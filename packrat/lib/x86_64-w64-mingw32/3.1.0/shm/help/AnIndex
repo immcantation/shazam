@@ -7,6 +7,8 @@ computeBaselinePDF	computeBaselinePDF
 computeMutationTypes	computeMutationTypes
 computeTargeting	computeTargeting
 countMutations	countMutations
+createSubstitutionModel	createSubstitutionModel
+listObservedMutations	listObservedMutations
 loadDB	loadDB
 multiplot	multiplot
 plotSelection	plotSelection
