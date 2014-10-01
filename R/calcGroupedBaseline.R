@@ -1,5 +1,12 @@
+#' Calculated CDR and FWR BASELINe selection strengths
+#'
+#' Given a DB file contianing the columns "CDR_PDFs" and "FWR_PDFs".\cr
+#' this function groups the sequences by specified columns
+
+#' @param   db  a data.frame of the DB file.
+#' @return  a data.frame of the BASELINe sigma values and 95% Conf. Intervals for the CDR and FWR
 calcGroupedBaseline <- function(db,columnsToGroupBy){
-  df[,columnsToGroupBy] <- lapply(df[,columnsToGroupBy] , factor)
+  #df[,columnsToGroupBy] <- lapply(df[,columnsToGroupBy] , factor)
   db <- ddply(db, columnsToGroupBy, .fun=fun_calcGroupedBaseline)
   return(db)
 }

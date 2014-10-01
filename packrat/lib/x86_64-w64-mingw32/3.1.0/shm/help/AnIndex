@@ -2,6 +2,8 @@ shm-package	shm
 addClonalSequence	addClonalSequence
 addExpectedFrequencies	addExpectedFrequencies
 addObservedMutations	addObservedMutations
+calcGroupedBaseline	calcGroupedBaseline
+computeBaselinePDF	computeBaselinePDF
 computeMutationTypes	computeMutationTypes
 computeTargeting	computeTargeting
 countMutations	countMutations

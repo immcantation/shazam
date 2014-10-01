@@ -5,8 +5,8 @@ Version: 0.1
 Date: 2014-03-28
 Author: Mohamed Uduman, Gur Yaari
 Maintainer: Mohamed Uduman <mohamed.uduman@yale.edu>
-Imports: plyr, seqinr, zoo
-Depends: R (>= 3.0.1), plyr, seqinr, zoo
+Imports: plyr, seqinr, zoo,ggplot2
+Depends: R (>= 3.0.1), plyr, seqinr, zoo,ggplot2
 Description: A new computational framework for Bayesian estimation of
     Antigen-driven selection in Immunoglobulin sequences, provides a more
     intuitive means of analyzing selection by actually quantifying it. Along
@@ -16,4 +16,4 @@ License: Creative Commons Attribution-NonCommercial-ShareAlike 3.0
 LazyData: yes
 Suggests: knitr
 VignetteBuilder: knitr
-Built: R 3.1.0; ; 2014-10-01 14:33:23 UTC; windows
+Built: R 3.1.0; ; 2014-10-01 15:28:47 UTC; windows

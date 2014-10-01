@@ -21,6 +21,6 @@ plotSelection(db, groups = NULL, colors = NULL,
 a \code{ggplot} object
 }
 \description{
-\code{plotSelection} plots.
+Plot the results of bootstrapDiversity
 }
 

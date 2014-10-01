@@ -5,6 +5,10 @@ addExpectedFrequencies
                         frequencies of mutations
 addObservedMutations    Adds columns to DB, containing the numbers of
                         observed mutations
+calcGroupedBaseline     Calculated CDR and FWR BASELINe selection
+                        strengths
+computeBaselinePDF      Adds columns to DB, containing the BASELINE
+                        prob. density functions
 computeMutationTypes    Adds columns to DB, containing the expected
                         frequencies of mutations
 computeTargeting        Adds columns to DB, containing the expected
