@@ -14,6 +14,7 @@ computeMutationTypes    Adds columns to DB, containing the expected
 computeTargeting        Adds columns to DB, containing the expected
                         frequencies of mutations
 countMutations          Count number of mutations in sequence
+createMutabilityModel   Builds a mutability model
 createSubstitutionModel
                         Builds a substitution model
 listObservedMutations   List the numbers of observed mutations

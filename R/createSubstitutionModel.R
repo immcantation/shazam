@@ -9,7 +9,7 @@
 #' @param   germlineColumn  The name of the germline column
 #' @param   VCallColumn The name of the genotyped columnn
 #' @param   multipleMutation 0 = Treat independently, 1 = Ignore codons with multiple mutations
-#' @return  list of fivemers and the substitution counts
+#' @return  matrix of fivemers and the substitution counts
 #' @export
 createSubstitutionModel <- function(db,
                                     model="RS",
@@ -37,7 +37,7 @@ createSubstitutionModel <- function(db,
                         gregexpr("IGH",db[,vCallColumn])[[1]][1]+4 )
   VH_FAMILES <- paste("VH",VH_FAMILES,sep="")
 
-  mutations <- listObservedMutations(DB_CLONE)
+  mutations <- listObservedMutations(db)
 
   #Silent model
   if(model=="S"){
