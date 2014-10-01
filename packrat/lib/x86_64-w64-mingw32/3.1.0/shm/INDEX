@@ -1,0 +1,19 @@
+addClonalSequence       Adds columns to DB, containing the concensus
+                        clonal sequence
+addExpectedFrequencies
+                        Adds columns to DB, containing the expected
+                        frequencies of mutations
+addObservedMutations    Adds columns to DB, containing the numbers of
+                        observed mutations
+computeMutationTypes    Adds columns to DB, containing the expected
+                        frequencies of mutations
+computeTargeting        Adds columns to DB, containing the expected
+                        frequencies of mutations
+countMutations          Count number of mutations in sequence
+loadDB                  Load DB file
+multiplot               Multiple plot function
+plotSelection           Plot the results of bootstrapDiversity
+prepareSequence         Prepare SEQUENCE_GAP column
+processNucMutations     Count mutations by region
+shm                     SHM
+writeDB                 Writes DB to file

@@ -1,0 +1,14 @@
+#' Adds columns to DB, containing the concensus clonal sequence
+#'
+#' This identifies the concensus clonal sequence to the DB file.\cr
+#'
+
+#' @param   db  a data.frame of the DB file.
+#' @param   sequenceColumn  The name of the sequence column.
+#' @param   germlineColumn  The name of the germline column.
+#' @return  db  a data.frame of the DB file
+#' @export
+addClonalSequence <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK")  {
+ddply(db, "CLONE", transform, SEQUENCE_GAP_CLONE=(collapseClone(SEQUENCE_GAP,GERMLINE_GAP_D_MASK,readEnd))[[1]][1])
+  return(db)
+}

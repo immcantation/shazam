@@ -1,0 +1,14 @@
+shm-package	shm
+addClonalSequence	addClonalSequence
+addExpectedFrequencies	addExpectedFrequencies
+addObservedMutations	addObservedMutations
+computeMutationTypes	computeMutationTypes
+computeTargeting	computeTargeting
+countMutations	countMutations
+loadDB	loadDB
+multiplot	multiplot
+plotSelection	plotSelection
+prepareSequence	prepareSequence
+processNucMutations	processNucMutations
+shm	shm
+writeDB	writeDB
