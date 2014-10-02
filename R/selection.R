@@ -497,6 +497,12 @@ computeCodonTable <- function(testID=1){
   #}
 }
 
+collapseCloneTry <- function(vecInputSeqs,glSeq,readEnd,nonTerminalOnly=0){
+  tryCatch(return(collapseClone(vecInputSeqs,glSeq,readEnd,nonTerminalOnly)), error = function(e) {
+    return(NA)
+  })
+}
+
 collapseClone <- function(vecInputSeqs,glSeq,readEnd,nonTerminalOnly=0){
   #print(length(vecInputSeqs))
   vecInputSeqs = unique(vecInputSeqs)
