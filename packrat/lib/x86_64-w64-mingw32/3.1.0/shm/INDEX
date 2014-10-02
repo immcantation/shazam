@@ -20,7 +20,8 @@ createSubstitutionModel
 listObservedMutations   List the numbers of observed mutations
 loadDB                  Load DB file
 multiplot               Multiple plot function
-plotSelection           Plot the results of bootstrapDiversity
+plotHedgehog            Plot Mutabilities in Hedgehog circle format
+plotSelection           Plot the BASELINe selection values
 prepareSequence         Prepare SEQUENCE_GAP column
 processNucMutations     Count mutations by region
 shm                     SHM

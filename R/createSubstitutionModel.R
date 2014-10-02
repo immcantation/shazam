@@ -49,6 +49,7 @@ createSubstitutionModel <- function(db,
       VH_FAMILY <- VH_FAMILES[index]
 
       positions <- as.numeric(names(indexMutation))
+      positions <- positions[positions<=readEnd]
       positions <- positions[!is.na(positions)]
       for( position in  positions){
         wrd <-  c2s(c(cGL[(position-2):(position-1)],cGL[(position+1):(position+2)]))
@@ -88,6 +89,7 @@ createSubstitutionModel <- function(db,
       VH_FAMILY <- VH_FAMILES[index]
 
       positions <- as.numeric(names(indexMutation))
+      positions <- positions[positions<=readEnd]
       positions <- positions[!is.na(positions)]
       for( position in  positions){
         wrd <-  c2s(c(cGL[(position-2):(position-1)],cGL[(position+1):(position+2)]))

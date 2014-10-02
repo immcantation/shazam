@@ -8,12 +8,12 @@ Maintainer: Mohamed Uduman <mohamed.uduman@yale.edu>
 Imports:
     plyr,
     seqinr,
-    zoo,ggplot2
+    zoo,ggplot2,SDMTools,grid,foreach,doParallel
 Depends:
     R (>= 3.0.1),
     plyr,
     seqinr,
-    zoo,ggplot2
+    zoo,ggplot2,SDMTools,grid,foreach,doParallel
 Description: A new computational framework for Bayesian estimation of
     Antigen-driven selection in Immunoglobulin sequences, provides a more
     intuitive means of analyzing selection by actually quantifying it. Along

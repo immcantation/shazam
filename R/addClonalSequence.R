@@ -9,6 +9,6 @@
 #' @return  db  a data.frame of the DB file
 #' @export
 addClonalSequence <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK")  {
-ddply(db, "CLONE", transform, SEQUENCE_GAP_CLONE=(collapseClone(SEQUENCE_GAP,GERMLINE_GAP_D_MASK,readEnd))[[1]][1])
+ddply(db, "CLONE", transform, SEQUENCE_GAP_CLONE=(collapseClone(SEQUENCE_GAP,GERMLINE_GAP_D_MASK,readEnd))[[1]][1],.progress="text")
   return(db)
 }

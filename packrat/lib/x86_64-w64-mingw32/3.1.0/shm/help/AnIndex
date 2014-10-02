@@ -12,6 +12,7 @@ createSubstitutionModel	createSubstitutionModel
 listObservedMutations	listObservedMutations
 loadDB	loadDB
 multiplot	multiplot
+plotHedgehog	plotHedgehog
 plotSelection	plotSelection
 prepareSequence	prepareSequence
 processNucMutations	processNucMutations

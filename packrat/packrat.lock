@@ -34,6 +34,12 @@ Version: 0.5.5
 Hash: 20881970e590ee68de97a468694db7b0
 Requires: stringr
 
+Package: foreach
+Source: CRAN
+Version: 1.4.2
+Hash: fbdaa99f6c6bd4f252c5d8412f6e79c9
+Requires: iterators
+
 Package: formatR
 Source: CRAN
 Version: 1.0
@@ -54,6 +60,11 @@ Package: highr
 Source: CRAN
 Version: 0.3
 Hash: 7c85a9b7d07a75e2d8ca74f9467fee21
+
+Package: iterators
+Source: CRAN
+Version: 1.0.7
+Hash: b5320a58712688d5b18c207cf256ef3f
 
 Package: knitr
 Source: CRAN
