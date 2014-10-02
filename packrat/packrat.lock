@@ -99,6 +99,23 @@ Source: CRAN
 Version: 0.3-10
 Hash: 668a9e87cedbdc5f56c396edf1bd2648
 
+Package: R.methodsS3
+Source: CRAN
+Version: 1.6.1
+Hash: 88717a386d97ad2687b28a411392f570
+
+Package: R.oo
+Source: CRAN
+Version: 1.18.0
+Hash: 151940a7861e78ae66c157a06a81eecc
+Requires: R.methodsS3
+
+Package: R.utils
+Source: CRAN
+Version: 1.33.0
+Hash: baaf57e1bdd3e8181815722274f4e5c1
+Requires: R.methodsS3, R.oo
+
 Package: RColorBrewer
 Source: CRAN
 Version: 1.0-5
@@ -126,6 +143,12 @@ Source: CRAN
 Version: 0.2.4
 Hash: b8b1af97bd07818605223060386b00dd
 Requires: dichromat, labeling, munsell, plyr, RColorBrewer
+
+Package: SDMTools
+Source: CRAN
+Version: 1.1-221
+Hash: d5bca1797f272f15a9f1f7a64da421ae
+Requires: R.utils
 
 Package: seqinr
 Source: CRAN

@@ -1,4 +1,4 @@
-#' Plot the results of bootstrapDiversity
+#' Plot the BASELINe selection values
 #'
 #'
 #' @param    db              data.frame returned by calcGroupedBaseline

@@ -58,8 +58,11 @@ createMutabilityModel <- function(db,
   }
 
   BG_COUNT<-list()
+  cat("Progress: 0%      50%     100%\n")
+  cat("          ")
+  pb <- txtProgressBar(min=1,max=length(mutations),width=20)
   for(index in 1:length(mutations)){
-    cat(index,"\n")
+    setTxtProgressBar(pb, index)
     BG_COUNT[[index]]<-template
     sSeq <- gsub("\\.","",db[index,sequenceColumn])
     sGL <- gsub("\\.","",db[index,germlineColumn])
@@ -95,7 +98,8 @@ createMutabilityModel <- function(db,
     }
     BG_COUNT[[index]][BG_COUNT[[index]]==0]<-NA
   }
-
+  close(pb)
+  cat("\n")
   Mutability<-list()
   for(i in 1:length(mutations)){
     Mutability[[i]]<-list()

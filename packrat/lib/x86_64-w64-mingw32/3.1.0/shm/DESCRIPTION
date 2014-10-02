@@ -16,4 +16,4 @@ License: Creative Commons Attribution-NonCommercial-ShareAlike 3.0
 LazyData: yes
 Suggests: knitr
 VignetteBuilder: knitr
-Built: R 3.1.0; ; 2014-10-01 19:01:16 UTC; windows
+Built: R 3.1.0; ; 2014-10-01 20:20:38 UTC; windows

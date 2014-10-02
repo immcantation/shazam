@@ -1,0 +1,43 @@
+COGravity               Centre of Gravity or Mass calculations for
+                        spatial data
+ClassStat               Landscape Class Statistics
+ConnCompLabel           Connected Components Labelling - Unique Patch
+                        Labelling
+Istat                   I Similarity Statistic for Quantifying Niche
+                        Overlap
+Kappa                   Kappa Statistic
+PatchStat               Landscape Patch Statistics
+Scalebar                Scalebar for Projected Maps
+SigDiff                 Identify Regions of Significant Differences
+ZonalStat               Landscape Zonal Statistics
+accuracy                Measures of Model Accuracy
+asc.from.raster         Raster conversion functions for adehabitat,
+                        raster and sp packages
+asc2dataframe           Ascii Grid Files to Dataframe and Dataframe to
+                        Ascii Grid Files
+auc                     Area Under the Curve of the Reciever Operating
+                        Curve
+circular.averaging      Circular Averaging based on Vector Averaging
+compare.matrix          Biplot Comparison of Matrices
+confusion.matrix        Confusion Matrix
+destination             Vincenty Direct Calculation of a Destination
+distance                Vincenty Direct Calculation of Distance and
+                        Direction
+extract.data            Spatial Join of Points with Raster Grids
+getXYcoords             Computes the X and Y Coordinates of the Pixels
+                        of a Raster Map
+grid.area               Create a Grid of Cell Areas or Perimeters
+grid.info               Grid Information from Geographic (lat lon)
+                        Projections
+lcmw                    Least Cost Moving Windows Calculation
+legend.gradient         Legend Gradient
+omission                Measures of Accuracy
+optim.thresh            Estimation of Optimal Threshold Values
+pnt.in.poly             Point in Polygon
+put.data                Spatial Join of Points with Raster Grids -
+                        replace data
+quick.map               Quick Map
+read.asc                ESRI ASCII Raster File Import And Export
+slope                   Slope and aspect calculations
+wt.mean                 Weighted mean, variance and standard deviation
+                        calculations
