@@ -5,7 +5,7 @@
 #' @param    outputName         Filename for the output files
 #' @param    outputPath         Path to save output
 #' @export
-plotHedgehog <- function(mutabilityModel, outputName="sample", outputPath="/home/mu37") {
+plotHedgehog <- function(mutabilityModel, outputName=NULL, outputPath=NULL) {
 
   NUCLEOTIDES <- c("A","C","G","T")
   Mutability <- mutabilityModel

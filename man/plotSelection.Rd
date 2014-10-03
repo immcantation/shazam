@@ -3,8 +3,8 @@
 \alias{plotSelection}
 \title{Plot the BASELINe selection values}
 \usage{
-plotSelection(db, groups = NULL, colors = NULL,
-  main_title = "Selection Strength", legend_title = NULL)
+plotSelection(db, groups = NULL, colors = NULL, outputName = NULL,
+  outputPath = NULL)
 }
 \arguments{
 \item{db}{data.frame returned by calcGroupedBaseline}
@@ -13,12 +13,9 @@ plotSelection(db, groups = NULL, colors = NULL,
 
 \item{colors}{values are colors to assign to those group values}
 
-\item{main_title}{string specifying the plot title.}
+\item{outputName}{Filename for the output files}
 
-\item{legend_title}{string specifying the legend title.}
-}
-\value{
-a \code{ggplot} object
+\item{outputPath}{Path to save output}
 }
 \description{
 Plot the BASELINe selection values

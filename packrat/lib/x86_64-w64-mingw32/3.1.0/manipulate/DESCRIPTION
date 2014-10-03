@@ -10,4 +10,4 @@ Depends: R (>= 2.10.0)
 Suggests: graphics, grid, lattice, ggplot2
 License:
 LazyLoad: yes
-Built: R 3.1.0; ; 2014-09-24 14:30:45 UTC; windows
+Built: R 3.1.0; ; 2014-10-02 19:29:15 UTC; windows

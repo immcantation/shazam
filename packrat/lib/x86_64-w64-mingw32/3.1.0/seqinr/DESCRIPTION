@@ -21,7 +21,7 @@ Repository/R-Forge/Revision: 1773
 Repository/R-Forge/DateTimeStamp: 2012-12-11 16:03:18
 Date/Publication: 2012-12-13 14:20:51
 Packaged: 2012-12-13 03:15:54 UTC; rforge
-Built: R 3.1.1; x86_64-w64-mingw32; 2014-09-22 22:34:31 UTC; windows
+Built: R 3.1.1; x86_64-w64-mingw32; 2014-09-30 22:36:36 UTC; windows
 Archs: i386, x64
 InstallAgent: packrat 0.4.1.1
 InstallSource: CRAN

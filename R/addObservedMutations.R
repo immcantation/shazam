@@ -9,6 +9,16 @@
 #' @return  db  a data.frame of the DB file
 #' @export
 addObservedMutations <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK")  {
-  db[,c("OBSERVED_R_CDR", "OBSERVED_S_CDR", "OBSERVED_R_FWR", "OBSERVED_S_FWR")] = t(sapply( 1:nrow(db), function(x){countMutations(db[x,sequenceColumn], db[x,germlineColumn])}, simplify="array"))
+  pb <- txtProgressBar(min=1,max=nrow(db),width=20)
+  cat("Progress: 0%      50%     100%\n")
+  cat("          ")
+  db[,c("OBSERVED_R_CDR", "OBSERVED_S_CDR", "OBSERVED_R_FWR", "OBSERVED_S_FWR")] = t(sapply( 1:nrow(db),
+                                                                                             function(x){
+                                                                                               setTxtProgressBar(pb, x);
+                                                                                               countMutations(db[x,sequenceColumn], db[x,germlineColumn])
+                                                                                               }
+                                                                                             , simplify="array"))
+  cat("\n")
+  close(pb)
   return(db)
 }

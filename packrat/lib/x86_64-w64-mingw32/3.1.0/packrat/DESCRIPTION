@@ -19,7 +19,7 @@ Packaged: 2014-09-03 16:15:13 UTC; kevin
 NeedsCompilation: no
 Repository: CRAN
 Date/Publication: 2014-09-03 22:17:01
-Built: R 3.1.1; ; 2014-09-22 22:36:37 UTC; windows
+Built: R 3.1.1; ; 2014-09-30 22:43:05 UTC; windows
 InstallAgent: packrat 0.4.1.1
 InstallSource: CRAN
 Hash: 5716097644904b9c1b4be2692de16005

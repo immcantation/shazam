@@ -20,7 +20,7 @@ Packaged: 2014-08-24 21:04:31 UTC; yihui
 NeedsCompilation: no
 Repository: CRAN
 Date/Publication: 2014-08-25 00:55:00
-Built: R 3.1.1; ; 2014-09-29 22:30:54 UTC; windows
+Built: R 3.1.1; ; 2014-09-30 22:28:19 UTC; windows
 InstallAgent: packrat 0.4.1.1
 InstallSource: CRAN
 Hash: a90c211d7df7e61a72b8ab6c99c2e848

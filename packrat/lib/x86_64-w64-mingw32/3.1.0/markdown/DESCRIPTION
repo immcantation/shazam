@@ -19,7 +19,7 @@ Packaged: 2014-08-23 20:01:57 UTC; yihui
 NeedsCompilation: yes
 Repository: CRAN
 Date/Publication: 2014-08-24 09:58:03
-Built: R 3.1.1; x86_64-w64-mingw32; 2014-09-29 22:30:56 UTC; windows
+Built: R 3.1.1; x86_64-w64-mingw32; 2014-09-30 22:28:17 UTC; windows
 Archs: i386, x64
 InstallAgent: packrat 0.4.1.1
 InstallSource: CRAN

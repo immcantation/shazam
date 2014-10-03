@@ -20,7 +20,7 @@ Maintainer: Yihui Xie <xie@yihui.name>
 NeedsCompilation: no
 Repository: CRAN
 Date/Publication: 2014-04-29 22:08:31
-Built: R 3.1.1; ; 2014-09-29 22:30:52 UTC; windows
+Built: R 3.1.1; ; 2014-09-30 22:28:18 UTC; windows
 InstallAgent: packrat 0.4.1.1
 InstallSource: CRAN
 Hash: 20881970e590ee68de97a468694db7b0

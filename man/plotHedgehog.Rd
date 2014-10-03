@@ -3,8 +3,7 @@
 \alias{plotHedgehog}
 \title{Plot Mutabilities in Hedgehog circle format}
 \usage{
-plotHedgehog(mutabilityModel, outputName = "sample",
-  outputPath = "/home/mu37")
+plotHedgehog(mutabilityModel, outputName = NULL, outputPath = NULL)
 }
 \arguments{
 \item{mutabilityModel}{matrix of mutabilities from createMutabilityModel()}

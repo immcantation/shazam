@@ -25,7 +25,7 @@ Maintainer: Achim Zeileis <Achim.Zeileis@R-project.org>
 NeedsCompilation: yes
 Repository: CRAN
 Date/Publication: 2013-09-30 07:37:29
-Built: R 3.1.1; x86_64-w64-mingw32; 2014-09-27 22:28:16 UTC; windows
+Built: R 3.1.1; x86_64-w64-mingw32; 2014-09-30 22:28:16 UTC; windows
 Archs: i386, x64
 InstallAgent: packrat 0.4.1.1
 InstallSource: CRAN

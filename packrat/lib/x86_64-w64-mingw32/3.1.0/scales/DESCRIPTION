@@ -20,7 +20,7 @@ Packaged: 2014-04-21 22:24:36 UTC; hadley
 NeedsCompilation: no
 Repository: CRAN
 Date/Publication: 2014-04-22 10:50:55
-Built: R 3.1.1; ; 2014-09-27 23:06:22 UTC; windows
+Built: R 3.1.1; ; 2014-09-30 23:04:49 UTC; windows
 InstallAgent: packrat 0.4.1.1
 InstallSource: CRAN
 Hash: b8b1af97bd07818605223060386b00dd

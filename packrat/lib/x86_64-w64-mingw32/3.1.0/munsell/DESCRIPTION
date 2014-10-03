@@ -14,7 +14,7 @@ Packaged: 2013-07-08 19:19:22 UTC; wickhamc
 NeedsCompilation: no
 Repository: CRAN
 Date/Publication: 2013-07-11 20:15:53
-Built: R 3.1.1; ; 2014-09-27 22:51:23 UTC; windows
+Built: R 3.1.1; ; 2014-09-30 22:52:52 UTC; windows
 InstallAgent: packrat 0.4.1.1
 InstallSource: CRAN
 Hash: fa8af6d040041439b249351e9d16ae9a
