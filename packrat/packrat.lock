@@ -1,12 +1,17 @@
 PackratFormat: 1.4
 PackratVersion: 0.4.1.1
-RVersion: 3.1.0
+RVersion: 3.1.1
 Repos: CRAN=http://cran.mirrors.hoobly.com,
     CRANextra=http://www.stats.ox.ac.uk/pub/RWin,
     BioCsoft=http://bioconductor.org/packages/2.14/bioc,
     BioCann=http://bioconductor.org/packages/2.14/data/annotation,
     BioCexp=http://bioconductor.org/packages/2.14/data/experiment,
     BioCextra=http://bioconductor.org/packages/2.14/extra
+
+Package: brew
+Source: CRAN
+Version: 1.0-6
+Hash: 9d92cc5ac60123fdb7b0daa3ae83bf99
 
 Package: colorspace
 Source: CRAN
@@ -29,6 +34,12 @@ Version: 0.5.5
 Hash: 20881970e590ee68de97a468694db7b0
 Requires: stringr
 
+Package: foreach
+Source: CRAN
+Version: 1.4.2
+Hash: fbdaa99f6c6bd4f252c5d8412f6e79c9
+Requires: iterators
+
 Package: formatR
 Source: CRAN
 Version: 1.0
@@ -38,7 +49,7 @@ Package: ggplot2
 Source: CRAN
 Version: 1.0.0
 Hash: c8bff66238347472f08b6a35608539ff
-Requires: digest, gtable, MASS, plyr, proto, reshape2, scales
+Requires: digest, gtable, proto, plyr, reshape2, scales
 
 Package: gtable
 Source: CRAN
@@ -50,32 +61,27 @@ Source: CRAN
 Version: 0.3
 Hash: 7c85a9b7d07a75e2d8ca74f9467fee21
 
+Package: iterators
+Source: CRAN
+Version: 1.0.7
+Hash: b5320a58712688d5b18c207cf256ef3f
+
 Package: knitr
 Source: CRAN
 Version: 1.6
 Hash: 0f6457facba94bccad17a7c67c2f4168
-Requires: digest, evaluate, formatR, highr, markdown, stringr
+Requires: digest, formatR, highr, stringr, markdown, evaluate
 
 Package: labeling
 Source: CRAN
 Version: 0.3
 Hash: 568a992912caf7eeddfb121924154047
 
-Package: lattice
-Source: CRAN
-Version: 0.20-29
-Hash: 17e9fe582d11197544a5ec817a80b21e
-
 Package: markdown
 Source: CRAN
 Version: 0.7.4
 Hash: 01d7f71ed6e3d9b1c17ba51cff91be72
 Requires: mime
-
-Package: MASS
-Source: CRAN
-Version: 7.3-35
-Hash: 2a7641e407ce2a484d5a587a4e30a9aa
 
 Package: mime
 Source: CRAN
@@ -107,17 +113,19 @@ Hash: 668a9e87cedbdc5f56c396edf1bd2648
 Package: R.methodsS3
 Source: CRAN
 Version: 1.6.1
-Hash: fd01864297a31320604c556a98e3e648
+Hash: 88717a386d97ad2687b28a411392f570
 
 Package: R.oo
 Source: CRAN
 Version: 1.18.0
+Hash: 151940a7861e78ae66c157a06a81eecc
 Requires: R.methodsS3
 
 Package: R.utils
 Source: CRAN
 Version: 1.33.0
-Requires: R.oo, R.methodsS3
+Hash: baaf57e1bdd3e8181815722274f4e5c1
+Requires: R.methodsS3, R.oo
 
 Package: RColorBrewer
 Source: CRAN
@@ -133,23 +141,30 @@ Package: reshape2
 Source: CRAN
 Version: 1.4
 Hash: e50809918ebb73dff47de17d36d12975
-Requires: plyr, Rcpp, stringr
+Requires: Rcpp, stringr, plyr
+
+Package: roxygen2
+Source: CRAN
+Version: 4.0.2
+Hash: 44172ff2d8beac88abb92535d89c6aaa
+Requires: brew, digest, Rcpp, stringr
 
 Package: scales
 Source: CRAN
 Version: 0.2.4
 Hash: b8b1af97bd07818605223060386b00dd
-Requires: dichromat, labeling, munsell, plyr, RColorBrewer
+Requires: dichromat, labeling, RColorBrewer, munsell, plyr
 
 Package: SDMTools
 Source: CRAN
 Version: 1.1-221
+Hash: d5bca1797f272f15a9f1f7a64da421ae
 Requires: R.utils
 
 Package: seqinr
 Source: CRAN
 Version: 3.0-7
-Hash: 38493e5125f52142425e47a846517c5d
+Hash: 3aacb1dfd1bbd1cf4cd5eff98240a2d8
 
 Package: stringr
 Source: CRAN
@@ -160,4 +175,3 @@ Package: zoo
 Source: CRAN
 Version: 1.7-11
 Hash: a412b124ff249b078d9cd870de913c90
-Requires: lattice
