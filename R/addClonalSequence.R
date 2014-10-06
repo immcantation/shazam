@@ -1,6 +1,6 @@
-#' Adds columns to DB, containing the concensus clonal sequence
+#' Adds columns to DB, containing the consensus clonal sequence
 #'
-#' This identifies the consensus clonal sequence to the DB file.\cr
+#' This identifies the consensus clonal sequence to the DB file.
 #'
 
 #' @param   db  a data.frame of the DB file.
