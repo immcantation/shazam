@@ -1,8 +1,7 @@
 #' Count mutations by region
 #'
-#' This function counts the number of mutations in a sequence and groups them by region.\cr
+#' This function counts the number of mutations in a sequence and groups them by region.
 #'
-
 #' @param   mutations  an array of mutations. The name indicates the position and the values are the kinds of mutations.
 #' @return  retArrary  an array of R_CDR, S_CDR, R_FWR and S_FWR
 processNucMutations <- function(mutations){

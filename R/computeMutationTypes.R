@@ -1,8 +1,7 @@
 #' Adds columns to DB, containing the expected frequencies of mutations
 #'
-#' This adds the expected frequencies number of mutations to the DB file.\cr
+#' This adds the expected frequencies number of mutations to the DB file.
 #'
-
 #' @param   param_strSeq  The name of the sequence column.
 #' @param   param_vecMutabilities  The name of the germline column.
 #' @return  matTargeting

@@ -1,12 +1,24 @@
-#' Adds columns to DB, containing the expected frequencies of mutations
+#' Determine expected mutation frequencies
 #'
-#' This adds the expected frequencies number of mutations to the DB file.\cr
+#' \code{addExpectedFrequencies} calculate the expected frequency of mutations for
+#' each sequence.  Expectations are calculated for CD and FW regions and both
+#' silent and replacement mutations.
+#' 
+#' Method details.
 #'
-
-#' @param   db  a data.frame of the DB file.
-#' @param   sequenceColumn  The name of the sequence column.
-#' @param   germlineColumn  The name of the germline column.
-#' @return  db  a data.frame of the DB file
+#' @param    db              data.frame containing sequence data.
+#' @param    sequenceColumn  name of the sequence column.
+#' @param    germlineColumn  name of the germline column.
+#' @return   A modified \code{db} data.frame with expected frequencies in the 
+#'           EXPECTED_R_CDR (CDR replacement), EXPECTED_S_CDR (CDR silent), 
+#'           EXPECTED_R_FWR, (FWR replacement, and EXPECTED_S_FWR (FWR silent) columns.
+#' 
+#' @seealso  \code{\link{addObservedMutations}}
+#' @examples
+#' # TODO
+#' # Working example
+#' 
+#' @export
 addExpectedFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK")  {
 
   facGL <- factor(db[,germlineColumn])

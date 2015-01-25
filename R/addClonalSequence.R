@@ -1,14 +1,35 @@
-#' Adds columns to DB, containing the consensus clonal sequence
+#' Identifies clonal consensus sequences
 #'
-#' This identifies the consensus clonal sequence to the DB file.
+#' \code{addClonalSequence} identifies the consensus sequence of each clonal group in the input
+#' data.frame.
+#' 
+#' Details (methods) section. Paragraph 1.
+#' 
+#' Paragraph 2.
 #'
-
-#' @param   db  a data.frame of the DB file.
-#' @param   sequenceColumn  The name of the sequence column.
-#' @param   germlineColumn  The name of the germline column.
-#' @return  db  a data.frame of the DB file
+#' @param    db              data.frame containing sequence data.
+#' @param    cloneColumn     column containing clonal cluster assignments.
+#' @param    sequenceColumn  gapped sequence column name.
+#' @param    germlineColumn  gapped germline column name.
+#' @return   A modified \code{db} data.frame with clonal consensus sequences in the 
+#'           SEQUENCE_GAP_CLONE column.
+#' 
+#' @seealso  \code{\link{addObservedMutations}}, \code{\link{addExpectedFrequencies}}
+#' @examples
+#' # TODO
+#' # Working example
+#' 
 #' @export
-addClonalSequence <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK")  {
-  db <- ddply(db, "CLONE", transform, SEQUENCE_GAP_CLONE=(collapseCloneTry(SEQUENCE_GAP,GERMLINE_GAP_D_MASK,readEnd))[[1]][1],.progress="text")
+addClonalSequence <- function(db, cloneColumn="CLONE", sequenceColumn="SEQUENCE_GAP", 
+                              germlineColumn="GERMLINE_GAP_D_MASK")  {
+  #db <- ddply(db, "CLONE", transform, 
+  #            SEQUENCE_GAP_CLONE=(collapseCloneTry(SEQUENCE_GAP, GERMLINE_GAP_D_MASK, readEnd))[[1]][1], 
+  #            .progress="text")
+  db <- ddply(db, cloneColumn, here(mutate), 
+              SEQUENCE_GAP_CLONE=(collapseCloneTry(eval(parse(text=sequenceColumn)), 
+                                                   eval(parse(text=germlineColumn)), 
+                                                   readEnd))[[1]][1], 
+              .progress="text")
+  
   return(db)
 }

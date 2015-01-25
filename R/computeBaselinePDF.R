@@ -1,10 +1,25 @@
-#' Adds columns to DB, containing the BASELINE prob. density functions
+#' Compute the BASELINe (selection?) probability density function.
 #'
-#' This adds the BASELINE prob. density functions to the DB file.\cr
+#' \code{computeBaselinePDF} computes the BASELINe probability density functions for...
 #'
-
-#' @param   db  a data.frame of the DB file.
-#' @return  db  a data.frame of the DB file
+#' @param    db  data.frame containing sequence data. \code{db} must contain the columns
+#'               A, B, C, D.
+#' @return   A modified \code{db} data.frame with added columns E, F, G.
+#' 
+#' @references    
+#' Uduman M, Yaari G, Hershberg U, Stern JA, Shlomchik MJ, Kleinstein SH. 
+#'   Detecting selection in immunoglobulin sequences. 
+#'   Nucleic Acids Res. 2011 Jul;39(Web Server issue):W499-504.
+#' 
+#' Yaari G, Uduman M, Kleinstein SH. 
+#'   Quantifying selection in high-throughput Immunoglobulin sequencing data sets. 
+#'   Nucleic Acids Res. 2012 Sep 1;40(17):e134.
+#' @seealso  \code{\link{addObservedMutations}}, \code{\link{addExpectedFrequencies}}, \code{\link{calcGroupedBaseline}}.
+#' @examples
+#' # TODO
+#' # Working example
+#' 
+#' @export
 computeBaselinePDF <- function(db){
   pdfs <- computeBayesianScore(db[,c("OBSERVED_R_CDR", "OBSERVED_S_CDR",
                                      "OBSERVED_R_FWR", "OBSERVED_S_FWR",

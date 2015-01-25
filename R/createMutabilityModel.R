@@ -1,8 +1,7 @@
 #' Builds a mutability model
 #'
-#' This builds a 5-mer based mutability model.\cr
+#' This builds a 5-mer based mutability model.
 #'
-
 #' @param   db  a data.frame of the DB file.
 #' @param   model  The type of model to create "S" = silent, "RS" = Silent = Replacement mutations
 #' @param   substitutionModel  matrix of fivemers and the substitution counts (from createSubstitutionModel)
@@ -11,6 +10,7 @@
 #' @param   VCallColumn The name of the genotyped columnn
 #' @param   multipleMutation 0 = Treat independently, 1 = Ignore codons with multiple mutations
 #' @return  list of fivemers and the substitution counts
+#' 
 #' @export
 createMutabilityModel <- function(db,
                                     model="RS",

@@ -1,8 +1,7 @@
 #' Writes DB to file
 #'
-#' Write the contents of DB file to a tab delimited text file. .\cr
-#'
-
+#' Write the contents of DB file to a tab delimited text file.
+#' 
 #' @param   db  a data.frame of the DB file.
 #' @param   fileName  The filename including path to write to
 #' @export
