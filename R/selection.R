@@ -1200,12 +1200,25 @@ fastConv<-function(cons, max_sigma=20, length_sigma=4001){
 }
 
 # Computes the 95% CI for a pdf
+# calcBayesCI <- function(Pdf,low=0.025,up=0.975,max_sigma=20, length_sigma=4001){
+#   if(length(Pdf)!=length_sigma) return(NA)
+#   sigma_s=seq(-max_sigma,max_sigma,length.out=length_sigma)
+#   cdf = cumsum(Pdf)
+#   cdf = cdf/cdf[length(cdf)]
+#   return( c(sigma_s[findInterval(low,cdf)-1] , sigma_s[findInterval(up,cdf)]) )
+# }
 calcBayesCI <- function(Pdf,low=0.025,up=0.975,max_sigma=20, length_sigma=4001){
   if(length(Pdf)!=length_sigma) return(NA)
   sigma_s=seq(-max_sigma,max_sigma,length.out=length_sigma)
   cdf = cumsum(Pdf)
-  cdf = cdf/cdf[length(cdf)]
-  return( c(sigma_s[findInterval(low,cdf)-1] , sigma_s[findInterval(up,cdf)]) )
+  cdf = cdf/cdf[length(cdf)]  
+  intervalLow = findInterval(low,cdf)
+  fractionLow = (low - cdf[intervalLow])/(cdf[intervalLow+1]-cdf[intervalLow])
+  intervalUp = findInterval(up,cdf)
+  fractionUp = (up - cdf[intervalUp])/(cdf[intervalUp]-cdf[intervalUp-1])
+  sigmaLow = sigma_s[intervalLow]+fractionLow*(sigma_s[intervalLow+1]-sigma_s[intervalLow])
+  sigmaUp = sigma_s[intervalUp]+fractionUp*(sigma_s[intervalUp+1]-sigma_s[intervalUp])
+  return( c(sigmaLow,sigmaUp) ) 
 }
 
 # Computes a mean for a pdf
@@ -4555,3 +4568,26 @@ getObservedMutationsByCodon <- function(listMutations){
 }
 
 NUCLEOTIDES = c("A","C","G","T", "N")
+
+
+#' Determines the OS plotform being used
+#'
+#' @return  The OS platform
+#' @examples
+#' getPlatform()
+getPlatform <-function(){
+  return(.Platform$OS.typ)
+}
+
+#' Determines the (maximum) numbers of cores/cpus availalbe
+#'
+#' @return  The number of cores/cpus available. Returns 1 if undeterminable.
+#' @examples
+#' getNumbOfCores()
+getNumbOfCores <-function(){
+  platform <- getPlatform()
+  numbOfCores <- 1
+  if(platform=="windows") numbOfCores <- Sys.getenv('NUMBER_OF_PROCESSORS')
+  if(platform=="unix") numbOfCores <- system("nproc", intern=TRUE)
+  return(as.numeric(numbOfCores))
+}
