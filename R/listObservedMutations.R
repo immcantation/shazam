@@ -1,8 +1,7 @@
 #' List the numbers of observed mutations
 #'
-#' This lists the observed number of mutation.\cr
+#' This lists the observed number of mutation.
 #'
-
 #' @param   db  a data.frame of the DB file.
 #' @param   sequenceColumn  The name of the sequence column.
 #' @param   germlineColumn  The name of the germline column.

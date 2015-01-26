@@ -1,11 +1,12 @@
 #' Count number of mutations in sequence
 #'
-#' This function counts the number of mutations in a sequence.\cr
+#' This function counts the number of mutations in a sequence.
 #'
-
 #' @param   seqInput  Input sequence
 #' @param   seqGL  Germline sequence
 #' @return  array of observed mutations
+#' 
+#' @export
 countMutations <- function(seqInput, seqGL) {
     if( is.na(c(seqInput, seqGL)) ) return(array(NA,4))
     seqI = s2c(seqInput)

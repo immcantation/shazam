@@ -1,11 +1,25 @@
 #' Calculated CDR and FWR BASELINe selection strengths
 #'
-#' Given a DB file contianing the columns "CDR_PDFs" and "FWR_PDFs".\cr
-#' this function groups the sequences by specified columns
-
-#' @param   db  a data.frame of the DB file.
-#' @return  a data.frame of the BASELINe sigma values and 95% Conf. Intervals for the CDR and FWR
-calcGroupedBaseline <- function(db,columnsToGroupBy){
+#' \code{calcGroupedBaseline} groups the sequences by specified columns
+#'
+#' @param    db  data.frame containing sequence data. \code{db} must contain the columns CDR_PDFs and FWR_PDFs.
+#' @return   A data.frame of the BASELINe sigma values and 95% Conf. Intervals for the CDR and FWR.
+#'
+#' @references    
+#' Uduman M, Yaari G, Hershberg U, Stern JA, Shlomchik MJ, Kleinstein SH. 
+#'   Detecting selection in immunoglobulin sequences. 
+#'   Nucleic Acids Res. 2011 Jul;39(Web Server issue):W499-504.
+#' 
+#' Yaari G, Uduman M, Kleinstein SH. 
+#'   Quantifying selection in high-throughput Immunoglobulin sequencing data sets. 
+#'   Nucleic Acids Res. 2012 Sep 1;40(17):e134.
+#' @seealso  \code{\link{addObservedMutations}}, \code{\link{addExpectedFrequencies}}, \code{\link{computeBaselinePDF}}.
+#' @examples
+#' # TODO
+#' # Working example
+#' 
+#' @export
+calcGroupedBaseline <- function(db, columnsToGroupBy){
   #df[,columnsToGroupBy] <- lapply(df[,columnsToGroupBy] , factor)
   db <- ddply(db, columnsToGroupBy, .fun=fun_calcGroupedBaseline)
   return(db)

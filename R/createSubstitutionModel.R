@@ -1,8 +1,7 @@
 #' Builds a substitution model
 #'
-#' This builds a 5-mer based substitution model.\cr
+#' This builds a 5-mer based substitution model.
 #'
-
 #' @param   db  a data.frame of the DB file.
 #' @param   model  The type of model to create "S" = silent, "RS" = Silent = Replacement mutations
 #' @param   sequenceColumn  The name of the sequence column
@@ -10,6 +9,7 @@
 #' @param   VCallColumn The name of the genotyped columnn
 #' @param   multipleMutation 0 = Treat independently, 1 = Ignore codons with multiple mutations
 #' @return  matrix of fivemers and the substitution counts
+#' 
 #' @export
 createSubstitutionModel <- function(db,
                                     model="RS",
