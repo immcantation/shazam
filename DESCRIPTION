@@ -11,7 +11,8 @@ Imports:
     plyr,
     SDMTools,
     seqinr,
-    zoo
+    zoo,
+    doSNOW
 Depends:
     R (>= 3.0.1),
     ggplot2,
@@ -19,7 +20,8 @@ Depends:
     plyr,
     SDMTools,
     seqinr,
-    zoo
+    zoo,
+    doSNOW
 Description: A new computational framework for Bayesian estimation of
     Antigen-driven selection in Immunoglobulin sequences, provides a more
     intuitive means of analyzing selection by actually quantifying it. Along

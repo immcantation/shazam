@@ -955,19 +955,37 @@ BAYESIAN_FITTED<-c(0.407277142798302, 0.554007336744485, 0.63777155771234, 0.693
 CONST_i <- sort(c(((2^(seq(-39,0,length.out=201)))/2)[1:200],(c(0:11,13:99)+0.5)/100,1-(2^(seq(-39,0,length.out=201)))/2))
 
 # Given x, M & p, returns a pdf
-calculate_bayes <- function ( x=3, N=10, p=0.33,
+# calculate_bayes <- function ( x=3, N=10, p=0.33,
+#                               i=CONST_i,
+#                               max_sigma=20,length_sigma=4001
+# ){
+#   if(!0%in%N){
+#     G <- max(length(x),length(N),length(p))
+#     x=array(x,dim=G)
+#     N=array(N,dim=G)
+#     p=array(p,dim=G)
+#     sigma_s<-seq(-max_sigma,max_sigma,length.out=length_sigma)
+#     sigma_1<-log({i/{1-i}}/{p/{1-p}})
+#     index<-min(N,60)
+#     y<-dbeta(i,x+BAYESIAN_FITTED[index],N+BAYESIAN_FITTED[index]-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
+#     if(!sum(is.na(y))){
+#       tmp<-approx(sigma_1,y,sigma_s)$y
+#       tmp/sum(tmp)/{2*max_sigma/{length_sigma-1}}
+#     }else{
+#       return(NA)
+#     }
+#   }else{
+#     return(NA)
+#   }
+# }
+calculate_bayes <- function ( x=3, n=10, p=0.33,
                               i=CONST_i,
-                              max_sigma=20,length_sigma=4001
-){
-  if(!0%in%N){
-    G <- max(length(x),length(N),length(p))
-    x=array(x,dim=G)
-    N=array(N,dim=G)
-    p=array(p,dim=G)
+                              max_sigma=20,length_sigma=4001){
+  if(n!=0){
     sigma_s<-seq(-max_sigma,max_sigma,length.out=length_sigma)
     sigma_1<-log({i/{1-i}}/{p/{1-p}})
-    index<-min(N,60)
-    y<-dbeta(i,x+BAYESIAN_FITTED[index],N+BAYESIAN_FITTED[index]-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
+    index<-min(n,60)
+    y<- dbeta(i,x+BAYESIAN_FITTED[index],n+BAYESIAN_FITTED[index]-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
     if(!sum(is.na(y))){
       tmp<-approx(sigma_1,y,sigma_s)$y
       tmp/sum(tmp)/{2*max_sigma/{length_sigma-1}}
@@ -1211,14 +1229,14 @@ calcBayesCI <- function(Pdf,low=0.025,up=0.975,max_sigma=20, length_sigma=4001){
   if(length(Pdf)!=length_sigma) return(NA)
   sigma_s=seq(-max_sigma,max_sigma,length.out=length_sigma)
   cdf = cumsum(Pdf)
-  cdf = cdf/cdf[length(cdf)]  
+  cdf = cdf/cdf[length(cdf)]
   intervalLow = findInterval(low,cdf)
   fractionLow = (low - cdf[intervalLow])/(cdf[intervalLow+1]-cdf[intervalLow])
   intervalUp = findInterval(up,cdf)
   fractionUp = (up - cdf[intervalUp])/(cdf[intervalUp]-cdf[intervalUp-1])
   sigmaLow = sigma_s[intervalLow]+fractionLow*(sigma_s[intervalLow+1]-sigma_s[intervalLow])
   sigmaUp = sigma_s[intervalUp]+fractionUp*(sigma_s[intervalUp+1]-sigma_s[intervalUp])
-  return( c(sigmaLow,sigmaUp) ) 
+  return( c(sigmaLow,sigmaUp) )
 }
 
 # Computes a mean for a pdf
@@ -4590,4 +4608,39 @@ getNumbOfCores <-function(){
   if(platform=="windows") numbOfCores <- Sys.getenv('NUMBER_OF_PROCESSORS')
   if(platform=="unix") numbOfCores <- system("nproc", intern=TRUE)
   return(as.numeric(numbOfCores))
+}
+
+
+#' Make a progress bar when using %dopar% with a parallel backend
+#' Adapated from http://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r
+#'
+#' @return  NULL
+doparProgressBar <- function(n){
+  pb <- txtProgressBar(min=1, max=n-1,style=3)
+  count <- 0
+  function(...) {
+    count <<- count + length(list(...)) - 1
+    setTxtProgressBar(pb,count)
+    #Sys.sleep(0.01)
+    flush.console()
+    rbind(...)
+
+  }
+}
+
+
+#' Make a progress bar when using %dopar% with a parallel backend
+#' Adapated from http://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r
+#'
+#' @return  NULL
+doparProgressBar <- function(n){
+  pb <- txtProgressBar(min=1, max=n-1,style=3)
+  count <- 0
+  function(...) {
+    count <<- count + length(list(...)) - 1
+    setTxtProgressBar(pb,count)
+    #Sys.sleep(0.01)
+    flush.console()
+    rbind(...)
+  }
 }

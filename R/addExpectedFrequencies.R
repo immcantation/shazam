@@ -3,24 +3,26 @@
 #' \code{addExpectedFrequencies} calculate the expected frequency of mutations for
 #' each sequence.  Expectations are calculated for CD and FW regions and both
 #' silent and replacement mutations.
-#' 
+#'
 #' Method details.
 #'
 #' @param    db              data.frame containing sequence data.
 #' @param    sequenceColumn  name of the sequence column.
 #' @param    germlineColumn  name of the germline column.
-#' @return   A modified \code{db} data.frame with expected frequencies in the 
-#'           EXPECTED_R_CDR (CDR replacement), EXPECTED_S_CDR (CDR silent), 
+#' @param    numbOfCores     The number of cores to distribute the function over.
+#' @return   A modified \code{db} data.frame with expected frequencies in the
+#'           EXPECTED_R_CDR (CDR replacement), EXPECTED_S_CDR (CDR silent),
 #'           EXPECTED_R_FWR, (FWR replacement, and EXPECTED_S_FWR (FWR silent) columns.
-#' 
+#'
 #' @seealso  \code{\link{addObservedMutations}}
 #' @examples
 #' # TODO
 #' # Working example
-#' 
+#'
 #' @export
-addExpectedFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK")  {
+addExpectedFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK", numbOfCores=1)  {
 
+  if(numbOfCores==1){
   facGL <- factor(db[,germlineColumn])
   facLevels = levels(facGL)
   cat("Computing mutabilities...\n")
@@ -79,6 +81,41 @@ addExpectedFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP", germlineCo
   matExp <- matrix(ul_LisGLs_Exp,ncol=4,nrow=(length(ul_LisGLs_Exp)/4),byrow=T)
   matExp <- matExp/apply(matExp,1,sum,na.rm=T)
   db[,c("EXPECTED_R_CDR", "EXPECTED_S_CDR", "EXPECTED_R_FWR", "EXPECTED_S_FWR")] <- matExp
+
+  }else{
+
+    availableCores <- getNumbOfCores()
+    if(!(numbOfCores<=availableCores))numbOfCores=availableCores
+    cluster <- makeCluster(numbOfCores, type = "SOCK")
+    registerDoSNOW(cluster)
+
+
+    nInterations <- nrow(db)
+    matExp <-
+    foreach(i=icount(nInterations), .packages='shm', .combine=doparProgressBar(n=nInterations)) %dopar% {
+
+      # Calculate mutability
+      seqMutabilities <- computeMutabilities(db[i,germlineColumn])
+      # Only include non N positions
+      cInput = rep(NA,nchar(db[i,sequenceColumn]))
+      cInput[s2c(db[i,sequenceColumn])!="N"] = 1
+      seqMutabilities <- seqMutabilities * cInput
+
+      # Calculate targeting
+      seqTargeting <- computeTargeting(db[i,germlineColumn],seqMutabilities)
+
+      # Calculate mutation types
+      seqMutationType <- computeMutationTypes(db[i,germlineColumn])
+
+      #Expected Freq
+      seqExpectedFreq <- computeExpected(seqTargeting, seqMutationType)
+      seqExpectedFreq <- seqExpectedFreq/sum(seqExpectedFreq, na.rm=T)
+    }
+    cat("\n")
+    stopCluster(cluster)
+
+    db[,c("EXPECTED_R_CDR", "EXPECTED_S_CDR", "EXPECTED_R_FWR", "EXPECTED_S_FWR")] <- matExp
+  }
   return(db)
 
 }
