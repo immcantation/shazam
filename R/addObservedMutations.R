@@ -40,7 +40,7 @@ addObservedMutations <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColu
     registerDoSNOW(cluster)
 
     obsMutations <-
-        foreach(i=icount(numbOfSeqs), .packages='shm', .combine=doparProgressBar(n=numbOfSeqs)) %dopar% {
+        foreach(i=icount(numbOfSeqs), .packages='shm', .combine=doparProgressBar(n=numbOfSeqs), .multicombine=TRUE) %dopar% {
           countMutations(db[i,sequenceColumn], db[i,germlineColumn])
         }
 

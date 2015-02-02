@@ -45,7 +45,7 @@ computeBaselinePDF <- function(db,numbOfCores=1){
       binomialX = vecObsExpected[3]
       fwrPDF <- calculate_bayes(x=binomialX,n=binomialN,p=binomialP,max_sigma=20,length_sigma=4001)
 
-      list(CDR.PDF=cdrPDF,FWR.PDF=fwrPDF)
+      list(CDR_PDF=cdrPDF,FWR_PDF=fwrPDF)
     }
   cat("\n")
   stopCluster(cluster)

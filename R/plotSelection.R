@@ -22,7 +22,8 @@ plotSelection <- function(db, groups=NULL, colors=NULL,outputName=NULL, outputPa
               geom_errorbar(aes_string(ymin="CDR_CI95_Lower", ymax="CDR_CI95_Upper",colors=groups), width=.1) +
               geom_point(aes_string(color=groups), size=5)+
               ylab("CDR")+
-              ggtitle("Selection Strength")
+              ggtitle("Selection Strength")+
+              scale_y_continuous(limits=c(-2,1), breaks=seq(-1, 1, 0.5), oob=rescale_none)
 
 
   plotFWR <-  ggplot(db, aes_string(x=groups, y="FWR_Sigma")) +
@@ -35,7 +36,8 @@ plotSelection <- function(db, groups=NULL, colors=NULL,outputName=NULL, outputPa
     theme(legend.title = element_text(size = 8))+
     geom_errorbar(aes_string(ymin="FWR_CI95_Lower", ymax="FWR_CI95_Upper",colors=groups), width=.1) +
     geom_point(aes_string(color=groups), size=5)+
-    ylab("FWR")
+    ylab("FWR")+
+    scale_y_continuous(limits=c(-3,1), breaks=seq(-3, 1, 0.5), oob=rescale_none)
 
 
   pdf(figurePath,8,10)

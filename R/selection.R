@@ -4593,6 +4593,7 @@ NUCLEOTIDES = c("A","C","G","T", "N")
 #' @return  The OS platform
 #' @examples
 #' getPlatform()
+#' @export
 getPlatform <-function(){
   return(.Platform$OS.typ)
 }
@@ -4602,6 +4603,7 @@ getPlatform <-function(){
 #' @return  The number of cores/cpus available. Returns 1 if undeterminable.
 #' @examples
 #' getNumbOfCores()
+#' @export
 getNumbOfCores <-function(){
   platform <- getPlatform()
   numbOfCores <- 1
@@ -4643,4 +4645,20 @@ doparProgressBar <- function(n){
     flush.console()
     rbind(...)
   }
+}
+
+
+
+#' Returns a 5-mer sliding window of given sequence
+#'
+#' @param   strSequence   The sequence string
+#' @return  An array of 5-mer sliding windows
+#'
+#' @examples
+#' slidingArrayOf5mers("ACGTNACGTNACGTN")
+#'
+#' @export
+slidingArrayOf5mers <- function(strSequence){
+  seqLength <- nchar(strSequence)
+  return( substr( rep(strSequence,seqLength-4), 1:(seqLength-4), 5:seqLength ) )
 }
