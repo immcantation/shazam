@@ -8,7 +8,8 @@
 #' @docType     package
 #' @references  BASELINe
 #'
+#' @import alakazam
+#' @import plyr
 #' @import seqinr
 #' @import zoo
-#' @import plyr
 NULL

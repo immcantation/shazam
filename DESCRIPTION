@@ -2,10 +2,11 @@ Package: shm
 Type: Package
 Title: Somatic Hypermutation Analysis
 Version: 0.1
-Date: 2015-01-24
-Author: Mohamed Uduman, Gur Yaari
+Date: 2015-02-04
+Author: Mohamed Uduman, Gur Yaari, Namita Gupta
 Maintainer: Mohamed Uduman <mohamed.uduman@yale.edu>
 Imports:
+    alakazam,
     ggplot2,
     grid,
     plyr,
@@ -15,13 +16,14 @@ Imports:
     doSNOW
 Depends:
     R (>= 3.0.1),
+    alakazam,
+    doSNOW,
     ggplot2,
     grid,
     plyr,
     SDMTools,
     seqinr,
-    zoo,
-    doSNOW
+    zoo
 Description: A new computational framework for Bayesian estimation of
     Antigen-driven selection in Immunoglobulin sequences, provides a more
     intuitive means of analyzing selection by actually quantifying it. Along
