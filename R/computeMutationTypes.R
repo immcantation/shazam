@@ -6,6 +6,7 @@
 #' @param   param_vecMutabilities  The name of the germline column.
 #' @return  matTargeting
 computeMutationTypes <- function(param_strSeq){
+  #NUCLEOTIDES_FAC <- factor(1:5, labels=c("A", "C", "G", "T", "N"))
   #cat(param_strSeq,"\n")
   lenSeq <- nchar(param_strSeq)
   trimmedSeq = trimToLastCodon(param_strSeq)
@@ -17,7 +18,8 @@ computeMutationTypes <- function(param_strSeq){
   #dimnames( matMutationTypes ) =  list(NUCLEOTIDES,1:(ncol(matMutationTypes)))
   matMutationTypes <- rbind(  matMutationTypes, matrix(NA,ncol=ncol(matMutationTypes),nrow=1))
   dimnames( matMutationTypes ) =  list(NUCLEOTIDES,s2c(param_strSeq))
-  selfbases <- as.numeric(factor(colnames(matMutationTypes),levels=NUCLEOTIDES_FAC))
+  #selfbases <- as.numeric(factor(colnames(matMutationTypes), levels=NUCLEOTIDES_FAC))
+  selfbases <- as.numeric(factor(colnames(matMutationTypes), levels=c("A", "C", "G", "T", "N")))
   tmp <- sapply(1:ncol(matMutationTypes),function(x){matMutationTypes[selfbases[x],x]<<-NA})
   if(nrow(matMutationTypes)==5)rownames(matMutationTypes)[5] <- "N"
   return(matMutationTypes)

@@ -677,7 +677,7 @@ permutateAllCodon <- function(codon){
 }
 
 # Given two codons, tells you if the mutation is R or S (based on your definition)
-mutationType <- function(codonFrom,codonTo){
+mutationType <- function(codonFrom, codonTo, testID=1) {
   if(testID==4){
     if( is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
       return(NA)
