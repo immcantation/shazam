@@ -13,8 +13,8 @@
 # @return  a list containing the substitution (subs) and mutability (mut) models
 #' @export
 loadModel <- function(model) {
-  if (model == "hs5f") { data_file = "HS5F_Targeting.RData" }
-  else if (model == "m3n") { data_file = "MTri_Targeting.RData" }
+  if(model == "hs5f") { data_file = "HS5F_Targeting.RData" }
+  else if(model == "m3n") { data_file = "MTri_Targeting.RData" }
   else { stop("Are you sure you know what you're doing?\n") }
   
   tmp_env <- new.env()
@@ -70,7 +70,7 @@ dist_seq_fast <- function(seq1, seq2, subs, mut) {
 }
 
 
-# Given an array of junction sequences, find the distance to the closest sequence
+# Given an array of junction sequences, find the pairwise distances
 #
 # @param   arrJunctions   character vector of junction sequences.
 # @param   model          name of SHM targeting model.
