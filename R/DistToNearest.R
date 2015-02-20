@@ -49,7 +49,7 @@ loadModel <- function(model) {
 #' model_data <- loadModel(model)
 #' dist_seq_fast(seq1, seq2, model_data[["subs"]], model_data[["mut"]])
 #' @export
-dist_seq_fast <- function(seq1, seq2, subs, mut){
+dist_seq_fast <- function(seq1, seq2, subs, mut) {
   #Compute distance only on fivemers that have mutations
   fivemersWithMu <- substr(seq1,3,3)!=substr(seq2,3,3)
   fivemersWithNonNuc <- ( !is.na(match(substr(seq1,3,3),c("A","C","G","T"))) & !is.na(match(substr(seq2,3,3),c("A","C","G","T"))) )
@@ -73,11 +73,46 @@ dist_seq_fast <- function(seq1, seq2, subs, mut){
 # Given an array of junction sequences, find the distance to the closest sequence
 #
 # @param   arrJunctions   character vector of junction sequences.
+# @param   model          name of SHM targeting model.
+# @return  A matrix of pairwise distances between junction sequences.
+#' @export
+getPairwiseDistances <- function(arrJunctions, model) {
+
+  # Load targeting model
+  model_data <- loadModel(model)
+  # Convert junctions to uppercase
+  arrJunctions <- toupper(arrJunctions)
+  # Convert gaps to Ns
+  arrJunctions <- gsub('.', 'N', arrJunctions, fixed=T)
+  # Add 'NN' to front and end of each sequence for fivemers
+  arrJunctions <- as.vector(sapply(arrJunctions, function(x){paste("NN",x,"NN",sep="")}))
+
+  N<-length(arrJunctions)
+  Mat<-diag(N)
+
+  # Break the junctions into 5-mers and create a sliding window matrix
+  # (each column is a sequence)
+  matSeqSlidingFiveMer <- sapply(arrJunctions,function(x) { slidingArrayOf5mers(x) },simplify="matrix")
+
+  # Compute pairwise distance between all sequences' fivemers (by column)
+  dist_mat <- sapply(1:N, function(i) c(rep.int(0,i-1), sapply(i:N,function(j) {
+							dist_seq_fast(matSeqSlidingFiveMer[,i], matSeqSlidingFiveMer[,j],
+									      model_data[["subs"]], model_data[["mut"]])
+								})))
+  # Make distance matrix symmetric
+  dist_mat <- dist_mat + t(dist_mat)
+  return(dist_mat)
+}
+
+
+# Given an array of junction sequences, find the distance to the closest sequence
+#
+# @param   arrJunctions   character vector of junction sequences.
 # @param   subs            substitution model.
 # @param   mut            mutability model.
 # @return  A vector of distances to the closest sequence.
 #' @export
-getDistanceToClosest <- function(arrJunctions, subs, mut){
+getDistanceToClosest <- function(arrJunctions, subs, mut) {
   
   #Initialize array of distances
   arrJunctionsDist <- rep(NA,length(arrJunctions))
