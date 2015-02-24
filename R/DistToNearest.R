@@ -239,14 +239,16 @@ distToNearest <- function(db, seq="JUNCTION", genotyped=FALSE, first=TRUE, model
   if(numbOfCores>1){
     cluster <- makeCluster(numbOfCores, type = "SOCK")
     registerDoSNOW(cluster)
-    clusterEvalQ(cluster, library(shm,alakazam))
+    clusterEvalQ(cluster, library(shm))
     runAsParallel <- TRUE
   }
   
-  db <- arrange(ddply(db, .(V, J, L), here(mutate),
-                      DIST_NEAREST=getDistanceToClosest(eval(parse(text=seq)),
-                                                        subs=model_data[['subs']],
-                                                        mut=model_data[['mut']]), .parallel=runAsParallel),
+  db <- arrange(ddply(db, .(V, J, L), 
+                      function(piece) mutate(piece, 
+                                             DIST_NEAREST=getDistanceToClosest(eval(parse(text=seq)), 
+                                                                               subs=model_data[['subs']], 
+                                                                               mut=model_data[['mut']])), 
+                      .parallel=runAsParallel),
                 ROW_ID)
   
   if(runAsParallel){
