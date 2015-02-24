@@ -1,5 +1,5 @@
 .onLoad <- function(libname, pkgname) {
-  #options(warn=-1)
+  options(warn=-1)
   #REGIONS <<- factor( c( rep("FWR",78), rep("CDR",36), rep("FWR",51), rep("CDR",30), rep("FWR",117)), levels=c("FWR","CDR") )
   #LENGTH_REGIONS <<- length(REGIONS)
   #testID <<- 1
