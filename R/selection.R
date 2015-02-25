@@ -4602,14 +4602,14 @@ getPlatform <-function(){
 #'
 #' @return  The number of cores/cpus available. Returns 1 if undeterminable.
 #' @examples
-#' getNumbOfCores()
+#' getnproc()
 #' @export
-getNumbOfCores <-function(){
+getnproc <-function(){
   platform <- getPlatform()
-  numbOfCores <- 1
-  if(platform=="windows") numbOfCores <- Sys.getenv('NUMBER_OF_PROCESSORS')
-  if(platform=="unix") numbOfCores <- system("nproc", intern=TRUE)
-  return(as.numeric(numbOfCores))
+  nproc <- 1
+  if(platform=="windows") nproc <- Sys.getenv('NUMBER_OF_PROCESSORS')
+  if(platform=="unix") nproc <- system("nproc", intern=TRUE)
+  return(as.numeric(nproc))
 }
 
 

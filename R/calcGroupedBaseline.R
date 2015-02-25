@@ -4,7 +4,7 @@
 #'
 #' @param    db                 data.frame containing sequence data. \code{db} must contain the columns CDR_PDFs and FWR_PDFs.
 #' @param    columnsToGroupBy   The columns you want to group and obtain combined selection scores for.
-#' @param    numbOfCores        The number of cores to distribute the function over.
+#' @param    nproc        The number of cores to distribute the function over.
 #' @return   A data.frame of the BASELINe sigma values and 95% Conf. Intervals for the CDR and FWR.
 #'
 #' @references
@@ -21,13 +21,13 @@
 #' # Working example
 #'
 #' @export
-calcGroupedBaseline <- function(db, columnsToGroupBy, numbOfCores=1){
+calcGroupedBaseline <- function(db, columnsToGroupBy, nproc=1){
 
-  availableCores <- getNumbOfCores()
+  availableCores <- getnproc()
   runAsParallel <- FALSE
-  if(!(numbOfCores<=availableCores))numbOfCores=availableCores
-  if(numbOfCores>1){
-    cluster <- makeCluster(numbOfCores, type = "SOCK")
+  if(!(nproc<=availableCores))nproc=availableCores
+  if(nproc>1){
+    cluster <- makeCluster(nproc, type = "SOCK")
     registerDoSNOW(cluster)
     clusterEvalQ(cluster, library(shm))
     runAsParallel <- TRUE

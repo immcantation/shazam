@@ -9,7 +9,7 @@
 #' @param    db              data.frame containing sequence data.
 #' @param    sequenceColumn  name of the sequence column.
 #' @param    germlineColumn  name of the germline column.
-#' @param    numbOfCores     The number of cores to distribute the function over.
+#' @param    nproc     The number of cores to distribute the function over.
 #' @return   A modified \code{db} data.frame with expected frequencies in the
 #'           EXPECTED_R_CDR (CDR replacement), EXPECTED_S_CDR (CDR silent),
 #'           EXPECTED_R_FWR, (FWR replacement, and EXPECTED_S_FWR (FWR silent) columns.
@@ -20,9 +20,9 @@
 #' # Working example
 #'
 #' @export
-addExpectedFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK", numbOfCores=1)  {
+addExpectedFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK", nproc=1)  {
 
-  if(numbOfCores==1){
+  if(nproc==1){
   facGL <- factor(db[,germlineColumn])
   facLevels = levels(facGL)
   cat("Computing mutabilities...\n")
@@ -84,9 +84,9 @@ addExpectedFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP", germlineCo
 
   }else{
 
-    availableCores <- getNumbOfCores()
-    if(!(numbOfCores<=availableCores))numbOfCores=availableCores
-    cluster <- makeCluster(numbOfCores, type = "SOCK")
+    availableCores <- getnproc()
+    if(!(nproc<=availableCores))nproc=availableCores
+    cluster <- makeCluster(nproc, type = "SOCK")
     registerDoSNOW(cluster)
 
 

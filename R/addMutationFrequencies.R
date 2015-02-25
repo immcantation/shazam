@@ -7,7 +7,7 @@
 #' @param    db              data.frame containing sequence data.
 #' @param    sequenceColumn  The name of the sequence column.
 #' @param    germlineColumn  The name of the germline column.
-#' @param    numbOfCores     The number of cores to distribute the function over.
+#' @param    nproc     The number of cores to distribute the function over.
 #' @return   A modified \code{db} data.frame with observed mutations in the
 #'           OBSERVED_R_CDR (CDR replacement), OBSERVED_S_CDR (CDR silent),
 #'           OBSERVED_R_FWR, (FWR replacement, and OBSERVED_S_FWR (FWR silent) columns.
@@ -17,13 +17,13 @@
 #' # Working example
 #'
 #' @export
-addMutationFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK", numbOfCores=1)  {
+addMutationFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP", germlineColumn="GERMLINE_GAP_D_MASK", nproc=1)  {
 
   numbOfSeqs <- nrow(db)
 
-  availableCores <- getNumbOfCores()
-  if(!(numbOfCores<=availableCores))numbOfCores=availableCores
-  cluster <- makeCluster(numbOfCores, type = "SOCK")
+  availableCores <- getnproc()
+  if(!(nproc<=availableCores))nproc=availableCores
+  cluster <- makeCluster(nproc, type = "SOCK")
   registerDoSNOW(cluster)
 
   muFreq <-

@@ -16,12 +16,12 @@ loadModel <- function(model) {
   if(model == "hs5f") { data_file = "HS5F_Targeting.RData" }
   else if(model == "m3n") { data_file = "MTri_Targeting.RData" }
   else { stop("Are you sure you know what you're doing?\n") }
-  
+
   tmp_env <- new.env()
   load(system.file("extdata", data_file, package="shm"), envir=tmp_env)
   Targeting <- get("Targeting", envir=tmp_env)
   rm(tmp_env)
-  
+
   return(list(subs=Targeting[["Substitution"]], mut=Targeting[["Mutability"]]))
 }
 
@@ -113,23 +113,23 @@ getPairwiseDistances <- function(arrJunctions, model) {
 # @return  A vector of distances to the closest sequence.
 #' @export
 getDistanceToClosest <- function(arrJunctions, subs, mut) {
-  
+
   #Initialize array of distances
   arrJunctionsDist <- rep(NA,length(arrJunctions))
-  
+
   #Filter unique junctions
   arrJunctionsUnique <- unique(arrJunctions)
-  
+
   #Map indexes of unique to its non-unique in the original arrJunctions
   indexJunctions <- match(arrJunctions, arrJunctionsUnique)
-  
+
   #Identify junctions with multiple non-unique sequences and set its distances to 0
   indexJunctionsCounts <- table(indexJunctions)
   indexRepeated <- as.numeric(names(indexJunctionsCounts)[indexJunctionsCounts>1])
   indexRepeated <- indexJunctions%in%indexRepeated
   arrJunctionsDist[ indexRepeated ] <- rep(0,sum(indexRepeated))
   names(arrJunctionsDist) <- arrJunctions
-  
+
   #Compute distances between junctions
   numbOfUniqueJuctions <- length(arrJunctionsUnique)
   arrUniqueJunctionsDist <- rep(NA,numbOfUniqueJuctions)
@@ -153,7 +153,7 @@ getDistanceToClosest <- function(arrJunctions, subs, mut) {
     arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJuctions, function(i){ min(matDistance[-i,i]) })
     names(arrUniqueJunctionsDist) <- arrJunctionsUnique
   }
-  
+
   #Fill the distances for the sequences that are unique
   arrJunctionsDist[is.na(arrJunctionsDist)] <- arrUniqueJunctionsDist[indexJunctionsCounts==1]
   return(round(arrJunctionsDist,4))
@@ -179,8 +179,8 @@ getDistanceToClosest <- function(arrJunctions, subs, mut) {
 #' @param   model      SHM targeting model; must be one of c("hs5f", "m3n"). See Details for further information.
 #' @param   vector     if \code{TRUE} return a numeric vector of only the distances; if \code{FALSE} return the
 #'                     entire input data.frame with a DIST_NEAREST column added.
-#' @param    numbOfCores     The number of cores to distribute the function over.
-#' 
+#' @param    nproc     The number of cores to distribute the function over.
+#'
 #' @return  If \code{vector=TRUE} returns a numeric vector of distances of each sequence to its nearest neighbor.
 #'          If \code{vector=FALSE} returns a modified \code{db} data.frame with nearest neighbor distances
 #'          in the DIST_NEAREST column.
@@ -196,19 +196,19 @@ getDistanceToClosest <- function(arrJunctions, subs, mut) {
 #'
 #' @export
 distToNearest <- function(db, seq="JUNCTION", genotyped=FALSE, first=TRUE, model="hs5f",
-                          vector=FALSE, numbOfCores=1) {
+                          vector=FALSE, nproc=1) {
   if(!is.data.frame(db)) { stop('Must submit a data frame') }
-  
+
   if(genotyped) {
     v_col <- "V_CALL_GENOTYPED"
   } else {
     v_col <- "V_CALL"
   }
   j_col <- "J_CALL"
-  
+
   # Parse V and J Column to get gene
   # cat("V+J Column parsing\n")
-  
+
   if(first) {
     db$V <- getGene(db[,v_col])
     db$J <- getGene(db[,j_col])
@@ -224,33 +224,33 @@ distToNearest <- function(db, seq="JUNCTION", genotyped=FALSE, first=TRUE, model
       for(g in strsplit(ambig, split=','))
         db$J[db$J==g] = ambig
   }
-  
+
   # Load targeting model
   # cat("Loading Targeting Model\n")
   model_data <- loadModel(model)
-  
+
   # Create new column for distance to nearest neighbor
   db$DIST_NEAREST <- rep(NA, nrow(db))
   db$ROW_ID <- 1:nrow(db)
   db$L <- nchar(db[, seq])
-  
+
   # cat("Calculating distance to nearest neighbor\n")
   runAsParallel <- FALSE
-  if(numbOfCores>1){
-    cluster <- makeCluster(numbOfCores, type = "SOCK")
+  if(nproc>1){
+    cluster <- makeCluster(nproc, type = "SOCK")
     registerDoSNOW(cluster)
     clusterEvalQ(cluster, library(shm))
     runAsParallel <- TRUE
   }
-  
-  db <- arrange(ddply(db, .(V, J, L), 
-                      function(piece) mutate(piece, 
-                                             DIST_NEAREST=getDistanceToClosest(eval(parse(text=seq)), 
-                                                                               subs=model_data[['subs']], 
-                                                                               mut=model_data[['mut']])), 
+
+  db <- arrange(ddply(db, .(V, J, L),
+                      function(piece) mutate(piece,
+                                             DIST_NEAREST=getDistanceToClosest(eval(parse(text=seq)),
+                                                                               subs=model_data[['subs']],
+                                                                               mut=model_data[['mut']])),
                       .parallel=runAsParallel),
                 ROW_ID)
-  
+
   if(runAsParallel){
     stopCluster(cluster)
   }
