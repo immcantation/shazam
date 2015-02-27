@@ -23,9 +23,7 @@
 #' @export
 calcGroupedBaseline <- function(db, columnsToGroupBy, nproc=1){
 
-  availableCores <- getnproc()
   runAsParallel <- FALSE
-  if(!(nproc<=availableCores))nproc=availableCores
   if(nproc>1){
     cluster <- makeCluster(nproc, type = "SOCK")
     registerDoSNOW(cluster)
@@ -39,8 +37,7 @@ calcGroupedBaseline <- function(db, columnsToGroupBy, nproc=1){
   }else{
     return(NULL)
   }
-
-  stopCluster(cluster)
+  if(nproc>1)stopCluster(cluster)
   return(db)
 }
 

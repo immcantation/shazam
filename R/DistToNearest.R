@@ -28,10 +28,13 @@ loadModel <- function(model) {
 
 #' Get distance between two five-mer sequences of same length
 #'
-#' @param   seq1   first nucleotide sequence.
-#' @param   seq2   second nucleotide sequence.
-#' @param   subs    substitution model.
-#' @param   mut    mutability model.
+#' @param   seq1          first nucleotide sequence.
+#' @param   seq2          second nucleotide sequence.
+#' @param   subs          substitution model.
+#' @param   mut           mutability model.
+#' @param   normalize     The method of normalization. Default is none.
+#'                        'juncLength' = normalize distance by length of junction.
+#'                        'juncMutations' = normalize distance by number of mutations in junction.
 #' @return  distance between two sequences.
 #'
 #' @examples
@@ -49,7 +52,7 @@ loadModel <- function(model) {
 #' model_data <- loadModel(model)
 #' dist_seq_fast(seq1, seq2, model_data[["subs"]], model_data[["mut"]])
 #' @export
-dist_seq_fast <- function(seq1, seq2, subs, mut) {
+dist_seq_fast <- function(seq1, seq2, subs, mut, normlize="none") {
   #Compute distance only on fivemers that have mutations
   fivemersWithMu <- substr(seq1,3,3)!=substr(seq2,3,3)
   fivemersWithNonNuc <- ( !is.na(match(substr(seq1,3,3),c("A","C","G","T"))) & !is.na(match(substr(seq2,3,3),c("A","C","G","T"))) )
@@ -63,7 +66,9 @@ dist_seq_fast <- function(seq1, seq2, subs, mut) {
       seq1_to_seq2 <- sum( diag(subs[substr(seq2,3,3),seq1]) *  mut[seq1] )
       seq2_to_seq1 <- sum( diag(subs[substr(seq1,3,3),seq2]) *  mut[seq2] )
     }
-    return( mean(c(seq1_to_seq2, seq2_to_seq1)) )
+    avgDist <- mean(c(seq1_to_seq2, seq2_to_seq1))
+    #if(normalize=="juncLength")avgDist <- avgDist/()
+    return(  )
   },error = function(e){
     return(NA)
   })
@@ -76,7 +81,7 @@ dist_seq_fast <- function(seq1, seq2, subs, mut) {
 # @param   model          name of SHM targeting model.
 # @return  A matrix of pairwise distances between junction sequences.
 #' @export
-getPairwiseDistances <- function(arrJunctions, model) {
+getPairwiseDistances <- function(arrJunctions, model="hs5f", normlize="none") {
 
   # Load targeting model
   model_data <- loadModel(model)
@@ -105,14 +110,25 @@ getPairwiseDistances <- function(arrJunctions, model) {
 }
 
 
-# Given an array of junction sequences, find the distance to the closest sequence
-#
-# @param   arrJunctions   character vector of junction sequences.
-# @param   subs            substitution model.
-# @param   mut            mutability model.
-# @return  A vector of distances to the closest sequence.
+#' Given an array of junction sequences, find the distance to the closest sequence
+#'
+#' @param   arrJunctions  character vector of junction sequences.
+#' @param   subs          substitution model.
+#' @param   mut           mutability model.
+#' @param   normalize     The method of normalization. Default is none.
+#'                        'juncLength' = normalize distance by length of junction.
+#'                        'juncMutations' = normalize distance by number of mutations in junction.
+#' @return  A vector of distances to the closest sequence.
+#' @examples
+#' arrJunctions <- c("ACGTACGTACGT","ACGAACGTACGT",
+#'                "ACGAACGTATGT", "ACGAACGTATGC",
+#'                "ACGAACGTATCC","AAAAAAAAAAAA")
+#' model_data <- loadModel(model="hs5f")
+#' subs <- model_data[['subs']]
+#' mut <- model_data[['mut']]
+#' getDistanceToClosest(arrJunctions, subs, muts, normalize="none" )
 #' @export
-getDistanceToClosest <- function(arrJunctions, subs, mut) {
+getDistanceToClosest <- function(arrJunctions, subs, mut, normalize="none") {
 
   #Initialize array of distances
   arrJunctionsDist <- rep(NA,length(arrJunctions))
@@ -168,18 +184,21 @@ getDistanceToClosest <- function(arrJunctions, subs, mut) {
 #' hs5f model is the SHM targeting model from Yaari, G., et al. Frontiers in Immunology, 2013.
 #' m3n model uses the SHM substitution matrix found in Smith, D., et al. J. Immunol., 1996.
 #'
-#' @param   db         \code{data.frame} which must have the following columns: V_CALL and J_CALL.
-#' @param   seq        the column containing nucleotide sequences to compare. Also used to determine
-#'                     sequence length for grouping.
-#' @param   genotyped  logical indicating whether \code{db} is genotyped; if genotyped is \code{TRUE},
-#'                     \code{db} must have the column V_CALL_GENOTYPED.
-#' @param   first      if \code{TRUE} only the first call the gene assignment is used;
-#'                     if \code{FALSE} the union of ambiguous gene assignments is used to group all sequences with
-#'                     any of those gene calls.
-#' @param   model      SHM targeting model; must be one of c("hs5f", "m3n"). See Details for further information.
-#' @param   vector     if \code{TRUE} return a numeric vector of only the distances; if \code{FALSE} return the
-#'                     entire input data.frame with a DIST_NEAREST column added.
-#' @param    nproc     The number of cores to distribute the function over.
+#' @param   db          \code{data.frame} which must have the following columns: V_CALL and J_CALL.
+#' @param   seq         the column containing nucleotide sequences to compare. Also used to determine
+#'                      sequence length for grouping.
+#' @param   genotyped   logical indicating whether \code{db} is genotyped; if genotyped is \code{TRUE},
+#'                      \code{db} must have the column V_CALL_GENOTYPED.
+#' @param   first       if \code{TRUE} only the first call the gene assignment is used;
+#'                      if \code{FALSE} the union of ambiguous gene assignments is used to group all sequences with
+#'                      any of those gene calls.
+#' @param   model       SHM targeting model; must be one of c("hs5f", "m3n"). See Details for further information.
+#' @param   vector      if \code{TRUE} return a numeric vector of only the distances; if \code{FALSE} return the
+#'                      entire input data.frame with a DIST_NEAREST column added.
+#' @param   nproc       The number of cores to distribute the function over.
+#' @param   normalize   The method of normalization. Default is none.
+#'                      'juncLength' = normalize distance by length of junction.
+#'                      'juncMutations' = normalize distance by number of mutations in junction.
 #'
 #' @return  If \code{vector=TRUE} returns a numeric vector of distances of each sequence to its nearest neighbor.
 #'          If \code{vector=FALSE} returns a modified \code{db} data.frame with nearest neighbor distances
@@ -196,7 +215,7 @@ getDistanceToClosest <- function(arrJunctions, subs, mut) {
 #'
 #' @export
 distToNearest <- function(db, seq="JUNCTION", genotyped=FALSE, first=TRUE, model="hs5f",
-                          vector=FALSE, nproc=1) {
+                          vector=FALSE, nproc=1, normalize="none") {
   if(!is.data.frame(db)) { stop('Must submit a data frame') }
 
   if(genotyped) {
@@ -247,7 +266,8 @@ distToNearest <- function(db, seq="JUNCTION", genotyped=FALSE, first=TRUE, model
                       function(piece) mutate(piece,
                                              DIST_NEAREST=getDistanceToClosest(eval(parse(text=seq)),
                                                                                subs=model_data[['subs']],
-                                                                               mut=model_data[['mut']])),
+                                                                               mut=model_data[['mut']],
+                                                                               normalize=normalize)),
                       .parallel=runAsParallel),
                 ROW_ID)
 

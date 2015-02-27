@@ -20,11 +20,11 @@
 #' # Working example
 #'
 #' @export
-computeBaselinePDF <- function(db,numbOfCores=1){
+computeBaselinePDF <- function(db,nproc=1){
 
-  availableCores <- getNumbOfCores()
-  if(!(numbOfCores<=availableCores))numbOfCores=availableCores
-  cluster <- makeCluster(numbOfCores, type = "SOCK")
+  availableCores <- getnproc()
+  if(!(nproc<=availableCores))nproc=availableCores
+  cluster <- makeCluster(nproc, type = "SOCK")
   registerDoSNOW(cluster)
   numbOfSeqs <- nrow(db)
   pdfs <-

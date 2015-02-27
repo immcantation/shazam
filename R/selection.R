@@ -4662,3 +4662,18 @@ slidingArrayOf5mers <- function(strSequence){
   seqLength <- nchar(strSequence)
   return( substr( rep(strSequence,seqLength-4), 1:(seqLength-4), 5:seqLength ) )
 }
+
+
+
+
+#' Clears console in R
+#'
+#' @export
+clearConsole <- function(){
+  platform <- getPlatform()
+  nproc <- 1
+  if(platform=="windows") cat("\014")
+  if(platform=="unix") system('clear')
+}
+
+
