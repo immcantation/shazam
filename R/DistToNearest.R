@@ -60,7 +60,7 @@ dist_seq_fast <- function(seq1, seq2, subs, mut, normalize="none") {
   seq1 <- seq1[fivemersWithMu & fivemersWithNonNuc]
   seq2 <- seq2[fivemersWithMu & fivemersWithNonNuc]
 
-
+  avgDist <- NA
   a <- tryCatch({
     if(length(seq1)==1){
       seq1_to_seq2 <- subs[substr(seq2,3,3),seq1] * mut[seq1]
