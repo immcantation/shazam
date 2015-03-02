@@ -26,7 +26,7 @@ loadModel <- function(model) {
 }
 
 
-#' Get distance between two five-mer sequences of same length
+#' Get distance between two sequences of same length, broken by a sliding window of 5mers
 #'
 #' @param   seq1          first nucleotide sequence.
 #' @param   seq2          second nucleotide sequence.
@@ -34,30 +34,33 @@ loadModel <- function(model) {
 #' @param   mut           mutability model.
 #' @param   normalize     The method of normalization. Default is none.
 #'                        'juncLength' = normalize distance by length of junction.
-#'                        'juncMutations' = normalize distance by number of mutations in junction.
+#'                        'juncMutation' = normalize distance by number of mutations in junction.
+#'                        If a numeric value is passed, then the computed distance is divided by the given value.
 #' @return  distance between two sequences.
 #'
 #' @examples
-#' seq1  = "AAAAAAA"
-#' seq2 = "ATAACAAA"
+#' seq1 = c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
+#' seq2 = c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
 #'
-#' # adds 'NN' to the begning and end of the sequences
-#' seq1 <- paste0('NN', seq1, 'NN')
-#' seq2 <- paste0('NN', seq2, 'NN')
-#'
-#' #Break sequence into fivemers
-#' seq1 <- slidingArrayOf5mers(seq1)
-#' seq2 <- slidingArrayOf5mers(seq2)
 #' model="hs5f"
 #' model_data <- loadModel(model)
-#' dist_seq_fast(seq1, seq2, model_data[["subs"]], model_data[["mut"]])
+#' dist_seq_fast(seq1, seq2, model_data[["subs"]], model_data[["mut"]], normalize="none")
 #' @export
-dist_seq_fast <- function(seq1, seq2, subs, mut, normlize="none") {
+dist_seq_fast <- function(seq1, seq2, subs, mut, normalize="none") {
+  #Compute length of sequence (for normalization, if specified)
+  juncLength <- length(seq1)
+
   #Compute distance only on fivemers that have mutations
   fivemersWithMu <- substr(seq1,3,3)!=substr(seq2,3,3)
   fivemersWithNonNuc <- ( !is.na(match(substr(seq1,3,3),c("A","C","G","T"))) & !is.na(match(substr(seq2,3,3),c("A","C","G","T"))) )
+  fivemersWithMu <- fivemersWithMu & fivemersWithNonNuc
+  #Number of mutations (for normalization, if specified)
+  numbOfMutation <- sum(fivemersWithMu)
+
   seq1 <- seq1[fivemersWithMu & fivemersWithNonNuc]
   seq2 <- seq2[fivemersWithMu & fivemersWithNonNuc]
+
+
   a <- tryCatch({
     if(length(seq1)==1){
       seq1_to_seq2 <- subs[substr(seq2,3,3),seq1] * mut[seq1]
@@ -67,21 +70,31 @@ dist_seq_fast <- function(seq1, seq2, subs, mut, normlize="none") {
       seq2_to_seq1 <- sum( diag(subs[substr(seq1,3,3),seq2]) *  mut[seq2] )
     }
     avgDist <- mean(c(seq1_to_seq2, seq2_to_seq1))
-    #if(normalize=="juncLength")avgDist <- avgDist/()
-    return(  )
   },error = function(e){
     return(NA)
   })
+
+  #Normalizing distance
+  if(normalize!="none"){
+    if(normalize=="juncLength")avgDist<-avgDist/juncLength
+    if(normalize=="juncMutation")avgDist<-avgDist/numbOfMutation
+    if(is.numeric(normalize))avgDist<-avgDist/normalize
+  }
+  return(avgDist)
 }
 
 
-# Given an array of junction sequences, find the pairwise distances
-#
-# @param   arrJunctions   character vector of junction sequences.
-# @param   model          name of SHM targeting model.
-# @return  A matrix of pairwise distances between junction sequences.
+#' Given an array of junction sequences, find the pairwise distances
+#'
+#' @param   arrJunctions   character vector of junction sequences.
+#' @param   model          name of SHM targeting model.
+#' @param   normalize     The method of normalization. Default is none.
+#'                        'juncLength' = normalize distance by length of junction.
+#'                        'juncMutations' = normalize distance by number of mutations in junction.
+#'                        If a numeric value is passed, then the computed distance is divided by the given value.
+#' @return  A matrix of pairwise distances between junction sequences.
 #' @export
-getPairwiseDistances <- function(arrJunctions, model="hs5f", normlize="none") {
+getPairwiseDistances <- function(arrJunctions, model="hs5f", normalize="none") {
 
   # Load targeting model
   model_data <- loadModel(model)
@@ -92,21 +105,28 @@ getPairwiseDistances <- function(arrJunctions, model="hs5f", normlize="none") {
   # Add 'NN' to front and end of each sequence for fivemers
   arrJunctions <- as.vector(sapply(arrJunctions, function(x){paste("NN",x,"NN",sep="")}))
 
-  N<-length(arrJunctions)
-  Mat<-diag(N)
+  numbOfJuctions<-length(arrJunctions)
 
-  # Break the junctions into 5-mers and create a sliding window matrix
-  # (each column is a sequence)
-  matSeqSlidingFiveMer <- sapply(arrJunctions,function(x) { slidingArrayOf5mers(x) },simplify="matrix")
+  #Junctions are broken in to 5-mers based on a sliding window (of one) and placed in matrix
+  #Each column is a junction
+  #E.g. junctions 1234567, ABCDEFG, JKLMNOP becomes:
+  # 12345   ABCDE   JKLMN
+  # 23456   BCDEF   KLMNO
+  # 34567   CDEFG   LMNOP
+  matSeqSlidingFiveMer <- sapply(arrJunctions, function(x) { slidingArrayOf5mers(x) },simplify="matrix")
 
   # Compute pairwise distance between all sequences' fivemers (by column)
-  dist_mat <- sapply(1:N, function(i) c(rep.int(0,i-1), sapply(i:N,function(j) {
-							dist_seq_fast(matSeqSlidingFiveMer[,i], matSeqSlidingFiveMer[,j],
-									      model_data[["subs"]], model_data[["mut"]])
-								})))
+  matDistance <-
+    sapply(1:numbOfJuctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfJuctions, function(j) {
+      dist_seq_fast( matSeqSlidingFiveMer[,i],
+                     matSeqSlidingFiveMer[,j],
+                     model_data[["subs"]],
+                     model_data[["mut"]],
+                     normalize=normalize)
+    })))
   # Make distance matrix symmetric
-  dist_mat <- dist_mat + t(dist_mat)
-  return(dist_mat)
+  matDistance <- matDistance + t(matDistance)
+  return(matDistance)
 }
 
 
@@ -118,11 +138,12 @@ getPairwiseDistances <- function(arrJunctions, model="hs5f", normlize="none") {
 #' @param   normalize     The method of normalization. Default is none.
 #'                        'juncLength' = normalize distance by length of junction.
 #'                        'juncMutations' = normalize distance by number of mutations in junction.
+#'                        If a numeric value is passed, then the computed distance is divided by the given value.
 #' @return  A vector of distances to the closest sequence.
 #' @examples
-#' arrJunctions <- c("ACGTACGTACGT","ACGAACGTACGT",
-#'                "ACGAACGTATGT", "ACGAACGTATGC",
-#'                "ACGAACGTATCC","AAAAAAAAAAAA")
+#' arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
+#'                    "ACGAACGTATGT", "ACGAACGTATGC",
+#'                    "ACGAACGTATCC","AAAAAAAAAAAA")
 #' model_data <- loadModel(model="hs5f")
 #' subs <- model_data[['subs']]
 #' mut <- model_data[['mut']]
@@ -153,18 +174,25 @@ getDistanceToClosest <- function(arrJunctions, subs, mut, normalize="none") {
     arrJunctionsUnique <- toupper(arrJunctionsUnique)
     arrJunctionsUnique <- gsub('.', '-', arrJunctionsUnique, fixed=TRUE)
     arrJunctionsUnique <- as.vector(sapply(arrJunctionsUnique,function(x){paste("NN",x,"NN",sep="")}))
-    matSequenceFivemers <- sapply(arrJunctionsUnique,
-                                  function(x){
-                                    lenString <- nchar(x)
-                                    fivemersPos <- 3:(lenString-2)
-                                    fivemers <-  substr(rep(x,lenString-4),(fivemersPos-2),(fivemersPos+2))
-                                    return(fivemers)
-                                  }
-                                  , simplify="matrix"
-    )
-    matDistance <-sapply(1:numbOfUniqueJuctions, function(i)c(rep.int(0,i-1),sapply(i:numbOfUniqueJuctions,function(j){
-      dist_seq_fast(matSequenceFivemers[,i],matSequenceFivemers[,j], subs=subs, mut=mut)
-    })))
+
+    #Junctions are broken in to 5-mers based on a sliding window (of one) and placed in matrix
+    #Each column is a junction
+    #E.g. junctions 1234567, ABCDEFG, JKLMNOP becomes:
+    # 12345   ABCDE   JKLMN
+    # 23456   BCDEF   KLMNO
+    # 34567   CDEFG   LMNOP
+    matSeqSlidingFiveMer <- sapply(arrJunctionsUnique, function(x) { slidingArrayOf5mers(x) },simplify="matrix")
+
+    # Compute pairwise distance between all sequences' fivemers (by column)
+    matDistance <-
+      sapply(1:numbOfUniqueJuctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJuctions, function(j) {
+        dist_seq_fast( matSeqSlidingFiveMer[,i],
+                       matSeqSlidingFiveMer[,j],
+                       model_data[["subs"]],
+                       model_data[["mut"]],
+                       normalize=normalize)
+      })))
+
     matDistance <- matDistance + t(matDistance)
     arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJuctions, function(i){ min(matDistance[-i,i]) })
     names(arrUniqueJunctionsDist) <- arrJunctionsUnique
@@ -196,9 +224,10 @@ getDistanceToClosest <- function(arrJunctions, subs, mut, normalize="none") {
 #' @param   vector      if \code{TRUE} return a numeric vector of only the distances; if \code{FALSE} return the
 #'                      entire input data.frame with a DIST_NEAREST column added.
 #' @param   nproc       The number of cores to distribute the function over.
-#' @param   normalize   The method of normalization. Default is none.
-#'                      'juncLength' = normalize distance by length of junction.
-#'                      'juncMutations' = normalize distance by number of mutations in junction.
+#' @param   normalize     The method of normalization. Default is none.
+#'                        'juncLength' = normalize distance by length of junction.
+#'                        'juncMutations' = normalize distance by number of mutations in junction.
+#'                        If a numeric value is passed, then the computed distance is divided by the given value.
 #'
 #' @return  If \code{vector=TRUE} returns a numeric vector of distances of each sequence to its nearest neighbor.
 #'          If \code{vector=FALSE} returns a modified \code{db} data.frame with nearest neighbor distances
