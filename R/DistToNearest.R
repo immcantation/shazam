@@ -224,10 +224,10 @@ getDistanceToClosest <- function(arrJunctions, subs, mut, normalize="none") {
 #' @param   vector      if \code{TRUE} return a numeric vector of only the distances; if \code{FALSE} return the
 #'                      entire input data.frame with a DIST_NEAREST column added.
 #' @param   nproc       The number of cores to distribute the function over.
-#' @param   normalize     The method of normalization. Default is none.
-#'                        'juncLength' = normalize distance by length of junction.
-#'                        'juncMutations' = normalize distance by number of mutations in junction.
-#'                        If a numeric value is passed, then the computed distance is divided by the given value.
+#' @param   normalize   The method of normalization. Default is none.
+#'                      'juncLength' = normalize distance by length of junction.
+#'                      'juncMutations' = normalize distance by number of mutations in junction.
+#'                      If a numeric value is passed, then the computed distance is divided by the given value.
 #'
 #' @return  If \code{vector=TRUE} returns a numeric vector of distances of each sequence to its nearest neighbor.
 #'          If \code{vector=FALSE} returns a modified \code{db} data.frame with nearest neighbor distances
@@ -245,8 +245,10 @@ getDistanceToClosest <- function(arrJunctions, subs, mut, normalize="none") {
 #' @export
 distToNearest <- function(db, seq="JUNCTION", genotyped=FALSE, first=TRUE, model="hs5f",
                           vector=FALSE, nproc=1, normalize="none") {
+  # Initial check
   if(!is.data.frame(db)) { stop('Must submit a data frame') }
 
+  # Define V and J columns
   if(genotyped) {
     v_col <- "V_CALL_GENOTYPED"
   } else {
@@ -254,9 +256,8 @@ distToNearest <- function(db, seq="JUNCTION", genotyped=FALSE, first=TRUE, model
   }
   j_col <- "J_CALL"
 
-  # Parse V and J Column to get gene
+  # Parse V and J columns to get gene
   # cat("V+J Column parsing\n")
-
   if(first) {
     db$V <- getGene(db[,v_col])
     db$J <- getGene(db[,j_col])
@@ -264,13 +265,17 @@ distToNearest <- function(db, seq="JUNCTION", genotyped=FALSE, first=TRUE, model
     db$V <- getGene(db[,v_col], first=FALSE)
     db$J <- getGene(db[,j_col], first=FALSE)
     # Reassign V genes to most general group of genes
-    for(ambig in unique(db$V[grepl(',',db$V)]))
-      for(g in strsplit(ambig, split=','))
+    for(ambig in unique(db$V[grepl(',',db$V)])) {
+      for(g in strsplit(ambig, split=',')) {
         db$V2[db$V==g] = ambig
+      }
+    }
     # Reassign J genes to most general group of genes
-    for(ambig in unique(db$J[grepl(',',db$J)]))
-      for(g in strsplit(ambig, split=','))
+    for(ambig in unique(db$J[grepl(',',db$J)])) {
+      for(g in strsplit(ambig, split=',')) {
         db$J[db$J==g] = ambig
+      }
+    }
   }
 
   # Load targeting model
@@ -281,28 +286,27 @@ distToNearest <- function(db, seq="JUNCTION", genotyped=FALSE, first=TRUE, model
   db$DIST_NEAREST <- rep(NA, nrow(db))
   db$ROW_ID <- 1:nrow(db)
   db$L <- nchar(db[, seq])
-
+  
+  # Create cluster of nproc size and export namespaces
+  cluster <- makeCluster(nproc, type = "SOCK")
+  registerDoSNOW(cluster)
+  clusterExport(cluster, list('model_data'), envir=environment())
+  clusterEvalQ(cluster, library(shm))
+  
+  # Calculate distance to nearest neighbor
   # cat("Calculating distance to nearest neighbor\n")
-  runAsParallel <- FALSE
-  if(nproc>1){
-    cluster <- makeCluster(nproc, type = "SOCK")
-    registerDoSNOW(cluster)
-    clusterEvalQ(cluster, library(shm))
-    runAsParallel <- TRUE
-  }
-
-  db <- arrange(ddply(db, .(V, J, L),
-                      function(piece) mutate(piece,
-                                             DIST_NEAREST=getDistanceToClosest(eval(parse(text=seq)),
-                                                                               subs=model_data[['subs']],
-                                                                               mut=model_data[['mut']],
-                                                                               normalize=normalize)),
-                      .parallel=runAsParallel),
-                ROW_ID)
-
-  if(runAsParallel){
-    stopCluster(cluster)
-  }
+  db <- arrange(ddply(db, .(V, J, L), function(piece) 
+    mutate(piece, DIST_NEAREST=getDistanceToClosest(eval(parse(text=seq)),
+                                                    subs=model_data[['subs']],
+                                                    mut=model_data[['mut']],
+                                                    normalize=normalize)),
+    .parallel=TRUE),
+    ROW_ID)
+  
+  # Stop the cluster
+  stopCluster(cluster)
+  
+  # Determine output
   if (vector) {
     return(db$DIST_NEAREST)
   } else {
