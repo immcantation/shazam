@@ -1,21 +1,19 @@
 Package: shm
 Type: Package
-Title: Somatic Hypermutation Analysis
 Version: 0.1
-Date: 2015-02-04
 Author: Mohamed Uduman, Gur Yaari, Namita Gupta
 Maintainer: Mohamed Uduman <mohamed.uduman@yale.edu>
-Imports:
-    alakazam,
-    ggplot2,
-    grid,
-    plyr,
-    SDMTools,
-    seqinr,
-    zoo,
-    doSNOW
+Title: Somatic Hypermutation Analysis
+Description: A new computational framework for Bayesian estimation of
+    Antigen-driven selection in Immunoglobulin sequences, provides a more
+    intuitive means of analyzing selection by actually quantifying it. Along
+    with advanced analysis of SHM in Ig sequences.
+License: CC BY-NC-SA 3.0
+URL: http://clip.med.yale.edu/changeo
 Depends:
-    R (>= 3.0.1),
+    R (>= 3.0.0),
+    alakazam (>= 0.2.0)
+Imports:
     alakazam,
     doSNOW,
     ggplot2,
@@ -24,12 +22,7 @@ Depends:
     SDMTools,
     seqinr,
     zoo
-Description: A new computational framework for Bayesian estimation of
-    Antigen-driven selection in Immunoglobulin sequences, provides a more
-    intuitive means of analyzing selection by actually quantifying it. Along
-    with advanced analysis of SHM in Ig sequences.
-License: Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
-LazyData: yes
 Suggests:
     knitr
 VignetteBuilder: knitr
+LazyData: yes
