@@ -1,32 +1,57 @@
 shm
 -------------------------------------------------------------------------------
-December 4, 2014  
+March 6, 2015  
 Version 0.1
 
 Somatic hypermutation analysis package.
 
-Build
+Dependencies
 -------------------------------------------------------------------------------
-1. Clone repository
-2. Update Mercurial ignore globs with (.hgignore file):
-    * .*
-    * *.Rproj
-    * man/*.Rd
-3. Use RStudio
-4. Make RStudio project from existing directory
-5. install.packages(c("devtools", "roxygen2", "testthat", "knitr"))
-6. Build -> Configure Build Tools
-    * Check use devtools option
-    * Check use roxygen option
-    * Select configure roxygen options and check everything.
+R 3.0  
+R packages
 
-Requirements
+  -  alakazam
+  -  doSNOW
+  -  ggplot2
+  -  grid
+  -  plyr
+  -  SDMTools
+  -  seqinr
+  -  zoo
+
+Mercurial Configuration
 -------------------------------------------------------------------------------
-* R 3.0
-* External R packages
-    - ggplot2
-    - grid
-    - plyr
-    - SDMTools
-    - seqinr
-    - zoo
+Update Mercurial .hgignore file with:  
+```
+syntax: glob
+  .*
+  *.Rproj
+  man/*.Rd
+  inst/doc/*
+```
+
+Build Instructions
+-------------------------------------------------------------------------------
+Install build dependencies:
+```R
+install.packages(c("devtools", "roxygen2", "testthat", "knitr", "rmarkdown"))
+```
+
+Building with Rstudio:
+
+-  Build -> Configure Build Tools
+-  Check use devtools option
+-  Check use roxygen option
+-  Select configure roxygen options and check everything.
+-  Build -> Build and Reload
+
+Building from the R console:
+
+```R
+library(roxygen2)
+library(devtools)
+roxygenize()
+install_deps()
+build(vignettes=FALSE)
+install()
+```

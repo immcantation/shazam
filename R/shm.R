@@ -42,7 +42,11 @@
 #' @docType  package
 #'
 #' @import   alakazam
+#' @import   doSNOW
+#' @import   ggplot2
+#' @import   grid
 #' @import   plyr
 #' @import   seqinr
+#' @import   SDMTools
 #' @import   zoo
 NULL
