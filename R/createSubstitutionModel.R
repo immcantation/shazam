@@ -17,7 +17,6 @@ createSubstitutionModel <- function(db,
                                     germlineColumn="GERMLINE_GAP_D_MASK",
                                     vCallColumn="V_CALL_GENOTYPED",
                                     multipleMutation=0)  {
-
   NUCLEOTIDES <- c("A", "C", "G", "T")
   substitutionMatrix <- matrix(0,ncol=4,nrow=4,dimnames=list(NUCLEOTIDES,NUCLEOTIDES))
   substitutionList = list()
@@ -49,7 +48,7 @@ createSubstitutionModel <- function(db,
       VH_FAMILY <- VH_FAMILES[index]
 
       positions <- as.numeric(names(indexMutation))
-      positions <- positions[positions<=readEnd]
+      positions <- positions[positions<=VLENGTH]
       positions <- positions[!is.na(positions)]
       for( position in  positions){
         wrd <-  c2s(c(cGL[(position-2):(position-1)],cGL[(position+1):(position+2)]))
@@ -89,7 +88,7 @@ createSubstitutionModel <- function(db,
       VH_FAMILY <- VH_FAMILES[index]
 
       positions <- as.numeric(names(indexMutation))
-      positions <- positions[positions<=readEnd]
+      positions <- positions[positions<=VLENGTH]
       positions <- positions[!is.na(positions)]
       for( position in  positions){
         wrd <-  c2s(c(cGL[(position-2):(position-1)],cGL[(position+1):(position+2)]))

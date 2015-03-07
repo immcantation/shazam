@@ -6,7 +6,9 @@
 #' @param   param_vecMutabilities  The name of the germline column.
 #' @return  matTargeting
 computeTargeting <- function(param_strSeq,param_vecMutabilities){
-    seqLen <- nchar(param_strSeq)
+    NUCLEOTIDES <- c("A", "C", "G", "T", "N")
+    seqLen <- nchar(param_strSeq)    
+    
     seqsubstitution = matrix(NA,ncol=seqLen,nrow=5,dimnames=list(NUCLEOTIDES,s2c(param_strSeq)))
     gaplessSeq = gsub("\\.", "", param_strSeq)
     gaplessSeq <- paste("NN",gaplessSeq,"NN",sep="")

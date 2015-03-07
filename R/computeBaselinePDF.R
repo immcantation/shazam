@@ -1,26 +1,64 @@
-#' Compute the BASELINe (selection?) probability density function.
+#' Computes the BASELINe probability density function
 #'
-#' \code{computeBaselinePDF} computes the BASELINe probability density functions for...
+#' \code{computeBaselinePDF} computes the BASELINe probability density functions for a
+#' set of sequences.
 #'
-#' @param    db  data.frame containing sequence data. \code{db} must contain the columns
-#'               A, B, C, D.
-#' @return   A modified \code{db} data.frame with added columns E, F, G.
+#' @param    db     data.frame containing observed mutations and expected mutation 
+#'                  frequencies for a set of sequence data. See Details for descriptions
+#'                  of the required input columns.
+#' @param    nproc  number of cores to distribute the operation over.
+#' 
+#' @return   (A modified \code{db} data.frame) Should convert to an object.
 #'
+#' @details
+#' The input data.frame \code{db} must contain the following columns, generated
+#' by \code{\link{addObservedMutations}} and \code{\link{addExpectedFrequencies}}:
+#' \itemize{
+#'     \item  \code{OBSERVED_R_CDR}:  number of replacement mutations in the CDRs.
+#'     \item  \code{OBSERVED_S_CDR}:  number of silent mutations in the CDRs.
+#'     \item  \code{OBSERVED_R_FWR}:  number of replacement mutations in the FWRs.
+#'     \item  \code{OBSERVED_S_FWR}:  number of silent mutations in the FWRs.
+#'     \item  \code{EXPECTED_R_CDR}:  expected frequency of replacement mutations 
+#'                                    in the CDRs.
+#'     \item  \code{EXPECTED_S_CDR}:  expected frequency of silent mutations 
+#'                                    in the CDRs.
+#'     \item  \code{EXPECTED_R_FWR}:  expected frequency of replacement mutations 
+#'                                    in the FWRs.
+#'     \item  \code{EXPECTED_S_FWR}:  expected frequency of silent mutations 
+#'                                    in the FWRs.
+#' }
+#' 
+#' Brief explanation of how this works!!!
+#' 
 #' @references
-#' Uduman M, Yaari G, Hershberg U, Stern JA, Shlomchik MJ, Kleinstein SH.
-#'   Detecting selection in immunoglobulin sequences.
-#'   Nucleic Acids Res. 2011 Jul;39(Web Server issue):W499-504.
-#'
-#' Yaari G, Uduman M, Kleinstein SH.
-#'   Quantifying selection in high-throughput Immunoglobulin sequencing data sets.
-#'   Nucleic Acids Res. 2012 Sep 1;40(17):e134.
-#' @seealso  \code{\link{addObservedMutations}}, \code{\link{addExpectedFrequencies}}, \code{\link{calcGroupedBaseline}}.
+#' \enumerate{
+#'   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
+#'            Nucleic Acids Res. 2011 39(Web Server issue):W499–504.
+#'   \item  Yaari G, et al. Quantifying selection in high-throughput Immunoglobulin 
+#'            sequencing data sets. 
+#'            Nucleic Acids Res. 2012 40(17):e134.
+#'  }
+#'  
+#' @seealso  See \code{\link{addObservedMutations}} and \code{\link{addExpectedFrequencies}}
+#'           for generating the necessary mutation statistics. 
+#'           See \code{\link{calcGroupedBaseline}} for combining selection scores within
+#'           groups.
+#' 
 #' @examples
-#' # TODO
-#' # Working example
-#'
+#' # Load example data
+#' library(alakazam)
+#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' db <- readChangeoDb(file)
+#' 
+#' # Add observed mutations and expected mutation frequencies to db
+#' db <- addObservedMutations(db)
+#' db <- addExpectedFrequencies(db)
+#' 
+#' # Calculate BASELINe PDFs
+#' db_pdf <- computeBaselinePDF(db)
+#' 
 #' @export
-computeBaselinePDF <- function(db,nproc=1){
+computeBaselinePDF <- function(db, nproc=1){
 
   availableCores <- getnproc()
   if(!(nproc<=availableCores))nproc=availableCores

@@ -7,7 +7,7 @@ listMutations <- function(seqInput, seqGL) {
   mutations <- analyzeMutations2NucUri(matIGL)
   mutations <- mutations[ !is.na(mutations) ]
   positions <- as.numeric(names(mutations))
-  mutations <- mutations[positions<=readEnd]
+  mutations <- mutations[positions<=VLENGTH]
   if(length(mutations)>0){
     return(mutations)
   }else{

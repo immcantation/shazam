@@ -35,7 +35,7 @@ createMutabilityModel <- function(db,
       cSeq <-  s2c(db[index,sequenceColumn])
       cGL  <-  s2c(db[index,germlineColumn])
       positions <- as.numeric(names(indexMutation))
-      positions <- positions[positions<=readEnd]
+      positions <- positions[positions<=VLENGTH]
       positions <- positions[!is.na(positions)]
       for( position in  positions){
         wrd5<-substr(db[index,germlineColumn],position-2,position+2)
@@ -70,7 +70,7 @@ createMutabilityModel <- function(db,
     sSeq <- gsub("\\.","",db[index,sequenceColumn])
     sGL <- gsub("\\.","",db[index,germlineColumn])
     cSeq <-  s2c(sSeq)
-    cGL  <-  s2c(sGL)[1:readEnd]
+    cGL  <-  s2c(sGL)[1:VLENGTH]
     positions <- 3:(length(cGL)-2)
     for( position in  positions){
       wrd5<-substr(sGL,position-2,position+2)
@@ -124,7 +124,7 @@ createMutabilityModel <- function(db,
 
 
   return(Mutability)
-  NUCLEOTIDES <- c("A", "C", "G", "T", "N")
+  #NUCLEOTIDES <- c("A", "C", "G", "T", "N")
 }
 
 

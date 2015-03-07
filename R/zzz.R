@@ -9,5 +9,5 @@
   mutability <<- Targeting[["Mutability"]]
   #NUCLEOTIDES_FAC <<- factor( 1:5, labels=c("A","C","G","T", "N") )
   #readEnd <<- length(REGIONS)
-  readEnd <<- 312
+  #readEnd <<- 312
 }

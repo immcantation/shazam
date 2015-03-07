@@ -1,9 +1,29 @@
+# SHM constants
+# 
+# @author     Mohamed Uduman
+# @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
+# @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
+# @version    0.1
+# @date       2015.03.06
 
+#### Constants ####
 
-# Nucleotides
-NUCLEOTIDES = c("A","C","G","T")
+# IMGT V-region definitions
+VREGIONS <- factor(c(rep("FWR", 78), 
+                     rep("CDR", 36), 
+                     rep("FWR", 51), 
+                     rep("CDR", 30), 
+                     rep("FWR", 117)), 
+                   levels=c("FWR", "CDR"))
 
-# Amino Acids
+# IMGT V-region length
+#readEnd <- 312
+VLENGTH <- length(VREGIONS)
+
+# Nucleotide characters
+NUCLEOTIDES <- c("A", "C", "G", "T")
+
+# Amino acid characters
 AMINO_ACIDS <- c("F", "F", "L", "L", "S", "S", "S", "S", "Y", "Y", "*", "*", "C", "C", "*", "W", "L", "L", "L", "L", "P", "P", "P", "P", "H", "H", "Q", "Q", "R", "R", "R", "R", "I", "I", "I", "M", "T", "T", "T", "T", "N", "N", "K", "K", "S", "S", "R", "R", "V", "V", "V", "V", "A", "A", "A", "A", "D", "D", "E", "E", "G", "G", "G", "G")
 names(AMINO_ACIDS) <- c("TTT", "TTC", "TTA", "TTG", "TCT", "TCC", "TCA", "TCG", "TAT", "TAC", "TAA", "TAG", "TGT", "TGC", "TGA", "TGG", "CTT", "CTC", "CTA", "CTG", "CCT", "CCC", "CCA", "CCG", "CAT", "CAC", "CAA", "CAG", "CGT", "CGC", "CGA", "CGG", "ATT", "ATC", "ATA", "ATG", "ACT", "ACC", "ACA", "ACG", "AAT", "AAC", "AAA", "AAG", "AGT", "AGC", "AGA", "AGG", "GTT", "GTC", "GTA", "GTG", "GCT", "GCC", "GCA", "GCG", "GAT", "GAC", "GAA", "GAG", "GGT", "GGC", "GGA", "GGG")
 names(AMINO_ACIDS) <- names(AMINO_ACIDS)
@@ -17,7 +37,7 @@ TRAITS_AMINO_ACIDS <- array(NA,21)
 
 
 
-# Functions
+#### Functions ####
 
 # Translate codon to amino acid
 translateCodonToAminoAcid<-function(Codon){
@@ -291,7 +311,7 @@ processInputAdvanced <- function(inputFASTA){
 
 
 # Replace leading and trailing dashes in the sequence
-replaceLeadingTrailingDashes <- function(x,readEnd){
+replaceLeadingTrailingDashes <- function(x,VLENGTH){
   iiGap = unlist(gregexpr("-",x[1]))
   ggGap = unlist(gregexpr("-",x[2]))
   #posToChange = intersect(iiGap,ggGap)
@@ -299,11 +319,11 @@ replaceLeadingTrailingDashes <- function(x,readEnd){
 
   seqIn = replaceLeadingTrailingDashesHelper(x[1])
   seqGL = replaceLeadingTrailingDashesHelper(x[2])
-  #seqTemplate = rep('N',readEnd)
-  seqIn <- c(seqIn,array("N",max(readEnd-length(seqIn),0)))
-  seqGL <- c(seqGL,array("N",max(readEnd-length(seqGL),0)))
-  seqIn <- seqIn[1:readEnd]
-  seqGL <- seqGL[1:readEnd]
+  #seqTemplate = rep('N',VLENGTH)
+  seqIn <- c(seqIn,array("N",max(VLENGTH-length(seqIn),0)))
+  seqGL <- c(seqGL,array("N",max(VLENGTH-length(seqGL),0)))
+  seqIn <- seqIn[1:VLENGTH]
+  seqGL <- seqGL[1:VLENGTH]
   #    if(posToChange!=-1){
   #      seqIn[posToChange] = "-"
   #      seqGL[posToChange] = "-"
@@ -329,13 +349,13 @@ replaceLeadingTrailingDashes <- function(x,readEnd){
   seqGL = c2s(seqGL)
 
   lenGL = nchar(seqGL)
-  if(lenGL<readEnd){
-    seqGL = paste(seqGL,c2s(rep("N",readEnd-lenGL)),sep="")
+  if(lenGL<VLENGTH){
+    seqGL = paste(seqGL,c2s(rep("N",VLENGTH-lenGL)),sep="")
   }
 
   lenInput = nchar(seqIn)
-  if(lenInput<readEnd){
-    seqIn = paste(seqIn,c2s(rep("N",readEnd-lenInput)),sep="")
+  if(lenInput<VLENGTH){
+    seqIn = paste(seqIn,c2s(rep("N",VLENGTH-lenInput)),sep="")
   }
   return( c(seqIn,seqGL) )
 }
@@ -497,23 +517,24 @@ computeCodonTable <- function(testID=1){
   #}
 }
 
-collapseCloneTry <- function(vecInputSeqs,glSeq,readEnd,nonTerminalOnly=0){
-  tryCatch(return(collapseClone(vecInputSeqs,glSeq,readEnd,nonTerminalOnly)), error = function(e) {
+collapseCloneTry <- function(vecInputSeqs,glSeq,VLENGTH,nonTerminalOnly=0){
+  tryCatch(return(collapseClone(vecInputSeqs,glSeq,VLENGTH,nonTerminalOnly)), error = function(e) {
     return(NA)
   })
 }
 
-collapseClone <- function(vecInputSeqs,glSeq,readEnd,nonTerminalOnly=0){
+# Identify clonal consensus sequences
+collapseClone <- function(vecInputSeqs,glSeq,VLENGTH,nonTerminalOnly=0){
   #print(length(vecInputSeqs))
   vecInputSeqs = unique(vecInputSeqs)
   if(length(vecInputSeqs)==1){
     return( list( c(vecInputSeqs,glSeq), F) )
   }else{
     charInputSeqs <- sapply(vecInputSeqs, function(x){
-      s2c(x)[1:readEnd]
+      s2c(x)[1:VLENGTH]
     })
     charGLSeq <- s2c(glSeq)
-    matClone <- sapply(1:readEnd, function(i){
+    matClone <- sapply(1:VLENGTH, function(i){
       posNucs = unique(charInputSeqs[i,])
       posGL = charGLSeq[i]
       error = FALSE
@@ -548,7 +569,7 @@ collapseClone <- function(vecInputSeqs,glSeq,readEnd,nonTerminalOnly=0){
 
 
     #print(length(vecInputSeqs))
-    return(list(c(c2s(matClone[1,]),glSeq),"TRUE"%in%matClone[2,]))
+    return(list(c(c2s(matClone[1,]),glSeq),"TRUE" %in% matClone[2,]))
   }
 }
 
@@ -2145,7 +2166,7 @@ getExpectedIndividualByCodon <- function(matInput){
     })
 
     LisGLs_R_Exp = mclapply(1:nrow(matInput),  function(x){
-      Exp_R <-  rollapply(as.zoo(1:readEnd),width=3,by=3,
+      Exp_R <-  rollapply(as.zoo(1:VLENGTH),width=3,by=3,
                           function(codonNucs){
                             RPos = which(LisGLs_MutationTypes[[x]][,codonNucs]=="R")
                             sum( LisGLs_Targeting[[x]][,codonNucs][RPos], na.rm=T )
@@ -2154,7 +2175,7 @@ getExpectedIndividualByCodon <- function(matInput){
     })
 
     LisGLs_S_Exp = mclapply(1:nrow(matInput),  function(x){
-      Exp_S <-  rollapply(as.zoo(1:readEnd),width=3,by=3,
+      Exp_S <-  rollapply(as.zoo(1:VLENGTH),width=3,by=3,
                           function(codonNucs){
                             SPos = which(LisGLs_MutationTypes[[x]][,codonNucs]=="S")
                             sum( LisGLs_Targeting[[x]][,codonNucs][SPos], na.rm=T )
@@ -2162,8 +2183,8 @@ getExpectedIndividualByCodon <- function(matInput){
       )
     })
 
-    Exp_R = matrix(unlist(LisGLs_R_Exp),nrow=nrow(matInput),ncol=readEnd/3,T)
-    Exp_S = matrix(unlist(LisGLs_S_Exp),nrow=nrow(matInput),ncol=readEnd/3,T)
+    Exp_R = matrix(unlist(LisGLs_R_Exp),nrow=nrow(matInput),ncol=VLENGTH/3,T)
+    Exp_S = matrix(unlist(LisGLs_S_Exp),nrow=nrow(matInput),ncol=VLENGTH/3,T)
     return( list( "Expected_R"=Exp_R, "Expected_S"=Exp_S) )
   }else{
     facGL <- factor(matInput[,2])
@@ -2189,7 +2210,7 @@ getExpectedIndividualByCodon <- function(matInput){
     })
 
     LisGLs_R_Exp = lapply(1:nrow(matInput),  function(x){
-      Exp_R <-  rollapply(as.zoo(1:readEnd),width=3,by=3,
+      Exp_R <-  rollapply(as.zoo(1:VLENGTH),width=3,by=3,
                           function(codonNucs){
                             RPos = which(LisGLs_MutationTypes[[x]][,codonNucs]=="R")
                             sum( LisGLs_Targeting[[x]][,codonNucs][RPos], na.rm=T )
@@ -2198,7 +2219,7 @@ getExpectedIndividualByCodon <- function(matInput){
     })
 
     LisGLs_S_Exp = lapply(1:nrow(matInput),  function(x){
-      Exp_S <-  rollapply(as.zoo(1:readEnd),width=3,by=3,
+      Exp_S <-  rollapply(as.zoo(1:VLENGTH),width=3,by=3,
                           function(codonNucs){
                             SPos = which(LisGLs_MutationTypes[[x]][,codonNucs]=="S")
                             sum( LisGLs_Targeting[[x]][,codonNucs][SPos], na.rm=T )
@@ -2206,15 +2227,15 @@ getExpectedIndividualByCodon <- function(matInput){
       )
     })
 
-    Exp_R = matrix(unlist(LisGLs_R_Exp),nrow=nrow(matInput),ncol=readEnd/3,T)
-    Exp_S = matrix(unlist(LisGLs_S_Exp),nrow=nrow(matInput),ncol=readEnd/3,T)
+    Exp_R = matrix(unlist(LisGLs_R_Exp),nrow=nrow(matInput),ncol=VLENGTH/3,T)
+    Exp_S = matrix(unlist(LisGLs_S_Exp),nrow=nrow(matInput),ncol=VLENGTH/3,T)
     return( list( "Expected_R"=Exp_R, "Expected_S"=Exp_S) )
   }
 }
 
 # getObservedMutationsByCodon <- function(listMutations){
 #   numbSeqs <- length(listMutations)
-#   obsMu_R <- matrix(0,nrow=numbSeqs,ncol=readEnd/3,dimnames=list(c(1:numbSeqs),c(1:(readEnd/3))))
+#   obsMu_R <- matrix(0,nrow=numbSeqs,ncol=VLENGTH/3,dimnames=list(c(1:numbSeqs),c(1:(VLENGTH/3))))
 #   obsMu_S <- obsMu_R
 #   temp <- mclapply(1:length(listMutations), function(i){
 #     arrMutations = listMutations[[i]]
@@ -2238,7 +2259,7 @@ getExpectedIndividualByCodon <- function(matInput){
 
 getObservedMutationsByCodon <- function(listMutations){
   numbSeqs <- length(listMutations)
-  obsMu_R <- matrix(0,nrow=numbSeqs,ncol=readEnd/3,dimnames=list(c(1:numbSeqs),c(1:(readEnd/3))))
+  obsMu_R <- matrix(0,nrow=numbSeqs,ncol=VLENGTH/3,dimnames=list(c(1:numbSeqs),c(1:(VLENGTH/3))))
   obsMu_S <- obsMu_R
   temp <- lapply(1:length(listMutations), function(i){
     arrMutations = listMutations[[i]]
@@ -2582,7 +2603,7 @@ getObservedMutationsByCodon <- function(listMutations){
 
 
                   # Replace leading and trailing dashes in the sequence
-                  replaceLeadingTrailingDashes <- function(x,readEnd){
+                  replaceLeadingTrailingDashes <- function(x,VLENGTH){
                     iiGap = unlist(gregexpr("-",x[1]))
                     ggGap = unlist(gregexpr("-",x[2]))
                     #posToChange = intersect(iiGap,ggGap)
@@ -2590,11 +2611,11 @@ getObservedMutationsByCodon <- function(listMutations){
 
                     seqIn = replaceLeadingTrailingDashesHelper(x[1])
                     seqGL = replaceLeadingTrailingDashesHelper(x[2])
-                    #seqTemplate = rep('N',readEnd)
-                    seqIn <- c(seqIn,array("N",max(readEnd-length(seqIn),0)))
-                    seqGL <- c(seqGL,array("N",max(readEnd-length(seqGL),0)))
-                    seqIn <- seqIn[1:readEnd]
-                    seqGL <- seqGL[1:readEnd]
+                    #seqTemplate = rep('N',VLENGTH)
+                    seqIn <- c(seqIn,array("N",max(VLENGTH-length(seqIn),0)))
+                    seqGL <- c(seqGL,array("N",max(VLENGTH-length(seqGL),0)))
+                    seqIn <- seqIn[1:VLENGTH]
+                    seqGL <- seqGL[1:VLENGTH]
                     #    if(posToChange!=-1){
                     #      seqIn[posToChange] = "-"
                     #      seqGL[posToChange] = "-"
@@ -2620,13 +2641,13 @@ getObservedMutationsByCodon <- function(listMutations){
                     seqGL = c2s(seqGL)
 
                     lenGL = nchar(seqGL)
-                    if(lenGL<readEnd){
-                      seqGL = paste(seqGL,c2s(rep("N",readEnd-lenGL)),sep="")
+                    if(lenGL<VLENGTH){
+                      seqGL = paste(seqGL,c2s(rep("N",VLENGTH-lenGL)),sep="")
                     }
 
                     lenInput = nchar(seqIn)
-                    if(lenInput<readEnd){
-                      seqIn = paste(seqIn,c2s(rep("N",readEnd-lenInput)),sep="")
+                    if(lenInput<VLENGTH){
+                      seqIn = paste(seqIn,c2s(rep("N",VLENGTH-lenInput)),sep="")
                     }
                     return( c(seqIn,seqGL) )
                   }
@@ -2788,17 +2809,17 @@ getObservedMutationsByCodon <- function(listMutations){
                     #}
                   }
 
-                  collapseClone <- function(vecInputSeqs,glSeq,readEnd,nonTerminalOnly=0){
+                  collapseClone <- function(vecInputSeqs,glSeq,VLENGTH,nonTerminalOnly=0){
                     #print(length(vecInputSeqs))
                     vecInputSeqs = unique(vecInputSeqs)
                     if(length(vecInputSeqs)==1){
                       return( list( c(vecInputSeqs,glSeq), F) )
                     }else{
                       charInputSeqs <- sapply(vecInputSeqs, function(x){
-                        s2c(x)[1:readEnd]
+                        s2c(x)[1:VLENGTH]
                       })
                       charGLSeq <- s2c(glSeq)
-                      matClone <- sapply(1:readEnd, function(i){
+                      matClone <- sapply(1:VLENGTH, function(i){
                         posNucs = unique(charInputSeqs[i,])
                         posGL = charGLSeq[i]
                         error = FALSE
@@ -4455,7 +4476,7 @@ getObservedMutationsByCodon <- function(listMutations){
                       })
 
                       LisGLs_R_Exp = mclapply(1:nrow(matInput),  function(x){
-                        Exp_R <-  rollapply(as.zoo(1:readEnd),width=3,by=3,
+                        Exp_R <-  rollapply(as.zoo(1:VLENGTH),width=3,by=3,
                                             function(codonNucs){
                                               RPos = which(LisGLs_MutationTypes[[x]][,codonNucs]=="R")
                                               sum( LisGLs_Targeting[[x]][,codonNucs][RPos], na.rm=T )
@@ -4464,7 +4485,7 @@ getObservedMutationsByCodon <- function(listMutations){
                       })
 
                       LisGLs_S_Exp = mclapply(1:nrow(matInput),  function(x){
-                        Exp_S <-  rollapply(as.zoo(1:readEnd),width=3,by=3,
+                        Exp_S <-  rollapply(as.zoo(1:VLENGTH),width=3,by=3,
                                             function(codonNucs){
                                               SPos = which(LisGLs_MutationTypes[[x]][,codonNucs]=="S")
                                               sum( LisGLs_Targeting[[x]][,codonNucs][SPos], na.rm=T )
@@ -4472,8 +4493,8 @@ getObservedMutationsByCodon <- function(listMutations){
                         )
                       })
 
-                      Exp_R = matrix(unlist(LisGLs_R_Exp),nrow=nrow(matInput),ncol=readEnd/3,T)
-                      Exp_S = matrix(unlist(LisGLs_S_Exp),nrow=nrow(matInput),ncol=readEnd/3,T)
+                      Exp_R = matrix(unlist(LisGLs_R_Exp),nrow=nrow(matInput),ncol=VLENGTH/3,T)
+                      Exp_S = matrix(unlist(LisGLs_S_Exp),nrow=nrow(matInput),ncol=VLENGTH/3,T)
                       return( list( "Expected_R"=Exp_R, "Expected_S"=Exp_S) )
                     }else{
                       facGL <- factor(matInput[,2])
@@ -4499,7 +4520,7 @@ getObservedMutationsByCodon <- function(listMutations){
                       })
 
                       LisGLs_R_Exp = lapply(1:nrow(matInput),  function(x){
-                        Exp_R <-  rollapply(as.zoo(1:readEnd),width=3,by=3,
+                        Exp_R <-  rollapply(as.zoo(1:VLENGTH),width=3,by=3,
                                             function(codonNucs){
                                               RPos = which(LisGLs_MutationTypes[[x]][,codonNucs]=="R")
                                               sum( LisGLs_Targeting[[x]][,codonNucs][RPos], na.rm=T )
@@ -4508,7 +4529,7 @@ getObservedMutationsByCodon <- function(listMutations){
                       })
 
                       LisGLs_S_Exp = lapply(1:nrow(matInput),  function(x){
-                        Exp_S <-  rollapply(as.zoo(1:readEnd),width=3,by=3,
+                        Exp_S <-  rollapply(as.zoo(1:VLENGTH),width=3,by=3,
                                             function(codonNucs){
                                               SPos = which(LisGLs_MutationTypes[[x]][,codonNucs]=="S")
                                               sum( LisGLs_Targeting[[x]][,codonNucs][SPos], na.rm=T )
@@ -4516,15 +4537,15 @@ getObservedMutationsByCodon <- function(listMutations){
                         )
                       })
 
-                      Exp_R = matrix(unlist(LisGLs_R_Exp),nrow=nrow(matInput),ncol=readEnd/3,T)
-                      Exp_S = matrix(unlist(LisGLs_S_Exp),nrow=nrow(matInput),ncol=readEnd/3,T)
+                      Exp_R = matrix(unlist(LisGLs_R_Exp),nrow=nrow(matInput),ncol=VLENGTH/3,T)
+                      Exp_S = matrix(unlist(LisGLs_S_Exp),nrow=nrow(matInput),ncol=VLENGTH/3,T)
                       return( list( "Expected_R"=Exp_R, "Expected_S"=Exp_S) )
                     }
                   }
 
                   # getObservedMutationsByCodon <- function(listMutations){
                   #   numbSeqs <- length(listMutations)
-                  #   obsMu_R <- matrix(0,nrow=numbSeqs,ncol=readEnd/3,dimnames=list(c(1:numbSeqs),c(1:(readEnd/3))))
+                  #   obsMu_R <- matrix(0,nrow=numbSeqs,ncol=VLENGTH/3,dimnames=list(c(1:numbSeqs),c(1:(VLENGTH/3))))
                   #   obsMu_S <- obsMu_R
                   #   temp <- mclapply(1:length(listMutations), function(i){
                   #     arrMutations = listMutations[[i]]
@@ -4548,7 +4569,7 @@ getObservedMutationsByCodon <- function(listMutations){
 
                   getObservedMutationsByCodon <- function(listMutations){
                     numbSeqs <- length(listMutations)
-                    obsMu_R <- matrix(0,nrow=numbSeqs,ncol=readEnd/3,dimnames=list(c(1:numbSeqs),c(1:(readEnd/3))))
+                    obsMu_R <- matrix(0,nrow=numbSeqs,ncol=VLENGTH/3,dimnames=list(c(1:numbSeqs),c(1:(VLENGTH/3))))
                     obsMu_S <- obsMu_R
                     temp <- lapply(1:length(listMutations), function(i){
                       arrMutations = listMutations[[i]]

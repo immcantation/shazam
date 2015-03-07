@@ -1,50 +1,61 @@
 #' Identifies clonal consensus sequences
 #'
-#' \code{addClonalSequence} identifies the consensus sequence of each clonal group in the input
-#' data.frame.
-#'
-#' Details (methods) section. Paragraph 1.
-#'
-#' Paragraph 2.
+#' \code{addClonalSequence} identifies the consensus sequence of each clonal group and
+#' appends a column to the input data.frame containing the clonal consensus for each 
+#' sequence.
 #'
 #' @param    db              data.frame containing sequence data.
-#' @param    cloneColumn     column containing clonal cluster assignments.
-#' @param    sequenceColumn  gapped sequence column name.
-#' @param    germlineColumn  gapped germline column name.
-#' @param    nproc           The number of cores to distribute the function over.
+#' @param    cloneColumn     name of the column containing clonal cluster identifiers.
+#' @param    sequenceColumn  name of the column containing IMGT-gapped sample sequences.
+#' @param    germlineColumn  name of the column containing IMGT-gapped germline sequences.
+#' @param    nproc           number of cores to distribute the operation over.
+#' 
 #' @return   A modified \code{db} data.frame with clonal consensus sequences in the
 #'           SEQUENCE_GAP_CLONE column.
 #'
-#' @seealso  \code{\link{addObservedMutations}}, \code{\link{addExpectedFrequencies}}
+#' @details
+#' How does this work?
+#' 
+#' @references
+#' Which ones?
+#' 
+#' @seealso  What uses this?
+#' 
 #' @examples
-#' # TODO
-#' # Working example
+#' # Load example data
+#' library(alakazam)
+#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' db <- readChangeoDb(file)
+#' 
+#' # Add SEQUENCE_GAP_CLONE column to db
+#' db_new <- addClonalSequence(db)
+#' head(db_new[c(1, 15)])
 #'
 #' @export
 addClonalSequence <- function(db, cloneColumn="CLONE", sequenceColumn="SEQUENCE_GAP",
                               germlineColumn="GERMLINE_GAP_D_MASK", nproc=1)  {
-  #db <- ddply(db, "CLONE", transform,
-  #            SEQUENCE_GAP_CLONE=(collapseCloneTry(SEQUENCE_GAP, GERMLINE_GAP_D_MASK, readEnd))[[1]][1],
-  #            .progress="text")
-
-  runAsParallel <- FALSE
-  progressBar <- "text"
-  if(nproc>1){
-    cluster <- makeCluster(nproc, type = "SOCK")
+  # Start SNOW cluster and set progress bar
+  if (nproc > 1) {
+    runAsParallel <- TRUE
+    progressBar <- "none"  
+    cluster <- makeCluster(nproc, type="SOCK")
     registerDoSNOW(cluster)
     clusterEvalQ(cluster, library(shm))
-    runAsParallel <- TRUE
-    progressBar <- "none"
+  } else {
+      runAsParallel <- FALSE
+      progressBar <- "text"
   }
 
-
+  # Generate clonal consensus sequences
+  if (progressBar != "none") { cat("-> BUILDING CLONAL SEQUENCES\n") }
   db <- ddply(db, cloneColumn, here(mutate),
               SEQUENCE_GAP_CLONE=(collapseCloneTry(eval(parse(text=sequenceColumn)),
                                                    eval(parse(text=germlineColumn)),
-                                                   readEnd))[[1]][1],
+                                                   VLENGTH))[[1]][1],
               .progress=progressBar, .parallel=runAsParallel)
-
-  if(nproc>1)stopCluster(cluster)
+    
+  # Stop SNOW cluster
+  if(nproc > 1) { stopCluster(cluster) }
 
   return(db)
 }

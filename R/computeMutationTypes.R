@@ -7,6 +7,8 @@
 #' @return  matTargeting
 computeMutationTypes <- function(param_strSeq){
   #NUCLEOTIDES_FAC <- factor(1:5, labels=c("A", "C", "G", "T", "N"))
+  NUCLEOTIDES <- c("A", "C", "G", "T", "N")
+  
   #cat(param_strSeq,"\n")
   lenSeq <- nchar(param_strSeq)
   trimmedSeq = trimToLastCodon(param_strSeq)
