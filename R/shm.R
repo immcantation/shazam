@@ -1,4 +1,13 @@
-#' shm
+# Project documentation for shm
+# 
+# @author     Mohamed Uduman, Gur Yaari, Namita Gupta, Jason Anthony Vander Heiden
+# @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
+# @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
+# @version    0.1
+# @date       2015.03.07
+
+
+#' The shm package
 #'
 #' Provides tools for advanced anaylisis of Ig Somatic HyperMutation. Includes BASELINe,
 #' a novel method for quantifying selection in high-throughput Immunoglobulin sequencing
@@ -13,11 +22,11 @@
 #'   \item  \code{\link{plotSelection}}:            Plot selection strength.
 #' }
 #'
-#' @section  Mutability profiling:
+#' @section  Targeting models:
 #' \itemize{
-#'   \item  \code{\link{createMutabilityModel}}:    Builds a targeting model.
-#'   \item  \code{\link{createSubstitutionModel}}:  Builds a mutability model.
-#'   \item  \code{\link{plotHedgehog}}:             Plots a mutability model.
+#'   \item  \code{\link{createMutabilityModel}}:    Builds a mutability model.
+#'   \item  \code{\link{createSubstitutionModel}}:  Builds a substitution model.
+#'   \item  \code{\link{plotHedgehog}}:             Plots a targeting model.
 #' }
 #'
 #' @section  Distance profiling:
@@ -38,6 +47,10 @@
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #'
+#' @seealso
+#' The Change-O suite of tools includes three separate R packages: \code{\link{alakazam}}, 
+#' \code{\link{tigger}}, and \code{\link{shm}}.
+#' 
 #' @name     shm
 #' @docType  package
 #'

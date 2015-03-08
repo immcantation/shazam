@@ -4609,12 +4609,11 @@ getObservedMutationsByCodon <- function(listMutations){
 NUCLEOTIDES = c("A","C","G","T", "N")
 
 
-#' Determines the OS plotform being used
-#'
-#' @return  The OS platform
-#' @examples
-#' getPlatform()
-#' @export
+# Determines the OS plotform being used
+#
+# @return  The OS platform
+# @examples
+# getPlatform()
 getPlatform <-function(){
   return(.Platform$OS.typ)
 }
@@ -4634,10 +4633,10 @@ getnproc <-function(){
 }
 
 
-#' Make a progress bar when using %dopar% with a parallel backend
-#' Adapated from http://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r
-#'
-#' @return  NULL
+# Make a progress bar when using %dopar% with a parallel backend
+# Adapated from http://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r
+#
+# @return  NULL
 doparProgressBar <- function(n){
   pb <- txtProgressBar(min=1, max=n-1,style=3)
   count <- 0
@@ -4652,33 +4651,13 @@ doparProgressBar <- function(n){
 }
 
 
-#' Make a progress bar when using %dopar% with a parallel backend
-#' Adapated from http://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r
-#'
-#' @return  NULL
-doparProgressBar <- function(n){
-  pb <- txtProgressBar(min=1, max=n-1,style=3)
-  count <- 0
-  function(...) {
-    count <<- count + length(list(...)) - 1
-    setTxtProgressBar(pb,count)
-    #Sys.sleep(0.01)
-    flush.console()
-    rbind(...)
-  }
-}
-
-
-
-#' Returns a 5-mer sliding window of given sequence
-#'
-#' @param   strSequence   The sequence string
-#' @return  An array of 5-mer sliding windows
-#'
-#' @examples
-#' slidingArrayOf5mers("ACGTNACGTNACGTN")
-#'
-#' @export
+# Returns a 5-mer sliding window of given sequence
+#
+# @param   strSequence   The sequence string
+# @return  An array of 5-mer sliding windows
+#
+# @examples
+# slidingArrayOf5mers("ACGTNACGTNACGTN")
 slidingArrayOf5mers <- function(strSequence){
   seqLength <- nchar(strSequence)
   return( substr( rep(strSequence,seqLength-4), 1:(seqLength-4), 5:seqLength ) )

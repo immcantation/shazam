@@ -26,26 +26,25 @@ loadModel <- function(model) {
 }
 
 
-#' Get distance between two sequences of same length, broken by a sliding window of 5mers
-#'
-#' @param   seq1          first nucleotide sequence.
-#' @param   seq2          second nucleotide sequence.
-#' @param   subs          substitution model.
-#' @param   mut           mutability model.
-#' @param   normalize     The method of normalization. Default is none.
-#'                        'juncLength' = normalize distance by length of junction.
-#'                        'juncMutation' = normalize distance by number of mutations in junction.
-#'                        If a numeric value is passed, then the computed distance is divided by the given value.
-#' @return  distance between two sequences.
-#'
-#' @examples
-#' seq1 = c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
-#' seq2 = c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
-#'
-#' model="hs5f"
-#' model_data <- loadModel(model)
-#' dist_seq_fast(seq1, seq2, model_data[["subs"]], model_data[["mut"]], normalize="none")
-#' @export
+# Get distance between two sequences of same length, broken by a sliding window of 5mers
+#
+# @param   seq1          first nucleotide sequence.
+# @param   seq2          second nucleotide sequence.
+# @param   subs          substitution model.
+# @param   mut           mutability model.
+# @param   normalize     The method of normalization. Default is none.
+#                        'juncLength' = normalize distance by length of junction.
+#                        'juncMutation' = normalize distance by number of mutations in junction.
+#                        If a numeric value is passed, then the computed distance is divided by the given value.
+# @return  distance between two sequences.
+#
+# @examples
+# seq1 = c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
+# seq2 = c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
+#
+# model="hs5f"
+# model_data <- loadModel(model)
+# dist_seq_fast(seq1, seq2, model_data[["subs"]], model_data[["mut"]], normalize="none")
 dist_seq_fast <- function(seq1, seq2, subs, mut, normalize="none") {
   #Compute length of sequence (for normalization, if specified)
   juncLength <- length(seq1)
@@ -130,25 +129,24 @@ getPairwiseDistances <- function(arrJunctions, model="hs5f", normalize="none") {
 }
 
 
-#' Given an array of junction sequences, find the distance to the closest sequence
-#'
-#' @param   arrJunctions  character vector of junction sequences.
-#' @param   subs          substitution model.
-#' @param   mut           mutability model.
-#' @param   normalize     The method of normalization. Default is none.
-#'                        'juncLength' = normalize distance by length of junction.
-#'                        'juncMutations' = normalize distance by number of mutations in junction.
-#'                        If a numeric value is passed, then the computed distance is divided by the given value.
-#' @return  A vector of distances to the closest sequence.
-#' @examples
-#' arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
-#'                    "ACGAACGTATGT", "ACGAACGTATGC",
-#'                    "ACGAACGTATCC","AAAAAAAAAAAA")
-#' model_data <- loadModel(model="hs5f")
-#' subs <- model_data[['subs']]
-#' mut <- model_data[['mut']]
-#' getDistanceToClosest(arrJunctions, subs, muts, normalize="none" )
-#' @export
+# Given an array of junction sequences, find the distance to the closest sequence
+#
+# @param   arrJunctions  character vector of junction sequences.
+# @param   subs          substitution model.
+# @param   mut           mutability model.
+# @param   normalize     The method of normalization. Default is none.
+#                        'juncLength' = normalize distance by length of junction.
+#                        'juncMutations' = normalize distance by number of mutations in junction.
+#                        If a numeric value is passed, then the computed distance is divided by the given value.
+# @return  A vector of distances to the closest sequence.
+# @examples
+# arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
+#                    "ACGAACGTATGT", "ACGAACGTATGC",
+#                    "ACGAACGTATCC","AAAAAAAAAAAA")
+# model_data <- loadModel(model="hs5f")
+# subs <- model_data[['subs']]
+# mut <- model_data[['mut']]
+# getDistanceToClosest(arrJunctions, subs, muts, normalize="none" )
 getDistanceToClosest <- function(arrJunctions, subs, mut, normalize="none") {
 
   #Initialize array of distances

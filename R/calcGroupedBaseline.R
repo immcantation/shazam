@@ -42,11 +42,10 @@ calcGroupedBaseline <- function(db, columnsToGroupBy, nproc=1){
 }
 
 
-#' Calucaltes BASELINe selection strengths for previously grouped sequences
-#'
-#' \code{function_ReGroupBaseline} is a helper function that further groups the sequences that have
-#'  been grouped using the \code{calcGroupedBaseline} (specifically, \code{function_GroupBaseline}).
-#'
+# Calucaltes BASELINe selection strengths for previously grouped sequences
+#
+# \code{function_ReGroupBaseline} is a helper function that further groups the sequences that have
+#  been grouped using the \code{calcGroupedBaseline} (specifically, \code{function_GroupBaseline}).
 function_ReGroupBaseline <- function(i){
   cdr_groupN <- sum(!is.na(i[,"CDR_PDF"]))
   fwr_groupN <- sum(!is.na(i[,"FWR_PDF"]))
@@ -80,12 +79,11 @@ function_ReGroupBaseline <- function(i){
 
 
 
-#' Calucaltes the BASELINe selection strengths for independent sequences grouped together
-#'
-#' \code{function_GroupBaseline} is a helper function that groups the sequences by specified columns,
-#' and returns the Baseline Selection strengt, 95% confidence intervals and the grouped (convoluted)
-#' probability density functions.
-#'
+# Calucaltes the BASELINe selection strengths for independent sequences grouped together
+#
+# \code{function_GroupBaseline} is a helper function that groups the sequences by specified columns,
+# and returns the Baseline Selection strengt, 95% confidence intervals and the grouped (convoluted)
+# probability density functions.
 function_GroupBaseline <- function(i){
 
   cdr_groupN <- sum(!is.na(i[,"CDR_PDF"]))
