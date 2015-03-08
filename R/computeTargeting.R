@@ -5,7 +5,7 @@
 #' @param   param_strSeq  The name of the sequence column.
 #' @param   param_vecMutabilities  The name of the germline column.
 #' @return  matTargeting
-computeTargeting <- function(param_strSeq,param_vecMutabilities){
+computeTargeting <- function(param_strSeq, param_vecMutabilities){
     NUCLEOTIDES <- c("A", "C", "G", "T", "N")
     seqLen <- nchar(param_strSeq)    
     

@@ -12,9 +12,16 @@ License: CC BY-NC-SA 3.0
 URL: http://clip.med.yale.edu/changeo
 Depends:
     R (>= 3.0.0),
-    alakazam (>= 0.2.0)
+    alakazam (>= 0.2.0),
+    doSNOW,
+    ggplot2,
+    grid,
+    plyr,
+    SDMTools,
+    seqinr,
+    zoo
 Imports:
-    alakazam,
+    alakazam (>= 0.2.0),
     doSNOW,
     ggplot2,
     grid,

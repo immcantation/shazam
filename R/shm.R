@@ -32,6 +32,7 @@
 #' @section  Distance profiling:
 #' \itemize{
 #'   \item  \code{\link{distToNearest}}:            Calculate distances to nearest-neighbors.
+#'   \item  \code{\link{getPairwiseDistances}}:     Calculate a matrix of pairwise distances.
 #' }
 #'
 #' @references

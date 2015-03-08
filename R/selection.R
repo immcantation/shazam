@@ -121,7 +121,7 @@ initializeMutabilityMatrix <- function(mutabilityModel=1, species=1,mutabilityMa
   if(mutabilityModel==0){ mutabilityMat <- matrix(1,64,3)}
 
   if(mutabilityModel==5){
-    mutabilityMat <- S5F_Targeting[["Mutability"]]
+    mutabilityMat <- HS5FModel@mutability
     return(mutabilityMat)
   }else{
     return( matrix( data.matrix(mutabilityMat), 64, 3, dimnames=list(triMutability_Names,1:3)) )
@@ -640,22 +640,22 @@ getExpectedIndividual <- function(matInput){
 
 # Returns the mutability of a triplet at a given position
 getMutability <- function(codon, pos=1:3){
-  triplets <- rownames(mutability)
-  mutability[  match(codon,triplets) ,pos]
+  triplets <- rownames(HS5FModel@mutability)
+  HS5FModel@mutability[  match(codon,triplets) ,pos]
 }
 
 getMutability5 <- function(fivemer){
-  return(mutability[fivemer])
+  return(HS5FModel@mutability[fivemer])
 }
 
 # Returns the substitution probabilty
 getTransistionProb <- function(nuc){
-  substitution[nuc,]
+  HS5FModel@substitution[nuc,]
 }
 
 getTransistionProb5 <- function(fivemer){
-  if(any(which(fivemer==colnames(substitution)))){
-    return(substitution[,fivemer])
+  if(any(which(fivemer==colnames(HS5FModel@substitution)))){
+    return(HS5FModel@substitution[,fivemer])
   }else{
     return(array(NA,4))
   }
@@ -668,7 +668,7 @@ canMutateTo <- function(nuc){
 
 # Given a nucleotide, returns the probabilty of other nucleotide it can mutate to
 canMutateToProb <- function(nuc){
-  substitution[nuc,canMutateTo(nuc)]
+    HS5FModel@substitution[nuc,canMutateTo(nuc)]
 }
 
 
@@ -1761,7 +1761,7 @@ buildMutabilityModel <- function( inputMatrixIndex, model=0 , multipleMutation=0
               positionWithinCodon = which(fivemerCodonPos==3)
               glNuc =  substr(fivemerReadingFrameCodonGL,positionWithinCodon,positionWithinCodon)
               inputNuc =  substr(fivemerReadingFrameCodon,positionWithinCodon,positionWithinCodon)
-              MutationMatrix[GLfivemer] <- (MutationMatrix[GLfivemer] + substitution[glNuc,inputNuc])
+              MutationMatrix[GLfivemer] <- (MutationMatrix[GLfivemer] + HS5FModel@substitution[glNuc,inputNuc])
               MutationCountMatrix[GLfivemer] <- (MutationCountMatrix[GLfivemer] + 1)
             }
           }
@@ -1794,7 +1794,7 @@ probMutations <- function(typeOfMutation){
         matCodon = matrix(rep(s2c(codon),3),nrow=3,ncol=3,byrow=T)
         glNuc = matCodon[1,muPos]
         matCodon[,muPos] = canMutateTo(glNuc)
-        substitutionRate = substitution[glNuc,matCodon[,muPos]]
+        substitutionRate = HS5FModel@substitution[glNuc,matCodon[,muPos]]
         typeOfMutations = apply(rbind(rep(codon,3),apply(matCodon,1,c2s)),2,function(x){mutationType(c2s(x[1]),c2s(x[2]))})
         matMutationProb[codon,muPos] <- sum(substitutionRate[typeOfMutations==typeOfMutation])
       }
@@ -2089,7 +2089,7 @@ buildMutabilityModelONE <- function( inputMatrixIndex, model=0 , multipleMutatio
             positionWithinCodon = which(ONEmerCodonPos==ONEmerIndex)
             glNuc =  substr(ONEmerReadingFrameCodonGL,positionWithinCodon,positionWithinCodon)
             inputNuc =  substr(ONEmerReadingFrameCodon,positionWithinCodon,positionWithinCodon)
-            MutationMatrix[GLONEmer] <- (MutationMatrix[GLONEmer] + substitution[glNuc,inputNuc])
+            MutationMatrix[GLONEmer] <- (MutationMatrix[GLONEmer] + HS5FModel@substitution[glNuc,inputNuc])
             MutationCountMatrix[GLONEmer] <- (MutationCountMatrix[GLONEmer] + 1)
           }
         }
@@ -2386,7 +2386,7 @@ getObservedMutationsByCodon <- function(listMutations){
 
                     NUCLEOTIDESN = c(NUCLEOTIDES,"N", "-")
                     if(substitutionModel==5){
-                      subsMat <- S5F_Targeting[["Substitution"]]
+                      subsMat <- HS5FModel@substitution
                       return(subsMat)
                     }else{
                       subsMat <- rbind(subsMat,rep(NA,4),rep(NA,4))
@@ -2413,7 +2413,7 @@ getObservedMutationsByCodon <- function(listMutations){
                     if(mutabilityModel==0){ mutabilityMat <- matrix(1,64,3)}
 
                     if(mutabilityModel==5){
-                      mutabilityMat <- S5F_Targeting[["Mutability"]]
+                      mutabilityMat <- HS5FModel@mutability
                       return(mutabilityMat)
                     }else{
                       return( matrix( data.matrix(mutabilityMat), 64, 3, dimnames=list(triMutability_Names,1:3)) )
@@ -2967,22 +2967,22 @@ getObservedMutationsByCodon <- function(listMutations){
 
                   # Returns the mutability of a triplet at a given position
                   getMutability <- function(codon, pos=1:3){
-                    triplets <- rownames(mutability)
-                    mutability[  match(codon,triplets) ,pos]
+                    triplets <- rownames(HS5FModel@mutability)
+                    HS5FModel@mutability[  match(codon,triplets) ,pos]
                   }
 
                   getMutability5 <- function(fivemer){
-                    return(mutability[fivemer])
+                    return(HS5FModel@mutability[fivemer])
                   }
 
                   # Returns the substitution probabilty
                   getTransistionProb <- function(nuc){
-                    substitution[nuc,]
+                      HS5FModel@substitution[nuc,]
                   }
 
                   getTransistionProb5 <- function(fivemer){
                     if(any(which(fivemer==colnames(substitution)))){
-                      return(substitution[,fivemer])
+                      return(HS5FModel@substitution[,fivemer])
                     }else{
                       return(array(NA,4))
                     }
@@ -2995,7 +2995,7 @@ getObservedMutationsByCodon <- function(listMutations){
 
                   # Given a nucleotide, returns the probabilty of other nucleotide it can mutate to
                   canMutateToProb <- function(nuc){
-                    substitution[nuc,canMutateTo(nuc)]
+                      HS5FModel@substitution[nuc,canMutateTo(nuc)]
                   }
 
 
@@ -4071,7 +4071,7 @@ getObservedMutationsByCodon <- function(listMutations){
                                 positionWithinCodon = which(fivemerCodonPos==3)
                                 glNuc =  substr(fivemerReadingFrameCodonGL,positionWithinCodon,positionWithinCodon)
                                 inputNuc =  substr(fivemerReadingFrameCodon,positionWithinCodon,positionWithinCodon)
-                                MutationMatrix[GLfivemer] <- (MutationMatrix[GLfivemer] + substitution[glNuc,inputNuc])
+                                MutationMatrix[GLfivemer] <- (MutationMatrix[GLfivemer] + HS5FModel@substitution[glNuc,inputNuc])
                                 MutationCountMatrix[GLfivemer] <- (MutationCountMatrix[GLfivemer] + 1)
                               }
                             }
@@ -4104,7 +4104,7 @@ getObservedMutationsByCodon <- function(listMutations){
                           matCodon = matrix(rep(s2c(codon),3),nrow=3,ncol=3,byrow=T)
                           glNuc = matCodon[1,muPos]
                           matCodon[,muPos] = canMutateTo(glNuc)
-                          substitutionRate = substitution[glNuc,matCodon[,muPos]]
+                          substitutionRate = HS5FModel@substitution[glNuc,matCodon[,muPos]]
                           typeOfMutations = apply(rbind(rep(codon,3),apply(matCodon,1,c2s)),2,function(x){mutationType(c2s(x[1]),c2s(x[2]))})
                           matMutationProb[codon,muPos] <- sum(substitutionRate[typeOfMutations==typeOfMutation])
                         }
@@ -4399,7 +4399,7 @@ getObservedMutationsByCodon <- function(listMutations){
                               positionWithinCodon = which(ONEmerCodonPos==ONEmerIndex)
                               glNuc =  substr(ONEmerReadingFrameCodonGL,positionWithinCodon,positionWithinCodon)
                               inputNuc =  substr(ONEmerReadingFrameCodon,positionWithinCodon,positionWithinCodon)
-                              MutationMatrix[GLONEmer] <- (MutationMatrix[GLONEmer] + substitution[glNuc,inputNuc])
+                              MutationMatrix[GLONEmer] <- (MutationMatrix[GLONEmer] + HS5FModel@substitution[glNuc,inputNuc])
                               MutationCountMatrix[GLONEmer] <- (MutationCountMatrix[GLONEmer] + 1)
                             }
                           }

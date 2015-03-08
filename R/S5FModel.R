@@ -4,7 +4,45 @@
 # @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
 # @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
 # @version    0.1
-# @date       2015.03.07
+# @date       2015.03.08
+
+
+#### Data ####
+
+#' 3-mer targeting model.
+#'
+#' 3-mer model of somatic hypermutation targeting based on Mus musculus Ig sequence data.
+#'
+#' @format \code{\link{TargetingModel}} object.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Smith DS, et al. Di- and trinucleotide target preferences of somatic 
+#'            mutagenesis in normal and autoreactive B cells. 
+#'            J Immunol. 1996 156:2642–52. 
+#' }
+#'
+#' @seealso  See \code{\link{HS5FModel}} for the 5-mer model.
+"M3NModel"
+
+
+#' 5-mer targeting model.
+#'
+#' 5-mer model of somatic hypermutation targeting based on analysis of silent mutations
+#' in functional Ig sequences from Homo sapiens.
+#'
+#' @format \code{\link{TargetingModel}} object.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
+#'            Front Immunol. 2013 4(November):358.
+#'  }
+#'  
+#' @seealso  See \code{\link{M3NModel}} for the 3-mer model.
+"HS5FModel"
+
 
 #### Classes ####
 
@@ -12,18 +50,37 @@
 #' 
 #' \code{TargetingModel} defines a common data structure for...
 #' 
+#' @slot     name          ?
+#' @slot     description   ?
+#' @slot     species       ?
+#' @slot     date          ?
+#' @slot     citation      ?
 #' @slot     substitution  substitution.
 #' @slot     mutability    mutability.
+#' @slot     targeting     ?
 #' 
 #' @seealso  See \code{\link{createMutabilityModel}} and \code{\link{createSubstitutionModel}} 
 #'           for building models from sequence data.
 #'           
-#' @name TargetingData
+#' @name TargetingModel
 #' @export
 setClass("TargetingModel", 
-         slots=c(substitution="numeric",
-                 mutability="numeric"))
-
+         slots=c(name="character",
+                 description="character",
+                 species="character",
+                 date="character",
+                 citation="character",
+                 mutability="numeric",
+                 substitution="matrix",
+                 targeting="matrix"),
+         prototype=c(name="name",
+                     description="description",
+                     species="species",
+                     date="2000-01-01",
+                     citation="citation",
+                     mutability=numeric(3125),
+                     substitution=matrix(0, 5, 3125),
+                     targeting=matrix(0, 5, 3125)))
 
 #### Model building functions #####
 
@@ -53,9 +110,8 @@ setClass("TargetingModel",
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
-#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
-#'            data. 
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #'
@@ -218,7 +274,7 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
 
 
 
-  simplifivemer<-function(fivemer=M,FIVEMER="CCATT",Thresh=20){
+  .simplifivemer <- function(fivemer=M, FIVEMER="CCATT", Thresh=20) {
     Nuc=substr(FIVEMER,3,3)
     Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
 
@@ -264,7 +320,7 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
     }
   }
 
-  substitutionModel <-sapply(words(5,NUCLEOTIDES),function(x)simplifivemer(M,x))
+  substitutionModel <- sapply(words(5, NUCLEOTIDES), function(x) .simplifivemer(M, x))
   #NUCLEOTIDES <- c("A", "C", "G", "T", "N")
   return(substitutionModel)
 }

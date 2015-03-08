@@ -29,3 +29,4 @@ AMINO.ACIDS <-
                   "13", "14", "15", "16", "17", "18", "19", "20")
   )
 save(AMINO.ACIDS,file="data/AMINO.ACIDS.RData")
+#devtools::use_data(AMINO.ACIDS)
