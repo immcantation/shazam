@@ -56,7 +56,9 @@
 #' @docType  package
 #'
 #' @import   alakazam
+#' @import   data.table
 #' @import   doSNOW
+#' @import   foreach
 #' @import   ggplot2
 #' @import   grid
 #' @import   plyr
@@ -64,3 +66,47 @@
 #' @import   SDMTools
 #' @import   zoo
 NULL
+
+
+#### Constants ####
+
+# IMGT V-region definitions
+VREGIONS <- factor(c(rep("FWR", 78), 
+                     rep("CDR", 36), 
+                     rep("FWR", 51), 
+                     rep("CDR", 30), 
+                     rep("FWR", 117)), 
+                   levels=c("FWR", "CDR"))
+
+# IMGT V-region length
+#readEnd <- 312
+VLENGTH <- length(VREGIONS)
+
+# Nucleotide characters
+NUCLEOTIDES <- c("A", "C", "G", "T")
+
+# Amino acid characters
+AMINO_ACIDS <- c("F", "F", "L", "L", "S", "S", "S", "S", "Y", "Y", "*", "*", "C", "C", "*", "W", "L", "L", "L", "L", "P", "P", "P", "P", "H", "H", "Q", "Q", "R", "R", "R", "R", "I", "I", "I", "M", "T", "T", "T", "T", "N", "N", "K", "K", "S", "S", "R", "R", "V", "V", "V", "V", "A", "A", "A", "A", "D", "D", "E", "E", "G", "G", "G", "G")
+names(AMINO_ACIDS) <- c("TTT", "TTC", "TTA", "TTG", "TCT", "TCC", "TCA", "TCG", "TAT", "TAC", "TAA", "TAG", "TGT", "TGC", "TGA", "TGG", "CTT", "CTC", "CTA", "CTG", "CCT", "CCC", "CCA", "CCG", "CAT", "CAC", "CAA", "CAG", "CGT", "CGC", "CGA", "CGG", "ATT", "ATC", "ATA", "ATG", "ACT", "ACC", "ACA", "ACG", "AAT", "AAC", "AAA", "AAG", "AGT", "AGC", "AGA", "AGG", "GTT", "GTC", "GTA", "GTG", "GCT", "GCC", "GCA", "GCG", "GAT", "GAC", "GAA", "GAG", "GGT", "GGC", "GGA", "GGG")
+names(AMINO_ACIDS) <- names(AMINO_ACIDS)
+
+#Amino Acid Traits
+#"*" "A" "C" "D" "E" "F" "G" "H" "I" "K" "L" "M" "N" "P" "Q" "R" "S" "T" "V" "W" "Y"
+#B = "Hydrophobic/Burried"  N = "Intermediate/Neutral"  S="Hydrophilic/Surface")
+TRAITS_AMINO_ACIDS_CHOTHIA98 <- c("*","N","B","S","S","B","N","N","B","S","B","B","S","N","S","S","N","N","B","B","N")
+names(TRAITS_AMINO_ACIDS_CHOTHIA98) <- sort(unique(AMINO_ACIDS))
+TRAITS_AMINO_ACIDS <- array(NA, 21)
+
+#### Sysdata ####
+
+# 5x312 logical matrix of CDR positions
+# CDR_Nuc_Mat
+
+# 5x312 logical matrix of FWR positions
+# FWR_Nuc_Mat
+
+# Vector of codon amino acid translations
+# CODON.TABLE
+
+# 12x216 matrix of replacement and silent mutation permutations
+# CODON_TABLE

@@ -3,27 +3,28 @@
 # @author     Namita Gupta, Gur Yaari, Mohamed Uduman
 # @copyright  Copyright 2013 Kleinstein Lab, Yale University. All rights reserved
 # @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
-# @date       2015.03.08
+# @date       2015.03.09
 
+#' @include shm.R
+NULL
 
 # Get distance between two sequences of same length, broken by a sliding window of 5mers
 #
-# @param   seq1          first nucleotide sequence.
-# @param   seq2          second nucleotide sequence.
-# @param   sub_model     substitution model.
-# @param   mut_model     mutability model.
-# @param   normalize     The method of normalization. Default is "none".
-#                        "length" = normalize distance by length of junction.
-#                        "mutations" = normalize distance by number of mutations in junction.
-#                        If a numeric value is passed, then the computed distance is divided by the given value.
-# @return  distance between two sequences.
+# @param    seq1          first nucleotide sequence.
+# @param    seq2          second nucleotide sequence.
+# @param    sub_model     substitution model.
+# @param    mut_model     mutability model.
+# @param    normalize     The method of normalization. Default is "none".
+#                         "length" = normalize distance by length of junction.
+#                         "mutations" = normalize distance by number of mutations in junction.
+# @return   distance between two sequences.
 #
 # @examples
 # seq1 = c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
 # seq2 = c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
 #
-# distSeqFast(seq1, seq2, HS5FModel@substitution, HS5FModel@mutability)
-distSeqFast <- function(seq1, seq2, sub_model, mut_model, 
+# distSeq5Mers(seq1, seq2, HS5FModel@substitution, HS5FModel@mutability)
+distSeq5Mers <- function(seq1, seq2, sub_model, mut_model, 
                         normalize=c("none" ,"length", "mutations")) {
   # Evaluate choices
   normalize <- match.arg(normalize)
@@ -121,7 +122,7 @@ getPairwiseDistances <- function(arrJunctions, model=c("hs5f", "m3n"),
   # Compute pairwise distance between all sequences' fivemers (by column)
   matDistance <-
     sapply(1:numbOfJuctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfJuctions, function(j) {
-      distSeqFast(matSeqSlidingFiveMer[,i],
+      distSeq5Mers(matSeqSlidingFiveMer[,i],
                   matSeqSlidingFiveMer[,j],
                   sub_model,
                   mut_model,
@@ -135,14 +136,13 @@ getPairwiseDistances <- function(arrJunctions, model=c("hs5f", "m3n"),
 
 # Given an array of junction sequences, find the distance to the closest sequence
 #
-# @param   arrJunctions  character vector of junction sequences.
-# @param   sub_model          substitution model.
-# @param   mut_model           mutability model.
-# @param   normalize     The method of normalization. Default is "none".
-#                        "length" = normalize distance by length of junction.
-#                        "mutations" = normalize distance by number of mutations in junction.
-#                        If a numeric value is passed, then the computed distance is divided by the given value.
-# @return  A vector of distances to the closest sequence.
+# @param    arrJunctions  character vector of junction sequences.
+# @param    sub_model     substitution model.
+# @param    mut_model     mutability model.
+# @param    normalize     method of normalization. Default is "none".
+#                         "length" = normalize distance by length of junction.
+#                         "mutations" = normalize distance by number of mutations in junction.
+# @return   A vector of distances to the closest sequence.
 # @examples
 # arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
 #                    "ACGAACGTATGT", "ACGAACGTATGC",
@@ -188,7 +188,7 @@ getDistanceToClosest <- function(arrJunctions, sub_model, mut_model,
     # Compute pairwise distance between all sequences' fivemers (by column)
     matDistance <-
       sapply(1:numbOfUniqueJuctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJuctions, function(j) {
-        distSeqFast( matSeqSlidingFiveMer[,i],
+        distSeq5Mers( matSeqSlidingFiveMer[,i],
                        matSeqSlidingFiveMer[,j],
                        sub_model,
                        mut_model,
@@ -211,23 +211,23 @@ getDistanceToClosest <- function(arrJunctions, sub_model, mut_model,
 #' Get distance of every sequence to its nearest sequence sharing same V gene, J gene, and
 #' sequence length.
 #'
-#' @param   db          \code{data.frame} which must have the following columns: V_CALL and J_CALL.
-#' @param   seq         the column containing nucleotide sequences to compare. Also used to determine
-#'                      sequence length for grouping.
-#' @param   genotyped   logical indicating whether \code{db} is genotyped; if genotyped is \code{TRUE},
-#'                      \code{db} must have the column V_CALL_GENOTYPED.
-#' @param   model       SHM targeting model; must be one of c("hs5f", "m3n"). See Details for further information.
-#' @param   normalize   The method of normalization. Default is "none".
-#'                      "length" = normalize distance by length of junction.
-#'                      "mutations" = normalize distance by number of mutations in junction.
-#'                      If a numeric value is passed, then the computed distance is divided by the given value.
-#' @param   first       if \code{TRUE} only the first call the gene assignment is used;
-#'                      if \code{FALSE} the union of ambiguous gene assignments is used to group all sequences with
-#'                      any of those gene calls.
-#' @param   nproc       The number of cores to distribute the function over.
+#' @param    db              data.frame containing sequence data.
+#' @param    sequenceColumn  name of the column containing nucleotide sequences to compare. 
+#'                           Also used to determine sequence length for grouping.
+#' @param    vCallColumn     name of the column containing the V-segment allele call.
+#' @param    jCallColumn     name of the column containing the J-segment allele call.
+#' @param    model           SHM targeting model; must be one of c("hs5f", "m3n"). See 
+#'                           Details for further information.
+#' @param    normalize       method of normalization. Default is "none".
+#'                           "length" = normalize distance by length of junction.
+#'                           "mutations" = normalize distance by number of mutations in junction.
+#' @param    first           if \code{TRUE} only the first call the gene assignment is used;
+#'                           if \code{FALSE} the union of ambiguous gene assignments is used to 
+#'                           group all sequences with any of those gene calls.
+#' @param    nproc           number of cores to distribute the function over.
 #'
-#' @return  Returns a modified \code{db} data.frame with nearest neighbor distances in the 
-#'          DIST_NEAREST column.
+#' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
+#'           DIST_NEAREST column.
 #'
 #' @details
 #' Needs method details.
@@ -254,18 +254,17 @@ getDistanceToClosest <- function(arrJunctions, sub_model, mut_model,
 #' db <- readChangeoDb(file)
 #'
 #' # Calculate distance to nearest using genotyped V assignments and 5-mer model
-#' dist <- distToNearest(db, vcall="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
+#' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
 #' hist(dist$DIST_NEAREST, breaks=50, xlim=c(0, 15))
 #'
 #' @export
-distToNearest <- function(db, seq="JUNCTION", vcall="V_CALL", jcall="J_CALL", 
-                          model=c("hs5f", "m3n"), 
+distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
+                          jCallColumn="J_CALL", model=c("hs5f", "m3n"), 
                           normalize=c("none" ,"length", "mutations"), 
                           first=TRUE, nproc=1) {
   # Initial checks
   model <- match.arg(model)
   normalize <- match.arg(normalize)
-  
   if(!is.data.frame(db)) { stop('Must submit a data frame') }
 
   if (model == "hs5f") {
@@ -279,11 +278,11 @@ distToNearest <- function(db, seq="JUNCTION", vcall="V_CALL", jcall="J_CALL",
   # Parse V and J columns to get gene
   # cat("V+J Column parsing\n")
   if(first) {
-    db$V <- getGene(db[, vcall])
-    db$J <- getGene(db[, jcall])
+    db$V <- getGene(db[, vCallColumn])
+    db$J <- getGene(db[, jCallColumn])
   } else {
-    db$V <- getGene(db[, vcall], first=FALSE)
-    db$J <- getGene(db[, jcall], first=FALSE)
+    db$V <- getGene(db[, vCallColumn], first=FALSE)
+    db$J <- getGene(db[, jCallColumn], first=FALSE)
     # Reassign V genes to most general group of genes
     for(ambig in unique(db$V[grepl(',', db$V)])) {
       for(g in strsplit(ambig, split=',')) {
@@ -301,7 +300,7 @@ distToNearest <- function(db, seq="JUNCTION", vcall="V_CALL", jcall="J_CALL",
   # Create new column for distance to nearest neighbor
   db$DIST_NEAREST <- rep(NA, nrow(db))
   db$ROW_ID <- 1:nrow(db)
-  db$L <- nchar(db[, seq])
+  db$L <- nchar(db[, sequenceColumn])
   
   # Create cluster of nproc size and export namespaces
   cluster <- makeCluster(nproc, type = "SOCK")
@@ -312,7 +311,7 @@ distToNearest <- function(db, seq="JUNCTION", vcall="V_CALL", jcall="J_CALL",
   # Calculate distance to nearest neighbor
   # cat("Calculating distance to nearest neighbor\n")
   db <- arrange(ddply(db, .(V, J, L), function(piece) 
-    mutate(piece, DIST_NEAREST=getDistanceToClosest(eval(parse(text=seq)),
+    mutate(piece, DIST_NEAREST=getDistanceToClosest(eval(parse(text=sequenceColumn)),
                                                     sub_model=sub_model,
                                                     mut_model=mut_model,
                                                     normalize=normalize)),

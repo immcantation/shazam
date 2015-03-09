@@ -49,7 +49,7 @@ accurate for human data) is S5F.
 
 ```{r, eval=TRUE}
 # The sample data has been genotyped
-df_dist <- distToNearest(df, vcall="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
+df_dist <- distToNearest(df, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
 ```
 
 Generate histogram
