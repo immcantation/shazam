@@ -106,7 +106,7 @@ TRAITS_AMINO_ACIDS <- array(NA, 21)
 # FWR_Nuc_Mat
 
 # Vector of codon amino acid translations
-# CODON.TABLE
+# CODON_AA_TABLE
 
 # 12x216 matrix of replacement and silent mutation permutations
 # CODON_TABLE
