@@ -19,7 +19,6 @@ Depends:
 Imports:
     data.table,
     foreach,
-    grid,
     SDMTools,
     seqinr,
     zoo

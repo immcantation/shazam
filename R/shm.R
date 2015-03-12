@@ -60,7 +60,6 @@
 #' @import   doSNOW
 #' @import   foreach
 #' @import   ggplot2
-#' @import   grid
 #' @import   plyr
 #' @import   seqinr
 #' @import   SDMTools
