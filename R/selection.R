@@ -100,6 +100,43 @@ initializeMutabilityMatrix <- function(mutabilityModel=1, species=1,mutabilityMa
   }
 }
 
+
+#' Write targeting model to tab-delimited file
+#' 
+#' \code{writeTargetingModel} writes a five-mer targeting model matrix 
+#' of \eqn{mutability * substitution} to a tab-delimited file.
+#' 
+#' @param    targeting   \code{\link{TargetingModel}} targeting slot with 
+#'                       mutation likelihood information.
+#' @param    out_dir     directory path in which to write tab-delimited file;
+#'                       default is current working directory.
+#' @param    out_name    name of file to write, default is Targeting.tab.
+#'                                                
+#' @return   None.
+#'           
+#' @details
+#' \code{writeTargetingModel} takes as input a targeting matrix, which is the 
+#' probability of a given mutation ocurring, defined as \eqn{mutability * substitution}. 
+#' The targeting model is stored as a 5x3125 matrix of rates. Rows define the mutated 
+#' nucleotide at the center of each 5-mer, one of c(A, C, G, T, N), and columns define 
+#' the complete 5-mer of the unmutated nucleotide sequence. It then replaces NAs in this 
+#' matrix with 0 and writes to a tab-delimited file with column and row names.
+#'    
+#' @seealso  Takes as input a mutability matrix from \code{\link{TargetingModel}} object.
+#'
+#' @examples
+#' \dontrun{
+#' # Write HS5F targeting model to working directory as hs5f.tab
+#' writeTargetingModel(HS5FModel@targeting, out_name='hs5f.tab') 
+#' } 
+#' @export
+writeTargetingModel <- function(targeting, out_dir=getwd(), out_name='Targeting.tab') {
+  to_write <- as.data.frame(targeting)
+  to_write[is.na(to_write)] <- 0
+  write.table(to_write, file.path(out_dir,out_name), quote=F, sep='\t')
+}
+
+
 # Read FASTA file formats
 # Modified from read.fasta from the seqinR package
 baseline.read.fasta <-
