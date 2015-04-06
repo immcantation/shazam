@@ -541,31 +541,31 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
 #' 
 #' @param    model     \code{\link{TargetingModel}} object with 
 #'                     mutation likelihood information.
-#' @param    out_name  name of file to write, default is Targeting.tab.
-#' @param    out_dir   directory path in which to write tab-delimited file;
-#'                     default is current working directory.
+#' @param    file      name of file to write.
 #'                                                
-#' @return   None.
+#' @return   NULL
 #'           
 #' @details
-#' \code{writeTargetingModel} takes as input a targeting matrix, which is the 
-#' probability of a given mutation ocurring, defined as \eqn{mutability * substitution}. 
-#' The targeting model is stored as a 5x3125 matrix of rates. Rows define the mutated 
-#' nucleotide at the center of each 5-mer, one of c(A, C, G, T, N), and columns define 
-#' the complete 5-mer of the unmutated nucleotide sequence. It then replaces NAs in this 
-#' matrix with 0 and writes to a tab-delimited file with column and row names.
+#' \code{writeTargetingModel} takes as input a \code{\link{TargetingModel}} object and
+#' writes the \code{targeting} slot, which is the probability of a given mutation 
+#' ocurring, defined as \eqn{mutability * substitution}. The targeting model is stored as 
+#' a 5x3125 matrix of rates. Rows define the mutated nucleotide at the center of each 5-mer, 
+#' one of c(A, C, G, T, N), and columns define the complete 5-mer of the unmutated nucleotide 
+#' sequence. It then replaces NAs in this matrix with 0 and writes to a tab-delimited file 
+#' with column and row names.
 #'    
-#' @seealso  Takes as input a mutability matrix from \code{\link{TargetingModel}} object.
+#' @seealso  Takes as input a \code{\link{TargetingModel}} object.
 #' 
 #' @examples
 #' \dontrun{
-#'   # Write HS5F targeting model to working directory as hs5f.tab
-#'   writeTargetingModel(HS5FModel, "hs5f.tab") 
+#' # Write HS5F targeting model to working directory as hs5f.tab
+#' writeTargetingModel(HS5FModel, "hs5f.tab") 
 #' }
 #' 
 #' @export
-writeTargetingModel <- function(model, out_name, out_dir=getwd()) {
+writeTargetingModel <- function(model, file) {
+    # TODO:  I'm not convinced 0 is the correct value for NA
     to_write <- as.data.frame(model@targeting)
     to_write[is.na(to_write)] <- 0
-    write.table(to_write, file.path(out_dir,out_name), quote=F, sep="\t")
+    write.table(to_write, file, quote=FALSE, sep="\t")
 }
