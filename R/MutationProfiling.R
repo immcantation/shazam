@@ -358,3 +358,65 @@ addExpectedFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP",
     
     return(db)
 }
+
+# List mutations
+listMutations <- function(seqInput, seqGL) {
+    #if( is.na(c(seqInput, seqGL)) ) return(array(NA,4))
+    if (is.na(seqInput) | is.na(seqGL)) { return(NA) }
+    seqI = s2c(seqInput)
+    seqG = s2c(seqGL)
+    matIGL = matrix(c(seqI, seqG), ncol=length(seqI), nrow=2, byrow=T)
+    mutations <- analyzeMutations2NucUri(matIGL)
+    mutations <- mutations[!is.na(mutations)]
+    positions <- as.numeric(names(mutations))
+    mutations <- mutations[positions <= VLENGTH]
+    if (length(mutations) > 0) {
+        return(mutations)
+    } else {
+        return(NA)
+    }
+}
+
+
+#' List the numbers of observed mutations
+#'
+#' This lists the observed number of mutation.
+#'
+#' @param   db  a data.frame of the DB file.
+#' @param   sequenceColumn  The name of the sequence column.
+#' @param   germlineColumn  The name of the germline column.
+#' 
+#' @return  list of mutations in each clone
+#' 
+#' @export
+listObservedMutations <- function(db, sequenceColumn="SEQUENCE_IMGT", 
+                                  germlineColumn="GERMLINE_IMGT_D_MASK")  {
+    mutations <- mapply(listMutations, db[, sequenceColumn], db[, germlineColumn], 
+                        USE.NAMES=FALSE)
+    return(mutations)
+}
+
+
+#' Count number of mutations in sequence
+#'
+#' This function counts the number of mutations in a sequence.
+#'
+#' @param   seqInput  Input sequence
+#' @param   seqGL  Germline sequence
+#' @return  array of observed mutations
+#' 
+#' @export
+countMutations <- function(seqInput, seqGL) {
+    if( is.na(c(seqInput, seqGL)) ) return(array(NA,4))
+    seqI = s2c(seqInput)
+    seqG = s2c(seqGL)
+    matIGL = matrix(c(seqI,seqG),ncol=length(seqI),nrow=2,byrow=T)
+    mutations <- analyzeMutations2NucUri(matIGL)
+    
+    if(is.na(mutations)){
+        return(array(0,4))
+    }else{
+        return(processNucMutations(mutations))
+    }
+}
+
