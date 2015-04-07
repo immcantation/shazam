@@ -61,9 +61,11 @@
 #' @import   foreach
 #' @import   ggplot2
 #' @import   plyr
-#' @import   seqinr
-#' @import   SDMTools
 #' @import   zoo
+#' @importFrom  SDMTools  wt.sd 
+#' @importFrom  seqinr    c2s
+#' @importFrom  seqinr    s2c
+#' @importFrom  seqinr    words
 NULL
 
 

@@ -4,7 +4,7 @@
 # @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
 # @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
 # @version    0.1
-# @date       2015.03.08
+# @date       2015.04.07
 
 #' @include shm.R
 NULL
@@ -164,9 +164,6 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
         stop("Please specify the V call column name")
     }   
     
-    # TODO:  remove once in sysdata.
-    NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
-    
     # Setup
     nuc_chars <- NUCLEOTIDES[1:4]
     nuc_words <- words(4, nuc_chars)
@@ -192,10 +189,9 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
     mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
                                        germlineColumn=germlineColumn)
     
-    #Silent model
-    if(model=="S"){
-        
-        for(index in 1:length(mutations)){
+    
+    if (model == "S") { # Silent model
+        for(index in 1:length(mutations)) {
             cSeq <-  s2c(db[index,sequenceColumn])
             cGL  <-  s2c(db[index,germlineColumn])
             indexMutation <- mutations[[index]]
@@ -230,10 +226,8 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
                 }
             }
         }
-    } else if (model == "RS") { #RS model (All mutations)
-        
-        for(index in 1:length(mutations)){
-            #cat(index,"\n")
+    } else if (model == "RS") { # RS model (All mutations)
+        for (index in 1:length(mutations)) {
             cSeq <-  s2c(db[index,sequenceColumn])
             cGL  <-  s2c(db[index,germlineColumn])
             indexMutation <- mutations[[index]]
@@ -263,24 +257,22 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
         }
     }
     
-    SAMPLE = "A"
-    nuc_words = words(4,nuc_chars)
-    vh_families <- paste(rep("VH",7),1:7,sep="")
+    # TODO: this is redundant code. can probably move the whole listSubstitution definition to the top of the function.
+    nuc_words = words(4, nuc_chars)
+    vh_families <- paste(rep("VH", 7), 1:7, sep="")
     
-    X1<-rep(nuc_words,7)
-    X2<-rep(vh_families,each=256)
-    arrNames <- paste(X2,X1,sep="_")
-    rm(X2,X1)
+    X1 <- rep(nuc_words, 7)
+    X2 <- rep(vh_families, each=256)
+    arrNames <- paste(X2, X1, sep="_")
+    rm(X2, X1)
+    
+    listSubstitution <- array(0, dim=c(256*7,4,4), dimnames=list(arrNames, nuc_chars, nuc_chars))
     
     
-    listSubstitution <- array(0,dim=c(256*7,4,4),dimnames=list(arrNames,nuc_chars,nuc_chars))
-    
-    
-    #substitutionList
+    # substitutionList
     for(vh_fam in vh_families){
         listSubstitution[paste(vh_fam,nuc_words,sep="_"),,]<-t(sapply(nuc_words,function(word){substitutionList[[vh_fam]][[word]]}))
     }
-    
     
     M<-list()
     NAMES<-sapply(dimnames(listSubstitution)[[1]],function(x)strsplit(x,"_",fixed=TRUE)[[1]])
@@ -306,8 +298,8 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
     rownames(M[["E"]]) <- nuc_chars
     
     
-    
-    .simplifivemer <- function(fivemer=M, FIVEMER="CCATT", Thresh=20) {
+    # fivemer=M; FIVEMER="CCATT"
+    .simplifivemer <- function(fivemer, FIVEMER, Thresh=20) {
         Nuc=substr(FIVEMER,3,3)
         Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
         
@@ -354,7 +346,7 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
     }
     
     substitutionModel <- sapply(words(5, nuc_chars), function(x) .simplifivemer(M, x))
-    #nuc_chars<- c("A", "C", "G", "T", "N")
+
     return(substitutionModel)
 }
 
@@ -419,6 +411,7 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
                                   germlineColumn="GERMLINE_IMGT_D_MASK",
                                   vCallColumn="V_CALL",
                                   multipleMutation=c("independent", "ignore")) {
+    # model="RS"; sequenceColumn="SEQUENCE_IMGT"; germlineColumn="GERMLINE_IMGT_D_MASK"; vCallColumn="V_CALL"; multipleMutation="independent"
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
@@ -434,8 +427,9 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
         stop("The V-segment allele call column", vCallColumn, "was not found.")
     } 
     
-    nuc_chars<- c("A", "C", "G", "T")
-    mutations <- listObservedMutations(db)
+    nuc_chars <- NUCLEOTIDES[1:4]
+    mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
+                                       germlineColumn=germlineColumn)
     
     substitutionModel <- apply(substitutionModel,2,function(x)x/sum(x))
     template <- rep(0, 1024)
@@ -519,6 +513,7 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
     }
     close(pb)
     cat("\n")
+    
     Mutability<-list()
     for(i in 1:length(mutations)){
         Mutability[[i]]<-list()
@@ -529,15 +524,17 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
         
     }
     
-    #MutabilityMatrix<-sapply(Mutability,function(x)x[[1]][1:1024])
-    #MutabilityWeights<-sapply(Mutability,function(x)x[[2]][1])
-    #require("SDMTools")
-    #Mutability_Mean<-sapply(1:1024,function(i)weighted.mean(MutabilityMatrix[i,],MutabilityWeights[i,],na.rm=TRUE))
-    #Mutability_SD<-sapply(1:1024,function(i)wt.sd(MutabilityMatrixNorm[i,],MutabilityWeights[i,]))
+    # TODO:  what is this?
+    # Aggregate mutability
+    #MutabilityMatrix <- sapply(Mutability, function(x) x[[1]][1:1024])
+    #MutabilityWeights <- sapply(Mutability, function(x) x[[2]][1:1024])
+    #MutabilityMatrixNorm <- apply(MutabilityMatrix, 2, function(x) x/sum(x, na.rm=TRUE) * sum(!is.na(x)))
+    #Mutability_Mean <- sapply(1:1024, function(i) weighted.mean(MutabilityMatrix[i,], MutabilityWeights[i,], na.rm=TRUE))
+    #Mutability_SD<-sapply(1:1024, function(i) SDMTools::wt.sd(MutabilityMatrixNorm[i,], MutabilityWeights[i,]))
     
     return(Mutability)
-    #nuc_chars<- c("A", "C", "G", "T", "N")
 }
+
 
 #' Normalized substitution
 #'

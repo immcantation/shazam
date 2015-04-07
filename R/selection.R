@@ -636,12 +636,12 @@ getTransistionProb5 <- function(fivemer){
 
 # Given a nuc, returns the other 3 nucs it can mutate to
 canMutateTo <- function(nuc){
-    NUCLEOTIDES[- which(NUCLEOTIDES==nuc)]
+    NUCLEOTIDES[1:4][-which(NUCLEOTIDES[1:4] == nuc)]
 }
 
 # Given a nucleotide, returns the probabilty of other nucleotide it can mutate to
 canMutateToProb <- function(nuc){
-    HS5FModel@substitution[nuc,canMutateTo(nuc)]
+    HS5FModel@substitution[nuc, canMutateTo(nuc)]
 }
 
 

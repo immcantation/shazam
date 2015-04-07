@@ -45,7 +45,7 @@ plotHedgehog <- function(mutabilityModel, outputName=NULL, outputPath=NULL) {
   MutabilityMatrixNorm<-apply(MutabilityMatrix,2,function(x)x/sum(x,na.rm=TRUE)*sum(!is.na(x)))
 
 
-  tmp99<-sapply(1:1024,function(i)wt.sd(MutabilityMatrixNorm[i,],MutabilityWeights[i,]))
+  tmp99<-sapply(1:1024,function(i) SDMTools::wt.sd(MutabilityMatrixNorm[i,],MutabilityWeights[i,]))
   Mutability_ALL_CI<-cbind(tmp19-tmp99,tmp19+tmp99)
   Mutability_ALL_CI[MuNumbers<=500,]<-NA
   rownames(Mutability_ALL_CI)<-names(Template)
