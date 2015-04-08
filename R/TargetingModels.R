@@ -345,8 +345,8 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
         }
     }
     
-    substitutionModel <- sapply(words(5, nuc_chars), function(x) .simplifivemer(M, x))
-
+    substitutionModel <- sapply(words(5, nuc_chars), function(x) { .simplifivemer(M, x) })
+    substitutionModel <- apply(substitutionModel, 2, function(x) { x/sum(x, na.rm=TRUE) })
     return(substitutionModel)
 }
 
@@ -427,40 +427,54 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
         stop("The V-segment allele call column", vCallColumn, "was not found.")
     } 
     
+    # Generate test data
+    #.mut <- function(x, n=40) {
+    #    y <- seqinr::s2c(x)
+    #    y[sample(1:nchar(x), n)] <- "A"
+    #    return(seqinr::c2s(y))
+    #}
+    #SEQUENCE_IMGT=apply(replicate(10, sample(words(5, nuc_chars), 50)), 2, paste, collapse="")
+    #GERMLINE_IMGT_D_MASK=sapply(SEQUENCE_IMGT, .mut, n=40)
+    #db <- data.frame(SEQUENCE_ID=LETTERS[1:10],
+    #                 SEQUENCE_IMGT=SEQUENCE_IMGT,
+    #                 GERMLINE_IMGT_D_MASK=GERMLINE_IMGT_D_MASK,
+    #                 V_CALL="Homsap IGHV3-66*02 F", stringsAsFactors=FALSE)
+    #rownames(db) <- NULL
+    
     nuc_chars <- NUCLEOTIDES[1:4]
     mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
                                        germlineColumn=germlineColumn)
     
-    substitutionModel <- apply(substitutionModel,2,function(x)x/sum(x))
+    #substitutionModel <- apply(substitutionModel,2,function(x)x/sum(x))
     template <- rep(0, 1024)
     names(template) <- words(5,nuc_chars)
     
     COUNT<-list()
     for(index in 1:length(mutations)){
-        COUNT[[index]]<-template
+        COUNT[[index]] <- template
         indexMutation <- mutations[[index]]
         if(!sum(is.na(indexMutation))){
-            cSeq <-  s2c(db[index,sequenceColumn])
-            cGL  <-  s2c(db[index,germlineColumn])
+            cSeq <-  s2c(db[index, sequenceColumn])
+            cGL  <-  s2c(db[index, germlineColumn])
             positions <- as.numeric(names(indexMutation))
-            positions <- positions[positions<=VLENGTH]
+            positions <- positions[positions <= VLENGTH]
             positions <- positions[!is.na(positions)]
-            for( position in  positions){
-                wrd5<-substr(db[index,germlineColumn],position-2,position+2)
-                if( !grepl("[^ACGT]", wrd5) & nchar(wrd5)==5  ){
+            for (position in  positions){
+                wrd5 <- substr(db[index, germlineColumn], position - 2, position + 2)
+                if(!grepl("[^ACGT]", wrd5) & nchar(wrd5)==5){
                     codonNucs = getCodonPos(position)
                     codonGL = cGL[codonNucs]
                     codonSeq = cSeq[codonNucs]
-                    muCodonPos = {position-1}%%3+1
+                    muCodonPos = {position - 1} %% 3 + 1
                     seqAtMutation <- codonSeq[muCodonPos]
                     glAtMutation <- codonGL[muCodonPos]
-                    if( !any(codonGL%in%c("N","-", ".")) & !any(codonSeq%in%c("N","-", ".")) ){
-                        if(multipleMutation=="independent"){ # if independent mutations are included
+                    if (!any(codonGL %in% c("N", "-", ".")) & !any(codonSeq %in% c("N", "-", "."))) {
+                        if (multipleMutation == "independent") { # if independent mutations are included
                             codonSeq <- codonGL
                             codonSeq[muCodonPos] <- seqAtMutation
                         }
-                        if(!length(grep("N",wrd5))){
-                            COUNT[[index]][wrd5]<- COUNT[[index]][wrd5]+1;
+                        if (!length(grep("N", wrd5))) {
+                            COUNT[[index]][wrd5]<- COUNT[[index]][wrd5] + 1;
                         }
                     }
                 }
@@ -471,68 +485,77 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
     BG_COUNT<-list()
     cat("Progress: 0%      50%     100%\n")
     cat("          ")
-    pb <- txtProgressBar(min=1,max=length(mutations),width=20)
-    for(index in 1:length(mutations)){
+    pb <- txtProgressBar(min=1, max=length(mutations), width=20)
+    for (index in 1:length(mutations)){
         setTxtProgressBar(pb, index)
-        BG_COUNT[[index]]<-template
-        sSeq <- gsub("\\.","",db[index,sequenceColumn])
-        sGL <- gsub("\\.","",db[index,germlineColumn])
+        BG_COUNT[[index]] <- template
+        sSeq <- gsub("\\.", "", db[index, sequenceColumn])
+        sGL <- gsub("\\.", "", db[index, germlineColumn])
         cSeq <-  s2c(sSeq)
         cGL  <-  s2c(sGL)[1:VLENGTH]
-        positions <- 3:(length(cGL)-2)
-        for( position in  positions){
-            wrd5<-substr(sGL,position-2,position+2)
-            if( !grepl("[^ACGT]", wrd5) & nchar(wrd5)==5 ){
+        positions <- 3:(length(cGL) - 2)
+        for (position in  positions) {
+            wrd5 <- substr(sGL, position - 2, position + 2)
+            if (!grepl("[^ACGT]", wrd5) & nchar(wrd5) == 5 ) {
                 codonNucs = getCodonPos(position)
                 codonGL = cGL[codonNucs]
                 codonSeq = cSeq[codonNucs]
-                muCodonPos = {position-1}%%3+1
+                muCodonPos = {position - 1} %% 3 + 1
                 seqAtMutation <- codonSeq[muCodonPos]
                 glAtMutation <- codonGL[muCodonPos]
-                if( !any(codonGL%in%c("N","-")) & !any(codonSeq%in%c("N","-")) ){
-                    if(multipleMutation=="independent"){ # if independent mutations are included
+                if (!any(codonGL %in% c("N", "-")) & !any(codonSeq %in% c("N", "-"))) {
+                    if(multipleMutation == "independent") { # if independent mutations are included
                         codonSeq <- codonGL
                         codonSeq[muCodonPos] <- seqAtMutation
                     }
-                    codonPermutate <- matrix(rep(codonGL,3),ncol=3,byrow=T)
-                    codonPermutate[,muCodonPos] <- canMutateTo(glAtMutation)[-4]
-                    codonPermutate <- apply(codonPermutate,1,paste,collapse="")
-                    codonPermutate <- matrix( c( codonPermutate, rep(c2s(codonGL),3) ), ncol=2, byrow=F)
+                    codonPermutate <- matrix(rep(codonGL, 3), ncol=3, byrow=TRUE)
+                    codonPermutate[, muCodonPos] <- canMutateTo(glAtMutation)[-4]
+                    codonPermutate <- apply(codonPermutate, 1, paste,collapse="")
+                    codonPermutate <- matrix(c(codonPermutate, rep(c2s(codonGL), 3)), ncol=2, byrow=FALSE)
                     muType <- mutationTypeOptimized(codonPermutate)
-                    if(!length(grep("N",wrd5)) & !length(grep("-",wrd5))){
-                        for(m in 1:3){
-                            if(muType[m]=="S"){
-                                BG_COUNT[[index]][wrd5]<- BG_COUNT[[index]][wrd5] + substitutionModel[substr(codonPermutate[m,1],muCodonPos,muCodonPos),wrd5];
+                    if (!length(grep("N", wrd5)) & !length(grep("-", wrd5))) {
+                        for (m in 1:3) {
+                            if (muType[m] == "S") {
+                                BG_COUNT[[index]][wrd5]<- BG_COUNT[[index]][wrd5] + 
+                                    substitutionModel[substr(codonPermutate[m, 1], muCodonPos, muCodonPos), wrd5];
                             }
                         }
                     }
                 }
             }
         }
-        BG_COUNT[[index]][BG_COUNT[[index]]==0]<-NA
+        BG_COUNT[[index]][BG_COUNT[[index]] == 0] <- NA
     }
     close(pb)
     cat("\n")
     
     Mutability<-list()
     for(i in 1:length(mutations)){
-        Mutability[[i]]<-list()
-        Mutability[[i]][[1]]<-COUNT[[i]]/BG_COUNT[[i]]
-        Mutability[[i]][[1]]<-Mutability[[i]][[1]]/sum(Mutability[[i]][[1]],na.rm=TRUE)
-        Mutability[[i]][[2]]<-length( mutations[[i]])
-        Mutability[[i]][[3]]<-sum(COUNT[[i]],na.rm=TRUE)
+        mut_mat <- COUNT[[i]] / BG_COUNT[[i]]
+        mut_mat <- mut_mat / sum(mut_mat, na.rm=TRUE)
+        mut_mat[!is.finite(mut_mat)] <- NA
+        wgt_mat <- length(mutations[[i]])
+        Mutability[[i]] <- list(mut_mat, wgt_mat)
         
+        #Mutability[[i]] <- list()
+        #Mutability[[i]][[1]]<-COUNT[[i]]/BG_COUNT[[i]]
+        #Mutability[[i]][[1]]<-Mutability[[i]][[1]]/sum(Mutability[[i]][[1]],na.rm=TRUE)
+        #Mutability[[i]][[2]]<-length( mutations[[i]])
+        #Mutability[[i]][[3]]<-sum(COUNT[[i]],na.rm=TRUE)
+        #Mutability[[i]][[1]][!is.finite(Mutability[[i]][[1]])] <- NA
     }
     
     # TODO:  what is this?
     # Aggregate mutability
-    #MutabilityMatrix <- sapply(Mutability, function(x) x[[1]][1:1024])
-    #MutabilityWeights <- sapply(Mutability, function(x) x[[2]][1:1024])
+    MutabilityMatrix <- sapply(Mutability, function(x) x[[1]])
+    MutabilityWeights <- sapply(Mutability, function(x) x[[2]])
+
+    # MutabilityMatrixNorm = Normalized by fivemers that are observed.
+    Mutability_Mean <- sapply(1:1024, function(i) weighted.mean(MutabilityMatrix[i, ], MutabilityWeights[i, ], na.rm=TRUE))
     #MutabilityMatrixNorm <- apply(MutabilityMatrix, 2, function(x) x/sum(x, na.rm=TRUE) * sum(!is.na(x)))
-    #Mutability_Mean <- sapply(1:1024, function(i) weighted.mean(MutabilityMatrix[i,], MutabilityWeights[i,], na.rm=TRUE))
-    #Mutability_SD<-sapply(1:1024, function(i) SDMTools::wt.sd(MutabilityMatrixNorm[i,], MutabilityWeights[i,]))
+    #Mutability_SD <- sapply(1:1024, function(i) SDMTools::wt.sd(MutabilityMatrixNorm[i, ], MutabilityWeights[i, ]))
     
-    return(Mutability)
+    return(Mutability_Mean)
 }
 
 
