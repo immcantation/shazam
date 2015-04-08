@@ -2,7 +2,7 @@
 title: "SHM: Calculate distance to nearest neighbor"
 author: "Namita Gupta"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{Distance to nearest neighbor}
   %\VignetteEngine{knitr::rmarkdown}
@@ -47,7 +47,7 @@ targeting model is used to calculate the distance. The default model (most
 accurate for human data) is S5F.
 
 
-```{r, eval=TRUE}
+```{r, eval=TRUE, warning=FALSE}
 # The sample data has been genotyped
 df_dist <- distToNearest(df, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
 ```
@@ -61,11 +61,11 @@ with no 'near' neighbor), which show up as two modes in a histogram. In the
 example provided here, this threshold is approximately at 0.002 for the 
 S5F model.
 
-```{r, eval=TRUE}
+```{r, eval=TRUE, warning=FALSE}
 # Generate histogram
 hist(df_dist$DIST_NEAREST, main='Histogram', xlab='Distance to Nearest', breaks=50)
 
-# Zoom in to find threshold at 0.002
+# Zoom in to find threshold at around 2
 hist(df_dist$DIST_NEAREST, main='Histogram - zoom', 
-     xlab='Distance to Nearest', breaks=50, xlim=c(0,0.004))
+     xlab='Distance to Nearest', breaks=100, xlim=c(0,5))
 ```
