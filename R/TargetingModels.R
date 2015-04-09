@@ -4,7 +4,7 @@
 # @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
 # @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
 # @version    0.1
-# @date       2015.04.07
+# @date       2015.04.09
 
 #' @include shm.R
 NULL
@@ -119,9 +119,9 @@ setClass("TargetingModel",
 #'                             If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                             excluded from the total mutation tally.
 #' 
-#' @return   A 4x1024 matrix of substitution counts for each 5-mer motif with rows names 
-#'           defining the center nucleotide, one of c(A, C, G, T), and column names 
-#'           defining the 5-mer nucleotide sequence.
+#' @return   A 4x1024 matrix of normalized substitution rate for each 5-mer motif with 
+#'           rows names defining the center nucleotide, one of \code{c("A", "C", "G", "T", "N")}, 
+#'           and column names defining the 5-mer nucleotide sequence.
 #' 
 #' @references
 #' \enumerate{
@@ -139,10 +139,10 @@ setClass("TargetingModel",
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
-#' sub_model <- createSubstitutionModel(db)
+#' sub <- createSubstitutionModel(db)
 #' 
 #' # Create model using only silent mutations
-#' sub_model <- createSubstitutionModel(db, model="S")
+#' sub <- createSubstitutionModel(db, model="S")
 #' 
 #' @export
 createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENCE_IMGT",
@@ -166,7 +166,7 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
     
     # Setup
     nuc_chars <- NUCLEOTIDES[1:4]
-    nuc_words <- words(4, nuc_chars)
+    nuc_words <- seqinr::words(4, nuc_chars)
     vh_families <- paste(rep("VH", 7), 1:7, sep="")
     
     # Define empty return list of lists
@@ -258,7 +258,7 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
     }
     
     # TODO: this is redundant code. can probably move the whole listSubstitution definition to the top of the function.
-    nuc_words = words(4, nuc_chars)
+    nuc_words = seqinr::words(4, nuc_chars)
     vh_families <- paste(rep("VH", 7), 1:7, sep="")
     
     X1 <- rep(nuc_words, 7)
@@ -280,9 +280,9 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
     X1<-list()
     
     CT_FiveMers <-
-        c( paste(substring(words(3,nuc_chars),1,1), "C",substring(words(3,nuc_chars),2,3),sep=""),
-           paste(substring(words(3,nuc_chars),1,1),"G",substring(words(3,nuc_chars),2,3),sep=""),
-           paste(substring(words(3,nuc_chars),1,1),"T",substring(words(3,nuc_chars),2,3),sep="")
+        c( paste(substring(seqinr::words(3,nuc_chars),1,1), "C",substring(seqinr::words(3,nuc_chars),2,3),sep=""),
+           paste(substring(seqinr::words(3,nuc_chars),1,1),"G",substring(seqinr::words(3,nuc_chars),2,3),sep=""),
+           paste(substring(seqinr::words(3,nuc_chars),1,1),"T",substring(seqinr::words(3,nuc_chars),2,3),sep="")
         )
     
     for(CT in CT_FiveMers){
@@ -291,8 +291,8 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
         M[[CT]]<- t(sapply(1:4,function(i)apply(listSubstitution[INDEx,i,],2,sum)))
         rownames(M[[CT]]) <- nuc_chars
     }
-    M[["E"]]<-M[[paste(substring(words(3,nuc_chars),1,1),"C",substring(words(3,nuc_chars),2,3),sep="")[1]]]
-    for(CT in c(paste(substring(words(3,nuc_chars),1,1),"C",substring(words(3,nuc_chars),2,3),sep=""),paste(substring(words(3,nuc_chars),1,1),"G",substring(words(3,nuc_chars),2,3),sep=""),paste(substring(words(3,nuc_chars),1,1),"T",substring(words(3,nuc_chars),2,3),sep=""))[-1]){
+    M[["E"]]<-M[[paste(substring(seqinr::words(3,nuc_chars),1,1),"C",substring(seqinr::words(3,nuc_chars),2,3),sep="")[1]]]
+    for(CT in c(paste(substring(seqinr::words(3,nuc_chars),1,1),"C",substring(seqinr::words(3,nuc_chars),2,3),sep=""),paste(substring(seqinr::words(3,nuc_chars),1,1),"G",substring(seqinr::words(3,nuc_chars),2,3),sep=""),paste(substring(seqinr::words(3,nuc_chars),1,1),"T",substring(seqinr::words(3,nuc_chars),2,3),sep=""))[-1]){
         M[["E"]]<- M[["E"]]+M[[CT]]
     }
     rownames(M[["E"]]) <- nuc_chars
@@ -345,7 +345,7 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
         }
     }
     
-    substitutionModel <- sapply(words(5, nuc_chars), function(x) { .simplifivemer(M, x) })
+    substitutionModel <- sapply(seqinr::words(5, nuc_chars), function(x) { .simplifivemer(M, x) })
     substitutionModel <- apply(substitutionModel, 2, function(x) { x/sum(x, na.rm=TRUE) })
     return(substitutionModel)
 }
@@ -357,7 +357,7 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
 #' the number of mutations occuring in the center position for all 5-mer motifs.
 #'
 #' @param    db                 data.frame containing sequence data.
-#' @param    substitutionModel  matrix of 5-mers substitution counts built by 
+#' @param    substitutionModel  matrix of 5-mer substitution rates built by 
 #'                              \code{\link{createSubstitutionModel}}.
 #' @param    model              type of model to create. The default model, "RS", creates 
 #'                              a model by counting both replacement and silent mutations.
@@ -371,15 +371,9 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
 #'                              mutations within the same 5-mer are counted indepedently. 
 #'                              If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                              excluded from the total mutation tally.
-#' 
-#' @return  A list with one element for each row in the input \code{db} where each entry
-#'          contains a list itself with:
-#'          \itemize{
-#'            \item \code{[[1]]} = numeric vector of 5-mer mutation counts normalized by 
-#'                                 the total number of mutations in the sequence.
-#'            \item \code{[[2]]} = count 5-mers that were mutated in the sequence.
-#'            \item \code{[[3]]} = total number of mutations in the sequence.
-#'          }
+#'
+#' @return   A named numeric vector of 1024 normalized mutability rates for each 5-mer 
+#'           motif with names 5-mer nucleotide sequence.
 #' 
 #' @references
 #' \enumerate{
@@ -398,12 +392,12 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
-#' sub_model <- createSubstitutionModel(db)
-#' mut_model <- createMutabilityModel(db, sub_model)
+#' sub <- createSubstitutionModel(db)
+#' mut <- createMutabilityModel(db, sub)
 #'
 #' # Create model using only silent mutations
-#' sub_model <- createSubstitutionModel(db, model="S")
-#' mut_model <- createMutabilityModel(db, sub_model, model="S")
+#' sub <- createSubstitutionModel(db, model="S")
+#' mut <- createMutabilityModel(db, sub, model="S")
 #' 
 #' @export
 createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
@@ -427,29 +421,16 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
         stop("The V-segment allele call column", vCallColumn, "was not found.")
     } 
     
-    # Generate test data
-    #.mut <- function(x, n=40) {
-    #    y <- seqinr::s2c(x)
-    #    y[sample(1:nchar(x), n)] <- "A"
-    #    return(seqinr::c2s(y))
-    #}
-    #SEQUENCE_IMGT=apply(replicate(10, sample(words(5, nuc_chars), 50)), 2, paste, collapse="")
-    #GERMLINE_IMGT_D_MASK=sapply(SEQUENCE_IMGT, .mut, n=40)
-    #db <- data.frame(SEQUENCE_ID=LETTERS[1:10],
-    #                 SEQUENCE_IMGT=SEQUENCE_IMGT,
-    #                 GERMLINE_IMGT_D_MASK=GERMLINE_IMGT_D_MASK,
-    #                 V_CALL="Homsap IGHV3-66*02 F", stringsAsFactors=FALSE)
-    #rownames(db) <- NULL
-    
+    # Count mutations
     nuc_chars <- NUCLEOTIDES[1:4]
     mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
                                        germlineColumn=germlineColumn)
     
     #substitutionModel <- apply(substitutionModel,2,function(x)x/sum(x))
     template <- rep(0, 1024)
-    names(template) <- words(5,nuc_chars)
+    names(template) <- seqinr::words(5, nuc_chars)
     
-    COUNT<-list()
+    COUNT <- list()
     for(index in 1:length(mutations)){
         COUNT[[index]] <- template
         indexMutation <- mutations[[index]]
@@ -482,12 +463,13 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
         }
     }
     
-    BG_COUNT<-list()
-    cat("Progress: 0%      50%     100%\n")
-    cat("          ")
-    pb <- txtProgressBar(min=1, max=length(mutations), width=20)
+    #cat("Progress: 0%      50%     100%\n")
+    #cat("          ")
+    #pb <- txtProgressBar(min=1, max=length(mutations), width=20)
+    
+    BG_COUNT <- list()
     for (index in 1:length(mutations)){
-        setTxtProgressBar(pb, index)
+        #setTxtProgressBar(pb, index)
         BG_COUNT[[index]] <- template
         sSeq <- gsub("\\.", "", db[index, sequenceColumn])
         sGL <- gsub("\\.", "", db[index, germlineColumn])
@@ -526,8 +508,8 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
         }
         BG_COUNT[[index]][BG_COUNT[[index]] == 0] <- NA
     }
-    close(pb)
-    cat("\n")
+    #close(pb)
+    #cat("\n")
     
     Mutability<-list()
     for(i in 1:length(mutations)){
@@ -545,101 +527,261 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
         #Mutability[[i]][[1]][!is.finite(Mutability[[i]][[1]])] <- NA
     }
     
-    # TODO:  what is this?
+    
     # Aggregate mutability
     MutabilityMatrix <- sapply(Mutability, function(x) x[[1]])
     MutabilityWeights <- sapply(Mutability, function(x) x[[2]])
-
+    Mutability_Mean <- apply(MutabilityMatrix, 1, weighted.mean, w=MutabilityWeights, na.rm=TRUE)
+    Mutability_Mean[!is.finite(Mutability_Mean)] <- NA
+    
+    # Normalize
+    Mutability_Mean <- Mutability_Mean / sum(Mutability_Mean, na.rm=TRUE)
+    
+    # TODO:  what is this?
     # MutabilityMatrixNorm = Normalized by fivemers that are observed.
-    Mutability_Mean <- sapply(1:1024, function(i) weighted.mean(MutabilityMatrix[i, ], MutabilityWeights[i, ], na.rm=TRUE))
+    #Mutability_Mean <- sapply(1:1024, function(i) weighted.mean(MutabilityMatrix[i, ], MutabilityWeights[i, ], na.rm=TRUE))
     #MutabilityMatrixNorm <- apply(MutabilityMatrix, 2, function(x) x/sum(x, na.rm=TRUE) * sum(!is.na(x)))
-    #Mutability_SD <- sapply(1:1024, function(i) SDMTools::wt.sd(MutabilityMatrixNorm[i, ], MutabilityWeights[i, ]))
+    #Mutability_SD <- sapply(1:1024, function(i) SDMTools::wt.sd(MutabilityMatrixNorm[i, ], MutabilityWeights[i]))    
     
     return(Mutability_Mean)
 }
 
 
-#' Normalized substitution
+#' Extends a substitution model to include Ns.
+#' 
+#' \code{extendSubstitutionModel} extends a 5-mer nucleotide substitution model 
+#' with 5-mers that include Ns by averaging over all corresponding 5-mers without Ns.
 #'
-createSymmetricSubstitution <- function() {
-    library("seqinr")
-    library("dclone")
-    library("gdata")
+#' @param    substitutionModel  matrix of 5-mers substitution counts built by 
+#'                              \code{\link{createSubstitutionModel}}.
+#' 
+#' @return   A 5x3125 matrix of normalized substitution rate for each 5-mer motif with 
+#'           rows names defining the center nucleotide, one of \code{c("A", "C", "G", "T", "N")}, 
+#'           and column names defining the 5-mer nucleotide sequence.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
+#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
+#'            data. 
+#'            Front Immunol. 2013 4(November):358.
+#'  }
+#' 
+#' @seealso  See \code{\link{createSubstitutionModel}} for building the substitution model.
+#'           See \code{\link{extendMutabilityModel}} for extending a mutability model.
+#' 
+#' @examples
+#' # Load example data
+#' library(alakazam)
+#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' db <- readChangeoDb(file)
+#' 
+#' # Create model using all mutations
+#' sub <- createSubstitutionModel(db)
+#' sub <- extendSubstitutionModel(sub)
+#' 
+#' @export
+extendSubstitutionModel <- function(substitutionModel) {
+    # Define old and new column/row names
+    input_names <- colnames(substitutionModel)
+    nuc_chars <- NUCLEOTIDES[1:5]
+    nuc_5mers <- seqinr::words(5, alphabet=nuc_chars)
     
-    load("FiveS_Substitution.RData")
-    FiveS_Substitution <- rbind(FiveS_Substitution,"N"=rep(NA,ncol(FiveS_Substitution)))
+    # Define empty extended matrix with Ns
+    extend_mat <- matrix(NA, nrow=length(nuc_chars), ncol=length(nuc_5mers), 
+                         dimnames=list(nuc_chars, nuc_5mers))
     
-    NUCS <- c("A", "C", "G", "T","N")
-    
-    
-    withN_5mer <- words(5, alphabet=s2c("ACGTN"))
-    withN_5mer_mat <- matrix(NA, nrow=5, ncol=length(withN_5mer), dimnames=list(NUCS,withN_5mer))
-    for(mer in withN_5mer){
-        #cat(mer,"\n")
-        if( is.finite(match(mer,colnames(FiveS_Substitution))) ){
-            withN_5mer_mat[,mer] <- FiveS_Substitution[,mer]
-        }else{
-            merAsChar <- s2c(mer)
-            N_Index <- grep("[N]",merAsChar)
-            if( any(N_Index==3) ){
-                withN_5mer_mat[,mer] <- NA
-            }else{
-                merAsChar[N_Index] <- "."
-                merAsStr <- c2s(merAsChar)
-                merIndex <- grep(merAsStr,colnames(FiveS_Substitution))
-                withN_5mer_mat[,mer] <- apply(FiveS_Substitution[,merIndex],1,mean,na.rm=TRUE)
-            }
-        }
-    }
-    S5F_Substitution <- withN_5mer_mat
-    #save(S5F_Substitution,file="S5F_Substitution.RData")
-    
-    #Make Subs an array
-    #S5F_Substitution_Array <- unmatrix(S5F_Substitution)
-    
-    #Mutability
-    #load("FiveS_Mutability.RData")
-    load("S5F_Mutability.RData")
-    withN_5mer <- words(5, alphabet=s2c("ACGTN"))
-    withN_5mer_mat <- array(NA, dim=length(withN_5mer), dimnames=list(withN_5mer))
-    FiveS_Mutability <- as.vector(S5F_Mutability)
-    FiveS_Mutability <- FiveS_Mutability/sum(FiveS_Mutability,na.rm=TRUE)
-    for(mer in withN_5mer){
-        #cat(mer,"\n")
-        if( is.finite(match(mer,rownames(FiveS_Mutability))) ){
-            withN_5mer_mat[mer] <- FiveS_Mutability[mer,]
-        }else{
-            merAsChar <- s2c(mer)
-            N_Index <- grep("[N]",merAsChar)
-            if( any(N_Index==3) ){
-                withN_5mer_mat[mer] <- NA
-            }else{
-                merAsChar[N_Index] <- "."
-                merAsStr <- c2s(merAsChar)
-                merIndex <- grep(merAsStr,rownames(FiveS_Mutability))
-                withN_5mer_mat[mer] <- mean(FiveS_Mutability[merIndex,],na.rm=TRUE)
+    # Extend matrix with Ns
+    for (mer in nuc_5mers) {
+        if (mer %in% input_names) {
+            extend_mat[, mer] <- c(substitutionModel[, mer], "N"=NA)
+        } else {
+            mer_char <- s2c(mer)
+            n_index <- grep("N", mer_char)
+            if (any(n_index == 3)) {
+                extend_mat[, mer] <- NA
+            } else {
+                mer_char[n_index] <- "."
+                mer_str <- c2s(mer_char)
+                mer_index <- grep(mer_str, input_names)
+                extend_mat[, mer] <- c(apply(substitutionModel[, mer_index], 1, mean, na.rm=TRUE), "N"=NA)
             }
         }
     }
     
+    # Normalize
+    extend_mat <- extend_mat / sum(extend_mat, na.rm=TRUE)
     
-    S5F_Mutability <- withN_5mer_mat
-    S5F_Mutability <- (S5F_Mutability/sum(S5F_Mutability,na.rm=TRUE)) * sum(!is.na(S5F_Mutability))
-    #save(S5F_Mutability,file="S5F_Mutability.RData")
-    
-    
-    
-    Targeting <- list()
-    Targeting[["Name"]] <- "HS5F"
-    Targeting[["Species"]] <- "Human"
-    Targeting[["Date"]] <- Sys.time()
-    Targeting[["Data"]] <- "Yaari G (2013). Front Immunol."
-    Targeting[["Substitution"]] <- S5F_Substitution
-    Targeting[["Mutability"]] <- S5F_Mutability
-    Targeting[["Targeting"]] <- sweep(S5F_Substitution,2,S5F_Mutability,`*`) 
-    save(Targeting,file=paste(Targeting[["Name"]],"_Targeting.RData", sep=""))
-
+    return (extend_mat)
 }
+
+
+#' Extends a mutability model to include Ns.
+#' 
+#' \code{extendMutabilityModel} extends a 5-mer nucleotide mutability model 
+#' with 5-mers that include Ns by averaging over all corresponding 5-mers without Ns.
+#'
+#' @param    mutabilityModel  vector of 5-mer mutability rates built by 
+#'                            \code{\link{createMutabilityModel}}.
+#' 
+#' @return   A 3125 vector of normalized mutability rates for each 5-mer motif with 
+#'           names defining the 5-mer nucleotide sequence.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
+#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
+#'            data. 
+#'            Front Immunol. 2013 4(November):358.
+#'  }
+#' 
+#' @seealso  See \code{\link{createMutabilityModel}} for building the mutability model.
+#'           See \code{\link{extendSubstitutionModel}} for extending a substitution model.
+#' 
+#' @examples
+#' # Load example data
+#' library(alakazam)
+#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' db <- readChangeoDb(file)
+#' 
+#' # Create model using all mutations
+#' sub <- createSubstitutionModel(db)
+#' mut <- createMutabilityModel(db, sub)
+#' mut <- extendMutabilityModel(mut)
+#' 
+#' @export
+extendMutabilityModel <- function(mutabilityModel) {
+    # Define old and new column/row names
+    input_names <- colnames(mutabilityModel)
+    nuc_chars <- NUCLEOTIDES[1:5]
+    nuc_5mers <- seqinr::words(5, alphabet=nuc_chars)
+    
+    # Define empty extended matrix with Ns
+    extend_mat <- array(NA, dim=length(nuc_5mers), dimnames=list(nuc_5mers))
+    
+    # Extend matrix with Ns
+    for(mer in nuc_5mers) {
+        #cat(mer,"\n")
+        if (mer %in% input_names) {
+            extend_mat[mer] <- mutabilityModel[mer]
+        } else {
+            mer_char <- s2c(mer)
+            n_index <- grep("N", mer_char)
+            if (any(n_index == 3)) {
+                extend_mat[mer] <- NA
+            } else {
+                mer_char[n_index] <- "."
+                mer_str <- c2s(mer_char)
+                mer_index <- grep(mer_str, input_names)
+                extend_mat[mer] <- mean(mutabilityModel[mer_index], na.rm=TRUE)
+            }
+        }
+    }
+    
+    # Normalize    
+    extend_mat <- (extend_mat / sum(extend_mat, na.rm=TRUE)) * sum(!is.na(extend_mat))
+    
+    return(extend_mat)
+}
+ 
+
+#' Creates a TargetingModel
+#' 
+#' \code{createTargetingModel} creates a \code{TargetingModel}.
+#'
+#' @param    db                 data.frame containing sequence data.
+#' @param    model              type of model to create. The default model, "RS", creates 
+#'                              a model by counting both replacement and silent mutations.
+#'                              The "S" specification builds a model by counting only 
+#'                              silent mutations.
+#' @param    sequenceColumn     name of the column containing IMGT-gapped sample sequences.
+#' @param    germlineColumn     name of the column containing IMGT-gapped germline sequences.
+#' @param    vCallColumn        name of the column containing the V-segment allele call.
+#' @param    multipleMutation   string specifying how to handle multiple mutations occuring 
+#'                              within the same 5-mer. If \code{"independent"} then multiple 
+#'                              mutations within the same 5-mer are counted indepedently. 
+#'                              If \code{"ignore"} then 5-mers with multiple mutations are 
+#'                              excluded from the total mutation tally.
+#' @param    name               name of the model.
+#' @param    description        description of the model and its source data.
+#' @param    species            genus and species of the source sequencing data.
+#' @param    date               date the model was built. If \code{NULL} the current date
+#'                              will be used.
+#' @param    citation           publication source.
+#' 
+#' @return   A \code{TargetingModel} object.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
+#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
+#'            data. 
+#'            Front Immunol. 2013 4(November):358.
+#'  }
+#' 
+#' @seealso  See \code{\link{TargetingModel}} for the return object.
+#' 
+#' @examples
+#' # Load example data
+#' library(alakazam)
+#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' db <- readChangeoDb(file)
+#' 
+#' # Create model using all mutations
+#' model <- createTargetingModel(db)
+#'
+#' # Create model using only silent mutations
+#' model <- createTargetingModel(db, model="S")
+#' 
+#' @export
+createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENCE_IMGT",
+                                 germlineColumn="GERMLINE_IMGT_D_MASK",
+                                 vCallColumn="V_CALL",
+                                 multipleMutation=c("independent", "ignore"),
+                                 name="", description="", species="", citation="", date=NULL) {
+    # Evaluate argument choices
+    model <- match.arg(model)
+    multipleMutation <- match.arg(multipleMutation)
+    
+    # Make sure the columns specified exist
+    if (!(germlineColumn %in% names(db))) {
+        stop("The germline column", germlineColumn, "was not found.")
+    } 
+    if (!(sequenceColumn %in% names(db))) {
+        stop("The sequence column", sequenceColumn, "was not found.")
+    } 
+    if (!(vCallColumn %in% names(db))) {
+        stop("The V-segment allele call column", vCallColumn, "was not found.")
+    } 
+    
+    # Set date
+    if (is.null(date)) { date <- format(Sys.time(), "%Y-%m-%d") }
+
+    # Create models
+    sub_model <- createSubstitutionModel(db)
+    mut_model <- createMutabilityModel(db, sub_model)
+
+    # Extend 5-mers with Ns
+    sub_model <- extendSubstitutionModel(sub_model)
+    mut_model <- extendMutabilityModel(mut_model)
+    
+    # TODO: this is wrong somehow
+    tar_model <- sweep(sub_model, 2, mut_model, `*`) 
+    
+    # Define TargetingModel object
+    model_obj <- new("TargetingModel",
+                     name=name,
+                     description=description,
+                     species=species,
+                     date=date,
+                     citation=citation,
+                     substitution=sub_model,
+                     mutability=mut_model,
+                     targeting=tar_model)
+
+    return(model_obj)
+}
+
 
 #### I/O Functions ####
 
@@ -676,4 +818,35 @@ writeTargetingModel <- function(model, file) {
     to_write <- as.data.frame(model@targeting)
     to_write[is.na(to_write)] <- 0
     write.table(to_write, file, quote=FALSE, sep="\t")
+}
+
+
+#### Testing functions ####
+
+# Function to make dummy data for testing targetting functions
+# 
+# @param   nseq  number of sequences
+# @param   nmut  number of mutations per sequence
+# @param   nmer  number of 5-mers per sequence (sequence length = 5 * nmer)
+#
+# @return  a data.frame with columns SEQUENCE_ID, SEQUENCE_IMGT, GERMLINE_IMGT_D_MASK, V_CALL.
+makeTargetingTestDb <- function(nseq=10, nmut=40, nmers=50) {
+    nuc_chars <- NUCLEOTIDES[1:4]
+    
+    .mut <- function(x, n) {
+       i <- sample(1:nchar(x), n) 
+       y <- seqinr::s2c(x)
+       y[i] <- sapply(y[i], function(z) sample(nuc_chars[nuc_chars != z], 1))
+       return(seqinr::c2s(y))
+    }
+    
+    SEQUENCE_IMGT=apply(replicate(nseq, sample(seqinr::words(5, nuc_chars), nmers)), 2, paste, collapse="")
+    GERMLINE_IMGT_D_MASK=sapply(SEQUENCE_IMGT, .mut, n=nmut)
+    db <- data.frame(SEQUENCE_ID=paste0("SEQ", 1:nseq),
+                     SEQUENCE_IMGT=SEQUENCE_IMGT,
+                     GERMLINE_IMGT_D_MASK=GERMLINE_IMGT_D_MASK,
+                     V_CALL="Homsap IGHV3-66*02 F", stringsAsFactors=FALSE)
+    rownames(db) <- NULL
+    
+    return(db)
 }
