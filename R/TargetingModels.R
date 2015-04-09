@@ -738,7 +738,8 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
                                  germlineColumn="GERMLINE_IMGT_D_MASK",
                                  vCallColumn="V_CALL",
                                  multipleMutation=c("independent", "ignore"),
-                                 name="", description="", species="", citation="", date=NULL) {
+                                 modelName="", modelDescription="", modelSpecies="", 
+                                 modelCitation="", modelDate=NULL) {
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
@@ -755,7 +756,7 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
     } 
     
     # Set date
-    if (is.null(date)) { date <- format(Sys.time(), "%Y-%m-%d") }
+    if (is.null(modelDate)) { modelDate <- format(Sys.time(), "%Y-%m-%d") }
 
     # Create models
     sub_model <- createSubstitutionModel(db)
@@ -770,11 +771,11 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
     
     # Define TargetingModel object
     model_obj <- new("TargetingModel",
-                     name=name,
-                     description=description,
-                     species=species,
-                     date=date,
-                     citation=citation,
+                     name=modelName,
+                     description=modelDescription,
+                     species=modelSpecies,
+                     date=modelDate,
+                     citation=modelCitation,
                      substitution=sub_model,
                      mutability=mut_model,
                      targeting=tar_model)
