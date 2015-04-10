@@ -13,64 +13,169 @@ NULL
 
 #' Identifies clonal consensus sequences
 #'
-#' \code{addClonalSequence} identifies the consensus sequence of each clonal group and
-#' appends a column to the input data.frame containing the clonal consensus for each 
-#' sequence.
+#' \code{getClonalConsensus} identifies the consensus sequence of each clonal 
+#' group and appends a column to the input data.frame containing the clonal consensus
+#' for each sequence.
 #'
 #' @param    db              data.frame containing sequence data.
 #' @param    cloneColumn     name of the column containing clonal cluster identifiers.
-#' @param    sequenceColumn  name of the column containing IMGT-gapped sample sequences.
-#' @param    germlineColumn  name of the column containing IMGT-gapped germline sequences.
+#' @param    sequenceColumn  name of the column containing input sequences.
+#' @param    germlineColumn  name of the column containing germline sequences.
+#' @param    trimSequence    optional argument that trims the consensus sequence to 
+#'                           the specified length (speicifed in number of nucleotides). 
 #' @param    nproc           number of cores to distribute the operation over.
 #' 
 #' @return   A modified \code{db} data.frame with clonal consensus sequences in the
-#'           SEQUENCE_GAP_CLONE column.
+#'           CLONAL_CONSENSUS_SEQUENCE column.
 #'
 #' @details
-#' How does this work?
+#' For seqeunces identified to be part of the same clone. this function defines an 
+#' effective sequence that will be representative for all mutations in the clone. Each 
+#' position in this consensus (or effective) sequence is created by a weighted sampling 
+#' of each mutated base (and non "N", '.' or '-') from all the sequences in the clone. 
 #' 
-#' @references
-#' Which ones?
+#' For example, in a clone with 5 sequences that have a C at position 1, and 5 sequences
+#' with a T at this same position, the consensus sequence will have a C 50% of the time
+#' and a T 50% of the time. Thus, the results of this function can change somewhat every 
+#' time it is called.
 #' 
-#' @seealso  What uses this?
+#' NOTE: The function returns an updated ChangeODB data.frame that collpases all the 
+#' sequences by clones defined in the \code{cloneColumn} column passed as a parameter.
+#' 
+#' Non-terminal branch mutations are defined as the set of mutations that occur on 
+#' branches of the lineage tree that are not connected to a leaf. For computational 
+#' efficiency, the set of non-terminal branch mutations is approximated as those that are
+#' shared between more than one sequence in a clone. In this case the terminal branch 
+#' mutations are filtered out.
+#' 
+#' This function can be paralellized if \code{db} contains thousands of sequences. 
+#' Specify the number of cores/CPUS available using the \code{nproc} parameter.
 #' 
 #' @examples
 #' # Load example data
 #' library(alakazam)
+#' 
 #' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
 #' db <- readChangeoDb(file)
 #' 
-#' # Add SEQUENCE_GAP_CLONE column to db
-#' db_new <- addClonalSequence(db)
+#' # For every clone identify  SEQUENCE_GAP_CLONE column to db
+#' db_new <- getClonalConsensus(db)
 #' head(db_new[c(1, 15)])
 #'
 #' @export
-addClonalSequence <- function(db, cloneColumn="CLONE", sequenceColumn="SEQUENCE_GAP",
-                              germlineColumn="GERMLINE_GAP_D_MASK", nproc=1)  {
-    # Start SNOW cluster and set progress bar
-    if (nproc > 1) {
-        runAsParallel <- TRUE
-        progressBar <- "none"  
+getClonalConsensus <- function(db, 
+                               cloneColumn="CLONE", 
+                               sequenceColumn="SEQUENCE_IMGT",
+                               germlineColumn="GERMLINE_IMGT_D_MASK",
+                               trimSequence=NULL,
+                               nproc=1) {
+    
+    db[,cloneColumn] <- as.numeric(db[,cloneColumn])
+    
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, getnproc())
+    
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.
+    if (nproc > 1) {        
+        runAsParallel <- TRUE # Flag used in ddply to indicate whether to run as paralell
+        progressBar <- "none" # Flag used in ddply to indicate whether to display a progress bar
+        # Register clusters   
         cluster <- makeCluster(nproc, type="SOCK")
-        registerDoSNOW(cluster)
+        clusterExport(cluster, list('trimSequence', 'sequenceColumn', 'germlineColumn', 'cloneColumn'), envir=environment())
         clusterEvalQ(cluster, library(shm))
+        clusterEvalQ(cluster, library(seqinr))
+        registerDoSNOW(cluster)
     } else {
-        runAsParallel <- FALSE
-        progressBar <- "text"
+        # If running on single CPU, then set flags 
+        runAsParallel <- FALSE # Flag used in ddply to indicate whether to run as paralell
+        progressBar <- "text"  # Flag used in ddply to indicate whether to display a progress bar
     }
     
-    # Generate clonal consensus sequences
-    if (progressBar != "none") { cat("-> BUILDING CLONAL SEQUENCES\n") }
-    db <- ddply(db, cloneColumn, here(mutate),
-                SEQUENCE_GAP_CLONE=(collapseCloneTry(eval(parse(text=sequenceColumn)),
-                                                     eval(parse(text=germlineColumn)),
-                                                     VLENGTH))[[1]][1],
-                .progress=progressBar, .parallel=runAsParallel)
+    # Printing status to console
+    cat("Building clonal consensus sequences...\n")
+    
+    # Subset the db by clones and calling the clonalConsensus helper function
+    # which identifies the consensus seqeunce for the clone.
+    df_ClonalConsensus <- 
+        ddply(db, cloneColumn, here(summarize),
+              CLONAL_CONSENSUS_SEQUENCE=(clonalConsensus(inputSeq = eval(parse(text=sequenceColumn)),
+                                                         glSeq = eval(parse(text=germlineColumn)),
+                                                         trimSequence)),
+              .progress=progressBar, 
+              .parallel=runAsParallel)
     
     # Stop SNOW cluster
     if(nproc > 1) { stopCluster(cluster) }
     
-    return(db)
+    #db_collapsed_by_clone <- db[ match(df_ClonalConsensus$CLONE, db[,cloneColumn]), ] 
+    #db_collapsed_by_clone$CLONAL_CONSENSUS_SEQUENCE <- df_ClonalConsensus$CLONAL_CONSENSUS_SEQUENCE
+    
+    return(df_ClonalConsensus)
+}
+
+# Helper function for getClonalConsensus
+# Given 
+clonalConsensus <- function(inputSeq, glSeq, trimSequence=NULL, nonTerminalOnly=0){
+    
+    # Since this function is called using ddply, each argument will be a vector
+    # the length of the number of sequences that comprises the clone.
+    # The trimSequence and nonTerminalOnly arguments will just be repeated, so 
+    # only the first element is considered
+    #trimSequence <- trimSequence[1]
+    #nonTerminalOnly <- nonTerminalOnly[1]
+    
+    # Find length of shortest input sequence
+    # This is used to trim all the sequencesto that length
+    # or the length of , if specified, trimSequence which ever is shorter
+    len_inputSeq <- sapply(inputSeq, function(x){nchar(x)})
+    len_shortest <- min(len_inputSeq, na.rm=TRUE)
+    if(!is.null(trimSequence)){len_shortest <- min(len_shortest, trimSequence, na.rm=TRUE)}
+    
+    #Find the length of the longest germline sequence
+    len_glSeq <- sapply(glSeq, function(x){nchar(x)})
+    len_longest <- max(len_glSeq, na.rm=TRUE)
+    glSeq <- glSeq[(which(len_longest==len_glSeq))[1]]
+    
+    
+    # Identify the consensus sequence
+    # TODO: Figure out the T/F
+    charInputSeqs <- sapply(inputSeq, function(x){ s2c(x)[1:len_shortest]})
+    charGLSeq <- s2c(glSeq)
+    matClone <- sapply(1:len_shortest, function(i){
+        posNucs = unique(charInputSeqs[i,])
+        posGL = charGLSeq[i]
+        error = FALSE
+        if(posGL=="-" & sum(!(posNucs%in%c("-","N")))==0 ){
+            return(c("-",error))
+        }
+        if(length(posNucs)==1)
+            return(c(posNucs[1],error))
+        else{
+            if("N"%in%posNucs){
+                error=TRUE
+            }
+            if(sum(!posNucs[posNucs!="N"]%in%posGL)==0){
+                return( c(posGL,error) )
+            }else{
+                #return( c(sample(posNucs[posNucs!="N"],1),error) )
+                if(nonTerminalOnly==0){
+                    return( c(sample(charInputSeqs[i,charInputSeqs[i,]!="N" & charInputSeqs[i,]!=posGL],1),error) )
+                }else{
+                    posNucs = charInputSeqs[i,charInputSeqs[i,]!="N" & charInputSeqs[i,]!=posGL]
+                    posNucsTable = table(posNucs)
+                    if(sum(posNucsTable>1)==0){
+                        return( c(posGL,error) )
+                    }else{
+                        return( c(sample( posNucs[posNucs%in%names(posNucsTable)[posNucsTable>1]],1),error) )
+                    }
+                }
+                
+            }
+        }
+    })
+    return( c2s(matClone[1,]) )
 }
 
 

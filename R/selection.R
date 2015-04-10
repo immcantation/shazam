@@ -496,55 +496,7 @@ collapseCloneTry <- function(vecInputSeqs,glSeq,VLENGTH,nonTerminalOnly=0){
     })
 }
 
-# Identify clonal consensus sequences
-collapseClone <- function(vecInputSeqs,glSeq,VLENGTH,nonTerminalOnly=0){
-    #print(length(vecInputSeqs))
-    vecInputSeqs = unique(vecInputSeqs)
-    if(length(vecInputSeqs)==1){
-        return( list( c(vecInputSeqs,glSeq), F) )
-    }else{
-        charInputSeqs <- sapply(vecInputSeqs, function(x){
-            s2c(x)[1:VLENGTH]
-        })
-        charGLSeq <- s2c(glSeq)
-        matClone <- sapply(1:VLENGTH, function(i){
-            posNucs = unique(charInputSeqs[i,])
-            posGL = charGLSeq[i]
-            error = FALSE
-            if(posGL=="-" & sum(!(posNucs%in%c("-","N")))==0 ){
-                return(c("-",error))
-            }
-            if(length(posNucs)==1)
-                return(c(posNucs[1],error))
-            else{
-                if("N"%in%posNucs){
-                    error=TRUE
-                }
-                if(sum(!posNucs[posNucs!="N"]%in%posGL)==0){
-                    return( c(posGL,error) )
-                }else{
-                    #return( c(sample(posNucs[posNucs!="N"],1),error) )
-                    if(nonTerminalOnly==0){
-                        return( c(sample(charInputSeqs[i,charInputSeqs[i,]!="N" & charInputSeqs[i,]!=posGL],1),error) )
-                    }else{
-                        posNucs = charInputSeqs[i,charInputSeqs[i,]!="N" & charInputSeqs[i,]!=posGL]
-                        posNucsTable = table(posNucs)
-                        if(sum(posNucsTable>1)==0){
-                            return( c(posGL,error) )
-                        }else{
-                            return( c(sample( posNucs[posNucs%in%names(posNucsTable)[posNucsTable>1]],1),error) )
-                        }
-                    }
-                    
-                }
-            }
-        })
-        
-        
-        #print(length(vecInputSeqs))
-        return(list(c(c2s(matClone[1,]),glSeq),"TRUE" %in% matClone[2,]))
-    }
-}
+
 
 # Compute the expected for each sequence-germline pair
 getExpectedIndividual <- function(matInput){
