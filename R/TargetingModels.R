@@ -4,7 +4,7 @@
 # @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
 # @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
 # @version    0.1
-# @date       2015.04.09
+# @date       2015.04.11
 
 #' @include shm.R
 NULL
@@ -74,7 +74,7 @@ NULL
 #'                         c(A, C, G, T, N), and columns define the complete 5-mer 
 #'                         of the unmutated nucleotide sequence.
 #' 
-#' @seealso  See \code{\link{createMutabilityModel}} and \code{\link{createSubstitutionModel}} 
+#' @seealso  See \code{\link{createMutabilityMatrix}} and \code{\link{createSubstitutionMatrix}} 
 #'           for building models from sequencing data.
 #'           
 #' @name TargetingModel
@@ -101,7 +101,7 @@ setClass("TargetingModel",
 
 #' Builds a substitution model
 #'
-#' \code{createSubstitutionModel} builds a 5-mer nucleotide substitution model by counting 
+#' \code{createSubstitutionMatrix} builds a 5-mer nucleotide substitution model by counting 
 #' the number of substitution mutations occuring in the center position for all 5-mer 
 #' motifs.
 #'
@@ -130,22 +130,22 @@ setClass("TargetingModel",
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #'
-#' @seealso  See \code{\link{createMutabilityModel}} for building a mutability model.
+#' @seealso  See \code{\link{createMutabilityMatrix}} for building a mutability model.
 #' 
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
-#' sub <- createSubstitutionModel(db)
+#' sub <- createSubstitutionMatrix(db)
 #' 
 #' # Create model using only silent mutations
-#' sub <- createSubstitutionModel(db, model="S")
+#' sub <- createSubstitutionMatrix(db, model="S")
 #' 
 #' @export
-createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENCE_IMGT",
+createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENCE_IMGT",
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     vCallColumn="V_CALL",
                                     multipleMutation=c("independent", "ignore"))  {
@@ -347,18 +347,20 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
     
     substitutionModel <- sapply(seqinr::words(5, nuc_chars), function(x) { .simplifivemer(M, x) })
     substitutionModel <- apply(substitutionModel, 2, function(x) { x/sum(x, na.rm=TRUE) })
+    substitutionModel[!is.finite(substitutionModel)] <- NA
+    
     return(substitutionModel)
 }
 
 
 #' Builds a mutability model
 #'
-#' \code{createMutabilityModel} builds a 5-mer nucleotide mutability model by counting 
+#' \code{createMutabilityMatrix} builds a 5-mer nucleotide mutability model by counting 
 #' the number of mutations occuring in the center position for all 5-mer motifs.
 #'
 #' @param    db                 data.frame containing sequence data.
 #' @param    substitutionModel  matrix of 5-mer substitution rates built by 
-#'                              \code{\link{createSubstitutionModel}}.
+#'                              \code{\link{createSubstitutionMatrix}}.
 #' @param    model              type of model to create. The default model, "RS", creates 
 #'                              a model by counting both replacement and silent mutations.
 #'                              The "S" specification builds a model by counting only 
@@ -383,29 +385,34 @@ createSubstitutionModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQU
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
-#' @seealso  See \code{\link{createSubstitutionModel}} for building the substitution model.
+#' @family   targeting model functions
 #' 
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
-#' sub <- createSubstitutionModel(db)
-#' mut <- createMutabilityModel(db, sub)
+#' sub_model <- createSubstitutionMatrix(db)
+#' mut_model <- createMutabilityMatrix(db, sub_model)
 #'
 #' # Create model using only silent mutations
-#' sub <- createSubstitutionModel(db, model="S")
-#' mut <- createMutabilityModel(db, sub, model="S")
+#' sub_model <- createSubstitutionMatrix(db, model="S")
+#' mut_model <- createMutabilityMatrix(db, sub_model, model="S")
 #' 
 #' @export
-createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
+createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                                   sequenceColumn="SEQUENCE_IMGT", 
                                   germlineColumn="GERMLINE_IMGT_D_MASK",
                                   vCallColumn="V_CALL",
                                   multipleMutation=c("independent", "ignore")) {
-    # model="RS"; sequenceColumn="SEQUENCE_IMGT"; germlineColumn="GERMLINE_IMGT_D_MASK"; vCallColumn="V_CALL"; multipleMutation="independent"
+    # model="RS"
+    # sequenceColumn="SEQUENCE_IMGT"
+    # germlineColumn="GERMLINE_IMGT_D_MASK"
+    # vCallColumn="V_CALL"
+    # multipleMutation="independent"
+    
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
@@ -426,10 +433,9 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
     mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
                                        germlineColumn=germlineColumn)
     
-    #substitutionModel <- apply(substitutionModel,2,function(x)x/sum(x))
+    # Do something
     template <- rep(0, 1024)
     names(template) <- seqinr::words(5, nuc_chars)
-    
     COUNT <- list()
     for(index in 1:length(mutations)){
         COUNT[[index]] <- template
@@ -466,7 +472,8 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
     #cat("Progress: 0%      50%     100%\n")
     #cat("          ")
     #pb <- txtProgressBar(min=1, max=length(mutations), width=20)
-    
+
+    # Do something else
     BG_COUNT <- list()
     for (index in 1:length(mutations)){
         #setTxtProgressBar(pb, index)
@@ -549,11 +556,11 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
 
 #' Extends a substitution model to include Ns.
 #' 
-#' \code{extendSubstitutionModel} extends a 5-mer nucleotide substitution model 
+#' \code{extendSubstitutionMatrix} extends a 5-mer nucleotide substitution model 
 #' with 5-mers that include Ns by averaging over all corresponding 5-mers without Ns.
 #'
 #' @param    substitutionModel  matrix of 5-mers substitution counts built by 
-#'                              \code{\link{createSubstitutionModel}}.
+#'                              \code{\link{createSubstitutionMatrix}}.
 #' 
 #' @return   A 5x3125 matrix of normalized substitution rate for each 5-mer motif with 
 #'           rows names defining the center nucleotide, one of \code{c("A", "C", "G", "T", "N")}, 
@@ -567,21 +574,20 @@ createMutabilityModel <- function(db, substitutionModel, model=c("RS", "S"),
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
-#' @seealso  See \code{\link{createSubstitutionModel}} for building the substitution model.
-#'           See \code{\link{extendMutabilityModel}} for extending a mutability model.
+#' @family   targeting model functions
 #' 
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
-#' sub <- createSubstitutionModel(db)
-#' sub <- extendSubstitutionModel(sub)
+#' sub_model <- createSubstitutionMatrix(db)
+#' ext_model <- extendSubstitutionMatrix(sub_model)
 #' 
 #' @export
-extendSubstitutionModel <- function(substitutionModel) {
+extendSubstitutionMatrix <- function(substitutionModel) {
     # Define old and new column/row names
     input_names <- colnames(substitutionModel)
     nuc_chars <- NUCLEOTIDES[1:5]
@@ -610,7 +616,10 @@ extendSubstitutionModel <- function(substitutionModel) {
     }
     
     # Normalize
-    extend_mat <- extend_mat / sum(extend_mat, na.rm=TRUE)
+    extend_mat <- apply(extend_mat, 2, function(x) { x/sum(x, na.rm=TRUE) })
+    extend_mat[!is.finite(extend_mat)] <- NA
+    
+    #extend_mat <- extend_mat / sum(extend_mat, na.rm=TRUE)
     
     return (extend_mat)
 }
@@ -618,11 +627,11 @@ extendSubstitutionModel <- function(substitutionModel) {
 
 #' Extends a mutability model to include Ns.
 #' 
-#' \code{extendMutabilityModel} extends a 5-mer nucleotide mutability model 
+#' \code{extendMutabilityMatrix} extends a 5-mer nucleotide mutability model 
 #' with 5-mers that include Ns by averaging over all corresponding 5-mers without Ns.
 #'
 #' @param    mutabilityModel  vector of 5-mer mutability rates built by 
-#'                            \code{\link{createMutabilityModel}}.
+#'                            \code{\link{createMutabilityMatrix}}.
 #' 
 #' @return   A 3125 vector of normalized mutability rates for each 5-mer motif with 
 #'           names defining the 5-mer nucleotide sequence.
@@ -635,24 +644,23 @@ extendSubstitutionModel <- function(substitutionModel) {
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
-#' @seealso  See \code{\link{createMutabilityModel}} for building the mutability model.
-#'           See \code{\link{extendSubstitutionModel}} for extending a substitution model.
+#' @family   targeting model functions
 #' 
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
-#' sub <- createSubstitutionModel(db)
-#' mut <- createMutabilityModel(db, sub)
-#' mut <- extendMutabilityModel(mut)
+#' sub_model <- createSubstitutionMatrix(db)
+#' mut_model <- createMutabilityMatrix(db, sub_model)
+#' ext_model <- extendMutabilityMatrix(mut_model)
 #' 
 #' @export
-extendMutabilityModel <- function(mutabilityModel) {
+extendMutabilityMatrix <- function(mutabilityModel) {
     # Define old and new column/row names
-    input_names <- colnames(mutabilityModel)
+    input_names <- names(mutabilityModel)
     nuc_chars <- NUCLEOTIDES[1:5]
     nuc_5mers <- seqinr::words(5, alphabet=nuc_chars)
     
@@ -679,11 +687,68 @@ extendMutabilityModel <- function(mutabilityModel) {
     }
     
     # Normalize    
-    extend_mat <- (extend_mat / sum(extend_mat, na.rm=TRUE)) * sum(!is.na(extend_mat))
+    extend_mat <- extend_mat / sum(extend_mat, na.rm=TRUE)
+    extend_mat[!is.finite(extend_mat)] <- NA
     
     return(extend_mat)
 }
  
+
+#' Calculates a targeting rate matrix
+#' 
+#' \code{createTargetingMatrix} calculates the targeting model matrix as the
+#' combined probability of mutability and substitution.
+#'
+#' @param    substitutionModel  matrix of 5-mers substitution rates built by 
+#'                              \code{\link{createSubstitutionMatrix}} or 
+#'                              \code{\link{extendSubstitutionMatrix}}.
+#' @param    mutabilityModel    vector of 5-mers mutability rates built by 
+#'                              \code{\link{createMutabilityMatrix}} or 
+#'                              \code{\link{extendMutabilityMatrix}}.
+#' 
+#' @return   A matrix with the same dimensions as the input \code{substitutionModel} 
+#'           containing normalized targeting probabilities for each 5-mer motif with 
+#'           rows names defining the center nucleotide and column names defining the 
+#'           5-mer nucleotide sequence.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
+#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
+#'            data. 
+#'            Front Immunol. 2013 4(November):358.
+#'  }
+#' 
+#' @family   targeting model functions
+#' 
+#' @examples
+#' # Load example data
+#' library(alakazam)
+#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' db <- readChangeoDb(file)
+#' 
+#' # Create 4x1024 model using all mutations
+#' sub_model <- createSubstitutionMatrix(db)
+#' mut_model <- createMutabilityMatrix(db, sub_model)
+#' tar_model <- createTargetingMatrix(sub_model, mut_model)
+#' 
+#' # Create 5x3125 model including Ns
+#' sub_model <- extendSubstitutionMatrix(sub_model)
+#' mut_model <- extendMutabilityMatrix(mut_model)
+#' tar_model <- createTargetingMatrix(sub_model, mut_model)
+#' 
+#' @export
+createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
+    # TODO: this is wrong somehow
+    tar_mat <- sweep(substitutionModel, 2, mutabilityModel, `*`)
+    
+    # Normalize    
+    tar_mat <- tar_mat / sum(tar_mat, na.rm=TRUE)
+    tar_mat[!is.finite(tar_mat)] <- NA
+    
+    return(tar_mat)
+}
+
 
 #' Creates a TargetingModel
 #' 
@@ -702,14 +767,14 @@ extendMutabilityModel <- function(mutabilityModel) {
 #'                              mutations within the same 5-mer are counted indepedently. 
 #'                              If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                              excluded from the total mutation tally.
-#' @param    name               name of the model.
-#' @param    description        description of the model and its source data.
-#' @param    species            genus and species of the source sequencing data.
-#' @param    date               date the model was built. If \code{NULL} the current date
+#' @param    modelName          name of the model.
+#' @param    modelDescription   description of the model and its source data.
+#' @param    modelSpecies       genus and species of the source sequencing data.
+#' @param    modelDate          date the model was built. If \code{NULL} the current date
 #'                              will be used.
-#' @param    citation           publication source.
+#' @param    modelCitation      publication source.
 #' 
-#' @return   A \code{TargetingModel} object.
+#' @return   A \code{\link{TargetingModel}} object.
 #' 
 #' @references
 #' \enumerate{
@@ -720,11 +785,12 @@ extendMutabilityModel <- function(mutabilityModel) {
 #'  }
 #' 
 #' @seealso  See \code{\link{TargetingModel}} for the return object.
+#' @family   targeting model functions
 #' 
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
@@ -759,15 +825,15 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
     if (is.null(modelDate)) { modelDate <- format(Sys.time(), "%Y-%m-%d") }
 
     # Create models
-    sub_model <- createSubstitutionModel(db)
-    mut_model <- createMutabilityModel(db, sub_model)
+    sub_model <- createSubstitutionMatrix(db)
+    mut_model <- createMutabilityMatrix(db, sub_model)
 
     # Extend 5-mers with Ns
-    sub_model <- extendSubstitutionModel(sub_model)
-    mut_model <- extendMutabilityModel(mut_model)
+    sub_model <- extendSubstitutionMatrix(sub_model)
+    mut_model <- extendMutabilityMatrix(mut_model)
     
     # TODO: this is wrong somehow
-    tar_model <- sweep(sub_model, 2, mut_model, `*`) 
+    tar_model <- createTargetingMatrix(sub_model, mut_model) 
     
     # Define TargetingModel object
     model_obj <- new("TargetingModel",
@@ -784,12 +850,101 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 }
 
 
+#' Calculates a 5-mer distance matrix from a TargetingModel object
+#' 
+#' \code{getTargetingDistance} renormalizes the targeting probabilities
+#' in a TargetingModel model and returns a distance matrix.
+#' 
+#' @param    model     \code{\link{TargetingModel}} object with 
+#'                     mutation likelihood information.
+#'                                                
+#' @return   A matrix of distances for each 5-mer motif with rows names defining 
+#'           the center nucleotide and column names defining the 5-mer nucleotide 
+#'           sequence.
+#'           
+#' @details
+#' The targeting distance is defined as the targeting probability of a given base change 
+#' from each 5-mer (columns) to each center nucleotide (rows), re-centered such that the
+#' mean distance for any base change is 0.25.
+#'    
+#' @seealso  Takes as input a \code{\link{TargetingModel}} object.
+#' @family   targeting model functions
+#' 
+#' @examples
+#' # Load example data
+#' library(alakazam)
+#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' db <- readChangeoDb(file)
+#' 
+#' # Create model and get targeting distance
+#' model <- createTargetingModel(db)
+#' dist <- getTargetingDistance(model)
+#' 
+#' @export
+getTargetingDistance <- function(model) {
+    if (is(model, "TargetingModel")) {
+        model <- model@targeting
+    } else if (!is(model, "matrix")) {
+        stop("Input must be either a targeting matrix or TargetingModel object.")
+    }
+    
+    # TODO:  recentering on 1 instead of 0.25 might be better.
+    # TODO:  also is this the right normalization strategy (non-NA values)
+    # Renormalize
+    dist <- model / sum(model, na.rm=TRUE) * sum(!is.na(model))
+    dist[!is.finite(dist)] <- NA
+    
+    return(dist)
+}
+
+
+#' Rescales mutability probabilities from a TargetingModel
+#' 
+#' \code{getRescaledMutability} renormalizes the mutability probabilities
+#' in a TargetingModel model and returns a rescaled matrix of mutability scores.
+#' 
+#' @param    model     \code{\link{TargetingModel}} object with 
+#'                     mutation likelihood information.
+#' @param    mean      the mean value for the rescaled mutability scores.
+#'                                                
+#' @return   A named vector of mutability scores for each 5-mer motif with mean
+#'           equal to \code{mean}.
+#'           
+#' @seealso  Takes as input a \code{\link{TargetingModel}} object.
+#' @family   targeting model functions
+#' 
+#' @examples
+#' # Load example data
+#' library(alakazam)
+#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' db <- readChangeoDb(file)
+#' 
+#' # Create model and get targeting distance
+#' model <- createTargetingModel(db)
+#' mut <- getRescaledMutability(model)
+#' 
+#' @export
+getRescaledMutability <- function(model, mean=1.0) {
+    if (is(model, "TargetingModel")) {
+        model <- model@mutability
+    } else if (!is(model, "vector")) {
+        stop("Input must be either a mutability vector or TargetingModel object.")
+    }
+    
+    # Renormalize
+    rescaled <- model / sum(model, na.rm=T) * sum(!is.na(model)) * mean
+    rescaled[!is.finite(rescaled)] <- NA
+    
+    return(rescaled)
+}
+
+
 #### I/O Functions ####
 
-#' Write targeting model to tab-delimited file
+#' Write targeting model distances to a file
 #' 
-#' \code{writeTargetingModel} writes a five-mer targeting model matrix 
-#' of \eqn{mutability * substitution} to a tab-delimited file.
+#' \code{writeTargetingDistance} writes a 5-mer targeting distance matrix 
+#' to a tab-delimited file.
 #' 
 #' @param    model     \code{\link{TargetingModel}} object with 
 #'                     mutation likelihood information.
@@ -798,15 +953,16 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #' @return   NULL
 #'           
 #' @details
-#' \code{writeTargetingModel} takes as input a \code{\link{TargetingModel}} object and
-#' writes the \code{targeting} slot, which is the probability of a given mutation 
-#' ocurring, defined as \eqn{mutability * substitution}. The targeting model is stored as 
+#' Takes as input a \code{\link{TargetingModel}} object and writes the re-centered 
+#' \code{targeting} slot, which is the probability of a given mutation ocurring, 
+#' defined as \eqn{mutability * substitution}. The targeting distance is stored as 
 #' a 5x3125 matrix of rates. Rows define the mutated nucleotide at the center of each 5-mer, 
-#' one of c(A, C, G, T, N), and columns define the complete 5-mer of the unmutated nucleotide 
-#' sequence. It then replaces NAs in this matrix with 0 and writes to a tab-delimited file 
-#' with column and row names.
+#' one of \code{c("A", "C", "G", "T", "N")}, and columns define the complete 5-mer of the 
+#' unmutated nucleotide sequence. \code{NA} values in the distance matrix are replaced with 
+#' distance 0. This writes to a tab-delimited file with column and row names.
 #'    
 #' @seealso  Takes as input a \code{\link{TargetingModel}} object.
+#' @family   targeting model functions
 #' 
 #' @examples
 #' \dontrun{
@@ -815,8 +971,8 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #' }
 #' 
 #' @export
-writeTargetingModel <- function(model, file) {
-    to_write <- as.data.frame(model@targeting)
+writeTargetingDistance <- function(model, file) {
+    to_write <- as.data.frame(getTargetingDistance(model))
     to_write[is.na(to_write)] <- 0
     write.table(to_write, file, quote=FALSE, sep="\t")
 }
@@ -832,7 +988,7 @@ writeTargetingModel <- function(model, file) {
 #
 # @return  a data.frame with columns SEQUENCE_ID, SEQUENCE_IMGT, GERMLINE_IMGT_D_MASK, V_CALL.
 makeTargetingTestDb <- function(nseq=10, nmut=40, nmers=50) {
-    nuc_chars <- NUCLEOTIDES[1:4]
+    nuc_chars <- c("A", "C", "G", "T")
     
     .mut <- function(x, n) {
        i <- sample(1:nchar(x), n) 
@@ -841,11 +997,11 @@ makeTargetingTestDb <- function(nseq=10, nmut=40, nmers=50) {
        return(seqinr::c2s(y))
     }
     
-    SEQUENCE_IMGT=apply(replicate(nseq, sample(seqinr::words(5, nuc_chars), nmers)), 2, paste, collapse="")
-    GERMLINE_IMGT_D_MASK=sapply(SEQUENCE_IMGT, .mut, n=nmut)
+    seq <- apply(replicate(nseq, sample(seqinr::words(5, nuc_chars), nmers)), 2, paste, collapse="")
+    germ <- sapply(seq, .mut, n=nmut)
     db <- data.frame(SEQUENCE_ID=paste0("SEQ", 1:nseq),
-                     SEQUENCE_IMGT=SEQUENCE_IMGT,
-                     GERMLINE_IMGT_D_MASK=GERMLINE_IMGT_D_MASK,
+                     SEQUENCE_IMGT=seq,
+                     GERMLINE_IMGT_D_MASK=germ,
                      V_CALL="Homsap IGHV3-66*02 F", stringsAsFactors=FALSE)
     rownames(db) <- NULL
     
