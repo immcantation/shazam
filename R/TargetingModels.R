@@ -739,7 +739,7 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' 
 #' @export
 createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
-    # TODO: this is wrong somehow
+    # Calculate targeting
     tar_mat <- sweep(substitutionModel, 2, mutabilityModel, `*`)
     
     # Normalize    
@@ -975,6 +975,165 @@ writeTargetingDistance <- function(model, file) {
     to_write <- as.data.frame(getTargetingDistance(model))
     to_write[is.na(to_write)] <- 0
     write.table(to_write, file, quote=FALSE, sep="\t")
+}
+
+
+#### Plotting functions ####
+
+#' Plot mutability probabilities
+#' 
+#' \code{plotMutability} creates a hedgehog plot of the mutability rates.
+#' 
+#' @param    model        \code{\link{TargetingModel}} object or mutability matrix
+#'                        with mutability probabilities.
+#' @param    nucleotides  vector of center nucleotide characters to plot mutability for.
+#'                                                
+#' @return   NULL
+#'    
+#' @seealso  Takes as input a \code{\link{TargetingModel}} object.
+#' @family   targeting model functions
+#' 
+#' @examples
+#' # Plot all nucleotides
+#' plotMutability(HS5FModel)
+#' 
+#' # Plot one nucleotide
+#' plotMutability(HS5FModel, "C")
+#' 
+#' @export
+plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
+    # Check input
+    if (is(model, "TargetingModel")) {
+        model <- model@mutability
+    } else if (!is(model, "vector")) {
+        stop("Input must be either a mutability vector or TargetingModel object.")
+    }
+    nucleotides <- toupper(nucleotides)
+
+    # Set base plot settings
+    base_theme <- theme_bw() +
+        theme(panel.border=element_blank(), 
+              axis.text=element_blank(), 
+              axis.ticks=element_blank(),
+              legend.position="bottom")
+        
+    # Set guide colors
+    motif_colors <- setNames(c("#33a02c", "#e31a1c", "#6a3d9a", "#999999"),
+                             c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
+    dna_colors <- setNames(c("#b2df8a", "#fdbf6f", "#fb9a99", "#a6cee3", "#aaaaaa"),
+                           c("A", "C", "G", "T", "N"))    
+    #motif_colors <- setNames(c("#4daf4a", "#e41a1c", "#377eb8", "#999999"),
+    #                         c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
+    #dna_colors <- setNames(c("#ccebc5", "#fed9a6", "#fbb4ae", "#b3cde3"),
+    #                       c("A", "C", "G", "T"))
+    
+    # Build data.frame of mutability scores
+    mut_scores <- model[!grepl("N", names(model))]
+    mut_scores <- getRescaledMutability(mut_scores)
+    mut_scores[!is.finite(mut_scores)] <- 0
+    mut_words <- names(mut_scores)
+    mut_positions <- as.data.frame(t(sapply(mut_words, s2c)))
+    colnames(mut_positions) <- paste0("pos", 1:ncol(mut_positions))
+    mut_df <- data.frame(word=mut_words, 
+                         score=mut_scores, 
+                         mut_positions)
+    
+    # Add hot and cold-spot motif information
+    mut_df$motif <- "Neutral"
+    mut_df$motif[grepl("(.[AT]A..)|(..T[AT].)", mut_df$word, perl=TRUE)] <- "WA/TW"
+    mut_df$motif[grepl("([AT][GA]C..)|(..G[CT][AT])", mut_df$word, perl=TRUE)] <- "WRC/GYW"
+    mut_df$motif[grepl("([CG][CT]C..)|(..G[GA][CG])", mut_df$word, perl=TRUE)] <- "SYC/GRS"
+    mut_df$motif <- factor(mut_df$motif, levels=c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
+
+    # Build plots for each center nucleotide
+    plot_list <- list()
+    for (center_nuc in nucleotides) {
+        # Subset data to center nucleotide
+        sub_df <- subset(mut_df, pos3 == center_nuc)
+        sub_df$x <- 1:nrow(sub_df)
+        
+        # Melt 5-mer position data
+        sub_melt <- reshape2::melt(sub_df, id.vars=c("x"), 
+                                 measure.vars=colnames(mut_positions),
+                                 variable.name="pos",
+                                 value.name="char")
+        sub_melt$pos <- factor(sub_melt$pos, levels=colnames(mut_positions))
+        sub_melt$pos <- as.numeric(sub_melt$pos)
+        
+        # Define text position data
+        sub_text <- list()
+        for (i in 1:5) {
+            tmp_rle <- rle(sub_melt$char[sub_melt$pos == i])
+            tmp_sum <- cumsum(tmp_rle$lengths)
+            tmp_pos <- tmp_sum - diff(c(0, tmp_sum))/2
+            if (length(tmp_pos) == 1) { tmp_pos = 1/2 }
+            
+            tmp_df <- data.frame(text_x=tmp_pos, 
+                                  text_y=i,
+                                  text_label=tmp_rle$values)
+            
+            sub_text[[i]] <- tmp_df
+        }
+        
+        # Plot mutability for center nucleotide
+        p1 <- ggplot(sub_df, aes(x=x)) + 
+            base_theme + 
+            ggtitle(paste0("NN", center_nuc, "NN")) +
+            xlab("") +
+            ylab("") + 
+            coord_polar(theta="x") +
+            scale_color_manual(name="Motif", values=motif_colors) +
+            scale_fill_manual(name="Nucleotide", values=dna_colors, guide=FALSE) +
+            geom_segment(data=sub_df, mapping=aes(x=x, xend=x, y=5, yend=5 + score * 2, color=motif), 
+                         size=2) +
+            geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=5, fill="white") +
+            geom_tile(data=sub_melt, mapping=aes(x=x, y=pos, fill=char)) +
+            geom_text(data=sub_text[[1]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+                      color="black", hjust=0.5, vjust=0.5, size=3) +
+            geom_text(data=sub_text[[2]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+                      color="black", hjust=0.5, vjust=0.5, size=3) +
+            geom_text(data=sub_text[[3]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+                      color="black", hjust=0.5, vjust=0.5, size=4) +
+            geom_text(data=sub_text[[4]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+                      color="black", hjust=0.5, vjust=0.5, size=2.5)
+        
+        # Add plot to list
+        plot_list[[center_nuc]] <- p1
+    }
+    
+    # Plot
+    if (length(plot_list) == 1) {
+        plot(plot_list[[1]])
+    } else {
+        do.call(multiggplot, args=c(plot_list, ncol=4))
+    }
+}
+
+
+# TODO:  put this in alakazam and export it
+# Plot multiple ggplot objects
+# 
+# @param   ...    ggplot objects to plot
+# @param   ncol   number of columns in the plot 
+# @return  NULL
+# 
+# @references  http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)
+multiggplot <- function(..., ncol=1) {
+    p <- list(...)
+    n <- length(p)
+    layout <- matrix(seq(1, ncol*ceiling(n/ncol)), ncol=ncol, nrow=ceiling(n/ncol))
+    
+    # Plot
+    if (n == 1) {
+        plot(p[[1]])
+    } else {
+        grid::grid.newpage()
+        grid::pushViewport(grid::viewport(layout=grid::grid.layout(nrow(layout), ncol(layout))))
+        for (i in 1:n) {
+            idx <- as.data.frame(which(layout == i, arr.ind=T))
+            plot(p[[i]], vp=grid::viewport(layout.pos.row = idx$row, layout.pos.col=idx$col))
+        }
+    }
 }
 
 
