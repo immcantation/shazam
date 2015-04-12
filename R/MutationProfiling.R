@@ -313,8 +313,9 @@ getObservedMutations <- function(db,
     
     observed_mutations[is.na(observed_mutations)] <- 0
     colnames(observed_mutations) <- paste0("OBSERVED_", colnames(observed_mutations))
+    
     # Properly shutting down the cluster
-    stopCluster(cluster)
+    if(nproc>1){ stopCluster(cluster) }
     
     # Bind the observed mutations to db
     db_new <- cbind(db, observed_mutations)

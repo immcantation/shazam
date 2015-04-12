@@ -2288,11 +2288,11 @@ collapseMatrixToVector <- function(mat, byrow = FALSE){
     # Collapse the matrix to a vector
     if (byrow) {
         collapsed_mat <- c(t(mat))
-        names(collapsed_mat) <- c(t(nmat))
+        names(collapsed_mat) <- c(t(cobminedNames))
     }
-    else {
+    else{
         collapsed_mat <- c(mat)
-        names(collapsed_mat) <- c(nmat)
+        names(collapsed_mat) <- c(cobminedNames)
     }
     return(collapsed_mat)
 }
