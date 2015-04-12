@@ -282,9 +282,9 @@ getObservedMutations <- function(db,
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
         cluster <- makeCluster(nproc, type = "SOCK")
-        registerDoSNOW(cluster)
-        clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition')  )
+        clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition'), envir=environment() )
         clusterEvalQ( cluster, library("shm") )
+        registerDoSNOW(cluster)
     }else{
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
@@ -396,13 +396,13 @@ countMutations <- function(inputSeq,
     # If the sequence and germline (which now should be the same length) is shorter
     # than the length_regionDefinition, pad it with Ns
     if(len_shortest<length_regionDefinition){
-        fillWithNs <- array("N",region_length-len_shortest)
+        fillWithNs <- array("N",length_regionDefinition-len_shortest)
         c_inputSeq <- c( c_inputSeq, fillWithNs)
         c_glSeq <- c( c_glSeq, fillWithNs)
     }
     
     mutations_array <- NA
-    mutations = c_glSeq != c_inputSeq
+    mutations = (c_glSeq != c_inputSeq) & (c_glSeq%in%NUCLEOTIDES[1:5]) & (c_inputSeq%in%NUCLEOTIDES[1:5])
     if(sum(mutations)>0){
         # The nucleotide positions of the mutations
         mutations_pos <- which(mutations==TRUE)
