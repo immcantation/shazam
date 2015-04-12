@@ -1,9 +1,9 @@
 CODON_TABLE <- as.data.frame(matrix(NA,ncol=64,nrow=12))
 
 intCounter = 1
-for(pOne in NUCLEOTIDES){
-  for(pTwo in NUCLEOTIDES){
-    for(pThree in NUCLEOTIDES){
+for(pOne in NUCLEOTIDES[1:4]){
+  for(pTwo in NUCLEOTIDES[1:4]){
+    for(pThree in NUCLEOTIDES[1:4]){
       codon = paste(pOne,pTwo,pThree,sep="")
       colnames(CODON_TABLE)[intCounter] =  codon
       intCounter = intCounter + 1

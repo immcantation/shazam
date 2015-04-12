@@ -1,3 +1,10 @@
+# IMGT_V_NO_CDR3 <- factor( c( rep("FWR", 78), rep("CDR", 36),  rep("FWR", 51), rep("CDR", 30), rep("FWR", 117) ),
+#                             levels = c("FWR", "CDR")
+#                         )
+#                     
+# save(IMGT_V_NO_CDR3, file="data/IMGT_V_NO_CDR3.RData")
+
+
 region <- "1:26:38:55:65:104:-"
 region <- as.numeric(strsplit(region,":")[[1]])
 # FWR/CDR boundaries
@@ -43,3 +50,4 @@ CDR_Codon <- as.logical(CDR_Codon)
 
 save(FWR_Nuc_Mat,file="data/FWR_Nuc_Mat.RData")
 save(CDR_Nuc_Mat,file="data/CDR_Nuc_Mat.RData")
+

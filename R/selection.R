@@ -448,14 +448,19 @@ getCodonNucs <- function(codonNumb){
     getCodonPos(codonNumb*3)
 }
 
+# Given a nucleotide postions return the position in the codon
+getContextInCodon <- function(nucPos){
+    return( {nucPos-1}%%3+1 )
+}
+
 computeCodonTable <- function(testID=1){
     
     #if(testID<=5){
     # Pre-compute every codons
     intCounter = 1
-    for(pOne in NUCLEOTIDES){
-        for(pTwo in NUCLEOTIDES){
-            for(pThree in NUCLEOTIDES){
+    for(pOne in NUCLEOTIDES[1:4]){
+        for(pTwo in NUCLEOTIDES[1:4]){
+            for(pThree in NUCLEOTIDES[1:4]){
                 codon = paste(pOne,pTwo,pThree,sep="")
                 colnames(CODON_TABLE)[intCounter] =  codon
                 intCounter = intCounter + 1
@@ -616,9 +621,9 @@ mutationTypeOptimized <- function( matOfCodons ){
 permutateAllCodon <- function(codon){
     cCodon = s2c(codon)
     matCodons = t(array(cCodon,dim=c(3,12)))
-    matCodons[1:4,1] = NUCLEOTIDES
-    matCodons[5:8,2] = NUCLEOTIDES
-    matCodons[9:12,3] = NUCLEOTIDES
+    matCodons[1:4,1] = NUCLEOTIDES[1:4]
+    matCodons[5:8,2] = NUCLEOTIDES[1:4]
+    matCodons[9:12,3] = NUCLEOTIDES[1:4]
     apply(matCodons,1,c2s)
 }
 
@@ -2186,32 +2191,6 @@ getObservedMutationsByCodon <- function(listMutations){
     return( list( "Observed_R"=obsMu_R, "Observed_S"=obsMu_S) )
 }
 
-NUCLEOTIDES = c("A","C","G","T", "N")
-
-
-# Determines the OS plotform being used
-#
-# @return  The OS platform
-# @examples
-# getPlatform()
-getPlatform <-function(){
-    return(.Platform$OS.typ)
-}
-
-#' Determines the (maximum) numbers of cores/cpus availalbe
-#'
-#' @return  The number of cores/cpus available. Returns 1 if undeterminable.
-#' @examples
-#' getnproc()
-#' @export
-getnproc <-function(){
-    platform <- getPlatform()
-    nproc <- 1
-    if(platform=="windows") nproc <- Sys.getenv('NUMBER_OF_PROCESSORS')
-    if(platform=="unix") nproc <- system("nproc", intern=TRUE)
-    return(as.numeric(nproc))
-}
-
 
 # Make a progress bar when using %dopar% with a parallel backend
 # Adapated from http://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r
@@ -2244,9 +2223,40 @@ slidingArrayOf5mers <- function(strSequence){
 }
 
 
+#' Determines the OS plotform being used
+#'
+#' @return  The OS platform
+#' 
+#' @examples
+#' getPlatform()
+#' 
+#' @export
+getPlatform <-function(){
+    return(.Platform$OS.typ)
+}
 
+#' Determines the (maximum) numbers of cores/cpus availalbe
+#'
+#' @return  The number of cores/cpus available. Returns 1 if undeterminable.
+#' 
+#' @examples
+#' getnproc()
+#' 
+#' @export
+getnproc <-function(){
+    platform <- getPlatform()
+    nproc <- 1
+    if(platform=="windows") nproc <- Sys.getenv('NUMBER_OF_PROCESSORS')
+    if(platform=="unix") nproc <- system("nproc", intern=TRUE)
+    return(as.numeric(nproc))
+}
 
-#' Clears console in R
+#' Clears the console
+#'
+#' \code{clearConsole} clears the console.
+#' 
+#' @examples
+#' clearConsole()
 #'
 #' @export
 clearConsole <- function(){
@@ -2254,6 +2264,37 @@ clearConsole <- function(){
     nproc <- 1
     if(platform=="windows") cat("\014")
     if(platform=="unix") system('clear')
+}
+
+
+# Converts a matrix to a vector
+#
+# \code{clearConsole} clears the console.
+# 
+# @examples
+# # Generate a sampel mutations_array 
+# sample_matrix <- matrix(sample(20,4),nrow=2, dimnames=list( c("CDR","FWR"), c("R","S") ))
+# collapseMatrixToVector(sample_matrix)
+#
+collapseMatrixToVector <- function(mat, byrow = FALSE){    
+    # Get the row and column names
+    rnames <- rownames(mat)
+    cnames <- colnames(mat)
+    if (is.null(rnames)) { rnames <- paste0("Row", 1:nrow(mat)) }
+    if (is.null(cnames)) { cnames <- paste0("Column", 1:ncol(mat)) }
+    # Combine the row and columns names
+    cobminedNames <- outer(rnames, cnames, paste, sep = "_")
+    
+    # Collapse the matrix to a vector
+    if (byrow) {
+        collapsed_mat <- c(t(mat))
+        names(collapsed_mat) <- c(t(nmat))
+    }
+    else {
+        collapsed_mat <- c(mat)
+        names(collapsed_mat) <- c(nmat)
+    }
+    return(collapsed_mat)
 }
 
 

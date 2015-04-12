@@ -9,7 +9,8 @@
 #' @include shm.R
 NULL
 
-#### Consensus functions ####
+
+#### Clonal Consensus building functions ####
 
 #' Identifies clonal consensus sequences
 #'
@@ -21,8 +22,9 @@ NULL
 #' @param    cloneColumn     name of the column containing clonal cluster identifiers.
 #' @param    sequenceColumn  name of the column containing input sequences.
 #' @param    germlineColumn  name of the column containing germline sequences.
-#' @param    trimSequence    optional argument that trims the consensus sequence to 
-#'                           the specified length (speicifed in number of nucleotides). 
+#' @param    collapseByClone if TRUE, collapse the \code{db} by the \code{cloneColumn}.
+#' @param    trimSequence    optional argument to trim the consensus sequence to a 
+#'                           specified length (speicifed in number of nucleotides). 
 #' @param    nproc           number of cores to distribute the operation over.
 #' 
 #' @return   A modified \code{db} data.frame with clonal consensus sequences in the
@@ -53,20 +55,23 @@ NULL
 #' 
 #' @examples
 #' # Load example data
-#' library(alakazam)
+#' library("shm")
+#' dbPath <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
 #' 
-#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
-#' db <- readChangeoDb(file)
-#' 
-#' # For every clone identify  SEQUENCE_GAP_CLONE column to db
-#' db_new <- getClonalConsensus(db)
-#' head(db_new[c(1, 15)])
-#'
+#' # Run getClonalConsensus
+#' db_new <- getClonalConsensus(db, 
+#'                              cloneColumn="CLONE", 
+#'                              sequenceColumn="SEQUENCE_IMGT",
+#'                              germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                              collapseByClone=TRUE)
+#'                              
 #' @export
 getClonalConsensus <- function(db, 
                                cloneColumn="CLONE", 
                                sequenceColumn="SEQUENCE_IMGT",
                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                               collapseByClone=TRUE,
                                trimSequence=NULL,
                                nproc=1) {
     
@@ -98,25 +103,30 @@ getClonalConsensus <- function(db,
     
     # Subset the db by clones and calling the clonalConsensus helper function
     # which identifies the consensus seqeunce for the clone.
-    df_ClonalConsensus <- 
-        ddply(db, cloneColumn, here(summarize),
+    db_ClonalConsensus <- 
+        ddply(db, cloneColumn, here(mutate),
               CLONAL_CONSENSUS_SEQUENCE=(clonalConsensus(inputSeq = eval(parse(text=sequenceColumn)),
                                                          glSeq = eval(parse(text=germlineColumn)),
-                                                         trimSequence)),
+                                                         trimSequence = trimSequence)),
               .progress=progressBar, 
               .parallel=runAsParallel)
     
     # Stop SNOW cluster
     if(nproc > 1) { stopCluster(cluster) }
     
-    #db_collapsed_by_clone <- db[ match(df_ClonalConsensus$CLONE, db[,cloneColumn]), ] 
-    #db_collapsed_by_clone$CLONAL_CONSENSUS_SEQUENCE <- df_ClonalConsensus$CLONAL_CONSENSUS_SEQUENCE
+    # If collapseByClone is TRUE then collapse the db by clones
+    if(collapseByClone){ 
+        uniqueCloneIDs <-  unique(db_ClonalConsensus[,cloneColumn])
+        indexOfFirstOccurenceOfClone <- match(uniqueCloneIDs, db_ClonalConsensus[,cloneColumn])
+        db_ClonalConsensus <- db_ClonalConsensus[indexOfFirstOccurenceOfClone, ]
+    }
     
-    return(df_ClonalConsensus)
+    return(db_ClonalConsensus)
 }
 
+
+
 # Helper function for getClonalConsensus
-# Given 
 clonalConsensus <- function(inputSeq, glSeq, trimSequence=NULL, nonTerminalOnly=0){
     
     # Since this function is called using ddply, each argument will be a vector
@@ -179,91 +189,305 @@ clonalConsensus <- function(inputSeq, glSeq, trimSequence=NULL, nonTerminalOnly=
 }
 
 
+
 #### Mutation counting functions ####
 
 #' Calculate observed mutations
 #'
-#' \code{addObservedMutations} calculates the observed number of V-segment mutations 
-#' within the framework (FW) and complementarity determining (CD) regions of IMGT-gapped 
+#' \code{getObservedMutations} calculates the observed number of mutations for each sequence
+#' in a given input data.frame (\code{db}). The mutations are determined by comparing the 
+#' input sequences (in the column specified by \code{sequenceColumn}) to the germline 
+#' seqeunce (in the column specified by \code{germlineColumn}). The mutations are 
+#' binned or aggregated by replacement(R) or silent(S) across the different regions of the
+#' seqeunce as defined in the \code{regionDefinition}. Typically, this would be the 
+#' framework (FWR) and complementarity determining (CDR) regions of IMGT-gapped 
 #' nucleotide sequences. Mutation counts are appended to the input data.frame as 
 #' additional columns.
 #'
-#' @param    db              data.frame containing sequence data.
-#' @param    sequenceColumn  name of the column containing IMGT-gapped sample sequences.
-#' @param    germlineColumn  name of the column containing IMGT-gapped germline sequences.
-#' @param    nproc           number of cores to distribute the operation over.
+#' @param   db                  data.frame containing sequence data.
+#' @param   sequenceColumn      name of the column containing sample/input sequences.
+#' @param   germlineColumn      name of the column containing germline sequences.
+#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                              and boundaries of the Ig sequences. Note, only the part of
+#'                              sequences defined in \code{regionDefinition} are analyzed.
+#'                              Any mutations outside the definition will be ignored. E.g.
+#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
+#'                              used, then mutations in positions greater than 312 will not
+#'                              be counted.
+#' @param   nproc               number of cores to distribute the operation over.
 #' 
-#' @return   A modified \code{db} data.frame with observed mutation counts for each 
-#'           sequence listed in the following columns: 
+#' @return  A modified \code{db} data.frame with observed mutation counts for each 
+#'           sequence listed. The columns names are dynamically created based on the
+#'           regions in the \code{regionDefinition}. E.g. For the default
+#'           \code{\link{IMGT_V_NO_CDR3}} definition, which defines positions for CDR and
+#'           FWR, the following columns are added:  
 #'           \itemize{
-#'             \item  \code{OBSERVED_R_CDR}:  number of replacement mutations in CDR1 and 
+#'             \item  \code{OBSERVED_CDR_R}:  number of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{OBSERVED_S_CDR}:  number of silent mutations in CDR1 and CDR2 
+#'             \item  \code{OBSERVED_CDR_S}:  number of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{OBSERVED_R_FWR}:  number of replacement mutations in FWR1, 
+#'             \item  \code{OBSERVED_FWR_R}:  number of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{OBSERVED_S_FWR}:  number of silent mutations in FWR1, FWR2 and
+#'             \item  \code{OBSERVED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           }
 #'           
 #' @details
-#' How does this work?
+#' \code{getObservedMutations} calculates the observed number of mutations for each sequence
+#' in a given input data.frame (\code{db}). The mutations are determined by comparing the 
+#' input sequences (in the column specified by \code{sequenceColumn}) to the germline 
+#' sequence (in the column specified by \code{germlineColumn}). The mutations are 
+#' binned or aggregated by replacement(R) or silent(S) across the different regions of the
+#' seqeunce as defined in the \code{regionDefinition}. Typically, this would be the 
+#' framework (FWR) and complementarity determining (CDR) regions of IMGT-gapped 
+#' nucleotide sequences. Mutation counts are appended to the input data.frame as 
+#' additional columns.
 #' 
-#' @references
-#' Which ones?
+#' @seealso  
+#' \code{\link{countMutations}} is called by this function to get the list of
+#' mutations in each sequence.
+#' \code{\link{binMutationsByRegion}} is called by this function to aggregate the mutations
+#' by the \code{regionDefinition}.
 #' 
-#' @seealso  See \code{\link{addExpectedFrequencies}} for calculating expected mutation
+#' Also see \code{\link{addExpectedFrequencies}} for calculating expected mutation
 #'           frequencies.
 #' 
 #' @examples
 #' # Load example data
-#' library(alakazam)
-#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
-#' db <- readChangeoDb(file)
-#' 
-#' # Add observed mutations to db
-#' db_new <- addObservedMutations(db)
-#' head(db_new[c(1, 15:18)])
+#' library("shm")
+#' dbPath <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#' # Subset data for demo purposes
+#' db <- db[1:10,]
 #'
+#' #Run getObservedMutations()
+#' db_new <- getObservedMutations(db,
+#'                      sequenceColumn="SEQUENCE_IMGT",
+#'                      germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                      regionDefinition=IMGT_V_NO_CDR3,
+#'                      nproc=1)
+#'                      
 #' @export
-addObservedMutations <- function(db, sequenceColumn="SEQUENCE_GAP", 
-                                 germlineColumn="GERMLINE_GAP_D_MASK", nproc=1) {
-    numbOfSeqs <- nrow(db)
-    if(nproc == 1) {
-        pb <- txtProgressBar(min=1, max=numbOfSeqs, width=20)
-        cat("Progress: 0%      50%     100%\n")
-        cat("          ")
-        db[, c("OBSERVED_R_CDR",
-               "OBSERVED_S_CDR",
-               "OBSERVED_R_FWR",
-               "OBSERVED_S_FWR")] = t(sapply(1:nrow(db), function(x) { setTxtProgressBar(pb, x);
-                                                                       countMutations(db[x,sequenceColumn], db[x,germlineColumn]) },
-                                             simplify="array"))
-        cat("\n")
-        close(pb)
-    } else {
-        availableCores <- getnproc()
-        if(!(nproc<=availableCores))nproc=availableCores
+getObservedMutations <- function(db, 
+                                 sequenceColumn="SEQUENCE_IMGT",
+                                 germlineColumn="GERMLINE_IMGT_D_MASK",
+                                 regionDefinition=IMGT_V_NO_CDR3,
+                                 nproc=1) {
+    
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, getnproc())
+    
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.  
+    if(nproc>1){        
         cluster <- makeCluster(nproc, type = "SOCK")
         registerDoSNOW(cluster)
-        
-        obsMutations <-
-            foreach(i=icount(numbOfSeqs), .packages='shm', .combine=doparProgressBar(n=numbOfSeqs), .multicombine=TRUE) %dopar% {
-                countMutations(db[i,sequenceColumn], db[i,germlineColumn])
-            }
-        
-        stopCluster(cluster)
-        
-        # Add observed mutations to db
-        db[, c("OBSERVED_R_CDR",
-               "OBSERVED_S_CDR",
-               "OBSERVED_R_FWR",
-               "OBSERVED_S_FWR")] <- obsMutations
-        cat("\n")
+        clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition')  )
+        clusterEvalQ( cluster, library("shm") )
+    }else{
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
     }
     
-    return(db)
+    # Identify all the mutations in the sequences
+    # observedMutations helper function returns a list (1 element per sequence)
+    # containing an array of mutations (s or R) and the array labels indicate
+    # the nucleotide position of the mutations.
+    numbOfSeqs <- nrow(db)
+    observedMutations_list <-
+        foreach( i=icount(numbOfSeqs) ) %dopar% {
+            countMutations( db[i,sequenceColumn], 
+                            db[i,germlineColumn], 
+                            regionDefinition,
+                            binByRegions=TRUE)
+        }
+    
+    # Convert list of mutations to data.frame
+    labels_length <- length(regionDefinition@labels)
+    observed_mutations <- do.call(rbind, lapply(observedMutations_list, function(x){ 
+                                        length(x) <- labels_length 
+                                        return(x)
+                                    })) 
+    
+    observed_mutations[is.na(observed_mutations)] <- 0
+    colnames(observed_mutations) <- paste0("OBSERVED_", colnames(observed_mutations))
+    # Properly shutting down the cluster
+    stopCluster(cluster)
+    
+    # Bind the observed mutations to db
+    db_new <- cbind(db, observed_mutations)
+    return(db_new)    
 }
+
+
+
+#' Count the number of observed mutations in a given sequence and its germline.
+#'
+#' \code{countMutations} determines all the mutations in a given input seqeunce and its
+#'  germline seqeunce
+#'
+#' @param   inputSeq            the input sequence
+#' @param   germlineSeq         the germline sequence
+#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                              and boundaries of the Ig sequences. Note, only the part of
+#'                              sequences defined in \code{regionDefinition} are analyzed.
+#'                              Any mutations outside the definition will be ignored. E.g.
+#'                              If the \code{\link{IMGT_V_NO_CDR3}} definition is used, 
+#'                              then mutations in positions greater than 312 will not
+#'                              be counted.
+#' @param   binByRegions        if TRUE, then aggregate the mutations by the regions
+#'                              defined in \code{regionDefinition}, which also needs to be
+#'                              passed. If not, binByRegions is ignored.
+#' @return   an \code{array} of the mutations (replacement (R) or silent(S)) with the 
+#'              names indicatng the nucleotide postion of the mutations in the sequence.
+#'              Note. Each mutation is considered independently in its codon context.
+#'              If \code{binByRegions}=\code{TRUE}, then the mutations are binned by the regions
+#'              defined by \code{regionDefinition} and an \code{array} of R/S mutations
+#'              across all the unique regions is returned (See \code{\link{binMutationsByRegion}}). 
+#'           
+#' @details
+#' Counts all the mutations observed in the input sequence. 
+#' Note. Each mutation is considered independently in its codon context.
+#' 
+#' @seealso  
+#' See \code{\link{getObservedMutations}} for indentifying and counting the 
+#' numer of observed mutations.
+#' 
+#' See \code{\link{binMutationsByRegion}} for 
+#' 
+#' @examples
+#' dbPath <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#' 
+#' # Extracting the first entry in the sample db to use for input and germline seqeucnes.
+#' inputSeq <- db[1,"SEQUENCE_IMGT"]
+#' glSeq <-  db[1,"GERMLINE_IMGT_D_MASK"]
+#' 
+#' #Identify all mutations in the sequence
+#' mutations <- countMutations(inputSeq, glSeq)
+#' 
+#' #Identify only mutations the V segment minus CDR3
+#' mutations <- countMutations(inputSeq, glSeq, regionDefinition=IMGT_V_NO_CDR3)
+#'  
+#' @export
+countMutations <- function(inputSeq, 
+                           glSeq, 
+                           regionDefinition=NULL, 
+                           binByRegions=FALSE) {
+    
+    # Trim the input and germline sequence to the shortest
+    len_inputSeq <- nchar(inputSeq)
+    len_glSeq <- nchar(glSeq)
+    # If a regionDefinition is passed,
+    # then only analyze till the end of the defined length
+    if(!is.null(regionDefinition)){
+        length_regionDefinition  <- regionDefinition@seqLength
+    } else{
+        length_regionDefinition <- max(len_inputSeq, len_glSeq, na.rm=TRUE)
+    }
+    len_shortest <- min( c(len_inputSeq,len_glSeq,length_regionDefinition),  na.rm=TRUE)
+    
+    c_inputSeq = s2c(inputSeq)[1:len_shortest]
+    c_glSeq = s2c(glSeq)[1:len_shortest]
+    
+    # If the sequence and germline (which now should be the same length) is shorter
+    # than the length_regionDefinition, pad it with Ns
+    if(len_shortest<length_regionDefinition){
+        fillWithNs <- array("N",region_length-len_shortest)
+        c_inputSeq <- c( c_inputSeq, fillWithNs)
+        c_glSeq <- c( c_glSeq, fillWithNs)
+    }
+    
+    mutations_array <- NA
+    mutations = c_glSeq != c_inputSeq
+    if(sum(mutations)>0){
+        # The nucleotide positions of the mutations
+        mutations_pos <- which(mutations==TRUE)
+        # For every mutations_pos, extract the entire codon from germline
+        mutations_pos_codons <- array(sapply(mutations_pos,getCodonPos))
+        c_glSeq_codons <- c_glSeq[mutations_pos_codons]
+        # For every mutations_pos, extract the codon from germline (without other mutations 
+        # at the same codon, if any).
+        c_inputSeq_codons <- array(sapply(mutations_pos, function(x){
+            seqP = c_glSeq[getCodonPos(x)]
+            seqP[getContextInCodon(x)] = c_inputSeq[x]
+            return(seqP)}))
+        # split the string of codons into vector of codons
+        c_glSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_glSeq_codons)), " ")[[1]]
+        c_inputSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
+        
+        # Determine whether the mutations are R or S
+        mutations_array <- apply(rbind(c_glSeq_codons , c_inputSeq_codons),2,function(x){mutationType(c2s(x[1]),c2s(x[2]))})
+        names(mutations_array) = mutations_pos
+        mutations_array<- mutations_array[!is.na(mutations_array)]
+        if(length(mutations_array)==sum(is.na(mutations_array))){
+            mutations_array<-NA    
+        }else{
+            if(binByRegions & !is.null(regionDefinition)){ 
+                mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
+            }
+        }        
+    }    
+    return(mutations_array)
+}
+
+
+
+
+#' Bin (i.e. aggregate) mutations (e.g. R or S) by the defined regions (e.g. CDR or FWR)
+#'
+#' \code{binMutationsByRegion} takes an array of observed mutations (e.g. from 
+#' \code{\link{countMutations}}) and bins them by the different regions defined in the 
+#' \code{regionDefinition}.
+#'
+#' @param   mutations_array    array containing the mutations (R/S) with the names
+#'                              indicatign the nucleotide positions of the mutations.
+#'                              See \code{\link{observedMutations}} for more information.
+#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                              and boundaries of the Ig sequences. Note, only the part of
+#'                              sequences defined in \code{regionDefinition} are analyzed.
+#'                              Any mutations outside the definition will be ignored. E.g.
+#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
+#'                              used, then mutations in positions greater than 312 will not
+#'                              be counted.
+#' 
+#' @return an \code{array} of R/S mutations binned across all the unique regions, defined
+#' by \code{regionDefinition} is returned.
+#' 
+#' @seealso  
+#' See \code{\link{getObservedMutations}} for indentifying and counting the 
+#' numer of observed mutations in a \code{db}.
+#' This function is also used in \code{\link{countMutations}}.
+#' 
+#' @examples
+#' # Generate a sampel mutations_array 
+#' numbOfMutations <- sample(3:10,1) #Random (between 3-10) number of mutations
+#' posOfMutations <- sort(sample(330,numbOfMutations)) #Random positions of mutations
+#' mutationTypes <- sample( c("R","S"), length(posOfMutations), replace=TRUE)
+#' mutations_array <- array( mutationTypes, dimnames=list(posOfMutations) )
+#' binMutationsByRegion(mutations_array, regionDefinition=IMGT_V_NO_CDR3)
+#' 
+#' @export
+binMutationsByRegion <- function( mutations_array, 
+                                  regionDefinition=IMGT_V_NO_CDR3){
+    # Make a factor of R/S
+    mutatedPositions <- as.numeric(names(mutations_array))
+    mutations <- array(NA,  dim=regionDefinition@seqLength)
+    mutations[mutatedPositions] <- mutations_array
+    mutations <- mutations[1:regionDefinition@seqLength]
+    mutations <- factor(mutations,levels=c("R","S"))
+    
+    mutations_region_counts <-  
+        collapseMatrixToVector( table(regionDefinition@boundaries, mutations) )
+    
+    sortingOrder <- match(regionDefinition@labels, names(mutations_region_counts))
+    mutations_region_counts <- mutations_region_counts[sortingOrder]
+    return(mutations_region_counts)
+}
+
+
 
 
 #' Calculate mutation frequencies
@@ -463,7 +687,6 @@ addExpectedFrequencies <- function(db, sequenceColumn="SEQUENCE_GAP",
     
     return(db)
 }
-
 # List mutations
 listMutations <- function(seqInput, seqGL) {
     #if( is.na(c(seqInput, seqGL)) ) return(array(NA,4))
@@ -500,28 +723,3 @@ listObservedMutations <- function(db, sequenceColumn="SEQUENCE_IMGT",
                         USE.NAMES=FALSE)
     return(mutations)
 }
-
-
-#' Count number of mutations in sequence
-#'
-#' This function counts the number of mutations in a sequence.
-#'
-#' @param   seqInput  Input sequence
-#' @param   seqGL  Germline sequence
-#' @return  array of observed mutations
-#' 
-#' @export
-countMutations <- function(seqInput, seqGL) {
-    if( is.na(c(seqInput, seqGL)) ) return(array(NA,4))
-    seqI = s2c(seqInput)
-    seqG = s2c(seqGL)
-    matIGL = matrix(c(seqI,seqG),ncol=length(seqI),nrow=2,byrow=T)
-    mutations <- analyzeMutations2NucUri(matIGL)
-    
-    if(is.na(mutations)){
-        return(array(0,4))
-    }else{
-        return(processNucMutations(mutations))
-    }
-}
-
