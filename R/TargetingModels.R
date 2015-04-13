@@ -659,6 +659,8 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' 
 #' @export
 extendMutabilityMatrix <- function(mutabilityModel) {
+    # TODO: fix order so Ns are at the end? (c(input_names, words not in input_names))
+    
     # Define old and new column/row names
     input_names <- names(mutabilityModel)
     nuc_chars <- NUCLEOTIDES[1:5]
@@ -888,10 +890,19 @@ getTargetingDistance <- function(model) {
         stop("Input must be either a targeting matrix or TargetingModel object.")
     }
     
-    # TODO:  recentering on 1 instead of 0.25 might be better.
-    # TODO:  also is this the right normalization strategy (non-NA values)
-    # Renormalize
-    dist <- model / sum(model, na.rm=TRUE) * sum(!is.na(model))
+    # TODO:  need to fix normalization in extend functions
+    # TODO:  need to make A->A, C->C, G->G, T->T NA.
+    
+    # Get mean of 5-mers without Ns
+    nuc_chars <- NUCLEOTIDES[1:4]
+    nuc_5mers <- words(5, nuc_chars)
+    index_5mers <- colnames(model) %in% nuc_5mers
+    dist_5mers <- 1 - model[nuc_chars, index_5mers]
+    mean_5mers <- mean(dist_5mers, na.rm=TRUE)
+    
+    # Convert to distance
+    dist <- 1 - model
+    dist <- 1 + dist - mean_5mers    
     dist[!is.finite(dist)] <- NA
     
     return(dist)
@@ -1075,6 +1086,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
             sub_text[[i]] <- tmp_df
         }
         
+        y_limits <- c(-1, max(sub_df$score) * 2 + 5.6)
         # Plot mutability for center nucleotide
         p1 <- ggplot(sub_df, aes(x=x)) + 
             base_theme + 
@@ -1082,12 +1094,15 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
             xlab("") +
             ylab("") + 
             coord_polar(theta="x") +
+            scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
             scale_color_manual(name="Motif", values=motif_colors) +
             scale_fill_manual(name="Nucleotide", values=dna_colors, guide=FALSE) +
-            geom_segment(data=sub_df, mapping=aes(x=x, xend=x, y=5, yend=5 + score * 2, color=motif), 
+            geom_segment(data=sub_df, mapping=aes(x=x, xend=x, y=5.6, yend=5.6 + score * 2, color=motif), 
                          size=2) +
-            geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=5, fill="white") +
-            geom_tile(data=sub_melt, mapping=aes(x=x, y=pos, fill=char)) +
+            #geom_bar(data=sub_df, mapping=aes(x=x, y=5 + score * 2, fill=motif), stat="identity", 
+            #         position="identity", size=2) +
+            #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=5, fill="white") +
+            geom_tile(data=sub_melt, mapping=aes(x=x, y=pos, fill=char), size=0) +
             geom_text(data=sub_text[[1]], mapping=aes(x=text_x, y=text_y, label=text_label), 
                       color="black", hjust=0.5, vjust=0.5, size=3) +
             geom_text(data=sub_text[[2]], mapping=aes(x=text_x, y=text_y, label=text_label), 
@@ -1096,17 +1111,14 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
                       color="black", hjust=0.5, vjust=0.5, size=4) +
             geom_text(data=sub_text[[4]], mapping=aes(x=text_x, y=text_y, label=text_label), 
                       color="black", hjust=0.5, vjust=0.5, size=2.5)
+            #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=0.5, fill="white")
         
         # Add plot to list
         plot_list[[center_nuc]] <- p1
     }
     
     # Plot
-    if (length(plot_list) == 1) {
-        plot(plot_list[[1]])
-    } else {
-        do.call(multiggplot, args=c(plot_list, ncol=4))
-    }
+    do.call(multiggplot, args=c(plot_list, ncol=4))
 }
 
 
