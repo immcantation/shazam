@@ -1,5 +1,7 @@
 # Loads and converts model data
 
+# TODO:  fix normalization
+
 # Smith DS, et al. Di- and trinucleotide target preferences of somatic mutagenesis 
 #    in normal and autoreactive B cells. 
 #    J Immunol. 1996 156:2642–52. 

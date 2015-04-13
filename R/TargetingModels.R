@@ -1023,10 +1023,14 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
 
     # Set base plot settings
     base_theme <- theme_bw() +
-        theme(panel.border=element_blank(), 
+        theme(panel.background=element_blank(),
+              panel.grid=element_blank(),
+              panel.border=element_blank(),
+              panel.margin=unit(c(0, 0, 0, 0), "inches")) +
+        theme(axis.title=element_blank(),
               axis.text=element_blank(), 
-              axis.ticks=element_blank(),
-              legend.position="bottom")
+              axis.ticks=element_blank()) +
+        theme(legend.position="top")
         
     # Set guide colors
     motif_colors <- setNames(c("#33a02c", "#e31a1c", "#6a3d9a", "#999999"),
@@ -1086,7 +1090,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
             sub_text[[i]] <- tmp_df
         }
         
-        y_limits <- c(-1, max(sub_df$score) * 2 + 5.6)
+        # Define scaling parameters
+        y_scale <- 3
+        y_limits <- c(-1, 5.6 + max(sub_df$score) * y_scale)
+        
         # Plot mutability for center nucleotide
         p1 <- ggplot(sub_df, aes(x=x)) + 
             base_theme + 
@@ -1094,10 +1101,11 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
             xlab("") +
             ylab("") + 
             coord_polar(theta="x") +
+            scale_x_continuous(expand=c(0, 0)) +
             scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
             scale_color_manual(name="Motif", values=motif_colors) +
             scale_fill_manual(name="Nucleotide", values=dna_colors, guide=FALSE) +
-            geom_segment(data=sub_df, mapping=aes(x=x, xend=x, y=5.6, yend=5.6 + score * 2, color=motif), 
+            geom_segment(data=sub_df, mapping=aes(x=x, xend=x, y=5.6, yend=5.6 + score * y_scale, color=motif), 
                          size=2) +
             #geom_bar(data=sub_df, mapping=aes(x=x, y=5 + score * 2, fill=motif), stat="identity", 
             #         position="identity", size=2) +
