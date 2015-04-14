@@ -998,6 +998,16 @@ writeTargetingDistance <- function(model, file) {
 #' @param    model        \code{\link{TargetingModel}} object or mutability matrix
 #'                        with mutability probabilities.
 #' @param    nucleotides  vector of center nucleotide characters to plot mutability for.
+#' @param    style        type of plot to draw. One of:
+#' #'                     \itemize{
+#'                          \item \code{"hedgehog"}:  circular plot showing higher mutability
+#'                                                    scores further from the circle. The 5-mer
+#'                                                    is denoted by the values of the inner 
+#'                                                    circle, read from the most interior position 
+#'                                                    of the 5-mer (5') to most exterior position (3'), 
+#'                                                    with the center nucleotide in the center ring.
+#'                          \item \code{"bar"}:       .
+#'                        }
 #'                                                
 #' @return   NULL
 #'    
@@ -1005,21 +1015,27 @@ writeTargetingDistance <- function(model, file) {
 #' @family   targeting model functions
 #' 
 #' @examples
-#' # Plot all nucleotides
+#' # Plot all nucleotides in circular style
 #' plotMutability(HS5FModel)
 #' 
-#' # Plot one nucleotide
+#' # Plot one nucleotide in circular style
 #' plotMutability(HS5FModel, "C")
 #' 
+#' # Plot one nucleotide in barchart style
+#' plotMutability(HS5FModel, "C", style="bar")
+#' 
 #' @export
-plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
+plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), style=c("hedgehog", "bar")) {
     # Check input
+    nucleotides <- toupper(nucleotides)
+    style <- match.arg(style)
+    
     if (is(model, "TargetingModel")) {
         model <- model@mutability
     } else if (!is(model, "vector")) {
         stop("Input must be either a mutability vector or TargetingModel object.")
     }
-    nucleotides <- toupper(nucleotides)
+    
 
     # Set base plot settings
     base_theme <- theme_bw() +
@@ -1027,11 +1043,16 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
               panel.grid=element_blank(),
               panel.border=element_blank(),
               panel.margin=unit(c(0, 0, 0, 0), "inches")) +
-        theme(axis.title=element_blank(),
-              axis.text=element_blank(), 
-              axis.ticks=element_blank()) +
+        theme(axis.title.x=element_blank(),
+              axis.text.x=element_blank(), 
+              axis.ticks.x=element_blank()) +
         theme(legend.position="top")
-        
+    
+    # Scaling and layout parameters
+    score_offset <- 0
+    score_scale <- 3
+    text_offset <- -5.6
+    
     # Set guide colors
     motif_colors <- setNames(c("#33a02c", "#e31a1c", "#6a3d9a", "#999999"),
                              c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
@@ -1074,25 +1095,26 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
                                  value.name="char")
         sub_melt$pos <- factor(sub_melt$pos, levels=colnames(mut_positions))
         sub_melt$pos <- as.numeric(sub_melt$pos)
-        
+
         # Define text position data
         sub_text <- list()
         for (i in 1:5) {
             tmp_rle <- rle(sub_melt$char[sub_melt$pos == i])
             tmp_sum <- cumsum(tmp_rle$lengths)
-            tmp_pos <- tmp_sum - diff(c(0, tmp_sum))/2
-            if (length(tmp_pos) == 1) { tmp_pos = 1/2 }
+            tmp_pos <- tmp_sum - diff(c(0, tmp_sum)) / 2
+            if (length(tmp_pos) == 1) { max(tmp_sum) / 2 }
             
             tmp_df <- data.frame(text_x=tmp_pos, 
-                                  text_y=i,
-                                  text_label=tmp_rle$values)
+                                 text_y=i,
+                                 text_label=tmp_rle$values)
             
             sub_text[[i]] <- tmp_df
         }
-        
-        # Define scaling parameters
-        y_scale <- 3
-        y_limits <- c(-1, 5.6 + max(sub_df$score) * y_scale)
+
+        # Rescale for plotting
+        sub_df$score <- sub_df$score * score_scale + score_offset
+        sub_melt$pos <- sub_melt$pos + text_offset
+        sub_text <- lapply(sub_text, function(x) { transform(x, text_y=text_y + text_offset) })
         
         # Plot mutability for center nucleotide
         p1 <- ggplot(sub_df, aes(x=x)) + 
@@ -1100,13 +1122,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
             ggtitle(paste0("NN", center_nuc, "NN")) +
             xlab("") +
             ylab("") + 
-            coord_polar(theta="x") +
-            scale_x_continuous(expand=c(0, 0)) +
-            scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
             scale_color_manual(name="Motif", values=motif_colors) +
             scale_fill_manual(name="Nucleotide", values=dna_colors, guide=FALSE) +
-            geom_segment(data=sub_df, mapping=aes(x=x, xend=x, y=5.6, yend=5.6 + score * y_scale, color=motif), 
-                         size=2) +
+            geom_segment(data=sub_df, mapping=aes(x=x, xend=x, yend=score, color=motif), 
+                         y=score_offset, size=2) +
             #geom_bar(data=sub_df, mapping=aes(x=x, y=5 + score * 2, fill=motif), stat="identity", 
             #         position="identity", size=2) +
             #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=5, fill="white") +
@@ -1120,6 +1139,25 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T")) {
             geom_text(data=sub_text[[4]], mapping=aes(x=text_x, y=text_y, label=text_label), 
                       color="black", hjust=0.5, vjust=0.5, size=2.5)
             #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=0.5, fill="white")
+        
+        if (style == "hedgehog") {
+            y_limits <- c(text_offset - 1, max(sub_df$score))            
+            p1 <- p1 + theme(axis.title.y=element_blank(),
+                             axis.text.y=element_blank(), 
+                             axis.ticks.y=element_blank()) +
+                scale_x_continuous(expand=c(0, 0)) +
+                scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
+                coord_polar(theta="x")
+        } else if (style == "bar") {
+            # TODO: proper axis ticks with transform to prob?
+            #y_sum <- sum(sub_df$score)
+            y_limits <- c(text_offset + 0.5, max(sub_df$score))
+            p1 <- p1 + theme(axis.title.y=element_blank(),
+                             axis.text.y=element_blank(), 
+                             axis.ticks.y=element_blank()) +
+                scale_x_continuous(expand=c(0, 0)) +
+                scale_y_continuous(limits=y_limits, expand=c(0, 0))
+        }
         
         # Add plot to list
         plot_list[[center_nuc]] <- p1

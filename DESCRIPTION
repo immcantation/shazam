@@ -20,6 +20,7 @@ Imports:
     data.table,
     foreach,
     SDMTools,
+    scales,
     seqinr,
     zoo
 Suggests:
@@ -39,7 +40,6 @@ Collate:
     'computeMutationTypes.R'
     'computeTargeting.R'
     'multiplot.R'
-    'plotHedgehog.R'
     'plotSelection.R'
     'processNucMutations.R'
     'selection.R'

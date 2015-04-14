@@ -15,18 +15,20 @@
 #' 
 #' @section  Selection analysis:
 #' \itemize{
-#'   \item  \code{\link{addClonalSequence}}:        Build clonal consensus sequence.
+#'   \item  \code{\link{getClonalConsensus}}:       Build clonal consensus sequence.
+#'   \item  \code{\link{getObservedMutations}}:     Compute observed mutation counts.
+#'   \item  \code{\link{addMutationFrequencies}}:   Compute mutation frequencies.
 #'   \item  \code{\link{addExpectedFrequencies}}:   Compute expected mutation frequencies.
-#'   \item  \code{\link{addObservedMutations}}:     Compute observed mutation counts.
 #'   \item  \code{\link{computeBaselinePDF}}:       Compute selection strength.
 #'   \item  \code{\link{plotSelection}}:            Plot selection strength.
 #' }
 #'
 #' @section  Targeting models:
 #' \itemize{
-#'   \item  \code{\link{createMutabilityModel}}:    Builds a mutability model.
-#'   \item  \code{\link{createSubstitutionModel}}:  Builds a substitution model.
-#'   \item  \code{\link{plotHedgehog}}:             Plots a targeting model.
+#'   \item  \code{\link{createTargetingModel}}:     Builds a targeting model.
+#'   \item  \code{\link{getTargetingDistance}}:     Constructs a nucleotide distance matrix 
+#'                                                  from a targeting model.
+#'   \item  \code{\link{plotMutability}}:           Plots 5-mer mutability rates.
 #' }
 #'
 #' @section  Distance profiling:
@@ -61,6 +63,7 @@
 #' @import   foreach
 #' @import   ggplot2
 #' @import   plyr
+#' @import   scales
 #' @import   zoo
 #' @importFrom  SDMTools  wt.sd 
 #' @importFrom  seqinr    c2s
