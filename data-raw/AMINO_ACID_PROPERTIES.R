@@ -1,4 +1,4 @@
-AMINO.ACIDS <- 
+AMINO_ACID_PROPERTIES <- 
   structure(
     list(
       Name = structure(c(1, 5, 4, 6, 14, 8, 9, 10, 12, 11, 13, 3, 15, 7, 2, 16, 17, 20, 18, 19), 
@@ -28,5 +28,4 @@ AMINO.ACIDS <-
     row.names = c("1","2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", 
                   "13", "14", "15", "16", "17", "18", "19", "20")
   )
-save(AMINO.ACIDS,file="data/AMINO.ACIDS.RData")
-#devtools::use_data(AMINO.ACIDS)
+save(AMINO_ACID_PROPERTIES, file="data-raw/AMINO_ACID_PROPERTIES.RData")

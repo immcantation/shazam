@@ -325,7 +325,7 @@ getBASELINeStats <- function () {
 #'
 #' \code{calculateBASELINeProbabilityDensities} calculates 
 #'
-#' @param   seqBASELINe         \link{\code{BASELINe}} object representing the sequence
+#' @param   seqBASELINe         \code{\link{BASELINe}} object representing the sequence
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
 #'                              and boundaries of the Ig sequences. Note, only the part of
 #'                              sequences defined in \code{regionDefinition} are analyzed.
@@ -334,7 +334,7 @@ getBASELINeStats <- function () {
 #'                              used, then mutations in positions greater than 312 will not
 #'                              be counted.
 #' 
-#' @return  A modified \link{\code{BASELINe}} object with the BASELINe probability 
+#' @return  A modified \code{\link{BASELINe}} object with the BASELINe probability 
 #'          density function calculated for the regions defined in the \code{regionDefinition}.
 #'           
 #' @details

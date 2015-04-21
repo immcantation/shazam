@@ -639,7 +639,7 @@ getExpectedMutationFrequencies <- function(db,
 #'
 #' \code{calculateExpectedMutationFrequencies} calculates the expected mutation
 #' frequencies of a given sequence. This is primariry a helper function for
-#' \link{\code{getExpectedMutationFrequencies}}. 
+#' \code{\link{getExpectedMutationFrequencies}}. 
 #'
 #' @param   inputSequence       Nucleotide sequence being tested for selection.
 #' @param   germlineSequence    The germline or reference sequence.

@@ -149,6 +149,12 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     vCallColumn="V_CALL",
                                     multipleMutation=c("independent", "ignore"))  {
+    # model="RS"
+    # sequenceColumn="SEQUENCE_IMGT"
+    # germlineColumn="GERMLINE_IMGT_D_MASK"\
+    # vCallColumn="V_CALL"
+    # multipleMutation="independent"
+    
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
@@ -297,7 +303,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     }
     rownames(M[["E"]]) <- nuc_chars
     
-    
+    # TODO:  what's going on with the if !="A" and if =="A" business?  is this necessary?
     # fivemer=M; FIVEMER="CCATT"
     .simplifivemer <- function(fivemer, FIVEMER, Thresh=20) {
         Nuc=substr(FIVEMER,3,3)
@@ -307,7 +313,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
             return(fivemer[[Nei]][Nuc,]);
         }
         else{
-            if(substring(Nei,2,2)!="A"){
+            if(substring(Nei,2,2)!="A"){ # Huh?
                 FIVE=fivemer[[Nei]][Nuc,]
                 for(i in 1:4){
                     for(j in 1:4){
@@ -317,7 +323,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                 }
                 return(FIVE)
             }
-            if(substring(Nei,2,2)=="A"){
+            if(substring(Nei,2,2)=="A"){ # Wah huh?
                 FIVE=fivemer[[paste(substring(Nei,1,1),canMutateTo(substring(Nei,2,2))[1],substring(Nei,3,4),collapse="",sep="")]][Nuc,]
                 for(i in 2){
                     for(j in 2:3){
@@ -346,6 +352,15 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     }
     
     substitutionModel <- sapply(seqinr::words(5, nuc_chars), function(x) { .simplifivemer(M, x) })
+
+    # TODO:  where is the value for A->A etc set?  this should be done there instead.
+    # Assign A->A, C->C, G->G, T->T to NA
+    center_nuc <- gsub("..([ACGT])..", "\\1", colnames(substitutionModel))
+    for (i in 1:length(center_nuc)) {
+        substitutionModel[center_nuc[i], i] <- NA
+    }
+    
+    # Normalize by column
     substitutionModel <- apply(substitutionModel, 2, function(x) { x/sum(x, na.rm=TRUE) })
     substitutionModel[!is.finite(substitutionModel)] <- NA
     
@@ -566,14 +581,6 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #'           rows names defining the center nucleotide, one of \code{c("A", "C", "G", "T", "N")}, 
 #'           and column names defining the 5-mer nucleotide sequence.
 #' 
-#' @references
-#' \enumerate{
-#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
-#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
-#'            data. 
-#'            Front Immunol. 2013 4(November):358.
-#'  }
-#' 
 #' @family   targeting model functions
 #' 
 #' @examples
@@ -616,10 +623,8 @@ extendSubstitutionMatrix <- function(substitutionModel) {
     }
     
     # Normalize
-    extend_mat <- apply(extend_mat, 2, function(x) { x/sum(x, na.rm=TRUE) })
+    #extend_mat <- apply(extend_mat, 2, function(x) { x/sum(x, na.rm=TRUE) })
     extend_mat[!is.finite(extend_mat)] <- NA
-    
-    #extend_mat <- extend_mat / sum(extend_mat, na.rm=TRUE)
     
     return (extend_mat)
 }
@@ -635,14 +640,6 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' 
 #' @return   A 3125 vector of normalized mutability rates for each 5-mer motif with 
 #'           names defining the 5-mer nucleotide sequence.
-#' 
-#' @references
-#' \enumerate{
-#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
-#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
-#'            data. 
-#'            Front Immunol. 2013 4(November):358.
-#'  }
 #' 
 #' @family   targeting model functions
 #' 
@@ -689,7 +686,7 @@ extendMutabilityMatrix <- function(mutabilityModel) {
     }
     
     # Normalize    
-    extend_mat <- extend_mat / sum(extend_mat, na.rm=TRUE)
+    #extend_mat <- extend_mat / sum(extend_mat, na.rm=TRUE)
     extend_mat[!is.finite(extend_mat)] <- NA
     
     return(extend_mat)
@@ -745,7 +742,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
     tar_mat <- sweep(substitutionModel, 2, mutabilityModel, `*`)
     
     # Normalize    
-    tar_mat <- tar_mat / sum(tar_mat, na.rm=TRUE)
+    #tar_mat <- tar_mat / sum(tar_mat, na.rm=TRUE)
     tar_mat[!is.finite(tar_mat)] <- NA
     
     return(tar_mat)
@@ -865,9 +862,7 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #'           sequence.
 #'           
 #' @details
-#' The targeting distance is defined as the targeting probability of a given base change 
-#' from each 5-mer (columns) to each center nucleotide (rows), re-centered such that the
-#' mean distance for any base change is 0.25.
+#' The targeting distance is defined as...
 #'    
 #' @seealso  Takes as input a \code{\link{TargetingModel}} object.
 #' @family   targeting model functions
@@ -889,23 +884,41 @@ getTargetingDistance <- function(model) {
     } else if (!is(model, "matrix")) {
         stop("Input must be either a targeting matrix or TargetingModel object.")
     }
+    # TODO: the indexing of A-->A etc positions can probably be done smarter/faster
+
+    # Get non-N containing 5-mer set
+    base_model <- model[NUCLEOTIDES[1:4], !grepl("N", colnames(model))]
     
-    # TODO:  need to fix normalization in extend functions
-    # TODO:  need to make A->A, C->C, G->G, T->T NA.
+    # Transform rates to distance
+    #base_dist <- 1 - base_model
+    base_dist <- 1 / sqrt(base_model)
+    base_dist[!is.finite(base_dist)] <- NA
     
-    # Get mean of 5-mers without Ns
-    nuc_chars <- NUCLEOTIDES[1:4]
-    nuc_5mers <- words(5, nuc_chars)
-    index_5mers <- colnames(model) %in% nuc_5mers
-    dist_5mers <- 1 - model[nuc_chars, index_5mers]
-    mean_5mers <- mean(dist_5mers, na.rm=TRUE)
+    # Assign A->A, C->C, G->G, T->T to NA
+    center_nuc <- gsub("..([ACGT])..", "\\1", colnames(base_model))
+    for (i in 1:length(center_nuc)) {
+        base_dist[center_nuc[i], i] <- NA
+    }
     
-    # Convert to distance
-    dist <- 1 - model
-    dist <- 1 + dist - mean_5mers    
-    dist[!is.finite(dist)] <- NA
+    # Get scaling and centering parameters from base model
+    base_sd <- sd(base_dist, na.rm=TRUE)
+    #base_mean <- mean(base_dist, na.rm=TRUE)
     
-    return(dist)
+    # Convert full model to distance
+    model_dist <- 1 / sqrt(model)
+    
+    # Scale and center full model
+    #model_dist <- model_dist - base_mean
+    model_dist <- model_dist / base_sd
+    model_dist[!is.finite(model_dist)] <- NA
+    
+    # Assign no-change entries to distance 0
+    center_nuc <- gsub("..([ACGTN])..", "\\1", colnames(model_dist))
+    for (i in 1:length(center_nuc)) {
+        model_dist[center_nuc[i], i] <- 0
+    }
+        
+    return(model_dist)
 }
 
 
@@ -999,17 +1012,24 @@ writeTargetingDistance <- function(model, file) {
 #'                        with mutability probabilities.
 #' @param    nucleotides  vector of center nucleotide characters to plot mutability for.
 #' @param    style        type of plot to draw. One of:
-#' #'                     \itemize{
+#'                        \itemize{
 #'                          \item \code{"hedgehog"}:  circular plot showing higher mutability
 #'                                                    scores further from the circle. The 5-mer
 #'                                                    is denoted by the values of the inner 
 #'                                                    circle, read from the most interior position 
 #'                                                    of the 5-mer (5') to most exterior position (3'), 
 #'                                                    with the center nucleotide in the center ring.
-#'                          \item \code{"bar"}:       .
+#'                          \item \code{"bar"}:       bar plot of mutability similar to the 
+#'                                                    \code{hedgehog} style with the most 5' positions
+#'                                                    of each 5-mer at the base of the plot.
 #'                        }
+#' @param    size         numeric scaling factor for lines and text in the plot.
+#' @param    silent       if \code{TRUE} do not draw the plot and just return the ggplot2 
+#'                        objects; if \code{FALSE} draw the plot.
+#' @param    ...          additional arguments to pass to ggplot2::theme.
 #'                                                
-#' @return   NULL
+#' @return   A named list of ggplot objects defining the plots, with names defined by the 
+#'           center nucleotide for the plot object.
 #'    
 #' @seealso  Takes as input a \code{\link{TargetingModel}} object.
 #' @family   targeting model functions
@@ -1025,7 +1045,11 @@ writeTargetingDistance <- function(model, file) {
 #' plotMutability(HS5FModel, "C", style="bar")
 #' 
 #' @export
-plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), style=c("hedgehog", "bar")) {
+plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), 
+                           style=c("hedgehog", "bar"), size=1, silent=FALSE, 
+                           ...) {
+    # TODO:  add flag to label or highlight specific 5-mer or 5-mer over threshold.
+    
     # Check input
     nucleotides <- toupper(nucleotides)
     style <- match.arg(style)
@@ -1125,19 +1149,19 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), style=c("he
             scale_color_manual(name="Motif", values=motif_colors) +
             scale_fill_manual(name="Nucleotide", values=dna_colors, guide=FALSE) +
             geom_segment(data=sub_df, mapping=aes(x=x, xend=x, yend=score, color=motif), 
-                         y=score_offset, size=2) +
-            #geom_bar(data=sub_df, mapping=aes(x=x, y=5 + score * 2, fill=motif), stat="identity", 
-            #         position="identity", size=2) +
+                         y=score_offset, size=2*size) +
+            #geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif, color=motif), stat="identity", 
+            #         position="identity", size=0) +
             #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=5, fill="white") +
             geom_tile(data=sub_melt, mapping=aes(x=x, y=pos, fill=char), size=0) +
             geom_text(data=sub_text[[1]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=3) +
+                      color="black", hjust=0.5, vjust=0.5, size=3*size) +
             geom_text(data=sub_text[[2]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=3) +
+                      color="black", hjust=0.5, vjust=0.5, size=3*size) +
             geom_text(data=sub_text[[3]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=4) +
+                      color="black", hjust=0.5, vjust=0.5, size=4*size) +
             geom_text(data=sub_text[[4]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=2.5)
+                      color="black", hjust=0.5, vjust=0.5, size=2.5*size)
             #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=0.5, fill="white")
         
         if (style == "hedgehog") {
@@ -1158,13 +1182,21 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), style=c("he
                 scale_x_continuous(expand=c(0, 0)) +
                 scale_y_continuous(limits=y_limits, expand=c(0, 0))
         }
+
+        # Add additional theme elements
+        p1 <- p1 + do.call(theme, list(...))
         
         # Add plot to list
         plot_list[[center_nuc]] <- p1
     }
+
     
     # Plot
-    do.call(multiggplot, args=c(plot_list, ncol=4))
+    if (!silent) { 
+        do.call(multiggplot, args=c(plot_list, ncol=length(plot_list))) 
+    }
+    
+    invisible(plot_list)
 }
 
 
@@ -1204,6 +1236,9 @@ multiggplot <- function(..., ncol=1) {
 # @param   nmer  number of 5-mers per sequence (sequence length = 5 * nmer)
 #
 # @return  a data.frame with columns SEQUENCE_ID, SEQUENCE_IMGT, GERMLINE_IMGT_D_MASK, V_CALL.
+# 
+# @examples
+# db <- makeTargetingTestDb(500)
 makeTargetingTestDb <- function(nseq=10, nmut=40, nmers=50) {
     nuc_chars <- c("A", "C", "G", "T")
     
