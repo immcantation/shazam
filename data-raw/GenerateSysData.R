@@ -3,9 +3,16 @@ load("data-raw/NUCLEOTIDES.RData")
 load("data-raw/AMINO_ACIDS.RData")
 load("data-raw/CDR_Nuc_Mat.RData")
 load("data-raw/FWR_Nuc_Mat.RData")
-#load("data-raw/CODON_AA_TABLE.RData")
 load("data-raw/CODON_TABLE.RData")
+load("data-raw/BAYESIAN_FITTED.RData")
+load("data-raw/CONST_I.RData")
 
 # Save to R/sysdata.rda
-devtools::use_data(CDR_Nuc_Mat, FWR_Nuc_Mat, CODON_TABLE,AMINO_ACIDS,NUCLEOTIDES, 
+devtools::use_data(CDR_Nuc_Mat, 
+                   FWR_Nuc_Mat, 
+                   CODON_TABLE,
+                   AMINO_ACIDS,
+                   NUCLEOTIDES,
+                   BAYESIAN_FITTED,
+                   CONST_I,                   
                    internal=TRUE, overwrite=TRUE)

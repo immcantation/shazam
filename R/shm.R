@@ -17,8 +17,7 @@
 #' \itemize{
 #'   \item  \code{\link{getClonalConsensus}}:       Build clonal consensus sequence.
 #'   \item  \code{\link{getObservedMutations}}:     Compute observed mutation counts.
-#'   \item  \code{\link{addMutationFrequencies}}:   Compute mutation frequencies.
-#'   \item  \code{\link{addExpectedFrequencies}}:   Compute expected mutation frequencies.
+#'   \item  \code{\link{getExpectedMutationFrequencies}}:   Compute mutation frequencies.
 #'   \item  \code{\link{computeBaselinePDF}}:       Compute selection strength.
 #'   \item  \code{\link{plotSelection}}:            Plot selection strength.
 #' }
@@ -48,6 +47,9 @@
 #'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
 #'            data. 
 #'            Front Immunol. 2013 4(November):358.
+#'   \item  Hershberg U, Uduman M, Shlomchik MJ, Kleinstein SH. Improved methods for
+#'            detecting selection by mutation analysis of Ig V region sequences. Int 
+#'            Immunol. 2008 May;20(5):683-94.
 #'  }
 #'
 #' @seealso
