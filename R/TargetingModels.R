@@ -917,7 +917,8 @@ getTargetingDistance <- function(model) {
     for (i in 1:length(center_nuc)) {
         model_dist[center_nuc[i], i] <- 0
     }
-        
+    
+    # TODO:  should add binning/quantile step to deal with extreme values
     return(model_dist)
 }
 
@@ -955,6 +956,7 @@ getRescaledMutability <- function(model, mean=1.0) {
         stop("Input must be either a mutability vector or TargetingModel object.")
     }
     
+    # TODO:  perhaps this is not so useful.  or perhaps it should be relative to max(model).
     # Renormalize
     rescaled <- model / sum(model, na.rm=T) * sum(!is.na(model)) * mean
     rescaled[!is.finite(rescaled)] <- NA
@@ -1074,7 +1076,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     
     # Scaling and layout parameters
     score_offset <- 0
-    score_scale <- 3
+    score_scale <- 10
     text_offset <- -5.6
     
     # Set guide colors
@@ -1089,7 +1091,6 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     
     # Build data.frame of mutability scores
     mut_scores <- model[!grepl("N", names(model))]
-    mut_scores <- getRescaledMutability(mut_scores)
     mut_scores[!is.finite(mut_scores)] <- 0
     mut_words <- names(mut_scores)
     mut_positions <- as.data.frame(t(sapply(mut_words, s2c)))
@@ -1097,14 +1098,20 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     mut_df <- data.frame(word=mut_words, 
                          score=mut_scores, 
                          mut_positions)
-    
+
     # Add hot and cold-spot motif information
     mut_df$motif <- "Neutral"
     mut_df$motif[grepl("(.[AT]A..)|(..T[AT].)", mut_df$word, perl=TRUE)] <- "WA/TW"
     mut_df$motif[grepl("([AT][GA]C..)|(..G[CT][AT])", mut_df$word, perl=TRUE)] <- "WRC/GYW"
     mut_df$motif[grepl("([CG][CT]C..)|(..G[GA][CG])", mut_df$word, perl=TRUE)] <- "SYC/GRS"
     mut_df$motif <- factor(mut_df$motif, levels=c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
-
+    
+    # Subset to nucleotides of interest
+    mut_df <- subset(mut_df, pos3 %in% nucleotides)
+    # Rescale scores to range 0-1 for plotting
+    mut_df$score <- mut_df$score / max(mut_df$score, na.rm=TRUE)
+    
+    # TODO:  Swap direction of G/T nucleotides and at 5'/3' logos.
     # Build plots for each center nucleotide
     plot_list <- list()
     for (center_nuc in nucleotides) {
@@ -1114,9 +1121,9 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         
         # Melt 5-mer position data
         sub_melt <- reshape2::melt(sub_df, id.vars=c("x"), 
-                                 measure.vars=colnames(mut_positions),
-                                 variable.name="pos",
-                                 value.name="char")
+                                   measure.vars=colnames(mut_positions),
+                                   variable.name="pos",
+                                   value.name="char")
         sub_melt$pos <- factor(sub_melt$pos, levels=colnames(mut_positions))
         sub_melt$pos <- as.numeric(sub_melt$pos)
 
@@ -1165,7 +1172,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=0.5, fill="white")
         
         if (style == "hedgehog") {
-            y_limits <- c(text_offset - 1, max(sub_df$score))            
+            y_limits <- c(text_offset - 1, score_scale + score_offset)
             p1 <- p1 + theme(axis.title.y=element_blank(),
                              axis.text.y=element_blank(), 
                              axis.ticks.y=element_blank()) +
@@ -1174,8 +1181,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
                 coord_polar(theta="x")
         } else if (style == "bar") {
             # TODO: proper axis ticks with transform to prob?
-            #y_sum <- sum(sub_df$score)
-            y_limits <- c(text_offset + 0.5, max(sub_df$score))
+            y_limits <- c(text_offset + 0.5, score_scale + score_offset)
             p1 <- p1 + theme(axis.title.y=element_blank(),
                              axis.text.y=element_blank(), 
                              axis.ticks.y=element_blank()) +
