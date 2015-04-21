@@ -595,6 +595,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #' 
 #' @export
 extendSubstitutionMatrix <- function(substitutionModel) {
+    # TODO: fix order so Ns are at the end? (c(input_names, words not in input_names))
+    
     # Define old and new column/row names
     input_names <- colnames(substitutionModel)
     nuc_chars <- NUCLEOTIDES[1:5]
@@ -918,7 +920,9 @@ getTargetingDistance <- function(model) {
         model_dist[center_nuc[i], i] <- 0
     }
     
-    # TODO:  should add binning/quantile step to deal with extreme values
+    # Bound extreme values at 5
+    model_dist[model_dist > 5] <- 5
+
     return(model_dist)
 }
 
