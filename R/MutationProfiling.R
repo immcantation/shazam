@@ -265,7 +265,7 @@ clonalConsensus <- function(inputSeq, germlineSeq,
 #' \code{\link{binMutationsByRegion}} is called by this function to aggregate the mutations
 #' by the \code{regionDefinition}.
 #' 
-#' Also see \code{\link{addExpectedFrequencies}} for calculating expected mutation
+#' Also see \code{\link{getExpectedMutationFrequencies}} for calculating expected mutation
 #'           frequencies.
 #' 
 #' @examples
@@ -461,7 +461,7 @@ countMutations <- function(inputSeq,
 #'
 #' @param   mutations_array    array containing the mutations (R/S) with the names
 #'                              indicatign the nucleotide positions of the mutations.
-#'                              See \code{\link{observedMutations}} for more information.
+#'                              See \code{\link{getObservedMutations}} for more information.
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
 #'                              and boundaries of the Ig sequences. Note, only the part of
 #'                              sequences defined in \code{regionDefinition} are analyzed.

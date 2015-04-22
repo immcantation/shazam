@@ -353,6 +353,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     
     substitutionModel <- sapply(seqinr::words(5, nuc_chars), function(x) { .simplifivemer(M, x) })
 
+    # TODO:  add imputation for missing values (0 count). options count=1, count=mean, count=min(!=0)
+    # TODO:  use more complicated imputation (as per paper)
     # TODO:  where is the value for A->A etc set?  this should be done there instead.
     # Assign A->A, C->C, G->G, T->T to NA
     center_nuc <- gsub("..([ACGT])..", "\\1", colnames(substitutionModel))
@@ -555,6 +557,9 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     MutabilityWeights <- sapply(Mutability, function(x) x[[2]])
     Mutability_Mean <- apply(MutabilityMatrix, 1, weighted.mean, w=MutabilityWeights, na.rm=TRUE)
     Mutability_Mean[!is.finite(Mutability_Mean)] <- NA
+    
+    # TODO:  add imputation for missing values (0 count). options count=1, count=mean, count=min(!=0)
+    # TODO:  use more complicated imputation (as per paper)
     
     # Normalize
     Mutability_Mean <- Mutability_Mean / sum(Mutability_Mean, na.rm=TRUE)
@@ -922,6 +927,7 @@ getTargetingDistance <- function(model) {
     
     # Bound extreme values at 5
     model_dist[model_dist > 5] <- 5
+    model_dist <- round(model_dist, 2)
 
     return(model_dist)
 }

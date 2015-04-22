@@ -15,7 +15,7 @@
 #' Yaari G, Uduman M, Kleinstein SH.
 #'   Quantifying selection in high-throughput Immunoglobulin sequencing data sets.
 #'   Nucleic Acids Res. 2012 Sep 1;40(17):e134.
-#' @seealso  \code{\link{addObservedMutations}}, \code{\link{addExpectedFrequencies}}, \code{\link{computeBaselinePDF}}.
+#' @seealso  \code{\link{getObservedMutations}}.
 #' @examples
 #' # TODO
 #' # Working example

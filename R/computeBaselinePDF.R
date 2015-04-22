@@ -11,8 +11,7 @@
 #' @return   (A modified \code{db} data.frame) Should convert to an object.
 #'
 #' @details
-#' The input data.frame \code{db} must contain the following columns, generated
-#' by \code{\link{addObservedMutations}} and \code{\link{addExpectedFrequencies}}:
+#' The input data.frame \code{db} must contain the following columns:
 #' \itemize{
 #'     \item  \code{OBSERVED_R_CDR}:  number of replacement mutations in the CDRs.
 #'     \item  \code{OBSERVED_S_CDR}:  number of silent mutations in the CDRs.
@@ -39,10 +38,8 @@
 #'            Nucleic Acids Res. 2012 40(17):e134.
 #'  }
 #'  
-#' @seealso  See \code{\link{addObservedMutations}} and \code{\link{addExpectedFrequencies}}
+#' @seealso  See \code{\link{getObservedMutations}} and \code{\link{getExpectedMutationFrequencies}}
 #'           for generating the necessary mutation statistics. 
-#'           See \code{\link{calcGroupedBaseline}} for combining selection scores within
-#'           groups.
 #' 
 #' @examples
 #' # Load example data
