@@ -100,14 +100,19 @@ createRegionDefinition <- function(name=NULL,
 
 #### Data ####
 
-#' IMGT unique numbering for V-DOMAIN
+#' IMGT unique numbering schemes
 #'
-#' Defines the CDR and FWR, according to the IMGT unique numbering scheme, for V segments
-#' uptill the begining of (but not including CDR3)
+#' Definitions of the CDR and FWR, according to the IMGT unique numbering scheme.
 #'
-#' @format \code{\link{RegionDefinition}} object.
-#' 
-#' @family IMGT unique numbering schemes
+#' @format A \code{\link{RegionDefinition}} object containing:
+#' \itemize{
+#'   \item  \code{IMGT_V}:                     V segments including CDR3.
+#'   \item  \code{IMGT_V_BY_REGIONS}:          V segments including CDR3.
+#'   \item  \code{IMGT_V_NO_CDR3}:             V segments up till the begining of (but not 
+#'                                             including) CDR3.
+#'   \item  \code{IMGT_V_BY_REGIONS_NO_CDR3}:  V segments up till the begining of (but not 
+#'                                             including CDR3).
+#' }
 #' 
 #' @references
 #' \enumerate{
@@ -116,62 +121,18 @@ createRegionDefinition <- function(name=NULL,
 #'              and T cell receptor variable domains and Ig superfamily V-like domains. 
 #'              Developmental and comparative immunology. 2003;27:55-77.
 #' }
-"IMGT_V_NO_CDR3"
-
-
-#' IMGT unique numbering for V-DOMAIN
-#'
-#' Defines the CDR and FWR, according to the IMGT unique numbering scheme, for V segments
-#' (including) CDR3.
-#'
-#' @format \code{\link{RegionDefinition}} object.
 #' 
-#' @family IMGT unique numbering schemes
-#' 
-#' @references
-#' \enumerate{
-#'   \item  Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
-#'              Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin 
-#'              and T cell receptor variable domains and Ig superfamily V-like domains. 
-#'              Developmental and comparative immunology. 2003;27:55-77.
-#' }
-#'
+#' @name IMGT_SCHEMES
+NULL
+
+#' @rdname IMGT_SCHEMES
 "IMGT_V"
 
-
-#' IMGT unique numbering for V-DOMAIN.
-#'
-#' Defines the indiviudal CDRs and FWRs, according to the IMGT unique numbering scheme, 
-#' for V segments uptill the begining of (but not including CDR3).
-#'
-#' @format \code{\link{RegionDefinition}} object.
-#' 
-#' @family IMGT unique numbering schemes
-#' 
-#' @references
-#' \enumerate{
-#'   \item  Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
-#'              Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin 
-#'              and T cell receptor variable domains and Ig superfamily V-like domains. 
-#'              Developmental and comparative immunology. 2003;27:55-77.
-#' }
-"IMGT_V_BY_REGIONS_NO_CDR3"
-
-
-#' IMGT unique numbering for V-DOMAIN.
-#'
-#' Defines the indiviudal CDRs and FWRs, according to the IMGT unique numbering scheme, 
-#' for V segments (including CDR3).
-#'
-#' @format \code{\link{RegionDefinition}} object.
-#' 
-#' @family IMGT unique numbering schemes
-#' 
-#' @references
-#' \enumerate{
-#'   \item  Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
-#'              Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin 
-#'              and T cell receptor variable domains and Ig superfamily V-like domains. 
-#'              Developmental and comparative immunology. 2003;27:55-77.
-#' }
+#' @rdname IMGT_SCHEMES
 "IMGT_V_BY_REGIONS"
+
+#' @rdname IMGT_SCHEMES
+"IMGT_V_NO_CDR3"
+
+#' @rdname IMGT_SCHEMES
+"IMGT_V_BY_REGIONS_NO_CDR3"
