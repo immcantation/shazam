@@ -23,33 +23,36 @@ NULL
 # seq1 = c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
 # seq2 = c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
 #
-# distSeq5Mers(seq1, seq2, HS5FModel@substitution, HS5FModel@mutability)
-distSeq5Mers <- function(seq1, seq2, sub_model, mut_model, 
+# distSeq5Mers(seq1, seq2, HS5FModel)
+distSeq5Mers <- function(seq1, seq2, targeting_model, 
                         normalize=c("none" ,"length", "mutations")) {
   # Evaluate choices
   normalize <- match.arg(normalize)
   
-  #Compute length of sequence (for normalization, if specified)
+  # Get distance from targeting model
+  targeting_dist <- getTargetingDistance(targeting_model)
+  
+  # Compute length of sequence (for normalization, if specified)
   juncLength <- length(seq1)
 
-  #Compute distance only on fivemers that have mutations
+  # Compute distance only on fivemers that have mutations
   fivemersWithMu <- substr(seq1,3,3)!=substr(seq2,3,3)
   fivemersWithNonNuc <- ( !is.na(match(substr(seq1,3,3),c("A","C","G","T"))) & !is.na(match(substr(seq2,3,3),c("A","C","G","T"))) )
   fivemersWithMu <- fivemersWithMu & fivemersWithNonNuc
-  #Number of mutations (for normalization, if specified)
+  seq1 <- seq1[fivemersWithMu]
+  seq2 <- seq2[fivemersWithMu]
+  
+  # Number of mutations (for normalization, if specified)
   numbOfMutation <- sum(fivemersWithMu)
-
-  seq1 <- seq1[fivemersWithMu & fivemersWithNonNuc]
-  seq2 <- seq2[fivemersWithMu & fivemersWithNonNuc]
 
   avgDist <- NA
   a <- tryCatch({
     if(length(seq1)==1){
-      seq1_to_seq2 <- sub_model[substr(seq2,3,3),seq1] * mut_model[seq1]
-      seq2_to_seq1 <- sub_model[substr(seq1,3,3),seq2] * mut_model[seq2]
+      seq1_to_seq2 <- targeting_dist[substr(seq2,3,3),seq1]
+      seq2_to_seq1 <- targeting_dist[substr(seq1,3,3),seq2]
     }else{
-      seq1_to_seq2 <- sum( diag(sub_model[substr(seq2,3,3),seq1]) *  mut_model[seq1] )
-      seq2_to_seq1 <- sum( diag(sub_model[substr(seq1,3,3),seq2]) *  mut_model[seq2] )
+      seq1_to_seq2 <- sum( diag(targeting_dist[substr(seq2,3,3),seq1]) )
+      seq2_to_seq1 <- sum( diag(targeting_dist[substr(seq1,3,3),seq2]) )
     }
     avgDist <- mean(c(seq1_to_seq2, seq2_to_seq1))
   },error = function(e){
@@ -95,11 +98,9 @@ getPairwiseDistances <- function(arrJunctions, model=c("hs5f", "m3n"),
     
   # Define targeting model
   if (model == "hs5f") {
-      mut_model <- HS5FModel@mutability
-      sub_model <- HS5FModel@substitution
+      targeting_model <- HS5FModel
   } else if (model == "m3n") {
-      mut_model <- M3NModel@mutability
-      sub_model <- M3NModel@substitution              
+      targeting_model <- M3NModel
   }
   
   # Convert junctions to uppercase
@@ -124,8 +125,7 @@ getPairwiseDistances <- function(arrJunctions, model=c("hs5f", "m3n"),
     sapply(1:numbOfJuctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfJuctions, function(j) {
       distSeq5Mers(matSeqSlidingFiveMer[,i],
                   matSeqSlidingFiveMer[,j],
-                  sub_model,
-                  mut_model,
+                  targeting_model,
                   normalize=normalize)
     })))
   # Make distance matrix symmetric
@@ -147,8 +147,8 @@ getPairwiseDistances <- function(arrJunctions, model=c("hs5f", "m3n"),
 # arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
 #                    "ACGAACGTATGT", "ACGAACGTATGC",
 #                    "ACGAACGTATCC","AAAAAAAAAAAA")
-# getDistanceToClosest(arrJunctions, HS5FModel@substitution, HS5FModel@mutability, normalize="none" )
-getDistanceToClosest <- function(arrJunctions, sub_model, mut_model, 
+# getDistanceToClosest(arrJunctions, HS5FModel, normalize="none" )
+getDistanceToClosest <- function(arrJunctions, targeting_model, 
                                  normalize=c("none" ,"length", "mutations")) {
   # Initial checks
   normalize <- match.arg(normalize)
@@ -190,8 +190,7 @@ getDistanceToClosest <- function(arrJunctions, sub_model, mut_model,
       sapply(1:numbOfUniqueJuctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJuctions, function(j) {
         distSeq5Mers( matSeqSlidingFiveMer[,i],
                        matSeqSlidingFiveMer[,j],
-                       sub_model,
-                       mut_model,
+                       targeting_model,
                        normalize=normalize)
       })))
 
@@ -255,7 +254,7 @@ getDistanceToClosest <- function(arrJunctions, sub_model, mut_model,
 #'
 #' # Calculate distance to nearest using genotyped V assignments and 5-mer model
 #' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
-#' hist(dist$DIST_NEAREST, breaks=50, xlim=c(0, 15))
+#' hist(dist$DIST_NEAREST, breaks=100, xlim=c(0, 60))
 #'
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
@@ -268,11 +267,9 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
   if(!is.data.frame(db)) { stop('Must submit a data frame') }
 
   if (model == "hs5f") {
-      mut_model <- HS5FModel@mutability
-      sub_model <- HS5FModel@substitution
+      targeting_model <- HS5FModel
   } else if (model == "m3n") {
-      mut_model <- M3NModel@mutability
-      sub_model <- M3NModel@substitution              
+      targeting_model <- M3NModel            
   }
 
   # Parse V and J columns to get gene
@@ -305,15 +302,14 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
   # Create cluster of nproc size and export namespaces
   cluster <- makeCluster(nproc, type = "SOCK")
   registerDoSNOW(cluster)
-  clusterExport(cluster, list("sub_model", "mut_model"), envir=environment())
+  clusterExport(cluster, list("targeting_model"), envir=environment())
   clusterEvalQ(cluster, library(shm))
   
   # Calculate distance to nearest neighbor
   # cat("Calculating distance to nearest neighbor\n")
   db <- arrange(ddply(db, .(V, J, L), function(piece) 
     mutate(piece, DIST_NEAREST=getDistanceToClosest(eval(parse(text=sequenceColumn)),
-                                                    sub_model=sub_model,
-                                                    mut_model=mut_model,
+                                                    targeting_model=targeting_model,
                                                     normalize=normalize)),
     .parallel=TRUE),
     ROW_ID)
