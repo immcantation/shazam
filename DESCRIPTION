@@ -26,7 +26,7 @@ Imports:
 Suggests:
     knitr
 VignetteBuilder: knitr
-LazyData: yes
+LazyData: true
 Collate:
     'shm.R'
     'RegionDefinitions.R'
