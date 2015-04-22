@@ -129,11 +129,6 @@ createBASELINe <- function(id="",
 # @return   A \code{BASELINe} object.
 # 
 # @seealso  See \code{\link{BASELINe}} for the return object.
-# 
-# @examples
-# library(shm)
-# 
-# 
 editBASELINe <- function ( seqBASELINe,
                            field_name,
                            value ) {

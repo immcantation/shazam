@@ -19,9 +19,9 @@ NULL
 #' @slot    description     Description of the model and its source
 #' @slot    boundaries      \code{factor} defining the regions (boundaries) of the 
 #'                          sequence. The levels and values of the \code{factor} 
-#'                          determine the nubmer of regions (e.g. CDR & FWR).
+#'                          determine the nubmer of regions (e.g. CDR and FWR).
 #' @slot    seqLength       the length of the sequence                        
-#' @slot    regions         the levels of the boundaries (e.g. CDR & FWR)
+#' @slot    regions         the levels of the boundaries (e.g. CDR and FWR)
 #' @slot    labels          the labels for the boundary/mutations combinations
 #'                          e.g. CDR_R CDR_S FWR_R, FWR_S.
 #' @slot    citation        publication source.
@@ -59,7 +59,7 @@ setClass("RegionDefinition",
 #' @param    name           name of the region definition.
 #' @param    boundaries     \code{factor} defining the regions (boundaries) of the sequence.
 #'                          the levels and values of the \code{factor} determine the 
-#'                          nubmer of regions (e.g. CDR & FWR).
+#'                          nubmer of regions (e.g. CDR and FWR).
 #' @param    description    description of the region definition and its source data.
 #' @param    citation       publication source.
 #' 
@@ -111,10 +111,10 @@ createRegionDefinition <- function(name=NULL,
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Lefranc MP, Pommié C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
+#'   \item  Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
 #'              Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin 
 #'              and T cell receptor variable domains and Ig superfamily V-like domains. 
-#'              Developmental and comparative immunology. 2003;27:55–77.
+#'              Developmental and comparative immunology. 2003;27:55-77.
 #' }
 "IMGT_V_NO_CDR3"
 
@@ -130,10 +130,10 @@ createRegionDefinition <- function(name=NULL,
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Lefranc MP, Pommié C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
+#'   \item  Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
 #'              Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin 
 #'              and T cell receptor variable domains and Ig superfamily V-like domains. 
-#'              Developmental and comparative immunology. 2003;27:55–77.
+#'              Developmental and comparative immunology. 2003;27:55-77.
 #' }
 #'
 "IMGT_V"
@@ -150,10 +150,10 @@ createRegionDefinition <- function(name=NULL,
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Lefranc MP, Pommié C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
+#'   \item  Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
 #'              Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin 
 #'              and T cell receptor variable domains and Ig superfamily V-like domains. 
-#'              Developmental and comparative immunology. 2003;27:55–77.
+#'              Developmental and comparative immunology. 2003;27:55-77.
 #' }
 "IMGT_V_BY_REGIONS_NO_CDR3"
 
@@ -169,9 +169,9 @@ createRegionDefinition <- function(name=NULL,
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Lefranc MP, Pommié C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
+#'   \item  Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
 #'              Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin 
 #'              and T cell receptor variable domains and Ig superfamily V-like domains. 
-#'              Developmental and comparative immunology. 2003;27:55–77.
+#'              Developmental and comparative immunology. 2003;27:55-77.
 #' }
 "IMGT_V_BY_REGIONS"
