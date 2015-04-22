@@ -18,8 +18,6 @@
 #'   \item  \code{\link{getClonalConsensus}}:       Build clonal consensus sequence.
 #'   \item  \code{\link{getObservedMutations}}:     Compute observed mutation counts.
 #'   \item  \code{\link{getExpectedMutationFrequencies}}:   Compute mutation frequencies.
-#'   \item  \code{\link{computeBaselinePDF}}:       Compute selection strength.
-#'   \item  \code{\link{plotSelection}}:            Plot selection strength.
 #' }
 #'
 #' @section  Targeting models:

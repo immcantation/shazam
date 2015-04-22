@@ -1,3 +1,7 @@
+#' @include RegionDefinitions.R
+#' @include shm.R
+NULL
+
 #### Classes ####
 
 #' S4 class defining a BASELINe selection object
@@ -19,11 +23,15 @@
 #' @slot    observedMutations               The number of mutations observed in the sequence
 #' @slot    expectedMutationFrequencies     The expected frequencies of mutations, based on the
 #'                                          \code{germlineSequence}.
-#' @slot    numbOfSequences                 The number of non NA sequences (i.e. seqeunces with mutations)
-#'                                          in each region/mutations type.
+#' @slot    numbOfSequences                 An \code{array} of the number of non NA sequences (i.e. 
+#'                                          sequences with mutations), for each region (defined in the
+#'                                          \code{defineRegions}).
 #' @slot    regions                         The levels of the boundaries (e.g. CDR & FWR).
 #' @slot    labels                          The labels for the boundary/mutations combinations.
 #'                                          e.g. CDR_R CDR_S FWR_R, FWR_S.
+#' @slot    probDensity                     A \code{list} (one for each sequence in the provided \code{db}
+#'                                          of \code{list(s)} (one for each region) contianing the probability
+#'                                          density function(s).
 #'                          
 #' @name BASELINe
 #' @export
@@ -61,7 +69,9 @@ setClass("BASELINe",
 #' @param   observedMutations               The number of mutations observed in the sequence
 #' @param   expectedMutationFrequencies     The expected frequencies of mutations, based on the
 #'                                          \code{germlineSequence}.
-#' @param   probDensity                     A \code{list} of probability density functions
+#' @param   probDensity                     A \code{list} (one for each sequence in the provided \code{db}
+#'                                          of \code{list(s)} (one for each region) contianing the probability
+#'                                          density function(s).
 #' 
 #' @return   A \code{BASELINe} object.
 #' 
@@ -136,15 +146,16 @@ editBASELINe <- function ( seqBASELINe,
 
 #### BASELINe selection calculating functions ####
 
-#' Return DB of baseline
+#' Return BASELINe probability density functions for each entry in the DB
 #'
-#' \code{getBASELINeProbabilityDensities} calculates 
+#' \code{getBASELINePDF} calculates 
 #'
 #' @param   db                  data.frame containing sequence data.
 #' @param   testStatistic       The statistical framework used to test for selection.
 #'                              \code{local} = CDR_R / (CDR_R + CDR_S)
 #'                              \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S)
 #'                              See Uduman et al. (2011) for further information.
+#' @param   groupBy             Aggregate BASELINe probability density functions from 
 #' @param   sequenceColumn      name of the column containing sample/input sequences.
 #' @param   germlineColumn      name of the column containing germline sequences.
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
@@ -194,7 +205,7 @@ editBASELINe <- function ( seqBASELINe,
 #' db <- readChangeoDb(dbPath)
 #'                      
 #' @export
-getBASELINeProbabilityDensities <- function( db,
+getBASELINePDF <- function( db,
                                              sequenceColumn="SEQUENCE_IMGT",
                                              germlineColumn="GERMLINE_IMGT_D_MASK",
                                              testStatistic=c("local","focused"),

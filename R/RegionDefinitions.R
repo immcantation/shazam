@@ -1,3 +1,13 @@
+# S4 Class defining RegionDefinitions
+# @author     Mohamed Uduman, Gur Yaari
+# @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
+# @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
+# @version    0.1
+# @date       2015.03.08
+
+#' @include shm.R
+NULL
+
 #### Classes ####
 
 #' S4 class defining a region definition
@@ -15,7 +25,7 @@
 #' @slot    labels          the labels for the boundary/mutations combinations
 #'                          e.g. CDR_R CDR_S FWR_R, FWR_S.
 #' @slot    citation       Publication source.
-   
+#'    
 #' @name RegionDefinition
 #' @export
 setClass("RegionDefinition", 

@@ -28,11 +28,11 @@ Suggests:
 VignetteBuilder: knitr
 LazyData: yes
 Collate:
-    'BASELINe.R'
     'shm.R'
+    'RegionDefinitions.R'
+    'BASELINe.R'
     'DistToNearest.R'
     'MutationProfiling.R'
-    'RegionDefinitions.R'
     'TargetingModels.R'
     'addBaseline.R'
     'calcGroupedBaseline.R'
