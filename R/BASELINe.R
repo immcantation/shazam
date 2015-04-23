@@ -91,7 +91,7 @@ createBASELINe <- function(id="",
                            expectedMutationFrequencies=array(NA,1),
                            probDensity=list()){
     
-
+    
     if (class(observedMutations) == "data.frame") {
         observedMutations <- array( as.numeric(observedMutations), 
                                     dimnames=list(colnames(observedMutations)) )
@@ -139,46 +139,43 @@ editBASELINe <- function ( seqBASELINe,
 
 
 
+
+
 #### BASELINe selection calculating functions ####
 
 #' Return BASELINe probability density functions for each entry in the DB
 #'
 #' \code{getBASELINePDF} calculates 
 #'
-#' @param   db                  data.frame containing sequence data.
-#' @param   testStatistic       The statistical framework used to test for selection.
-#'                              \code{local} = CDR_R / (CDR_R + CDR_S)
-#'                              \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S)
-#'                              See Uduman et al. (2011) for further information.
-#' @param   groupBy             Aggregate BASELINe probability density functions from 
-#' @param   sequenceColumn      name of the column containing sample/input sequences.
-#' @param   germlineColumn      name of the column containing germline sequences.
-#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.
-#' @param   nproc               number of cores to distribute the operation over.
+#' @param       db                  data.frame containing sequence data.
+#' @param       testStatistic       The statistical framework used to test for selection.
+#'                                  \code{local} = CDR_R / (CDR_R + CDR_S)
+#'                                  \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S)
+#'                                  See Uduman et al. (2011) for further information.
+#' @param       groupBy             Aggregate BASELINe probability density functions from 
+#' @param       sequenceColumn      name of the column containing sample/input sequences.
+#' @param       germlineColumn      name of the column containing germline sequences.
+#' @param       regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                                  and boundaries of the Ig sequences. Note, only the part of
+#'                                  sequences defined in \code{regionDefinition} are analyzed.
+#'                                  Any mutations outside the definition will be ignored. E.g.
+#'                                  If the default \code{\link{IMGT_V_NO_CDR3}} definition is
+#'                                  used, then mutations in positions greater than 312 will not
+#'                                  be counted.
+#' @param       nproc               number of cores to distribute the operation over. If 
+#'                                  \code{nproc} = 0 then the \code{cluster} has already been
+#'                                  set and will not be reset.
 #' 
-#' @return  A modified \code{db} data.frame with the BASELINe selection values and 95%
-#'          confidence intervals. The columns names are dynamically created based on the
-#'           regions in the \code{regionDefinition}. E.g. For the default
-#'           \code{\link{IMGT_V_NO_CDR3}} definition, which defines positions for CDR and
-#'           FWR, the following columns are added:  
-#'           \itemize{
-#'             \item  \code{BASELINe_CDR}:  BASELINe Sigma value for the CDR
-#'             \item  \code{BASELINe_CDR_95CI_LOWER}: 95% CI for the CDR
-#'             \item  \code{BASELINe_FWR}:  BASELINe Sigma value for the FWR
-#'             \item  \code{BASELINe_FWR_95CI_LOWER}: 95% CI for the FWR
-#'           }
+#' @return      A \code{list} of length two. The first element contains the modified \code{db}
+#'              and the second element is a \code{list} of \code{\link{BASELINe}} objects
+#'              (elements match the sequences in \code{db}).
 #'           
-#' @details
-#' \code{getBASELINe} calculates 
+#' @details     \code{getBASELINe} calculates the BASELINe probability density functions for each
+#'              sequence in the \code{db.}.
 #' 
-#' @seealso  
-#' See also
+#' @seealso     To calculate BASELINe statistics, such as the mean selection strength
+#'              and the 95% confidence interval, see \code{\link{getBASELINeStats}}.
+#' 
 #' 
 #' @references
 #' \enumerate{
@@ -201,11 +198,11 @@ editBASELINe <- function ( seqBASELINe,
 #'                      
 #' @export
 getBASELINePDF <- function( db,
-                                             sequenceColumn="SEQUENCE_IMGT",
-                                             germlineColumn="GERMLINE_IMGT_D_MASK",
-                                             testStatistic=c("local","focused"),
-                                             regionDefinition=IMGT_V_NO_CDR3,
-                                             nproc=1) {
+                            sequenceColumn="SEQUENCE_IMGT",
+                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                            testStatistic=c("local","focused"),
+                            regionDefinition=IMGT_V_NO_CDR3,
+                            nproc=1 ) {
     
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused"))
@@ -221,7 +218,7 @@ getBASELINePDF <- function( db,
         clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition'), envir=environment() )
         clusterEvalQ( cluster, library("shm") )
         registerDoSNOW(cluster)
-    }else{
+    } else if( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
@@ -234,7 +231,7 @@ getBASELINePDF <- function( db,
     expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
     
     if( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
-                
+        
         # checking the validity of input parameters
         if ( !all( c(!is.null(sequenceColumn), !is.null(germlineColumn)) ) ) {
             stop("The OBSERVED and EXPECTED values are not in DB. Please specify the 'sequenceColumn', 'germlineColumn'")
@@ -262,6 +259,10 @@ getBASELINePDF <- function( db,
     
     # Compute the BASELINe prob. density values for all the seqeunces in the DB
     # and for each of the regions, defined in the regionDefinition
+    
+    # Printing status to console
+    cat("Calculating BASELINe probability density functions...\n")
+    
     numbOfSeqs <- nrow(db)
     db_BASELINe <-
         foreach( i=icount(numbOfSeqs) ) %dopar% {
@@ -269,17 +270,17 @@ getBASELINePDF <- function( db,
                                            observedMutations = db[i, observedColumns],
                                            expectedMutationFrequencies = db[i, expectedColumns] )
             return(
-                calculateBASELINeProbabilityDensities( seqBASELINe, 
-                                                       testStatistic=testStatistic,
-                                                       regionDefinition=regionDefinition) 
+                calculateBASELINePDF( seqBASELINe, 
+                                      testStatistic=testStatistic,
+                                      regionDefinition=regionDefinition) 
             )
         }
     
-        
+    
     # Properly shutting down the cluster
     if(nproc>1){ stopCluster(cluster) }
     
-    return(list("db"=db, "db_BASELINe"=db_BASELINe))    
+    return(list("db"=db, "list_BASELINe"=db_BASELINe))    
 }
 
 
@@ -287,35 +288,30 @@ getBASELINePDF <- function( db,
 #'
 #' \code{getBASELINeStats} calculates 
 #'
-#' @param   db                  data.frame containing sequence data.
-#' @param   sequenceColumn      name of the column containing sample/input sequences.
-#' @param   germlineColumn      name of the column containing germline sequences.
-#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.
-#' @param   nproc               number of cores to distribute the operation over.
+#' @param       db              \code{data.frame} containing sequence data.
+#' @param       list_BASELINe   \code{list} of \code{\link{BASELIne}} objects, length matching
+#'                              the number of entires in the \code{db}. (This is returned by 
+#'                              \code{\link{getBASELINePDF}})
+#' @param       nproc           number of cores to distribute the operation over. If 
+#'                              \code{nproc} = 0 then the \code{cluster} has already been
+#'                              set and will not be reset.
 #' 
-#' @return  A modified \code{db} data.frame with the BASELINe selection values and 95%
-#'          confidence intervals. The columns names are dynamically created based on the
-#'           regions in the \code{regionDefinition}. E.g. For the default
-#'           \code{\link{IMGT_V_NO_CDR3}} definition, which defines positions for CDR and
-#'           FWR, the following columns are added:  
-#'           \itemize{
-#'             \item  \code{BASELINe_CDR}:  BASELINe Sigma value for the CDR
-#'             \item  \code{BASELINe_CDR_95CI_LOWER}: 95% CI for the CDR
-#'             \item  \code{BASELINe_FWR}:  BASELINe Sigma value for the FWR
-#'             \item  \code{BASELINe_FWR_95CI_LOWER}: 95% CI for the FWR
-#'           }
+#' @return      A modified \code{db} data.frame with the BASELINe selection values and 95%
+#'              confidence intervals. The columns names are dynamically created based on the
+#'              regions in the \code{regionDefinition}. E.g. For the default
+#'              \code{\link{IMGT_V_NO_CDR3}} definition, which defines positions for CDR and
+#'              FWR, the following columns are added:  
+#'              \itemize{
+#'                  \item  \code{BASELINe_CDR}:  BASELINe Sigma value for the CDR
+#'                  \item  \code{BASELINe_CDR_95CI_LOWER}: 95% CI for the CDR
+#'                  \item  \code{BASELINe_FWR}:  BASELINe Sigma value for the FWR
+#'                  \item  \code{BASELINe_FWR_95CI_LOWER}: 95% CI for the FWR
+#'              }
 #'           
-#' @details
-#' \code{getBASELINe} calculates 
+#' @details     \code{getBASELINeStats} calculates 
 #' 
-#' @seealso  
-#' See also
+#' @seealso     See \code{link{getBASELINePDF}}.
+#' 
 #' @examples
 #' # Load example data
 #' library("shm")
@@ -323,13 +319,39 @@ getBASELINePDF <- function( db,
 #' db <- readChangeoDb(dbPath)
 #'                      
 #' @export
-getBASELINeStats <- function () {
- return(NULL)
+getBASELINeStats <- function ( db,
+                               list_BASELINe,
+                               nproc=1 ) {
+    
+    
+    # Checking if the nrows of db is the same as the length of list_BASELINe
+    if ( length(list_BASELINe)!= nrow(db) ) {
+        stop("The number of entires in db and list_BASELINe do not match.")
+    }
+    
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, getnproc())
+    
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.  
+    if(nproc>1){        
+        cluster <- makeCluster(nproc, type = "SOCK")
+        clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition'), envir=environment() )
+        clusterEvalQ( cluster, library("shm") )
+        registerDoSNOW(cluster)
+    } else if( nproc==1 ) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    }
+    
+    return(NULL)
 }
 
 #' Calculate BASELINe
 #'
-#' \code{calculateBASELINeProbabilityDensities} calculates 
+#' \code{calculateBASELINePDF} calculates 
 #'
 #' @param   seqBASELINe         \code{\link{BASELINe}} object representing the sequence
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
@@ -355,9 +377,9 @@ getBASELINeStats <- function () {
 #' db <- readChangeoDb(dbPath)
 #'                      
 #' @export
-calculateBASELINeProbabilityDensities  <- function( seqBASELINe,
-                                                    testStatistic=c("local", "focused"),
-                                                    regionDefinition=IMGT_V_NO_CDR3 ) {
+calculateBASELINePDF  <- function( seqBASELINe,
+                                   testStatistic=c("local", "focused"),
+                                   regionDefinition=IMGT_V_NO_CDR3 ) {
     
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused"))

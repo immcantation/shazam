@@ -307,6 +307,9 @@ getObservedMutations <- function(db,
         registerDoSEQ()
     }
     
+    # Printing status to console
+    cat("Calculating observed number of mutations...\n")
+    
     # Identify all the mutations in the sequences
     # observedMutations helper function returns a list (1 element per sequence)
     # containing an array of mutations (s or R) and the array labels indicate
@@ -602,11 +605,15 @@ getExpectedMutationFrequencies <- function(db,
         registerDoSEQ()
     }
     
-    numbOfSeqs <- nrow(db)
+    
+    # Printing status to console
+    cat("Calculating the expected frequencies of mutations...\n")
     
     # Calculate targeting for each sequence (based on the germline)
     # Should be a 5 x N matrix where N in the number of nucleotides defined by
     # the regionDefinition
+    numbOfSeqs <- nrow(db)
+    
     targeting_list <-
         foreach( i=icount(numbOfSeqs) ) %dopar% {
             calculateExpectedMutationFrequencies( germlineSeq = db[i,germlineColumn],

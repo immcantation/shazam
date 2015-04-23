@@ -2,7 +2,7 @@
 
 export(binMutationsByRegion)
 export(calcGroupedBaseline)
-export(calculateBASELINeProbabilityDensities)
+export(calculateBASELINePDF)
 export(calculateExpectedMutationFrequencies)
 export(clearConsole)
 export(computeBaselinePDF)
