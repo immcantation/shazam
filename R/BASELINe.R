@@ -337,7 +337,12 @@ getBASELINeStats <- function ( db,
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
         cluster <- makeCluster(nproc, type = "SOCK")
-        clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition'), envir=environment() )
+        clusterExport( cluster, list( 'db', 'list_BASELINe', 
+                                      'calculateBASELINeStats',
+                                      'calculateBASELINeSigma',
+                                      'calculateBASELINeCI',
+                                      'calculateBASELINePvalue' ), 
+                       envir=environment() )
         clusterEvalQ( cluster, library("shm") )
         registerDoSNOW(cluster)
     } else if( nproc==1 ) {
@@ -346,7 +351,28 @@ getBASELINeStats <- function ( db,
         registerDoSEQ()
     }
     
-    return(NULL)
+    # Printing status to console
+    cat("Calculating BASELINe statistics...\n")
+    
+    numbOfSeqs <- nrow(db)
+    BASELINe_stats_list <-
+        foreach( i=icount(numbOfSeqs) ) %dopar% {
+            seqBASELINe <- list_BASELINe[[i]]
+            seqBASELINe_stats <- list()
+            for ( region in seqBASELINe@regions ) {
+                seqBASELINe_stats[[region]] <- calculateBASELINeStats( seqBASELINe@probDensity[[region]] )
+            }
+            seqBASELINe_stats <- unlist( seqBASELINe_stats )
+            names(seqBASELINe_stats) <- gsub("\\.","_",names(seqBASELINe_stats))
+            return( seqBASELINe_stats )
+        }
+    
+    # Convert list of BASELINe stats into a data.frame
+    BASELINe_stats <- do.call(rbind, BASELINe_stats_list)
+    
+    # Bind the stats to db
+    db_new <- cbind(db, BASELINe_stats)
+    return(db_new)   
 }
 
 #' Calculate BASELINe
@@ -430,7 +456,7 @@ calculateBASELINePDF  <- function( seqBASELINe,
             seqBASELINe@expectedMutationFrequencies[expX_Index] / 
             sum( seqBASELINe@expectedMutationFrequencies[expN_Index], na.rm=T )
         
-        list_BASELINE_ProbDensity[[region]] <- calculateBASELINeStatstic( x=obsX, n=obsN, p=expP)
+        list_BASELINE_ProbDensity[[region]] <- calculateBASELINeBinomialPDF( x=obsX, n=obsN, p=expP)
     }
     
     seqBASELINe <- editBASELINe(seqBASELINe, "probDensity", list_BASELINE_ProbDensity)
@@ -443,12 +469,12 @@ calculateBASELINePDF  <- function( seqBASELINe,
 
 # Calculate the BASELINe probability function in a
 # binomial framework.
-calculateBASELINeStatstic <- function ( x=3, 
-                                        n=10, 
-                                        p=0.33,
-                                        CONST_i=CONST_I,
-                                        max_sigma=20,
-                                        length_sigma=4001 ) {
+calculateBASELINeBinomialPDF <- function ( x=3, 
+                                           n=10, 
+                                           p=0.33,
+                                           CONST_i=CONST_I,
+                                           max_sigma=20,
+                                           length_sigma=4001 ) {
     if(n!=0){
         sigma_s<-seq(-max_sigma,max_sigma,length.out=length_sigma)
         sigma_1<-log({CONST_i/{1-CONST_i}}/{p/{1-p}})
@@ -464,3 +490,90 @@ calculateBASELINeStatstic <- function ( x=3,
         return(NA)
     }
 }
+
+
+# Given a BASELIne PDF calculate mean sigma
+calculateBASELINeSigma <- function ( baseline_pdf,
+                                     max_sigma=20,
+                                    length_sigma=4001 ) {
+    
+    if ( length(baseline_pdf)!=length_sigma) { return(NA) }
+    
+    sigma_s <- seq(-max_sigma, max_sigma, length.out=length_sigma)
+    norm = {length_sigma-1}/2/max_sigma
+    return( (baseline_pdf%*%sigma_s/norm)  )
+}
+
+
+# Given a BASELIne PDF calculate Confidence Interval
+calculateBASELINeCI <- function ( baseline_pdf,
+                                  low=0.025,
+                                  up=0.975,
+                                  max_sigma=20,
+                                  length_sigma=4001 ){
+    
+    if ( length(baseline_pdf)!=length_sigma ) { return( c(NA,NA) ) }
+    
+    sigma_s <- seq(-max_sigma, max_sigma, length.out=length_sigma)
+    cdf <- cumsum(baseline_pdf)
+    cdf <- cdf/cdf[length(cdf)]
+    intervalLow <- findInterval(low,cdf)
+    fractionLow <- (low - cdf[intervalLow])/(cdf[intervalLow+1]-cdf[intervalLow])
+    intervalUp <- findInterval(up,cdf)
+    fractionUp <- (up - cdf[intervalUp])/(cdf[intervalUp]-cdf[intervalUp-1])
+    sigmaLow <- sigma_s[intervalLow]+fractionLow*(sigma_s[intervalLow+1]-sigma_s[intervalLow])
+    sigmaUp <- sigma_s[intervalUp]+fractionUp*(sigma_s[intervalUp+1]-sigma_s[intervalUp])
+    return( c(sigmaLow,sigmaUp) )
+}
+
+# Given a BASELIne PDF calculate P value
+calculateBASELINePvalue <- function ( baseline_pdf, 
+                                      length_sigma=4001, 
+                                      max_sigma=20 ){
+    if ( length(baseline_pdf)>1 ) {
+        norm = {length_sigma-1}/2/max_sigma
+        pVal = {sum(baseline_pdf[1:{{length_sigma-1}/2}]) + baseline_pdf[{{length_sigma+1}/2}]/2}/norm
+        if(pVal>0.5){
+            pVal = pVal-1
+        }
+        return(pVal)
+    }else{
+        return(NA)
+    }
+}
+
+
+# Given a BASELIne PDF calculate Mean, Confidence Interval (lower & upper) and P value
+calculateBASELINeStats <- function ( baseline_pdf,
+                                     low=0.025,
+                                     up=0.975,
+                                     max_sigma=20, 
+                                     length_sigma=4001 ){
+    
+    # if NA (i.e. length of baseline_pdf is 1)
+    if ( length(baseline_pdf)==1  ) { return(rep(NA,4)) }
+    
+    
+    baselineSigma <- calculateBASELINeSigma( baseline_pdf=baseline_pdf, 
+                                             max_sigma=max_sigma, 
+                                             length_sigma=length_sigma )
+    
+    
+    baselineCI <- calculateBASELINeCI( baseline_pdf=baseline_pdf,
+                                       low=low,
+                                       up=up,
+                                       max_sigma=max_sigma,
+                                       length_sigma=length_sigma )
+    
+    baselinePvalue <- calculateBASELINePvalue( baseline_pdf=baseline_pdf,
+                                               max_sigma=max_sigma,
+                                               length_sigma=length_sigma )
+    
+    return( c( "Sigma"=baselineSigma, 
+               "CI_Lower"=baselineCI[1], 
+               "CI_Upper"=baselineCI[2],
+               "Pvalue"=baselinePvalue 
+               ) 
+            )
+}
+
