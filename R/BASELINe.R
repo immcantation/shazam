@@ -148,15 +148,14 @@ editBASELINe <- function ( seqBASELINe,
 #' \code{getBASELINe} calculates 
 #'
 #' @param       db                  data.frame containing sequence data.
-#' @param       groupColumn         Name of column in \code{db} to group by. If parameter 
-#'                                  \code{groupColumn} is specified then \code{db_baseline}
+#' @param       groupBy             Name of column in \code{db} to group by. If parameter 
+#'                                  \code{groupBy} is specified then \code{db_baseline}
 #'                                  must also be provided.
-#' @param       db_baseline         data.frame containing sequence data.
+#' @param       db_BASELINe         data.frame containing sequence data.
 #' @param       testStatistic       The statistical framework used to test for selection.
 #'                                  \code{local} = CDR_R / (CDR_R + CDR_S)
 #'                                  \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S)
 #'                                  See Uduman et al. (2011) for further information.
-#' @param       groupBy             Aggregate BASELINe probability density functions from 
 #' @param       sequenceColumn      name of the column containing sample/input sequences.
 #' @param       germlineColumn      name of the column containing germline sequences.
 #' @param       regionDefinition    \code{\link{RegionDefinition}} object defining the regions
@@ -172,7 +171,7 @@ editBASELINe <- function ( seqBASELINe,
 #' 
 #' @return      A \code{list} of length two. The first element contains the modified \code{db}
 #'              and the second element is a \code{list} of \code{\link{BASELINe}} objects
-#'              (elements match the sequences in \code{db}). If parameter \code{groupColumn} 
+#'              (elements match the sequences in \code{db}). If parameter \code{groupBy} 
 #'              is specified then the \code{db} returned is a summary of BASELINe statistics.
 #'           
 #' @details     \code{getBASELINe} calculates the BASELINe probability density functions for each
@@ -203,13 +202,13 @@ editBASELINe <- function ( seqBASELINe,
 #'                      
 #' @export
 getBASELINe <- function( db,
-                            db_BASELINe=NULL,
-                            groupColumn=NULL,
-                            sequenceColumn="SEQUENCE_IMGT",
-                            germlineColumn="GERMLINE_IMGT_D_MASK",
-                            testStatistic=c("local","focused"),
-                            regionDefinition=IMGT_V_NO_CDR3,
-                            nproc=1 ) {
+                         groupBy=NULL,
+                         db_BASELINe=NULL,
+                         sequenceColumn="SEQUENCE_IMGT",
+                         germlineColumn="GERMLINE_IMGT_D_MASK",
+                         testStatistic=c("local","focused"),
+                         regionDefinition=IMGT_V_NO_CDR3,
+                         nproc=1 ) {
     
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused"))
@@ -217,14 +216,14 @@ getBASELINe <- function( db,
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
     
-    if ( !is.null(groupColumn) & length(db_BASELINe)==nrow(db) ){
+    if ( !is.null(groupBy) & length(db_BASELINe)==nrow(db) ){
         
         # Convert the db (data.frame) to a data.table & set keys
         # This is an efficient way to get the groups of CLONES, instead of doing dplyr
         dt <- data.table(db)
-        setkeyv(dt, groupColumn )
+        setkeyv(dt, groupBy )
         # Get the group indexes
-        dt <- dt[ , list( yidx = list(.I) ) , by = list(eval(parse(text=groupColumn))) ]
+        dt <- dt[ , list( yidx = list(.I) ) , by = list(eval(parse(text=groupBy))) ]
         groups <- dt[,yidx]
         
        
