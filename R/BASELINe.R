@@ -381,9 +381,9 @@ getBASELINe <- function( db,
 #' \code{getBASELINeStats} calculates 
 #'
 #' @param       db              \code{data.frame} containing sequence data.
-#' @param       list_BASELINe   \code{list} of \code{\link{BASELIne}} objects, length matching
+#' @param       list_BASELINe   \code{list} of \code{\link{BASELINe}} objects, length matching
 #'                              the number of entires in the \code{db}. (This is returned by 
-#'                              \code{\link{getBASELINePDF}})
+#'                              \code{\link{getBASELINe}})
 #' @param       nproc           number of cores to distribute the operation over. If 
 #'                              \code{nproc} = 0 then the \code{cluster} has already been
 #'                              set and will not be reset.

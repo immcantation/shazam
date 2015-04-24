@@ -61,6 +61,7 @@
 #' @import   data.table
 #' @import   doSNOW
 #' @import   foreach
+#' @import   grid
 #' @import   ggplot2
 #' @import   plyr
 #' @import   scales

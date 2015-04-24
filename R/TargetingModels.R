@@ -1063,6 +1063,11 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
                            style=c("hedgehog", "bar"), size=1, silent=FALSE, 
                            ...) {
     # TODO:  add flag to label or highlight specific 5-mer or 5-mer over threshold.
+    # model=HS5FModel
+    # nucleotides="T"
+    # style="hedgehog"
+    # size=1
+    # silent=FALSE
     
     # Check input
     nucleotides <- toupper(nucleotides)
@@ -1078,13 +1083,15 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     # Set base plot settings
     base_theme <- theme_bw() +
         theme(panel.background=element_blank(),
-              panel.grid=element_blank(),
               panel.border=element_blank(),
+              panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank(),
               panel.margin=unit(c(0, 0, 0, 0), "inches")) +
-        theme(axis.title.x=element_blank(),
-              axis.text.x=element_blank(), 
-              axis.ticks.x=element_blank()) +
+        #theme(axis.title.x=element_blank(),
+        #      axis.text.x=element_blank(), 
+        #      axis.ticks.x=element_blank()) +
         theme(legend.position="top")
+
     
     # Scaling and layout parameters
     score_offset <- 0
@@ -1120,23 +1127,36 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     
     # Subset to nucleotides of interest
     mut_df <- subset(mut_df, pos3 %in% nucleotides)
-    # Rescale scores to range 0-1 for plotting
-    mut_df$score <- mut_df$score / max(mut_df$score, na.rm=TRUE)
     
-    # TODO:  Swap direction of G/T nucleotides and at 5'/3' logos.
+    # Functions to transform and revert score for plotting
+    score_max <- max(mut_df$score, na.rm=TRUE)
+    .transform_score <- function(x) { x / score_max * score_scale + score_offset }
+    .invert_score <- function(x) { (x - score_offset) / score_scale * score_max }
+    
+    # Rescale scores for plotting
+    mut_df$score <- .transform_score(mut_df$score)
+    
     # Build plots for each center nucleotide
     plot_list <- list()
     for (center_nuc in nucleotides) {
+        # center_nuc <- nucleotides[1]
         # Subset data to center nucleotide
         sub_df <- subset(mut_df, pos3 == center_nuc)
         sub_df$x <- 1:nrow(sub_df)
         
+        # Swap orientation of positions is center nucleotide is G or T
+        mut_names <- colnames(mut_positions)
+        if (center_nuc %in% c("G", "T")) {
+            names(sub_df)[names(sub_df) %in% mut_names] <- rev(mut_names)
+            mut_names <- rev(mut_names)
+        }
+        
         # Melt 5-mer position data
         sub_melt <- reshape2::melt(sub_df, id.vars=c("x"), 
-                                   measure.vars=colnames(mut_positions),
+                                   measure.vars=mut_names,
                                    variable.name="pos",
                                    value.name="char")
-        sub_melt$pos <- factor(sub_melt$pos, levels=colnames(mut_positions))
+        sub_melt$pos <- factor(sub_melt$pos, levels=mut_names)
         sub_melt$pos <- as.numeric(sub_melt$pos)
 
         # Define text position data
@@ -1154,8 +1174,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             sub_text[[i]] <- tmp_df
         }
 
-        # Rescale for plotting
-        sub_df$score <- sub_df$score * score_scale + score_offset
+        # Define text positions for inner circle
         sub_melt$pos <- sub_melt$pos + text_offset
         sub_text <- lapply(sub_text, function(x) { transform(x, text_y=text_y + text_offset) })
         
@@ -1167,12 +1186,13 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             ylab("") + 
             scale_color_manual(name="Motif", values=motif_colors) +
             scale_fill_manual(name="Nucleotide", values=dna_colors, guide=FALSE) +
+            #scale_fill_manual(name="", values=c(motif_colors, dna_colors), guide=FALSE) +
             geom_segment(data=sub_df, mapping=aes(x=x, xend=x, yend=score, color=motif), 
                          y=score_offset, size=2*size) +
-            #geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif, color=motif), stat="identity", 
+            #geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif), stat="identity", 
             #         position="identity", size=0) +
             #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=5, fill="white") +
-            geom_tile(data=sub_melt, mapping=aes(x=x, y=pos, fill=char), size=0) +
+            geom_tile(data=sub_melt, mapping=aes(x=x, y=pos, fill=char), size=0, show_guide=FALSE) +
             geom_text(data=sub_text[[1]], mapping=aes(x=text_x, y=text_y, label=text_label), 
                       color="black", hjust=0.5, vjust=0.5, size=3*size) +
             geom_text(data=sub_text[[2]], mapping=aes(x=text_x, y=text_y, label=text_label), 
@@ -1185,20 +1205,32 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         
         if (style == "hedgehog") {
             y_limits <- c(text_offset - 1, score_scale + score_offset)
-            p1 <- p1 + theme(axis.title.y=element_blank(),
-                             axis.text.y=element_blank(), 
-                             axis.ticks.y=element_blank()) +
+            orient_x <- sub_text[[3]]$text_x[1]
+            orient_y <- text_offset - 1
+            orient_label <- ifelse(center_nuc %in% c("G", "T"), "3'", "5'")
+            p1 <- p1 + theme(panel.grid=element_blank(), 
+                             axis.title=element_blank(),
+                             axis.text=element_blank(), 
+                             axis.ticks=element_blank()) +
                 scale_x_continuous(expand=c(0, 0)) +
                 scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
-                coord_polar(theta="x")
+                coord_polar(theta="x") +
+                geom_text(x=orient_x, y=orient_y, label=orient_label, 
+                          color="black", fontface="plain",
+                          hjust=0.5, vjust=0.5, size=5*size)
         } else if (style == "bar") {
-            # TODO: proper axis ticks with transform to prob?
+            y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
-            p1 <- p1 + theme(axis.title.y=element_blank(),
-                             axis.text.y=element_blank(), 
-                             axis.ticks.y=element_blank()) +
-                scale_x_continuous(expand=c(0, 0)) +
-                scale_y_continuous(limits=y_limits, expand=c(0, 0))
+            orient_label <- ifelse(center_nuc %in% c("G", "T"), "3'", "5'")
+            #p1 <- p1 + theme() +
+            p1 <- p1 + theme(axis.line=element_line(color="black"),
+                             axis.text.x=element_blank(), 
+                             axis.ticks.x=element_blank()) +
+                xlab(orient_label) +
+                ylab("Mutability") +
+                scale_x_continuous(expand=c(0, 1)) +
+                scale_y_continuous(limits=y_limits, breaks=y_breaks, expand=c(0, 0.5),
+                                   labels=function(x) scales::scientific(.invert_score(x)))
         }
 
         # Add additional theme elements

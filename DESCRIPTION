@@ -19,6 +19,7 @@ Depends:
 Imports:
     data.table,
     foreach,
+    grid,
     SDMTools,
     scales,
     seqinr,
@@ -34,5 +35,6 @@ Collate:
     'DistToNearest.R'
     'MutationProfiling.R'
     'TargetingModels.R'
+    'plot_tmp.R'
     'processNucMutations.R'
     'selection.R'
