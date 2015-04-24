@@ -145,14 +145,17 @@ editBASELINe <- function ( seqBASELINe,
 
 #' Return BASELINe probability density functions for each entry in the DB
 #'
-#' \code{getBASELINePDF} calculates 
+#' \code{getBASELINe} calculates 
 #'
 #' @param       db                  data.frame containing sequence data.
+#' @param       groupBy             Name of column in \code{db} to group by. If parameter 
+#'                                  \code{groupBy} is specified then \code{db_baseline}
+#'                                  must also be provided.
+#' @param       db_BASELINe         data.frame containing sequence data.
 #' @param       testStatistic       The statistical framework used to test for selection.
 #'                                  \code{local} = CDR_R / (CDR_R + CDR_S)
 #'                                  \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S)
 #'                                  See Uduman et al. (2011) for further information.
-#' @param       groupBy             Aggregate BASELINe probability density functions from 
 #' @param       sequenceColumn      name of the column containing sample/input sequences.
 #' @param       germlineColumn      name of the column containing germline sequences.
 #' @param       regionDefinition    \code{\link{RegionDefinition}} object defining the regions
@@ -168,13 +171,14 @@ editBASELINe <- function ( seqBASELINe,
 #' 
 #' @return      A \code{list} of length two. The first element contains the modified \code{db}
 #'              and the second element is a \code{list} of \code{\link{BASELINe}} objects
-#'              (elements match the sequences in \code{db}).
+#'              (elements match the sequences in \code{db}). If parameter \code{groupBy} 
+#'              is specified then the \code{db} returned is a summary of BASELINe statistics.
 #'           
 #' @details     \code{getBASELINe} calculates the BASELINe probability density functions for each
 #'              sequence in the \code{db.}.
 #' 
 #' @seealso     To calculate BASELINe statistics, such as the mean selection strength
-#'              and the 95\% confidence interval, see \code{\link{getBASELINeStats}}.
+#'              and the 95% confidence interval, see \code{\link{getBASELINeStats}}.
 #' 
 #' 
 #' @references
@@ -197,12 +201,14 @@ editBASELINe <- function ( seqBASELINe,
 #' db <- readChangeoDb(dbPath)
 #'                      
 #' @export
-getBASELINePDF <- function( db,
-                            sequenceColumn="SEQUENCE_IMGT",
-                            germlineColumn="GERMLINE_IMGT_D_MASK",
-                            testStatistic=c("local","focused"),
-                            regionDefinition=IMGT_V_NO_CDR3,
-                            nproc=1 ) {
+getBASELINe <- function( db,
+                         groupBy=NULL,
+                         db_BASELINe=NULL,
+                         sequenceColumn="SEQUENCE_IMGT",
+                         germlineColumn="GERMLINE_IMGT_D_MASK",
+                         testStatistic=c("local","focused"),
+                         regionDefinition=IMGT_V_NO_CDR3,
+                         nproc=1 ) {
     
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused"))
@@ -210,77 +216,163 @@ getBASELINePDF <- function( db,
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
     
-    # If user wants to paralellize this function and specifies nproc > 1, then
-    # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.  
-    if(nproc>1){        
-        cluster <- makeCluster(nproc, type = "SOCK")
-        clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition'), envir=environment() )
-        clusterEvalQ( cluster, library("shm") )
-        registerDoSNOW(cluster)
-    } else if( nproc==1 ) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ 
-        # (needed for 'foreach' in non-parallel mode)
-        registerDoSEQ()
-    }
-    
-    
-    # If db does not contain the correct OBSERVED & MUTATIONS columns then first
-    # create them. After that BASELINe prob. densities can be calcualted per seqeunce.
-    observedColumns <- paste0("OBSERVED_", regionDefinition@labels)
-    expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
-    
-    if( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
+    if ( !is.null(groupBy) & length(db_BASELINe)==nrow(db) ){
         
-        # checking the validity of input parameters
-        if ( !all( c(!is.null(sequenceColumn), !is.null(germlineColumn)) ) ) {
-            stop("The OBSERVED and EXPECTED values are not in DB. Please specify the 'sequenceColumn', 'germlineColumn'")
+        # Convert the db (data.frame) to a data.table & set keys
+        # This is an efficient way to get the groups of CLONES, instead of doing dplyr
+        dt <- data.table(db)
+        setkeyv(dt, groupBy )
+        # Get the group indexes
+        dt <- dt[ , list( yidx = list(.I) ) , by = list(eval(parse(text=groupBy))) ]
+        groups <- dt[,yidx]
+        
+       
+        
+        # If user wants to paralellize this function and specifies nproc > 1, then
+        # initialize and register slave R processes/clusters & 
+        # export all nesseary environment variables, functions and packages.  
+        if(nproc>1){        
+            cluster <- makeCluster(nproc, type = "SOCK")
+            clusterExport( cluster, list('dt', 'db_BASELINe', 'groups', 
+                                         'break2chunks', 'PowersOfTwo', 
+                                         'convolutionPowersOfTwo', 
+                                         'convolutionPowersOfTwoByTwos', 
+                                         'weighted_conv', 
+                                         'calculate_bayesGHelper', 
+                                         'groupPosteriors', 'fastConv'), 
+                           envir=environment() )
+            clusterEvalQ( cluster, library("shm") )
+            registerDoSNOW(cluster)
+        } else if( nproc==1 ) {
+            # If needed to run on a single core/cpu then, regsiter DoSEQ 
+            # (needed for 'foreach' in non-parallel mode)
+            registerDoSEQ()
         }
         
-        db <- getClonalConsensus(db, 
-                                 cloneColumn="CLONE", 
-                                 sequenceColumn="SEQUENCE_IMGT",
-                                 germlineColumn="GERMLINE_IMGT_D_MASK",
-                                 collapseByClone=TRUE,nproc=0)
-        
-        db <- getObservedMutations(db,
-                                   sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
-                                   germlineColumn="GERMLINE_IMGT_D_MASK",
-                                   regionDefinition=IMGT_V_NO_CDR3,
-                                   nproc=0)
-        
-        
-        db <- getExpectedMutationFrequencies(db,
-                                             sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
-                                             germlineColumn="GERMLINE_IMGT_D_MASK",
-                                             regionDefinition=IMGT_V_NO_CDR3,
-                                             nproc=0)
-    }
-    
-    # Compute the BASELINe prob. density values for all the seqeunces in the DB
-    # and for each of the regions, defined in the regionDefinition
-    
-    # Printing status to console
-    cat("Calculating BASELINe probability density functions...\n")
-    
-    numbOfSeqs <- nrow(db)
-    db_BASELINe <-
-        foreach( i=icount(numbOfSeqs) ) %dopar% {
-            seqBASELINe <- createBASELINe( id = db[i,"SEQUENCE_ID"],
-                                           observedMutations = db[i, observedColumns],
-                                           expectedMutationFrequencies = db[i, expectedColumns] )
-            return(
-                calculateBASELINePDF( seqBASELINe, 
-                                      testStatistic=testStatistic,
-                                      regionDefinition=regionDefinition) 
-            )
+        regions <- regionDefinition@regions
+        numbOfGroups <- length(groups)
+        db_BASELINe <-
+            foreach( i=icount(numbOfGroups) ) %dopar% {
+                group_probDensity <- list()
+                for(region in regions){
+                    group_probDensity[[region]] <- 
+                        groupPosteriors(
+                            sapply( db_BASELINe[ groups[[i]] ], function(x) { return(x@probDensity[[region]])} )
+                        )                    
+                }
+                groupBASELINe <- createBASELINe( id=dt[i]$parse, 
+                                                 regionDefinition=regionDefinition,
+                                                 probDensity=group_probDensity )
+                return(groupBASELINe)
+            }
+
+        # Summarize
+        if(nproc>1){        
+            clusterExport( cluster, list( 'db_BASELINe', 
+                                          'calculateBASELINeStats',
+                                          'calculateBASELINeSigma',
+                                          'calculateBASELINeCI',
+                                          'calculateBASELINePvalue' ), 
+                           envir=environment() )          
         }
+        
+        numbOfSeqs <- length(db_BASELINe)
+        BASELINe_stats_list <-
+            foreach( i=icount(numbOfSeqs) ) %dopar% {
+                seqBASELINe <- db_BASELINe[[i]]
+                seqBASELINe_stats <- list()
+                for ( region in seqBASELINe@regions ) {
+                    seqBASELINe_stats[[region]] <- calculateBASELINeStats( seqBASELINe@probDensity[[region]] )
+                }
+                seqBASELINe_stats <- unlist( seqBASELINe_stats )
+                names(seqBASELINe_stats) <- gsub("\\.","_",names(seqBASELINe_stats))
+                return( seqBASELINe_stats )
+            }
+        
+        # Convert list of BASELINe stats into a data.frame
+        BASELINe_stats <- do.call(rbind, BASELINe_stats_list)
+        
+        # Bind the stats to db
+        db_new <- cbind( "GROUP"=dt[,parse], BASELINe_stats)
+        
+        return( list("db"=db_new, "list_BASELINe"=db_BASELINe)) 
+        
+    } else {
+        
+        
+        # If user wants to paralellize this function and specifies nproc > 1, then
+        # initialize and register slave R processes/clusters & 
+        # export all nesseary environment variables, functions and packages.  
+        if(nproc>1){        
+            cluster <- makeCluster(nproc, type = "SOCK")
+            clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition'), envir=environment() )
+            clusterEvalQ( cluster, library("shm") )
+            registerDoSNOW(cluster)
+        } else if( nproc==1 ) {
+            # If needed to run on a single core/cpu then, regsiter DoSEQ 
+            # (needed for 'foreach' in non-parallel mode)
+            registerDoSEQ()
+        }
+        
     
+        
+        # If db does not contain the correct OBSERVED & MUTATIONS columns then first
+        # create them. After that BASELINe prob. densities can be calcualted per seqeunce.
+        observedColumns <- paste0("OBSERVED_", regionDefinition@labels)
+        expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
+        
+        if( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
+            
+            # checking the validity of input parameters
+            if ( !all( c(!is.null(sequenceColumn), !is.null(germlineColumn)) ) ) {
+                stop("The OBSERVED and EXPECTED values are not in DB. Please specify the 'sequenceColumn', 'germlineColumn'")
+            }
+            
+            db <- getClonalConsensus(db, 
+                                     cloneColumn="CLONE", 
+                                     sequenceColumn="SEQUENCE_IMGT",
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     collapseByClone=TRUE,nproc=0)
+            
+            db <- getObservedMutations(db,
+                                       sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+                                       germlineColumn="GERMLINE_IMGT_D_MASK",
+                                       regionDefinition=IMGT_V_NO_CDR3,
+                                       nproc=0)
+            
+            
+            db <- getExpectedMutationFrequencies(db,
+                                                 sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+                                                 germlineColumn="GERMLINE_IMGT_D_MASK",
+                                                 regionDefinition=IMGT_V_NO_CDR3,
+                                                 nproc=0)
+        }
+        
+        # Compute the BASELINe prob. density values for all the seqeunces in the DB
+        # and for each of the regions, defined in the regionDefinition
+        
+        # Printing status to console
+        cat("Calculating BASELINe probability density functions...\n")
+        
+        numbOfSeqs <- nrow(db)
+        db_BASELINe <-
+            foreach( i=icount(numbOfSeqs) ) %dopar% {
+                seqBASELINe <- createBASELINe( id = db[i,"SEQUENCE_ID"],
+                                               observedMutations = db[i, observedColumns],
+                                               expectedMutationFrequencies = db[i, expectedColumns] )
+                return(
+                    calculateBASELINePDF( seqBASELINe, 
+                                          testStatistic=testStatistic,
+                                          regionDefinition=regionDefinition) 
+                )
+            }
+        
+        
+        # Properly shutting down the cluster
+        if(nproc>1){ stopCluster(cluster) }
     
-    # Properly shutting down the cluster
-    if(nproc>1){ stopCluster(cluster) }
-    
-    return(list("db"=db, "list_BASELINe"=db_BASELINe))    
+        return(list("db"=db, "list_BASELINe"=db_BASELINe))  
+    }
 }
 
 
@@ -289,7 +381,7 @@ getBASELINePDF <- function( db,
 #' \code{getBASELINeStats} calculates 
 #'
 #' @param       db              \code{data.frame} containing sequence data.
-#' @param       list_BASELINe   \code{list} of \code{\link{BASELINe}} objects, length matching
+#' @param       list_BASELINe   \code{list} of \code{\link{BASELIne}} objects, length matching
 #'                              the number of entires in the \code{db}. (This is returned by 
 #'                              \code{\link{getBASELINePDF}})
 #' @param       nproc           number of cores to distribute the operation over. If 
@@ -310,7 +402,7 @@ getBASELINePDF <- function( db,
 #'           
 #' @details     \code{getBASELINeStats} calculates 
 #' 
-#' @seealso     See \code{\link{getBASELINePDF}}.
+#' @seealso     See \code{link{getBASELINePDF}}.
 #' 
 #' @examples
 #' # Load example data
@@ -575,6 +667,152 @@ calculateBASELINeStats <- function ( baseline_pdf,
                "Pvalue"=baselinePvalue 
                ) 
             )
+}
+
+
+#### Original BASELINe functions ####
+
+##Covolution
+break2chunks<-function(G=1000){
+    base<-2^round(log(sqrt(G),2),0)
+    return(c(rep(base,floor(G/base)-1),base+G-(floor(G/base)*base)))
+}
+
+PowersOfTwo <- function(G=100){
+    exponents <- array()
+    i = 0
+    while(G > 0){
+        i=i+1
+        exponents[i] <- floor( log2(G) )
+        G <- G-2^exponents[i]
+    }
+    return(exponents)
+}
+
+convolutionPowersOfTwo <- function( cons, length_sigma=4001 ){
+    G = ncol(cons)
+    if(G>1){
+        for(gen in log(G,2):1){
+            ll<-seq(from=2,to=2^gen,by=2)
+            sapply(ll,function(l){cons[,l/2]<<-weighted_conv(cons[,l],cons[,l-1],length_sigma=length_sigma)})
+        }
+    }
+    return( cons[,1] )
+}
+
+convolutionPowersOfTwoByTwos <- function( cons, length_sigma=4001,G=1 ){
+    if(length(ncol(cons))) G<-ncol(cons)
+    groups <- PowersOfTwo(G)
+    matG <- matrix(NA, ncol=length(groups), nrow=length(cons)/G )
+    startIndex = 1
+    for( i in 1:length(groups) ){
+        stopIndex <- 2^groups[i] + startIndex - 1
+        if(stopIndex!=startIndex){
+            matG[,i] <- convolutionPowersOfTwo( cons[,startIndex:stopIndex], length_sigma=length_sigma )
+            startIndex = stopIndex + 1
+        }
+        else {
+            if(G>1) matG[,i] <- cons[,startIndex:stopIndex]
+            else matG[,i] <- cons
+            #startIndex = stopIndex + 1
+        }
+    }
+    return( list( matG, groups ) )
+}
+
+weighted_conv<-function(x,y,w=1,m=100,length_sigma=4001){
+    lx<-length(x)
+    ly<-length(y)
+    if({lx<m}| {{lx*w}<m}| {{ly}<m}| {{ly*w}<m}){
+        if(w<1){
+            y1<-approx(1:ly,y,seq(1,ly,length.out=m))$y
+            x1<-approx(1:lx,x,seq(1,lx,length.out=m/w))$y
+            lx<-length(x1)
+            ly<-length(y1)
+        }
+        else {
+            y1<-approx(1:ly,y,seq(1,ly,length.out=m*w))$y
+            x1<-approx(1:lx,x,seq(1,lx,length.out=m))$y
+            lx<-length(x1)
+            ly<-length(y1)
+        }
+    }
+    else{
+        x1<-x
+        y1<-approx(1:ly,y,seq(1,ly,length.out=floor(lx*w)))$y
+        ly<-length(y1)
+    }
+    tmp<-approx(x=1:(lx+ly-1),y=convolve(x1,rev(y1),type="open"),xout=seq(1,lx+ly-1,length.out=length_sigma))$y
+    tmp[tmp<=0] = 0
+    return(tmp/sum(tmp))
+}
+
+calculate_bayesGHelper <- function( listMatG,length_sigma=4001 ){
+    matG <- listMatG[[1]]
+    groups <- listMatG[[2]]
+    i = 1
+    resConv <- matG[,i]
+    denom <- 2^groups[i]
+    if(length(groups)>1){
+        while( i<length(groups) ){
+            i = i + 1
+            resConv <- weighted_conv(resConv, matG[,i], w= {{2^groups[i]}/denom} ,length_sigma=length_sigma)
+            #cat({{2^groups[i]}/denom},"\n")
+            denom <- denom + 2^groups[i]
+        }
+    }
+    return(resConv)
+}
+
+# Given a list of PDFs, returns a convoluted PDF
+groupPosteriors <- function( listPosteriors, max_sigma=20, length_sigma=4001 ,Threshold=2 ){
+    listPosteriors = listPosteriors[ !is.na(listPosteriors) ]
+    Length_Postrior<-length(listPosteriors)
+    if(Length_Postrior>1 & Length_Postrior<=Threshold){
+        cons = matrix(unlist(listPosteriors),length(listPosteriors[[1]]),length(listPosteriors))
+        listMatG <- convolutionPowersOfTwoByTwos(cons,length_sigma=length_sigma)
+        y<-calculate_bayesGHelper(listMatG,length_sigma=length_sigma)
+        return( y/sum(y)/(2*max_sigma/(length_sigma-1)) )
+    }else if(Length_Postrior==1) return(listPosteriors[[1]])
+    else  if(Length_Postrior==0) return(NA)
+    else {
+        cons = matrix(unlist(listPosteriors),length(listPosteriors[[1]]),length(listPosteriors))
+        y = fastConv(cons,max_sigma=max_sigma, length_sigma=length_sigma )
+        return( y/sum(y)/(2*max_sigma/(length_sigma-1)) )
+    }
+}
+
+fastConv<-function(cons, max_sigma=20, length_sigma=4001){
+    chunks<-break2chunks(G=ncol(cons))
+    if(ncol(cons)==3) chunks<-2:1
+    index_chunks_end <- cumsum(chunks)
+    index_chunks_start <- c(1,index_chunks_end[-length(index_chunks_end)]+1)
+    index_chunks <- cbind(index_chunks_start,index_chunks_end)
+    
+    case <- sum(chunks!=chunks[1])
+    if(case==1) End <- max(1,((length(index_chunks)/2)-1))
+    else End <- max(1,((length(index_chunks)/2)))
+    
+    firsts <- sapply(1:End,function(i){
+        indexes<-index_chunks[i,1]:index_chunks[i,2]
+        convolutionPowersOfTwoByTwos(cons[ ,indexes])[[1]]
+    })
+    if(case==0){
+        result<-calculate_bayesGHelper( convolutionPowersOfTwoByTwos(firsts) )
+    }else if(case==1){
+        last<-list(calculate_bayesGHelper(
+            convolutionPowersOfTwoByTwos( cons[ ,index_chunks[length(index_chunks)/2,1]:index_chunks[length(index_chunks)/2,2]] )
+        ),0)
+        result_first<-calculate_bayesGHelper(convolutionPowersOfTwoByTwos(firsts))
+        result<-calculate_bayesGHelper(
+            list(
+                cbind(
+                    result_first,last[[1]]),
+                c(log(index_chunks_end[length(index_chunks)/2-1],2),log(index_chunks[length(index_chunks)/2,2]-index_chunks[length(index_chunks)/2,1]+1,2))
+            )
+        )
+    }
+    return(as.vector(result))
 }
 
 
