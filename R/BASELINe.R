@@ -221,19 +221,24 @@ getBASELINe <- function( db,
         # Convert the db (data.frame) to a data.table & set keys
         # This is an efficient way to get the groups of CLONES, instead of doing dplyr
         dt <- data.table(db)
-        setkeyv(dt, groupBy )
+        #setkeyv(dt, groupBy )
         # Get the group indexes
-        dt <- dt[ , list( yidx = list(.I) ) , by = list(eval(parse(text=groupBy))) ]
-        groups <- dt[,yidx]
-        
-       
+        groupByFormatted <- paste(groupBy, collapse=",", sep=",")
+        dt <- dt[ , list( yidx = list(.I) ) , by=groupByFormatted ]
+        groups <- dt[,yidx] 
+        if(length(groupBy)==1){
+            mat_dt <- unlist(as.matrix(dt)[,groupBy])
+        }else{
+            mat_dt <- as.matrix(dt)[,groupBy]
+        }
         
         # If user wants to paralellize this function and specifies nproc > 1, then
         # initialize and register slave R processes/clusters & 
         # export all nesseary environment variables, functions and packages.  
         if(nproc>1){        
             cluster <- makeCluster(nproc, type = "SOCK")
-            clusterExport( cluster, list('dt', 'db_BASELINe', 'groups', 
+            clusterExport( cluster, list('dt', 'db_BASELINe', 'groups',
+                                         'groupBy', 'mat_dt',
                                          'break2chunks', 'PowersOfTwo', 
                                          'convolutionPowersOfTwo', 
                                          'convolutionPowersOfTwoByTwos', 
@@ -257,10 +262,12 @@ getBASELINe <- function( db,
                 for(region in regions){
                     group_probDensity[[region]] <- 
                         groupPosteriors(
-                            sapply( db_BASELINe[ groups[[i]] ], function(x) { return(x@probDensity[[region]])} )
+                            lapply( db_BASELINe[ groups[[i]] ], 
+                                    function(x) { return(x@probDensity[[region]])}
+                            )
                         )                    
                 }
-                groupBASELINe <- createBASELINe( id=dt[i]$parse, 
+                groupBASELINe <- createBASELINe( id=as.character(i), 
                                                  regionDefinition=regionDefinition,
                                                  probDensity=group_probDensity )
                 return(groupBASELINe)
@@ -279,22 +286,31 @@ getBASELINe <- function( db,
         numbOfSeqs <- length(db_BASELINe)
         BASELINe_stats_list <-
             foreach( i=icount(numbOfSeqs) ) %dopar% {
-                seqBASELINe <- db_BASELINe[[i]]
-                seqBASELINe_stats <- list()
-                for ( region in seqBASELINe@regions ) {
-                    seqBASELINe_stats[[region]] <- calculateBASELINeStats( seqBASELINe@probDensity[[region]] )
+                if(length(groupBy==1)){ 
+                    groupInfo <- mat_dt[i]
+                }else{
+                    groupInfo <- unlist(mat_dt[i,])
                 }
-                seqBASELINe_stats <- unlist( seqBASELINe_stats )
-                names(seqBASELINe_stats) <- gsub("\\.","_",names(seqBASELINe_stats))
+                seqBASELINe <- db_BASELINe[[i]]
+                seqBASELINe_stats <- matrix(NA, 
+                                            ncol=(5+length(groupBy)), 
+                                            nrow=length(regions),
+                                            dimnames=list( regions, 
+                                                           c(groupBy,"REGION","SIGMA",
+                                                             "CI_LOWER","CI_UPPER",
+                                                             "P_VALUE")
+                                                         )
+                                            )
+                seqBASELINe_stats[,groupBy] = rep(groupInfo, each=length(regions))
+                for ( region in seqBASELINe@regions ) {
+                    seqBASELINe_stats[region, c("REGION","SIGMA","CI_LOWER","CI_UPPER","P_VALUE")] <- 
+                        c( region, calculateBASELINeStats( seqBASELINe@probDensity[[region]] ) )                     
+                }
                 return( seqBASELINe_stats )
             }
         
         # Convert list of BASELINe stats into a data.frame
-        BASELINe_stats <- do.call(rbind, BASELINe_stats_list)
-        
-        # Bind the stats to db
-        db_new <- cbind( "GROUP"=dt[,parse], BASELINe_stats)
-        
+        db_new <- do.call(rbind, BASELINe_stats_list)
         return( list("db"=db_new, "list_BASELINe"=db_BASELINe)) 
         
     } else {
@@ -381,9 +397,9 @@ getBASELINe <- function( db,
 #' \code{getBASELINeStats} calculates 
 #'
 #' @param       db              \code{data.frame} containing sequence data.
-#' @param       list_BASELINe   \code{list} of \code{\link{BASELIne}} objects, length matching
+#' @param       list_BASELINe   \code{list} of \code{\link{BASELINe}} objects, length matching
 #'                              the number of entires in the \code{db}. (This is returned by 
-#'                              \code{\link{getBASELINePDF}})
+#'                              \code{\link{getBASELINe}})
 #' @param       nproc           number of cores to distribute the operation over. If 
 #'                              \code{nproc} = 0 then the \code{cluster} has already been
 #'                              set and will not be reset.
