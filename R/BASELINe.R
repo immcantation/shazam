@@ -174,7 +174,7 @@ editBASELINe <- function ( seqBASELINe,
 #'              sequence in the \code{db.}.
 #' 
 #' @seealso     To calculate BASELINe statistics, such as the mean selection strength
-#'              and the 95% confidence interval, see \code{\link{getBASELINeStats}}.
+#'              and the 95\% confidence interval, see \code{\link{getBASELINeStats}}.
 #' 
 #' 
 #' @references
@@ -289,7 +289,7 @@ getBASELINePDF <- function( db,
 #' \code{getBASELINeStats} calculates 
 #'
 #' @param       db              \code{data.frame} containing sequence data.
-#' @param       list_BASELINe   \code{list} of \code{\link{BASELIne}} objects, length matching
+#' @param       list_BASELINe   \code{list} of \code{\link{BASELINe}} objects, length matching
 #'                              the number of entires in the \code{db}. (This is returned by 
 #'                              \code{\link{getBASELINePDF}})
 #' @param       nproc           number of cores to distribute the operation over. If 
@@ -310,7 +310,7 @@ getBASELINePDF <- function( db,
 #'           
 #' @details     \code{getBASELINeStats} calculates 
 #' 
-#' @seealso     See \code{link{getBASELINePDF}}.
+#' @seealso     See \code{\link{getBASELINePDF}}.
 #' 
 #' @examples
 #' # Load example data
@@ -576,4 +576,5 @@ calculateBASELINeStats <- function ( baseline_pdf,
                ) 
             )
 }
+
 

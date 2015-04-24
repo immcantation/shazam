@@ -151,7 +151,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                                     multipleMutation=c("independent", "ignore"))  {
     # model="RS"
     # sequenceColumn="SEQUENCE_IMGT"
-    # germlineColumn="GERMLINE_IMGT_D_MASK"\
+    # germlineColumn="GERMLINE_IMGT_D_MASK"
     # vCallColumn="V_CALL"
     # multipleMutation="independent"
     
@@ -355,6 +355,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 
     # TODO:  add imputation for missing values (0 count). options count=1, count=mean, count=min(!=0)
     # TODO:  use more complicated imputation (as per paper)
+    
+    
     # TODO:  where is the value for A->A etc set?  this should be done there instead.
     # Assign A->A, C->C, G->G, T->T to NA
     center_nuc <- gsub("..([ACGT])..", "\\1", colnames(substitutionModel))
