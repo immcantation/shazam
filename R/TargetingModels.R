@@ -1030,12 +1030,16 @@ writeTargetingDistance <- function(model, file) {
 #'                          \item \code{"hedgehog"}:  circular plot showing higher mutability
 #'                                                    scores further from the circle. The 5-mer
 #'                                                    is denoted by the values of the inner 
-#'                                                    circle, read from the most interior position 
-#'                                                    of the 5-mer (5') to most exterior position (3'), 
-#'                                                    with the center nucleotide in the center ring.
+#'                                                    circle. The 5-mer is read from the most interior 
+#'                                                    position of the 5-mer (5') to most exterior position 
+#'                                                    (3'), with the center nucleotide in the center ring.
+#'                                                    The 5' and 3' positions are reversed when the center
+#'                                                    nucleotides is either G or T.
 #'                          \item \code{"bar"}:       bar plot of mutability similar to the 
 #'                                                    \code{hedgehog} style with the most 5' positions
-#'                                                    of each 5-mer at the base of the plot.
+#'                                                    of each 5-mer at the base of the plot. The 5' and 3' 
+#'                                                    positions are reversed when the center nucleotides 
+#'                                                    is either G or T.
 #'                        }
 #' @param    size         numeric scaling factor for lines and text in the plot.
 #' @param    silent       if \code{TRUE} do not draw the plot and just return the ggplot2 
@@ -1222,7 +1226,6 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
             orient_label <- ifelse(center_nuc %in% c("G", "T"), "3'", "5'")
-            #p1 <- p1 + theme() +
             p1 <- p1 + theme(axis.line=element_line(color="black"),
                              axis.text.x=element_blank(), 
                              axis.ticks.x=element_blank()) +

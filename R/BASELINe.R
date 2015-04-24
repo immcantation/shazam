@@ -686,6 +686,148 @@ calculateBASELINeStats <- function ( baseline_pdf,
 }
 
 
+#### Plotting functions ####
+
+#' Plots the results of BASELINe analysis
+#' 
+#' \code{plotBaseline} plots the results of selection analysis using the BASELINe method.
+#'
+#' @param    baseline  \code{BASELINe} object containing selection probability 
+#'                     density functions.
+#' @param    group     name of the column containing primary grouping identifiers.
+#' @param    subgroup  name of the column containing secondary grouping identifiers. 
+#'                     If \code{NULL}, organize the plot only on \code{group1} values.
+#' @param    regions   character vector naming the regions to plot, correspoding to the
+#'                     regions for which the \code{baseline} data was calculated.
+#' @param    style     type of plot to draw. One of:
+#'                     \itemize{
+#'                       \item \code{"point"}:  plots the mean selection scores for each
+#'                                              \code{group} with confidence intervals.
+#'                       \item \code{"curve"}:  plots a set of curves for each probability 
+#'                                              density function in \code{baseline} split
+#'                                              by \code{group}.
+#'                     }
+#' @param    size      numeric scaling factor for lines, points and text in the plot.
+#' @param    silent    if \code{TRUE} do not draw the plot and just return the ggplot2 
+#'                     object; if \code{FALSE} draw the plot.
+#' @param    ...       additional arguments to pass to ggplot2::theme.
+#' 
+#' @return   A ggplot object defining the plot.
+#'
+#' @seealso  Takes as input a \code{\link{BASELINe}} object.
+#'           See \code{\link{getBASELINe}} for generating selection probability density 
+#'           functions.
+#' 
+#' @examples
+#' library(alakazam)
+#' db_file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' db <- readChangeoDb(db_file)
+#' 
+#' @export
+plotBaseline <- function(baseline, group, subgroup=NULL, regions=c("CDR", "FWR"), 
+                         style=c("point", "curve"), size=1, silent=FALSE, ...) {
+    # TODO:  add group/subgroup color specification.
+    # TODO:  add subgroup plotting
+    # TODO:  curve is not right
+    
+    #group="BARCODE"
+    #subgroup="BARCODE"
+    #regions=c("CDR", "FWR")
+    #style="point"
+    #size=1
+    #silent=FALSE
+    
+    # Check input
+    style <- match.arg(style)
+    
+    # Set base plot settings
+    base_theme <- theme_bw() +
+        theme(panel.background=element_blank(),
+              panel.border=element_blank(),
+              panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank()) +
+        theme(strip.background=element_rect(fill="white"))
+    #theme(axis.title.x=element_blank(),
+    #      axis.text.x=element_blank(), 
+    #      axis.ticks.x=element_blank()) +
+    #theme(legend.position="top")
+    
+    # Define universal plot settings
+    base_theme <- theme_bw()
+    
+    # Plot BASELINe summary
+    if (style == "point") {
+        # Get summary statistics
+        #baseline_df <- getBASELINeStats(baseline[[1]], baseline[[2]], nproc=1)
+        baseline_df <- as.data.frame(baseline[[1]], stringsAsFactors=FALSE)
+        baseline_df <- transform(baseline_df, SIGMA=as.numeric(SIGMA), CI_LOWER=as.numeric(CI_LOWER), 
+                                 CI_UPPER=as.numeric(CI_UPPER), P_VALUE=as.numeric(P_VALUE))
+        
+        # Subset to regions of interest
+        sub_df <- subset(baseline_df, REGION %in% regions)
+        
+        # Build plot
+        p1 <- ggplot(sub_df, aes_string(x=group, y="SIGMA")) +
+            base_theme + 
+            #theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1)) +
+            #ggtitle(region) +
+            xlab("") +
+            ylab(expression(Sigma)) +
+            #scale_shape_manual(name="Isotype", values=isotype_shapes) +
+            #scale_color_manual(name="Sample Type", values=CLASS_COLORS) +
+            #scale_fill_manual(name="Sample Type", values=CLASS_COLORS) +
+            geom_hline(yintercept=0, size=1*size, linestyle=2, color="grey") +
+            geom_errorbar(aes_string(ymin="CI_LOWER", ymax="CI_UPPER", color=group), 
+                          width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.4))            
+        if (is.null(subgroup)) {
+            p1 <- p1 + geom_point(aes_string(color=group), size=3*size, 
+                                  position=position_dodge(0.4))
+        } else {
+            p1 <- p1 + geom_point(aes_string(color=group, shape=subgroup), size=3*size, 
+                                  position=position_dodge(0.4))
+        }
+        p1 <- p1 + facet_grid(REGION ~ .)
+    } else if (style == "curve") {
+        # Mess with input to get curves
+        group_names <- baseline[[1]][baseline[[1]][, "REGION"] == "CDR", "BARCODE"]
+        cdr_pdf <- t(sapply(baseline[[2]], function(x) x@probDensity$CDR))
+        fwr_pdf <- t(sapply(baseline[[2]], function(x) x@probDensity$FWR))
+        rownames(cdr_pdf) <- group_names
+        rownames(fwr_pdf) <- group_names
+        cdr_melt <- reshape2::melt(cdr_pdf, varnames=c("BARCODE", "Z"), value.name="SIGMA")
+        fwr_melt <- reshape2::melt(fwr_pdf, varnames=c("BARCODE", "Z"), value.name="SIGMA")
+        cdr_melt$REGION <- "CDR"
+        fwr_melt$REGION <- "FWR"
+        pdf_df <- rbind.fill(cdr_melt, fwr_melt)
+        
+        # Subset to regions of interest
+        sub_df <- subset(pdf_df, REGION %in% regions)
+        
+        # Build plot
+        p1 <- ggplot(sub_df, aes_string(x="Z", y="SIGMA")) +
+            base_theme + 
+            xlab("Z") +
+            ylab(expression(Sigma))
+        if (is.null(subgroup)) {
+            p1 <- p1 + geom_line(aes_string(color=group), size=1*size)
+        } else {
+            p1 <- p1 + geom_line(aes_string(color=group, linetype=subgroup), size=1*size)
+        }
+        p1 <- p1 + facet_grid(REGION ~ .)
+    }
+    
+    # Add additional theme elements
+    p1 <- p1 + do.call(theme, list(...))
+    
+    # Plot
+    if (!silent) { 
+        plot(p1)
+    }
+    
+    invisible(p1)
+}
+
+
 #### Original BASELINe functions ####
 
 ##Covolution
