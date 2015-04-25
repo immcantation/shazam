@@ -692,25 +692,29 @@ calculateBASELINeStats <- function ( baseline_pdf,
 #' 
 #' \code{plotBaseline} plots the results of selection analysis using the BASELINe method.
 #'
-#' @param    baseline  \code{BASELINe} object containing selection probability 
-#'                     density functions.
-#' @param    group     name of the column containing primary grouping identifiers.
-#' @param    subgroup  name of the column containing secondary grouping identifiers. 
-#'                     If \code{NULL}, organize the plot only on \code{group1} values.
-#' @param    regions   character vector naming the regions to plot, correspoding to the
-#'                     regions for which the \code{baseline} data was calculated.
-#' @param    style     type of plot to draw. One of:
-#'                     \itemize{
-#'                       \item \code{"point"}:  plots the mean selection scores for each
-#'                                              \code{group} with confidence intervals.
-#'                       \item \code{"curve"}:  plots a set of curves for each probability 
-#'                                              density function in \code{baseline} split
-#'                                              by \code{group}.
-#'                     }
-#' @param    size      numeric scaling factor for lines, points and text in the plot.
-#' @param    silent    if \code{TRUE} do not draw the plot and just return the ggplot2 
-#'                     object; if \code{FALSE} draw the plot.
-#' @param    ...       additional arguments to pass to ggplot2::theme.
+#' @param    baseline     \code{BASELINe} object containing selection probability 
+#'                        density functions.
+#' @param    idColumn     name of the column in the \code{data} slot of \code{baseline} 
+#'                        containing primary identifiers.
+#' @param    groupColumn  name of the column in the \code{data} slot of \code{baseline} 
+#'                        containing secondary grouping identifiers. If \code{NULL}, 
+#'                        organize the plot only on values in \code{idColumn}.
+#' @param    regions      character vector naming the regions to plot, correspoding to the
+#'                        regions for which the \code{baseline} data was calculated.
+#' @param    style        type of plot to draw. One of:
+#'                        \itemize{
+#'                          \item \code{"point"}:  plots the mean and confidence interval of
+#'                                                 selection scores for each value in 
+#'                                                 \code{idColumn}, grouped and colored
+#'                                                 by values in \code{groupColumn}.
+#'                          \item \code{"curve"}:  plots a set of curves for each probability 
+#'                                                 density function in \code{baseline}, 
+#'                                                 colored by values in \code{idColumn}.
+#'                        }
+#' @param    size         numeric scaling factor for lines, points and text in the plot.
+#' @param    silent       if \code{TRUE} do not draw the plot and just return the ggplot2 
+#'                        object; if \code{FALSE} draw the plot.
+#' @param    ...          additional arguments to pass to ggplot2::theme.
 #' 
 #' @return   A ggplot object defining the plot.
 #'
@@ -723,15 +727,18 @@ calculateBASELINeStats <- function ( baseline_pdf,
 #' db_file <- system.file("extdata", "Influenza_IB.tab", package="shm")
 #' db <- readChangeoDb(db_file)
 #' 
+#' # Plot
+#' plotBaseline(baseline, "BARCODE")
+#' 
 #' @export
-plotBaseline <- function(baseline, group, subgroup=NULL, regions=c("CDR", "FWR"), 
+plotBaseline <- function(baseline, idColumn, groupColumn=NULL, regions=c("CDR", "FWR"), 
                          style=c("point", "curve"), size=1, silent=FALSE, ...) {
     # TODO:  add group/subgroup color specification.
     # TODO:  add subgroup plotting
     # TODO:  curve is not right
     
-    #group="BARCODE"
-    #subgroup="BARCODE"
+    #idColumn="BARCODE"
+    #groupColumn="BARCODE"
     #regions=c("CDR", "FWR")
     #style="point"
     #size=1
@@ -767,7 +774,7 @@ plotBaseline <- function(baseline, group, subgroup=NULL, regions=c("CDR", "FWR")
         sub_df <- subset(baseline_df, REGION %in% regions)
         
         # Build plot
-        p1 <- ggplot(sub_df, aes_string(x=group, y="SIGMA")) +
+        p1 <- ggplot(sub_df, aes_string(x=idColumn, y="SIGMA")) +
             base_theme + 
             #theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1)) +
             #ggtitle(region) +
@@ -777,19 +784,19 @@ plotBaseline <- function(baseline, group, subgroup=NULL, regions=c("CDR", "FWR")
             #scale_color_manual(name="Sample Type", values=CLASS_COLORS) +
             #scale_fill_manual(name="Sample Type", values=CLASS_COLORS) +
             geom_hline(yintercept=0, size=1*size, linestyle=2, color="grey") +
-            geom_errorbar(aes_string(ymin="CI_LOWER", ymax="CI_UPPER", color=group), 
-                          width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.4))            
-        if (is.null(subgroup)) {
-            p1 <- p1 + geom_point(aes_string(color=group), size=3*size, 
-                                  position=position_dodge(0.4))
-        } else {
-            p1 <- p1 + geom_point(aes_string(color=group, shape=subgroup), size=3*size, 
-                                  position=position_dodge(0.4))
+            geom_point(size=3*size, position=position_dodge(0.4)) +
+            geom_errorbar(aes(ymin=CI_LOWER, ymax=CI_UPPER), 
+                          width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.4))
+        if (!is.null(groupColumn)) {
+            p1 <- p1 + aes_string(color=groupColumn)
         }
         p1 <- p1 + facet_grid(REGION ~ .)
     } else if (style == "curve") {
         # Mess with input to get curves
         group_names <- baseline[[1]][baseline[[1]][, "REGION"] == "CDR", "BARCODE"]
+        pdf_names <- names(baseline[[2]][[1]]@probDensity)
+        pdf_list <- list()
+        #for ()
         cdr_pdf <- t(sapply(baseline[[2]], function(x) x@probDensity$CDR))
         fwr_pdf <- t(sapply(baseline[[2]], function(x) x@probDensity$FWR))
         rownames(cdr_pdf) <- group_names

@@ -1,0 +1,80 @@
+---
+title: "SHM: Infer SHM targeting model"
+author: "Namita Gupta"
+date: "`r Sys.Date()`"
+output: rmarkdown::pdf_document
+vignette: >
+  %\VignetteIndexEntry{SHM Targeting}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+THe targeting model is the background likelihood of a particular mutation, based on the surrounding sequence context as well as the mutation itself. The model is inferred from observed mutations in the data. The model can then be transformed into a distance function to compare Ig sequences of a given dataset based on the likelihood of the observed mutations. This is done via the following steps:
+
+1. Load a Change-O tab-delimited database file
+2. Infer substitution model (likelihood of a base mutating to any other base) and mutability model (likelihood of a given base being mutated)
+3. Visualize mutability model to identify hot and cold spots
+4. Calculate distance matrix based on underlying SHM targeting model
+
+Load Change-O data
+--------------------------------------------------------------------------------
+A small example Change-O tab-delimited database file is included in the 
+`shm` package. Inferring a targeting model requires the following fields 
+(columns) to be present in the Change-O file: `V_CALL`, `J_CALL`, 
+`SEQUENCE_IMGT`, and `GERMLINE_IMGT_D_MASK`.
+
+```{r, eval=TRUE, warning=FALSE}
+library(alakazam)
+library(shm)
+
+# Load Change-O file
+file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+db <- readChangeoDb(file)
+```
+
+Infer targeting model (substitution and mutability)
+--------------------------------------------------------------------------------
+The function for inferring a substitution model (createSubstitutionMatrix) counts the number of mutations from a given base to all others occurring in the center position for all 5-mer motifs in the dataset. Its  `model` parameter allows the user to specify whether to count all mutations, or just silent mutations to infer the model. Column names for sequence, germline sequence, and V call can also be passed in as parameters if they differ from Change-O defaults. Additionally, the `multipleMutation` parameter determines handling of multiple mutations in a single 5-mer; independent treats each mutation independently and ignore disregards these 5-mers entirely.
+
+The function for inferring a mutability model (createMutabilityMatrix) counts the number of mutations in all 5-mer motifs of the dataset. This model depends on the substitution model. FUrthermore, the same parameters available for creating the substitution model are also available to adjust this function.
+
+The inferred substitution and mutability matrices returned by the above functions only account for unambiguous 5-mers. However, there may be cases in which the user may need the likelihood of a mutation in a 5-mer with ambiguous characters. Each of the above functions has a corresponding function (extendSubstitutionMatrix and extendMutabilityMatrix) to extend the matrix to infer 5-mers with Ns by averaging over all corresponding unambiguous 5-mers.
+
+These extended substitution and mutability matrices can be used to create an overal SHM targeting matrix (createTargetingMatrix), which is the combined probability of mutability and substitution. All of the above steps can be combined by using the single function createTargetingModel to get a TargetingModel object directly from the dataset.
+
+
+```{r, eval=TRUE, warning=FALSE}
+# Create substitution model using silent mutations
+sub_model <- createSubstitutionMatrix(db, model="S")
+# Create mutability model using silent mutations
+mut_model <- createMutabilityMatrix(db, sub_model, model="S")
+# Extend models to include ambiguous 5-mers
+sub_model <- extendSubstitutionMatrix(sub_model)
+mut_model <- extendMutabilityMatrix(mut_model)
+# Create targeting model matrix from substitution and mutability models
+tar_matrix <- createTargetingMatrix(sub_model, mut_model)
+
+# Create targeting model in one step using only silent mutations
+tar_model <- createTargetingModel(db, model="S")
+```
+
+Visualize targeting model
+--------------------------------------------------------------------------------
+The visualization of a dataset's underlying SHM mutability model can be used to visualize hot and cold spots. The length of the bars on the hedgehog plot of mutability rates corresponds to the likelihood of a given base in the given 5-mer being mutated. The plotting function has the parameter `style` to specify either a hedgehog plot or a barplot. If the model for only specific bases are required, this can be specified with the `nucleotides` parameter.
+
+```{r, eval=TRUE, warning=FALSE}
+# Generate hedgehog plot
+plotMutability(tar_model, nucleotides="A")
+plotMutability(tar_model, nucleotides="C")
+plotMutability(tar_model, nucleotides="G")
+plotMutability(tar_model, nucleotides="T")
+```
+
+Calculate targeting distance matrix
+--------------------------------------------------------------------------------
+In the Change-O pipeline, the hs5f and m3n cloning methods rely on inferred targeting models. If a dataset-specific inferred targeting model is desired to determine distances between sequences for clonal grouping, the probabilities of mutations must be transformed into distances. The following function (getTargetingDistance) returns a matrix of distances between a given 5-mer and each corresponding mutation of the center base. This matrix can also be generated and written directly to a file using the function writeTargetingDistance.
+
+```{r, eval=TRUE, warning=FALSE}
+# Calculate distance matrix
+dist <- getTargetingDistance(tar_model)
+```
