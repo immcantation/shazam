@@ -727,8 +727,11 @@ calculateBASELINeStats <- function ( baseline_pdf,
 #' db_file <- system.file("extdata", "Influenza_IB.tab", package="shm")
 #' db <- readChangeoDb(db_file)
 #' 
-#' # Plot
-#' plotBaseline(baseline, "BARCODE")
+#' # Plot mean and confidence interval
+#' plotBaseline(baseline, "BARCODE", style="point")
+#' 
+#' # Plot density function
+#' plotBaseline(baseline, "BARCODE", style="curve")
 #' 
 #' @export
 plotBaseline <- function(baseline, idColumn, groupColumn=NULL, regions=c("CDR", "FWR"), 
@@ -766,7 +769,7 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, regions=c("CDR", 
     if (style == "point") {
         # Get summary statistics
         #baseline_df <- getBASELINeStats(baseline[[1]], baseline[[2]], nproc=1)
-        baseline_df <- as.data.frame(baseline[[1]], stringsAsFactors=FALSE)
+        baseline_df <- as.data.frame(baseline[[1]], row.names=1:nrow(baseline[[1]]), stringsAsFactors=FALSE)
         baseline_df <- transform(baseline_df, SIGMA=as.numeric(SIGMA), CI_LOWER=as.numeric(CI_LOWER), 
                                  CI_UPPER=as.numeric(CI_UPPER), P_VALUE=as.numeric(P_VALUE))
         
@@ -774,7 +777,7 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, regions=c("CDR", 
         sub_df <- subset(baseline_df, REGION %in% regions)
         
         # Build plot
-        p1 <- ggplot(sub_df, aes_string(x=idColumn, y="SIGMA")) +
+        p1 <- ggplot(sub_df, aes_string(x=idColumn, y="SIGMA", ymax=max("SIGMA"))) +
             base_theme + 
             #theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1)) +
             #ggtitle(region) +
@@ -793,32 +796,36 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, regions=c("CDR", 
         p1 <- p1 + facet_grid(REGION ~ .)
     } else if (style == "curve") {
         # Mess with input to get curves
-        group_names <- baseline[[1]][baseline[[1]][, "REGION"] == "CDR", "BARCODE"]
-        pdf_names <- names(baseline[[2]][[1]]@probDensity)
-        pdf_list <- list()
-        #for ()
-        cdr_pdf <- t(sapply(baseline[[2]], function(x) x@probDensity$CDR))
-        fwr_pdf <- t(sapply(baseline[[2]], function(x) x@probDensity$FWR))
-        rownames(cdr_pdf) <- group_names
-        rownames(fwr_pdf) <- group_names
-        cdr_melt <- reshape2::melt(cdr_pdf, varnames=c("BARCODE", "Z"), value.name="SIGMA")
-        fwr_melt <- reshape2::melt(fwr_pdf, varnames=c("BARCODE", "Z"), value.name="SIGMA")
-        cdr_melt$REGION <- "CDR"
-        fwr_melt$REGION <- "FWR"
-        pdf_df <- rbind.fill(cdr_melt, fwr_melt)
+        id_names <- unique(baseline[[1]][, idColumn])
+        dens_names <- names(baseline[[2]][[1]]@probDensity)
         
         # Subset to regions of interest
-        sub_df <- subset(pdf_df, REGION %in% regions)
+        dens_names <- dens_names[dens_names %in% regions]
+        dens_list <- list()
+        for (n in dens_names) {
+             # Extract density into matrix
+             tmp_mat <- t(sapply(baseline[[2]], function(x) x@probDensity[[n]]))
+             colnames(tmp_mat) <- 1:ncol(tmp_mat)
+             rownames(tmp_mat) <- id_names
+             dens_list[[n]] <- tmp_mat
+        }
+        
+        # Melt density matrices
+        melt_list <- list()
+        for (n in dens_names) {
+            tmp_melt <- reshape2::melt(dens_list[[n]], varnames=c(idColumn, "x"), value.name="SIGMA")
+            melt_list[[n]] <- tmp_melt
+        }
+        dens_df <- ldply(melt_list, .id="REGION")
         
         # Build plot
-        p1 <- ggplot(sub_df, aes_string(x="Z", y="SIGMA")) +
+        p1 <- ggplot(dens_df, aes_string(x="x", y="SIGMA")) +
             base_theme + 
-            xlab("Z") +
-            ylab(expression(Sigma))
-        if (is.null(subgroup)) {
-            p1 <- p1 + geom_line(aes_string(color=group), size=1*size)
-        } else {
-            p1 <- p1 + geom_line(aes_string(color=group, linetype=subgroup), size=1*size)
+            xlab("x") +
+            ylab(expression(Sigma)) +
+            geom_line(aes_string(color=idColumn), size=1*size)
+        if (!is.null(groupColumn)) {
+            p1 <- p1 + aes_string(linetype=groupColumn)
         }
         p1 <- p1 + facet_grid(REGION ~ .)
     }

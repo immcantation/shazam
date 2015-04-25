@@ -32,6 +32,7 @@ Collate:
     'shm.R'
     'RegionDefinitions.R'
     'BASELINe.R'
+    'Core.R'
     'DistToNearest.R'
     'MutationProfiling.R'
     'TargetingModels.R'

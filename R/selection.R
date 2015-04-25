@@ -11,10 +11,7 @@ NULL
 
 #### Functions ####
 
-# Translate codon to amino acid
-translateCodonToAminoAcid<-function(Codon){
-    return(AMINO_ACIDS[Codon])
-}
+
 
 # Translate amino acid to trait change
 translateAminoAcidToTraitChange<-function(AminoAcid){
@@ -430,12 +427,6 @@ trimToLastCodon <- function(seqToTrim){
     return(trimmedSeq)
 }
 
-# Given a nuclotide position, returns the pos of the 3 nucs that made the codon
-# e.g. nuc 86 is part of nucs 85,86,87
-getCodonPos <- function(nucPos){
-    codonNum =  (ceiling(nucPos/3))*3
-    return( (codonNum-2):codonNum)
-}
 
 # Given a nuclotide position, returns the codon number
 # e.g. nuc 86  = codon 29
@@ -591,11 +582,6 @@ getTransistionProb5 <- function(fivemer){
     }
 }
 
-# Given a nuc, returns the other 3 nucs it can mutate to
-canMutateTo <- function(nuc){
-    NUCLEOTIDES[1:4][-which(NUCLEOTIDES[1:4] == nuc)]
-}
-
 # Given a nucleotide, returns the probabilty of other nucleotide it can mutate to
 canMutateToProb <- function(nuc){
     HS5FModel@substitution[nuc, canMutateTo(nuc)]
@@ -604,7 +590,6 @@ canMutateToProb <- function(nuc){
 
 
 # Compute the mutations types
-
 computeMutationTypesFast <- function(param_strSeq){
     matMutationTypes = matrix( CODON_TABLE[,param_strSeq] ,ncol=3,nrow=4, byrow=F)
     if(mutabilityModel==5){
@@ -613,9 +598,7 @@ computeMutationTypesFast <- function(param_strSeq){
     #dimnames( matMutationTypes ) =  list(NUCLEOTIDES,1:(length(vecSeq)))
     return(matMutationTypes)
 }
-mutationTypeOptimized <- function( matOfCodons ){
-    apply( matOfCodons,1,function(x){ mutationType(x[2],x[1]) } )
-}
+
 
 # Returns a vector of codons 1 mutation away from the given codon
 permutateAllCodon <- function(codon){
@@ -627,55 +610,6 @@ permutateAllCodon <- function(codon){
     apply(matCodons,1,c2s)
 }
 
-# Given two codons, tells you if the mutation is R or S (based on your definition)
-mutationType <- function(codonFrom, codonTo, testID=1) {
-    if(testID==4){
-        if( is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-            return(NA)
-        }else{
-            mutationType = "S"
-            if( translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonFrom)) != translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonTo)) ){
-                mutationType = "R"
-            }
-            if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
-                mutationType = "Stop"
-            }
-            return(mutationType)
-        }
-    }else if(testID==5){
-        if( is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-            return(NA)
-        }else{
-            if(codonFrom==codonTo){
-                mutationType = "S"
-            }else{
-                codonFrom = s2c(codonFrom)
-                codonTo = s2c(codonTo)
-                mutationType = "Stop"
-                nucOfI = codonFrom[which(codonTo!=codonFrom)]
-                if(nucOfI=="C"){
-                    mutationType = "R"
-                }else if(nucOfI=="G"){
-                    mutationType = "S"
-                }
-            }
-            return(mutationType)
-        }
-    }else{
-        if( is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-            return(NA)
-        }else{
-            mutationType = "S"
-            if( translateCodonToAminoAcid(codonFrom) != translateCodonToAminoAcid(codonTo) ){
-                mutationType = "R"
-            }
-            if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
-                mutationType = "Stop"
-            }
-            return(mutationType)
-        }
-    }
-}
 
 #given a mat of targeting & it's corresponding mutationtypes returns
 #a vector of Exp_R frequecies in FWR1,CDR1,FWR2,CDR3,FWR3
@@ -725,52 +659,6 @@ computeExpected_Regions <- function(paramTargeting,paramMutationTypes){
     ))
 }
 
-
-# row 1 = GL
-# row 2 = Seq
-# in_matrix <- matrix(c(c("A","A","A","C","C","C"), c("A","G","G","C","C","A")), 2 ,6, byrow=T)
-# analyzeMutations2NucUri(in_matrix)
-analyzeMutations2NucUri <- function(in_matrix){
-    paramGL = in_matrix[2,]
-    paramSeq = in_matrix[1,]
-    paramSeqUri = paramGL
-    #mutations = apply(rbind(paramGL,paramSeq), 2, function(x){!x[1]==x[2]})
-    mutations_val = paramGL != paramSeq
-    if(any(mutations_val)){
-        mutationPos = {1:length(mutations_val)}[mutations_val]
-        #mutationPos = mutationPos[sapply(mutationPos, function(x){!any(paramSeq[getCodonPos(x)]=="N")})]
-        length_mutations =length(mutationPos)
-        mutationInfo = rep(NA,length_mutations)
-        if(any(mutationPos)){
-            
-            pos<- mutationPos
-            pos <- pos[!is.na(pos)]
-            pos_array <- array(sapply(pos,getCodonPos))
-            codonGL <- paramGL[pos_array]
-            codonGL[is.na(codonGL)] <- "N"
-            codonSeq = sapply(pos,function(x){
-                seqP = paramGL[getCodonPos(x)]
-                muCodonPos = {x-1}%%3+1
-                seqP[muCodonPos] = paramSeq[x]
-                return(seqP)
-            })
-            codonSeq[is.na(codonSeq)] <- "N"
-            GLcodons =  apply(matrix(codonGL,length_mutations,3,byrow=TRUE),1,c2s)
-            Seqcodons =   apply(codonSeq,2,c2s)
-            mutationInfo = apply(rbind(GLcodons , Seqcodons),2,function(x){mutationType(c2s(x[1]),c2s(x[2]))})
-            names(mutationInfo) = mutationPos
-        }
-        if(any(!is.na(mutationInfo))){
-            return(mutationInfo[!is.na(mutationInfo)])
-        }else{
-            return(NA)
-        }
-        
-        
-    }else{
-        return (NA)
-    }
-}
 
 processNucMutations2 <- function(mu){
     if(!is.na(mu)){
@@ -2047,112 +1935,6 @@ getObservedMutationsByCodon <- function(listMutations){
     }
     )
     return( list( "Observed_R"=obsMu_R, "Observed_S"=obsMu_S) )
-}
-
-
-# Make a progress bar when using %dopar% with a parallel backend
-# Adapated from http://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r
-#
-# @return  NULL
-doparProgressBar <- function(n){
-    pb <- txtProgressBar(min=1, max=n-1,style=3)
-    count <- 0
-    function(...) {
-        count <<- count + length(list(...)) - 1
-        setTxtProgressBar(pb,count)
-        #Sys.sleep(0.01)
-        flush.console()
-        rbind(...)
-        
-    }
-}
-
-
-# Returns a 5-mer sliding window of given sequence
-#
-# @param   strSequence   The sequence string
-# @return  An array of 5-mer sliding windows
-#
-# @examples
-# slidingArrayOf5mers("ACGTNACGTNACGTN")
-slidingArrayOf5mers <- function(strSequence){
-    seqLength <- nchar(strSequence)
-    return( substr( rep(strSequence,seqLength-4), 1:(seqLength-4), 5:seqLength ) )
-}
-
-
-#' Determines the OS plotform being used
-#'
-#' @return  The OS platform
-#' 
-#' @examples
-#' getPlatform()
-#' 
-#' @export
-getPlatform <-function(){
-    return(.Platform$OS.typ)
-}
-
-#' Determines the (maximum) numbers of cores/cpus availalbe
-#'
-#' @return  The number of cores/cpus available. Returns 1 if undeterminable.
-#' 
-#' @examples
-#' getnproc()
-#' 
-#' @export
-getnproc <-function(){
-    platform <- getPlatform()
-    nproc <- 1
-    if(platform=="windows") nproc <- Sys.getenv('NUMBER_OF_PROCESSORS')
-    if(platform=="unix") nproc <- system("nproc", intern=TRUE)
-    return(as.numeric(nproc))
-}
-
-#' Clears the console
-#'
-#' \code{clearConsole} clears the console.
-#' 
-#' @examples
-#' clearConsole()
-#'
-#' @export
-clearConsole <- function(){
-    platform <- getPlatform()
-    nproc <- 1
-    if(platform=="windows") cat("\014")
-    if(platform=="unix") system('clear')
-}
-
-
-# Converts a matrix to a vector
-#
-# \code{clearConsole} clears the console.
-# 
-# @examples
-# # Generate a sampel mutations_array 
-# sample_matrix <- matrix(sample(20,4),nrow=2, dimnames=list( c("CDR","FWR"), c("R","S") ))
-# collapseMatrixToVector(sample_matrix)
-#
-collapseMatrixToVector <- function(mat, byrow = FALSE){    
-    # Get the row and column names
-    rnames <- rownames(mat)
-    cnames <- colnames(mat)
-    if (is.null(rnames)) { rnames <- paste0("Row", 1:nrow(mat)) }
-    if (is.null(cnames)) { cnames <- paste0("Column", 1:ncol(mat)) }
-    # Combine the row and columns names
-    cobminedNames <- outer(rnames, cnames, paste, sep = "_")
-    
-    # Collapse the matrix to a vector
-    if (byrow) {
-        collapsed_mat <- c(t(mat))
-        names(collapsed_mat) <- c(t(cobminedNames))
-    }
-    else{
-        collapsed_mat <- c(mat)
-        names(collapsed_mat) <- c(cobminedNames)
-    }
-    return(collapsed_mat)
 }
 
 

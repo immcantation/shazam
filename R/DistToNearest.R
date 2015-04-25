@@ -8,6 +8,20 @@
 #' @include shm.R
 NULL
 
+
+# Returns a 5-mer sliding window of given sequence
+#
+# @param   strSequence   The sequence string
+# @return  An array of 5-mer sliding windows
+#
+# @examples
+# slidingArrayOf5mers("ACGTNACGTNACGTN")
+slidingArrayOf5mers <- function(strSequence){
+    seqLength <- nchar(strSequence)
+    return( substr( rep(strSequence,seqLength-4), 1:(seqLength-4), 5:seqLength ) )
+}
+
+
 # Get distance between two sequences of same length, broken by a sliding window of 5mers
 #
 # @param    seq1          first nucleotide sequence.

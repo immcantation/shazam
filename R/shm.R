@@ -76,16 +76,17 @@ NULL
 #### Constants ####
 
 # IMGT V-region definitions
-VREGIONS <- factor(c(rep("FWR", 78), 
-                     rep("CDR", 36), 
-                     rep("FWR", 51), 
-                     rep("CDR", 30), 
-                     rep("FWR", 117)), 
-                   levels=c("FWR", "CDR"))
+#VREGIONS <- factor(c(rep("FWR", 78), 
+#                     rep("CDR", 36), 
+#                     rep("FWR", 51), 
+#                     rep("CDR", 30), 
+#                     rep("FWR", 117)), 
+#                   levels=c("FWR", "CDR"))
 
 # IMGT V-region length
 #readEnd <- 312
-VLENGTH <- length(VREGIONS)
+#VLENGTH <- length(VREGIONS)
+VLENGTH <- 312
 
 # Nucleotide characters
 NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")

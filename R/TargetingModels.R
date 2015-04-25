@@ -141,14 +141,14 @@ setClass("TargetingModel",
 #' # Create model using all mutations
 #' sub <- createSubstitutionMatrix(db)
 #' 
-#' # Create model using only silent mutations
-#' sub <- createSubstitutionMatrix(db, model="S")
+#' # Create model using only silent mutations and ignore multiple mutations
+#' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
 #' 
 #' @export
 createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENCE_IMGT",
-                                    germlineColumn="GERMLINE_IMGT_D_MASK",
-                                    vCallColumn="V_CALL",
-                                    multipleMutation=c("independent", "ignore"))  {
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     vCallColumn="V_CALL",
+                                     multipleMutation=c("independent", "ignore"))  {
     # model="RS"
     # sequenceColumn="SEQUENCE_IMGT"
     # germlineColumn="GERMLINE_IMGT_D_MASK"
@@ -416,16 +416,16 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #' sub_model <- createSubstitutionMatrix(db)
 #' mut_model <- createMutabilityMatrix(db, sub_model)
 #'
-#' # Create model using only silent mutations
-#' sub_model <- createSubstitutionMatrix(db, model="S")
-#' mut_model <- createMutabilityMatrix(db, sub_model, model="S")
+#' # Create model using only silent mutations and ignore multiple mutations
+#' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
+#' mut_model <- createMutabilityMatrix(db, sub_model, model="S", multipleMutation="ignore")
 #' 
 #' @export
 createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
-                                  sequenceColumn="SEQUENCE_IMGT", 
-                                  germlineColumn="GERMLINE_IMGT_D_MASK",
-                                  vCallColumn="V_CALL",
-                                  multipleMutation=c("independent", "ignore")) {
+                                   sequenceColumn="SEQUENCE_IMGT", 
+                                   germlineColumn="GERMLINE_IMGT_D_MASK",
+                                   vCallColumn="V_CALL",
+                                   multipleMutation=c("independent", "ignore")) {
     # model="RS"
     # sequenceColumn="SEQUENCE_IMGT"
     # germlineColumn="GERMLINE_IMGT_D_MASK"
@@ -804,8 +804,8 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' # Create model using all mutations
 #' model <- createTargetingModel(db)
 #'
-#' # Create model using only silent mutations
-#' model <- createTargetingModel(db, model="S")
+#' # Create model using only silent mutations and ignore multiple mutations
+#' model <- createTargetingModel(db, model="S", multipleMutation="ignore")
 #' 
 #' @export
 createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENCE_IMGT",
@@ -1253,31 +1253,130 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
 }
 
 
-# TODO:  put this in alakazam and export it
-# Plot multiple ggplot objects
-# 
-# @param   ...    ggplot objects to plot
-# @param   ncol   number of columns in the plot 
-# @return  NULL
-# 
-# @references  http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)
-multiggplot <- function(..., ncol=1) {
-    p <- list(...)
-    n <- length(p)
-    layout <- matrix(seq(1, ncol*ceiling(n/ncol)), ncol=ncol, nrow=ceiling(n/ncol))
-    
-    # Plot
-    if (n == 1) {
-        plot(p[[1]])
+#### Original BASELINe functions ####
+
+# Translate codon to amino acid
+translateCodonToAminoAcid <- function(Codon) {
+    return (AMINO_ACIDS[Codon])
+}
+
+
+# Given a nuclotide position, returns the pos of the 3 nucs that made the codon
+# e.g. nuc 86 is part of nucs 85,86,87
+getCodonPos <- function(nucPos) {
+    codonNum =  (ceiling(nucPos/3))*3
+    return ((codonNum-2):codonNum)
+}
+
+
+# Given a nuc, returns the other 3 nucs it can mutate to
+canMutateTo <- function(nuc) {
+    NUCLEOTIDES[1:4][-which(NUCLEOTIDES[1:4] == nuc)]
+}
+
+
+# Compute the mutations types
+mutationTypeOptimized <- function(matOfCodons) {
+    apply(matOfCodons, 1, function(x) { mutationType(x[2], x[1]) })
+}
+
+
+# row 1 = GL
+# row 2 = Seq
+# in_matrix <- matrix(c(c("A","A","A","C","C","C"), c("A","G","G","C","C","A")), 2 ,6, byrow=T)
+# analyzeMutations2NucUri(in_matrix)
+analyzeMutations2NucUri <- function(in_matrix) {
+    paramGL = in_matrix[2,]
+    paramSeq = in_matrix[1,]
+    paramSeqUri = paramGL
+    #mutations = apply(rbind(paramGL,paramSeq), 2, function(x){!x[1]==x[2]})
+    mutations_val = paramGL != paramSeq
+    if (any(mutations_val)) {
+        mutationPos = {1:length(mutations_val)}[mutations_val]
+        #mutationPos = mutationPos[sapply(mutationPos, function(x){!any(paramSeq[getCodonPos(x)]=="N")})]
+        length_mutations =length(mutationPos)
+        mutationInfo = rep(NA,length_mutations)
+        if (any(mutationPos)) {
+            pos<- mutationPos
+            pos <- pos[!is.na(pos)]
+            pos_array <- array(sapply(pos,getCodonPos))
+            codonGL <- paramGL[pos_array]
+            codonGL[is.na(codonGL)] <- "N"
+            codonSeq = sapply(pos,function(x){
+                seqP = paramGL[getCodonPos(x)]
+                muCodonPos = {x-1}%%3+1
+                seqP[muCodonPos] = paramSeq[x]
+                return(seqP)
+            })
+            codonSeq[is.na(codonSeq)] <- "N"
+            GLcodons =  apply(matrix(codonGL,length_mutations,3,byrow=TRUE),1,c2s)
+            Seqcodons =   apply(codonSeq,2,c2s)
+            mutationInfo = apply(rbind(GLcodons , Seqcodons),2,function(x){mutationType(c2s(x[1]),c2s(x[2]))})
+            names(mutationInfo) = mutationPos
+        }
+        if (any(!is.na(mutationInfo))) {
+            return(mutationInfo[!is.na(mutationInfo)])
+        } else {
+            return(NA)
+        }
+        
+        
     } else {
-        grid::grid.newpage()
-        grid::pushViewport(grid::viewport(layout=grid::grid.layout(nrow(layout), ncol(layout))))
-        for (i in 1:n) {
-            idx <- as.data.frame(which(layout == i, arr.ind=T))
-            plot(p[[i]], vp=grid::viewport(layout.pos.row = idx$row, layout.pos.col=idx$col))
+        return (NA)
+    }
+}
+
+
+# Given two codons, tells you if the mutation is R or S (based on your definition)
+mutationType <- function(codonFrom, codonTo, testID=1) {
+    if (testID == 4) {
+        if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
+            return(NA)
+        } else {
+            mutationType = "S"
+            if( translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonFrom)) != translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonTo)) ){
+                mutationType = "R"
+            }
+            if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
+                mutationType = "Stop"
+            }
+            return(mutationType)
+        }
+    } else if (testID == 5) {
+        if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
+            return(NA)
+        } else {
+            if (codonFrom==codonTo) {
+                mutationType = "S"
+            } else {
+                codonFrom = s2c(codonFrom)
+                codonTo = s2c(codonTo)
+                mutationType = "Stop"
+                nucOfI = codonFrom[which(codonTo!=codonFrom)]
+                if(nucOfI=="C"){
+                    mutationType = "R"
+                }else if(nucOfI=="G"){
+                    mutationType = "S"
+                }
+            }
+            return(mutationType)
+        }
+    } else {
+        if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
+            return(NA)
+        } else {
+            mutationType = "S"
+            if( translateCodonToAminoAcid(codonFrom) != translateCodonToAminoAcid(codonTo) ){
+                mutationType = "R"
+            }
+            if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
+                mutationType = "Stop"
+            }
+            return(mutationType)
         }
     }
 }
+
 
 
 #### Testing functions ####

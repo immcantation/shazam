@@ -1,5 +1,8 @@
+#### Region boundaries ####
+#VLENGTH <- 312
+
 #### Nucleotide characters ####
-NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
+#NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
 
 #### Codon translations ####
 AMINO_ACIDS <- c("TTT"="F", "TTC"="F",
@@ -35,7 +38,6 @@ load("data-raw/CONST_I.RData")
 devtools::use_data(CDR_Nuc_Mat, 
                    FWR_Nuc_Mat, 
                    CODON_TABLE,
-                   NUCLEOTIDES,
                    AMINO_ACIDS,
                    BAYESIAN_FITTED,
                    CONST_I,                   
