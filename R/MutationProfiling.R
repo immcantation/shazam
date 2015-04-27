@@ -18,10 +18,10 @@ NULL
 #' group and appends a column to the input data.frame containing the clonal consensus
 #' for each sequence.
 #'
-#' @param   db                  data.frame containing sequence data.
-#' @param   cloneColumn         name of the column containing clonal cluster identifiers.
-#' @param   sequenceColumn      name of the column containing input sequences.
-#' @param   germlineColumn      name of the column containing germline sequences.
+#' @param   db                  \code{data.frame} containing sequence data.
+#' @param   cloneColumn         Name of the column containing clonal cluster identifiers.
+#' @param   sequenceColumn      Name of the column containing input sequences.
+#' @param   germlineColumn      Name of the column containing germline sequences.
 #' @param   collapseByClone     if TRUE, collapse the \code{db} by the \code{cloneColumn}.
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
 #'                              and boundaries of the Ig sequences. Note, only the part of
@@ -30,9 +30,9 @@ NULL
 #'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
 #'                              used, then mutations in positions greater than 312 will not
 #'                              be counted.
-#' @param    nproc              number of cores to distribute the operation over. If 
-#'                              \code{nproc} = 0 then the \code{cluster} has already been
-#'                              set and will not be reset.
+#' @param    nproc              Number of cores to distribute the operation over. If the 
+#'                              \code{cluster} has already been set earlier, then pass the 
+#'                              \code{cluster}. This will ensure that it is not reset.
 #'                              
 #' 
 #' @return   A modified \code{db} data.frame with clonal consensus sequences in the
@@ -83,6 +83,12 @@ getClonalConsensus <- function(db,
                                regionDefinition=IMGT_V_NO_CDR3,
                                nproc=1) {
     
+    # If the user has previously set the cluster and does not wish to reset it
+    if(!is.numeric(nproc)){ 
+        cluster = nproc 
+        nproc = 0
+    }
+    
     db[,cloneColumn] <- as.numeric(db[,cloneColumn])
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
@@ -100,23 +106,19 @@ getClonalConsensus <- function(db,
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.
-    if (nproc > 1) {        
-        runAsParallel <- TRUE # Flag used in ddply to indicate whether to run as paralell
-        progressBar <- "none" # Flag used in ddply to indicate whether to display a progress bar
-        # Register clusters   
-        cluster <- makeCluster(nproc, type="SOCK")
-        registerDoSNOW(cluster)
-        clusterExport( cluster, list('db', 'sequenceColumn', 
-                                     'germlineColumn', "cloneColumn",
-                                     'regionDefinition'), 
-                       envir=environment() )
-        clusterEvalQ(cluster, library(shm))
-        clusterEvalQ(cluster, library(seqinr))
-        
-    } else if( nproc==1 ) {
+    if( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
+    } else {
+        if(nproc != 0) { cluster <- makeCluster(nproc, type="SOCK") }
+        clusterExport( cluster, list('db', 
+                                     'sequenceColumn', 'germlineColumn', "cloneColumn",
+                                     'regionDefinition', 'groups'), 
+                       envir=environment() )
+        clusterEvalQ(cluster, library(shm))
+        clusterEvalQ(cluster, library(seqinr))
+        registerDoSNOW(cluster)
     }
     
     # Printing status to console
@@ -289,6 +291,12 @@ getObservedMutations <- function(db,
                                  germlineColumn="GERMLINE_IMGT_D_MASK",
                                  regionDefinition=IMGT_V_NO_CDR3,
                                  nproc=1) {
+        
+    # If the user has previously set the cluster and does not wish to reset it
+    if(!is.numeric(nproc)){ 
+        cluster = nproc 
+        nproc = 0
+    }
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
@@ -586,6 +594,12 @@ getExpectedMutationFrequencies <- function(db,
                                            targetingModel=HS5FModel,
                                            regionDefinition=IMGT_V_NO_CDR3,
                                            nproc=1) {
+    
+    # If the user has previously set the cluster and does not wish to reset it
+    if(!is.numeric(nproc)){ 
+        cluster = nproc 
+        nproc = 0
+    }
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc(), na.rm=T)
@@ -904,3 +918,6 @@ listObservedMutations <- function(db, sequenceColumn="SEQUENCE_IMGT",
                         USE.NAMES=FALSE)
     return(mutations)
 }
+
+
+#### Additional functions needed for Mutational Profiling ####

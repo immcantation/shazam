@@ -31,10 +31,9 @@ LazyData: true
 Collate:
     'shm.R'
     'RegionDefinitions.R'
-    'BASELINe.R'
+    'Baseline.R'
     'Core.R'
     'DistToNearest.R'
     'MutationProfiling.R'
     'TargetingModels.R'
-    'processNucMutations.R'
     'selection.R'

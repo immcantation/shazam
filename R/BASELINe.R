@@ -4,181 +4,205 @@ NULL
 
 #### Classes ####
 
-#' S4 class defining a BASELINe selection object
+#' S4 class defining a Baseline (selection) object
 #' 
-#' \code{BASELINe} defines a common data structure for defining the BASELINe selection
+#' \code{Baseline} defines a common data structure for defining the BASELINe Selection
 #' results
 #' 
-#' @slot    id                              Unique identifier.
-#' @slot    description                     Description of the sequence.
-#' @slot    inputSequence                   Nucleotide sequence being tested for selection.
-#' @slot    germlineSequence                The germline or reference sequence.
-#' @slot    regionDefinition                \code{\link{RegionDefinition}} object defining the regions
-#'                                          and boundaries of the Ig sequences. Note, only the part of
-#'                                          sequences defined in \code{regionDefinition} are analyzed.
-#'                                          Any mutations outside the definition will be ignored. E.g.
-#'                                          If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                                          used, then mutations in positions greater than 312 will not
-#'                                          be counted.
-#' @slot    observedMutations               The number of mutations observed in the sequence
-#' @slot    expectedMutationFrequencies     The expected frequencies of mutations, based on the
-#'                                          \code{germlineSequence}.
-#' @slot    numbOfSequences                 An \code{array} of the number of non NA sequences (i.e. 
-#'                                          sequences with mutations), for each region (defined in the
-#'                                          \code{defineRegions}).
-#' @slot    regions                         The levels of the boundaries (e.g. CDR & FWR).
-#' @slot    labels                          The labels for the boundary/mutations combinations.
-#'                                          e.g. CDR_R CDR_S FWR_R, FWR_S.
-#' @slot    probDensity                     A \code{list} (one for each sequence in the provided \code{db}
-#'                                          of \code{list(s)} (one for each region) contianing the probability
-#'                                          density function(s).
+#' @slot    description         General information regarding the sequences, selection 
+#'                              analysis and/or object.
+#' @slot    db                  \code{data.frame} containing annotation information about 
+#'                              the sequences/selection results.
+#' @slot    regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                              and boundaries of the Ig sequences. Note, only the part of
+#'                              sequences defined in \code{regionDefinition} are analyzed.
+#'                              Any mutations outside the definition will be ignored. E.g.
+#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
+#'                              used, then mutations in positions greater than 312 will not
+#'                              be counted.                   
+#' @slot    testStatistic       The statistical framework used to test for selection.
+#'                              E.g.
+#'                              \code{local} = CDR_R / (CDR_R + CDR_S)
+#'                              \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
+#'                              For \code{focused} the \code{regionDefinition} must only
+#'                              contain two regions. If more than two regions are defined
+#'                              the \code{local} test statistic will be used.
+#'                              See Uduman et al. (2011) for further information.
+#' @slot    regions             \code{character} vector of the regions the BASELINe 
+#'                              selection was carried out on. E.g. "CDR & "FWR" or
+#'                              "CDR1", "CDR2", "CDR3" etc.
+#' @slot    numbOfSeqs          \code{matrix} of r x c dimensions, where"
+#'                              r = number of rows = number of groups/sequencs and
+#'                              c = number of columns = number of regions
+#'                              The matrix contains the number of non-NA sequences or the
+#'                              number of BASELINe posterior probability distribution 
+#'                              functions (PDF) that were convoluted (grouped) together. 
+#'                              This information is essential to further regroup PDFs and 
+#'                              weight them accordingly.
+#'                              
+#' @slot    pdfs                 A \code{list} (one item for each defined region e.g. CDR &
+#'                              FWR) of \code{matrices} of r x c deminetions, where:
+#'                              r = number of sequences or groups and
+#'                              c = number of columns = length of the PDF (default 4001)
+#'                              The matrix contains the BASELINe posterior probability 
+#'                              distribution functions (PDF) for each sequence or goup of
+#'                              sequences.  
 #'                          
-#' @name BASELINe
+#' @name Baseline
 #' @export
-setClass("BASELINe", 
-         slots=c(id="character",
-                 description="character",
-                 inputSequence="character",
-                 germlineSequence="character",
-                 observedMutations="array",
-                 expectedMutationFrequencies="array",
-                 regionDefinition="RegionDefinition",
-                 regions="character",
-                 labels="character",
-                 probDensity="list")
+setClass("Baseline", 
+         slots = c( description="character",
+                    db="data.frame",
+                    regionDefinition="RegionDefinition",
+                    testStatistic="character",
+                    regions="character",
+                    numbOfSeqs="matrix",
+                    pdfs="list"
+         )
 )
 
-#### BASELINe building functions #####
+#### Baseline building functions #####
 
-#' Creates a BASELINe object
+#' Creates a Baseline object
 #' 
-#' \code{createBASELINe} creates a \code{RegionDefinition}.
+#' \code{createBaseline} creates a \code{RegionDefinition}.
 #'
+#' @param   description         General information regarding the sequences, selection 
+#'                              analysis and/or object.
+#' @param   db                  \code{data.frame} containing annotation information about 
+#'                              the sequences/selection results.
+#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                              and boundaries of the Ig sequences. Note, only the part of
+#'                              sequences defined in \code{regionDefinition} are analyzed.
+#'                              Any mutations outside the definition will be ignored. E.g.
+#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
+#'                              used, then mutations in positions greater than 312 will not
+#'                              be counted.                   
+#' @param   testStatistic       The statistical framework used to test for selection.
+#'                              E.g.
+#'                              \code{local} = CDR_R / (CDR_R + CDR_S)
+#'                              \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
+#'                              For \code{focused} the \code{regionDefinition} must only
+#'                              contain two regions. If more than two regions are defined
+#'                              the \code{local} test statistic will be used.
+#'                              See Uduman et al. (2011) for further information.
+#' @param   numbOfSeqs          \code{matrix} of r x c dimensions, where"
+#'                              r = number of rows = number of groups/sequencs and
+#'                              c = number of columns = number of regions
+#'                              The matrix contains the number of non-NA sequences or the
+#'                              number of BASELINe posterior probability distribution 
+#'                              functions (PDF) that were convoluted (grouped) together. 
+#'                              This information is essential to further regroup PDFs and 
+#'                              weight them accordingly.
+#' @param   pdfs                 A \code{list} (one item for each defined region e.g. CDR &
+#'                              FWR) of \code{matrices} of r x c deminetions, where:
+#'                              r = number of sequences or groups and
+#'                              c = number of columns = length of the PDF (default 4001)
+#'                              The matrix contains the BASELINe posterior probability 
+#'                              distribution functions (PDF) for each sequence or goup of
+#'                              sequences.  
 #' 
-#' @param   id                              Unique identifier.
-#' @param   description                     Description of the sequence.
-#' @param   inputSequence                   Nucleotide sequence being tested for selection.
-#' @param   germlineSequence                The germline or reference sequence.
-#' @param   regionDefinition                \code{\link{RegionDefinition}} object defining the regions
-#'                                          and boundaries of the Ig sequences. Note, only the part of
-#'                                          sequences defined in \code{regionDefinition} are analyzed.
-#'                                          Any mutations outside the definition will be ignored. E.g.
-#'                                          If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                                          used, then mutations in positions greater than 312 will not
-#'                                          be counted.
-#' @param   observedMutations               The number of mutations observed in the sequence
-#' @param   expectedMutationFrequencies     The expected frequencies of mutations, based on the
-#'                                          \code{germlineSequence}.
-#' @param   probDensity                     A \code{list} (one for each sequence in the provided \code{db}
-#'                                          of \code{list(s)} (one for each region) contianing the probability
-#'                                          density function(s).
+#' @return   A \code{Baseline} object.
 #' 
-#' @return   A \code{BASELINe} object.
-#' 
-#' @seealso  See \code{\link{BASELINe}} for the return object.
+#' @seealso  See \code{\link{Baseline}} for the return object.
 #' 
 #' @examples
 #' library(shm)
 #' 
 #' 
 #' @export
-createBASELINe <- function(id="",
-                           description="",
-                           inputSequence="",
-                           germlineSequence="",
-                           regionDefinition=IMGT_V_NO_CDR3,
-                           observedMutations=array(NA,1),
-                           expectedMutationFrequencies=array(NA,1),
-                           probDensity=list()){
+createBaseline <- function( description="",
+                            db="",
+                            regionDefinition="",
+                            testStatistic="",
+                            regions="",
+                            numbOfSeqs="",
+                            pdfs="") {
     
-    
-    if (class(observedMutations) == "data.frame") {
-        observedMutations <- array( as.numeric(observedMutations), 
-                                    dimnames=list(colnames(observedMutations)) )
-    }
-    
-    if (class(expectedMutationFrequencies) == "data.frame") {
-        expectedMutationFrequencies <- array( as.numeric(expectedMutationFrequencies), 
-                                              dimnames=list(colnames(expectedMutationFrequencies)) )
-    }
     
     # Define RegionDefinition object
-    seqBASELINe <- new("BASELINe",
-                       id=id,
-                       description=description,
-                       inputSequence=inputSequence,
-                       observedMutations=observedMutations,
-                       expectedMutationFrequencies=expectedMutationFrequencies,
-                       regionDefinition=regionDefinition,
-                       regions=regionDefinition@regions,
-                       labels=regionDefinition@labels,
-                       probDensity=probDensity)
+    baseline <- new( "Baseline",
+                     description=description,
+                     db=db,
+                     regionDefinition=regionDefinition,
+                     testStatistic=testStatistic,
+                     regions=regionDefinition@regions,
+                     numbOfSeqs=numbOfSeqs,
+                     pdfs=pdfs)
     
-    return(seqBASELINe)
+    return(baseline)
 }
 
 
-# Edit the BASELINe object
+# Edit the Baseline object
 # 
-# \code{editBASELINe} edits a \code{BASELINe}.
+# \code{editBaseline} edits a \code{Baseline}.
 #
-# @param   seqBASELINe     The \code{BASELINe} S4 object to be edited.
-# @param   field_name      Name of the field in the \code{BASELINe} S4 object to be edited.
-# @param   value           The value to set the \code{field_anme}.
+# param   baseline     The \code{Baseline} S4 object to be edited.
+# param   field_name   Name of the field in the \code{Baseline} S4 object to be edited.
+# param   value        The value to set the \code{field_name}.
 # 
-# @return   A \code{BASELINe} object.
+# return   A \code{Baseline} object.
 # 
-# @seealso  See \code{\link{BASELINe}} for the return object.
-editBASELINe <- function ( seqBASELINe,
+# seealso  See \code{\link{Baseline}} for the return object.
+editBaseline <- function ( baseline,
                            field_name,
                            value ) {
-    if ( !match(field_name, slotNames(seqBASELINe)) ) { stop("field_name not part of BASELINe object!")}
-    slot(seqBASELINe, field_name) = value
-    return(seqBASELINe)
+    if ( !match(field_name, slotNames(baseline)) ) { stop("field_name not part of BASELINe object!")}
+    slot(baseline, field_name) = value
+    return(baseline)
 }
 
 
+#### Baseline selection calculating functions ####
 
-
-
-#### BASELINe selection calculating functions ####
-
-#' Return BASELINe probability density functions for each entry in the DB
-#'
-#' \code{getBASELINe} calculates 
-#'
-#' @param       db                  data.frame containing sequence data.
-#' @param       groupBy             Name of column in \code{db} to group by. If parameter 
-#'                                  \code{groupBy} is specified then \code{db_baseline}
-#'                                  must also be provided.
-#' @param       db_BASELINe         data.frame containing sequence data.
-#' @param       testStatistic       The statistical framework used to test for selection.
-#'                                  \code{local} = CDR_R / (CDR_R + CDR_S)
-#'                                  \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S)
-#'                                  See Uduman et al. (2011) for further information.
-#' @param       sequenceColumn      name of the column containing sample/input sequences.
-#' @param       germlineColumn      name of the column containing germline sequences.
-#' @param       regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                                  and boundaries of the Ig sequences. Note, only the part of
-#'                                  sequences defined in \code{regionDefinition} are analyzed.
-#'                                  Any mutations outside the definition will be ignored. E.g.
-#'                                  If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                                  used, then mutations in positions greater than 312 will not
-#'                                  be counted.
-#' @param       nproc               number of cores to distribute the operation over. If 
-#'                                  \code{nproc} = 0 then the \code{cluster} has already been
-#'                                  set and will not be reset.
+#' Calculate the BASELINe PDFs
 #' 
-#' @return      A \code{list} of length two. The first element contains the modified \code{db}
-#'              and the second element is a \code{list} of \code{\link{BASELINe}} objects
-#'              (elements match the sequences in \code{db}). If parameter \code{groupBy} 
-#'              is specified then the \code{db} returned is a summary of BASELINe statistics.
+#' \code{calcBaselinePdfs} calculates the BASELINe posterior probability distribution 
+#' functions (PDFs) for sequences in the given db
+#'
+#' @param   db                  \code{data.frame} containing sequence data and annotation.
+#' @param   sequenceColumn      Name of the column containing sample/input sequences.
+#' @param   germlineColumn      Name of the column containing germline sequences.
+#' @param   testStatistic       The statistical framework used to test for selection.
+#'                              E.g.
+#'                              \code{local} = CDR_R / (CDR_R + CDR_S)
+#'                              \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
+#'                              For \code{focused} the \code{regionDefinition} must only
+#'                              contain two regions. If more than two regions are defined
+#'                              the \code{local} test statistic will be used.
+#'                              See Uduman et al. (2011) for further information.
+#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                              and boundaries of the Ig sequences. Note, only the part of
+#'                              sequences defined in \code{regionDefinition} are analyzed.
+#'                              Any mutations outside the definition will be ignored. E.g.
+#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
+#'                              used, then mutations in positions greater than 312 will not
+#'                              be counted.
+#' @param   nproc               number of cores to distribute the operation over. If 
+#'                              \code{nproc} = 0 then the \code{cluster} has already been
+#'                              set and will not be reset.
+#' 
+#' @return  A \code{Baseline} object, containing the modified \code{db} and the BASELINe 
+#'          posterior probability distribution functions (PDF) for each of the sequences
 #'           
-#' @details     \code{getBASELINe} calculates the BASELINe probability density functions for each
-#'              sequence in the \code{db.}.
-#' 
-#' @seealso     To calculate BASELINe statistics, such as the mean selection strength
-#'              and the 95% confidence interval, see \code{\link{getBASELINeStats}}.
+#' @details Calculates the BASELINe posterior probability distribution function (PDF) for 
+#'          sequences in the provided \code{db}. 
+#'          
+#'          If the \code{db} does not contain the 
+#'          required columns to calculate the PDFs (namely OBSERVED & EXPECTED mutations)
+#'          then the function will:
+#'          1. Collapse the sequences by the CLONE column (if present)
+#'          2. Calculate the numbers of observed mutations
+#'          3. Calculate the expected frequencies of mutations
+#'          and modify the provided \code{db} (this will be returned as part of the 
+#'          \code{Baseline} object).
+#'          
+#'          
+#' @seealso To calculate BASELINe statistics, such as the mean selection strength
+#'          and the 95\% confidence interval, see .
+#'          To group the sequence PDFs and get a combined PDF see 
+#'          \code{\link{groupBaseline}}.
 #' 
 #' 
 #' @references
@@ -201,241 +225,15 @@ editBASELINe <- function ( seqBASELINe,
 #' db <- readChangeoDb(dbPath)
 #'                      
 #' @export
-getBASELINe <- function( db,
-                         groupBy=NULL,
-                         db_BASELINe=NULL,
-                         sequenceColumn="SEQUENCE_IMGT",
-                         germlineColumn="GERMLINE_IMGT_D_MASK",
-                         testStatistic=c("local","focused"),
-                         regionDefinition=IMGT_V_NO_CDR3,
-                         nproc=1 ) {
+calcBaselinePdfs <- function( db,
+                              sequenceColumn="SEQUENCE_IMGT",
+                              germlineColumn="GERMLINE_IMGT_D_MASK",
+                              testStatistic=c("local","focused"),
+                              regionDefinition=IMGT_V_NO_CDR3,
+                              nproc=1 ) {
     
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused"))
-    
-    # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, getnproc())
-    
-    if ( !is.null(groupBy) & length(db_BASELINe)==nrow(db) ){
-        
-        # Convert the db (data.frame) to a data.table & set keys
-        # This is an efficient way to get the groups of CLONES, instead of doing dplyr
-        dt <- data.table(db)
-        #setkeyv(dt, groupBy )
-        # Get the group indexes
-        groupByFormatted <- paste(groupBy, collapse=",", sep=",")
-        dt <- dt[ , list( yidx = list(.I) ) , by=groupByFormatted ]
-        groups <- dt[,yidx] 
-        if(length(groupBy)==1){
-            mat_dt <- unlist(as.matrix(dt)[,groupBy])
-        }else{
-            mat_dt <- as.matrix(dt)[,groupBy]
-        }
-        
-        # If user wants to paralellize this function and specifies nproc > 1, then
-        # initialize and register slave R processes/clusters & 
-        # export all nesseary environment variables, functions and packages.  
-        if(nproc>1){        
-            cluster <- makeCluster(nproc, type = "SOCK")
-            clusterExport( cluster, list('dt', 'db_BASELINe', 'groups',
-                                         'groupBy', 'mat_dt',
-                                         'break2chunks', 'PowersOfTwo', 
-                                         'convolutionPowersOfTwo', 
-                                         'convolutionPowersOfTwoByTwos', 
-                                         'weighted_conv', 
-                                         'calculate_bayesGHelper', 
-                                         'groupPosteriors', 'fastConv'), 
-                           envir=environment() )
-            clusterEvalQ( cluster, library("shm") )
-            registerDoSNOW(cluster)
-        } else if( nproc==1 ) {
-            # If needed to run on a single core/cpu then, regsiter DoSEQ 
-            # (needed for 'foreach' in non-parallel mode)
-            registerDoSEQ()
-        }
-        
-        regions <- regionDefinition@regions
-        numbOfGroups <- length(groups)
-        db_BASELINe <-
-            foreach( i=icount(numbOfGroups) ) %dopar% {
-                group_probDensity <- list()
-                for(region in regions){
-                    group_probDensity[[region]] <- 
-                        groupPosteriors(
-                            lapply( db_BASELINe[ groups[[i]] ], 
-                                    function(x) { return(x@probDensity[[region]])}
-                            )
-                        )                    
-                }
-                groupBASELINe <- createBASELINe( id=as.character(i), 
-                                                 regionDefinition=regionDefinition,
-                                                 probDensity=group_probDensity )
-                return(groupBASELINe)
-            }
-
-        # Summarize
-        if(nproc>1){        
-            clusterExport( cluster, list( 'db_BASELINe', 
-                                          'calculateBASELINeStats',
-                                          'calculateBASELINeSigma',
-                                          'calculateBASELINeCI',
-                                          'calculateBASELINePvalue' ), 
-                           envir=environment() )          
-        }
-        
-        numbOfSeqs <- length(db_BASELINe)
-        BASELINe_stats_list <-
-            foreach( i=icount(numbOfSeqs) ) %dopar% {
-                if(length(groupBy==1)){ 
-                    groupInfo <- mat_dt[i]
-                }else{
-                    groupInfo <- unlist(mat_dt[i,])
-                }
-                seqBASELINe <- db_BASELINe[[i]]
-                seqBASELINe_stats <- matrix(NA, 
-                                            ncol=(5+length(groupBy)), 
-                                            nrow=length(regions),
-                                            dimnames=list( regions, 
-                                                           c(groupBy,"REGION","SIGMA",
-                                                             "CI_LOWER","CI_UPPER",
-                                                             "P_VALUE")
-                                                         )
-                                            )
-                seqBASELINe_stats[,groupBy] = rep(groupInfo, each=length(regions))
-                for ( region in seqBASELINe@regions ) {
-                    seqBASELINe_stats[region, c("REGION","SIGMA","CI_LOWER","CI_UPPER","P_VALUE")] <- 
-                        c( region, calculateBASELINeStats( seqBASELINe@probDensity[[region]] ) )                     
-                }
-                return( seqBASELINe_stats )
-            }
-        
-        # Convert list of BASELINe stats into a data.frame
-        db_new <- do.call(rbind, BASELINe_stats_list)
-        return( list("db"=db_new, "list_BASELINe"=db_BASELINe)) 
-        
-    } else {
-        
-        
-        # If user wants to paralellize this function and specifies nproc > 1, then
-        # initialize and register slave R processes/clusters & 
-        # export all nesseary environment variables, functions and packages.  
-        if(nproc>1){        
-            cluster <- makeCluster(nproc, type = "SOCK")
-            clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition'), envir=environment() )
-            clusterEvalQ( cluster, library("shm") )
-            registerDoSNOW(cluster)
-        } else if( nproc==1 ) {
-            # If needed to run on a single core/cpu then, regsiter DoSEQ 
-            # (needed for 'foreach' in non-parallel mode)
-            registerDoSEQ()
-        }
-        
-    
-        
-        # If db does not contain the correct OBSERVED & MUTATIONS columns then first
-        # create them. After that BASELINe prob. densities can be calcualted per seqeunce.
-        observedColumns <- paste0("OBSERVED_", regionDefinition@labels)
-        expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
-        
-        if( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
-            
-            # checking the validity of input parameters
-            if ( !all( c(!is.null(sequenceColumn), !is.null(germlineColumn)) ) ) {
-                stop("The OBSERVED and EXPECTED values are not in DB. Please specify the 'sequenceColumn', 'germlineColumn'")
-            }
-            
-            db <- getClonalConsensus(db, 
-                                     cloneColumn="CLONE", 
-                                     sequenceColumn="SEQUENCE_IMGT",
-                                     germlineColumn="GERMLINE_IMGT_D_MASK",
-                                     collapseByClone=TRUE,nproc=0)
-            
-            db <- getObservedMutations(db,
-                                       sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
-                                       germlineColumn="GERMLINE_IMGT_D_MASK",
-                                       regionDefinition=IMGT_V_NO_CDR3,
-                                       nproc=0)
-            
-            
-            db <- getExpectedMutationFrequencies(db,
-                                                 sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
-                                                 germlineColumn="GERMLINE_IMGT_D_MASK",
-                                                 regionDefinition=IMGT_V_NO_CDR3,
-                                                 nproc=0)
-        }
-        
-        # Compute the BASELINe prob. density values for all the seqeunces in the DB
-        # and for each of the regions, defined in the regionDefinition
-        
-        # Printing status to console
-        cat("Calculating BASELINe probability density functions...\n")
-        
-        numbOfSeqs <- nrow(db)
-        db_BASELINe <-
-            foreach( i=icount(numbOfSeqs) ) %dopar% {
-                seqBASELINe <- createBASELINe( id = db[i,"SEQUENCE_ID"],
-                                               observedMutations = db[i, observedColumns],
-                                               expectedMutationFrequencies = db[i, expectedColumns] )
-                return(
-                    calculateBASELINePDF( seqBASELINe, 
-                                          testStatistic=testStatistic,
-                                          regionDefinition=regionDefinition) 
-                )
-            }
-        
-        
-        # Properly shutting down the cluster
-        if(nproc>1){ stopCluster(cluster) }
-    
-        return(list("db"=db, "list_BASELINe"=db_BASELINe))  
-    }
-}
-
-
-#' Return DB of BASELINe stats
-#'
-#' \code{getBASELINeStats} calculates 
-#'
-#' @param       db              \code{data.frame} containing sequence data.
-#' @param       list_BASELINe   \code{list} of \code{\link{BASELINe}} objects, length matching
-#'                              the number of entires in the \code{db}. (This is returned by 
-#'                              \code{\link{getBASELINe}})
-#' @param       nproc           number of cores to distribute the operation over. If 
-#'                              \code{nproc} = 0 then the \code{cluster} has already been
-#'                              set and will not be reset.
-#' 
-#' @return      A modified \code{db} data.frame with the BASELINe selection values and 95%
-#'              confidence intervals. The columns names are dynamically created based on the
-#'              regions in the \code{regionDefinition}. E.g. For the default
-#'              \code{\link{IMGT_V_NO_CDR3}} definition, which defines positions for CDR and
-#'              FWR, the following columns are added:  
-#'              \itemize{
-#'                  \item  \code{BASELINe_CDR}:  BASELINe Sigma value for the CDR
-#'                  \item  \code{BASELINe_CDR_95CI_LOWER}: 95% CI for the CDR
-#'                  \item  \code{BASELINe_FWR}:  BASELINe Sigma value for the FWR
-#'                  \item  \code{BASELINe_FWR_95CI_LOWER}: 95% CI for the FWR
-#'              }
-#'           
-#' @details     \code{getBASELINeStats} calculates 
-#' 
-#' @seealso     See \code{link{getBASELINePDF}}.
-#' 
-#' @examples
-#' # Load example data
-#' library("shm")
-#' dbPath <- system.file("extdata", "Influenza_IB.tab", package="shm")
-#' db <- readChangeoDb(dbPath)
-#'                      
-#' @export
-getBASELINeStats <- function ( db,
-                               list_BASELINe,
-                               nproc=1 ) {
-    
-    
-    # Checking if the nrows of db is the same as the length of list_BASELINe
-    if ( length(list_BASELINe)!= nrow(db) ) {
-        stop("The number of entires in db and list_BASELINe do not match.")
-    }
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
@@ -445,13 +243,18 @@ getBASELINeStats <- function ( db,
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
         cluster <- makeCluster(nproc, type = "SOCK")
-        clusterExport( cluster, list( 'db', 'list_BASELINe', 
-                                      'calculateBASELINeStats',
-                                      'calculateBASELINeSigma',
-                                      'calculateBASELINeCI',
-                                      'calculateBASELINePvalue' ), 
+        clusterExport( cluster, list( 'db',
+                                      'sequenceColumn', 'germlineColumn', 
+                                      'regionDefinition',
+                                      'break2chunks', 'PowersOfTwo', 
+                                      'convolutionPowersOfTwo', 
+                                      'convolutionPowersOfTwoByTwos', 
+                                      'weighted_conv', 
+                                      'calculate_bayesGHelper', 
+                                      'groupPosteriors', 'fastConv'), 
                        envir=environment() )
-        clusterEvalQ( cluster, library("shm") )
+        clusterEvalQ(cluster, library(shm))
+        clusterEvalQ(cluster, library(seqinr))
         registerDoSNOW(cluster)
     } else if( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
@@ -459,130 +262,213 @@ getBASELINeStats <- function ( db,
         registerDoSEQ()
     }
     
-    # Printing status to console
-    cat("Calculating BASELINe statistics...\n")
+    # If db does not contain the required columns to calculate the PDFs (namely OBSERVED 
+    # & EXPECTED mutations), then the function will:
+    #          1. Collapse the sequences by the CLONE column (if present)
+    #          2. Calculate the numbers of observed mutations
+    #          3. Calculate the expected frequencies of mutations    
+    # After that BASELINe prob. densities can be calcualted per seqeunce.    
+    observedColumns <- paste0("OBSERVED_", regionDefinition@labels)
+    expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
     
-    numbOfSeqs <- nrow(db)
-    BASELINe_stats_list <-
-        foreach( i=icount(numbOfSeqs) ) %dopar% {
-            seqBASELINe <- list_BASELINe[[i]]
-            seqBASELINe_stats <- list()
-            for ( region in seqBASELINe@regions ) {
-                seqBASELINe_stats[[region]] <- calculateBASELINeStats( seqBASELINe@probDensity[[region]] )
-            }
-            seqBASELINe_stats <- unlist( seqBASELINe_stats )
-            names(seqBASELINe_stats) <- gsub("\\.","_",names(seqBASELINe_stats))
-            return( seqBASELINe_stats )
+    if( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
+        
+        # If the germlineColumn & sequenceColumn are not found in the db error and quit
+        if( !all( c(sequenceColumn, germlineColumn) %in% colnames(db) ) ) {
+            stop( paste0("Both ", sequenceColumn, " & ", germlineColumn, 
+                         " columns need to be present in the db") )
         }
+        
+        # Collapse the sequences by the CLONE column (if present)
+        if( "CLONE" %in% colnames(db) ) {                       
+            db <- getClonalConsensus( db, 
+                                      cloneColumn="CLONE", 
+                                      sequenceColumn=sequenceColumn,
+                                      germlineColumn=germlineColumn,
+                                      collapseByClone=TRUE, nproc=cluster)            
+            sequenceColumn="CLONAL_CONSENSUS_SEQUENCE"
+        }
+        
+        # Calculate the numbers of observed mutations
+        db <- getObservedMutations( db,
+                                    sequenceColumn=sequenceColumn,
+                                    germlineColumn="GERMLINE_IMGT_D_MASK",
+                                    regionDefinition=IMGT_V_NO_CDR3,
+                                    nproc=0 )
+        
+        # Calculate the expected frequencies of mutations
+        db <- getExpectedMutationFrequencies( db,
+                                              sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+                                              germlineColumn="GERMLINE_IMGT_D_MASK",
+                                              regionDefinition=IMGT_V_NO_CDR3,
+                                              nproc=0 )
+    }
     
-    # Convert list of BASELINe stats into a data.frame
-    BASELINe_stats <- do.call(rbind, BASELINe_stats_list)
+    # Calculate PDFs for each sequence
     
-    # Bind the stats to db
-    db_new <- cbind(db, BASELINe_stats)
-    return(db_new)   
+    # Print status to console
+    cat("Calculating BASELINe probability density functions...\n")
+    
+    # Number of sequences (used in foreach)
+    totalNumbOfSequences <- nrow(db)
+    # The column indexes of the OBSERVED_ and EXPECTED_
+    cols_observed <- grep( paste0("OBSERVED_"),  colnames(db) ) 
+    cols_expected <- grep( paste0("EXPECTED_"),  colnames(db) ) 
+    
+    # Exporting additional environment variables and functions needed to run foreach 
+    if( nproc!=1 ) {
+        clusterExport( 
+            cluster, list('cols_observed', 'cols_expected'), 
+            envir=environment() 
+        )
+        registerDoSNOW(cluster)
+    }
+    
+    list_pdfs <- list()
+    # For every region (e.g. CDR, FWR etc.)
+    for (region in regionDefinition@regions) {
+        
+        # Foreach returns a list of PDFs
+        list_region_pdfs <- 
+            foreach( i=icount(totalNumbOfSequences) ) %dopar% {                
+                calcBaselinePdfs_Helper( 
+                    observed = db[i,cols_observed],
+                    expected = db[i,cols_expected],
+                    region = region,
+                    testStatistic = testStatistic,
+                    regionDefinition = regionDefinition
+                )
+            }
+        # Convert the list of the region's PDFs into a matrix                
+        list_pdfs[[region]] <- 
+            do.call( rbind, 
+                     lapply( 
+                         list_region_pdfs, 
+                         function(x) { 
+                             length(x) <- 4001 
+                             return(x)
+                         }
+                     )
+            ) 
+    }
+    
+    # Initialize numbOfSeqs
+    # This holds the number of non NA sequences
+    numbOfSeqs <- matrix( NA, 
+                          ncol=length(regionDefinition@regions), 
+                          nrow=totalNumbOfSequences,
+                          dimnames=list( 1:totalNumbOfSequences, regionDefinition@regions )
+    )
+    
+    # Create a Baseline object with the above results to return
+    baseline <- createBaseline( description="",
+                                db=db,
+                                regionDefinition=regionDefinition,
+                                testStatistic=testStatistic,
+                                regions=regionDefinition@regions,
+                                numbOfSeqs=numbOfSeqs,
+                                pdfs=list_pdfs )
+    
+    # Stop SNOW cluster
+    if(nproc > 1) { stopCluster(cluster) }
+    
+    return(baseline)
+    
 }
 
-#' Calculate BASELINe
-#'
-#' \code{calculateBASELINePDF} calculates 
-#'
-#' @param   seqBASELINe         \code{\link{BASELINe}} object representing the sequence
-#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.
-#' 
-#' @return  A modified \code{\link{BASELINe}} object with the BASELINe probability 
-#'          density function calculated for the regions defined in the \code{regionDefinition}.
-#'           
-#' @details
-#' \code{getBASELINe} calculates 
-#' 
-#' @seealso  
-#' See also
-#' @examples
-#' # Load example data
-#' library("shm")
-#' dbPath <- system.file("extdata", "Influenza_IB.tab", package="shm")
-#' db <- readChangeoDb(dbPath)
-#'                      
-#' @export
-calculateBASELINePDF  <- function( seqBASELINe,
-                                   testStatistic=c("local", "focused"),
-                                   regionDefinition=IMGT_V_NO_CDR3 ) {
+
+
+# Helper function for calcBaselinePdfs
+#
+# \code{calcBaselinePdfs_Helper} calculates 
+#
+# @param   observed
+# @param   expected
+# @param   region
+# @param   testStatistic
+# @param   regionDefinition
+# 
+# @return  A modified \code{\link{Baseline}} object with the BASELINe probability 
+#          density function calculated for the regions defined in the \code{regionDefinition}.
+#           
+# @details
+# \code{getBaseline} calculates 
+# 
+# @seealso  
+# See also
+# @examples
+# # Load example data
+# library("shm")
+# dbPath <- system.file("extdata", "Influenza_IB.tab", package="shm")
+# db <- readChangeoDb(dbPath)
+#    
+# export
+calcBaselinePdfs_Helper  <- function( observed,
+                                      expected,
+                                      region,
+                                      testStatistic="local",
+                                      regionDefinition=IMGT_V_NO_CDR3 ) {
     
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused"))
     
     #If there are more than two regions (e.g. CDR and FWR then you cannot perform the focused test)
-    if (testStatistic=="focused" & length(seqBASELINe@regions)!=2) {
+    if (testStatistic=="focused" & length(regionDefinition@regions)!=2) {
         testStatistic="local"    
+    }    
+    
+    # local test statistic
+    if (testStatistic == "local") { 
+        obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(observed) )
+        obsN_Index <- grep( paste0("OBSERVED_", region),  names(observed) )
+        
+        expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(expected) )
+        expN_Index <- grep( paste0("EXPECTED_", region),  names(expected) )       
     }
     
-    list_BASELINE_ProbDensity <- list()
-    for (region in seqBASELINe@regions) {
+    # focused test statistic
+    if (testStatistic == "focused") { 
+        obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(observed) )
+        obsN_Index <- 
+            grep( 
+                paste0( 
+                    "OBSERVED_", region, "|", 
+                    "OBSERVED_", regionDefinition@regions[regionDefinition@regions!=region], "_S"
+                ),
+                names(observed) 
+            )
         
-        # local test statistic
-        if (testStatistic == "local") { 
-            obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(seqBASELINe@observedMutations) )
-            obsN_Index <- grep( paste0("OBSERVED_", region),  names(seqBASELINe@observedMutations) )
-            
-            expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(seqBASELINe@expectedMutationFrequencies) )
-            expN_Index <- grep( paste0("EXPECTED_", region),  names(seqBASELINe@expectedMutationFrequencies) )       
-        }
-        
-        # focused test statistic
-        if (testStatistic == "focused") { 
-            obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(seqBASELINe@observedMutations) )
-            obsN_Index <- 
-                grep( 
-                    paste0( "OBSERVED_", region, "|", 
-                            "OBSERVED_", seqBASELINe@regions[seqBASELINe@regions!=region], "_S"
-                    ),
-                    names(seqBASELINe@observedMutations) 
-                )
-            
-            expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(seqBASELINe@expectedMutationFrequencies) )
-            expN_Index <- 
-                grep( 
-                    paste0( "EXPECTED_", region, "|", 
-                            "EXPECTED_", seqBASELINe@regions[seqBASELINe@regions!=region], "_S"
-                    ),
-                    names(seqBASELINe@expectedMutationFrequencies) 
-                )
-            
-        }     
-        
-        obsX <- seqBASELINe@observedMutations[obsX_Index]
-        obsN <- sum( seqBASELINe@observedMutations[obsN_Index], na.rm=T )
-        
-        expP <- 
-            seqBASELINe@expectedMutationFrequencies[expX_Index] / 
-            sum( seqBASELINe@expectedMutationFrequencies[expN_Index], na.rm=T )
-        
-        list_BASELINE_ProbDensity[[region]] <- calculateBASELINeBinomialPDF( x=obsX, n=obsN, p=expP)
-    }
+        expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(expected) )
+        expN_Index <- 
+            grep( 
+                paste0( 
+                    "EXPECTED_", region, "|", 
+                    "EXPECTED_",  regionDefinition@regions[regionDefinition@regions!=region], "_S"
+                ),
+                names(expected) 
+            )        
+    }     
     
-    seqBASELINe <- editBASELINe(seqBASELINe, "probDensity", list_BASELINE_ProbDensity)
+    obsX <- as.numeric( observed[obsX_Index] )
+    obsN <- as.numeric( sum( observed[obsN_Index], na.rm=T ) )
     
-    return(seqBASELINe)
+    expP <-
+        as.numeric( 
+            expected[expX_Index] / 
+                sum( expected[expN_Index], na.rm=T )
+        )
+    
+    return( calcBaselineBinomialPdf( x=obsX, n=obsN, p=expP) )
 }
-
-
-
 
 # Calculate the BASELINe probability function in a
 # binomial framework.
-calculateBASELINeBinomialPDF <- function ( x=3, 
-                                           n=10, 
-                                           p=0.33,
-                                           CONST_i=CONST_I,
-                                           max_sigma=20,
-                                           length_sigma=4001 ) {
+calcBaselineBinomialPdf <- function ( x=3, 
+                                      n=10, 
+                                      p=0.33,
+                                      CONST_i=CONST_I,
+                                      max_sigma=20,
+                                      length_sigma=4001 ) {
     if(n!=0){
         sigma_s<-seq(-max_sigma,max_sigma,length.out=length_sigma)
         sigma_1<-log({CONST_i/{1-CONST_i}}/{p/{1-p}})
@@ -600,10 +486,171 @@ calculateBASELINeBinomialPDF <- function ( x=3,
 }
 
 
+#' Group BASELINe PDFs
+#' 
+#' \code{groupBaseline} convolutes the BASELINe posterior probability distribution 
+#' functions (PDFs) of sequences to get a combined (grouped) pdf
+#'
+#' @param   baseline            \code{Baseline} object, containing the \code{db} and the 
+#'                              BASELINe posterior probability distribution functions 
+#'                              (PDF) for each of the sequences. This would be returned by
+#'                              \code{\link{calcBaselinePdfs}}.
+#' @param   groupBy             The columns in the \code{db} slot of the \code{Baseline}
+#'                              object to group the sequence PDFs by.
+#' @param   nproc               number of cores to distribute the operation over. If 
+#'                              \code{nproc} = 0 then the \code{cluster} has already been
+#'                              set and will not be reset.
+#' 
+#' @return  A \code{Baseline} object, containing the modified \code{db} and the BASELINe 
+#'          posterior probability distribution functions (PDF) for each of the groups.
+#'           
+#' @details Calculates the BASELINe posterior probability distribution function (PDF) for 
+#'          sequences in the provided \code{db}, convoluted (grouped)  according to the 
+#'          annotations in the \code{groupBy} argument.
+#'          
+#'          
+#' @seealso To calculate BASELINe statistics, such as the mean selection strength
+#'          and the 95\% confidence interval, see .
+#' 
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Gur Yaari; Mohamed Uduman; Steven H. Kleinstein. Quantifying selection 
+#'          in high-throughput Immunoglobulin sequencing data sets. Nucleic Acids Res.
+#'           2012 May 27. 
+#' }
+#' 
+#' @examples
+#' # Load example data
+#' library("shm")
+#' dbPath <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#'                      
+#' @export
+groupBaseline <- function( baseline,
+                           groupBy,
+                           nproc=1 ) {
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, getnproc())
+
+    # Convert the db (data.frame) to a data.table & set keys
+    # This is an efficient way to get the groups of CLONES, instead of doing dplyr
+    dt <- data.table(baseline@db)
+    # Get the group indexes
+    groupByFormatted <- paste(groupBy, collapse=",", sep=",")
+    dt <- dt[ , list( yidx = list(.I) ) , by=groupByFormatted ]
+    groups <- dt[,yidx] 
+    df <- as.data.frame(dt)    
+   
+
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.  
+    if(nproc>1){        
+        cluster <- makeCluster(nproc, type = "SOCK")
+        clusterExport( cluster, list( 'baseline', 'groups',
+                                      'break2chunks', 'PowersOfTwo', 
+                                      'convolutionPowersOfTwo', 
+                                      'convolutionPowersOfTwoByTwos', 
+                                      'weighted_conv', 
+                                      'calculate_bayesGHelper', 
+                                      'groupPosteriors', 'fastConv'), 
+                       envir=environment() )
+        clusterEvalQ(cluster, library(shm))
+        registerDoSNOW(cluster)
+    } else if( nproc==1 ) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    }
+ 
+    
+    # Print status to console
+    cat("Grouping BASELINe probability density functions...\n")
+    
+    # Number of total groups
+    numbOfTotalGroups <- length(groups)
+    list_pdfs <- list()
+    
+    # Initialize numbOfSeqs
+    # This holds the number of non NA sequences
+    numbOfSeqs <- matrix( NA, 
+                          ncol=length(baseline@regions), 
+                          nrow=numbOfTotalGroups,
+                          dimnames=list( 1:numbOfTotalGroups, baseline@regions )
+    )    
+    
+
+    # For every region (e.g. CDR, FWR etc.)
+    for (region in baseline@regions) {
+        
+        list_region_pdfs  <-
+            foreach( i=icount(numbOfTotalGroups) ) %dopar% {
+                matrix_GroupPdfs <- (baseline@pdfs[[region]])[groups[[i]],]
+                
+                list_GroupPdfs <- 
+                    lapply( 1:nrow(matrix_GroupPdfs), 
+                            function(rowIndex) {
+                                rowVals <- matrix_GroupPdfs[rowIndex,]
+                                if( !all(is.na(rowVals)) ) { matrix_GroupPdfs[rowIndex,] }
+                            })
+                
+                list_GroupPdfs <- Filter(Negate(is.null), list_GroupPdfs)
+                numbOfNonNASeqs <- length(list_GroupPdfs)
+                
+                # If all the sequences in the group are NAs, return a PDF of NAs
+                if( length(list_GroupPdfs) == 0 ) { list_GroupPdfs = list((rep(NA,4001))) }
+                
+                return( c( groupPosteriors(list_GroupPdfs), numbOfNonNASeqs ) )
+            }
+        
+        # Convert the list of the region's PDFs into a matrix                
+        matrix_region_pdfs <- 
+            do.call( rbind, 
+                     lapply( 
+                         list_region_pdfs, 
+                         function(x) { 
+                             length(x) <- 4002 
+                             return(x)
+                         }
+                     )
+            )
+        
+        
+        list_pdfs[[region]] <- matrix_region_pdfs[,1:4001]
+        numbOfSeqs[,region] <- matrix_region_pdfs[,4002]
+        
+    }
+ 
+    
+    # Create the db, which will now contain the group information
+    db <- cbind( df[,groupBy], numbOfSeqs)
+    if(!class(db)=="data.frame") { 
+        db <- as.data.frame(db) 
+        colnames(db)[1] <- groupBy
+    }
+    
+    # Create a Baseline object with the above results to return
+    baseline <- createBaseline( description="",
+                                db=db,
+                                regionDefinition=baseline@regionDefinition,
+                                testStatistic=baseline@testStatistic,
+                                regions=regionDefinition@regions,
+                                numbOfSeqs=numbOfSeqs,
+                                pdfs=list_pdfs )
+    
+    # Stop SNOW cluster
+    if(nproc > 1) { stopCluster(cluster) }
+    
+    return(baseline)
+    
+}
+
+
 # Given a BASELIne PDF calculate mean sigma
-calculateBASELINeSigma <- function ( baseline_pdf,
+calculateBaselineSigma <- function ( baseline_pdf,
                                      max_sigma=20,
-                                    length_sigma=4001 ) {
+                                     length_sigma=4001 ) {
     
     if ( length(baseline_pdf)!=length_sigma) { return(NA) }
     
@@ -614,7 +661,7 @@ calculateBASELINeSigma <- function ( baseline_pdf,
 
 
 # Given a BASELIne PDF calculate Confidence Interval
-calculateBASELINeCI <- function ( baseline_pdf,
+calculateBaselineCI <- function ( baseline_pdf,
                                   low=0.025,
                                   up=0.975,
                                   max_sigma=20,
@@ -635,7 +682,7 @@ calculateBASELINeCI <- function ( baseline_pdf,
 }
 
 # Given a BASELIne PDF calculate P value
-calculateBASELINePvalue <- function ( baseline_pdf, 
+calculateBaselinePvalue <- function ( baseline_pdf, 
                                       length_sigma=4001, 
                                       max_sigma=20 ){
     if ( length(baseline_pdf)>1 ) {
@@ -652,7 +699,7 @@ calculateBASELINePvalue <- function ( baseline_pdf,
 
 
 # Given a BASELIne PDF calculate Mean, Confidence Interval (lower & upper) and P value
-calculateBASELINeStats <- function ( baseline_pdf,
+calculateBaselineStats <- function ( baseline_pdf,
                                      low=0.025,
                                      up=0.975,
                                      max_sigma=20, 
@@ -662,18 +709,18 @@ calculateBASELINeStats <- function ( baseline_pdf,
     if ( length(baseline_pdf)==1  ) { return(rep(NA,4)) }
     
     
-    baselineSigma <- calculateBASELINeSigma( baseline_pdf=baseline_pdf, 
+    baselineSigma <- calculateBaselineSigma( baseline_pdf=baseline_pdf, 
                                              max_sigma=max_sigma, 
                                              length_sigma=length_sigma )
     
     
-    baselineCI <- calculateBASELINeCI( baseline_pdf=baseline_pdf,
+    baselineCI <- calculateBaselineCI( baseline_pdf=baseline_pdf,
                                        low=low,
                                        up=up,
                                        max_sigma=max_sigma,
                                        length_sigma=length_sigma )
     
-    baselinePvalue <- calculateBASELINePvalue( baseline_pdf=baseline_pdf,
+    baselinePvalue <- calculateBaselinePvalue( baseline_pdf=baseline_pdf,
                                                max_sigma=max_sigma,
                                                length_sigma=length_sigma )
     
@@ -681,8 +728,8 @@ calculateBASELINeStats <- function ( baseline_pdf,
                "CI_Lower"=baselineCI[1], 
                "CI_Upper"=baselineCI[2],
                "Pvalue"=baselinePvalue 
-               ) 
-            )
+    ) 
+    )
 }
 
 
@@ -692,7 +739,7 @@ calculateBASELINeStats <- function ( baseline_pdf,
 #' 
 #' \code{plotBaseline} plots the results of selection analysis using the BASELINe method.
 #'
-#' @param    baseline     \code{BASELINe} object containing selection probability 
+#' @param    baseline     \code{Baseline} object containing selection probability 
 #'                        density functions.
 #' @param    idColumn     name of the column in the \code{data} slot of \code{baseline} 
 #'                        containing primary identifiers.
@@ -718,8 +765,8 @@ calculateBASELINeStats <- function ( baseline_pdf,
 #' 
 #' @return   A ggplot object defining the plot.
 #'
-#' @seealso  Takes as input a \code{\link{BASELINe}} object.
-#'           See \code{\link{getBASELINe}} for generating selection probability density 
+#' @seealso  Takes as input a \code{\link{Baseline}} object.
+#'           See \code{\link{getBaseline}} for generating selection probability density 
 #'           functions.
 #' 
 #' @examples
@@ -803,11 +850,11 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, regions=c("CDR", 
         dens_names <- dens_names[dens_names %in% regions]
         dens_list <- list()
         for (n in dens_names) {
-             # Extract density into matrix
-             tmp_mat <- t(sapply(baseline[[2]], function(x) x@probDensity[[n]]))
-             colnames(tmp_mat) <- 1:ncol(tmp_mat)
-             rownames(tmp_mat) <- id_names
-             dens_list[[n]] <- tmp_mat
+            # Extract density into matrix
+            tmp_mat <- t(sapply(baseline[[2]], function(x) x@probDensity[[n]]))
+            colnames(tmp_mat) <- 1:ncol(tmp_mat)
+            rownames(tmp_mat) <- id_names
+            dens_list[[n]] <- tmp_mat
         }
         
         # Melt density matrices
@@ -986,5 +1033,3 @@ fastConv<-function(cons, max_sigma=20, length_sigma=4001){
     }
     return(as.vector(result))
 }
-
-
