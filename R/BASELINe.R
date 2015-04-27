@@ -689,7 +689,7 @@ groupBaseline <- function( baseline,
 #'          95\% confidence intervals and P-value. This information is updated in the 
 #'          \code{stats} slot of the \code{baseline} object passed as an argument. 
 #'           
-#' @details \code{getBASELINeStats} calculates BASELINe statistics such as the Selection 
+#' @details \code{getBaselineStats} calculates BASELINe statistics such as the Selection 
 #'          Strength (Sigma), the 95% confidence intervals & P-values.
 #' 
 #' @seealso See \code{link{calcBaselinePdfs}} and \code{link{groupBaseline}}.
@@ -763,6 +763,40 @@ calcBaselineStats <- function ( baseline,
     baseline <- editBaseline(baseline, field_name = "stats", stats )
     
     return(baseline)   
+}
+
+
+#' Returns a summary of the BASELINe statistics
+#'
+#' \code{summarizeBaselineStats} returns a summary of the BASELINe statistics,
+#' which is stored in the \code{stats} slot of the \code{baseline} object - provided
+#' \code\link{groupBasline} has already been run.
+#'
+#' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
+#'                      BASELINe posterior probability distribution functions 
+#'                      (PDF) for each of the sequences. This would be returned by
+#'                      \code{\link{calcBaselinePdfs}}.
+#' 
+#' @return  A \code{data.frame} with the BASELINe selection strength ,
+#'          95\% confidence intervals and P-value. This information is also in the 
+#'          \code{stats} slot of the \code{baseline} object. 
+#'           
+#' @details An accessor method, that returns a summary of the BASELINe statistics,
+#'          which is stored in the \code{stats} slot of the \code{baseline} object. 
+#' 
+#' @seealso See \code{\link{getBaselineStats}}, the function which calculates the BASELINe 
+#'          statistics such as the Selection Strength (Sigma), the 95% confidence 
+#'          intervals & P-values.
+#' 
+#' @examples
+#' # Load example data
+#' library("shm")
+#' dbPath <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#'                      
+#' @export
+summarizeBaselineStats <- function ( baseline ) {
+    return( baseline@stats )
 }
 
 
