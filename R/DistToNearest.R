@@ -84,6 +84,61 @@ distSeq5Mers <- function(seq1, seq2, targeting_model,
 }
 
 
+# Get distance between two sequences of same length, broken by a sliding window of 5mers
+#
+# @param    seq1          first nucleotide sequence.
+# @param    seq2          second nucleotide sequence.
+# @param    sub_model     substitution model.
+# @param    mut_model     mutability model.
+# @param    normalize     The method of normalization. Default is "none".
+#                         "length" = normalize distance by length of junction.
+#                         "mutations" = normalize distance by number of mutations in junction.
+# @return   distance between two sequences.
+#
+# @examples
+# seq1 = c("A", "C", "G", "T", "A", "C", "G", "T", "A", "C", "G", "T")
+# seq2 = c("A", "C", "G", "A", "A", "C", "G", "T", "A", "C", "G", "T")
+# 
+# distSeqM1n(seq1, seq2)
+distSeqM1n <- function(seq1, seq2, normalize=c("none" ,"length", "mutations")) {
+  # Evaluate choices
+  normalize <- match.arg(normalize)
+  
+  # Compute length of sequence (for normalization, if specified)
+  juncLength <- length(seq1)
+  
+  # Compute distance only on fivemers that have mutations
+  withMu <- seq1 != seq2
+  withNonNuc <- ( !is.na(match(seq1, c("A","C","G","T"))) & !is.na(match(seq2, c("A","C","G","T"))) )
+  withMu <- withMu & withNonNuc
+  seq1 <- seq1[withMu]
+  seq2 <- seq2[withMu]
+  
+  # Number of mutations (for normalization, if specified)
+  numbOfMutation <- sum(withMu)
+  
+  dist <- NA
+  a <- tryCatch({
+    if(length(seq1)==1){
+      dist <- M1NDistance[seq2,seq1]
+    }else{
+      dist <- sum( diag(M1NDistance[seq2,seq1]) )
+    }
+  },error = function(e){
+    return(NA)
+  })
+  
+  # Normalize distances
+  if (normalize == "length") { 
+    dist <- dist/juncLength
+  } else if (normalize == "mutations") { 
+    dist <- dist/numbOfMutation 
+  }
+  
+  return(dist)
+}
+
+
 #' Given an array of junction sequences, find the pairwise distances
 #'
 #' @param   arrJunctions   character vector of junction sequences.
@@ -104,18 +159,10 @@ distSeq5Mers <- function(seq1, seq2, targeting_model,
 #' # working example
 #' 
 #' @export
-getPairwiseDistances <- function(arrJunctions, model=c("hs5f", "m3n"), 
+getPairwiseDistances <- function(arrJunctions, targeting_model, 
                                  normalize=c("none" ,"length", "mutations")) {
   # Initial checks
-  model <- match.arg(model)
   normalize <- match.arg(normalize)
-    
-  # Define targeting model
-  if (model == "hs5f") {
-      targeting_model <- HS5FModel
-  } else if (model == "m3n") {
-      targeting_model <- M3NModel
-  }
   
   # Convert junctions to uppercase
   arrJunctions <- toupper(arrJunctions)
@@ -124,7 +171,7 @@ getPairwiseDistances <- function(arrJunctions, model=c("hs5f", "m3n"),
   # Add 'NN' to front and end of each sequence for fivemers
   arrJunctions <- as.vector(sapply(arrJunctions, function(x){ paste("NN", x, "NN", sep="") }))
 
-  numbOfJuctions<-length(arrJunctions)
+  numbOfJunctions<-length(arrJunctions)
 
   #Junctions are broken in to 5-mers based on a sliding window (of one) and placed in matrix
   #Each column is a junction
@@ -136,7 +183,7 @@ getPairwiseDistances <- function(arrJunctions, model=c("hs5f", "m3n"),
 
   # Compute pairwise distance between all sequences' fivemers (by column)
   matDistance <-
-    sapply(1:numbOfJuctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfJuctions, function(j) {
+    sapply(1:numbOfJunctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfJunctions, function(j) {
       distSeq5Mers(matSeqSlidingFiveMer[,i],
                   matSeqSlidingFiveMer[,j],
                   targeting_model,
@@ -145,6 +192,34 @@ getPairwiseDistances <- function(arrJunctions, model=c("hs5f", "m3n"),
   # Make distance matrix symmetric
   matDistance <- matDistance + t(matDistance)
   return(matDistance)
+}
+
+
+# Given an array of junctions, generate distance array for pairwise distances with
+# 0 if junction is non-unique and return this array along with unique junctions that 
+# are only observed once
+findUniqueJunctions <- function(arrJunctions) {
+  # Initialize array of distances
+  arrJunctionsDist <- rep(NA,length(arrJunctions))
+  
+  # Filter unique junctions
+  arrJunctionsUnique <- unique(arrJunctions)
+  
+  # Map indices of unique to its non-unique in the original arrJunctions
+  indexJunctions <- match(arrJunctions, arrJunctionsUnique)
+  
+  # Identify junctions with multiple non-unique sequences and set its distances to 0
+  indexJunctionsCounts <- table(indexJunctions)
+  indexRepeated <- as.numeric(names(indexJunctionsCounts)[indexJunctionsCounts>1])
+  indexRepeated <- indexJunctions%in%indexRepeated
+  arrJunctionsDist[ indexRepeated ] <- 0
+  names(arrJunctionsDist) <- arrJunctions
+  
+  # Subset unique junctions to those that are only observed once
+  arrJunctionsUnique <- arrJunctionsUnique[indexJunctionsCounts==1]
+  
+  return(list('arrJunctionsDist'=arrJunctionsDist, 
+              'arrJunctionsUnique'=arrJunctionsUnique))
 }
 
 
@@ -161,63 +236,77 @@ getPairwiseDistances <- function(arrJunctions, model=c("hs5f", "m3n"),
 # arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
 #                    "ACGAACGTATGT", "ACGAACGTATGC",
 #                    "ACGAACGTATCC","AAAAAAAAAAAA")
-# getDistanceToClosest(arrJunctions, HS5FModel, normalize="none" )
-getDistanceToClosest <- function(arrJunctions, targeting_model, 
+# getClosestBy5mers(arrJunctions, HS5FModel, normalize="none" )
+getClosestBy5mers <- function(arrJunctions, targeting_model, 
                                  normalize=c("none" ,"length", "mutations")) {
   # Initial checks
   normalize <- match.arg(normalize)
   
-  #Initialize array of distances
-  arrJunctionsDist <- rep(NA,length(arrJunctions))
+  # Find unique sequences and return distance array with mapping
+  l <- findUniqueJunctions(arrJunctions)
+  arrJunctionsDist <- l$arrJunctionsDist
+  arrJunctionsUnique <- l$arrJunctionsUnique
 
-  #Filter unique junctions
-  arrJunctionsUnique <- unique(arrJunctions)
-
-  #Map indexes of unique to its non-unique in the original arrJunctions
-  indexJunctions <- match(arrJunctions, arrJunctionsUnique)
-
-  #Identify junctions with multiple non-unique sequences and set its distances to 0
-  indexJunctionsCounts <- table(indexJunctions)
-  indexRepeated <- as.numeric(names(indexJunctionsCounts)[indexJunctionsCounts>1])
-  indexRepeated <- indexJunctions%in%indexRepeated
-  arrJunctionsDist[ indexRepeated ] <- rep(0,sum(indexRepeated))
-  names(arrJunctionsDist) <- arrJunctions
-
-  #Compute distances between junctions
-  numbOfUniqueJuctions <- length(arrJunctionsUnique)
-  arrUniqueJunctionsDist <- rep(NA,numbOfUniqueJuctions)
-  if(numbOfUniqueJuctions>1){
-    arrJunctionsUnique <- toupper(arrJunctionsUnique)
-    arrJunctionsUnique <- gsub('.', '-', arrJunctionsUnique, fixed=TRUE)
-    arrJunctionsUnique <- as.vector(sapply(arrJunctionsUnique,function(x){paste("NN",x,"NN",sep="")}))
-
-    #Junctions are broken in to 5-mers based on a sliding window (of one) and placed in matrix
-    #Each column is a junction
-    #E.g. junctions 1234567, ABCDEFG, JKLMNOP becomes:
-    # 12345   ABCDE   JKLMN
-    # 23456   BCDEF   KLMNO
-    # 34567   CDEFG   LMNOP
-    matSeqSlidingFiveMer <- sapply(arrJunctionsUnique, function(x) { slidingArrayOf5mers(x) },simplify="matrix")
-
-    # Compute pairwise distance between all sequences' fivemers (by column)
-    matDistance <-
-      sapply(1:numbOfUniqueJuctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJuctions, function(j) {
-        distSeq5Mers( matSeqSlidingFiveMer[,i],
-                       matSeqSlidingFiveMer[,j],
-                       targeting_model,
-                       normalize=normalize)
-      })))
-
-    matDistance <- matDistance + t(matDistance)
-    arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJuctions, function(i){ min(matDistance[-i,i]) })
+  # Compute distances between junctions
+  numbOfUniqueJunctions <- length(arrJunctionsUnique)
+  arrUniqueJunctionsDist <- rep(NA,numbOfUniqueJunctions)
+  if(numbOfUniqueJunctions>1){
+    # Calculate symmetric distance matrix
+    matDistance <- getPairwiseDistances(arrJunctionsUnique, targeting_model, normalize)
+    # Find minimum distance for each sequence
+    arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJunctions, function(i){ min(matDistance[-i,i]) })
     names(arrUniqueJunctionsDist) <- arrJunctionsUnique
   }
 
-  #Fill the distances for the sequences that are unique
-  arrJunctionsDist[is.na(arrJunctionsDist)] <- arrUniqueJunctionsDist[indexJunctionsCounts==1]
+  # Fill the distances for unique sequences
+  arrJunctionsDist[is.na(arrJunctionsDist)] <- arrUniqueJunctionsDist
   return(round(arrJunctionsDist,4))
 }
 
+
+# Given an array of junction sequences, find the distance to the closest sequence
+#
+# @param    arrJunctions  character vector of junction sequences.
+# @param    sub_model     substitution model.
+# @param    mut_model     mutability model.
+# @param    normalize     method of normalization. Default is "none".
+#                         "length" = normalize distance by length of junction.
+#                         "mutations" = normalize distance by number of mutations in junction.
+# @return   A vector of distances to the closest sequence.
+# @examples
+arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
+                   "ACGAACGTATGT", "ACGAACGTATGC",
+                   "ACGAACGTATCC","AAAAAAAAAAAA")
+# getClosestM1n(arrJunctions, normalize="none" )
+getClosestM1n <- function(arrJunctions, normalize=c("none" ,"length", "mutations")) {
+  # Initial checks
+  normalize <- match.arg(normalize)
+  
+  # Find unique sequences and return distance array with mapping
+  l <- findUniqueJunctions(arrJunctions)
+  arrJunctionsDist <- l$arrJunctionsDist
+  arrJunctionsUnique <- l$arrJunctionsUnique
+  
+  # Compute distances between junctions
+  numbOfUniqueJunctions <- length(arrJunctionsUnique)
+  arrUniqueJunctionsDist <- rep(NA,numbOfUniqueJunctions)
+  if(numbOfUniqueJunctions>1){
+    # Calculate symmetric distance matrix
+    charDf <- ldply(strsplit(arrJunctionsUnique, ''))
+    matDistance <-
+      sapply(1:numbOfUniqueJunctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJunctions, function(j) {
+        distSeqM1n(charDf[i,], charDf[j,], normalize=normalize)
+      })))
+    matDistance <- matDistance + t(matDistance)
+    # Find minimum distance for each sequence
+    arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJunctions, function(i){ min(matDistance[-i,i]) })
+    names(arrUniqueJunctionsDist) <- arrJunctionsUnique
+  }
+  
+  # Fill the distances for unique sequences
+  arrJunctionsDist[is.na(arrJunctionsDist)] <- arrUniqueJunctionsDist
+  return(round(arrJunctionsDist,4))
+}
 
 #' Distance to nearest neighbor
 #'
@@ -229,8 +318,8 @@ getDistanceToClosest <- function(arrJunctions, targeting_model,
 #'                           Also used to determine sequence length for grouping.
 #' @param    vCallColumn     name of the column containing the V-segment allele call.
 #' @param    jCallColumn     name of the column containing the J-segment allele call.
-#' @param    model           SHM targeting model; must be one of c("hs5f", "m3n"). See 
-#'                           Details for further information.
+#' @param    model           SHM targeting model; must be one of c("hs5f", "m3n", "m1n"). 
+#'                           See Details for further information.
 #' @param    normalize       method of normalization. Default is "none".
 #'                           "length" = normalize distance by length of junction.
 #'                           "mutations" = normalize distance by number of mutations in junction.
@@ -272,7 +361,7 @@ getDistanceToClosest <- function(arrJunctions, targeting_model,
 #'
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
-                          jCallColumn="J_CALL", model=c("hs5f", "m3n"), 
+                          jCallColumn="J_CALL", model=c("hs5f", "m3n", "m1n"), 
                           normalize=c("none" ,"length", "mutations"), 
                           first=TRUE, nproc=1) {
   # Initial checks
@@ -281,10 +370,10 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
   if(!is.data.frame(db)) { stop('Must submit a data frame') }
 
   if (model == "hs5f") {
-      targeting_model <- HS5FModel
+    targeting_model <- HS5FModel
   } else if (model == "m3n") {
-      targeting_model <- M3NModel            
-  }
+    targeting_model <- M3NModel            
+  } 
 
   # Parse V and J columns to get gene
   # cat("V+J Column parsing\n")
@@ -316,17 +405,27 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
   # Create cluster of nproc size and export namespaces
   cluster <- makeCluster(nproc, type = "SOCK")
   registerDoSNOW(cluster)
-  clusterExport(cluster, list("targeting_model"), envir=environment())
   clusterEvalQ(cluster, library(shm))
   
   # Calculate distance to nearest neighbor
   # cat("Calculating distance to nearest neighbor\n")
-  db <- arrange(ddply(db, .(V, J, L), function(piece) 
-    mutate(piece, DIST_NEAREST=getDistanceToClosest(eval(parse(text=sequenceColumn)),
-                                                    targeting_model=targeting_model,
-                                                    normalize=normalize)),
-    .parallel=TRUE),
-    ROW_ID)
+  if(model %in% c('hs5f','m3n')) {
+    # Export targeting model to processes
+    clusterExport(cluster, list("targeting_model"), envir=environment())
+    
+    db <- arrange(ddply(db, .(V, J, L), function(piece) 
+      mutate(piece, DIST_NEAREST=getClosestBy5mers(eval(parse(text=sequenceColumn)),
+                                                   targeting_model=targeting_model,
+                                                   normalize=normalize)),
+      .parallel=TRUE),
+      ROW_ID)
+  } else if(model == 'm1n') {
+    db <- arrange(ddply(db, .(V, J, L), function(piece) 
+      mutate(piece, DIST_NEAREST=getClosestM1n(eval(parse(text=sequenceColumn)),
+                                               normalize=normalize)),
+      .parallel=TRUE),
+      ROW_ID)
+  }
   
   # Stop the cluster
   stopCluster(cluster)

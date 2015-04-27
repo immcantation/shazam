@@ -8,6 +8,10 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(dev='pdf')
+```
 
 THe targeting model is the background likelihood of a particular mutation, based on the surrounding sequence context as well as the mutation itself. The model is inferred from observed mutations in the data. The model can then be transformed into a distance function to compare Ig sequences of a given dataset based on the likelihood of the observed mutations. This is done via the following steps:
 
@@ -43,7 +47,7 @@ The inferred substitution and mutability matrices returned by the above function
 These extended substitution and mutability matrices can be used to create an overal SHM targeting matrix (createTargetingMatrix), which is the combined probability of mutability and substitution. All of the above steps can be combined by using the single function createTargetingModel to get a TargetingModel object directly from the dataset.
 
 
-```{r, eval=TRUE, warning=FALSE}
+```{r, eval=FALSE}
 # Create substitution model using silent mutations
 sub_model <- createSubstitutionMatrix(db, model="S")
 # Create mutability model using silent mutations
@@ -53,21 +57,22 @@ sub_model <- extendSubstitutionMatrix(sub_model)
 mut_model <- extendMutabilityMatrix(mut_model)
 # Create targeting model matrix from substitution and mutability models
 tar_matrix <- createTargetingMatrix(sub_model, mut_model)
-
+```
+```{r, eval=TRUE, warning=FALSE}
 # Create targeting model in one step using only silent mutations
 tar_model <- createTargetingModel(db, model="S")
 ```
 
 Visualize targeting model
 --------------------------------------------------------------------------------
-The visualization of a dataset's underlying SHM mutability model can be used to visualize hot and cold spots. The length of the bars on the hedgehog plot of mutability rates corresponds to the likelihood of a given base in the given 5-mer being mutated. The plotting function has the parameter `style` to specify either a hedgehog plot or a barplot. If the model for only specific bases are required, this can be specified with the `nucleotides` parameter.
+The visualization of a dataset's underlying SHM mutability model can be used to visualize hot and cold spots. The length of the bars on the plot of mutability rates corresponds to the likelihood of a given base in the given 5-mer being mutated. The plotting function has the parameter `style` to specify either a hedgehog plot or a barplot. If the model for only specific bases are required, this can be specified with the `nucleotides` parameter.
 
 ```{r, eval=TRUE, warning=FALSE}
-# Generate hedgehog plot
-plotMutability(tar_model, nucleotides="A")
-plotMutability(tar_model, nucleotides="C")
-plotMutability(tar_model, nucleotides="G")
-plotMutability(tar_model, nucleotides="T")
+# Generate mutability model plot
+plotMutability(tar_model, nucleotides="A", style='bar', size=0.8)
+plotMutability(tar_model, nucleotides="C", style='bar', size=0.8)
+plotMutability(tar_model, nucleotides="G", style='bar', size=0.8)
+plotMutability(tar_model, nucleotides="T", style='bar', size=0.8)
 ```
 
 Calculate targeting distance matrix

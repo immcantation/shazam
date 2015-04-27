@@ -141,3 +141,16 @@ devtools::use_data(HS5FModel, overwrite=TRUE)
 #                    substitution=Targeting[['Substitution']],
 #                    targeting=Targeting[['Targeting']])
 # devtools::use_data(MRS5NFModel)
+
+#### M1N #####
+
+# Smith DS, et al. Di- and trinucleotide target preferences of somatic mutagenesis 
+#    in normal and autoreactive B cells. 
+#    J Immunol. 1996 156:2642–52. 
+
+NUCS <- c('A','C','G','T','N','.','-')
+M1NDistance <- matrix(c(1, 2.86, 1, 2.14, 0, 0, 0, 2.86, 0, 2.14, 1, 0, 0, 0, 1, 
+                        2.14, 0, 2.86, 0, 0, 0, 2.14, 1, 2.86, 0, 0, 0, 0, 0, 0, 
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                      7, 7, dimnames=list(NUCS,NUCS))
+devtools::use_data(M1NDistance, overwrite=TRUE)

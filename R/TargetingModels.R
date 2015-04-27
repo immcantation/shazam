@@ -11,6 +11,22 @@ NULL
 
 #### Data ####
 
+#' 1-mer substitution matrix.
+#'
+#' 1-mer substitution matrix of somatic hypermutation targeting based on Mus musculus Ig sequence data.
+#'
+#' @format matrix.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Smith DS, et al. Di- and trinucleotide target preferences of somatic 
+#'            mutagenesis in normal and autoreactive B cells. 
+#'            J Immunol. 1996 156:2642–52. 
+#' }
+#'
+#' @seealso  See \code{\link{M3NModel}} for the 3-mer model from same publication.
+"M1NDistance"
+
 #' 3-mer targeting model.
 #'
 #' 3-mer model of somatic hypermutation targeting based on Mus musculus Ig sequence data.
