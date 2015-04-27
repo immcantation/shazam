@@ -2,6 +2,7 @@
 
 export(binMutationsByRegion)
 export(calcBaselinePdfs)
+export(calcBaselineStats)
 export(calculateExpectedMutationFrequencies)
 export(clearConsole)
 export(countMutations)

@@ -368,12 +368,12 @@ getObservedMutations <- function(db,
 #' @param   binByRegions        if TRUE, then aggregate the mutations by the regions
 #'                              defined in \code{regionDefinition}, which also needs to be
 #'                              passed. If not, binByRegions is ignored.
-#' @return   an \code{array} of the mutations (replacement (R) or silent(S)) with the 
-#'              names indicatng the nucleotide postion of the mutations in the sequence.
-#'              Note. Each mutation is considered independently in its codon context.
-#'              If \code{binByRegions}=\code{TRUE}, then the mutations are binned by the regions
-#'              defined by \code{regionDefinition} and an \code{array} of R/S mutations
-#'              across all the unique regions is returned (See \code{\link{binMutationsByRegion}}). 
+#' @return  an \code{array} of the mutations (replacement (R) or silent(S)) with the 
+#'          names indicatng the nucleotide postion of the mutations in the sequence.
+#'          Note. Each mutation is considered independently in its codon context.
+#'          If \code{binByRegions}=\code{TRUE}, then the mutations are binned by the regions
+#'          defined by \code{regionDefinition} and an \code{array} of R/S mutations
+#'          across all the unique regions is returned (See \code{\link{binMutationsByRegion}}). 
 #'           
 #' @details
 #' Counts all the mutations observed in the input sequence. 

@@ -31,7 +31,7 @@ NULL
 #' @slot    regions             \code{character} vector of the regions the BASELINe 
 #'                              selection was carried out on. E.g. "CDR & "FWR" or
 #'                              "CDR1", "CDR2", "CDR3" etc.
-#' @slot    numbOfSeqs          \code{matrix} of r x c dimensions, where"
+#' @slot    numbOfSeqs          \code{matrix} of r x c dimensions, where:
 #'                              r = number of rows = number of groups/sequencs and
 #'                              c = number of columns = number of regions
 #'                              The matrix contains the number of non-NA sequences or the
@@ -40,13 +40,17 @@ NULL
 #'                              This information is essential to further regroup PDFs and 
 #'                              weight them accordingly.
 #'                              
-#' @slot    pdfs                 A \code{list} (one item for each defined region e.g. CDR &
+#' @slot    pdfs                A \code{list} (one item for each defined region e.g. CDR &
 #'                              FWR) of \code{matrices} of r x c deminetions, where:
 #'                              r = number of sequences or groups and
 #'                              c = number of columns = length of the PDF (default 4001)
 #'                              The matrix contains the BASELINe posterior probability 
 #'                              distribution functions (PDF) for each sequence or goup of
-#'                              sequences.  
+#'                              sequences. 
+#' @slot    stats               A melted \code{data.frame} of BASELINe statistics, 
+#'                              including: Selection strength (Sigma), 95\% confidence 
+#'                              intervals and P values.
+#'                                
 #'                          
 #' @name Baseline
 #' @export
@@ -57,7 +61,8 @@ setClass("Baseline",
                     testStatistic="character",
                     regions="character",
                     numbOfSeqs="matrix",
-                    pdfs="list"
+                    pdfs="list",
+                    stats="data.frame"
          )
 )
 
@@ -100,7 +105,10 @@ setClass("Baseline",
 #'                              c = number of columns = length of the PDF (default 4001)
 #'                              The matrix contains the BASELINe posterior probability 
 #'                              distribution functions (PDF) for each sequence or goup of
-#'                              sequences.  
+#'                              sequences.
+#' @param   stats               A melted \code{data.frame} of BASELINe statistics, 
+#'                              including: Selection strength (Sigma), 95\% confidence 
+#'                              intervals and P values.#'                                
 #' 
 #' @return   A \code{Baseline} object.
 #' 
@@ -117,9 +125,18 @@ createBaseline <- function( description="",
                             testStatistic="",
                             regions="",
                             numbOfSeqs="",
-                            pdfs="") {
+                            pdfs="",
+                            stats="") {
     
-    
+    if ( stats=="" ) {
+        stats <- data.frame( GROUP=character(),
+                             REGION=character(),
+                             BASELINE_SIGMA=character(),
+                             BASELINE_CI_LOWER=character(),
+                             BASELINE_CI_UPPER=character(),
+                             BASELINE_CI_PVALUE=character(),
+                             stringsAsFactors=FALSE) 
+    }
     # Define RegionDefinition object
     baseline <- new( "Baseline",
                      description=description,
@@ -128,7 +145,8 @@ createBaseline <- function( description="",
                      testStatistic=testStatistic,
                      regions=regionDefinition@regions,
                      numbOfSeqs=numbOfSeqs,
-                     pdfs=pdfs)
+                     pdfs=pdfs,
+                     stats=stats)
     
     return(baseline)
 }
@@ -325,8 +343,9 @@ calcBaselinePdfs <- function( db,
     }
     
     list_pdfs <- list()
+    regions <- regionDefinition@regions
     # For every region (e.g. CDR, FWR etc.)
-    for (region in regionDefinition@regions) {
+    for (region in regions) {
         
         # Foreach returns a list of PDFs
         list_region_pdfs <- 
@@ -355,9 +374,9 @@ calcBaselinePdfs <- function( db,
     # Initialize numbOfSeqs
     # This holds the number of non NA sequences
     numbOfSeqs <- matrix( NA, 
-                          ncol=length(regionDefinition@regions), 
-                          nrow=totalNumbOfSequences,
-                          dimnames=list( 1:totalNumbOfSequences, regionDefinition@regions )
+                          ncol=length(regions), 
+                          nrow=1,
+                          dimnames=list( 1, regions )
     )
     
     # Create a Baseline object with the above results to return
@@ -571,21 +590,22 @@ groupBaseline <- function( baseline,
     # Number of total groups
     numbOfTotalGroups <- length(groups)
     list_pdfs <- list()
+    regions <- baseline@regions
     
     # Initialize numbOfSeqs
     # This holds the number of non NA sequences
     numbOfSeqs <- matrix( NA, 
                           ncol=length(baseline@regions), 
                           nrow=numbOfTotalGroups,
-                          dimnames=list( 1:numbOfTotalGroups, baseline@regions )
+                          dimnames=list( 1:numbOfTotalGroups, regions )
     )    
     
 
     # For every region (e.g. CDR, FWR etc.)
-    for (region in baseline@regions) {
+    for (region in regions) {
         
         list_region_pdfs  <-
-            foreach( i=icount(numbOfTotalGroups) ) %dopar% {
+            foreach( i=icount(numbOfTotalGroups), .export="region" ) %dopar% {
                 matrix_GroupPdfs <- (baseline@pdfs[[region]])[groups[[i]],]
                 
                 list_GroupPdfs <- 
@@ -618,8 +638,8 @@ groupBaseline <- function( baseline,
         
         
         list_pdfs[[region]] <- matrix_region_pdfs[,1:4001]
-        numbOfSeqs[,region] <- matrix_region_pdfs[,4002]
-        
+        #numbOfSeqs[,region] <- matrix_region_pdfs[,4002]
+        #colnames(numbOfSeqs) <- paste0("NUMB_SEQUENCES_", colnames(numbOfSeqs))
     }
  
     
@@ -635,7 +655,7 @@ groupBaseline <- function( baseline,
                                 db=db,
                                 regionDefinition=baseline@regionDefinition,
                                 testStatistic=baseline@testStatistic,
-                                regions=regionDefinition@regions,
+                                regions=regions,
                                 numbOfSeqs=numbOfSeqs,
                                 pdfs=list_pdfs )
     
@@ -647,8 +667,102 @@ groupBaseline <- function( baseline,
 }
 
 
+#' Calculate BASELINe statistics
+#'
+#' \code{calcBaselineStats} calculates BASELINe statistics such as the Selection Strength
+#' (Sigma), the 95% confidence intervals & P-values.
+#'
+#' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
+#'                      BASELINe posterior probability distribution functions 
+#'                      (PDF) for each of the sequences. This would be returned by
+#'                      \code{\link{calcBaselinePdfs}}.
+#' @param   nproc       number of cores to distribute the operation over. If 
+#'                      \code{nproc} = 0 then the \code{cluster} has already been
+#'                      set and will not be reset.
+#' 
+#' @return  A modified \code{Baseline} object with the BASELINe selection strength ,
+#'          95\% confidence intervals and P-value. This information is updated in the 
+#'          \code{stats} slot of the \code{baseline} object passed as an argument. 
+#'           
+#' @details \code{getBASELINeStats} calculates BASELINe statistics such as the Selection 
+#'          Strength (Sigma), the 95% confidence intervals & P-values.
+#' 
+#' @seealso See \code{link{calcBaselinePdfs}} and \code{link{groupBaseline}}.
+#' 
+#' @examples
+#' # Load example data
+#' library("shm")
+#' dbPath <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#'                      
+#' @export
+calcBaselineStats <- function ( baseline,
+                                nproc=1 ) {
+    
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, getnproc())
+    
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.  
+    if(nproc>1){        
+        cluster <- makeCluster(nproc, type = "SOCK")
+        clusterExport( cluster, list( 'baseline',
+                                      'calcBaselineSigma',
+                                      'calcBaselineCI',
+                                      'calcBaselinePvalue' ), 
+                       envir=environment() )
+        clusterEvalQ( cluster, library("shm") )
+        registerDoSNOW(cluster)
+    } else if( nproc==1 ) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    }
+    
+    # Printing status to console
+    cat("Calculating BASELINe statistics...\n")
+    
+    # Calculate stats for each sequence/group
+    numbOfTotalSeqs <- nrow(baseline@db)
+    regions <- baseline@regions
+    db <- baseline@db
+    if ( "SEQUENCE_ID" %in% colnames(db) ) { db <- subset(db, select="SEQUENCE_ID")}
+    list_stats <-
+        foreach( i=icount(numbOfTotalSeqs) ) %dopar% {
+            df_baseline_seq <- NULL
+            db_seq <- db[i,]
+            for (region in regions) {
+                baseline_pdf <- baseline@pdfs[[region]][i,]
+                baseline_ci <- calcBaselineCI(baseline_pdf)
+                df_baseline_seq_region <- 
+                    data.frame( db[i,],
+                                REGION=region,
+                                BASELINE_SIGMA=calcBaselineSigma(baseline_pdf),
+                                BASELINE_CI_LOWER=baseline_ci[1],
+                                BASELINE_CI_UPPER=baseline_ci[2],
+                                BASELINE_CI_PVALUE=calcBaselinePvalue(baseline_pdf)
+                    )
+                df_baseline_seq <- rbind(df_baseline_seq, df_baseline_seq_region)
+            }
+            return(df_baseline_seq)
+        }
+    
+    # Stop SNOW cluster
+    if(nproc > 1) { stopCluster(cluster) }
+    
+    # Convert list of BASELINe stats into a data.frame
+    stats <- do.call(rbind, list_stats)
+    
+    # Append stats to baseline object
+    editBaseline(baselien, field_name = "stats", stats )
+    
+    return(baseline)   
+}
+
+
 # Given a BASELIne PDF calculate mean sigma
-calculateBaselineSigma <- function ( baseline_pdf,
+calcBaselineSigma <- function ( baseline_pdf,
                                      max_sigma=20,
                                      length_sigma=4001 ) {
     
@@ -661,7 +775,7 @@ calculateBaselineSigma <- function ( baseline_pdf,
 
 
 # Given a BASELIne PDF calculate Confidence Interval
-calculateBaselineCI <- function ( baseline_pdf,
+calcBaselineCI <- function ( baseline_pdf,
                                   low=0.025,
                                   up=0.975,
                                   max_sigma=20,
@@ -682,7 +796,7 @@ calculateBaselineCI <- function ( baseline_pdf,
 }
 
 # Given a BASELIne PDF calculate P value
-calculateBaselinePvalue <- function ( baseline_pdf, 
+calcBaselinePvalue <- function ( baseline_pdf, 
                                       length_sigma=4001, 
                                       max_sigma=20 ){
     if ( length(baseline_pdf)>1 ) {
@@ -698,39 +812,39 @@ calculateBaselinePvalue <- function ( baseline_pdf,
 }
 
 
-# Given a BASELIne PDF calculate Mean, Confidence Interval (lower & upper) and P value
-calculateBaselineStats <- function ( baseline_pdf,
-                                     low=0.025,
-                                     up=0.975,
-                                     max_sigma=20, 
-                                     length_sigma=4001 ){
-    
-    # if NA (i.e. length of baseline_pdf is 1)
-    if ( length(baseline_pdf)==1  ) { return(rep(NA,4)) }
-    
-    
-    baselineSigma <- calculateBaselineSigma( baseline_pdf=baseline_pdf, 
-                                             max_sigma=max_sigma, 
-                                             length_sigma=length_sigma )
-    
-    
-    baselineCI <- calculateBaselineCI( baseline_pdf=baseline_pdf,
-                                       low=low,
-                                       up=up,
-                                       max_sigma=max_sigma,
-                                       length_sigma=length_sigma )
-    
-    baselinePvalue <- calculateBaselinePvalue( baseline_pdf=baseline_pdf,
-                                               max_sigma=max_sigma,
-                                               length_sigma=length_sigma )
-    
-    return( c( "Sigma"=baselineSigma, 
-               "CI_Lower"=baselineCI[1], 
-               "CI_Upper"=baselineCI[2],
-               "Pvalue"=baselinePvalue 
-    ) 
-    )
-}
+# # Given a BASELIne PDF calculate Mean, Confidence Interval (lower & upper) and P value
+# calcBaselineStats <- function ( baseline_pdf,
+#                                      low=0.025,
+#                                      up=0.975,
+#                                      max_sigma=20, 
+#                                      length_sigma=4001 ){
+#     
+#     # if NA (i.e. length of baseline_pdf is 1)
+#     if ( length(baseline_pdf)==1  ) { return(rep(NA,4)) }
+#     
+#     
+#     baselineSigma <- calculateBaselineSigma( baseline_pdf=baseline_pdf, 
+#                                              max_sigma=max_sigma, 
+#                                              length_sigma=length_sigma )
+#     
+#     
+#     baselineCI <- calculateBaselineCI( baseline_pdf=baseline_pdf,
+#                                        low=low,
+#                                        up=up,
+#                                        max_sigma=max_sigma,
+#                                        length_sigma=length_sigma )
+#     
+#     baselinePvalue <- calculateBaselinePvalue( baseline_pdf=baseline_pdf,
+#                                                max_sigma=max_sigma,
+#                                                length_sigma=length_sigma )
+#     
+#     return( c( "Sigma"=baselineSigma, 
+#                "CI_Lower"=baselineCI[1], 
+#                "CI_Upper"=baselineCI[2],
+#                "Pvalue"=baselinePvalue 
+#     ) 
+#     )
+# }
 
 
 #### Plotting functions ####
