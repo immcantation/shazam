@@ -639,10 +639,10 @@ groupBaseline <- function( baseline,
         
         
         list_pdfs[[region]] <- matrix_region_pdfs[,1:4001]
-        #numbOfSeqs[,region] <- matrix_region_pdfs[,4002]
-        #colnames(numbOfSeqs) <- paste0("NUMB_SEQUENCES_", colnames(numbOfSeqs))
+        numbOfSeqs[,region] <- matrix_region_pdfs[,4002]        
     }
- 
+    
+    colnames(numbOfSeqs) <- paste0("NUMB_SEQUENCES_", colnames(numbOfSeqs))
     
     # Create the db, which will now contain the group information
     db <- cbind( df[,groupBy], numbOfSeqs)
@@ -650,6 +650,7 @@ groupBaseline <- function( baseline,
         db <- as.data.frame(db) 
         colnames(db)[1] <- groupBy
     }
+    
     
     # Create a Baseline object with the above results to return
     baseline <- createBaseline( description="",
@@ -659,6 +660,9 @@ groupBaseline <- function( baseline,
                                 regions=regions,
                                 numbOfSeqs=numbOfSeqs,
                                 pdfs=list_pdfs )
+    
+    # Calculate BASELINe stats and update slot
+    baseline <- calcBaselineStats(baseline,nproc=0)
     
     # Stop SNOW cluster
     if(nproc > 1) { stopCluster(cluster) }
@@ -728,7 +732,7 @@ calcBaselineStats <- function ( baseline,
     numbOfTotalSeqs <- nrow(baseline@db)
     regions <- baseline@regions
     db <- baseline@db
-    if ( "SEQUENCE_ID" %in% colnames(db) ) { db <- subset(db, select="SEQUENCE_ID")}
+    if( "SEQUENCE_ID" %in% colnames(db) ) { db <- subset(db, select="SEQUENCE_ID")}
     list_stats <-
         foreach( i=icount(numbOfTotalSeqs) ) %dopar% {
             df_baseline_seq <- NULL
@@ -756,7 +760,7 @@ calcBaselineStats <- function ( baseline,
     stats <- do.call(rbind, list_stats)
     
     # Append stats to baseline object
-    editBaseline(baselien, field_name = "stats", stats )
+    baseline <- editBaseline(baseline, field_name = "stats", stats )
     
     return(baseline)   
 }
@@ -767,7 +771,7 @@ calcBaselineSigma <- function ( baseline_pdf,
                                      max_sigma=20,
                                      length_sigma=4001 ) {
     
-    if ( length(baseline_pdf)!=length_sigma) { return(NA) }
+    if ( any(is.na(baseline_pdf)) ) { return(NA) }
     
     sigma_s <- seq(-max_sigma, max_sigma, length.out=length_sigma)
     norm = {length_sigma-1}/2/max_sigma
@@ -782,7 +786,7 @@ calcBaselineCI <- function ( baseline_pdf,
                                   max_sigma=20,
                                   length_sigma=4001 ){
     
-    if ( length(baseline_pdf)!=length_sigma ) { return( c(NA,NA) ) }
+    if ( any(is.na(baseline_pdf)) ) { return( c(NA,NA) ) }
     
     sigma_s <- seq(-max_sigma, max_sigma, length.out=length_sigma)
     cdf <- cumsum(baseline_pdf)
@@ -800,7 +804,7 @@ calcBaselineCI <- function ( baseline_pdf,
 calcBaselinePvalue <- function ( baseline_pdf, 
                                       length_sigma=4001, 
                                       max_sigma=20 ){
-    if ( length(baseline_pdf)>1 ) {
+    if ( !any(is.na(baseline_pdf)) ) {
         norm = {length_sigma-1}/2/max_sigma
         pVal = {sum(baseline_pdf[1:{{length_sigma-1}/2}]) + baseline_pdf[{{length_sigma+1}/2}]/2}/norm
         if(pVal>0.5){
