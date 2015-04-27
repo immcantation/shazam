@@ -269,7 +269,8 @@ calcBaselinePdfs <- function( db,
                                       'convolutionPowersOfTwoByTwos', 
                                       'weighted_conv', 
                                       'calculate_bayesGHelper', 
-                                      'groupPosteriors', 'fastConv'), 
+                                      'groupPosteriors', 'fastConv',
+                                      'calcBaselinePdfs_Helper'), 
                        envir=environment() )
         clusterEvalQ(cluster, library(shm))
         clusterEvalQ(cluster, library(seqinr))
@@ -605,7 +606,7 @@ groupBaseline <- function( baseline,
     for (region in regions) {
         
         list_region_pdfs  <-
-            foreach( i=icount(numbOfTotalGroups), .export="region" ) %dopar% {
+            foreach( i=icount(numbOfTotalGroups)) %dopar% {
                 matrix_GroupPdfs <- (baseline@pdfs[[region]])[groups[[i]],]
                 
                 list_GroupPdfs <- 

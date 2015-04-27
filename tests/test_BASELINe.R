@@ -20,6 +20,6 @@ baseline <- calcBaselinePdfs( db,
 
 # Group PDFs by the BARCODE column
 baseline_grp <- groupBaseline( baseline, 
-                               groupBy="BARCODE", 
-                               nproc=3)
+                               groupBy=c("BARCODE","VPRIMER"), 
+                               nproc=1)
 
