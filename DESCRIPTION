@@ -1,7 +1,7 @@
 Package: shm
 Type: Package
 Version: 0.1
-Author: Mohamed Uduman, Gur Yaari, Namita Gupta
+Author: Mohamed Uduman, Gur Yaari, Namita Gupta, Jason Anthony Vander Heiden
 Maintainer: Mohamed Uduman <mohamed.uduman@yale.edu>
 Title: Somatic Hypermutation Analysis
 Description: A new computational framework for Bayesian estimation of
@@ -31,7 +31,7 @@ LazyData: true
 Collate:
     'shm.R'
     'RegionDefinitions.R'
-    'BASELINe.R'
+    'Baseline.R'
     'Core.R'
     'DistToNearest.R'
     'MutationProfiling.R'

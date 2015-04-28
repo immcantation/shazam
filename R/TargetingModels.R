@@ -11,11 +11,13 @@ NULL
 
 #### Data ####
 
-#' 1-mer substitution matrix.
+#' Single nucleotide distance matrix.
 #'
-#' 1-mer substitution matrix of somatic hypermutation targeting based on Mus musculus Ig sequence data.
+#' Single nucleotide distance matrix of somatic hypermutation targeting based on 
+#' Mus musculus Ig sequence data.
 #'
-#' @format matrix.
+#' @format   A symmetric matrix of nucleotide substitution distance scores with 
+#'           row names and column names definition the specific subsitution.
 #' 
 #' @references
 #' \enumerate{
@@ -26,6 +28,7 @@ NULL
 #'
 #' @seealso  See \code{\link{M3NModel}} for the 3-mer model from same publication.
 "M1NDistance"
+
 
 #' 3-mer targeting model.
 #'
@@ -113,6 +116,7 @@ setClass("TargetingModel",
                      substitution=matrix(0, 5, 3125),
                      targeting=matrix(0, 5, 3125)))
 
+
 #### Model building functions #####
 
 #' Builds a substitution model
@@ -151,7 +155,7 @@ setClass("TargetingModel",
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
@@ -425,7 +429,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
@@ -609,7 +613,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
@@ -671,7 +675,7 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
@@ -748,7 +752,7 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create 4x1024 model using all mutations
@@ -814,7 +818,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model using all mutations
@@ -895,7 +899,7 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model and get targeting distance
@@ -969,7 +973,7 @@ getTargetingDistance <- function(model) {
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza_IB.tab", package="shm")
+#' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Create model and get targeting distance
