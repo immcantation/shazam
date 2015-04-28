@@ -2,9 +2,10 @@
 # @author  Mohamed Uduman
 # @date    2015.4.24
 
-library("shm")
+library(alakazam)
+library(shm)
 
-dbPath <- system.file("extdata", "Influenza_IB.tab", package="shm")
+dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 db <- readChangeoDb(dbPath)
 
 # Collapses sequences by clones
@@ -21,5 +22,5 @@ baseline <- calcBaselinePdfs( db,
 # Group PDFs by the BARCODE column
 baseline_grp <- groupBaseline( baseline, 
                                groupBy=c("BARCODE","CPRIMER"), 
-                               nproc=3)
+                               nproc=1 )
 

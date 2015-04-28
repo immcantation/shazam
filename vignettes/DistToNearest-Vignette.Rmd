@@ -1,5 +1,5 @@
 ---
-title: "SHM: Calculate distance to nearest neighbor"
+title: "SHM: Tuning clonal assignment thresholds by calculating distance to nearest neighbor"
 author: "Namita Gupta"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
@@ -29,7 +29,7 @@ library(alakazam)
 library(shm)
 
 # Load Change-O file
-file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+file <- system.file("extdata", "Influenza.tab", package="shm")
 df <- readChangeoDb(file)
 ```
 

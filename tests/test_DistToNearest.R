@@ -2,10 +2,12 @@
 # @author  Namita Gupta
 # @date    2014.9.25
 
-#### Run paramaters ####
-db_file1 <- "inst/extdata/changeo_demo.tab"
+#### Imports ####
+library(alakazam)
+library(shm)
 
-#### Preprocessing ####
+#### Load data ####
+db_file1 <- system.file("extdata", "Influenza.tab", package="shm")
 data_df1 <- readChangeoDb(db_file1)
 
 #### DistToNearest steps ####

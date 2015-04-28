@@ -17,7 +17,7 @@
 #' \itemize{
 #'   \item  \code{\link{getClonalConsensus}}:       Build clonal consensus sequence.
 #'   \item  \code{\link{getObservedMutations}}:     Compute observed mutation counts.
-#'   \item  \code{\link{getExpectedMutationFrequencies}}:   Compute mutation frequencies.
+#'   \item  \code{\link{getExpectedMutationFreq}}:   Compute mutation frequencies.
 #' }
 #'
 #' @section  Targeting models:
