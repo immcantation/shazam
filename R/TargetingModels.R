@@ -385,7 +385,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     }
     
     # Normalize by column
-    substitutionModel <- apply(substitutionModel, 2, function(x) { x/sum(x, na.rm=TRUE) })
+    substitutionModel <- apply(substitutionModel, 2, function(x) { x / sum(x, na.rm=TRUE) })
     substitutionModel[!is.finite(substitutionModel)] <- NA
     
     return(substitutionModel)
@@ -1107,7 +1107,6 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     # Set base plot settings
     base_theme <- theme_bw() +
         theme(panel.background=element_blank(),
-              panel.border=element_blank(),
               panel.grid.major=element_blank(),
               panel.grid.minor=element_blank(),
               panel.margin=grid::unit(c(0, 0, 0, 0), "inches")) +
@@ -1233,6 +1232,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             orient_y <- text_offset - 1
             orient_label <- ifelse(center_nuc %in% c("G", "T"), "3'", "5'")
             p1 <- p1 + theme(panel.grid=element_blank(), 
+                             panel.border=element_blank(),
                              axis.title=element_blank(),
                              axis.text=element_blank(), 
                              axis.ticks=element_blank()) +
@@ -1246,7 +1246,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
             orient_label <- ifelse(center_nuc %in% c("G", "T"), "3'", "5'")
-            p1 <- p1 + theme(axis.line=element_line(color="black"),
+            p1 <- p1 + theme(panel.border=element_rect(color="black"),
                              axis.text.x=element_blank(), 
                              axis.ticks.x=element_blank()) +
                 xlab(orient_label) +

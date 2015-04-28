@@ -894,7 +894,7 @@ calcBaselinePvalue <- function ( baseline_pdf,
 
 #### Plotting functions ####
 
-#' Plots the results of BASELINe analysis
+#' Plots BASELINe summary statistics
 #' 
 #' \code{plotBaseline} plots the results of selection analysis using the BASELINe method.
 #'
