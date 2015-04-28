@@ -255,6 +255,11 @@ calcBaselinePdfs <- function( db,
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
+    # nproc_arg will be passeed to any function that has the nproc argument
+    # If the cluster is already being set by the parent function then 
+    # this will be set to 'cluster', that way the child function does not close
+    # the connections and reset the cluster.
+    nproc_arg <- nproc
     
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
@@ -275,6 +280,7 @@ calcBaselinePdfs <- function( db,
         clusterEvalQ(cluster, library(shm))
         clusterEvalQ(cluster, library(seqinr))
         registerDoSNOW(cluster)
+        nproc_arg <- cluster
     } else if( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
@@ -304,7 +310,7 @@ calcBaselinePdfs <- function( db,
                                       cloneColumn="CLONE", 
                                       sequenceColumn=sequenceColumn,
                                       germlineColumn=germlineColumn,
-                                      collapseByClone=TRUE, nproc=cluster)            
+                                      collapseByClone=TRUE, nproc=nproc_arg)            
             sequenceColumn="CLONAL_CONSENSUS_SEQUENCE"
         }
         
@@ -675,7 +681,7 @@ groupBaseline <- function( baseline,
 #' Calculate BASELINe statistics
 #'
 #' \code{calcBaselineStats} calculates BASELINe statistics such as the Selection Strength
-#' (Sigma), the 95% confidence intervals & P-values.
+#' (Sigma), the 95\% confidence intervals & P-values.
 #'
 #' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
 #'                      BASELINe posterior probability distribution functions 
@@ -690,7 +696,7 @@ groupBaseline <- function( baseline,
 #'          \code{stats} slot of the \code{baseline} object passed as an argument. 
 #'           
 #' @details \code{getBaselineStats} calculates BASELINe statistics such as the Selection 
-#'          Strength (Sigma), the 95% confidence intervals & P-values.
+#'          Strength (Sigma), the 95\% confidence intervals & P-values.
 #' 
 #' @seealso See \code{link{calcBaselinePdfs}} and \code{link{groupBaseline}}.
 #' 
@@ -785,7 +791,7 @@ calcBaselineStats <- function ( baseline,
 #'          which is stored in the \code{stats} slot of the \code{baseline} object. 
 #' 
 #' @seealso See \code{\link{summarizeBaselineStats}}, the function which calculates the BASELINe 
-#'          statistics such as the Selection Strength (Sigma), the 95% confidence 
+#'          statistics such as the Selection Strength (Sigma), the 95\% confidence 
 #'          intervals & P-values.
 #' 
 #' @examples
