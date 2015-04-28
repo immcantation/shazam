@@ -22,5 +22,5 @@ baseline <- calcBaselinePdfs( db,
 # Group PDFs by the BARCODE column
 baseline_grp <- groupBaseline( baseline, 
                                groupBy=c("BARCODE","CPRIMER"), 
-                               nproc=3 )
+                               nproc=1 )
 

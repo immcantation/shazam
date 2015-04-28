@@ -267,7 +267,7 @@ clonalConsensus <- function(inputSeq, germlineSeq,
 #' \code{\link{binMutationsByRegion}} is called by this function to aggregate the mutations
 #' by the \code{regionDefinition}.
 #' 
-#' Also see \code{\link{getExpectedMutationFrequencies}} for calculating expected mutation
+#' Also see \code{\link{getExpectedMutationFreq}} for calculating expected mutation
 #'           frequencies.
 #' 
 #' @examples
@@ -291,7 +291,7 @@ getObservedMutations <- function(db,
                                  germlineColumn="GERMLINE_IMGT_D_MASK",
                                  regionDefinition=IMGT_V_NO_CDR3,
                                  nproc=1) {
-        
+    
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
         cluster = nproc 
@@ -334,9 +334,9 @@ getObservedMutations <- function(db,
     # Convert list of mutations to data.frame
     labels_length <- length(regionDefinition@labels)
     observed_mutations <- do.call(rbind, lapply(observedMutations_list, function(x){ 
-                                        length(x) <- labels_length 
-                                        return(x)
-                                    })) 
+        length(x) <- labels_length 
+        return(x)
+    })) 
     
     observed_mutations[is.na(observed_mutations)] <- 0
     colnames(observed_mutations) <- paste0("OBSERVED_", colnames(observed_mutations))
@@ -523,7 +523,7 @@ binMutationsByRegion <- function( mutations_array,
 
 #' Calculate expected mutation frequencies
 #'
-#' \code{getExpectedMutationFrequencies} calculates the 
+#' \code{getExpectedMutationFreq} calculates the 
 #'
 #' @param   db                  data.frame containing sequence data.
 #' @param   sequenceColumn      name of the column containing sample/input sequences.
@@ -588,12 +588,12 @@ binMutationsByRegion <- function( mutations_array,
 #'                           nproc=1)
 #'
 #' @export
-getExpectedMutationFrequencies <- function(db, 
-                                           sequenceColumn="SEQUENCE_IMGT",
-                                           germlineColumn="GERMLINE_IMGT_D_MASK",
-                                           targetingModel=HS5FModel,
-                                           regionDefinition=IMGT_V_NO_CDR3,
-                                           nproc=1) {
+getExpectedMutationFreq <- function(db, 
+                                    sequenceColumn="SEQUENCE_IMGT",
+                                    germlineColumn="GERMLINE_IMGT_D_MASK",
+                                    targetingModel=HS5FModel,
+                                    regionDefinition=IMGT_V_NO_CDR3,
+                                    nproc=1) {
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
@@ -630,10 +630,10 @@ getExpectedMutationFrequencies <- function(db,
     
     targeting_list <-
         foreach( i=icount(numbOfSeqs) ) %dopar% {
-            calculateExpectedMutationFrequencies( germlineSeq = db[i,germlineColumn],
-                                                  inputSeq = db[i,sequenceColumn],
-                                                  targetingModel = HS5FModel,
-                                                  regionDefinition = IMGT_V_NO_CDR3)
+            calcExpectedMutationFreq( germlineSeq = db[i,germlineColumn],
+                                      inputSeq = db[i,sequenceColumn],
+                                      targetingModel = HS5FModel,
+                                      regionDefinition = regionDefinition)
         }
     
     # Convert list of expected mutation freq to data.frame
@@ -658,9 +658,9 @@ getExpectedMutationFrequencies <- function(db,
 
 #' Helper function to calculate expected mutation frequencies
 #'
-#' \code{calculateExpectedMutationFrequencies} calculates the expected mutation
+#' \code{calcExpectedMutationFreq} calculates the expected mutation
 #' frequencies of a given sequence. This is primariry a helper function for
-#' \code{\link{getExpectedMutationFrequencies}}. 
+#' \code{\link{getExpectedMutationFreq}}. 
 #'
 #' @param   inputSequence       Nucleotide sequence being tested for selection.
 #' @param   germlineSequence    The germline or reference sequence.
@@ -694,18 +694,18 @@ getExpectedMutationFrequencies <- function(db,
 #' XXXXXXXXXXXXXXXXX
 #' 
 #' @seealso  
-#' \code{\link{getExpectedMutationFrequencies}} calls this function
+#' \code{\link{getExpectedMutationFreq}} calls this function
 #' 
 #' Also see \code{\link{countMutations}} for getting observed mutation counts.
 #' 
 #' @examples
 #'  1+1
 #' @export
-calculateExpectedMutationFrequencies <- function(germlineSeq,
-                                                 inputSeq=NULL,
-                                                 targetingModel=HS5FModel,
-                                                 regionDefinition=IMGT_V_NO_CDR3){
-
+calcExpectedMutationFreq <- function(germlineSeq,
+                                     inputSeq=NULL,
+                                     targetingModel=HS5FModel,
+                                     regionDefinition=IMGT_V_NO_CDR3){
+    
     
     targeting <- 
         calculateTargeting( germlineSeq = germlineSeq, 
@@ -789,7 +789,7 @@ calculateTargeting <- function(germlineSeq,
         s_germlineSeq <- germlineSeq
         c_germlineSeq <- s2c(s_germlineSeq)
     }
-
+    
     # Removing IMGT gaps (they should come in threes)
     # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
     gaplessSeq <- gsub("\\.\\.\\.", "XXX", s_germlineSeq)
@@ -801,9 +801,9 @@ calculateTargeting <- function(germlineSeq,
     c_germlineSeq <- s2c(s_germlineSeq)
     # Matrix to hold targeting values for each position in c_germlineSeq
     germlineSeqTargeting <- matrix(NA, 
-                             ncol=nchar(s_germlineSeq), 
-                             nrow=length(NUCLEOTIDES[1:5]),
-                             dimnames=list( NUCLEOTIDES[1:5], c_germlineSeq))
+                                   ncol=nchar(s_germlineSeq), 
+                                   nrow=length(NUCLEOTIDES[1:5]),
+                                   dimnames=list( NUCLEOTIDES[1:5], c_germlineSeq))
     
     # Now remove the IMGT gaps so that the correct 5mers can be made to calculate
     # targeting. e.g.

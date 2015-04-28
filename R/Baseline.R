@@ -318,15 +318,15 @@ calcBaselinePdfs <- function( db,
         db <- getObservedMutations( db,
                                     sequenceColumn=sequenceColumn,
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
-                                    regionDefinition=IMGT_V_NO_CDR3,
+                                    regionDefinition=regionDefinition,
                                     nproc=0 )
         
         # Calculate the expected frequencies of mutations
-        db <- getExpectedMutationFrequencies( db,
-                                              sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
-                                              germlineColumn="GERMLINE_IMGT_D_MASK",
-                                              regionDefinition=IMGT_V_NO_CDR3,
-                                              nproc=0 )
+        db <- getExpectedMutationFreq( db,
+                                       sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+                                       germlineColumn="GERMLINE_IMGT_D_MASK",
+                                       regionDefinition=regionDefinition,
+                                       nproc=0 )
     }
     
     # Calculate PDFs for each sequence
@@ -558,7 +558,7 @@ groupBaseline <- function( baseline,
                            nproc=1 ) {
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
-
+    
     # Convert the db (data.frame) to a data.table & set keys
     # This is an efficient way to get the groups of CLONES, instead of doing dplyr
     dt <- data.table(baseline@db)
@@ -567,8 +567,8 @@ groupBaseline <- function( baseline,
     dt <- dt[ , list( yidx = list(.I) ) , by=groupByFormatted ]
     groups <- dt[,yidx] 
     df <- as.data.frame(dt)    
-   
-
+    
+    
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.  
@@ -589,7 +589,7 @@ groupBaseline <- function( baseline,
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     }
- 
+    
     
     # Print status to console
     cat("Grouping BASELINe probability density functions...\n")
@@ -607,7 +607,7 @@ groupBaseline <- function( baseline,
                           dimnames=list( 1:numbOfTotalGroups, regions )
     )    
     
-
+    
     # For every region (e.g. CDR, FWR etc.)
     for (region in regions) {
         
@@ -808,8 +808,8 @@ summarizeBaselineStats <- function ( baseline ) {
 
 # Given a BASELIne PDF calculate mean sigma
 calcBaselineSigma <- function ( baseline_pdf,
-                                     max_sigma=20,
-                                     length_sigma=4001 ) {
+                                max_sigma=20,
+                                length_sigma=4001 ) {
     
     if ( any(is.na(baseline_pdf)) ) { return(NA) }
     
@@ -821,10 +821,10 @@ calcBaselineSigma <- function ( baseline_pdf,
 
 # Given a BASELIne PDF calculate Confidence Interval
 calcBaselineCI <- function ( baseline_pdf,
-                                  low=0.025,
-                                  up=0.975,
-                                  max_sigma=20,
-                                  length_sigma=4001 ){
+                             low=0.025,
+                             up=0.975,
+                             max_sigma=20,
+                             length_sigma=4001 ){
     
     if ( any(is.na(baseline_pdf)) ) { return( c(NA,NA) ) }
     
@@ -842,8 +842,8 @@ calcBaselineCI <- function ( baseline_pdf,
 
 # Given a BASELIne PDF calculate P value
 calcBaselinePvalue <- function ( baseline_pdf, 
-                                      length_sigma=4001, 
-                                      max_sigma=20 ){
+                                 length_sigma=4001, 
+                                 max_sigma=20 ){
     if ( !any(is.na(baseline_pdf)) ) {
         norm = {length_sigma-1}/2/max_sigma
         pVal = {sum(baseline_pdf[1:{{length_sigma-1}/2}]) + baseline_pdf[{{length_sigma+1}/2}]/2}/norm
@@ -991,7 +991,7 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, facetBy=c("region
     if (style == "point") { 
         # Get summary statistics
         stats_df <- baseline@stats
-
+        
         # Check for proper grouping
         if (any(duplicated(stats_df[, c(idColumn, groupColumn, "REGION")]))) {
             stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
@@ -999,7 +999,7 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, facetBy=c("region
         
         # Subset to regions of interest
         stats_df <- subset(stats_df, REGION %in% regions)
-            
+        
         # Plot BASELINe summary statistics
         p1 <- ggplot(stats_df, aes_string(x=idColumn, y="BASELINE_SIGMA", ymax=max("BASELINE_SIGMA"))) +
             base_theme + 
@@ -1061,7 +1061,7 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, facetBy=c("region
             dens_df[, groupColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
                                                groupColumn]
         }    
-
+        
         # Plot probability density curve
         p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="PROB")) +
             base_theme + 
