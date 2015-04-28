@@ -1107,8 +1107,6 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     # Set base plot settings
     base_theme <- theme_bw() +
         theme(panel.background=element_blank(),
-              panel.grid.major=element_blank(),
-              panel.grid.minor=element_blank(),
               panel.margin=grid::unit(c(0, 0, 0, 0), "inches")) +
         #theme(axis.title.x=element_blank(),
         #      axis.text.x=element_blank(), 
@@ -1208,7 +1206,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             xlab("") +
             ylab("") + 
             scale_color_manual(name="Motif", values=motif_colors) +
-            scale_fill_manual(name="Nucleotide", values=dna_colors, guide=FALSE) +
+            scale_fill_manual(name="", values=dna_colors, guide=FALSE) +
             #scale_fill_manual(name="", values=c(motif_colors, dna_colors), guide=FALSE) +
             geom_segment(data=sub_df, mapping=aes(x=x, xend=x, yend=score, color=motif), 
                          y=score_offset, size=2*size) +
@@ -1246,7 +1244,8 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
             orient_label <- ifelse(center_nuc %in% c("G", "T"), "3'", "5'")
-            p1 <- p1 + theme(panel.border=element_rect(color="black"),
+            p1 <- p1 + theme(panel.grid=element_blank(), 
+                             panel.border=element_rect(color="black"),
                              axis.text.x=element_blank(), 
                              axis.ticks.x=element_blank()) +
                 xlab(orient_label) +

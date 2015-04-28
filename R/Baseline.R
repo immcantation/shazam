@@ -1095,7 +1095,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #' 
 #' @return   A ggplot object defining the plot.
 #'
-#' @seealso  Takes as input a \link{Baseline} object or data.frame returned from
+#' @seealso  Takes as input a \link{Baseline} object returned from
 #'           \link{groupBaseline}. See \link{calcBaselinePdfs} for generating 
 #'           \code{Baseline} objects to pass to \link{groupBaseline}.
 #' 
