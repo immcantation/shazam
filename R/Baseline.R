@@ -961,6 +961,10 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
 #' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
 #' 
+#' # Plot subset of data
+#' baseline_sub <- subset(summarizeBaseline(baseline_two), BARCODE %in% c("RL013", "RL014"))
+#' plotBaselineSummary(baseline_sub, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
+#' 
 #' @export
 plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
                                 subsetRegions=NULL, facetBy=c("region", "group"), 
@@ -1014,6 +1018,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     
     if (style == "mean") { 
         # Plot mean and confidence intervals
+        stats_df <- subset(stats_df, !is.na(BASELINE_SIGMA))
         p1 <- ggplot(stats_df, aes_string(x=idColumn, y="BASELINE_SIGMA", ymax=max("BASELINE_SIGMA"))) +
             base_theme + 
             xlab("") +
