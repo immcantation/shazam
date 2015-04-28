@@ -1,10 +1,10 @@
 ---
-title: "SHM: Calculate distance to nearest neighbor"
+title: "SHM: Quantify selection pressures"
 author: "Namita Gupta"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
 vignette: >
-  %\VignetteIndexEntry{Distance to nearest neighbor}
+  %\VignetteIndexEntry{SHM Selection}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
