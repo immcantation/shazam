@@ -776,7 +776,7 @@ calcBaselineStats <- function ( baseline,
 #'
 #' \code{summarizeBaselineStats} returns a summary of the BASELINe statistics,
 #' which is stored in the \code{stats} slot of the \code{baseline} object - provided
-#' \code\link{groupBaseline} has already been run.
+#' \code{\link{groupBaseline}} has already been run.
 #'
 #' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
 #'                      BASELINe posterior probability distribution functions 
@@ -792,7 +792,7 @@ calcBaselineStats <- function ( baseline,
 #' 
 #' @seealso See \code{\link{summarizeBaselineStats}}, the function which calculates the BASELINe 
 #'          statistics such as the Selection Strength (Sigma), the 95\% confidence 
-#'          intervals & P-values.
+#'          intervals and P-values.
 #' 
 #' @examples
 #' # Load example data
@@ -801,21 +801,21 @@ calcBaselineStats <- function ( baseline,
 #' db <- readChangeoDb(dbPath)
 #'                      
 #' @export
-summarizeBaselineStats <- function ( baseline ) {
-    return( baseline@stats )
+summarizeBaselineStats <- function(baseline) {
+    return(baseline@stats)
 }
 
 
 # Given a BASELIne PDF calculate mean sigma
-calcBaselineSigma <- function ( baseline_pdf,
-                                max_sigma=20,
-                                length_sigma=4001 ) {
+calcBaselineSigma <- function(baseline_pdf,
+                              max_sigma=20,
+                              length_sigma=4001 ) {
     
-    if ( any(is.na(baseline_pdf)) ) { return(NA) }
+    if (any(is.na(baseline_pdf))) { return(NA) }
     
     sigma_s <- seq(-max_sigma, max_sigma, length.out=length_sigma)
-    norm = {length_sigma-1}/2/max_sigma
-    return( (baseline_pdf%*%sigma_s/norm)  )
+    norm = {length_sigma - 1} / 2 / max_sigma
+    return(baseline_pdf %*% sigma_s / norm)
 }
 
 
