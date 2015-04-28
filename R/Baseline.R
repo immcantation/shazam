@@ -1000,7 +1000,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     
     # Subset to regions of interest
     if (!is.null(subsetRegions)) {
-        stats_df <- subset(stats_df, REGION %in% regions)
+        stats_df <- subset(stats_df, REGION %in% subsetRegions)
     }
     
     # Set base plot settings
