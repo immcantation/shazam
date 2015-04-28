@@ -8,6 +8,17 @@
 #' @include shm.R
 NULL
 
+#### Constants ####
+
+# Region color palette
+REGION_PALETTE <-  c("CDR"="#377eb8",
+                     "FWR"="#e41a1c",
+                     "CDR1"="#ff7f00",
+                     "CDR2"="#a65628",
+                     "CDR3"="#377eb8",
+                     "FWR1"="#4daf4a",
+                     "FWR2"="#984ea3",
+                     "FWR3"="#e41a1c")
 #### Classes ####
 
 #' S4 class defining a region definition

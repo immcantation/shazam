@@ -774,7 +774,7 @@ calcBaselineStats <- function ( baseline,
 
 #' Returns a summary of the BASELINe statistics
 #'
-#' \code{summarizeBaselineStats} returns a summary of the BASELINe statistics,
+#' \code{summarizeBaseline} returns a summary of the BASELINe statistics,
 #' which is stored in the \code{stats} slot of the \code{baseline} object - provided
 #' \code{\link{groupBaseline}} has already been run.
 #'
@@ -790,7 +790,7 @@ calcBaselineStats <- function ( baseline,
 #' @details An accessor method, that returns a summary of the BASELINe statistics,
 #'          which is stored in the \code{stats} slot of the \code{baseline} object. 
 #' 
-#' @seealso See \code{\link{summarizeBaselineStats}}, the function which calculates the BASELINe 
+#' @seealso See \code{\link{summarizeBaseline}}, the function which calculates the BASELINe 
 #'          statistics such as the Selection Strength (Sigma), the 95\% confidence 
 #'          intervals and P-values.
 #' 
@@ -801,7 +801,7 @@ calcBaselineStats <- function ( baseline,
 #' db <- readChangeoDb(dbPath)
 #'                      
 #' @export
-summarizeBaselineStats <- function(baseline) {
+summarizeBaseline <- function(baseline) {
     return(baseline@stats)
 }
 
@@ -898,36 +898,47 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' 
 #' \code{plotBaseline} plots the results of selection analysis using the BASELINe method.
 #'
-#' @param    baseline     \code{Baseline} object containing selection probability 
-#'                        density functions and summary statistics.
-#' @param    idColumn     name of the column in the \code{data} slot of \code{baseline} 
-#'                        containing primary identifiers.
-#' @param    groupColumn  name of the column in the \code{data} slot of \code{baseline} 
-#'                        containing secondary grouping identifiers. If \code{NULL}, 
-#'                        organize the plot only on values in \code{idColumn}.
-#' @param    regions      character vector naming the regions to plot, correspoding to the
-#'                        regions for which the \code{baseline} data was calculated.
-#' @param    style        type of plot to draw. One of:
-#'                        \itemize{
-#'                          \item \code{"point"}:  plots the mean and confidence interval of
-#'                                                 selection scores for each value in 
-#'                                                 \code{idColumn}, grouped and colored
-#'                                                 by values in \code{groupColumn}.
-#'                          \item \code{"curve"}:  plots a set of curves for each probability 
-#'                                                 density function in \code{baseline}, 
-#'                                                 colored by values in \code{idColumn}.
-#'                        }
-#' @param    size         numeric scaling factor for lines, points and text in the plot.
-#' @param    silent       if \code{TRUE} do not draw the plot and just return the ggplot2 
-#'                        object; if \code{FALSE} draw the plot.
-#' @param    ...          additional arguments to pass to ggplot2::theme.
+#' @param    baseline       either a data.frame returned from \link{summarizeBaseline}
+#'                          or a \code{Baseline} object containing selection probability 
+#'                          density functions and summary statistics.
+#' @param    idColumn       name of the column in \code{baseline} containing primary identifiers. 
+#'                          If the input is a \code{Baseline} object, then this will be a column
+#'                          in the \code{stats} slot of \code{baseline}.
+#' @param    groupColumn    name of the column in \code{baseline} containing secondary grouping 
+#'                          identifiers. If the input is a \code{Baseline} object, then this will 
+#'                          be a column in the \code{stats} slot of \code{baseline}.
+#' @param    groupColors    named vector of colors for entries in \code{groupColumn}, with 
+#'                          names defining unique values in the \code{groupColumn} and values
+#'                          being colors. Also controls the order in which groups appear on the
+#'                          plot. If \code{NULL} default ordering and color palette will be used.
+#'                          Has no effect if \code{facetBy="group"}.
+#' @param    subsetRegions  character vector defining a subset of regions to plot, correspoding 
+#'                          to the regions for which the \code{baseline} data was calculated. If
+#'                          \code{NULL} all regions in \code{baseline} are plotted.
+#' @param    facetBy        one of c("group", "region") defining which category to facet the
+#'                          plot by, either values in \code{groupColumn} ("group") or regions
+#'                          defining the \code{baseline} ("region"). The data that is not used
+#'                          for faceting will be color coded.
+#' @param    style          type of plot to draw. One of:
+#'                          \itemize{
+#'                            \item \code{"mean"}:     plots the mean and confidence interval of
+#'                                                     selection scores for each value in 
+#'                                                     \code{idColumn}. Faceting and coloring
+#'                                                     is determine by values in \code{groupColumn}
+#'                                                     and regions defined in \code{baseline}, 
+#'                                                     depending upon the \code{facetBy} argument.
+#'                          }
+#' @param    size           numeric scaling factor for lines, points and text in the plot.
+#' @param    silent         if \code{TRUE} do not draw the plot and just return the ggplot2 
+#'                          object; if \code{FALSE} draw the plot.
+#' @param    ...            additional arguments to pass to ggplot2::theme.
 #' 
 #' @return   A ggplot object defining the plot.
 #'
-#' @seealso  Takes as input a \code{\link{Baseline}} object.
-#'           See \code{\link{calcBaselinePdfs}} for generating selection probability density 
-#'           functions and \code{\link{groupBaseline}} for summarizing selection scores by
-#'           annotation columns.
+#' @seealso  Takes as input a \link{Baseline} object or data.frame returned from
+#'           \link{summarizeBaseline}. See \link{calcBaselinePdfs} for generating 
+#'           \code{Baseline} objects. See \link{groupBaseline} for summarizing selection 
+#'           scores by annotation columns.
 #' 
 #' @examples
 #' library(alakazam)
@@ -941,39 +952,52 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Plot mean and confidence interval
-#' plotBaseline(baseline_one, "BARCODE", style="point")
-#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", style="point")
-#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="point")
+#' plotBaselineSummary(baseline_one, "BARCODE", style="mean")
+#' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", style="mean")
+#' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR", style="mean")
+#' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="mean")
 #' 
-#' # Plot density function
-#' plotBaseline(baseline_one, "BARCODE", style="curve")
-#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", style="curve")
-#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="curve")
+#' # Reorder and recolor groups
+#' group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
+#' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
 #' 
 #' @export
-plotBaseline <- function(baseline, idColumn, groupColumn=NULL, facetBy=c("region", "group"), 
-                         regions=c("CDR", "FWR"), groupColors=NULL, regionColors=NULL,
-                         style=c("point", "curve"), size=1, silent=FALSE, ...) {
-    # TODO:  add group/subgroup color specification.
-    # TODO:  add subgroup plotting
-    # TODO:  curve might not be right
-    # TODO:  add p-value data
-    
-    # "CDR1" "CDR2" "CDR3" "FWR1" "FWR2" "FWR3"
-    # "CDR" "FWR"
-    #idColumn="BARCODE"
-    #groupColumn="CPRIMER"
-    #facetBy="region"
-    #regions=c("CDR", "FWR")
-    #groupColors=NULL
-    #regionColors=NULL
-    #style="point"
-    #size=1
-    #silent=FALSE
-    
-    # Check input
+plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
+                                subsetRegions=NULL, facetBy=c("region", "group"), 
+                                style=c("mean"), size=1, silent=FALSE, ...) {
+    # Check arguments
     style <- match.arg(style)
     facetBy <- match.arg(facetBy)
+
+    # Check input object
+    if (is(baseline, "Baseline")) {
+        stats_df <- baseline@stats
+    } else if (is(baseline, "data.frame")) {
+        stats_df <- baseline
+    } else {
+        stop("Input must be either a data.frame or Baseline object.")
+    }
+    
+    # Check for required columns
+    baseline_cols <- c("REGION", 
+                       "BASELINE_SIGMA", 
+                       "BASELINE_CI_LOWER", 
+                       "BASELINE_CI_LOWER", 
+                       "BASELINE_CI_LOWER", 
+                       "BASELINE_CI_PVALUE")
+    if (!(all(baseline_cols %in% names(stats_df)))) {
+        stop("Input must contain columns defined by summarizeBaseline.")
+    }
+    
+    # Check for proper grouping
+    if (any(duplicated(stats_df[, c(idColumn, groupColumn, "REGION")]))) {
+        stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
+    }
+    
+    # Subset to regions of interest
+    if (!is.null(subsetRegions)) {
+        stats_df <- subset(stats_df, REGION %in% regions)
+    }
     
     # Set base plot settings
     base_theme <- theme_bw() +
@@ -988,48 +1012,136 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, facetBy=c("region
     #theme(legend.position="top")
     #theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1))
     
-    if (style == "point") { 
-        # Get summary statistics
-        stats_df <- baseline@stats
-        
-        # Check for proper grouping
-        if (any(duplicated(stats_df[, c(idColumn, groupColumn, "REGION")]))) {
-            stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
-        }
-        
-        # Subset to regions of interest
-        stats_df <- subset(stats_df, REGION %in% regions)
-        
-        # Plot BASELINe summary statistics
+    if (style == "mean") { 
+        # Plot mean and confidence intervals
         p1 <- ggplot(stats_df, aes_string(x=idColumn, y="BASELINE_SIGMA", ymax=max("BASELINE_SIGMA"))) +
             base_theme + 
             xlab("") +
             ylab(expression(Sigma)) +
-            #scale_shape_manual(name="Isotype", values=isotype_shapes) +
-            #scale_color_manual(name="Sample Type", values=CLASS_COLORS) +
-            #scale_fill_manual(name="Sample Type", values=CLASS_COLORS) +
             geom_hline(yintercept=0, size=1*size, linestyle=2, color="grey") +
             geom_point(size=3*size, position=position_dodge(0.6)) +
             geom_errorbar(aes(ymin=BASELINE_CI_LOWER, ymax=BASELINE_CI_UPPER), 
                           width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.6))
         if (is.null(groupColumn) & facetBy == "region") {
             p1 <- p1 + facet_grid(REGION ~ .)
-        } else if (!is.null(groupColumn) & facetBy == "region") {
+        } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
+            #groupColors <- factor(groupColors, levels=groupColors)
+            p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
+                aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+        } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
             p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
         } else if (!is.null(groupColumn) & facetBy == "group") {
-            p1 <- p1 + aes(color=REGION) + facet_grid(paste(groupColumn, "~ ."))
+            p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
+                aes(color=REGION) + facet_grid(paste(groupColumn, "~ ."))
         } else {
             stop("Cannot facet by group if groupColumn=NULL")
         }
-    } else if (style == "curve") {
-        #TODO:  what order are the names in?  Matching @pdf for @stats?
+    }
+    
+    # Add additional theme elements
+    p1 <- p1 + do.call(theme, list(...))
+    
+    # Plot
+    if (!silent) { 
+        plot(p1)
+    }
+    
+    invisible(p1)
+}
+
+
+#' Plots BASELINe probability density functions
+#' 
+#' \code{plotBaselinePdfs} plots the results of selection analysis using the BASELINe method.
+#'
+#' @param    baseline       \code{Baseline} object containing selection probability 
+#'                          density functions.
+#' @param    idColumn       name of the column in the \code{db} slot of \code{baseline} 
+#'                          containing primary identifiers.
+#' @param    groupColumn    name of the column in the \code{db} slot of \code{baseline} 
+#'                          containing secondary grouping identifiers. If \code{NULL}, 
+#'                          organize the plot only on values in \code{idColumn}.
+#' @param    groupColors    named vector of colors for entries in \code{groupColumn}, with 
+#'                          names defining unique values in the \code{groupColumn} and values
+#'                          being colors. Also controls the order in which groups appear on the
+#'                          plot. If \code{NULL} default ordering and color palette will be used.
+#'                          Has no effect if \code{facetBy="group"}.
+#' @param    subsetRegions  character vector defining a subset of regions to plot, correspoding 
+#'                          to the regions for which the \code{baseline} data was calculated. If
+#'                          \code{NULL} all regions in \code{baseline} are plotted.
+#' @param    facetBy        one of c("group", "region") defining which category to facet the
+#'                          plot by, either values in \code{groupColumn} ("group") or regions
+#'                          defining the \code{baseline} ("region"). The data that is not used
+#'                          for faceting will be color coded.
+#' @param    style          type of plot to draw. One of:
+#'                          \itemize{
+#'                            \item \code{"density"}:  plots a set of curves for each probability 
+#'                                                     density function in \code{baseline}, 
+#'                                                     with the line type determined by \code{idColumn}.
+#'                                                     Faceting and coloring is determine by values in 
+#'                                                     \code{groupColumn} and regions defined in 
+#'                                                     \code{baseline}, depending upon the 
+#'                                                     \code{facetBy} argument
+#'                          }
+#' @param    size           numeric scaling factor for lines, points and text in the plot.
+#' @param    silent         if \code{TRUE} do not draw the plot and just return the ggplot2 
+#'                          object; if \code{FALSE} draw the plot.
+#' @param    ...            additional arguments to pass to ggplot2::theme.
+#' 
+#' @return   A ggplot object defining the plot.
+#'
+#' @seealso  Takes as input a \link{Baseline} object or data.frame returned from
+#'           \link{groupBaseline}. See \link{calcBaselinePdfs} for generating 
+#'           \code{Baseline} objects to pass to \link{groupBaseline}.
+#' 
+#' @examples
+#' library(alakazam)
+#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(db_file)
+#' 
+#' # Calculate selection scores
+#' baseline <- calcBaselinePdfs(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' # Combine selection scores by samples barcode and isotype primer
+#' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
+#' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' 
+#' # Plot mean and confidence interval
+#' plotBaselinePdfs(baseline_one, "BARCODE", style="density")
+#' plotBaselinePdfs(baseline_two, "BARCODE", "CPRIMER", style="density")
+#' plotBaselinePdfs(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
+#' plotBaselinePdfs(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="density")
+#'
+#' # Reorder and recolor groups
+#' group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
+#' plotBaselinePdfs(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
+#' 
+#' @export
+plotBaselinePdfs <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
+                             subsetRegions=NULL, facetBy=c("region", "group"),
+                             style=c("density"), size=1, silent=FALSE, ...) {
+    # Check input
+    style <- match.arg(style)
+    facetBy <- match.arg(facetBy)
+    
+    # Set base plot settings
+    base_theme <- theme_bw() +
+        theme(panel.background=element_blank(),
+              panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank(),
+              panel.border=element_rect(color="black", size=0.5)) +
+        theme(strip.background=element_rect(fill="white", color="black", size=0.5))
+ 
+    if (style == "density") {
         # Check for proper grouping
         if (any(duplicated(baseline@db[, c(idColumn, groupColumn)]))) {
             stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
         }
         
         # Subset to regions of interest
-        dens_names <- baseline@regions[baseline@regions %in% regions]        
+        dens_names <- baseline@regions        
+        if (!is.null(subsetRegions)) {
+            dens_names <- dens_names[dens_names %in% subsetRegions]        
+        }
         dens_list <- baseline@pdfs[dens_names]
         
         # Get row and column names for PDF matrices
@@ -1067,13 +1179,17 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, facetBy=c("region
             base_theme + 
             xlab(expression(Sigma)) +
             ylab(expression(P(Sigma))) +
-            geom_line(aes_string(color=idColumn), size=1*size)
+            geom_line(aes_string(linetype=idColumn), size=1*size)
         if (is.null(groupColumn) & facetBy == "region") {
             p1 <- p1 + facet_grid(REGION ~ .)
-        } else if (!is.null(groupColumn) & facetBy == "region") {
-            p1 <- p1 + aes_string(linetype=groupColumn) + facet_grid(REGION ~ .)
+        } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
+            p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+        } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
+            p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
+                aes_string(color=groupColumn) + facet_grid(REGION ~ .)
         } else if (!is.null(groupColumn) & facetBy == "group") {
-            p1 <- p1 + aes(linetype=REGION) + facet_grid(paste(groupColumn, "~ ."))
+            p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
+                aes(color=REGION) + facet_grid(paste(groupColumn, "~ ."))
         } else {
             stop("Cannot facet by group if groupColumn=NULL")
         }
