@@ -8,6 +8,10 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(dev='pdf')
+```
 
 Distance to nearest neighbor is calculated to estimate the threshold 
 for partitioning clonally related sequences. This is done via the 
@@ -24,7 +28,7 @@ A small example Change-O tab-delimited database file is included in the
 (columns) to be present in the Change-O file: `V_CALL`, `J_CALL`, 
 `JUNCTION_GAP_LENGTH`, and `JUNCTION`.
 
-```{r, eval=TRUE, warning=FALSE}
+```{r, eval=TRUE, warning=FALSE, message=FALSE}
 library(alakazam)
 library(shm)
 
