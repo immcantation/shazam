@@ -165,10 +165,6 @@ distSeqHam <- function(seq1, seq2, model=c("ham","aa"),
     
     # Compute length of sequence (for normalization, if specified)
     juncLength <- nchar(seq1)
-    # Number of mutations (for normalization, if specified)
-    seq1 <- strsplit(seq1,"")[[1]]
-    seq2 <- strsplit(seq2,"")[[1]]
-    numbOfMutation <- sum(seq1 != seq2)
   } else if (model == "aa") {
     
     # Translate sequences
@@ -178,21 +174,19 @@ distSeqHam <- function(seq1, seq2, model=c("ham","aa"),
     aa2 <- translate(seq2, ambiguous=T)
     
     # Calculate distance
-    # Disregard ambiguous amino acids
-    x <- (aa1 != 'X' & aa2 != 'X')
+    dist_mat <- getAADistMatrix()
     # Calculate distance
-    dist <- sum(aa1[x] != aa2[x])
+    dist <- getSeqDistance(aa1, aa2, dist_mat=dist_mat)
     
     # Compute length of sequence (for normalization, if specified)
     juncLength <- length(aa1)
-    # Number of mutations (for normalization, if specified)
-    numbOfMutation <- dist
   }
   
   # Normalize distances
   if (normalize == "length") { 
     dist <- dist/juncLength
   } else if (normalize == "mutations") { 
+    numbOfMutation <- dist
     dist <- dist/numbOfMutation 
   }
   
@@ -486,18 +480,20 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     db$V <- getGene(db[, vCallColumn])
     db$J <- getGene(db[, jCallColumn])
   } else {
-    db$V <- getGene(db[, vCallColumn], first=FALSE)
-    db$J <- getGene(db[, jCallColumn], first=FALSE)
+    db$V1 <- getGene(db[, vCallColumn], first=FALSE)
+    db$J1 <- getGene(db[, jCallColumn], first=FALSE)
+    db$V <- db$V1
+    db$J <- db$J1
     # Reassign V genes to most general group of genes
-    for(ambig in unique(db$V[grepl(',', db$V)])) {
-      for(g in strsplit(ambig, split=',')) {
-        db$V2[db$V==g] = ambig
+    for(ambig in unique(db$V1[grepl(',', db$V1)])) {
+      for(g in strsplit(ambig, split=',')[[1]]) {
+        db$V[grepl(g, db$V1)] = ambig
       }
     }
     # Reassign J genes to most general group of genes
-    for(ambig in unique(db$J[grepl(',',db$J)])) {
+    for(ambig in unique(db$J1[grepl(',',db$J1)])) {
       for(g in strsplit(ambig, split=',')) {
-        db$J[db$J==g] = ambig
+        db$J[grepl(g, db$J1)] = ambig
       }
     }
   }
@@ -542,5 +538,5 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
   # Stop the cluster
   stopCluster(cluster)
   
-  return(db[, !(names(db) %in% c("V", "J", "L", "ROW_ID"))])
+  return(db[, !(names(db) %in% c("V", "J", "L", "ROW_ID", "V1", "J1"))])
 }

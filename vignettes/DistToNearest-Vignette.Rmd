@@ -47,16 +47,19 @@ the more accurate V call will be utilized. Furthermore, for a more leniency
 toward ambiguous segment calls, the parameter `first` can be set to FALSE, which 
 would use the union of all possible genes to group sequences, rather than the 
 first gene in the field. The `model` parameter determines which underlying SHM 
-model is used to calculate the distance. The default model is `m3n`, a 
-tri-nucleotide model from Smith et al., J Immunol, 1996. Other options include 
-nucleotide (`ham`) and amino acid (`aa`) Hamming distance, a single nucleotide 
-mouse model (`m1n`, Smith et al., J Immunol, 1996), and a 5-mer model inferred 
-from human data (`hs5f`, Yaari et al., Front Immunol., 2013).
+model is used to calculate the distance. The default model is `m1n`, a 
+single nucleotide model from Smith et al., J Immunol, 1996. Other options include 
+nucleotide (`ham`) and amino acid (`aa`) Hamming distance, a 3-mer mouse model 
+(`m3n`, Smith et al., J Immunol, 1996), and a 5-mer model inferred from human data 
+(`hs5f`, Yaari et al., Front Immunol., 2013).
 
 
 ```{r, eval=TRUE, warning=FALSE}
-# Calculate distance to nearest for genotyped sample data
+# Use genotyped V assignments and 5-mer model
 db_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
+
+# Use m1n model and normalize by junction length
+dist_m1n <- distToNearest(db, model="m1n", first=FALSE, normalize="length")
 ```
 
 Generate histogram
@@ -69,10 +72,14 @@ example provided here, this threshold is approximately at 0.002 for the
 S5F model.
 
 ```{r, eval=TRUE, warning=FALSE}
-# Generate histogram
-hist(db_dist$DIST_NEAREST, main='Histogram', xlab='Distance to Nearest', breaks=50)
+# Generate hs5f histogram
+hist(db_hs5f$DIST_NEAREST, main='Histogram - hs5f', 
+     xlab='Distance to Nearest', breaks=50)
+# Zoom in to find threshold at around 5
+hist(db_hs5f$DIST_NEAREST, main='Histogram - hs5f - zoom', 
+     xlab='Distance to Nearest', breaks=100, xlim=c(0, 15), ylim=c(0,50))
 
-# Zoom in to find threshold at around 2
-hist(db_dist$DIST_NEAREST, main='Histogram - zoom', 
-     xlab='Distance to Nearest', breaks=100, xlim=c(0, 5))
+# Generate m1n histogram
+hist(dist_m1n$DIST_NEAREST, main='Histogram - m1n', 
+     xlab='Distance to Nearest', breaks=25, xlim=c(0, 1))
 ```
