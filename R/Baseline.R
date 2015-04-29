@@ -91,7 +91,7 @@ setClass("Baseline",
 #' 
 #' @seealso  
 #' See \code{\link{Baseline}} for the return object.
-#' \code{createBaseline} is used in \code\link{calcBaselinePdfs}.
+#' \code{createBaseline} is used in \code{\link{calcBaselinePdfs}}.
 #' 
 #' @references
 #' \enumerate{
