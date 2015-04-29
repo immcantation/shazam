@@ -465,8 +465,8 @@ getClosestHam <- function(arrJunctions, model=c("ham","aa"),
 #'
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
-                          jCallColumn="J_CALL", model=c("m3n", "hs5f", "m1n", "ham","aa"), 
-                          normalize=c("none" ,"length"), 
+                          jCallColumn="J_CALL", model=c("m1n", "ham", "aa", "m3n", "hs5f"), 
+                          normalize=c("none", "length"), 
                           first=TRUE, nproc=1) {
   # Initial checks
   model <- match.arg(model)
@@ -514,7 +514,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
   
   # Calculate distance to nearest neighbor
   # cat("Calculating distance to nearest neighbor\n")
-  if (model %in% c("hs5f","m3n")) {
+  if (model %in% c("hs5f", "m3n")) {
     # Export targeting model to processes
     clusterExport(cluster, list("targeting_model"), envir=environment())
     

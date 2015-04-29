@@ -56,7 +56,7 @@ from human data (`hs5f`, Yaari et al., Front Immunol., 2013).
 
 ```{r, eval=TRUE, warning=FALSE}
 # Calculate distance to nearest for genotyped sample data
-db_hs5f <- distToNearest(df, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
+db_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
 ```
 
 Generate histogram
@@ -74,5 +74,5 @@ hist(db_dist$DIST_NEAREST, main='Histogram', xlab='Distance to Nearest', breaks=
 
 # Zoom in to find threshold at around 2
 hist(db_dist$DIST_NEAREST, main='Histogram - zoom', 
-     xlab='Distance to Nearest', breaks=100, xlim=c(0,5))
+     xlab='Distance to Nearest', breaks=100, xlim=c(0, 5))
 ```
