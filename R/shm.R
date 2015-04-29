@@ -130,6 +130,7 @@
 #' @importFrom  seqinr    c2s
 #' @importFrom  seqinr    s2c
 #' @importFrom  seqinr    words
+#' @importFrom  seqinr    translate
 NULL
 
 

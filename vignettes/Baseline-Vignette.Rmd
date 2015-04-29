@@ -61,7 +61,7 @@ Plot and compare selection scores of different groups of sequences
 --------------------------------------------------------------------------------
 `plotBaselineSummary` plots the mean and confidence interval of selection scores for the given groups. The `idColumn` parameter specifies the field that contains identifiers of the groups of sequences. If there is a secondary field by which the sequences are grouped, this can be specified using the `groupColumn`. This secondary grouping can have a user-defined color palette passed into `groupColors` or can be separated into facets by setting the `facetBy` parameter to "group". The `subsetRegions` parameter can be used to visualize selection of specific regions. Several examples utilizing these different parameters are provided below.
 
-`plotBaselinePdfs` plots the full `Baseline` PDF of selection scores for the given groups. The parameters are the same as those for `plotBaselineSummary`, however rather than plotting the mean and confidence interval, the full density function is shown.
+`plotBaseline` plots the full `Baseline` PDF of selection scores for the given groups. The parameters are the same as those for `plotBaselineSummary`, however rather than plotting the mean and confidence interval, the full density function is shown.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Plot mean and confidence interval by time-point
@@ -86,5 +86,5 @@ plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", facetBy="group")
 plotBaselineSummary(baseline_sub, "BARCODE", "CPRIMER", groupColors=group_colors)
 
 # Plot selection PDFs of subset of data
-plotBaselinePdfs(baseline_two_sub, "BARCODE", "CPRIMER", groupColors=group_colors)
+plotBaseline(baseline_two_sub, "BARCODE", "CPRIMER", groupColors=group_colors)
 ```

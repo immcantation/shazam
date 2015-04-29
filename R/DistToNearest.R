@@ -26,8 +26,7 @@ slidingArrayOf5mers <- function(strSequence){
 #
 # @param    seq1          first nucleotide sequence.
 # @param    seq2          second nucleotide sequence.
-# @param    sub_model     substitution model.
-# @param    mut_model     mutability model.
+# @param    targeting_model     targeting model.
 # @param    normalize     The method of normalization. Default is "none".
 #                         "length" = normalize distance by length of junction.
 #                         "mutations" = normalize distance by number of mutations in junction.
@@ -61,10 +60,10 @@ distSeq5Mers <- function(seq1, seq2, targeting_model,
 
   avgDist <- NA
   a <- tryCatch({
-    if(length(seq1)==1){
+    if (length(seq1)==1){
       seq1_to_seq2 <- targeting_dist[substr(seq2,3,3),seq1]
       seq2_to_seq1 <- targeting_dist[substr(seq1,3,3),seq2]
-    }else{
+    } else {
       seq1_to_seq2 <- sum( diag(targeting_dist[substr(seq2,3,3),seq1]) )
       seq2_to_seq1 <- sum( diag(targeting_dist[substr(seq1,3,3),seq2]) )
     }
@@ -88,8 +87,6 @@ distSeq5Mers <- function(seq1, seq2, targeting_model,
 #
 # @param    seq1          first nucleotide sequence.
 # @param    seq2          second nucleotide sequence.
-# @param    sub_model     substitution model.
-# @param    mut_model     mutability model.
 # @param    normalize     The method of normalization. Default is "none".
 #                         "length" = normalize distance by length of junction.
 #                         "mutations" = normalize distance by number of mutations in junction.
@@ -107,7 +104,7 @@ distSeqM1n <- function(seq1, seq2, normalize=c("none" ,"length", "mutations")) {
   # Compute length of sequence (for normalization, if specified)
   juncLength <- length(seq1)
   
-  # Compute distance only on fivemers that have mutations
+  # Compute distance only on positions that have mutations
   withMu <- seq1 != seq2
   withNonNuc <- ( !is.na(match(seq1, c("A","C","G","T"))) & !is.na(match(seq2, c("A","C","G","T"))) )
   withMu <- withMu & withNonNuc
@@ -119,9 +116,9 @@ distSeqM1n <- function(seq1, seq2, normalize=c("none" ,"length", "mutations")) {
   
   dist <- NA
   a <- tryCatch({
-    if(length(seq1)==1){
+    if (length(seq1)==1){
       dist <- M1NDistance[seq2,seq1]
-    }else{
+    } else {
       dist <- sum( diag(M1NDistance[seq2,seq1]) )
     }
   },error = function(e){
@@ -139,26 +136,88 @@ distSeqM1n <- function(seq1, seq2, normalize=c("none" ,"length", "mutations")) {
 }
 
 
-#' Given an array of junction sequences, find the pairwise distances
-#'
-#' @param   arrJunctions   character vector of junction sequences.
-#' @param   model          name of SHM targeting model.
-#' @param   normalize     The method of normalization. Default is "none".
-#'                        "length" = normalize distance by length of junction.
-#'                        "mutations" = normalize distance by number of mutations in junction.
-#'                        If a numeric value is passed, then the computed distance is divided by the given value.
-#' @return  A matrix of pairwise distances between junction sequences.
-#' 
-#' @details
-#' needs method details
-#' 
-#' @seealso needs links
-#' 
-#' @examples
-#' # TODO
-#' # working example
-#' 
-#' @export
+# Get distance between two sequences of same length, broken by a sliding window of 5mers
+#
+# @param    seq1          first nucleotide sequence.
+# @param    seq2          second nucleotide sequence.
+# @param    model         DNA (ham) or amino acid (aa) hamming distance model
+# @param    normalize     The method of normalization. Default is "none".
+#                         "length" = normalize distance by length of junction.
+#                         "mutations" = normalize distance by number of mutations in junction.
+# @return   distance between two sequences.
+#
+# @examples
+# seq1 = c("ATG-C")
+# seq2 = c("AT--C")
+# 
+# distSeqHam(seq1, seq2)
+distSeqHam <- function(seq1, seq2, model=c("ham","aa"),
+                       normalize=c("none" ,"length", "mutations")) {
+  # Evaluate choices
+  model <- match.arg(model)
+  normalize <- match.arg(normalize)
+  
+  # Get character distance matrix
+  if (model == "ham") {
+    # Calculate distance
+    dist_mat <- getDNADistMatrix(gap=0)
+    dist <- getSeqDistance(seq1, seq2, dist_mat=dist_mat)
+    
+    # Compute length of sequence (for normalization, if specified)
+    juncLength <- nchar(seq1)
+    # Number of mutations (for normalization, if specified)
+    seq1 <- strsplit(seq1,"")[[1]]
+    seq2 <- strsplit(seq2,"")[[1]]
+    numbOfMutation <- sum(seq1 != seq2)
+  } else if (model == "aa") {
+    
+    # Translate sequences
+    seq1 <- strsplit(tolower(gsub("[-.]","N",seq1)), "")[[1]]
+    seq2 <- strsplit(tolower(gsub("[-.]","N",seq2)), "")[[1]]
+    aa1 <- translate(seq1, ambiguous=T)
+    aa2 <- translate(seq2, ambiguous=T)
+    
+    # Calculate distance
+    # Disregard ambiguous amino acids
+    x <- (aa1 != 'X' & aa2 != 'X')
+    # Calculate distance
+    dist <- sum(aa1[x] != aa2[x])
+    
+    # Compute length of sequence (for normalization, if specified)
+    juncLength <- length(aa1)
+    # Number of mutations (for normalization, if specified)
+    numbOfMutation <- dist
+  }
+  
+  # Normalize distances
+  if (normalize == "length") { 
+    dist <- dist/juncLength
+  } else if (normalize == "mutations") { 
+    dist <- dist/numbOfMutation 
+  }
+  
+  return(dist)
+}
+
+
+# Given an array of junction sequences, find the pairwise distances
+# 
+# @param   arrJunctions   character vector of junction sequences.
+# @param   model          name of SHM targeting model.
+# @param   normalize     The method of normalization. Default is "none".
+#                        "length" = normalize distance by length of junction.
+#                        "mutations" = normalize distance by number of mutations in junction.
+#                        If a numeric value is passed, then the computed distance is divided by the given value.
+# @return  A matrix of pairwise distances between junction sequences.
+# 
+# @details
+# needs method details
+# 
+# @seealso needs links
+# 
+# @examples
+# # TODO
+# # working example
 getPairwiseDistances <- function(arrJunctions, targeting_model, 
                                  normalize=c("none" ,"length", "mutations")) {
   # Initial checks
@@ -167,7 +226,7 @@ getPairwiseDistances <- function(arrJunctions, targeting_model,
   # Convert junctions to uppercase
   arrJunctions <- toupper(arrJunctions)
   # Convert gaps to Ns
-  arrJunctions <- gsub('.', 'N', arrJunctions, fixed=T)
+  arrJunctions <- gsub('[-.]', 'N', arrJunctions, fixed=T)
   # Add 'NN' to front and end of each sequence for fivemers
   arrJunctions <- as.vector(sapply(arrJunctions, function(x){ paste("NN", x, "NN", sep="") }))
 
@@ -226,8 +285,7 @@ findUniqueJunctions <- function(arrJunctions) {
 # Given an array of junction sequences, find the distance to the closest sequence
 #
 # @param    arrJunctions  character vector of junction sequences.
-# @param    sub_model     substitution model.
-# @param    mut_model     mutability model.
+# @param    targeting_model     targeting model
 # @param    normalize     method of normalization. Default is "none".
 #                         "length" = normalize distance by length of junction.
 #                         "mutations" = normalize distance by number of mutations in junction.
@@ -250,7 +308,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
   # Compute distances between junctions
   numbOfUniqueJunctions <- length(arrJunctionsUnique)
   arrUniqueJunctionsDist <- rep(NA,numbOfUniqueJunctions)
-  if(numbOfUniqueJunctions>1){
+  if (numbOfUniqueJunctions>1){
     # Calculate symmetric distance matrix
     matDistance <- getPairwiseDistances(arrJunctionsUnique, targeting_model, normalize)
     # Find minimum distance for each sequence
@@ -267,16 +325,14 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
 # Given an array of junction sequences, find the distance to the closest sequence
 #
 # @param    arrJunctions  character vector of junction sequences.
-# @param    sub_model     substitution model.
-# @param    mut_model     mutability model.
 # @param    normalize     method of normalization. Default is "none".
 #                         "length" = normalize distance by length of junction.
 #                         "mutations" = normalize distance by number of mutations in junction.
 # @return   A vector of distances to the closest sequence.
 # @examples
-arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
-                   "ACGAACGTATGT", "ACGAACGTATGC",
-                   "ACGAACGTATCC","AAAAAAAAAAAA")
+# arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
+#                    "ACGAACGTATGT", "ACGAACGTATGC",
+#                    "ACGAACGTATCC","AAAAAAAAAAAA")
 # getClosestM1n(arrJunctions, normalize="none" )
 getClosestM1n <- function(arrJunctions, normalize=c("none" ,"length", "mutations")) {
   # Initial checks
@@ -290,12 +346,57 @@ getClosestM1n <- function(arrJunctions, normalize=c("none" ,"length", "mutations
   # Compute distances between junctions
   numbOfUniqueJunctions <- length(arrJunctionsUnique)
   arrUniqueJunctionsDist <- rep(NA,numbOfUniqueJunctions)
-  if(numbOfUniqueJunctions>1){
+  if (numbOfUniqueJunctions>1){
     # Calculate symmetric distance matrix
     charDf <- ldply(strsplit(arrJunctionsUnique, ''))
     matDistance <-
       sapply(1:numbOfUniqueJunctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJunctions, function(j) {
         distSeqM1n(charDf[i,], charDf[j,], normalize=normalize)
+      })))
+    matDistance <- matDistance + t(matDistance)
+    # Find minimum distance for each sequence
+    arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJunctions, function(i){ min(matDistance[-i,i]) })
+    names(arrUniqueJunctionsDist) <- arrJunctionsUnique
+  }
+  
+  # Fill the distances for unique sequences
+  arrJunctionsDist[is.na(arrJunctionsDist)] <- arrUniqueJunctionsDist
+  return(round(arrJunctionsDist,4))
+}
+
+
+# Given an array of junction sequences, find the distance to the closest sequence
+#
+# @param    arrJunctions  character vector of junction sequences.
+# @param    model         DNA (ham) or amino acid (aa) hamming distance model
+# @param    normalize     method of normalization. Default is "none".
+#                         "length" = normalize distance by length of junction.
+#                         "mutations" = normalize distance by number of mutations in junction.
+# @return   A vector of distances to the closest sequence.
+# @examples
+# arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
+#                    "ACGAACGTATGT", "ACGAACGTATGC",
+#                    "ACGAACGTATCC","AAAAAAAAAAAA")
+# getClosestM1n(arrJunctions, normalize="none" )
+getClosestHam <- function(arrJunctions, model=c("ham","aa"),
+                          normalize=c("none" ,"length", "mutations")) {
+  # Initial checks
+  model <- match.arg(model)
+  normalize <- match.arg(normalize)
+  
+  # Find unique sequences and return distance array with mapping
+  l <- findUniqueJunctions(arrJunctions)
+  arrJunctionsDist <- l$arrJunctionsDist
+  arrJunctionsUnique <- l$arrJunctionsUnique
+  
+  # Compute distances between junctions
+  numbOfUniqueJunctions <- length(arrJunctionsUnique)
+  arrUniqueJunctionsDist <- rep(NA,numbOfUniqueJunctions)
+  if (numbOfUniqueJunctions>1){
+    # Calculate symmetric distance matrix
+    matDistance <-
+      sapply(1:numbOfUniqueJunctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJunctions, function(j) {
+        distSeqHam(arrJunctionsUnique[i], arrJunctionsUnique[j], model=model, normalize=normalize)
       })))
     matDistance <- matDistance + t(matDistance)
     # Find minimum distance for each sequence
@@ -318,11 +419,10 @@ getClosestM1n <- function(arrJunctions, normalize=c("none" ,"length", "mutations
 #'                           Also used to determine sequence length for grouping.
 #' @param    vCallColumn     name of the column containing the V-segment allele call.
 #' @param    jCallColumn     name of the column containing the J-segment allele call.
-#' @param    model           SHM targeting model; must be one of c("hs5f", "m3n", "m1n"). 
+#' @param    model           SHM targeting model; must be one of c("hs5f", "m3n", "m1n", "ham", "aa). 
 #'                           See Details for further information.
 #' @param    normalize       method of normalization. Default is "none".
 #'                           "length" = normalize distance by length of junction.
-#'                           "mutations" = normalize distance by number of mutations in junction.
 #' @param    first           if \code{TRUE} only the first call the gene assignment is used;
 #'                           if \code{FALSE} the union of ambiguous gene assignments is used to 
 #'                           group all sequences with any of those gene calls.
@@ -355,29 +455,34 @@ getClosestM1n <- function(arrJunctions, normalize=c("none" ,"length", "mutations
 #' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
 #' db <- readChangeoDb(file)
 #'
-#' # Calculate distance to nearest using genotyped V assignments and 5-mer model
-#' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
-#' hist(dist$DIST_NEAREST, breaks=100, xlim=c(0, 60))
+#' # Use genotyped V assignments and 5-mer model
+#' dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
+#' hist(dist_hs5f$DIST_NEAREST, breaks=100, xlim=c(0, 60))
+#' 
+#' # Use M1N model and normalize by junction length
+#' dist_m1n <- distToNearest(db, model="m1n", first=FALSE, normalize="length")
+#' hist(dist_m1n$DIST_NEAREST, breaks=25, xlim=c(0, 1))
 #'
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
-                          jCallColumn="J_CALL", model=c("hs5f", "m3n", "m1n"), 
-                          normalize=c("none" ,"length", "mutations"), 
+                          jCallColumn="J_CALL", model=c("m3n", "hs5f", "m1n", "ham","aa"), 
+                          normalize=c("none" ,"length"), 
                           first=TRUE, nproc=1) {
   # Initial checks
   model <- match.arg(model)
   normalize <- match.arg(normalize)
-  if(!is.data.frame(db)) { stop('Must submit a data frame') }
-
+  if (!is.data.frame(db)) { stop('Must submit a data frame') }
+  
+  # Get targeting model
   if (model == "hs5f") {
     targeting_model <- HS5FModel
   } else if (model == "m3n") {
     targeting_model <- M3NModel            
-  } 
+  }
 
   # Parse V and J columns to get gene
   # cat("V+J Column parsing\n")
-  if(first) {
+  if (first) {
     db$V <- getGene(db[, vCallColumn])
     db$J <- getGene(db[, jCallColumn])
   } else {
@@ -409,7 +514,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
   
   # Calculate distance to nearest neighbor
   # cat("Calculating distance to nearest neighbor\n")
-  if(model %in% c('hs5f','m3n')) {
+  if (model %in% c("hs5f","m3n")) {
     # Export targeting model to processes
     clusterExport(cluster, list("targeting_model"), envir=environment())
     
@@ -419,9 +524,16 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                                                    normalize=normalize)),
       .parallel=TRUE),
       ROW_ID)
-  } else if(model == 'm1n') {
+  } else if (model == "m1n") {
     db <- arrange(ddply(db, .(V, J, L), function(piece) 
       mutate(piece, DIST_NEAREST=getClosestM1n(eval(parse(text=sequenceColumn)),
+                                               normalize=normalize)),
+      .parallel=TRUE),
+      ROW_ID)
+  } else if (model %in% c("ham","aa")) {    
+    db <- arrange(ddply(db, .(V, J, L), function(piece) 
+      mutate(piece, DIST_NEAREST=getClosestHam(eval(parse(text=sequenceColumn)),
+                                               model = model,
                                                normalize=normalize)),
       .parallel=TRUE),
       ROW_ID)

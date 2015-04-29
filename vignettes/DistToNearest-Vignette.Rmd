@@ -34,7 +34,7 @@ library(shm)
 
 # Load Change-O file
 file <- system.file("extdata", "Influenza.tab", package="shm")
-df <- readChangeoDb(file)
+db <- readChangeoDb(file)
 ```
 
 Calculate distance to nearest neighbor
@@ -47,13 +47,16 @@ the more accurate V call will be utilized. Furthermore, for a more leniency
 toward ambiguous segment calls, the parameter `first` can be set to FALSE, which 
 would use the union of all possible genes to group sequences, rather than the 
 first gene in the field. The `model` parameter determines which underlying SHM 
-targeting model is used to calculate the distance. The default model (most 
-accurate for human data) is S5F.
+model is used to calculate the distance. The default model is `m3n`, a 
+tri-nucleotide model from Smith et al., J Immunol, 1996. Other options include 
+nucleotide (`ham`) and amino acid (`aa`) Hamming distance, a single nucleotide 
+mouse model (`m1n`, Smith et al., J Immunol, 1996), and a 5-mer model inferred 
+from human data (`hs5f`, Yaari et al., Front Immunol., 2013).
 
 
 ```{r, eval=TRUE, warning=FALSE}
-# The sample data has been genotyped
-df_dist <- distToNearest(df, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
+# Calculate distance to nearest for genotyped sample data
+db_hs5f <- distToNearest(df, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
 ```
 
 Generate histogram
@@ -67,9 +70,9 @@ S5F model.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Generate histogram
-hist(df_dist$DIST_NEAREST, main='Histogram', xlab='Distance to Nearest', breaks=50)
+hist(db_dist$DIST_NEAREST, main='Histogram', xlab='Distance to Nearest', breaks=50)
 
 # Zoom in to find threshold at around 2
-hist(df_dist$DIST_NEAREST, main='Histogram - zoom', 
+hist(db_dist$DIST_NEAREST, main='Histogram - zoom', 
      xlab='Distance to Nearest', breaks=100, xlim=c(0,5))
 ```
