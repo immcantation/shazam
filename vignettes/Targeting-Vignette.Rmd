@@ -1,5 +1,5 @@
 ---
-title: "SHM: Infer SHM targeting model"
+title: "SHM: Inferring SHM targeting models"
 author: "Namita Gupta"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
@@ -68,10 +68,10 @@ The visualization of a dataset's underlying SHM mutability model can be used to 
 
 ```{r, eval=TRUE, warning=FALSE}
 # Generate mutability model plot
-plotMutability(tar_model, nucleotides="A", style='bar', size=0.8)
-plotMutability(tar_model, nucleotides="C", style='bar', size=0.8)
-plotMutability(tar_model, nucleotides="G", style='bar', size=0.8)
-plotMutability(tar_model, nucleotides="T", style='bar', size=0.8)
+plotMutability(tar_model, nucleotides="A", style='bar', size=0.3)
+plotMutability(tar_model, nucleotides="C", style='bar', size=0.3)
+plotMutability(tar_model, nucleotides="G", style='bar', size=0.3)
+plotMutability(tar_model, nucleotides="T", style='bar', size=0.3)
 ```
 
 Calculate targeting distance matrix

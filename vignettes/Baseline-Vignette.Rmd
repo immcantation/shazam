@@ -1,5 +1,5 @@
 ---
-title: "SHM: Quantify selection pressures"
+title: "SHM: Quantifing selection pressures"
 author: "Namita Gupta"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
