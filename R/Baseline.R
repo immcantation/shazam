@@ -896,7 +896,8 @@ calcBaselinePvalue <- function ( baseline_pdf,
 
 #' Plots BASELINe summary statistics
 #' 
-#' \code{plotBaseline} plots the results of selection analysis using the BASELINe method.
+#' \code{plotBaselineSummary} plots the summary of the results of selection analysis 
+#'                            using the BASELINe method.
 #'
 #' @param    baseline       either a data.frame returned from \link{summarizeBaseline}
 #'                          or a \code{Baseline} object containing selection probability 
@@ -1057,7 +1058,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
 
 #' Plots BASELINe probability density functions
 #' 
-#' \code{plotBaselinePdfs} plots the results of selection analysis using the BASELINe method.
+#' \code{plotBaseline} plots the results of selection analysis using the BASELINe method.
 #'
 #' @param    baseline       \code{Baseline} object containing selection probability 
 #'                          density functions.
@@ -1111,17 +1112,17 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Plot mean and confidence interval
-#' plotBaselinePdfs(baseline_one, "BARCODE", style="density")
-#' plotBaselinePdfs(baseline_two, "BARCODE", "CPRIMER", style="density")
-#' plotBaselinePdfs(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
-#' plotBaselinePdfs(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="density")
+#' plotBaseline(baseline_one, "BARCODE", style="density")
+#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", style="density")
+#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
+#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="density")
 #'
 #' # Reorder and recolor groups
 #' group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
-#' plotBaselinePdfs(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
+#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
 #' 
 #' @export
-plotBaselinePdfs <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
+plotBaseline <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
                              subsetRegions=NULL, facetBy=c("region", "group"),
                              style=c("density"), size=1, silent=FALSE, ...) {
     # Check input
