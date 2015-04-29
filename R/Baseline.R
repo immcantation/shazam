@@ -4,53 +4,34 @@ NULL
 
 #### Classes ####
 
-#' S4 class defining a Baseline (selection) object
+#' S4 class defining a BASELINe (selection) object
 #' 
-#' \code{Baseline} defines a common data structure for defining the BASELINe Selection
+#' \code{Baseline} defines a common data structure for defining the BASELINe selection
 #' results
 #' 
-#' @slot    description         General information regarding the sequences, selection 
-#'                              analysis and/or object.
+#' @slot    description         \code{character} of general information regarding the 
+#'                              sequences, selection analysis and/or object.
 #' @slot    db                  \code{data.frame} containing annotation information about 
 #'                              the sequences/selection results.
 #' @slot    regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.                   
-#' @slot    testStatistic       The statistical framework used to test for selection.
-#'                              E.g.
-#'                              \code{local} = CDR_R / (CDR_R + CDR_S)
-#'                              \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
-#'                              For \code{focused} the \code{regionDefinition} must only
-#'                              contain two regions. If more than two regions are defined
-#'                              the \code{local} test statistic will be used.
-#'                              See Uduman et al. (2011) for further information.
+#'                              and boundaries of the Ig sequences.
+#' @slot    testStatistic       \code{character} indicating the statistical framework 
+#'                              used to test for selection. E.g. code{"local"}, \code{"focused"}.                           
 #' @slot    regions             \code{character} vector of the regions the BASELINe 
 #'                              selection was carried out on. E.g. "CDR & "FWR" or
 #'                              "CDR1", "CDR2", "CDR3" etc.
-#' @slot    numbOfSeqs          \code{matrix} of r x c dimensions, where:
-#'                              r = number of rows = number of groups/sequencs and
-#'                              c = number of columns = number of regions
-#'                              The matrix contains the number of non-NA sequences or the
-#'                              number of BASELINe posterior probability distribution 
-#'                              functions (PDF) that were convoluted (grouped) together. 
-#'                              This information is essential to further regroup PDFs and 
-#'                              weight them accordingly.
-#'                              
-#' @slot    pdfs                A \code{list} (one item for each defined region e.g. CDR &
-#'                              FWR) of \code{matrices} of r x c deminetions, where:
-#'                              r = number of sequences or groups and
+#' @slot    numbOfSeqs          \code{matrix} of r x c dimensions containing the number of 
+#'                              sequences or PDFs in each region, where: \cr
+#'                              r = number of rows = number of groups/sequencs and \cr
+#'                              c = number of columns = number of regions.
+#' @slot    pdfs                \code{list} of PDFs (one item for each defined region 
+#'                              e.g. CDR & FWR) of \code{matrices} of r x c dementions, 
+#'                              where: \cr
+#'                              r = number of sequences or groups and \cr
 #'                              c = number of columns = length of the PDF (default 4001)
-#'                              The matrix contains the BASELINe posterior probability 
-#'                              distribution functions (PDF) for each sequence or goup of
-#'                              sequences. 
-#' @slot    stats               A melted \code{data.frame} of BASELINe statistics, 
-#'                              including: Selection strength (Sigma), 95\% confidence 
-#'                              intervals and P values.
-#'                                
+#' @slot    stats               \code{data.frame} of BASELINe statistics, 
+#'                              including: selection strength (Sigma), 95\% confidence 
+#'                              intervals, and P values.
 #'                          
 #' @name Baseline
 #' @export
@@ -70,53 +51,66 @@ setClass("Baseline",
 
 #' Creates a Baseline object
 #' 
-#' \code{createBaseline} creates a \code{RegionDefinition}.
+#' \code{createBaseline} creates a \code{Baseline}.
 #'
 #' @param   description         General information regarding the sequences, selection 
 #'                              analysis and/or object.
 #' @param   db                  \code{data.frame} containing annotation information about 
 #'                              the sequences/selection results.
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.                   
-#' @param   testStatistic       The statistical framework used to test for selection.
-#'                              E.g.
-#'                              \code{local} = CDR_R / (CDR_R + CDR_S)
-#'                              \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
-#'                              For \code{focused} the \code{regionDefinition} must only
-#'                              contain two regions. If more than two regions are defined
-#'                              the \code{local} test statistic will be used.
-#'                              See Uduman et al. (2011) for further information.
-#' @param   numbOfSeqs          \code{matrix} of r x c dimensions, where"
-#'                              r = number of rows = number of groups/sequencs and
-#'                              c = number of columns = number of regions
-#'                              The matrix contains the number of non-NA sequences or the
-#'                              number of BASELINe posterior probability distribution 
-#'                              functions (PDF) that were convoluted (grouped) together. 
-#'                              This information is essential to further regroup PDFs and 
-#'                              weight them accordingly.
-#' @param   pdfs                 A \code{list} (one item for each defined region e.g. CDR &
-#'                              FWR) of \code{matrices} of r x c deminetions, where:
-#'                              r = number of sequences or groups and
+#'                              and boundaries of the Ig sequences.
+#' @param   testStatistic       \code{character} indicating the statistical framework 
+#'                              used to test for selection. E.g. code{"local"}, \code{"focused"}.   
+#' @param   numbOfSeqs          \code{matrix} of r x c dimensions containing the number of 
+#'                              sequences or PDFs in each region, where: \cr
+#'                              r = number of rows = number of groups/sequencs and \cr
+#'                              c = number of columns = number of regions.
+#' @param   pdfs                \code{list} of PDFs (one item for each defined region 
+#'                              e.g. CDR & FWR) of \code{matrices} of r x c dementions, 
+#'                              where: \cr
+#'                              r = number of sequences or groups and \cr
 #'                              c = number of columns = length of the PDF (default 4001)
-#'                              The matrix contains the BASELINe posterior probability 
-#'                              distribution functions (PDF) for each sequence or goup of
-#'                              sequences.
-#' @param   stats               A melted \code{data.frame} of BASELINe statistics, 
-#'                              including: Selection strength (Sigma), 95\% confidence 
-#'                              intervals and P values.#'                                
+#' @param   stats               \code{data.frame} of BASELINe statistics, 
+#'                              including: selection strength (Sigma), 95\% confidence 
+#'                              intervals, and P values.                              
 #' 
 #' @return   A \code{Baseline} object.
 #' 
-#' @seealso  See \code{\link{Baseline}} for the return object.
+#' @details
+#' Create and initialize a \code{Baseline} object. 
 #' 
+#' The \code{testStatistic} indicates the statistical framework used to test for selection. 
+#' E.g.
+#' \itemize{
+#'   \item   \code{local} = CDR_R / (CDR_R + CDR_S).
+#'   \item   \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
+#' }
+#' For \code{focused} the \code{regionDefinition} must only contain two regions. If more 
+#' than two regions are defined the \code{local} test statistic will be used.
+#' For further information on the frame of these tests see Uduman et al. (2011).
+#' 
+#' @seealso  
+#' See \code{\link{Baseline}} for the return object.
+#' \code{createBaseline} is used in \code\link{calcBaselinePdfs}.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Hershberg U, Uduman M, Shlomchik MJ and Kleinstein SH: Improved methods for 
+#'          detecting selection by mutation analysis of Ig V region sequences. 
+#'          Int Immunol. 2008 May;20 (5) :683-94. Epub 2008 Apr 7. PMID: 18397909
+#'   \item  Uduman M, Yaari G, Hershberg U, Stern JA, Shlomchik MJ and Kleinstein SH: 
+#'          Detecting selection in immunoglobulin sequences. Nucleic Acids Res. 2011 Jul;39 
+#'          (Web Server issue) :W499-504. Epub 2011 Jun 10. PMID: 21665923
+#'   \item  Yaari G, Uduman M and Kleinstein SH: Quantifying selection in high-throughput 
+#'          Immunoglobulin sequencing data sets. Nucleic Acids Res. 
+#'          2012 Sep 1;40 (17) :e134. Epub 2012 May 27. PMID: 22641856
+#'  }
+#'  
 #' @examples
 #' library(shm)
 #' 
+#' # Creates an empty Baseline object
+#' createBaseline()
 #' 
 #' @export
 createBaseline <- function( description="",
@@ -176,35 +170,28 @@ editBaseline <- function ( baseline,
 
 #' Calculate the BASELINe PDFs
 #' 
-#' \code{calcBaselinePdfs} calculates the BASELINe posterior probability distribution 
-#' functions (PDFs) for sequences in the given db
+#' \code{calcBaselinePdfs} calculates the BASELINe posterior probability density 
+#' functions (PDFs) for sequences in the given ChangeO db \code{data.frame}.
 #'
 #' @param   db                  \code{data.frame} containing sequence data and annotation.
-#' @param   sequenceColumn      Name of the column containing sample/input sequences.
-#' @param   germlineColumn      Name of the column containing germline sequences.
-#' @param   testStatistic       The statistical framework used to test for selection.
-#'                              E.g.
-#'                              \code{local} = CDR_R / (CDR_R + CDR_S)
-#'                              \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
-#'                              For \code{focused} the \code{regionDefinition} must only
-#'                              contain two regions. If more than two regions are defined
-#'                              the \code{local} test statistic will be used.
-#'                              See Uduman et al. (2011) for further information.
+#' @param   sequenceColumn      \code{character} name of the column in \code{db} 
+#'                              containing input sequences.
+#' @param   germlineColumn      \code{character} name of the column in \code{db} 
+#'                              containing germline sequences.
+#' @param   testStatistic       \code{character} indicating the statistical framework 
+#'                              used to test for selection. E.g. code{"local"}, \code{"focused"}. 
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.
+#'                              and boundaries of the Ig sequences.
+#' @param   targetingModel      \code{\link{TargetingModel}} object. Default is the 
+#'                              \link{HS5FModel}.
 #' @param   nproc               number of cores to distribute the operation over. If 
 #'                              \code{nproc} = 0 then the \code{cluster} has already been
 #'                              set and will not be reset.
 #' 
 #' @return  A \code{Baseline} object, containing the modified \code{db} and the BASELINe 
-#'          posterior probability distribution functions (PDF) for each of the sequences
+#'          posterior probability density functions (PDF) for each of the sequences
 #'           
-#' @details Calculates the BASELINe posterior probability distribution function (PDF) for 
+#' @details Calculates the BASELINe posterior probability density function (PDF) for 
 #'          sequences in the provided \code{db}. 
 #'          
 #'          If the \code{db} does not contain the 
@@ -222,32 +209,46 @@ editBaseline <- function ( baseline,
 #'          To group the sequence PDFs and get a combined PDF see 
 #'          \code{\link{groupBaseline}}.
 #' 
-#' 
+#' @details
+#' The \code{testStatistic} indicates the statistical framework used to test for selection. 
+#' E.g.
+#' \itemize{
+#'   \item   \code{local} = CDR_R / (CDR_R + CDR_S).
+#'   \item   \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
+#' }
+#' For \code{focused} the \code{regionDefinition} must only contain two regions. If more 
+#' than two regions are defined the \code{local} test statistic will be used.
+#' For further information on the frame of these tests see Uduman et al. (2011).
+#'                              
 #' @references
 #' \enumerate{
-#'   \item  Gur Yaari; Mohamed Uduman; Steven H. Kleinstein. Quantifying selection 
-#'          in high-throughput Immunoglobulin sequencing data sets. Nucleic Acids Res.
-#'           2012 May 27. 
-#'  \item   Mohamed Uduman; Gur Yaari; Uri Hershberg; Mark J. Shlomchik; Steven H. 
-#'          Kleinstein. Detecting selection in immunoglobulin sequences. Nucleic Acids 
-#'          Res. 2011 Jul;39(Web Server issue):W499-504.  
-#'  \item   Hershberg U, Uduman M, Shlomchik MJ, Kleinstein SH. Improved methods for
-#'          detecting selection by mutation analysis of Ig V region sequences. Int Immunol.
-#'          2008 May;20(5):683-94. doi: 10.1093/intimm/dxn026. Epub 2008 Apr 7. 
-#' }
+#'   \item  Hershberg U, Uduman M, Shlomchik MJ and Kleinstein SH: Improved methods for 
+#'          detecting selection by mutation analysis of Ig V region sequences. 
+#'          Int Immunol. 2008 May;20 (5) :683-94. Epub 2008 Apr 7. PMID: 18397909
+#'   \item  Uduman M, Yaari G, Hershberg U, Stern JA, Shlomchik MJ and Kleinstein SH: 
+#'          Detecting selection in immunoglobulin sequences. Nucleic Acids Res. 2011 Jul;39 
+#'          (Web Server issue) :W499-504. Epub 2011 Jun 10. PMID: 21665923
+#'   \item  Yaari G, Uduman M and Kleinstein SH: Quantifying selection in high-throughput 
+#'          Immunoglobulin sequencing data sets. Nucleic Acids Res. 
+#'          2012 Sep 1;40 (17) :e134. Epub 2012 May 27. PMID: 22641856
+#'  }
 #' 
 #' @examples
-#' # Load example data
-#' library("shm")
-#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
-#' db <- readChangeoDb(dbPath)
-#'                      
+#' library(alakazam)
+#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(db_file)
+#' 
+#' # Calculate BASELINe PDFs for all sequences using the focused test statistic, and
+#' # analyzing uptill but not including CDR3
+#' baseline <- calcBaselinePdfs(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' 
 #' @export
 calcBaselinePdfs <- function( db,
                               sequenceColumn="SEQUENCE_IMGT",
                               germlineColumn="GERMLINE_IMGT_D_MASK",
                               testStatistic=c("local","focused"),
                               regionDefinition=IMGT_V_NO_CDR3,
+                              targetingModel=HS5FModel,
                               nproc=1 ) {
     
     # Evaluate argument choices
@@ -326,6 +327,7 @@ calcBaselinePdfs <- function( db,
                                        sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
                                        germlineColumn="GERMLINE_IMGT_D_MASK",
                                        regionDefinition=regionDefinition,
+                                       targetingModel=targetingModel,
                                        nproc=0 )
     }
     
@@ -514,44 +516,58 @@ calcBaselineBinomialPdf <- function ( x=3,
 
 #' Group BASELINe PDFs
 #' 
-#' \code{groupBaseline} convolutes the BASELINe posterior probability distribution 
-#' functions (PDFs) of sequences to get a combined (grouped) pdf
+#' \code{groupBaseline} convolutes the BASELINe posterior probability density 
+#' functions (PDFs) of sequences in ChangeO db to get a combined (grouped) PDF.
 #'
-#' @param   baseline            \code{Baseline} object, containing the \code{db} and the 
-#'                              BASELINe posterior probability distribution functions 
-#'                              (PDF) for each of the sequences. This would be returned by
-#'                              \code{\link{calcBaselinePdfs}}.
-#' @param   groupBy             The columns in the \code{db} slot of the \code{Baseline}
-#'                              object to group the sequence PDFs by.
-#' @param   nproc               number of cores to distribute the operation over. If 
-#'                              \code{nproc} = 0 then the \code{cluster} has already been
-#'                              set and will not be reset.
+#' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
+#'                      BASELINe posterior probability density functions 
+#'                      (PDF) for each of the sequences, as returned by
+#'                      \code{\link{calcBaselinePdfs}}.
+#' @param   groupBy     The columns in the \code{db} slot of the \code{Baseline}
+#'                      object by which to group the sequence PDFs.
+#' @param   nproc       number of cores to distribute the operation over. If 
+#'                      \code{nproc} = 0 then the \code{cluster} has already been
+#'                      set and will not be reset.
 #' 
 #' @return  A \code{Baseline} object, containing the modified \code{db} and the BASELINe 
-#'          posterior probability distribution functions (PDF) for each of the groups.
+#'          posterior probability density functions (PDF) for each of the groups.
 #'           
-#' @details Calculates the BASELINe posterior probability distribution function (PDF) for 
-#'          sequences in the provided \code{db}, convoluted (grouped)  according to the 
-#'          annotations in the \code{groupBy} argument.
-#'          
-#'          
-#' @seealso To calculate BASELINe statistics, such as the mean selection strength
-#'          and the 95\% confidence interval, see .
+#' @details
+#' While the selection strengths predicted by BASELINe perform well on average, 
+#' the estimates for individual sequences can be highly variable, especially when the 
+#' number of mutations is small. 
 #' 
+#' To overcome this, PDFs from sequences grouped by biological or experimental relevance 
+#' (i.e. group sequences from one subject/patient, so you may comprare selection across 
+#' patients). are convoluted to from a single PDF for the selection strength. This is 
+#' accomplished through a fast numerical convolution technique we have developed for this 
+#' purpose.
+#'               
+#' @seealso 
+#' To calculate BASELINe statistics, such as the mean selection strength
+#'  and the 95\% confidence interval, see \code{\link{calcBaselineStats}}. To print 
+#'  summary statistics see \code{\link{summarizeBaseline}}.
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Gur Yaari; Mohamed Uduman; Steven H. Kleinstein. Quantifying selection 
-#'          in high-throughput Immunoglobulin sequencing data sets. Nucleic Acids Res.
-#'           2012 May 27. 
-#' }
+#'   \item  Yaari G, Uduman M and Kleinstein SH: Quantifying selection in high-throughput 
+#'          Immunoglobulin sequencing data sets. Nucleic Acids Res. 
+#'          2012 Sep 1;40 (17) :e134. Epub 2012 May 27. PMID: 22641856
+#'  }
 #' 
 #' @examples
-#' # Load example data
-#' library("shm")
-#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
-#' db <- readChangeoDb(dbPath)
-#'                      
+#' library(alakazam)
+#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(db_file)
+#' 
+#' # Calculate BASELINe PDFs for all sequences using the focused test statistic, and
+#' # analyzing uptill but not including CDR3
+#' baseline <- calcBaselinePdfs(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#'  
+#' # Combine selection scores by samples barcode and isotype primer
+#' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
+#' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))   
+#'                   
 #' @export
 groupBaseline <- function( baseline,
                            groupBy,
@@ -684,7 +700,7 @@ groupBaseline <- function( baseline,
 #' (Sigma), the 95\% confidence intervals & P-values.
 #'
 #' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
-#'                      BASELINe posterior probability distribution functions 
+#'                      BASELINe posterior probability density functions 
 #'                      (PDF) for each of the sequences. This would be returned by
 #'                      \code{\link{calcBaselinePdfs}}.
 #' @param   nproc       number of cores to distribute the operation over. If 
@@ -702,7 +718,7 @@ groupBaseline <- function( baseline,
 #' 
 #' @examples
 #' # Load example data
-#' library("shm")
+#' library("alakazam")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
 #'                      
@@ -779,7 +795,7 @@ calcBaselineStats <- function ( baseline,
 #' \code{\link{groupBaseline}} has already been run.
 #'
 #' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
-#'                      BASELINe posterior probability distribution functions 
+#'                      BASELINe posterior probability density functions 
 #'                      (PDF) for each of the sequences. This would be returned by
 #'                      \code{\link{calcBaselinePdfs}}.
 #' 
@@ -796,7 +812,7 @@ calcBaselineStats <- function ( baseline,
 #' 
 #' @examples
 #' # Load example data
-#' library("shm")
+#' library("alakazam")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
 #'                      
@@ -946,8 +962,10 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' db_file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(db_file)
 #' 
-#' # Calculate selection scores
-#' baseline <- calcBaselinePdfs(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3, nproc=3)
+#' # Calculate BASELINe PDFs for all sequences using the focused test statistic, and
+#' # analyzing uptill but not including CDR3
+#' baseline <- calcBaselinePdfs(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' 
 #' # Combine selection scores by samples barcode and isotype primer
 #' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
 #' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))

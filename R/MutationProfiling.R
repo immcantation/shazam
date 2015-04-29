@@ -15,22 +15,21 @@ NULL
 #' Identifies clonal consensus sequences
 #'
 #' \code{getClonalConsensus} identifies the consensus sequence of each clonal 
-#' group and appends a column to the input data.frame containing the clonal consensus
-#' for each sequence.
+#' group and appends a column to the input \code{data.frame} containing the clonal 
+#' consensus for each sequence.
 #'
 #' @param   db                  \code{data.frame} containing sequence data.
-#' @param   cloneColumn         Name of the column containing clonal cluster identifiers.
-#' @param   sequenceColumn      Name of the column containing input sequences.
-#' @param   germlineColumn      Name of the column containing germline sequences.
-#' @param   collapseByClone     if TRUE, collapse the \code{db} by the \code{cloneColumn}.
+#' @param   cloneColumn         \code{character} name of the column containing clonal 
+#'                              identifiers.
+#' @param   sequenceColumn      \code{character} name of the column containing input 
+#'                              sequences.
+#' @param   germlineColumn      \code{character} name of the column containing germline 
+#'                              sequences.
+#' @param   collapseByClone     \code{logical} indicatign whether or not to collapse the 
+#'                              \code{db} by the \code{cloneColumn}.
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.
-#' @param    nproc              Number of cores to distribute the operation over. If the 
+#'                              and boundaries of the Ig sequences.
+#' @param   nproc               Number of cores to distribute the operation over. If the 
 #'                              \code{cluster} has already been set earlier, then pass the 
 #'                              \code{cluster}. This will ensure that it is not reset.
 #'                              
@@ -45,11 +44,10 @@ NULL
 #' of each mutated base (and non "N", '.' or '-') from all the sequences in the clone. 
 #' 
 #' For example, in a clone with 5 sequences that have a C at position 1, and 5 sequences
-#' with a T at this same position, the consensus sequence will have a C 50% of the time
-#' and a T 50% of the time. Thus, the results of this function can change somewhat every 
-#' time it is called.
+#' with a T at this same position, the consensus sequence will have a C 50\%  and T 50\% 
+#' of the time it is called.
 #' 
-#' NOTE: The function returns an updated ChangeODB data.frame that collpases all the 
+#' The function returns an updated ChangeODB \code{data.frame} that collpases all the 
 #' sequences by clones defined in the \code{cloneColumn} column passed as a parameter.
 #' 
 #' Non-terminal branch mutations are defined as the set of mutations that occur on 
@@ -207,34 +205,24 @@ clonalConsensus <- function(inputSeq, germlineSeq,
 
 #### Mutation counting functions ####
 
-#' Calculate observed mutations
+#' Calculate observed numbers of mutations
 #'
 #' \code{getObservedMutations} calculates the observed number of mutations for each sequence
-#' in a given input data.frame (\code{db}). The mutations are determined by comparing the 
-#' input sequences (in the column specified by \code{sequenceColumn}) to the germline 
-#' seqeunce (in the column specified by \code{germlineColumn}). The mutations are 
-#' binned or aggregated by replacement(R) or silent(S) across the different regions of the
-#' seqeunce as defined in the \code{regionDefinition}. Typically, this would be the 
-#' framework (FWR) and complementarity determining (CDR) regions of IMGT-gapped 
-#' nucleotide sequences. Mutation counts are appended to the input data.frame as 
-#' additional columns.
+#' in a given ChangeO \code{data.frame} (\code{db}).
 #'
-#' @param   db                  data.frame containing sequence data.
-#' @param   sequenceColumn      name of the column containing sample/input sequences.
-#' @param   germlineColumn      name of the column containing germline sequences.
+#' @param   db                  \code{data.frame} containing sequence data.
+#' @param   sequenceColumn      \code{character} name of the column containing input 
+#'                              sequences.
+#' @param   germlineColumn      \code{character} name of the column containing 
+#'                              the germline or reference sequence.
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.
+#'                              and boundaries of the Ig sequences. 
 #' @param   nproc               number of cores to distribute the operation over. If the 
 #'                              cluster has already been set the call function with 
 #'                              \code{nproc} = 0 to not reset or reinitialize. Default is 
 #'                              \code{nproc} = 1.
 #' 
-#' @return  A modified \code{db} data.frame with observed mutation counts for each 
+#' @return  A modified \code{db} \code{data.frame} with observed mutation counts for each 
 #'           sequence listed. The columns names are dynamically created based on the
 #'           regions in the \code{regionDefinition}. E.g. For the default
 #'           \code{\link{IMGT_V_NO_CDR3}} definition, which defines positions for CDR and
@@ -252,14 +240,15 @@ clonalConsensus <- function(inputSeq, germlineSeq,
 #'           
 #' @details
 #' \code{getObservedMutations} calculates the observed number of mutations for each sequence
-#' in a given input data.frame (\code{db}). The mutations are determined by comparing the 
+#' in a given input \code{data.frame} (\code{db}). The mutations are determined by comparing the 
 #' input sequences (in the column specified by \code{sequenceColumn}) to the germline 
-#' sequence (in the column specified by \code{germlineColumn}). The mutations are 
-#' binned or aggregated by replacement(R) or silent(S) across the different regions of the
-#' seqeunce as defined in the \code{regionDefinition}. Typically, this would be the 
-#' framework (FWR) and complementarity determining (CDR) regions of IMGT-gapped 
-#' nucleotide sequences. Mutation counts are appended to the input data.frame as 
-#' additional columns.
+#' sequence (in the column specified by \code{germlineColumn}). 
+#' 
+#' The mutations are binned or aggregated by replacement (R) or silent (S) across 
+#' the different regions of the seqeunce as defined in the \code{regionDefinition}. 
+#' Typically, this would be the framework (FWR) and complementarity determining (CDR) 
+#' regions of IMGT-gapped nucleotide sequences. Mutation counts are appended to the 
+#' input \code{data.frame} as additional columns.
 #' 
 #' @seealso  
 #' \code{\link{countMutations}} is called by this function to get the list of
@@ -275,15 +264,13 @@ clonalConsensus <- function(inputSeq, germlineSeq,
 #' library("shm")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
-#' # Subset data for demo purposes
-#' db <- db[1:10,]
 #'
-#' #Run getObservedMutations()
+#' # Run getObservedMutations()
 #' db_new <- getObservedMutations(db,
-#'                      sequenceColumn="SEQUENCE_IMGT",
-#'                      germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                      regionDefinition=IMGT_V_NO_CDR3,
-#'                      nproc=1)
+#'                                sequenceColumn="SEQUENCE_IMGT",
+#'                                germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                                regionDefinition=IMGT_V_NO_CDR3,
+#'                                nproc=1)
 #'                      
 #' @export
 getObservedMutations <- function(db, 
@@ -353,31 +340,27 @@ getObservedMutations <- function(db,
 
 #' Count the number of observed mutations in a given sequence and its germline.
 #'
-#' \code{countMutations} determines all the mutations in a given input seqeunce and its
-#'  germline seqeunce
+#' \code{countMutations} determines all the mutations in a given input seqeunce compared
+#' to its germline seqeunce
 #'
 #' @param   inputSeq            the input sequence
 #' @param   germlineSeq         the germline sequence
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
 #'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the \code{\link{IMGT_V_NO_CDR3}} definition is used, 
-#'                              then mutations in positions greater than 312 will not
-#'                              be counted.
-#' @param   binByRegions        if TRUE, then aggregate the mutations by the regions
-#'                              defined in \code{regionDefinition}, which also needs to be
-#'                              passed. If not, binByRegions is ignored.
+#'                              sequences defined in \code{regionDefinition} are analyzed.                              
+#' @param   binByRegions        \code{logical} if TRUE, then aggregate the mutations by 
+#'                              the regions defined in \code{regionDefinition}.
 #' @return  an \code{array} of the mutations (replacement (R) or silent(S)) with the 
 #'          names indicatng the nucleotide postion of the mutations in the sequence.
-#'          Note. Each mutation is considered independently in its codon context.
-#'          If \code{binByRegions}=\code{TRUE}, then the mutations are binned by the regions
-#'          defined by \code{regionDefinition} and an \code{array} of R/S mutations
-#'          across all the unique regions is returned (See \code{\link{binMutationsByRegion}}). 
 #'           
 #' @details
-#' Counts all the mutations observed in the input sequence. 
-#' Note. Each mutation is considered independently in its codon context.
+#' Each mutation is considered independently in its codon context. Note, only the part of 
+#' sequences defined in \code{regionDefinition} are analyzed. E.g. If the default 
+#' \code{\link{IMGT_V_NO_CDR3}} definition is used, then mutations in positions beyond 
+#' 312 will be ignored.
+#' 
+#' If \code{binByRegions} = \code{TRUE}, then \code{regionDefinition} must also be passed.
+#' If not, \code{binByRegions} = \code{FALSE}.
 #' 
 #' @seealso  
 #' See \code{\link{getObservedMutations}} for indentifying and counting the 
@@ -470,33 +453,34 @@ countMutations <- function(inputSeq,
 #' \code{\link{countMutations}}) and bins them by the different regions defined in the 
 #' \code{regionDefinition}.
 #'
-#' @param   mutations_array    array containing the mutations (R/S) with the names
-#'                              indicatign the nucleotide positions of the mutations.
-#'                              See \code{\link{getObservedMutations}} for more information.
+#' @param   mutations_array    \code{array} containing the mutations (R/S) with the names
+#'                              indicating the nucleotide positions of the mutations.                             
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.
+#'                              and boundaries of the Ig sequences.
 #' 
-#' @return an \code{array} of R/S mutations binned across all the unique regions, defined
+#' @return \code{array} of R/S mutations binned across all the unique regions, defined
 #' by \code{regionDefinition} is returned.
 #' 
 #' @details
-#' XXXXXXXX   
+#' Note, only the part of sequences defined in \code{regionDefinition} are analyzed.
+#' E.g. If the default \code{\link{IMGT_V_NO_CDR3}} definition is used, then mutations
+#' in positions beyond 312 will be ignored.
+#' 
 #' @seealso  
-#' See \code{\link{getObservedMutations}} for indentifying and counting the 
-#' numer of observed mutations in a \code{db}.
+#' See \code{\link{getObservedMutations}} for identifying and counting the 
+#' number of observed mutations in a \code{db}.
 #' This function is also used in \code{\link{countMutations}}.
 #' 
 #' @examples
-#' # Generate a sampel mutations_array 
-#' numbOfMutations <- sample(3:10,1) #Random (between 3-10) number of mutations
-#' posOfMutations <- sort(sample(330,numbOfMutations)) #Random positions of mutations
+#' # Generate a sample mutations_array 
+#' 
+#' #Random (between 3-10) number of mutations
+#' numbOfMutations <- sample(3:10,1) 
+#' #Random positions of mutations
+#' posOfMutations <- sort(sample(330,numbOfMutations)
 #' mutationTypes <- sample( c("R","S"), length(posOfMutations), replace=TRUE)
 #' mutations_array <- array( mutationTypes, dimnames=list(posOfMutations) )
+#' 
 #' binMutationsByRegion(mutations_array, regionDefinition=IMGT_V_NO_CDR3)
 #' 
 #' @export
@@ -523,28 +507,25 @@ binMutationsByRegion <- function( mutations_array,
 
 #' Calculate expected mutation frequencies
 #'
-#' \code{getExpectedMutationFreq} calculates the 
+#' \code{getExpectedMutationFreq} calculates the expected mutation frequencies for 
+#' sequences in a given ChangeODB \code{data.frame}.
 #'
-#' @param   db                  data.frame containing sequence data.
-#' @param   sequenceColumn      name of the column containing sample/input sequences.
-#' @param   germlineColumn      name of the column containing germline sequences.
+#' @param   db                  \code{data.frame} containing sequence data.
+#' @param   sequenceColumn      \code{character} name of the column containing input 
+#'                              sequences.
+#' @param   germlineColumn      \code{character} name of the column containing 
+#'                              the germline or reference sequence.
 #' @param   targetingModel      \code{\link{TargetingModel}} object. Default is the 
 #'                              \link{HS5FModel}.
-#'                              \code{\link{createSubstitutionMatrix}}.
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.
-#' @param   nproc               number of cores to distribute the operation over. If the 
-#'                              cluster has already been set the call function with 
+#'                              and boundaries of the Ig sequences.
+#' @param   nproc               \code{numeric} number of cores to distribute the operation
+#'                               over. If the cluster has already been set the call function with 
 #'                              \code{nproc} = 0 to not reset or reinitialize. Default is 
 #'                              \code{nproc} = 1.
 #' 
-#' @return  A modified \code{db} data.frame with expected mutation frequencies counts for 
-#'          each region defined in the \code{regionDefinition}.
+#' @return  A modified ChangeO \code{db} \code{data.frame} with expected mutation frequencies 
+#'          for each region defined in the \code{regionDefinition}.
 #'          
 #'          The columns names are dynamically created based on the  regions in the 
 #'          \code{regionDefinition}. E.g. For the default \code{\link{IMGT_V_NO_CDR3}} 
@@ -562,13 +543,18 @@ binMutationsByRegion <- function( mutations_array,
 #'           }
 #'           
 #' @details
-#' XXXXXXXXXXXXXXXXX
+#' \code{getExpectedMutationFreq} calculates the expected mutation frequencies of sequences
+#' in a ChangeO \code{db} \code{data.frame}.
+#' 
+#' Note, only the part of sequences defined in \code{regionDefinition} are analyzed. 
+#' E.g. If the default \code{\link{IMGT_V_NO_CDR3}} definition is used, then mutations in
+#' positions beyond 312 will be ignored.
+#' 
+#' To create custom \code{targetingModel}, see See \code{\link{createTargetingModel}}.
 #' 
 #' @seealso  
-#' \code{\link{countMutations}} is called by this function to get the list of
-#' mutations in each sequence.
-#' \code{\link{binMutationsByRegion}} is called by this function to aggregate the mutations
-#' by the \code{regionDefinition}.
+#' \code{\link{calcExpectedMutationFreq}} is called by this function to calculate the
+#' expected mutation frequencies.
 #' 
 #' Also see \code{\link{getObservedMutations}} for getting observed mutation counts.
 #' 
@@ -580,12 +566,12 @@ binMutationsByRegion <- function( mutations_array,
 #' # Subset data for demo purposes
 #' db <- db[1:10,]
 #'
-#' #Run getObservedMutations()
-#'db <- getObservedMutations(db,
-#'                           sequenceColumn="SEQUENCE_IMGT",
-#'                           germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                           regionDefinition=IMGT_V_NO_CDR3,
-#'                           nproc=1)
+#' # Run getExpectedMutationFreq()
+#' db <- getExpectedMutationFreq(db,
+#'                               sequenceColumn="SEQUENCE_IMGT",
+#'                               germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                               regionDefinition=IMGT_V_NO_CDR3,
+#'                               nproc=1)
 #'
 #' @export
 getExpectedMutationFreq <- function(db, 
@@ -656,25 +642,20 @@ getExpectedMutationFreq <- function(db,
 }
 
 
-#' Helper function to calculate expected mutation frequencies
+#' Calculate expected mutation frequencies of a sequence
 #'
 #' \code{calcExpectedMutationFreq} calculates the expected mutation
-#' frequencies of a given sequence. This is primariry a helper function for
+#' frequencies of a given sequence. This is primarily a helper function for
 #' \code{\link{getExpectedMutationFreq}}. 
 #'
-#' @param   inputSequence       Nucleotide sequence being tested for selection.
-#' @param   germlineSequence    The germline or reference sequence.
-#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
-#'                              and boundaries of the Ig sequences. Note, only the part of
-#'                              sequences defined in \code{regionDefinition} are analyzed.
-#'                              Any mutations outside the definition will be ignored. E.g.
-#'                              If the default \code{\link{IMGT_V_NO_CDR3}} definition is
-#'                              used, then mutations in positions greater than 312 will not
-#'                              be counted.
+#' @param   germlineColumn      \code{character} name of the column containing 
+#'                              the germline or reference sequence.
+#' @param   sequenceColumn      \code{character} name of the column containing input 
+#'                              sequences.
 #' @param   targetingModel      \code{\link{TargetingModel}} object. Default is the 
 #'                              \link{HS5FModel}.
-#'                              \code{\link{createSubstitutionMatrix}}.
-#' 
+#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                              and boundaries of the Ig sequences.#' 
 #' @return  A \code{numeric} vector of the expected frequencies of mutations in the 
 #'          regions in the \code{regionDefinition}. E.g. For the default 
 #'          \code{\link{IMGT_V_NO_CDR3}} definition, which defines positions for CDR and 
@@ -691,15 +672,34 @@ getExpectedMutationFreq <- function(db,
 #'           }
 #'           
 #' @details
-#' XXXXXXXXXXXXXXXXX
+#' \code{calcExpectedMutationFreq} calculates the expected mutation frequencies of a 
+#' given sequence and its germline. 
+#' 
+#' Note, only the part of sequences defined in \code{regionDefinition} are analyzed. 
+#' E.g. If the default \code{\link{IMGT_V_NO_CDR3}} definition is used, then mutations in
+#' positions beyond 312 will be ignored.
+#' 
+#' To create custom \code{targetingModel}, see See \code{\link{createTargetingModel}}.
 #' 
 #' @seealso  
-#' \code{\link{getExpectedMutationFreq}} calls this function
+#' \code{\link{getExpectedMutationFreq}} calls this function.
 #' 
 #' Also see \code{\link{countMutations}} for getting observed mutation counts.
 #' 
 #' @examples
-#'  1+1
+#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#' 
+#' # Extracting the first entry in the sample db to use for input and germline sequences.
+#' inputSeq <- db[1,"SEQUENCE_IMGT"]
+#' germlineSeq <-  db[1,"GERMLINE_IMGT_D_MASK"]
+#' 
+#' #Identify all mutations in the sequence
+#' expectedFreq <- calcExpectedMutationFreq(inputSeq, germlineSeq)
+#' 
+#' #Identify only mutations the V segment minus CDR3
+#' expectedFreq <- countMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
+
 #' @export
 calcExpectedMutationFreq <- function(germlineSeq,
                                      inputSeq=NULL,

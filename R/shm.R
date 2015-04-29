@@ -9,17 +9,17 @@
 
 #' The shm package
 #'
-#' Provides tools for advanced anaylisis of Ig Somatic HyperMutation (SHM), including  
-#' BASELINe, a novel method for quantifying antigen-driven selection in high-throughput 
-#' immunoglobulin sequencing data.
+#' Provides tools for advanced anaylisis of Immunoglobulin (Ig) Somatic HyperMutation 
+#' (SHM), including BASELINe, a novel method for quantifying antigen-driven selection in high-throughput 
+#' Ig sequencing data.
 #' 
 #' Dramatic improvements in high-throughput sequencing technologies now enable 
-#' large-scale characterization of immunoglobulin (Ig) repertoires, defined as the 
+#' large-scale characterization of Ig repertoires, defined as the 
 #' collection of trans-membrane antigen-receptor proteins located on the surface of T 
 #' and/or B lymphocytes.
 #' 
 #' The \code{shm} package provides tools for advanced analysis of Ig sequences following 
-#' germline segment assignment. Namely, the analysis  of Ig Somatic HyperMutation (SHM). 
+#' germline segment assignment. Namely, the analysis  of SHM. 
 #' Which includes:
 #'  \itemize{
 #'      \item   Statistical analysis of SHM patterns \cr
@@ -54,12 +54,12 @@
 #' @section  Targeting models:
 #' \itemize{
 #'   \item  
-#'      \code{\link{createTargetingModel}}:         Builds a targeting model.
+#'      \code{\link{createTargetingModel}}:         Build a targeting model.
 #'   \item  
-#'      \code{\link{getTargetingDistance}}:         Constructs a nucleotide distance 
+#'      \code{\link{getTargetingDistance}}:         Construct a nucleotide distance 
 #'                                                  matrix from a targeting model.
 #'   \item  
-#'      \code{\link{plotMutability}}:               Plots 5-mer mutability rates.
+#'      \code{\link{plotMutability}}:               Plot 5-mer mutability rates.
 #' }
 #' 
 #' @section  Selection analysis:
@@ -76,13 +76,13 @@
 #'   \item  \code{\link{calcBaselinePdfs}}:         Calculate the BASELINe probablity
 #'                                                  density fuctions (PDFs) 
 #'   \item  \code{\link{groupBaseline}}:            Combine PDFs from sequences grouped
-#'                                                  by biological/experimetnal relevance 
+#'                                                  by biological/experimental relevance 
 #'                                                  (i.e. group sequences from one subject
 #'                                                  /patient, so you may comprare 
 #'                                                  selection across patients).
 #'
-#'   \item  \code{\link{plotBaseline}}:             Plots the results of selection analysis
-#'   \item  \code{\link{plotBaselineSummary}}:      Plots the summary of the results of 
+#'   \item  \code{\link{plotBaseline}}:             Plot the results of selection analysis
+#'   \item  \code{\link{plotBaselineSummary}}:      Plot the summary of the results of 
 #'                                                  selection analysis
 #' }
 #'
@@ -90,24 +90,24 @@
 #' \itemize{
 #'   \item  \code{\link{distToNearest}}:            Calculate distances to 
 #'                                                  nearest-neighbors.
-#'   \item  \code{\link{getPairwiseDistances}}:     Calculate a matrix of pairwise 
-#'                                                  distances.
 #' }
 #'
 #' @references
 #' \enumerate{
-#'   \item  Hershberg U, Uduman M, Shlomchik MJ, Kleinstein SH. Improved methods for
-#'            detecting selection by mutation analysis of Ig V region sequences. Int 
-#'            Immunol. 2008 May;20(5):683-94.
-#'   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
-#'            Nucleic Acids Res. 2011 39(Web Server issue):W499–504.
-#'   \item  Yaari G, et al. Quantifying selection in high-throughput Immunoglobulin 
-#'            sequencing data sets. 
-#'            Nucleic Acids Res. 2012 40(17):e134.
-#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
-#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
-#'            data. 
-#'            Front Immunol. 2013 4(November):358.
+#'   \item  Hershberg U, Uduman M, Shlomchik MJ and Kleinstein SH: Improved methods for 
+#'          detecting selection by mutation analysis of Ig V region sequences. 
+#'          Int Immunol. 2008 May;20 (5) :683-94. Epub 2008 Apr 7. PMID: 18397909
+#'   \item  Uduman M, Yaari G, Hershberg U, Stern JA, Shlomchik MJ and Kleinstein SH: 
+#'          Detecting selection in immunoglobulin sequences. Nucleic Acids Res. 2011 Jul;39 
+#'          (Web Server issue) :W499-504. Epub 2011 Jun 10. PMID: 21665923
+#'   \item  Yaari G, Uduman M and Kleinstein SH: Quantifying selection in high-throughput 
+#'          Immunoglobulin sequencing data sets. Nucleic Acids Res. 
+#'          2012 Sep 1;40 (17) :e134. Epub 2012 May 27. PMID: 22641856
+#'   \item  Yaari G, Vander Heiden JA, Uduman M, Gadala-Maria D, Gupta N, Stern JN, 
+#'          O'Connor KC, Hafler DA, Laserson U, Vigneault F and Kleinstein SH: Models of 
+#'          somatic hypermutation targeting and substitution based on synonymous mutations
+#'           from high-throughput immunoglobulin sequencing data. Front Immunol. 
+#'           2013;4 :358. Epub 2013 Nov 15. PMID: 24298272
 #'  }
 #'
 #' @seealso
