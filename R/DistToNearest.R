@@ -333,8 +333,8 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
 # arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
 #                    "ACGAACGTATGT", "ACGAACGTATGC",
 #                    "ACGAACGTATCC","AAAAAAAAAAAA")
-# getClosestM1n(arrJunctions, normalize="none" )
-getClosestM1n <- function(arrJunctions, normalize=c("none" ,"length", "mutations")) {
+# getClosestM1N(arrJunctions, normalize="none" )
+getClosestM1N <- function(arrJunctions, normalize=c("none" ,"length", "mutations")) {
   # Initial checks
   normalize <- match.arg(normalize)
   
@@ -377,7 +377,7 @@ getClosestM1n <- function(arrJunctions, normalize=c("none" ,"length", "mutations
 # arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
 #                    "ACGAACGTATGT", "ACGAACGTATGC",
 #                    "ACGAACGTATCC","AAAAAAAAAAAA")
-# getClosestM1n(arrJunctions, normalize="none" )
+# getClosestM1N(arrJunctions, normalize="none" )
 getClosestHam <- function(arrJunctions, model=c("ham","aa"),
                           normalize=c("none" ,"length", "mutations")) {
   # Initial checks
@@ -519,24 +519,24 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     clusterExport(cluster, list("targeting_model"), envir=environment())
     
     db <- arrange(ddply(db, .(V, J, L), function(piece) 
-      mutate(piece, DIST_NEAREST=getClosestBy5mers(eval(parse(text=sequenceColumn)),
-                                                   targeting_model=targeting_model,
-                                                   normalize=normalize)),
-      .parallel=TRUE),
-      ROW_ID)
+                        mutate(piece, DIST_NEAREST=getClosestBy5mers(eval(parse(text=sequenceColumn)),
+                                                                     targeting_model=targeting_model,
+                                                                     normalize=normalize)),
+                        .parallel=TRUE),
+                  ROW_ID)
   } else if (model == "m1n") {
     db <- arrange(ddply(db, .(V, J, L), function(piece) 
-      mutate(piece, DIST_NEAREST=getClosestM1n(eval(parse(text=sequenceColumn)),
-                                               normalize=normalize)),
-      .parallel=TRUE),
-      ROW_ID)
-  } else if (model %in% c("ham","aa")) {    
+                        mutate(piece, DIST_NEAREST=getClosestM1N(eval(parse(text=sequenceColumn)),
+                                                                 normalize=normalize)),
+                        .parallel=TRUE),
+                  ROW_ID)
+  } else if (model %in% c("ham", "aa")) {    
     db <- arrange(ddply(db, .(V, J, L), function(piece) 
-      mutate(piece, DIST_NEAREST=getClosestHam(eval(parse(text=sequenceColumn)),
-                                               model = model,
-                                               normalize=normalize)),
-      .parallel=TRUE),
-      ROW_ID)
+                        mutate(piece, DIST_NEAREST=getClosestHam(eval(parse(text=sequenceColumn)),
+                                                                 model=model,
+                                                                 normalize=normalize)),
+                        .parallel=TRUE),
+                  ROW_ID)
   }
   
   # Stop the cluster
