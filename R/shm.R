@@ -73,15 +73,15 @@
 #'        \item  
 #'          \code{\link{getExpectedMutationFreq}}:  Compute expected mutation frequencies.
 #'      }
-#'   \item  \code{\link{calcBaselinePdfs}}:         Calculate the BASELINe probablity
-#'                                                  density fuctions (PDFs) 
+#'   \item  \code{\link{calcBaseline}}:             Calculate the BASELINe probablity
+#'                                                  density fuctions (PDFs) .
 #'   \item  \code{\link{groupBaseline}}:            Combine PDFs from sequences grouped
 #'                                                  by biological/experimental relevance 
-#'                                                  (i.e. group sequences from one subject
-#'                                                  /patient, so you may comprare 
-#'                                                  selection across patients).
-#'
-#'   \item  \code{\link{plotBaseline}}:             Plot the results of selection analysis
+#'                                                  (i.e. group sequences from one subject, 
+#'                                                  so you may comprare selection across 
+#'                                                  patients).
+#'   \item  \code{\link{plotBaselineDensity}}:      Plot the probability density functions
+#'                                                  from selection analysis
 #'   \item  \code{\link{plotBaselineSummary}}:      Plot the summary of the results of 
 #'                                                  selection analysis
 #' }
@@ -111,8 +111,8 @@
 #'  }
 #'
 #' @seealso
-#' The Change-O suite of tools includes three separate R packages: \code{\link{alakazam}}, 
-#' \code{\link{tigger}}, and \code{\link{shm}}.
+#' The Change-O suite of tools includes three separate R packages: \link{alakazam}, 
+#' \link{tigger}, and \link{shm}.
 #' 
 #' @name     shm
 #' @docType  package

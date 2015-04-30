@@ -47,7 +47,7 @@ setClass("Baseline",
          )
 )
 
-#### Baseline building functions #####
+#### Methods #####
 
 #' Creates a Baseline object
 #' 
@@ -89,9 +89,8 @@ setClass("Baseline",
 #' than two regions are defined the \code{local} test statistic will be used.
 #' For further information on the frame of these tests see Uduman et al. (2011).
 #' 
-#' @seealso  
-#' See \code{\link{Baseline}} for the return object.
-#' \code{createBaseline} is used in \code{\link{calcBaselinePdfs}}.
+#' @seealso  See \link{Baseline} for the return object.
+#'           \code{createBaseline} is used in \link{calcBaseline}.
 #' 
 #' @references
 #' \enumerate{
@@ -166,11 +165,37 @@ editBaseline <- function ( baseline,
 }
 
 
+#' Gets the summary statistics of a Baseline object
+#'
+#' \code{getBaselineStats} is an accessor method that returns the 
+#' summary statistics data.frame stored in the \code{stats} slot of a 
+#' \link{Baseline} object - provided \link{groupBaseline} has already been run.
+#'
+#' @param    baseline  \code{Baseline} object that has been run through
+#'                     either \link{groupBaseline} or \link{summarizeBaseline}.
+#' 
+#' @return   A \code{data.frame} with the BASELINe selection strength,
+#'           95\% confidence intervals and P-value. 
+#' 
+#' @seealso  For calculating the BASELINe summary statistics see \link{summarizeBaseline}.
+#' 
+#' @examples
+#' # Load example data
+#' library("alakazam")
+#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#'                      
+#' @export
+getBaselineStats <- function(baseline) {
+    return(baseline@stats)
+}
+
+
 #### Baseline selection calculating functions ####
 
 #' Calculate the BASELINe PDFs
 #' 
-#' \code{calcBaselinePdfs} calculates the BASELINe posterior probability density 
+#' \code{calcBaseline} calculates the BASELINe posterior probability density 
 #' functions (PDFs) for sequences in the given ChangeO db \code{data.frame}.
 #'
 #' @param   db                  \code{data.frame} containing sequence data and annotation.
@@ -204,10 +229,7 @@ editBaseline <- function ( baseline,
 #'          \code{Baseline} object).
 #'          
 #'          
-#' @seealso To calculate BASELINe statistics, such as the mean selection strength
-#'          and the 95\% confidence interval, see .
-#'          To group the sequence PDFs and get a combined PDF see 
-#'          \code{\link{groupBaseline}}.
+#' @family  selection analysis functions
 #' 
 #' @details
 #' The \code{testStatistic} indicates the statistical framework used to test for selection. 
@@ -240,16 +262,16 @@ editBaseline <- function ( baseline,
 #' 
 #' # Calculate BASELINe PDFs for all sequences using the focused test statistic, and
 #' # analyzing uptill but not including CDR3
-#' baseline <- calcBaselinePdfs(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
 #' 
 #' @export
-calcBaselinePdfs <- function( db,
-                              sequenceColumn="SEQUENCE_IMGT",
-                              germlineColumn="GERMLINE_IMGT_D_MASK",
-                              testStatistic=c("local","focused"),
-                              regionDefinition=IMGT_V_NO_CDR3,
-                              targetingModel=HS5FModel,
-                              nproc=1 ) {
+calcBaseline <- function(db,
+                         sequenceColumn="SEQUENCE_IMGT",
+                         germlineColumn="GERMLINE_IMGT_D_MASK",
+                         testStatistic=c("local","focused"),
+                         regionDefinition=IMGT_V_NO_CDR3,
+                         targetingModel=HS5FModel,
+                         nproc=1) {
     
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused"))
@@ -276,7 +298,7 @@ calcBaselinePdfs <- function( db,
                                       'weighted_conv', 
                                       'calculate_bayesGHelper', 
                                       'groupPosteriors', 'fastConv',
-                                      'calcBaselinePdfs_Helper'), 
+                                      'calcBaselineHelper'), 
                        envir=environment() )
         clusterEvalQ(cluster, library(shm))
         clusterEvalQ(cluster, library(seqinr))
@@ -359,7 +381,7 @@ calcBaselinePdfs <- function( db,
         # Foreach returns a list of PDFs
         list_region_pdfs <- 
             foreach( i=icount(totalNumbOfSequences) ) %dopar% {                
-                calcBaselinePdfs_Helper( 
+                calcBaselineHelper( 
                     observed = db[i,cols_observed],
                     expected = db[i,cols_expected],
                     region = region,
@@ -406,9 +428,7 @@ calcBaselinePdfs <- function( db,
 
 
 
-# Helper function for calcBaselinePdfs
-#
-# \code{calcBaselinePdfs_Helper} calculates 
+# Helper function for calcBaseline
 #
 # @param   observed
 # @param   expected
@@ -418,24 +438,11 @@ calcBaselinePdfs <- function( db,
 # 
 # @return  A modified \code{\link{Baseline}} object with the BASELINe probability 
 #          density function calculated for the regions defined in the \code{regionDefinition}.
-#           
-# @details
-# \code{getBaseline} calculates 
-# 
-# @seealso  
-# See also
-# @examples
-# # Load example data
-# library("shm")
-# dbPath <- system.file("extdata", "Influenza.tab", package="shm")
-# db <- readChangeoDb(dbPath)
-#    
-# export
-calcBaselinePdfs_Helper  <- function( observed,
-                                      expected,
-                                      region,
-                                      testStatistic="local",
-                                      regionDefinition=IMGT_V_NO_CDR3 ) {
+calcBaselineHelper  <- function(observed,
+                                expected,
+                                region,
+                                testStatistic="local",
+                                regionDefinition=IMGT_V_NO_CDR3) {
     
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused"))
@@ -489,8 +496,7 @@ calcBaselinePdfs_Helper  <- function( observed,
     return( calcBaselineBinomialPdf( x=obsX, n=obsN, p=expP) )
 }
 
-# Calculate the BASELINe probability function in a
-# binomial framework.
+# Calculate the BASELINe probability function in a binomial framework.
 calcBaselineBinomialPdf <- function ( x=3, 
                                       n=10, 
                                       p=0.33,
@@ -522,7 +528,7 @@ calcBaselineBinomialPdf <- function ( x=3,
 #' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
 #'                      BASELINe posterior probability density functions 
 #'                      (PDF) for each of the sequences, as returned by
-#'                      \code{\link{calcBaselinePdfs}}.
+#'                      \link{calcBaseline}.
 #' @param   groupBy     The columns in the \code{db} slot of the \code{Baseline}
 #'                      object by which to group the sequence PDFs.
 #' @param   nproc       number of cores to distribute the operation over. If 
@@ -545,8 +551,8 @@ calcBaselineBinomialPdf <- function ( x=3,
 #'               
 #' @seealso 
 #' To calculate BASELINe statistics, such as the mean selection strength
-#'  and the 95\% confidence interval, see \code{\link{calcBaselineStats}}. To print 
-#'  summary statistics see \code{\link{summarizeBaseline}}.
+#' and the 95\% confidence interval, see \link{summarizeBaseline}.
+#' @family   selection analysis functions
 #' 
 #' @references
 #' \enumerate{
@@ -562,16 +568,16 @@ calcBaselineBinomialPdf <- function ( x=3,
 #' 
 #' # Calculate BASELINe PDFs for all sequences using the focused test statistic, and
 #' # analyzing uptill but not including CDR3
-#' baseline <- calcBaselinePdfs(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
 #'  
 #' # Combine selection scores by samples barcode and isotype primer
 #' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
 #' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))   
 #'                   
 #' @export
-groupBaseline <- function( baseline,
-                           groupBy,
-                           nproc=1 ) {
+groupBaseline <- function(baseline,
+                          groupBy,
+                          nproc=1 ) {
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
     
@@ -684,7 +690,7 @@ groupBaseline <- function( baseline,
                                 pdfs=list_pdfs )
     
     # Calculate BASELINe stats and update slot
-    baseline <- calcBaselineStats(baseline,nproc=0)
+    baseline <- summarizeBaseline(baseline,nproc=0)
     
     # Stop SNOW cluster
     if(nproc > 1) { stopCluster(cluster) }
@@ -694,27 +700,26 @@ groupBaseline <- function( baseline,
 }
 
 
-#' Calculate BASELINe statistics
+#' Calculate BASELINe summary statistics
 #'
-#' \code{calcBaselineStats} calculates BASELINe statistics such as the Selection Strength
-#' (Sigma), the 95\% confidence intervals & P-values.
+#' \code{summarizeBaseline} calculates BASELINe statistics such as the selection strength
+#' (Sigma), the 95\% confidence intervals and P-values.
 #'
-#' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
-#'                      BASELINe posterior probability density functions 
-#'                      (PDF) for each of the sequences. This would be returned by
-#'                      \code{\link{calcBaselinePdfs}}.
-#' @param   nproc       number of cores to distribute the operation over. If 
-#'                      \code{nproc} = 0 then the \code{cluster} has already been
-#'                      set and will not be reset.
+#' @param    baseline    \code{Baseline} object containing the annotations and the 
+#'                       BASELINe posterior probability density functions 
+#'                       (PDFs) for each sequence. This would be returned by
+#'                       \code{\link{calcBaseline}}.
+#' @param    returnType  One of \code{c("baseline", "df")} defining whether
+#'                       to return a \code{Baseline} object ("baseline") with an updated
+#'                       \code{stats} slot or a data.frame ("df") of summary statistics.
+#' @param    nproc       number of cores to distribute the operation over. If 
+#'                       \code{nproc} = 0 then the \code{cluster} has already been
+#'                       set and will not be reset.
 #' 
-#' @return  A modified \code{Baseline} object with the BASELINe selection strength ,
-#'          95\% confidence intervals and P-value. This information is updated in the 
-#'          \code{stats} slot of the \code{baseline} object passed as an argument. 
+#' @return   Either a modified \code{Baseline} object or data.frame containing the 
+#'           BASELINe selection strength, 95\% confidence intervals and P-value.  
 #'           
-#' @details \code{getBaselineStats} calculates BASELINe statistics such as the Selection 
-#'          Strength (Sigma), the 95\% confidence intervals & P-values.
-#' 
-#' @seealso See \code{link{calcBaselinePdfs}} and \code{link{groupBaseline}}.
+#' @family   selection analysis functions
 #' 
 #' @examples
 #' # Load example data
@@ -723,8 +728,11 @@ groupBaseline <- function( baseline,
 #' db <- readChangeoDb(dbPath)
 #'                      
 #' @export
-calcBaselineStats <- function ( baseline,
-                                nproc=1 ) {
+summarizeBaseline <- function(baseline,
+                              returnType=c("baseline", "df"),
+                              nproc=1) {
+    # Check arguments
+    returnType <- match.arg(returnType)
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
@@ -781,44 +789,14 @@ calcBaselineStats <- function ( baseline,
     # Convert list of BASELINe stats into a data.frame
     stats <- do.call(rbind, list_stats)
     
-    # Append stats to baseline object
-    baseline <- editBaseline(baseline, field_name = "stats", stats )
-    
-    return(baseline)   
-}
-
-
-#' Returns a summary of the BASELINe statistics
-#'
-#' \code{summarizeBaseline} returns a summary of the BASELINe statistics,
-#' which is stored in the \code{stats} slot of the \code{baseline} object - provided
-#' \code{\link{groupBaseline}} has already been run.
-#'
-#' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
-#'                      BASELINe posterior probability density functions 
-#'                      (PDF) for each of the sequences. This would be returned by
-#'                      \code{\link{calcBaselinePdfs}}.
-#' 
-#' @return  A \code{data.frame} with the BASELINe selection strength ,
-#'          95\% confidence intervals and P-value. This information is also in the 
-#'          \code{stats} slot of the \code{baseline} object. 
-#'           
-#' @details An accessor method, that returns a summary of the BASELINe statistics,
-#'          which is stored in the \code{stats} slot of the \code{baseline} object. 
-#' 
-#' @seealso See \code{\link{summarizeBaseline}}, the function which calculates the BASELINe 
-#'          statistics such as the Selection Strength (Sigma), the 95\% confidence 
-#'          intervals and P-values.
-#' 
-#' @examples
-#' # Load example data
-#' library("alakazam")
-#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
-#' db <- readChangeoDb(dbPath)
-#'                      
-#' @export
-summarizeBaseline <- function(baseline) {
-    return(baseline@stats)
+    if (returnType == "df") {
+        return(stats)    
+    } else if (returnType == "baseline") {
+        # Append stats to baseline object
+        return(editBaseline(baseline, field_name = "stats", stats))
+    } else {
+        return(NULL)
+    }
 }
 
 
@@ -873,47 +851,12 @@ calcBaselinePvalue <- function ( baseline_pdf,
 }
 
 
-# # Given a BASELIne PDF calculate Mean, Confidence Interval (lower & upper) and P value
-# calcBaselineStats <- function ( baseline_pdf,
-#                                      low=0.025,
-#                                      up=0.975,
-#                                      max_sigma=20, 
-#                                      length_sigma=4001 ){
-#     
-#     # if NA (i.e. length of baseline_pdf is 1)
-#     if ( length(baseline_pdf)==1  ) { return(rep(NA,4)) }
-#     
-#     
-#     baselineSigma <- calculateBaselineSigma( baseline_pdf=baseline_pdf, 
-#                                              max_sigma=max_sigma, 
-#                                              length_sigma=length_sigma )
-#     
-#     
-#     baselineCI <- calculateBaselineCI( baseline_pdf=baseline_pdf,
-#                                        low=low,
-#                                        up=up,
-#                                        max_sigma=max_sigma,
-#                                        length_sigma=length_sigma )
-#     
-#     baselinePvalue <- calculateBaselinePvalue( baseline_pdf=baseline_pdf,
-#                                                max_sigma=max_sigma,
-#                                                length_sigma=length_sigma )
-#     
-#     return( c( "Sigma"=baselineSigma, 
-#                "CI_Lower"=baselineCI[1], 
-#                "CI_Upper"=baselineCI[2],
-#                "Pvalue"=baselinePvalue 
-#     ) 
-#     )
-# }
-
-
 #### Plotting functions ####
 
 #' Plots BASELINe summary statistics
 #' 
-#' \code{plotBaselineSummary} plots the summary of the results of selection analysis 
-#'                            using the BASELINe method.
+#' \code{plotBaselineSummary} plots a summary of the results of selection analysis 
+#' using the BASELINe method.
 #'
 #' @param    baseline       either a data.frame returned from \link{summarizeBaseline}
 #'                          or a \code{Baseline} object containing selection probability 
@@ -952,10 +895,9 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' 
 #' @return   A ggplot object defining the plot.
 #'
-#' @seealso  Takes as input a \link{Baseline} object or data.frame returned from
-#'           \link{summarizeBaseline}. See \link{calcBaselinePdfs} for generating 
-#'           \code{Baseline} objects. See \link{groupBaseline} for summarizing selection 
-#'           scores by annotation columns.
+#' @seealso  Takes as input either a \link{Baseline} object returned by \link{groupBaseline} 
+#'           or a data.frame returned from \link{summarizeBaseline}.
+#' @family   selection analysis functions
 #' 
 #' @examples
 #' library(alakazam)
@@ -964,7 +906,7 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' 
 #' # Calculate BASELINe PDFs for all sequences using the focused test statistic, and
 #' # analyzing uptill but not including CDR3
-#' baseline <- calcBaselinePdfs(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
 #' 
 #' # Combine selection scores by samples barcode and isotype primer
 #' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
@@ -981,8 +923,8 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
 #' 
 #' # Plot subset of data
-#' baseline_sub <- subset(summarizeBaseline(baseline_two), BARCODE %in% c("RL013", "RL014"))
-#' plotBaselineSummary(baseline_sub, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
+#' stats <- subset(getBaselineStats(baseline_two), BARCODE %in% c("RL013", "RL014"))
+#' plotBaselineSummary(stats, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
 #' 
 #' @export
 plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
@@ -1076,7 +1018,8 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
 
 #' Plots BASELINe probability density functions
 #' 
-#' \code{plotBaseline} plots the results of selection analysis using the BASELINe method.
+#' \code{plotBaselineDensity} plots the probability density functions resulting from selection 
+#' analysis using the BASELINe method.
 #'
 #' @param    baseline       \code{Baseline} object containing selection probability 
 #'                          density functions.
@@ -1093,6 +1036,8 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #' @param    subsetRegions  character vector defining a subset of regions to plot, correspoding 
 #'                          to the regions for which the \code{baseline} data was calculated. If
 #'                          \code{NULL} all regions in \code{baseline} are plotted.
+#' @param    sigmaLimits    numeric vector containing two values defining the \code{c(lower, upper)}
+#'                          bounds of the selection scores to plot.
 #' @param    facetBy        one of c("group", "region") defining which category to facet the
 #'                          plot by, either values in \code{groupColumn} ("group") or regions
 #'                          defining the \code{baseline} ("region"). The data that is not used
@@ -1114,9 +1059,8 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #' 
 #' @return   A ggplot object defining the plot.
 #'
-#' @seealso  Takes as input a \link{Baseline} object returned from
-#'           \link{groupBaseline}. See \link{calcBaselinePdfs} for generating 
-#'           \code{Baseline} objects to pass to \link{groupBaseline}.
+#' @seealso  Takes as input a \link{Baseline} object returned from \link{groupBaseline}.
+#' @family   selection analysis functions
 #' 
 #' @examples
 #' library(alakazam)
@@ -1124,25 +1068,26 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #' db <- readChangeoDb(db_file)
 #' 
 #' # Calculate selection scores
-#' baseline <- calcBaselinePdfs(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
 #' # Combine selection scores by samples barcode and isotype primer
 #' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
 #' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Plot mean and confidence interval
-#' plotBaseline(baseline_one, "BARCODE", style="density")
-#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", style="density")
-#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
-#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="density")
+#' plotBaselineDensity(baseline_one, "BARCODE", style="density")
+#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", style="density")
+#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
+#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="density")
 #'
 #' # Reorder and recolor groups
 #' group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
-#' plotBaseline(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
+#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
 #' 
 #' @export
-plotBaseline <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
-                             subsetRegions=NULL, facetBy=c("region", "group"),
-                             style=c("density"), size=1, silent=FALSE, ...) {
+plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
+                                subsetRegions=NULL, sigmaLimits=c(-5, 5), 
+                                facetBy=c("region", "group"), style=c("density"), size=1, 
+                                silent=FALSE, ...) {
     # Check input
     style <- match.arg(style)
     facetBy <- match.arg(facetBy)
@@ -1178,14 +1123,15 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL,
         for (i in 1:length(dens_list)) {
             rownames(dens_list[[i]]) <- group_df$GROUP_COLLAPSE
             colnames(dens_list[[i]]) <- col_names
-            dens_list[[i]] <- dens_list[[i]][, col_names >= -5 & col_names <= 5]
+            dens_list[[i]] <- dens_list[[i]][, col_names >= sigmaLimits[1] & 
+                                               col_names <= sigmaLimits[2]]
         }
         
         # Melt density matrices
         melt_list <- list()
         for (n in dens_names) {
             tmp_melt <- reshape2::melt(dens_list[[n]], varnames=c("GROUP_COLLAPSE", "SIGMA"), 
-                                       value.name="PROB")
+                                       value.name="DENSITY")
             melt_list[[n]] <- tmp_melt
         }
         dens_df <- ldply(melt_list, .id="REGION")
@@ -1199,10 +1145,10 @@ plotBaseline <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL,
         }    
         
         # Plot probability density curve
-        p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="PROB")) +
+        p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="DENSITY")) +
             base_theme + 
             xlab(expression(Sigma)) +
-            ylab(expression(P(Sigma))) +
+            ylab("Density") +
             geom_line(aes_string(linetype=idColumn), size=1*size)
         if (is.null(groupColumn) & facetBy == "region") {
             p1 <- p1 + facet_grid(REGION ~ .)

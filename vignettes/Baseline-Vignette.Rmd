@@ -46,18 +46,18 @@ db_collapsed <- getClonalConsensus(db, regionDefinition=IMGT_V_NO_CDR3,
                                    collapseByClone=TRUE, nproc=3)
 # Count observed mutations
 db_obs <- getObservedMutations(db_collapsed, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
-                               targetingModel=HS5FModel,
                                regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 # Calculate expected mutations
 db_obs_exp <- getExpectedMutationFreq(db_obs, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
-                               regionDefinition=IMGT_V_NO_CDR3, nproc=3)
+                                      targetingModel=HS5FModel,
+                                      regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 
 # Calculate selection scores
-baseline <- calcBaselinePdfs(db, testStatistic="focused", nproc=3)
+baseline <- calcBaseline(db, testStatistic="focused", nproc=3)
 # Subset data to two time-points and IgA isotype
 db_sub <- subset(db, CPRIMER=="IGHA" & BARCODE %in% c("RL013", "RL018"))
 # Calculate selection scores from scratch on subset
-baseline_pdf_sub <- calcBaselinePdfs(db_sub, testStatistic="focused", 
+baseline_pdf_sub <- calcBaseline(db_sub, testStatistic="focused", 
                                      regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 
 # Combine selection scores by sample barcode
@@ -67,7 +67,7 @@ baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
 baseline_two_sub <- groupBaseline(baseline_pdf_sub, groupBy=c("BARCODE", "CPRIMER"))
 
 # Subset to only two time-points
-baseline_sub <- subset(summarizeBaseline(baseline_two), 
+baseline_sub <- subset(getBaselineStats(baseline_two), 
                        CPRIMER=="IGHA" & BARCODE %in% c("RL013", "RL018"))
 ```
 
@@ -75,7 +75,7 @@ Plot and compare selection scores of different groups of sequences
 --------------------------------------------------------------------------------
 `plotBaselineSummary` plots the mean and confidence interval of selection scores for the given groups. The `idColumn` parameter specifies the field that contains identifiers of the groups of sequences. If there is a secondary field by which the sequences are grouped, this can be specified using the `groupColumn`. This secondary grouping can have a user-defined color palette passed into `groupColors` or can be separated into facets by setting the `facetBy` parameter to "group". The `subsetRegions` parameter can be used to visualize selection of specific regions. Several examples utilizing these different parameters are provided below.
 
-`plotBaseline` plots the full `Baseline` PDF of selection scores for the given groups. The parameters are the same as those for `plotBaselineSummary`, however rather than plotting the mean and confidence interval, the full density function is shown.
+`plotBaselineDensity` plots the full `Baseline` PDF of selection scores for the given groups. The parameters are the same as those for `plotBaselineSummary`, however rather than plotting the mean and confidence interval, the full density function is shown.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Plot mean and confidence interval by time-point
