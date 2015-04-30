@@ -43,7 +43,7 @@ distSeq5Mers <- function(seq1, seq2, targeting_model,
   normalize <- match.arg(normalize)
   
   # Get distance from targeting model
-  targeting_dist <- getTargetingDistance(targeting_model)
+  targeting_dist <- calcTargetingDistance(targeting_model)
   
   # Compute length of sequence (for normalization, if specified)
   juncLength <- length(seq1)
@@ -411,22 +411,24 @@ getClosestHam <- function(arrJunctions, model=c("ham","aa"),
 #' @param    db              data.frame containing sequence data.
 #' @param    sequenceColumn  name of the column containing nucleotide sequences to compare. 
 #'                           Also used to determine sequence length for grouping.
-#' @param    vCallColumn     name of the column containing the V-segment allele call.
-#' @param    jCallColumn     name of the column containing the J-segment allele call.
-#' @param    model           SHM targeting model; must be one of c("hs5f", "m3n", "m1n", "ham", "aa). 
+#' @param    vCallColumn     name of the column containing the V-segment allele calls.
+#' @param    jCallColumn     name of the column containing the J-segment allele calls.
+#' @param    model           SHM targeting model, which must be one of 
+#'                           \code{c("m1n", "ham", "aa", "m3n", "hs5f")}.
 #'                           See Details for further information.
-#' @param    normalize       method of normalization. Default is "none".
-#'                           "length" = normalize distance by length of junction.
-#' @param    first           if \code{TRUE} only the first call the gene assignment is used;
-#'                           if \code{FALSE} the union of ambiguous gene assignments is used to 
-#'                           group all sequences with any of those gene calls.
+#' @param    normalize       method of normalization. The default is "none". If the "length" 
+#'                           method is chosen, then distance is divided by the length of the 
+#'                           junction sequence.
+#' @param    first           if \code{TRUE} only the first call of the gene assignments is used.
+#'                           If \code{FALSE} the union of ambiguous gene assignments is used to 
+#'                           group all sequences with any overlapping gene calls.
 #' @param    nproc           number of cores to distribute the function over.
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
-#'           DIST_NEAREST column.
+#'           \code{DIST_NEAREST} column.
 #'
 #' @details
-#' Needs method details.
+#' TODO.
 #' 
 #' @references
 #' \enumerate{
@@ -441,7 +443,8 @@ getClosestHam <- function(arrJunctions, model=c("ham","aa"),
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #'  
-#' @seealso needs links
+#' @seealso  See \link{calcTargetingDistance} for generating nucleotide distance matrices 
+#'           from a \link{TargetingModel} object.
 #' 
 #' @examples
 #' # Load example data

@@ -10,42 +10,40 @@
 #' The shm package
 #'
 #' Provides tools for advanced anaylisis of Immunoglobulin (Ig) Somatic HyperMutation 
-#' (SHM), including BASELINe, a novel method for quantifying antigen-driven selection in high-throughput 
-#' Ig sequencing data.
+#' (SHM), including BASELINe, a novel method for quantifying antigen-driven selection in 
+#' high-throughput Ig sequencing data.
 #' 
 #' Dramatic improvements in high-throughput sequencing technologies now enable 
-#' large-scale characterization of Ig repertoires, defined as the 
-#' collection of trans-membrane antigen-receptor proteins located on the surface of T 
-#' and/or B lymphocytes.
+#' large-scale characterization of Ig repertoires, defined as the collection of transmembrane 
+#' antigen-receptor proteins located on the surface of T and B lymphocytes.
 #' 
 #' The \code{shm} package provides tools for advanced analysis of Ig sequences following 
-#' germline segment assignment. Namely, the analysis  of SHM. 
+#' germline segment assignment. Namely, the analysis of SHM. 
 #' Which includes:
 #'  \itemize{
 #'      \item   Statistical analysis of SHM patterns \cr
 #'              Computational models and analyses of SHM have separated the process 
 #'              into two independent components: 
 #'              \enumerate{
-#'                  \item  a mutability model that defines where mutations occur, and
-#'                  \item  a nucleotide substitution model that defines the resulting 
-#'                              mutation
+#'                  \item  A mutability model that defines where mutations occur.
+#'                  \item  A nucleotide substitution model that defines the resulting mutation.
 #'              }
 #'              Collectively these are what form the targeting model of SHM. \code{shm} 
-#'              provides tools to build these mutability and substitution (i.e. the 
-#'              targeting) models.
+#'              provides tools to build these mutability and substitution (i.e. targeting) 
+#'              models.
 #'                  
 #'      \item   BASELINe \cr
 #'              Bayesian Estimation of Antigen-driven Selection in Ig Sequences is a 
 #'              novel method for quantifying antigen-driven selection in high-throughput
-#'              Ig sequence data. The targeting model created using \code{shm} is used as
+#'              Ig sequence data. The targeting model created using \code{shm} is used 
 #'              to estimate the null distribution of expected mutation frequencies in 
-#'              BASELINe. 
+#'              BASELINe.
 #'              
 #'      \item   Distance calculations \cr
 #'              Based on the underlying SHM targeting (calculated using \code{shm}) one 
-#'              can compute evolutionary distances between sequences, or groups of 
+#'              can compute evolutionary distances between sequences or groups of 
 #'              sequences. This information is particularly useful in understanding and 
-#'              defining lineage relationships.
+#'              defining clonal relationships.
 #'  }
 #' 
 #' Below are the functions in \code{shm} broken down by the three main tasks described
@@ -53,43 +51,35 @@
 #' 
 #' @section  Targeting models:
 #' \itemize{
-#'   \item  
-#'      \code{\link{createTargetingModel}}:         Build a targeting model.
-#'   \item  
-#'      \code{\link{getTargetingDistance}}:         Construct a nucleotide distance 
-#'                                                  matrix from a targeting model.
-#'   \item  
-#'      \code{\link{plotMutability}}:               Plot 5-mer mutability rates.
+#'   \item  \link{createTargetingModel}:   Build a 5-mer targeting model.
+#'   \item  \link{plotMutability}:         Plot 5-mer mutability rates.
 #' }
 #' 
 #' @section  Selection analysis:
 #' \itemize{
 #'   \item  Mutational profiling
 #'      \itemize{
-#'        \item  
-#'          \code{\link{getClonalConsensus}}:       Build clonal consensus sequence.
-#'        \item  
-#'          \code{\link{getObservedMutations}}:     Compute observed mutation counts.
-#'        \item  
-#'          \code{\link{getExpectedMutationFreq}}:  Compute expected mutation frequencies.
+#'        \item  \link{getClonalConsensus}:       Build clonal consensus sequence.
+#'        \item  \link{getObservedMutations}:     Compute observed mutation counts.
+#'        \item  \link{getExpectedMutationFreq}:  Compute expected mutation frequencies.
 #'      }
-#'   \item  \code{\link{calcBaseline}}:             Calculate the BASELINe probablity
-#'                                                  density fuctions (PDFs) .
-#'   \item  \code{\link{groupBaseline}}:            Combine PDFs from sequences grouped
-#'                                                  by biological/experimental relevance 
-#'                                                  (i.e. group sequences from one subject, 
-#'                                                  so you may comprare selection across 
-#'                                                  patients).
-#'   \item  \code{\link{plotBaselineDensity}}:      Plot the probability density functions
-#'                                                  from selection analysis
-#'   \item  \code{\link{plotBaselineSummary}}:      Plot the summary of the results of 
-#'                                                  selection analysis
+#'   \item  \link{calcBaseline}:           Calculate the BASELINe probability
+#'                                         density functions (PDFs).
+#'   \item  \link{groupBaseline}:          Combine PDFs from sequences grouped
+#'                                         by biological or experimental relevance.
+#'   \item  \link{summarizeBaseline}:      Compute summary statistics from BASELINe PDFs.
+#'   \item  \link{plotBaselineDensity}:    Plot the probability density functions
+#'                                         resulting from selection analysis.
+#'   \item  \link{plotBaselineSummary}:    Plot summary stastistics resulting from 
+#'                                         selection analysis.
 #' }
 #'
 #' @section  Distance profiling:
 #' \itemize{
-#'   \item  \code{\link{distToNearest}}:            Calculate distances to 
-#'                                                  nearest-neighbors.
+#'   \item  \link{distToNearest}:          Tune clonal assignment thresholds by calculating 
+#'                                         distances to nearest-neighbors.
+#'   \item  \link{calcTargetingDistance}:  Construct a nucleotide distance matrix from a 
+#'                                         5-mer targeting model.
 #' }
 #'
 #' @references

@@ -81,9 +81,9 @@ doparProgressBar <- function(n){
 
 #### OS interaction functions ####
 
-#' Determines the OS plotform being used
+#' Determines the OS platform being used
 #'
-#' @return  The OS platform
+#' @return  The OS platform.
 #' 
 #' @examples
 #' getPlatform()
@@ -94,9 +94,9 @@ getPlatform <-function(){
 }
 
 
-#' Determines the (maximum) numbers of cores/cpus availalbe
+#' Determines the numbers of CPU cores available
 #'
-#' @return  The number of cores/cpus available. Returns 1 if undeterminable.
+#' @return  The number of cores available. Returns 1 if undeterminable.
 #'
 #' @examples
 #' getnproc()

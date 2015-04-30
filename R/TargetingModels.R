@@ -77,24 +77,23 @@ NULL
 #' @slot     species       Genus and species of the source sequencing data.
 #' @slot     date          Date the model was built.
 #' @slot     citation      Publication source.
-#' @slot     substitution  Normalized probability of the center nucleotide of a given 5-mer 
+#' @slot     substitution  Normalized rates of the center nucleotide of a given 5-mer 
 #'                         mutating to a different nucleotide. The substitution model 
 #'                         is stored as a 5x3125 matrix of rates. Rows define
 #'                         the mutated nucleotide at the center of each 5-mer, one of 
-#'                         c(A, C, G, T, N), and columns define the complete 5-mer 
-#'                         of the unmutated nucleotide sequence.
-#' @slot     mutability    Normalized probability of a given 5-mer being mutated. The 
+#'                         \code{c("A", "C", "G", "T", "N")}, and columns define the 
+#'                         complete 5-mer of the unmutated nucleotide sequence.
+#' @slot     mutability    Normalized rates of a given 5-mer being mutated. The 
 #'                         mutability model is stored as a numeric vector of length 3125 
 #'                         with mutability rates for each 5-mer.
-#' @slot     targeting     Probability of a given mutation ocurring, defined as 
+#' @slot     targeting     Rate matrix of a given mutation ocurring, defined as 
 #'                         \eqn{mutability * substitution}. The targeting model 
-#'                         is stored as a 5x3125 matrix of rates. Rows define
+#'                         is stored as a 5x3125 matrix. Rows define
 #'                         the mutated nucleotide at the center of each 5-mer, one of 
-#'                         c(A, C, G, T, N), and columns define the complete 5-mer 
+#'                         \code{c("A", "C", "G", "T", "N")}, and columns define the complete 5-mer 
 #'                         of the unmutated nucleotide sequence.
 #' 
-#' @seealso  See \code{\link{createMutabilityMatrix}} and \code{\link{createSubstitutionMatrix}} 
-#'           for building models from sequencing data.
+#' @seealso  See \link{createTargetingModel} building models from sequencing data.
 #'           
 #' @name TargetingModel
 #' @export
@@ -139,8 +138,8 @@ setClass("TargetingModel",
 #'                             If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                             excluded from the total mutation tally.
 #' 
-#' @return   A 4x1024 matrix of normalized substitution rate for each 5-mer motif with 
-#'           rows names defining the center nucleotide, one of \code{c("A", "C", "G", "T", "N")}, 
+#' @return   A 4x1024 matrix of column normalized substitution rates for each 5-mer motif with 
+#'           row names defining the center nucleotide, one of \code{c("A", "C", "G", "T")}, 
 #'           and column names defining the 5-mer nucleotide sequence.
 #' 
 #' @references
@@ -150,7 +149,7 @@ setClass("TargetingModel",
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #'
-#' @seealso  See \code{\link{createMutabilityMatrix}} for building a mutability model.
+#' @family   targeting model functions
 #' 
 #' @examples
 #' # Load example data
@@ -414,7 +413,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #'                              excluded from the total mutation tally.
 #'
 #' @return   A named numeric vector of 1024 normalized mutability rates for each 5-mer 
-#'           motif with names 5-mer nucleotide sequence.
+#'           motif with names defining the 5-mer nucleotide sequence.
 #' 
 #' @references
 #' \enumerate{
@@ -736,8 +735,12 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' 
 #' @return   A matrix with the same dimensions as the input \code{substitutionModel} 
 #'           containing normalized targeting probabilities for each 5-mer motif with 
-#'           rows names defining the center nucleotide and column names defining the 
+#'           row names defining the center nucleotide and column names defining the 
 #'           5-mer nucleotide sequence.
+#' 
+#' @details
+#' Targeting rates are calculated by multiplying the normalized mutability rate by the 
+#' normalized substitution rates for each individual 5-mer.
 #' 
 #' @references
 #' \enumerate{
@@ -789,7 +792,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #'                              silent mutations.
 #' @param    sequenceColumn     name of the column containing IMGT-gapped sample sequences.
 #' @param    germlineColumn     name of the column containing IMGT-gapped germline sequences.
-#' @param    vCallColumn        name of the column containing the V-segment allele call.
+#' @param    vCallColumn        name of the column containing the V-segment allele calls.
 #' @param    multipleMutation   string specifying how to handle multiple mutations occuring 
 #'                              within the same 5-mer. If \code{"independent"} then multiple 
 #'                              mutations within the same 5-mer are counted indepedently. 
@@ -812,7 +815,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
-#' @seealso  See \code{\link{TargetingModel}} for the return object.
+#' @seealso  See \link{TargetingModel} for the return object.
 #' @family   targeting model functions
 #' 
 #' @examples
@@ -888,20 +891,19 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 
 #' Calculates a 5-mer distance matrix from a TargetingModel object
 #' 
-#' \code{getTargetingDistance} renormalizes the targeting probabilities
-#' in a TargetingModel model and returns a distance matrix.
+#' \code{calcTargetingDistance} converts the targeting rates in a TargetingModel model 
+#' to a matrix of 5-mer to single-nucleotide mutation distances.
 #' 
-#' @param    model     \code{\link{TargetingModel}} object with 
-#'                     mutation likelihood information.
+#' @param    model     \link{TargetingModel} object with mutation likelihood information.
 #'                                                
 #' @return   A matrix of distances for each 5-mer motif with rows names defining 
 #'           the center nucleotide and column names defining the 5-mer nucleotide 
 #'           sequence.
 #'           
 #' @details
-#' The targeting distance is defined as...
+#' TODO
 #'    
-#' @seealso  Takes as input a \code{\link{TargetingModel}} object.
+#' @seealso  Takes as input a \link{TargetingModel} object.
 #' @family   targeting model functions
 #' 
 #' @examples
@@ -910,12 +912,15 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
 #' 
-#' # Create model and get targeting distance
+#' # Calculate targeting distance of custom model
 #' model <- createTargetingModel(db)
-#' dist <- getTargetingDistance(model)
+#' dist <- calcTargetingDistance(model)
+#' 
+#' # Calculate targeting distance of built-model
+#' dist <- calcTargetingDistance(HS5FModel)
 #' 
 #' @export
-getTargetingDistance <- function(model) {
+calcTargetingDistance <- function(model) {
     if (is(model, "TargetingModel")) {
         model <- model@targeting
     } else if (!is(model, "matrix")) {
@@ -965,17 +970,16 @@ getTargetingDistance <- function(model) {
 
 #' Rescales mutability probabilities from a TargetingModel
 #' 
-#' \code{getRescaledMutability} renormalizes the mutability probabilities
+#' \code{rescaleMutability} renormalizes the mutability probabilities
 #' in a TargetingModel model and returns a rescaled matrix of mutability scores.
 #' 
-#' @param    model     \code{\link{TargetingModel}} object with 
-#'                     mutation likelihood information.
+#' @param    model     \link{TargetingModel} object with mutation likelihood information.
 #' @param    mean      the mean value for the rescaled mutability scores.
 #'                                                
 #' @return   A named vector of mutability scores for each 5-mer motif with mean
 #'           equal to \code{mean}.
 #'           
-#' @seealso  Takes as input a \code{\link{TargetingModel}} object.
+#' @seealso  Takes as input a \link{TargetingModel} object.
 #' @family   targeting model functions
 #' 
 #' @examples
@@ -986,10 +990,10 @@ getTargetingDistance <- function(model) {
 #' 
 #' # Create model and get targeting distance
 #' model <- createTargetingModel(db)
-#' mut <- getRescaledMutability(model)
+#' mut <- rescaleMutability(model)
 #' 
 #' @export
-getRescaledMutability <- function(model, mean=1.0) {
+rescaleMutability <- function(model, mean=1.0) {
     if (is(model, "TargetingModel")) {
         model <- model@mutability
     } else if (!is(model, "vector")) {
@@ -1019,15 +1023,13 @@ getRescaledMutability <- function(model, mean=1.0) {
 #' @return   NULL
 #'           
 #' @details
-#' Takes as input a \code{\link{TargetingModel}} object and writes the re-centered 
-#' \code{targeting} slot, which is the probability of a given mutation ocurring, 
-#' defined as \eqn{mutability * substitution}. The targeting distance is stored as 
-#' a 5x3125 matrix of rates. Rows define the mutated nucleotide at the center of each 5-mer, 
-#' one of \code{c("A", "C", "G", "T", "N")}, and columns define the complete 5-mer of the 
-#' unmutated nucleotide sequence. \code{NA} values in the distance matrix are replaced with 
-#' distance 0. This writes to a tab-delimited file with column and row names.
+#' The targeting distance write as a tab-delimited 5x3125 matrix. Rows define the mutated 
+#' nucleotide at the center of each 5-mer, one of \code{c("A", "C", "G", "T", "N")}, 
+#' and columns define the complete 5-mer of the unmutated nucleotide sequence. 
+#' \code{NA} values in the distance matrix are replaced with distance 0.
 #'    
-#' @seealso  Takes as input a \code{\link{TargetingModel}} object.
+#' @seealso  Takes as input a \code{\link{TargetingModel}} object and calculates  
+#'           distances using \link{calcTargetingDistance}.
 #' @family   targeting model functions
 #' 
 #' @examples
@@ -1038,7 +1040,7 @@ getRescaledMutability <- function(model, mean=1.0) {
 #' 
 #' @export
 writeTargetingDistance <- function(model, file) {
-    to_write <- as.data.frame(getTargetingDistance(model))
+    to_write <- as.data.frame(calcTargetingDistance(model))
     to_write[is.na(to_write)] <- 0
     write.table(to_write, file, quote=FALSE, sep="\t")
 }
@@ -1048,11 +1050,11 @@ writeTargetingDistance <- function(model, file) {
 
 #' Plot mutability probabilities
 #' 
-#' \code{plotMutability} creates a hedgehog plot of the mutability rates.
+#' \code{plotMutability} plots the mutability rates of a \code{TargetingModel}.
 #' 
-#' @param    model        \code{\link{TargetingModel}} object or mutability matrix
-#'                        with mutability probabilities.
-#' @param    nucleotides  vector of center nucleotide characters to plot mutability for.
+#' @param    model        \link{TargetingModel} object or matrix containing normalized 
+#'                        mutability rates.
+#' @param    nucleotides  vector of center nucleotide characters to plot.
 #' @param    style        type of plot to draw. One of:
 #'                        \itemize{
 #'                          \item \code{"hedgehog"}:  circular plot showing higher mutability

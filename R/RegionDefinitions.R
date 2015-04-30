@@ -19,22 +19,24 @@ REGION_PALETTE <-  c("CDR"="#377eb8",
                      "FWR1"="#4daf4a",
                      "FWR2"="#984ea3",
                      "FWR3"="#e41a1c")
+
+
 #### Classes ####
 
 #' S4 class defining a region definition
 #' 
-#' \code{RegionDefinition} defines a common data structure for defining the regions
-#' (boundaries) of the Ig sequence.
+#' \code{RegionDefinition} defines a common data structure for defining the region
+#' boundaries of an Ig sequence.
 #' 
-#' @slot    name            Name of the RegionDefinition
-#' @slot    description     Description of the model and its source
-#' @slot    boundaries      \code{factor} defining the regions (boundaries) of the 
-#'                          sequence. The levels and values of the \code{factor} 
-#'                          determine the nubmer of regions (e.g. CDR and FWR).
-#' @slot    seqLength       the length of the sequence                        
-#' @slot    regions         the levels of the boundaries (e.g. CDR and FWR)
-#' @slot    labels          the labels for the boundary/mutations combinations
-#'                          e.g. CDR_R CDR_S FWR_R, FWR_S.
+#' @slot    name            name of the RegionDefinition.
+#' @slot    description     description of the model and its source.
+#' @slot    boundaries      \code{factor} defining the region boundaries of the 
+#'                          sequence. The levels and values of \code{boundaries} 
+#'                          determine the number of regions.
+#' @slot    seqLength       length of the sequence.
+#' @slot    regions         levels of the boundaries; e.g, \code{c("CDR", "FWR")}.
+#' @slot    labels          labels for the boundary and mutations combinations;
+#'                          e.g., \code{c("CDR_R", "CDR_S", "FWR_R", "FWR_S")}.
 #' @slot    citation        publication source.
 #'    
 #' @name    RegionDefinition
@@ -48,7 +50,7 @@ setClass("RegionDefinition",
                  labels="character",
                  citation="character"),
          prototype=c(name="IMGT_V_NO_CDR3",
-                     description="IMGT_Numbering scheme defining the V gene up till but not including CDR3",
+                     description="IMGT_Numbering scheme defining the V gene up to, but not including, CDR3.",
                      boundaries=factor(c(rep("FWR", 78), 
                                          rep("CDR", 36),  
                                          rep("FWR", 51), 
@@ -68,9 +70,9 @@ setClass("RegionDefinition",
 #' \code{createRegionDefinition} creates a \code{RegionDefinition}.
 #'
 #' @param    name           name of the region definition.
-#' @param    boundaries     \code{factor} defining the regions (boundaries) of the sequence.
-#'                          the levels and values of the \code{factor} determine the 
-#'                          nubmer of regions (e.g. CDR and FWR).
+#' @param    boundaries     \code{factor} defining the region boundaries of the sequence.
+#'                          The levels and values of \code{boundaries} determine the 
+#'                          number of regions (e.g. CDR and FWR).
 #' @param    description    description of the region definition and its source data.
 #' @param    citation       publication source.
 #' 
@@ -78,11 +80,15 @@ setClass("RegionDefinition",
 #' 
 #' @seealso  See \code{\link{RegionDefinition}} for the return object.
 #' 
+#' @examples
+#' # Creates an empty RegionDefinition object
+#' createRegionDefinition()
+#' 
 #' @export
-createRegionDefinition <- function(name=NULL,
-                                   boundaries=NULL,
-                                   description=NULL,
-                                   citation=NULL) {
+createRegionDefinition <- function(name="",
+                                   boundaries=factor(),
+                                   description="",
+                                   citation="") {
     #Extract information from 'boundaries'
     # Determine the number of levels (e.g. CDR, FWR)
     regions <- levels(boundaries)
@@ -117,20 +123,18 @@ createRegionDefinition <- function(name=NULL,
 #'
 #' @format A \code{\link{RegionDefinition}} object containing:
 #' \itemize{
-#'   \item  \code{IMGT_V}:                     V segments including CDR3.
-#'   \item  \code{IMGT_V_BY_REGIONS}:          V segments including CDR3.
-#'   \item  \code{IMGT_V_NO_CDR3}:             V segments up till the begining of (but not 
-#'                                             including) CDR3.
-#'   \item  \code{IMGT_V_BY_REGIONS_NO_CDR3}:  V segments up till the begining of (but not 
-#'                                             including CDR3).
+#'   \item  \code{IMGT_V}:                     Grouped CDR and FWR V-segment regions including CDR3.
+#'   \item  \code{IMGT_V_BY_REGIONS}:          Individual CDR and FWR V-segment regions including CDR3.
+#'   \item  \code{IMGT_V_NO_CDR3}:             Grouped CDR and FWR V-segment regions excluding CDR3.
+#'   \item  \code{IMGT_V_BY_REGIONS_NO_CDR3}:  Individual CDR and FWR V-segment regions excluding CDR3.
 #' }
 #' 
 #' @references
 #' \enumerate{
 #'   \item  Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
-#'              Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin 
-#'              and T cell receptor variable domains and Ig superfamily V-like domains. 
-#'              Developmental and comparative immunology. 2003;27:55-77.
+#'            Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin 
+#'            and T cell receptor variable domains and Ig superfamily V-like domains. 
+#'            Developmental and comparative immunology. 2003;27:55-77.
 #' }
 #' 
 #' @name IMGT_SCHEMES

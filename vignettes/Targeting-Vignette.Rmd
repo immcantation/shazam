@@ -76,9 +76,9 @@ plotMutability(tar_model, nucleotides="T", style='bar', size=0.3)
 
 Calculate targeting distance matrix
 --------------------------------------------------------------------------------
-In the Change-O pipeline, the `hs5f` and `m3n` cloning methods rely on inferred targeting models. If a dataset-specific inferred targeting model is desired to determine distances between sequences for clonal grouping, the probabilities of mutations must be transformed into distances. The `getTargetingDistance` function returns a matrix of distances between a given 5-mer and each corresponding mutation of the center base. This matrix can also be generated and written directly to a file using the function `writeTargetingDistance`.
+In the Change-O pipeline, the `hs5f` and `m3n` cloning methods rely on inferred targeting models. If a dataset-specific inferred targeting model is desired to determine distances between sequences for clonal grouping, the probabilities of mutations must be transformed into distances. The `calcTargetingDistance` function returns a matrix of distances between a given 5-mer and each corresponding mutation of the center base. This matrix can also be generated and written directly to a file using the function `writeTargetingDistance`.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Calculate distance matrix
-dist <- getTargetingDistance(tar_model)
+dist <- calcTargetingDistance(tar_model)
 ```

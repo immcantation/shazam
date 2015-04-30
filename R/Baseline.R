@@ -6,34 +6,35 @@ NULL
 
 #' S4 class defining a BASELINe (selection) object
 #' 
-#' \code{Baseline} defines a common data structure for defining the BASELINe selection
-#' results
+#' \code{Baseline} defines a common data structure the results of selection
+#' analysis using the BASELINe method.
 #' 
-#' @slot    description         \code{character} of general information regarding the 
+#' @slot    description         \code{character} providing general information regarding the 
 #'                              sequences, selection analysis and/or object.
 #' @slot    db                  \code{data.frame} containing annotation information about 
-#'                              the sequences/selection results.
-#' @slot    regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                              the sequences and selection results.
+#' @slot    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences.
 #' @slot    testStatistic       \code{character} indicating the statistical framework 
-#'                              used to test for selection. E.g. code{"local"}, \code{"focused"}.                           
-#' @slot    regions             \code{character} vector of the regions the BASELINe 
-#'                              selection was carried out on. E.g. "CDR & "FWR" or
-#'                              "CDR1", "CDR2", "CDR3" etc.
-#' @slot    numbOfSeqs          \code{matrix} of r x c dimensions containing the number of 
-#'                              sequences or PDFs in each region, where: \cr
-#'                              r = number of rows = number of groups/sequencs and \cr
-#'                              c = number of columns = number of regions.
-#' @slot    pdfs                \code{list} of PDFs (one item for each defined region 
-#'                              e.g. CDR & FWR) of \code{matrices} of r x c dementions, 
-#'                              where: \cr
-#'                              r = number of sequences or groups and \cr
-#'                              c = number of columns = length of the PDF (default 4001)
+#'                              used to test for selection. For example, \code{"local"} or 
+#'                              \code{"focused"}.                           
+#' @slot    regions             \code{character} vector defining the regions the BASELINe 
+#'                              analysis was carried out on. For \code{"CDR"} and \code{"FWR"} 
+#'                              or \code{"CDR1"}, \code{"CDR2"}, \code{"CDR3"}, etc.
+#' @slot    numbOfSeqs          \code{matrix} of dimensions \code{r x c} containing the number of 
+#'                              sequences or PDFs in each region, where:\cr
+#'                              \code{r} = number of rows = number of groups or sequences.\cr
+#'                              \code{c} = number of columns = number of regions.
+#' @slot    pdfs                \code{list} of matrices containing PDFs with one item for each 
+#'                              defined region (e.g. "CDR" and "FWR"). Matrices have dimensions
+#'                              \code{r x c} dementions, where:\cr
+#'                              \code{r} = number of rows = number of sequences or groups. \cr
+#'                              \code{c} = number of columns = length of the PDF (default 4001).
 #' @slot    stats               \code{data.frame} of BASELINe statistics, 
 #'                              including: selection strength (Sigma), 95\% confidence 
 #'                              intervals, and P values.
 #'                          
-#' @name Baseline
+#' @name    Baseline
 #' @export
 setClass("Baseline", 
          slots = c( description="character",
@@ -47,50 +48,54 @@ setClass("Baseline",
          )
 )
 
-#### Methods #####
+#### Baseline object methods #####
 
 #' Creates a Baseline object
 #' 
-#' \code{createBaseline} creates a \code{Baseline}.
-#'
-#' @param   description         General information regarding the sequences, selection 
-#'                              analysis and/or object.
+#' \code{createBaseline} creates and initialize a \code{Baseline} object. 
+#' 
+#' @param   description         \code{character} providing general information regarding the 
+#'                              sequences, selection analysis and/or object.
 #' @param   db                  \code{data.frame} containing annotation information about 
-#'                              the sequences/selection results.
-#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                              the sequences and selection results.
+#' @param   regionDefinition    \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences.
 #' @param   testStatistic       \code{character} indicating the statistical framework 
-#'                              used to test for selection. E.g. code{"local"}, \code{"focused"}.   
-#' @param   numbOfSeqs          \code{matrix} of r x c dimensions containing the number of 
-#'                              sequences or PDFs in each region, where: \cr
-#'                              r = number of rows = number of groups/sequencs and \cr
-#'                              c = number of columns = number of regions.
-#' @param   pdfs                \code{list} of PDFs (one item for each defined region 
-#'                              e.g. CDR & FWR) of \code{matrices} of r x c dementions, 
-#'                              where: \cr
-#'                              r = number of sequences or groups and \cr
-#'                              c = number of columns = length of the PDF (default 4001)
+#'                              used to test for selection. For example, \code{"local"} or 
+#'                              \code{"focused"}.                           
+#' @param   regions             \code{character} vector defining the regions the BASELINe 
+#'                              analysis was carried out on. For \code{"CDR"} and \code{"FWR"} 
+#'                              or \code{"CDR1"}, \code{"CDR2"}, \code{"CDR3"}, etc. If \code{NULL}
+#'                              then regions will be determined automatically from \code{regionDefinition}.
+#' @param   numbOfSeqs          \code{matrix} of dimensions \code{r x c} containing the number of 
+#'                              sequences or PDFs in each region, where:\cr
+#'                              \code{r} = number of rows = number of groups or sequences.\cr
+#'                              \code{c} = number of columns = number of regions.
+#' @param   pdfs                \code{list} of matrices containing PDFs with one item for each 
+#'                              defined region (e.g. "CDR" and "FWR"). Matrices have dimensions
+#'                              \code{r x c} dementions, where:\cr
+#'                              \code{r} = number of rows = number of sequences or groups. \cr
+#'                              \code{c} = number of columns = length of the PDF (default 4001).
 #' @param   stats               \code{data.frame} of BASELINe statistics, 
 #'                              including: selection strength (Sigma), 95\% confidence 
-#'                              intervals, and P values.                              
-#' 
+#'                              intervals, and P values.
+#'                              
 #' @return   A \code{Baseline} object.
 #' 
 #' @details
 #' Create and initialize a \code{Baseline} object. 
 #' 
 #' The \code{testStatistic} indicates the statistical framework used to test for selection. 
-#' E.g.
+#' For example,
 #' \itemize{
 #'   \item   \code{local} = CDR_R / (CDR_R + CDR_S).
 #'   \item   \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
 #' }
 #' For \code{focused} the \code{regionDefinition} must only contain two regions. If more 
-#' than two regions are defined the \code{local} test statistic will be used.
+#' than two regions are defined, then the \code{local} test statistic will be used.
 #' For further information on the frame of these tests see Uduman et al. (2011).
 #' 
 #' @seealso  See \link{Baseline} for the return object.
-#'           \code{createBaseline} is used in \link{calcBaseline}.
 #' 
 #' @references
 #' \enumerate{
@@ -106,40 +111,44 @@ setClass("Baseline",
 #'  }
 #'  
 #' @examples
-#' library(shm)
-#' 
 #' # Creates an empty Baseline object
 #' createBaseline()
 #' 
 #' @export
-createBaseline <- function( description="",
-                            db="",
-                            regionDefinition="",
-                            testStatistic="",
-                            regions="",
-                            numbOfSeqs="",
-                            pdfs="",
-                            stats="") {
+createBaseline <- function(description="",
+                           db=data.frame(),
+                           regionDefinition=createRegionDefinition(),
+                           testStatistic="",
+                           regions=NULL,
+                           numbOfSeqs=matrix(),
+                           pdfs=list(),
+                           stats=data.frame()) {
     
-    if ( stats=="" ) {
-        stats <- data.frame( GROUP=character(),
-                             REGION=character(),
-                             BASELINE_SIGMA=character(),
-                             BASELINE_CI_LOWER=character(),
-                             BASELINE_CI_UPPER=character(),
-                             BASELINE_CI_PVALUE=character(),
-                             stringsAsFactors=FALSE) 
+    # Get regions if not passing in               
+    if (is.null(regions)) {
+        regions <- regionDefinition@regions
     }
+    # Define empty stats data.frame if not passed in
+    if (nrow(stats) == 0) {
+        stats <- data.frame(GROUP=character(),
+                            REGION=character(),
+                            BASELINE_SIGMA=character(),
+                            BASELINE_CI_LOWER=character(),
+                            BASELINE_CI_UPPER=character(),
+                            BASELINE_CI_PVALUE=character(),
+                            stringsAsFactors=FALSE) 
+    }
+    
     # Define RegionDefinition object
-    baseline <- new( "Baseline",
-                     description=description,
-                     db=db,
-                     regionDefinition=regionDefinition,
-                     testStatistic=testStatistic,
-                     regions=regionDefinition@regions,
-                     numbOfSeqs=numbOfSeqs,
-                     pdfs=pdfs,
-                     stats=stats)
+    baseline <- new("Baseline",
+                    description=description,
+                    db=db,
+                    regionDefinition=regionDefinition,
+                    testStatistic=testStatistic,
+                    regions=regionDefinition@regions,
+                    numbOfSeqs=numbOfSeqs,
+                    pdfs=pdfs,
+                    stats=stats)
     
     return(baseline)
 }
@@ -174,8 +183,8 @@ editBaseline <- function ( baseline,
 #' @param    baseline  \code{Baseline} object that has been run through
 #'                     either \link{groupBaseline} or \link{summarizeBaseline}.
 #' 
-#' @return   A \code{data.frame} with the BASELINe selection strength,
-#'           95\% confidence intervals and P-value. 
+#' @return   A \code{data.frame} with the BASELINe selection strength scores (Sigma),
+#'           95\% confidence intervals and P-values. 
 #' 
 #' @seealso  For calculating the BASELINe summary statistics see \link{summarizeBaseline}.
 #' 
@@ -196,38 +205,39 @@ getBaselineStats <- function(baseline) {
 #' Calculate the BASELINe PDFs
 #' 
 #' \code{calcBaseline} calculates the BASELINe posterior probability density 
-#' functions (PDFs) for sequences in the given ChangeO db \code{data.frame}.
+#' functions (PDFs) for sequences in the given Change-O \code{data.frame}.
 #'
-#' @param   db                  \code{data.frame} containing sequence data and annotation.
+#' @param   db                  \code{data.frame} containing sequence data and annotations.
 #' @param   sequenceColumn      \code{character} name of the column in \code{db} 
 #'                              containing input sequences.
 #' @param   germlineColumn      \code{character} name of the column in \code{db} 
 #'                              containing germline sequences.
 #' @param   testStatistic       \code{character} indicating the statistical framework 
-#'                              used to test for selection. E.g. code{"local"}, \code{"focused"}. 
-#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#'                              used to test for selection. One of \code{c("local", "focused")}.
+#' @param   regionDefinition    \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences.
-#' @param   targetingModel      \code{\link{TargetingModel}} object. Default is the 
-#'                              \link{HS5FModel}.
+#' @param   targetingModel      \link{TargetingModel} object. Default is  \link{HS5FModel}.
 #' @param   nproc               number of cores to distribute the operation over. If 
 #'                              \code{nproc} = 0 then the \code{cluster} has already been
 #'                              set and will not be reset.
 #' 
-#' @return  A \code{Baseline} object, containing the modified \code{db} and the BASELINe 
-#'          posterior probability density functions (PDF) for each of the sequences
+#' @return  A \code{Baseline} object containing the modified \code{db} and BASELINe 
+#'          posterior probability density functions (PDF) for each of the sequences.
 #'           
-#' @details Calculates the BASELINe posterior probability density function (PDF) for 
-#'          sequences in the provided \code{db}. 
+#' @details 
+#' Calculates the BASELINe posterior probability density function (PDF) for 
+#' sequences in the provided \code{db}. 
 #'          
-#'          If the \code{db} does not contain the 
-#'          required columns to calculate the PDFs (namely OBSERVED & EXPECTED mutations)
-#'          then the function will:
-#'          1. Collapse the sequences by the CLONE column (if present)
-#'          2. Calculate the numbers of observed mutations
-#'          3. Calculate the expected frequencies of mutations
-#'          and modify the provided \code{db} (this will be returned as part of the 
-#'          \code{Baseline} object).
-#'          
+#' If the \code{db} does not contain the 
+#' required columns to calculate the PDFs (namely OBSERVED & EXPECTED mutations)
+#' then the function will:
+#'   \enumerate{
+#'   \item  Collapse the sequences by the CLONE column (if present).
+#'   \item  Calculate the numbers of observed mutations.
+#'   \item  Calculate the expected frequencies of mutations and modify the provided 
+#'          \code{db}. The modified \code{db} will be included as part of the 
+#'          returned \code{Baseline} object).
+#' }
 #'          
 #' @family  selection analysis functions
 #' 
@@ -260,15 +270,15 @@ getBaselineStats <- function(baseline) {
 #' db_file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(db_file)
 #' 
-#' # Calculate BASELINe PDFs for all sequences using the focused test statistic, and
-#' # analyzing uptill but not including CDR3
+#' # Calculate BASELINe PDFs for all sequences using the focused test statistic, 
+#' # analyzing up to, but not including, CDR3.
 #' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
 #' 
 #' @export
 calcBaseline <- function(db,
                          sequenceColumn="SEQUENCE_IMGT",
                          germlineColumn="GERMLINE_IMGT_D_MASK",
-                         testStatistic=c("local","focused"),
+                         testStatistic=c("local", "focused"),
                          regionDefinition=IMGT_V_NO_CDR3,
                          targetingModel=HS5FModel,
                          nproc=1) {
@@ -522,36 +532,34 @@ calcBaselineBinomialPdf <- function ( x=3,
 
 #' Group BASELINe PDFs
 #' 
-#' \code{groupBaseline} convolutes the BASELINe posterior probability density 
-#' functions (PDFs) of sequences in ChangeO db to get a combined (grouped) PDF.
+#' \code{groupBaseline} convolves groups of BASELINe posterior probability density 
+#' functions (PDFs) to get combined PDFs for each group.
 #'
-#' @param   baseline    \code{Baseline} object, containing the \code{db} and the 
+#' @param    baseline   \code{Baseline} object containing the \code{db} and the 
 #'                      BASELINe posterior probability density functions 
 #'                      (PDF) for each of the sequences, as returned by
 #'                      \link{calcBaseline}.
-#' @param   groupBy     The columns in the \code{db} slot of the \code{Baseline}
+#' @param    groupBy    The columns in the \code{db} slot of the \code{Baseline}
 #'                      object by which to group the sequence PDFs.
-#' @param   nproc       number of cores to distribute the operation over. If 
+#' @param    nproc      number of cores to distribute the operation over. If 
 #'                      \code{nproc} = 0 then the \code{cluster} has already been
 #'                      set and will not be reset.
 #' 
-#' @return  A \code{Baseline} object, containing the modified \code{db} and the BASELINe 
-#'          posterior probability density functions (PDF) for each of the groups.
+#' @return   A \code{Baseline} object, containing the modified \code{db} and the BASELINe 
+#'           posterior probability density functions (PDF) for each of the groups.
 #'           
 #' @details
 #' While the selection strengths predicted by BASELINe perform well on average, 
 #' the estimates for individual sequences can be highly variable, especially when the 
 #' number of mutations is small. 
 #' 
-#' To overcome this, PDFs from sequences grouped by biological or experimental relevance 
-#' (i.e. group sequences from one subject/patient, so you may comprare selection across 
-#' patients). are convoluted to from a single PDF for the selection strength. This is 
-#' accomplished through a fast numerical convolution technique we have developed for this 
-#' purpose.
+#' To overcome this, PDFs from sequences grouped by biological or experimental relevance,
+#' are convolved to from a single PDF for the selection strength. For example, sequences
+#' from each sample may be combined together, allowing you to compare selection  across 
+#' samples. This is accomplished through a fast numerical convolution technique.
 #'               
-#' @seealso 
-#' To calculate BASELINe statistics, such as the mean selection strength
-#' and the 95\% confidence interval, see \link{summarizeBaseline}.
+#' @seealso  To calculate BASELINe statistics, such as the mean selection strength
+#'           and the 95\% confidence interval, see \link{summarizeBaseline}.
 #' @family   selection analysis functions
 #' 
 #' @references
@@ -705,10 +713,9 @@ groupBaseline <- function(baseline,
 #' \code{summarizeBaseline} calculates BASELINe statistics such as the selection strength
 #' (Sigma), the 95\% confidence intervals and P-values.
 #'
-#' @param    baseline    \code{Baseline} object containing the annotations and the 
-#'                       BASELINe posterior probability density functions 
-#'                       (PDFs) for each sequence. This would be returned by
-#'                       \code{\link{calcBaseline}}.
+#' @param    baseline    \code{Baseline} object returned by \link{calcBaseline} containing 
+#'                       annotations and BASELINe posterior probability density functions 
+#'                       (PDFs) for each sequence.
 #' @param    returnType  One of \code{c("baseline", "df")} defining whether
 #'                       to return a \code{Baseline} object ("baseline") with an updated
 #'                       \code{stats} slot or a data.frame ("df") of summary statistics.
@@ -723,9 +730,15 @@ groupBaseline <- function(baseline,
 #' 
 #' @examples
 #' # Load example data
-#' library("alakazam")
-#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
-#' db <- readChangeoDb(dbPath)
+#' library(alakazam)
+#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(db_file)
+#' db <- db[1:5, ]
+#' 
+#' # Calculate BASELINe PDFs for all sequences using the focused test statistic excluding CDR3
+#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' 
+#' stats <- summarizeBaseline(baseline, returnType="df")
 #'                      
 #' @export
 summarizeBaseline <- function(baseline,
@@ -853,14 +866,176 @@ calcBaselinePvalue <- function ( baseline_pdf,
 
 #### Plotting functions ####
 
+#' Plots BASELINe probability density functions
+#' 
+#' \code{plotBaselineDensity} plots the probability density functions resulting from selection 
+#' analysis using the BASELINe method.
+#'
+#' @param    baseline       \code{Baseline} object containing selection probability 
+#'                          density functions.
+#' @param    idColumn       name of the column in the \code{db} slot of \code{baseline} 
+#'                          containing primary identifiers.
+#' @param    groupColumn    name of the column in the \code{db} slot of \code{baseline} 
+#'                          containing secondary grouping identifiers. If \code{NULL}, 
+#'                          organize the plot only on values in \code{idColumn}.
+#' @param    groupColors    named vector of colors for entries in \code{groupColumn}, with 
+#'                          names defining unique values in the \code{groupColumn} and values
+#'                          being colors. Also controls the order in which groups appear on the
+#'                          plot. If \code{NULL} alphabetical ordering and a default color palette 
+#'                          will be used. Has no effect if \code{facetBy="group"}.
+#' @param    subsetRegions  character vector defining a subset of regions to plot, correspoding 
+#'                          to the regions for which the \code{baseline} data was calculated. If
+#'                          \code{NULL} all regions in \code{baseline} are plotted.
+#' @param    sigmaLimits    numeric vector containing two values defining the \code{c(lower, upper)}
+#'                          bounds of the selection scores to plot.
+#' @param    facetBy        one of c("group", "region") specifying which category to facet the
+#'                          plot by, either values in \code{groupColumn} ("group") or regions
+#'                          defined in \code{baseline} ("region"). The data that is not used
+#'                          for faceting will be color coded.
+#' @param    style          type of plot to draw. One of:
+#'                          \itemize{
+#'                            \item \code{"density"}:  plots a set of curves for each probability 
+#'                                                     density function in \code{baseline}, 
+#'                                                     with the line type determined by \code{idColumn}.
+#'                                                     Faceting and coloring are determine by values in 
+#'                                                     \code{groupColumn} and regions defined in 
+#'                                                     \code{baseline}, depending upon the 
+#'                                                     \code{facetBy} argument.
+#'                          }
+#' @param    size           numeric scaling factor for lines, points and text in the plot.
+#' @param    silent         if \code{TRUE} do not draw the plot and just return the ggplot2 
+#'                          object; if \code{FALSE} draw the plot.
+#' @param    ...            additional arguments to pass to ggplot2::theme.
+#' 
+#' @return   A ggplot object defining the plot.
+#'
+#' @seealso  Takes as input a \link{Baseline} object returned from \link{groupBaseline}.
+#' @family   selection analysis functions
+#' 
+#' @examples
+#' library(alakazam)
+#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(db_file)
+#' 
+#' # Calculate selection scores
+#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' # Combine selection scores by samples barcode and isotype primer
+#' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
+#' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' 
+#' # Plot mean and confidence interval
+#' plotBaselineDensity(baseline_one, "BARCODE", style="density")
+#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", style="density")
+#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
+#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="density")
+#'
+#' # Reorder and recolor groups
+#' group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
+#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
+#' 
+#' @export
+plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
+                                subsetRegions=NULL, sigmaLimits=c(-5, 5), 
+                                facetBy=c("region", "group"), style=c("density"), size=1, 
+                                silent=FALSE, ...) {
+    # Check input
+    style <- match.arg(style)
+    facetBy <- match.arg(facetBy)
+    
+    # Set base plot settings
+    base_theme <- theme_bw() +
+        theme(panel.background=element_blank(),
+              panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank(),
+              panel.border=element_rect(color="black", size=0.5)) +
+        theme(strip.background=element_rect(fill="white", color="black", size=0.5))
+    
+    if (style == "density") {
+        # Check for proper grouping
+        if (any(duplicated(baseline@db[, c(idColumn, groupColumn)]))) {
+            stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
+        }
+        
+        # Subset to regions of interest
+        dens_names <- baseline@regions        
+        if (!is.null(subsetRegions)) {
+            dens_names <- dens_names[dens_names %in% subsetRegions]        
+        }
+        dens_list <- baseline@pdfs[dens_names]
+        
+        # Get row and column names for PDF matrices
+        group_df <- subset(baseline@db, select=c(idColumn, groupColumn))
+        group_df$GROUP_COLLAPSE <- apply(subset(group_df, select=c(idColumn, groupColumn)), 
+                                         1, paste, collapse=",")
+        col_names <- seq(-20, 20, length.out=ncol(dens_list[[1]]))
+        
+        # Update column and rownames for PDF matrices and subset to Sigma in -5:5
+        for (i in 1:length(dens_list)) {
+            rownames(dens_list[[i]]) <- group_df$GROUP_COLLAPSE
+            colnames(dens_list[[i]]) <- col_names
+            dens_list[[i]] <- dens_list[[i]][, col_names >= sigmaLimits[1] & 
+                                                 col_names <= sigmaLimits[2]]
+        }
+        
+        # Melt density matrices
+        melt_list <- list()
+        for (n in dens_names) {
+            tmp_melt <- reshape2::melt(dens_list[[n]], varnames=c("GROUP_COLLAPSE", "SIGMA"), 
+                                       value.name="DENSITY")
+            melt_list[[n]] <- tmp_melt
+        }
+        dens_df <- ldply(melt_list, .id="REGION")
+        
+        # Assign id and group columns to density data.frame
+        dens_df[, idColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
+                                        idColumn]
+        if (!is.null(groupColumn)) {
+            dens_df[, groupColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
+                                               groupColumn]
+        }    
+        
+        # Plot probability density curve
+        p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="DENSITY")) +
+            base_theme + 
+            xlab(expression(Sigma)) +
+            ylab("Density") +
+            geom_line(aes_string(linetype=idColumn), size=1*size)
+        if (is.null(groupColumn) & facetBy == "region") {
+            p1 <- p1 + facet_grid(REGION ~ .)
+        } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
+            p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+        } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
+            p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
+                aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+        } else if (!is.null(groupColumn) & facetBy == "group") {
+            p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
+                aes(color=REGION) + facet_grid(paste(groupColumn, "~ ."))
+        } else {
+            stop("Cannot facet by group if groupColumn=NULL")
+        }
+    }
+    
+    # Add additional theme elements
+    p1 <- p1 + do.call(theme, list(...))
+    
+    # Plot
+    if (!silent) { 
+        plot(p1)
+    }
+    
+    invisible(p1)
+}
+
+
 #' Plots BASELINe summary statistics
 #' 
 #' \code{plotBaselineSummary} plots a summary of the results of selection analysis 
 #' using the BASELINe method.
 #'
 #' @param    baseline       either a data.frame returned from \link{summarizeBaseline}
-#'                          or a \code{Baseline} object containing selection probability 
-#'                          density functions and summary statistics.
+#'                          or a \code{Baseline} object returned from \link{groupBaseline}
+#'                          containing selection probability density functions and summary 
+#'                          statistics.
 #' @param    idColumn       name of the column in \code{baseline} containing primary identifiers. 
 #'                          If the input is a \code{Baseline} object, then this will be a column
 #'                          in the \code{stats} slot of \code{baseline}.
@@ -870,21 +1045,21 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' @param    groupColors    named vector of colors for entries in \code{groupColumn}, with 
 #'                          names defining unique values in the \code{groupColumn} and values
 #'                          being colors. Also controls the order in which groups appear on the
-#'                          plot. If \code{NULL} default ordering and color palette will be used.
-#'                          Has no effect if \code{facetBy="group"}.
+#'                          plot. If \code{NULL} alphabetical ordering and a default color palette 
+#'                          will be used. Has no effect if \code{facetBy="group"}.
 #' @param    subsetRegions  character vector defining a subset of regions to plot, correspoding 
 #'                          to the regions for which the \code{baseline} data was calculated. If
 #'                          \code{NULL} all regions in \code{baseline} are plotted.
-#' @param    facetBy        one of c("group", "region") defining which category to facet the
+#' @param    facetBy        one of c("group", "region") specifying which category to facet the
 #'                          plot by, either values in \code{groupColumn} ("group") or regions
-#'                          defining the \code{baseline} ("region"). The data that is not used
+#'                          defined in \code{baseline} ("region"). The data that is not used
 #'                          for faceting will be color coded.
 #' @param    style          type of plot to draw. One of:
 #'                          \itemize{
-#'                            \item \code{"mean"}:     plots the mean and confidence interval of
-#'                                                     selection scores for each value in 
+#'                            \item \code{"mean"}:     plots the mean and confidence interval for
+#'                                                     the selection scores of each value in 
 #'                                                     \code{idColumn}. Faceting and coloring
-#'                                                     is determine by values in \code{groupColumn}
+#'                                                     are determine by values in \code{groupColumn}
 #'                                                     and regions defined in \code{baseline}, 
 #'                                                     depending upon the \code{facetBy} argument.
 #'                          }
@@ -904,8 +1079,7 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' db_file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(db_file)
 #' 
-#' # Calculate BASELINe PDFs for all sequences using the focused test statistic, and
-#' # analyzing uptill but not including CDR3
+#' # Calculate BASELINe PDFs for all sequences using the focused test statistic up to CDR3
 #' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
 #' 
 #' # Combine selection scores by samples barcode and isotype primer
@@ -996,167 +1170,6 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
                 aes_string(color=groupColumn) + facet_grid(REGION ~ .)
         } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
             p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
-        } else if (!is.null(groupColumn) & facetBy == "group") {
-            p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
-                aes(color=REGION) + facet_grid(paste(groupColumn, "~ ."))
-        } else {
-            stop("Cannot facet by group if groupColumn=NULL")
-        }
-    }
-    
-    # Add additional theme elements
-    p1 <- p1 + do.call(theme, list(...))
-    
-    # Plot
-    if (!silent) { 
-        plot(p1)
-    }
-    
-    invisible(p1)
-}
-
-
-#' Plots BASELINe probability density functions
-#' 
-#' \code{plotBaselineDensity} plots the probability density functions resulting from selection 
-#' analysis using the BASELINe method.
-#'
-#' @param    baseline       \code{Baseline} object containing selection probability 
-#'                          density functions.
-#' @param    idColumn       name of the column in the \code{db} slot of \code{baseline} 
-#'                          containing primary identifiers.
-#' @param    groupColumn    name of the column in the \code{db} slot of \code{baseline} 
-#'                          containing secondary grouping identifiers. If \code{NULL}, 
-#'                          organize the plot only on values in \code{idColumn}.
-#' @param    groupColors    named vector of colors for entries in \code{groupColumn}, with 
-#'                          names defining unique values in the \code{groupColumn} and values
-#'                          being colors. Also controls the order in which groups appear on the
-#'                          plot. If \code{NULL} default ordering and color palette will be used.
-#'                          Has no effect if \code{facetBy="group"}.
-#' @param    subsetRegions  character vector defining a subset of regions to plot, correspoding 
-#'                          to the regions for which the \code{baseline} data was calculated. If
-#'                          \code{NULL} all regions in \code{baseline} are plotted.
-#' @param    sigmaLimits    numeric vector containing two values defining the \code{c(lower, upper)}
-#'                          bounds of the selection scores to plot.
-#' @param    facetBy        one of c("group", "region") defining which category to facet the
-#'                          plot by, either values in \code{groupColumn} ("group") or regions
-#'                          defining the \code{baseline} ("region"). The data that is not used
-#'                          for faceting will be color coded.
-#' @param    style          type of plot to draw. One of:
-#'                          \itemize{
-#'                            \item \code{"density"}:  plots a set of curves for each probability 
-#'                                                     density function in \code{baseline}, 
-#'                                                     with the line type determined by \code{idColumn}.
-#'                                                     Faceting and coloring is determine by values in 
-#'                                                     \code{groupColumn} and regions defined in 
-#'                                                     \code{baseline}, depending upon the 
-#'                                                     \code{facetBy} argument
-#'                          }
-#' @param    size           numeric scaling factor for lines, points and text in the plot.
-#' @param    silent         if \code{TRUE} do not draw the plot and just return the ggplot2 
-#'                          object; if \code{FALSE} draw the plot.
-#' @param    ...            additional arguments to pass to ggplot2::theme.
-#' 
-#' @return   A ggplot object defining the plot.
-#'
-#' @seealso  Takes as input a \link{Baseline} object returned from \link{groupBaseline}.
-#' @family   selection analysis functions
-#' 
-#' @examples
-#' library(alakazam)
-#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
-#' db <- readChangeoDb(db_file)
-#' 
-#' # Calculate selection scores
-#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
-#' # Combine selection scores by samples barcode and isotype primer
-#' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
-#' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
-#' 
-#' # Plot mean and confidence interval
-#' plotBaselineDensity(baseline_one, "BARCODE", style="density")
-#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", style="density")
-#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
-#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="density")
-#'
-#' # Reorder and recolor groups
-#' group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
-#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
-#' 
-#' @export
-plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
-                                subsetRegions=NULL, sigmaLimits=c(-5, 5), 
-                                facetBy=c("region", "group"), style=c("density"), size=1, 
-                                silent=FALSE, ...) {
-    # Check input
-    style <- match.arg(style)
-    facetBy <- match.arg(facetBy)
-    
-    # Set base plot settings
-    base_theme <- theme_bw() +
-        theme(panel.background=element_blank(),
-              panel.grid.major=element_blank(),
-              panel.grid.minor=element_blank(),
-              panel.border=element_rect(color="black", size=0.5)) +
-        theme(strip.background=element_rect(fill="white", color="black", size=0.5))
- 
-    if (style == "density") {
-        # Check for proper grouping
-        if (any(duplicated(baseline@db[, c(idColumn, groupColumn)]))) {
-            stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
-        }
-        
-        # Subset to regions of interest
-        dens_names <- baseline@regions        
-        if (!is.null(subsetRegions)) {
-            dens_names <- dens_names[dens_names %in% subsetRegions]        
-        }
-        dens_list <- baseline@pdfs[dens_names]
-        
-        # Get row and column names for PDF matrices
-        group_df <- subset(baseline@db, select=c(idColumn, groupColumn))
-        group_df$GROUP_COLLAPSE <- apply(subset(group_df, select=c(idColumn, groupColumn)), 
-                                         1, paste, collapse=",")
-        col_names <- seq(-20, 20, length.out=ncol(dens_list[[1]]))
-        
-        # Update column and rownames for PDF matrices and subset to Sigma in -5:5
-        for (i in 1:length(dens_list)) {
-            rownames(dens_list[[i]]) <- group_df$GROUP_COLLAPSE
-            colnames(dens_list[[i]]) <- col_names
-            dens_list[[i]] <- dens_list[[i]][, col_names >= sigmaLimits[1] & 
-                                               col_names <= sigmaLimits[2]]
-        }
-        
-        # Melt density matrices
-        melt_list <- list()
-        for (n in dens_names) {
-            tmp_melt <- reshape2::melt(dens_list[[n]], varnames=c("GROUP_COLLAPSE", "SIGMA"), 
-                                       value.name="DENSITY")
-            melt_list[[n]] <- tmp_melt
-        }
-        dens_df <- ldply(melt_list, .id="REGION")
-        
-        # Assign id and group columns to density data.frame
-        dens_df[, idColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
-                                        idColumn]
-        if (!is.null(groupColumn)) {
-            dens_df[, groupColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
-                                               groupColumn]
-        }    
-        
-        # Plot probability density curve
-        p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="DENSITY")) +
-            base_theme + 
-            xlab(expression(Sigma)) +
-            ylab("Density") +
-            geom_line(aes_string(linetype=idColumn), size=1*size)
-        if (is.null(groupColumn) & facetBy == "region") {
-            p1 <- p1 + facet_grid(REGION ~ .)
-        } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
-            p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
-        } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
-            p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
-                aes_string(color=groupColumn) + facet_grid(REGION ~ .)
         } else if (!is.null(groupColumn) & facetBy == "group") {
             p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
                 aes(color=REGION) + facet_grid(paste(groupColumn, "~ ."))
