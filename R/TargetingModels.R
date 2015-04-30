@@ -853,8 +853,12 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
     if (is.null(modelDate)) { modelDate <- format(Sys.time(), "%Y-%m-%d") }
 
     # Create models
-    sub_model <- createSubstitutionMatrix(db)
-    mut_model <- createMutabilityMatrix(db, sub_model)
+    sub_model <- createSubstitutionMatrix(db, sequenceColumn=sequenceColumn,
+                                          germlineColumn=germlineColumn,
+                                          vCallColumn=vCallColumn)
+    mut_model <- createMutabilityMatrix(db, sub_model, sequenceColumn=sequenceColumn,
+                                        germlineColumn=germlineColumn,
+                                        vCallColumn=vCallColumn)
 
     # Extend 5-mers with Ns
     sub_model <- extendSubstitutionMatrix(sub_model)
