@@ -797,7 +797,7 @@ calculateTargeting <- function(germlineSeq,
     gaplessSeq <- gsub("\\.", "N", gaplessSeq)
     
     # Re-assigning s_germlineSeq (now has all "." that are not IMGT gaps converted to Ns)
-    s_germlineSeq <- gsub("XXX", "...", s_germlineSeq)
+    s_germlineSeq <- gsub("XXX", "...", gaplessSeq)
     c_germlineSeq <- s2c(s_germlineSeq)
     # Matrix to hold targeting values for each position in c_germlineSeq
     germlineSeqTargeting <- matrix(NA, 

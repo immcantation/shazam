@@ -324,7 +324,7 @@ calcBaselinePdfs <- function( db,
         
         # Calculate the expected frequencies of mutations
         db <- getExpectedMutationFreq( db,
-                                       sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+                                       sequenceColumn=sequenceColumn,
                                        germlineColumn="GERMLINE_IMGT_D_MASK",
                                        regionDefinition=regionDefinition,
                                        targetingModel=targetingModel,
