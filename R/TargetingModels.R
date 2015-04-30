@@ -853,19 +853,23 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
     if (is.null(modelDate)) { modelDate <- format(Sys.time(), "%Y-%m-%d") }
 
     # Create models
-    sub_model <- createSubstitutionMatrix(db, sequenceColumn=sequenceColumn,
+    sub_mat<- createSubstitutionMatrix(db, model=model, 
+                                          sequenceColumn=sequenceColumn,
                                           germlineColumn=germlineColumn,
-                                          vCallColumn=vCallColumn)
-    mut_model <- createMutabilityMatrix(db, sub_model, sequenceColumn=sequenceColumn,
+                                          vCallColumn=vCallColumn,
+                                          multipleMutation=multipleMutation)
+    mut_mat <- createMutabilityMatrix(db, sub_mat, model=model,
+                                        sequenceColumn=sequenceColumn,
                                         germlineColumn=germlineColumn,
-                                        vCallColumn=vCallColumn)
+                                        vCallColumn=vCallColumn,
+                                        multipleMutation=multipleMutation)
 
     # Extend 5-mers with Ns
-    sub_model <- extendSubstitutionMatrix(sub_model)
-    mut_model <- extendMutabilityMatrix(mut_model)
+    sub_mat <- extendSubstitutionMatrix(sub_mat)
+    mut_mat <- extendMutabilityMatrix(mut_mat)
     
     # TODO: this is wrong somehow
-    tar_model <- createTargetingMatrix(sub_model, mut_model) 
+    tar_mat <- createTargetingMatrix(sub_mat, mut_mat) 
     
     # Define TargetingModel object
     model_obj <- new("TargetingModel",
@@ -874,9 +878,9 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
                      species=modelSpecies,
                      date=modelDate,
                      citation=modelCitation,
-                     substitution=sub_model,
-                     mutability=mut_model,
-                     targeting=tar_model)
+                     substitution=sub_mat,
+                     mutability=mut_mat,
+                     targeting=tar_mat)
 
     return(model_obj)
 }
