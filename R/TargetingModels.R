@@ -1126,7 +1126,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     
     # Scaling and layout parameters
     score_offset <- 0
-    score_scale <- 10
+    score_scale <- 15
     text_offset <- -5.6
     
     # Set guide colors
@@ -1219,7 +1219,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             scale_fill_manual(name="", values=dna_colors, guide=FALSE) +
             #scale_fill_manual(name="", values=c(motif_colors, dna_colors), guide=FALSE) +
             geom_segment(data=sub_df, mapping=aes(x=x, xend=x, yend=score, color=motif), 
-                         y=score_offset, size=2*size) +
+                         y=score_offset, size=1.5*size) +
             #geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif), stat="identity", 
             #         position="identity", size=0) +
             #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=5, fill="white") +

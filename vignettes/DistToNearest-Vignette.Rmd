@@ -13,20 +13,23 @@ library(knitr)
 opts_chunk$set(dev='pdf')
 ```
 
-Distance to nearest neighbor is calculated to estimate the threshold 
-for partitioning clonally related sequences. This is done via the 
-following steps:
+Estimating the optimal distance threshold for partitioning clonally related 
+sequences is accomplished by calculating the distance from each sequence in the 
+data set to its nearest neighbor and finding the break point in the resulting 
+bi-modal distribution that separates clonally related from unrelated sequences. 
+This is done via the following steps:
 
-1. Load a Change-O tab-delimited database file
-2. Calculate distance to nearest neighbor
-3. Generate histogram and inspect for threshold separating two modes
+1. Load a Change-O tab-delimited database file.
+2. Calculate the nearest neighbor distances for each sequence.
+3. Generate a histogram of the nearest neighbor distances and inspect for the 
+   threshold separating the two modes.
 
 Load Change-O data
 --------------------------------------------------------------------------------
-A small example Change-O tab-delimited database file is included in the 
-`alakazam` package. Distance to nearest neighbor requires the following fields 
-(columns) to be present in the Change-O file: `V_CALL`, `J_CALL`, 
-`JUNCTION_GAP_LENGTH`, and `JUNCTION`.
+A small example Change-O tab-delimited database file is included in the `shm` 
+package. Calculating the nearest neighbor distances requires the following 
+fields (columns) to be present in the Change-O file: `V_CALL`, `J_CALL`, 
+`JUNCTION_LENGTH`, and `JUNCTION`.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 library(alakazam)
@@ -37,49 +40,61 @@ file <- system.file("extdata", "Influenza.tab", package="shm")
 db <- readChangeoDb(file)
 ```
 
-Calculate distance to nearest neighbor
+Calculate nearest neighbor distances
 --------------------------------------------------------------------------------
 The function for calculating distance between every sequence and its nearest
 neighbor takes a few parameters to adjust how the distance is measured. If a 
-genotype has been inferred using a tool (e.g., TIgGER) and the database has a
-`V_CALL_GENOTYPED` field, then the parameter `genotyped` can be set to TRUE and 
-the more accurate V call will be utilized. Furthermore, for a more leniency 
-toward ambiguous segment calls, the parameter `first` can be set to FALSE, which 
-would use the union of all possible genes to group sequences, rather than the 
-first gene in the field. The `model` parameter determines which underlying SHM 
-model is used to calculate the distance. The default model is `m1n`, a 
-single nucleotide model from Smith et al., J Immunol, 1996. Other options include 
-nucleotide (`ham`) and amino acid (`aa`) Hamming distance, a 3-mer mouse model 
-(`m3n`, Smith et al., J Immunol, 1996), and a 5-mer model inferred from human data 
-(`hs5f`, Yaari et al., Front Immunol., 2013).
-
+genotype has been inferred using the methods in the `tigger` package, and a 
+`V_CALL_GENOTYPED` field has been added to the database, then this column may be 
+used instead of the default `V_CALL` column by specifying the `vCallColumn` 
+argument. This will allows the more accurate V call from `tigger` to be used for 
+grouping of the sequences. Furthermore, for more leniency toward ambiguous 
+V(D)J segment calls, the parameter `first` can be set to `FALSE`. Setting 
+`first=FALSE` will use the union of all possible genes to group sequences, rather 
+than the first gene in the field. The `model` parameter determines which 
+underlying SHM model is used to calculate the distance. The default model is 
+`m1n`, an Ig-specific single nucleotide model similar to a 
+transition/transversion model (Smith et al, J Immunol, 1996). Other options 
+include nucleotide Hamming distance (`ham`), amino acid Hamming distance (`aa`), 
+a 3-mer mouse model (`m3n`) (Smith et al, J Immunol, 1996), and a 5-mer model 
+inferred from human data (`hs5f`) (Yaari et al, Front Immunol, 2013).
 
 ```{r, eval=TRUE, warning=FALSE}
-# Use genotyped V assignments and 5-mer model
-db_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
-
 # Use m1n model and normalize by junction length
 dist_m1n <- distToNearest(db, model="m1n", first=FALSE, normalize="length")
+
+# Use genotyped V assignments and 5-mer model
+dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
 ```
 
 Generate histogram
 --------------------------------------------------------------------------------
-The use of the distance to nearest calculation in the Change-O pipeline is to 
-determine the optimal threshold for separating clonally related sequences 
-(represented by sequences with 'near' neighbors) from singletons (sequences 
-with no 'near' neighbor), which show up as two modes in a histogram. In the 
-example provided here, this threshold is approximately at 0.002 for the 
-S5F model.
+The primary use of the distance to nearest calculation in the Change-O pipeline 
+is to determine the optimal threshold for separating clonally related sequences 
+(represented by sequences with "near"" neighbors) from singletons (sequences 
+without "near"" neighbor), which show up as two modes in a histogram.
+
+```{r, eval=TRUE, warning=FALSE}
+# Generate m1n histogram
+library(ggplot2)
+ggplot() + theme_bw() + ggtitle("Distance to nearest: m1n") + xlab("distance") +
+    geom_histogram(data=dist_m1n, aes(x=DIST_NEAREST), binwidth=0.025, fill="steelblue", color="white") +
+    geom_rug(aes(x=seq(0.0, 0.5, 0.1)), color="firebrick")
+```
+In this example, the length normalized `m1n` model distance threshold would be 
+set to a value near 0.1.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Generate hs5f histogram
-hist(db_hs5f$DIST_NEAREST, main='Histogram - hs5f', 
-     xlab='Distance to Nearest', breaks=50)
-# Zoom in to find threshold at around 5
-hist(db_hs5f$DIST_NEAREST, main='Histogram - hs5f - zoom', 
-     xlab='Distance to Nearest', breaks=100, xlim=c(0, 15), ylim=c(0,50))
+ggplot() + theme_bw() + ggtitle("Distance to nearest: hs5f") + xlab("distance") +
+    geom_histogram(data=dist_hs5f, aes(x=DIST_NEAREST), binwidth=1, fill="steelblue", color="white") +
+    geom_rug(aes(x=seq(0, 15, 1)), color="firebrick")
 
-# Generate m1n histogram
-hist(dist_m1n$DIST_NEAREST, main='Histogram - m1n', 
-     xlab='Distance to Nearest', breaks=25, xlim=c(0, 1))
+# Zoom in to find threshold
+ggplot() + theme_bw() + ggtitle("Distance to nearest: hs5f") + xlab("distance") +
+    geom_histogram(data=dist_hs5f, aes(x=DIST_NEAREST), binwidth=1, fill="steelblue", color="white") +
+    geom_rug(aes(x=seq(0, 15, 1)), color="firebrick") +
+    xlim(c(0, 15)) + scale_y_sqrt()
 ```
+In this example, the unnormalized `hs5f` model distance threshold would be 
+set to a value near 5.

@@ -1568,7 +1568,7 @@ generateUnambiguousRepertoire <- function(repertoireInFile,repertoireOutFile){
 
 
 
-############
+#### Bayes stuff ####
 groupBayes2 = function(indexes, param_resultMat){
     
     BayesGDist_Focused_CDR = calculate_bayesG( x=param_resultMat[indexes,1], N=apply(param_resultMat[indexes,c(1,2,4)],1,sum,na.rm=T), p=apply(param_resultMat[indexes,5:8],1,function(x){x[1]/(x[1]+x[2]+x[4])}))
@@ -1662,10 +1662,7 @@ weighted_conv<-function(x,y,w=1,m=100,length_sigma=4001){
     return(tmp/sum(tmp))
 }
 
-########################
-
-
-
+#### Mutability stuff ####
 
 mutabilityMatrixONE <- rep(0,4)
 names(mutabilityMatrixONE) <- NUCLEOTIDES[1:4]
@@ -1760,7 +1757,7 @@ buildMutabilityModelONE <- function( inputMatrixIndex, model=0 , multipleMutatio
     }
 }
 
-################
+#### Trim stuff ####
 # $Id: trim.R 989 2006-10-29 15:28:26Z ggorjan $
 
 trim <- function(s, recode.factor=TRUE, ...)
@@ -1795,7 +1792,10 @@ trim.data.frame <- function(s, recode.factor=TRUE, ...)
     s[] <- trim.list(s, recode.factor=recode.factor, ...)
     s
 }
-#######################################
+
+
+#### Mutation stuff ####
+
 # Compute the expected for each sequence-germline pair by codon
 getExpectedIndividualByCodon <- function(matInput){
     if( any(grep("multicore",search())) ){
