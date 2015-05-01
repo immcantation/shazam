@@ -177,7 +177,7 @@ editBaseline <- function ( baseline,
 #' Gets the summary statistics of a Baseline object
 #'
 #' \code{getBaselineStats} is an accessor method that returns the 
-#' summary statistics data.frame stored in the \code{stats} slot of a 
+#' summary statistics \code{data.frame} stored in the \code{stats} slot of a 
 #' \link{Baseline} object - provided \link{groupBaseline} has already been run.
 #'
 #' @param    baseline  \code{Baseline} object that has been run through
@@ -193,7 +193,30 @@ editBaseline <- function ( baseline,
 #' library("alakazam")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
-#'                      
+#' # Subset the data for demo purposes
+#' db_subset <- db[sample(5000),] 
+#' 
+#' # Calculate BASELINe
+#' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
+#' # calculates the numbers of observed mutations and expected frequencies of mutations,
+#' # as defined in the IMGT_V_NO_CDR3 and using the HS5FModel targeting model.
+#' # Then, it calculates  the BASELINe posterior probability density functions (PDFs) for
+#' # sequences in the updated db files; using the focused test statistic
+#' db_subset_baseline <- calcBaseline(db_subset, 
+#'                                    sequenceColumn="SEQUENCE_IMGT",
+#'                                    germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                                    testStatistic="focused",
+#'                                    regionDefinition=IMGT_V_NO_CDR3,
+#'                                    targetingModel = HS5FModel,
+#'                                    nproc = 1)
+#' 
+#' # Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 
+#' # respectively to sample barcodes and the constant region isotype primers.
+#' baseline_group <- groupBaseline(db_subset_baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' 
+#' # Get a data.frame of the summary statistics
+#' getBaselineStats(baseline_group)
+#' 
 #' @export
 getBaselineStats <- function(baseline) {
     return(baseline@stats)
@@ -266,13 +289,26 @@ getBaselineStats <- function(baseline) {
 #'  }
 #' 
 #' @examples
-#' library(alakazam)
-#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
-#' db <- readChangeoDb(db_file)
+#' # Load example data
+#' library("alakazam")
+#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#' # Subset the data for demo purposes
+#' db_subset <- db[sample(5000),] 
 #' 
-#' # Calculate BASELINe PDFs for all sequences using the focused test statistic, 
-#' # analyzing up to, but not including, CDR3.
-#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' # Calculate BASELINe
+#' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
+#' # calculates the numbers of observed mutations and expected frequencies of mutations,
+#' # as defined in the IMGT_V_NO_CDR3 and using the HS5FModel targeting model.
+#' # Then, it calculates  the BASELINe posterior probability density functions (PDFs) for
+#' # sequences in the updated db files; using the focused test statistic
+#' db_subset_baseline <- calcBaseline(db_subset, 
+#'                                    sequenceColumn="SEQUENCE_IMGT",
+#'                                    germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                                    testStatistic="focused",
+#'                                    regionDefinition=IMGT_V_NO_CDR3,
+#'                                    targetingModel = HS5FModel,
+#'                                    nproc = 1)
 #' 
 #' @export
 calcBaseline <- function(db,
@@ -570,14 +606,36 @@ calcBaselineBinomialPdf <- function ( x=3,
 #'  }
 #' 
 #' @examples
-#' library(alakazam)
-#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
-#' db <- readChangeoDb(db_file)
+#' # Load example data
+#' library("alakazam")
+#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#' # Subset the data for demo purposes
+#' db_subset <- db[sample(5000),] 
 #' 
-#' # Calculate BASELINe PDFs for all sequences using the focused test statistic, and
-#' # analyzing uptill but not including CDR3
-#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' # Calculate BASELINe
+#' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
+#' # calculates the numbers of observed mutations and expected frequencies of mutations,
+#' # as defined in the IMGT_V_NO_CDR3 and using the HS5FModel targeting model.
+#' # Then, it calculates  the BASELINe posterior probability density functions (PDFs) for
+#' # sequences in the updated db files; using the focused test statistic
+#' db_subset_baseline <- calcBaseline(db_subset, 
+#'                                    sequenceColumn="SEQUENCE_IMGT",
+#'                                    germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                                    testStatistic="focused",
+#'                                    regionDefinition=IMGT_V_NO_CDR3,
+#'                                    targetingModel = HS5FModel,
+#'                                    nproc = 1)
+#' 
+#' # Grouping the PDFs by the BARCODE column in the db, corresponding 
+#' # to sample barcodes.
+#' baseline_one <- groupBaseline(db_subset_baseline, groupBy="BARCODE")
 #'  
+#' # Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 
+#' # respectively to sample barcodes and the constant region isotype primers.
+#' baseline_two <- groupBaseline(db_subset_baseline, groupBy=c("BARCODE", "CPRIMER"))
+
+#' 
 #' # Combine selection scores by samples barcode and isotype primer
 #' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
 #' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))   
@@ -730,15 +788,32 @@ groupBaseline <- function(baseline,
 #' 
 #' @examples
 #' # Load example data
-#' library(alakazam)
-#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
-#' db <- readChangeoDb(db_file)
-#' db <- db[1:5, ]
+#' library("alakazam")
+#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#' # Subset the data for demo purposes
+#' db_subset <- db[sample(5000),] 
 #' 
-#' # Calculate BASELINe PDFs for all sequences using the focused test statistic excluding CDR3
-#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' # Calculate BASELINe
+#' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
+#' # calculates the numbers of observed mutations and expected frequencies of mutations,
+#' # as defined in the IMGT_V_NO_CDR3 and using the HS5FModel targeting model.
+#' # Then, it calculates  the BASELINe posterior probability density functions (PDFs) for
+#' # sequences in the updated db files; using the focused test statistic
+#' db_subset_baseline <- calcBaseline(db_subset, 
+#'                                    sequenceColumn="SEQUENCE_IMGT",
+#'                                    germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                                    testStatistic="focused",
+#'                                    regionDefinition=IMGT_V_NO_CDR3,
+#'                                    targetingModel = HS5FModel,
+#'                                    nproc = 1)
 #' 
-#' stats <- summarizeBaseline(baseline, returnType="df")
+#' # Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 
+#' # respectively to sample barcodes and the constant region isotype primers.
+#' baseline_group <- groupBaseline(db_subset_baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' 
+#' # Get a data.frame of the summary statistics
+#' stats <- summarizeBaseline(baseline_group, returnType="df")
 #'                      
 #' @export
 summarizeBaseline <- function(baseline,
@@ -913,15 +988,34 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' @family   selection analysis functions
 #' 
 #' @examples
-#' library(alakazam)
-#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
-#' db <- readChangeoDb(db_file)
+#' # Load example data
+#' library("alakazam")
+#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#' # Subset the data for demo purposes
+#' db_subset <- db[sample(5000),] 
 #' 
-#' # Calculate selection scores
-#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
-#' # Combine selection scores by samples barcode and isotype primer
-#' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
-#' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' # Calculate BASELINe
+#' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
+#' # calculates the numbers of observed mutations and expected frequencies of mutations,
+#' # as defined in the IMGT_V_NO_CDR3 and using the HS5FModel targeting model.
+#' # Then, it calculates  the BASELINe posterior probability density functions (PDFs) for
+#' # sequences in the updated db files; using the focused test statistic
+#' db_subset_baseline <- calcBaseline(db_subset, 
+#'                                    sequenceColumn="SEQUENCE_IMGT",
+#'                                    germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                                    testStatistic="focused",
+#'                                    regionDefinition=IMGT_V_NO_CDR3,
+#'                                    targetingModel = HS5FModel,
+#'                                    nproc = 1)
+#' 
+#' # Grouping the PDFs by the BARCODE column in the db, corresponding 
+#' # to sample barcodes.
+#' baseline_one <- groupBaseline(db_subset_baseline, groupBy="BARCODE")
+#'  
+#' # Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 
+#' # respectively to sample barcodes and the constant region isotype primers.
+#' baseline_two <- groupBaseline(db_subset_baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Plot mean and confidence interval
 #' plotBaselineDensity(baseline_one, "BARCODE", style="density")
@@ -1075,16 +1169,34 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #' @family   selection analysis functions
 #' 
 #' @examples
-#' library(alakazam)
-#' db_file <- system.file("extdata", "Influenza.tab", package="shm")
-#' db <- readChangeoDb(db_file)
+#' # Load example data
+#' library("alakazam")
+#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' db <- readChangeoDb(dbPath)
+#' # Subset the data for demo purposes
+#' db_subset <- db[sample(5000),] 
 #' 
-#' # Calculate BASELINe PDFs for all sequences using the focused test statistic up to CDR3
-#' baseline <- calcBaseline(db, testStatistic="focused", regionDefinition=IMGT_V_NO_CDR3)
+#' # Calculate BASELINe
+#' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
+#' # calculates the numbers of observed mutations and expected frequencies of mutations,
+#' # as defined in the IMGT_V_NO_CDR3 and using the HS5FModel targeting model.
+#' # Then, it calculates  the BASELINe posterior probability density functions (PDFs) for
+#' # sequences in the updated db files; using the focused test statistic
+#' db_subset_baseline <- calcBaseline(db_subset, 
+#'                                    sequenceColumn="SEQUENCE_IMGT",
+#'                                    germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                                    testStatistic="focused",
+#'                                    regionDefinition=IMGT_V_NO_CDR3,
+#'                                    targetingModel = HS5FModel,
+#'                                    nproc = 1)
 #' 
-#' # Combine selection scores by samples barcode and isotype primer
-#' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
-#' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' # Grouping the PDFs by the BARCODE column in the db, corresponding 
+#' # to sample barcodes.
+#' baseline_one <- groupBaseline(db_subset_baseline, groupBy="BARCODE")
+#'  
+#' # Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 
+#' # respectively to sample barcodes and the constant region isotype primers.
+#' baseline_two <- groupBaseline(db_subset_baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Plot mean and confidence interval
 #' plotBaselineSummary(baseline_one, "BARCODE", style="mean")
@@ -1107,7 +1219,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     # Check arguments
     style <- match.arg(style)
     facetBy <- match.arg(facetBy)
-
+    
     # Check input object
     if (is(baseline, "Baseline")) {
         stats_df <- baseline@stats
