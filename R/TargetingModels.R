@@ -1221,19 +1221,19 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             scale_fill_manual(name="", values=dna_colors, guide=FALSE) +
             #scale_fill_manual(name="", values=c(motif_colors, dna_colors), guide=FALSE) +
             geom_segment(data=sub_df, mapping=aes(x=x, xend=x, yend=score, color=motif), 
-                         y=score_offset, size=1.5*size) +
+                         y=score_offset, size=0.75*size) +
             #geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif), stat="identity", 
             #         position="identity", size=0) +
             #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=5, fill="white") +
             geom_tile(data=sub_melt, mapping=aes(x=x, y=pos, fill=char), size=0, show_guide=FALSE) +
             geom_text(data=sub_text[[1]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=3*size) +
+                      color="black", hjust=0.5, vjust=0.5, size=2*size) +
             geom_text(data=sub_text[[2]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=3*size) +
+                      color="black", hjust=0.5, vjust=0.5, size=2*size) +
             geom_text(data=sub_text[[3]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=4*size) +
+                      color="black", hjust=0.5, vjust=0.5, size=3*size) +
             geom_text(data=sub_text[[4]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=2.5*size)
+                      color="black", hjust=0.5, vjust=0.5, size=1.5*size)
             #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=0.5, fill="white")
         
         if (style == "hedgehog") {

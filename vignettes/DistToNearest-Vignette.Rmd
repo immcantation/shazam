@@ -2,16 +2,24 @@
 title: "SHM: Tuning clonal assignment thresholds by calculating distance to nearest neighbor"
 author: "Namita Gupta"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    fig_height: 4
+    fig_width: 7.5
+    highlight: pygments
+    theme: readable
+    toc: yes
+  pdf_document:
+    fig_height: 4
+    fig_width: 7.5
+    highlight: pygments
+    toc: yes
+    dev: pdf
 vignette: >
   %\VignetteIndexEntry{Distance to nearest neighbor}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
-```{r setup, include=FALSE}
-library(knitr)
-opts_chunk$set(dev="pdf")
-```
 
 Estimating the optimal distance threshold for partitioning clonally related 
 sequences is accomplished by calculating the distance from each sequence in the 
@@ -74,7 +82,7 @@ is to determine the optimal threshold for separating clonally related sequences
 (represented by sequences with "near"" neighbors) from singletons (sequences 
 without "near"" neighbor), which show up as two modes in a histogram.
 
-```{r, eval=TRUE, warning=FALSE, fig.width=7.5}
+```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Generate m1n histogram
 library(ggplot2)
 p1 <- ggplot() + theme_bw() + ggtitle("Distance to nearest: m1n") + xlab("distance") +
@@ -86,7 +94,7 @@ plot(p1)
 In this example, the length normalized `m1n` model distance threshold would be 
 set to a value near 0.1.
 
-```{r, eval=TRUE, warning=FALSE, fig.width=7.5}
+```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Generate hs5f histogram
 p2 <- ggplot() + theme_bw() + ggtitle("Distance to nearest: hs5f") + xlab("distance") +
     geom_histogram(data=dist_hs5f, aes(x=DIST_NEAREST), binwidth=1, fill="steelblue", color="white") +

@@ -2,16 +2,24 @@
 title: "SHM: Inferring SHM targeting models"
 author: "Namita Gupta"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    fig_height: 4.5
+    fig_width: 7.5
+    highlight: pygments
+    theme: readable
+    toc: yes
+  pdf_document:
+    fig_height: 4.5
+    fig_width: 7.5
+    highlight: pygments
+    toc: yes
+    dev: pdf
 vignette: >
-  %\VignetteIndexEntry{SHM Targeting}
+  %\VignetteIndexEntry{SHM Targeting models}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
-```{r setup, include=FALSE}
-library(knitr)
-opts_chunk$set(dev="pdf")
-```
 
 The targeting model is the background likelihood of a particular mutation, based 
 on the surrounding sequence context as well as the mutation itself. The model is 
@@ -25,8 +33,7 @@ likelihood of the observed mutations. This is done via the following steps:
 3. Infer a mutability model, which is likelihood of a given base being mutated
    given the microsequence context and substitution model.
 4. Visualize the mutability model to identify hot and cold spots.
-5. Calculate a nucleotide distance matrix based on the underlying SHM 
-   substitution and mutability models.
+5. Calculate a nucleotide distance matrix based on the underlying SHM models.
 
 Load Change-O data
 --------------------------------------------------------------------------------
@@ -35,7 +42,7 @@ package. Inferring a targeting model requires the following fields (columns) to
 be present in the Change-O file: `SEQUENCE_IMGT`, `GERMLINE_IMGT_D_MASK` and 
 `V_CALL`.
 
-```{r, eval=TRUE, warning=FALSE}
+```{r, eval=TRUE, warning=FALSE, message=FALSE}
 library(alakazam)
 library(shm)
 
@@ -104,12 +111,12 @@ mutability rates corresponds to the likelihood of a given base in the given
 5-mer mutability rates. If the mutability for only specific bases is required, 
 this can be specified via the `nucleotides` argument.
 
-```{r, eval=TRUE, warning=FALSE, fig.width=7.5}
+```{r, eval=TRUE, warning=FALSE}
 # Generate mutability model plot
-plotMutability(model, nucleotides="A", style="hedgehog", size=0.5)
-plotMutability(model, nucleotides="C", style="bar", size=0.5)
-plotMutability(model, nucleotides="G", style="bar", size=0.5)
-plotMutability(model, nucleotides="T", style="bar", size=0.5)
+plotMutability(model, nucleotides="A", style="bar")
+plotMutability(model, nucleotides="C", style="bar")
+plotMutability(model, nucleotides="G", style="bar")
+plotMutability(model, nucleotides="T", style="bar")
 ```
 
 Calculate targeting distance matrix

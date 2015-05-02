@@ -1,17 +1,25 @@
 ---
-title: "SHM: Quantifing selection pressures"
+title: 'SHM: Quantifing selection pressures'
 author: "Namita Gupta"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    fig_height: 4
+    fig_width: 7.5
+    highlight: pygments
+    theme: readable
+    toc: yes
+  pdf_document:
+    fig_height: 4
+    fig_width: 7.5
+    highlight: pygments
+    toc: yes
+    dev: pdf
 vignette: >
-  %\VignetteIndexEntry{Selection quantification}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Selection quantification} 
+  %\VignetteEngine{knitr::rmarkdown} 
   %\usepackage[utf8]{inputenc}
 ---
-```{r setup, include=FALSE}
-library(knitr)
-opts_chunk$set(dev="pdf")
-```
 
 BASELINe quantifies selection pressure by calculating the posterior probability 
 density function (PDF) based on observed mutations compared to expected 
@@ -140,7 +148,7 @@ The `subsetRegions` argument can be used to visualize selection of specific
 regions. Several examples utilizing these different parameters are provided 
 below.
 
-```{r, eval=TRUE, warning=FALSE, fig.width=7.5}
+```{r, eval=TRUE, warning=FALSE}
 # Plot mean and confidence interval by time-point
 plotBaselineSummary(baseline_one, "BARCODE")
 
@@ -161,7 +169,7 @@ given groups. The parameters are the same as those for `plotBaselineSummary`.
 However, rather than plotting the mean and confidence interval, the full density 
 function is shown.
 
-```{r, eval=TRUE, warning=FALSE, fig.width=7.5}
+```{r, eval=TRUE, warning=FALSE}
 # Plot selection PDFs for a subset of the data
 group_colors <- c("RL013"="steelblue", "RL018"="firebrick")
 plotBaselineDensity(baseline_sub, "CPRIMER", "BARCODE",
