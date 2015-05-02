@@ -2,26 +2,35 @@
 title: "SHM: Quantifing selection pressures"
 author: "Namita Gupta"
 date: "`r Sys.Date()`"
-output: rmarkdown::pdf_document
+output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{SHM Selection}
+  %\VignetteIndexEntry{Selection quantification}
   %\VignetteEngine{knitr::rmarkdown}
   %\usepackage[utf8]{inputenc}
 ---
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(dev='pdf')
+opts_chunk$set(dev="pdf")
 ```
 
-BASELINe quantification of selection pressures calculates the posterior probability density function (PDF) based on observed mutations compared to expected based on the underlying targeting model. Selection is quantified via the following steps:
+BASELINe quantifies selection pressure by calculating the posterior probability 
+density function (PDF) based on observed mutations compared to expected 
+mutation rates derived from an underlying SHM targeting model. Selection is 
+quantified via the following steps:
 
-1. Load a Change-O tab-delimited database file
-2. Calculate selection scores and group by relevant fields for comparison
-3. Plot and compare selection scores of different groups of sequences
+1. Load a Change-O tab-delimited database file.
+2. Calculate the selection scores and group by relevant fields for comparison.
+3. Plot and compare selection scores of different groups of sequences.
 
 Load Change-O data
 --------------------------------------------------------------------------------
-A small example Change-O tab-delimited database file is included in the `shm` package. The example dataset consists of a subset of Ig sequencing data from an influenza vaccination study (Laserson et al., PNAS, 2014). The data have sequences from multiple time-points before and after the subject received an influenza vaccination. Quantifying selection requires the following fields (columns) to be present in the Change-O file: `SEQUENCE_IMGT`, and `GERMLINE_IMGT_D_MASK`.
+A small example Change-O tab-delimited database file is included in the `shm` 
+package. The example dataset consists of a subset of Ig sequencing data from an 
+influenza vaccination study (Laserson et al., PNAS, 2014). The data include 
+sequences from multiple time-points before and after the subject received an 
+influenza vaccination. Quantifying selection requires the following fields 
+(columns) to be present in the Change-O file: `SEQUENCE_IMGT` and 
+`GERMLINE_IMGT_D_MASK`.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 library(alakazam)
@@ -34,73 +43,127 @@ db <- readChangeoDb(file)
 
 Calculate selection scores and group by relevant fields for comparison
 --------------------------------------------------------------------------------
-The first step to calculate selection is to call `getClonalConsensus` to collapse sequences by the `CLONE` column, if the data has been divided into clonal groups. The next function (`getObservedMutations`) calculates the number of observed mutations using the `CLONAL_CONSENSUS_SEQUENCE` column generated in the previous step. `getExpectedMutationFreq` calculates the expected frequency of mutations. The underlying targeting model for calculating expectation can be specified using the `targetingModel` parameter; in the example below, the default model (`HS5FModel`) is used. Mutations are counted by these functions separately for complementarity determining (CDR) and framework (FWR) regions. If Ig sequences are not gapped according to IMGT numbering, the region boundaries may be defined using the `regionDefinition` parameter. There are four built in region definitions in the `shm` package. `IMGT_V` is all regions in the V segment grouped as CDR or FWR, `IMGT_V_BY_REGIONS` is all CDR and FWR regions in the V segment treated as individual regions, `IMGT_V_NO_CDR3` (default value of `regionDefinition`) is all regions in the V segment excluding CDR3 grouped as CDR or FWR, and `IMGT_V_BY_REGIONS_NO_CDR3` is all regions in the V segment excluding CDR3 treated as individual regions. Column names for sequence and germline sequence can also be passed in as parameters if they differ from Change-O defaults. 
-
-The counts of observed and expected mutations can be combined to test for selection using `calcBaselinePdfs`. The statistical framework used to test for selection based on mutation counts can be specified using the `testStatistic` parameter. If the previous three functions have not yet been called on the input `data.frame` (as demonstrated by having colunns `OBSERVED` and `EXPECTED`), this function will calculate observed and expected mutations after collapsing by the `CLONE` column.
-
-Selection scores can be used to compare selection pressures between different samples. In the example Influenza dataset, the `BARCODE` field corresponds to samples taken at different timepoints before and after an influenza vaccination. Additionally, the `CPRIMER` field specifies the isotype of the sequence. The `groupBaseline` function convolutes the Baseline PDF of individual sequences (or clones) to get a combined PDF. The field(s) by which to group the sequences are specified with the `groupBy` parameter. The `summarizeBaseline` function takes the `Baseline` object returned by `groupBaseline` and summarizes it into a `data.frame` with grouping fields, number of sequences with observed mutations for each region, selection scores, 95% confidence intervals, and p-value. This summary `data.frame` can be subset to groups of interest and passed to `plotBaselineSummary` for visualization.
+The first step to calculate selection is to call `getClonalConsensus` to 
+collapse sequences by the `CLONE` column, if the data has been divided into 
+clonal groups. 
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Collapse clonal groups into single sequences
-db_collapsed <- getClonalConsensus(db, regionDefinition=IMGT_V_NO_CDR3, 
-                                   collapseByClone=TRUE, nproc=3)
-# Count observed mutations
-db_obs <- getObservedMutations(db_collapsed, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+db_clone <- getClonalConsensus(db, regionDefinition=IMGT_V_NO_CDR3, 
+                               collapseByClone=TRUE, nproc=3)
+```
+
+Following construction of an effective sequence for each clone, the observed
+and expected mutation counts are calculated for each sequence of the 
+`CLONAL_CONSENSUS_SEQUENCE` column adding in the previous step. 
+`getObservedMutations` is used to calculate the number of observed mutations 
+and `getExpectedMutationFreq` calculates the expected frequency of mutations. 
+The underlying targeting model for calculating expectation can be specified 
+using the `targetingModel` parameter. In the example below, the default 
+`HS5FModel` is used. Column names for sequence and germline sequence may
+also be passed in as parameters if they differ from Change-O defaults. 
+
+Mutations are counted by these functions separately for complementarity 
+determining (CDR) and framework (FWR) regions. If Ig sequences are not gapped 
+according to IMGT numbering, the region boundaries may be defined using the 
+`regionDefinition` parameter. There are four built-in region definitions 
+in the `shm` package: 
+
+*  `IMGT_V` is all regions in the V-segment grouped as either CDR or FWR.
+*  `IMGT_V_BY_REGIONS` is all CDR and FWR regions in the V-segment treated as 
+   individual regions.
+*  `IMGT_V_NO_CDR3` (the default value of `regionDefinition`) is all regions in 
+   the V-segment, excluding CDR3, grouped as either CDR or FWR.
+*  `IMGT_V_BY_REGIONS_NO_CDR3` is all regions in the V-segment, excluding CDR3, 
+   treated as individual regions. 
+
+```{r, eval=TRUE, warning=FALSE, results="hide"}
+# Count observed mutations and add OBSERVED columns to db_clone
+db_obs <- getObservedMutations(db_clone, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
                                regionDefinition=IMGT_V_NO_CDR3, nproc=3)
-# Calculate expected mutations
-db_obs_exp <- getExpectedMutationFreq(db_obs, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+# Calculate expected mutations and add EXPECTED columns to db_obs
+db_exp <- getExpectedMutationFreq(db_obs, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
                                       targetingModel=HS5FModel,
                                       regionDefinition=IMGT_V_NO_CDR3, nproc=3)
+````
 
-# Calculate selection scores
-baseline <- calcBaseline(db, testStatistic="focused", nproc=3)
-# Subset data to two time-points and IgA isotype
-db_sub <- subset(db, CPRIMER=="IGHA" & BARCODE %in% c("RL013", "RL018"))
+The counts of observed and expected mutations can be combined to test for selection 
+using `calcBaseline`. The statistical framework used to test for selection based 
+on mutation counts can be specified using the `testStatistic` parameter. If the 
+previous three functions have not yet been called on the input `data.frame` 
+(as demonstrated by having columns beginning with `OBSERVED` and `EXPECTED`), 
+this function will calculate observed and expected mutations after collapsing by 
+the `CLONE` column.
+
+```{r, eval=TRUE, warning=FALSE, results="hide"}
+# Calculate selection scores using the output from getExpectedMutationFreq
+baseline <- calcBaseline(db_exp, testStatistic="focused", nproc=3)
+
+# Subset the original data to two time-points and switched isotypes
+db_sub <- subset(db, CPRIMER %in% c("IGHA", "IGHG") & 
+                     BARCODE %in% c("RL013", "RL018"))
 # Calculate selection scores from scratch on subset
-baseline_pdf_sub <- calcBaseline(db_sub, testStatistic="focused", 
-                                     regionDefinition=IMGT_V_NO_CDR3, nproc=3)
+baseline_sub <- calcBaseline(db_sub, testStatistic="focused", 
+                             regionDefinition=IMGT_V_NO_CDR3, nproc=3)
+```
 
-# Combine selection scores by sample barcode
+Selection scores can be used to compare selection pressures between different 
+samples. In the example influenza dataset, the `BARCODE` field corresponds to 
+samples taken at different timepoints before and after an influenza vaccination. 
+Additionally, the `CPRIMER` field specifies the isotype of the sequence. The 
+`groupBaseline` function convolves the Baseline PDFs of individual sequences 
+(or clones) to get a combined PDF. The field(s) by which to group the sequences are 
+specified with the `groupBy` parameter. The `groupBaseline` function automatically
+calls `summarizeBaseline` to generate summary statistics based on the requested 
+groupings, and populates the `stats` slot of the input `Baseline` object with the 
+number of sequences with observed mutations for each region, selection scores, 95% 
+confidence intervals, and p-values for each grouping. 
+
+```{r, eval=TRUE, warning=FALSE, results="hide"}
+# Combine selection scores by time-point
 baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
-# Combine selection scores by sample barcode and isotype
-baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
-baseline_two_sub <- groupBaseline(baseline_pdf_sub, groupBy=c("BARCODE", "CPRIMER"))
 
-# Subset to only two time-points
-baseline_sub <- subset(getBaselineStats(baseline_two), 
-                       CPRIMER=="IGHA" & BARCODE %in% c("RL013", "RL018"))
+# Combine selection scores by time-point and isotype
+baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+baseline_sub <- groupBaseline(baseline_sub, groupBy=c("BARCODE", "CPRIMER"))
 ```
 
 Plot and compare selection scores of different groups of sequences
 --------------------------------------------------------------------------------
-`plotBaselineSummary` plots the mean and confidence interval of selection scores for the given groups. The `idColumn` parameter specifies the field that contains identifiers of the groups of sequences. If there is a secondary field by which the sequences are grouped, this can be specified using the `groupColumn`. This secondary grouping can have a user-defined color palette passed into `groupColors` or can be separated into facets by setting the `facetBy` parameter to "group". The `subsetRegions` parameter can be used to visualize selection of specific regions. Several examples utilizing these different parameters are provided below.
+`plotBaselineSummary` plots the mean and confidence interval of selection scores 
+for the given groups. The `idColumn` argument specifies the field that contains 
+identifiers of the groups of sequences. If there is a secondary field by which 
+the sequences are grouped, this can be specified using the `groupColumn`. This 
+secondary grouping can have a user-defined color palette passed into 
+`groupColors` or can be separated into facets by setting the `facetBy="group"`. 
+The `subsetRegions` argument can be used to visualize selection of specific 
+regions. Several examples utilizing these different parameters are provided 
+below.
 
-`plotBaselineDensity` plots the full `Baseline` PDF of selection scores for the given groups. The parameters are the same as those for `plotBaselineSummary`, however rather than plotting the mean and confidence interval, the full density function is shown.
-
-```{r, eval=TRUE, warning=FALSE}
+```{r, eval=TRUE, warning=FALSE, fig.width=7.5}
 # Plot mean and confidence interval by time-point
 plotBaselineSummary(baseline_one, "BARCODE")
-```
-```{r, eval=TRUE, warning=FALSE, fig.width=10}
-# Also group selection scores by isotype
-plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER")
-# Reorder and recolor isotype groups
+
+# Plot selection scores by time-point and isotype for only CDR
+plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR")
+
+# Plot only two time-points and recolor isotypes
 group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
                   "IGHG"="seagreen", "IGHA"="steelblue")
-plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors)
-# Only visualize selection scores for CDR
-plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR")
-```
-```{r, eval=TRUE, warning=FALSE, fig.width=8.5}
+plotBaselineSummary(baseline_sub, "BARCODE", "CPRIMER", groupColors=group_colors)
+
 # Group by CDR/FWR and facet by isotype
 plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", facetBy="group")
 ```
-```{r, eval=TRUE, warning=FALSE}
-# Plot subset of data
-plotBaselineSummary(baseline_sub, "BARCODE", "CPRIMER", groupColors=group_colors)
 
-# Plot selection PDFs of subset of data
+`plotBaselineDensity` plots the full `Baseline` PDF of selection scores for the 
+given groups. The parameters are the same as those for `plotBaselineSummary`.
+However, rather than plotting the mean and confidence interval, the full density 
+function is shown.
+
+```{r, eval=TRUE, warning=FALSE, fig.width=7.5}
+# Plot selection PDFs for a subset of the data
 group_colors <- c("RL013"="steelblue", "RL018"="firebrick")
-plotBaselineDensity(baseline_two_sub, "CPRIMER", "BARCODE",
+plotBaselineDensity(baseline_sub, "CPRIMER", "BARCODE",
                     groupColors=group_colors, sigmaLimits=c(-3, 3))
 ```

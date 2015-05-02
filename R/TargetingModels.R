@@ -1116,12 +1116,14 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
 
     # Set base plot settings
     base_theme <- theme_bw() +
-        theme(panel.background=element_blank(),
-              panel.margin=grid::unit(c(0, 0, 0, 0), "inches")) +
-        #theme(axis.title.x=element_blank(),
-        #      axis.text.x=element_blank(), 
-        #      axis.ticks.x=element_blank()) +
-        theme(legend.position="top")
+        theme(plot.margin=grid::unit(c(1, 1, 1, 1), "lines"),
+              panel.margin=grid::unit(0, "lines"),
+              panel.background=element_blank()) +
+        theme(axis.ticks.margin=grid::unit(0, "lines")) +
+        theme(text=element_text(size=10*size),
+              title=element_text(size=10*size),
+              legend.margin=grid::unit(0, "lines"),
+              legend.position="top")
 
     
     # Scaling and layout parameters

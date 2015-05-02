@@ -2,7 +2,7 @@
 title: "SHM: Tuning clonal assignment thresholds by calculating distance to nearest neighbor"
 author: "Namita Gupta"
 date: "`r Sys.Date()`"
-output: rmarkdown::pdf_document
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Distance to nearest neighbor}
   %\VignetteEngine{knitr::rmarkdown}
@@ -10,7 +10,7 @@ vignette: >
 ---
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(dev='pdf')
+opts_chunk$set(dev="pdf")
 ```
 
 Estimating the optimal distance threshold for partitioning clonally related 
@@ -74,27 +74,29 @@ is to determine the optimal threshold for separating clonally related sequences
 (represented by sequences with "near"" neighbors) from singletons (sequences 
 without "near"" neighbor), which show up as two modes in a histogram.
 
-```{r, eval=TRUE, warning=FALSE}
+```{r, eval=TRUE, warning=FALSE, fig.width=7.5}
 # Generate m1n histogram
 library(ggplot2)
-ggplot() + theme_bw() + ggtitle("Distance to nearest: m1n") + xlab("distance") +
+p1 <- ggplot() + theme_bw() + ggtitle("Distance to nearest: m1n") + xlab("distance") +
     geom_histogram(data=dist_m1n, aes(x=DIST_NEAREST), binwidth=0.025, fill="steelblue", color="white") +
     geom_rug(aes(x=seq(0.0, 0.5, 0.1)), color="firebrick")
+plot(p1)
 ```
+
 In this example, the length normalized `m1n` model distance threshold would be 
 set to a value near 0.1.
 
-```{r, eval=TRUE, warning=FALSE}
+```{r, eval=TRUE, warning=FALSE, fig.width=7.5}
 # Generate hs5f histogram
-ggplot() + theme_bw() + ggtitle("Distance to nearest: hs5f") + xlab("distance") +
+p2 <- ggplot() + theme_bw() + ggtitle("Distance to nearest: hs5f") + xlab("distance") +
     geom_histogram(data=dist_hs5f, aes(x=DIST_NEAREST), binwidth=1, fill="steelblue", color="white") +
     geom_rug(aes(x=seq(0, 15, 1)), color="firebrick")
+plot(p2)
 
 # Zoom in to find threshold
-ggplot() + theme_bw() + ggtitle("Distance to nearest: hs5f") + xlab("distance") +
-    geom_histogram(data=dist_hs5f, aes(x=DIST_NEAREST), binwidth=1, fill="steelblue", color="white") +
-    geom_rug(aes(x=seq(0, 15, 1)), color="firebrick") +
-    xlim(c(0, 15)) + scale_y_sqrt()
+p3 <- p2 + xlim(c(0, 15)) + scale_y_sqrt()
+plot(p3)
 ```
+
 In this example, the unnormalized `hs5f` model distance threshold would be 
 set to a value near 5.

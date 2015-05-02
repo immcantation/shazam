@@ -499,7 +499,7 @@ binMutationsByRegion <- function(mutations_array,
 #' \code{getExpectedMutationFreq} calculates the expected mutation frequencies for 
 #' sequences.
 #'
-#' @param   db                  \code{data.frame} containing sequence data.
+#' @param    db                \code{data.frame} containing sequence data.
 #' @param    sequenceColumn    \code{character} name of the column containing input 
 #'                             sequences.
 #' @param    germlineColumn    \code{character} name of the column containing 

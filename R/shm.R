@@ -114,8 +114,8 @@
 #' @import   grid
 #' @import   ggplot2
 #' @import   plyr
+#' @import   reshape2
 #' @import   scales
-#' @import   zoo
 #' @importFrom  SDMTools  wt.sd 
 #' @importFrom  seqinr    c2s
 #' @importFrom  seqinr    s2c
