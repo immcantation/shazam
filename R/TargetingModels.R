@@ -901,7 +901,11 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #'           sequence.
 #'           
 #' @details
-#' TODO
+#' The targeting model is turned into a distance matrix by 1) converting 
+#' likelihood of being mutated (p = mutability*substitution) to distance (1/sqrt(p))
+#' 2) dividing this distance by the standard deviation of the distances for 5-mers
+#' without Ns 3) converting all infinite, no change (e.g., A->A), and NA distances to 
+#' zero and 4) bounding extreme values at 5.
 #'    
 #' @seealso  Takes as input a \link{TargetingModel} object.
 #' @family   targeting model functions

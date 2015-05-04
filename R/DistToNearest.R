@@ -24,12 +24,11 @@ slidingArrayOf5mers <- function(strSequence){
 
 # Get distance between two sequences of same length, broken by a sliding window of 5mers
 #
-# @param    seq1          first nucleotide sequence.
-# @param    seq2          second nucleotide sequence.
+# @param    seq1                first nucleotide sequence, broken into 5mers.
+# @param    seq2                second nucleotide sequence, broken into 5mers.
 # @param    targeting_model     targeting model.
-# @param    normalize     The method of normalization. Default is "none".
-#                         "length" = normalize distance by length of junction.
-#                         "mutations" = normalize distance by number of mutations in junction.
+# @param    normalize           The method of normalization. Default is "none".
+#                               "length" = normalize distance by length of junction.
 # @return   distance between two sequences.
 #
 # @examples
@@ -194,14 +193,12 @@ distSeqHam <- function(seq1, seq2, model=c("ham","aa"),
 }
 
 
-# Given an array of junction sequences, find the pairwise distances
+# Given an array of nucleotide sequences, find the pairwise distances
 # 
-# @param   arrJunctions   character vector of junction sequences.
-# @param   model          name of SHM targeting model.
-# @param   normalize     The method of normalization. Default is "none".
-#                        "length" = normalize distance by length of junction.
-#                        "mutations" = normalize distance by number of mutations in junction.
-#                        If a numeric value is passed, then the computed distance is divided by the given value.
+# @param   arrJunctions   character vector of nucleotide sequences.
+# @param   model          SHM targeting model.
+# @param   normalize      The method of normalization. Default is "none".
+#                         "length" = normalize distance by length of junction.
 # @return  A matrix of pairwise distances between junction sequences.
 # 
 # @details
@@ -413,7 +410,7 @@ getClosestHam <- function(arrJunctions, model=c("ham","aa"),
 #'                           Also used to determine sequence length for grouping.
 #' @param    vCallColumn     name of the column containing the V-segment allele calls.
 #' @param    jCallColumn     name of the column containing the J-segment allele calls.
-#' @param    model           SHM targeting model, which must be one of 
+#' @param    model           underlying SHM model, which must be one of 
 #'                           \code{c("m1n", "ham", "aa", "m3n", "hs5f")}.
 #'                           See Details for further information.
 #' @param    normalize       method of normalization. The default is "none". If the "length" 
@@ -428,7 +425,14 @@ getClosestHam <- function(arrJunctions, model=c("ham","aa"),
 #'           \code{DIST_NEAREST} column.
 #'
 #' @details
-#' TODO.
+#' The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
+#' sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
+#' with the ideal threshold being a value that separates the two modes.
+#' 
+#' "hs5f" and "m3n" use distance derived from the \link{HS5FModel} and \link{M3NModel} respectively 
+#' using \link{calcTargetingDistance}. "m1n" uses \link{M1NDistance} to calculate distances.
+#' "ham" uses a nucleotide hamming distance matrix from \link{getDNADistMatrix}, with 
+#' gaps being zero. "aa" uses an amino acid hamming distance matrix from \link{getAADistMatrix}.
 #' 
 #' @references
 #' \enumerate{
@@ -444,7 +448,9 @@ getClosestHam <- function(arrJunctions, model=c("ham","aa"),
 #'  }
 #'  
 #' @seealso  See \link{calcTargetingDistance} for generating nucleotide distance matrices 
-#'           from a \link{TargetingModel} object.
+#'           from a \link{TargetingModel} object. See \link{M1NDistance}, \link{M3NModel}, 
+#'           \link{HS5FModel}, \link{getDNADistMatrix}, and \link{getAADistMatrix}
+#'           for individual model details.
 #' 
 #' @examples
 #' # Load example data
@@ -452,7 +458,7 @@ getClosestHam <- function(arrJunctions, model=c("ham","aa"),
 #' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
 #' db <- readChangeoDb(file)
 #'
-#' # Use genotyped V assignments and 5-mer model
+#' # Use genotyped V assignments and HS5F model
 #' dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
 #' hist(dist_hs5f$DIST_NEAREST, breaks=100, xlim=c(0, 60))
 #' 
