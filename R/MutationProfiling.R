@@ -851,3 +851,20 @@ calculateMutationalPaths <- function(germlineSeq,
     
     return(matMutationTypes)
 }
+
+#### Additional helper functions ####
+# Given a nuclotide position, returns the codon number
+# e.g. nuc 86  = codon 29
+getCodonNumb <- function(nucPos){
+  return( ceiling(nucPos/3) )
+}
+
+# Given a codon, returns all the nuc positions that make the codon
+getCodonNucs <- function(codonNumb){
+  getCodonPos(codonNumb*3)
+}
+
+# Given a nucleotide postions return the position in the codon
+getContextInCodon <- function(nucPos){
+  return( {nucPos-1}%%3+1 )
+}

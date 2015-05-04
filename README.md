@@ -11,13 +11,15 @@ R 3.0
 R packages
 
   -  alakazam
+  -  data.table
   -  doSNOW
   -  ggplot2
-  -  grid
+  -  foreach
   -  plyr
+  -  reshape2
+  -  scales  
   -  SDMTools
   -  seqinr
-  -  zoo
 
 Mercurial Configuration
 -------------------------------------------------------------------------------

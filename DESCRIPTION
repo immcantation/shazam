@@ -36,4 +36,3 @@ Collate:
     'DistToNearest.R'
     'MutationProfiling.R'
     'TargetingModels.R'
-    'selection.R'
