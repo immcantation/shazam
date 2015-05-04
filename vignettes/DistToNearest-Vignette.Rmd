@@ -1,26 +1,25 @@
 ---
-title: "SHM: Tuning clonal assignment thresholds by calculating distance to nearest neighbor"
+title: 'SHM: Tuning clonal assignment thresholds by calculating distance to nearest
+  neighbor'
 author: "Namita Gupta"
-date: "`r Sys.Date()`"
+date: '`r Sys.Date()`'
 output:
+  pdf_document:
+    dev: pdf
+    fig_height: 4
+    fig_width: 7.5
+    highlight: pygments
+    toc: yes
   html_document:
     fig_height: 4
     fig_width: 7.5
     highlight: pygments
     theme: readable
     toc: yes
-  pdf_document:
-    fig_height: 4
-    fig_width: 7.5
-    highlight: pygments
-    toc: yes
-    dev: pdf
 geometry: margin=1in
 fontsize: 11pt
-vignette: >
-  %\VignetteIndexEntry{Distance to nearest neighbor}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\usepackage[utf8]{inputenc}
+vignette: |
+  %\VignetteIndexEntry{Distance to nearest neighbor} %\VignetteEngine{knitr::rmarkdown} %\usepackage[utf8]{inputenc}
 ---
 
 Estimating the optimal distance threshold for partitioning clonally related 
@@ -74,7 +73,8 @@ inferred from human data (`hs5f`) (Yaari et al, Front Immunol, 2013).
 dist_m1n <- distToNearest(db, model="m1n", first=FALSE, normalize="length")
 
 # Use genotyped V assignments and 5-mer model
-dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
+dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", 
+                           first=FALSE)
 ```
 
 Generate histogram
@@ -87,8 +87,10 @@ without "near"" neighbor), which show up as two modes in a histogram.
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Generate m1n histogram
 library(ggplot2)
-p1 <- ggplot() + theme_bw() + ggtitle("Distance to nearest: m1n") + xlab("distance") +
-    geom_histogram(data=dist_m1n, aes(x=DIST_NEAREST), binwidth=0.025, fill="steelblue", color="white") +
+p1 <- ggplot() + theme_bw() + 
+    ggtitle("Distance to nearest: m1n") + xlab("distance") +
+    geom_histogram(data=dist_m1n, aes(x=DIST_NEAREST), binwidth=0.025, 
+                   fill="steelblue", color="white") +
     geom_rug(aes(x=seq(0.0, 0.5, 0.1)), color="firebrick")
 plot(p1)
 ```
@@ -98,8 +100,10 @@ set to a value near 0.1.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Generate hs5f histogram
-p2 <- ggplot() + theme_bw() + ggtitle("Distance to nearest: hs5f") + xlab("distance") +
-    geom_histogram(data=dist_hs5f, aes(x=DIST_NEAREST), binwidth=1, fill="steelblue", color="white") +
+p2 <- ggplot() + theme_bw() + 
+    ggtitle("Distance to nearest: hs5f") + xlab("distance") +
+    geom_histogram(data=dist_hs5f, aes(x=DIST_NEAREST), binwidth=1, 
+                   fill="steelblue", color="white") +
     geom_rug(aes(x=seq(0, 15, 1)), color="firebrick")
 plot(p2)
 
