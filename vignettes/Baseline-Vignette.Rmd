@@ -53,21 +53,21 @@ db <- readChangeoDb(file)
 
 Calculate selection scores and group by relevant fields for comparison
 --------------------------------------------------------------------------------
-The first step to calculate selection is to call `getClonalConsensus` to 
+The first step to calculate selection is to call `getDBClonalConsensus` to 
 collapse sequences by the `CLONE` column, if the data has been divided into 
 clonal groups. 
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Collapse clonal groups into single sequences
-db_clone <- getClonalConsensus(db, regionDefinition=IMGT_V_NO_CDR3, 
+db_clone <- getDBClonalConsensus(db, regionDefinition=IMGT_V_NO_CDR3, 
                                collapseByClone=TRUE, nproc=3)
 ```
 
 Following construction of an effective sequence for each clone, the observed
 and expected mutation counts are calculated for each sequence of the 
 `CLONAL_CONSENSUS_SEQUENCE` column adding in the previous step. 
-`getObservedMutations` is used to calculate the number of observed mutations 
-and `getExpectedMutationFreq` calculates the expected frequency of mutations. 
+`getDBObservedMutations` is used to calculate the number of observed mutations 
+and `getDBExpectedMutations` calculates the expected frequency of mutations. 
 The underlying targeting model for calculating expectation can be specified 
 using the `targetingModel` parameter. In the example below, the default 
 `HS5FModel` is used. Column names for sequence and germline sequence may
@@ -89,10 +89,10 @@ in the `shm` package:
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Count observed mutations and add OBSERVED columns to db_clone
-db_obs <- getObservedMutations(db_clone, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+db_obs <- getDBObservedMutations(db_clone, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
                                regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 # Calculate expected mutations and add EXPECTED columns to db_obs
-db_exp <- getExpectedMutationFreq(db_obs, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+db_exp <- getDBExpectedMutations(db_obs, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
                                       targetingModel=HS5FModel,
                                       regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 ````
@@ -106,7 +106,7 @@ this function will calculate observed and expected mutations after collapsing by
 the `CLONE` column.
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
-# Calculate selection scores using the output from getExpectedMutationFreq
+# Calculate selection scores using the output from getDBExpectedMutations
 baseline <- calcBaseline(db_exp, testStatistic="focused", nproc=3)
 
 # Subset the original data to two time-points and switched isotypes

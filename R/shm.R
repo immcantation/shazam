@@ -59,9 +59,9 @@
 #' \itemize{
 #'   \item  Mutational profiling
 #'      \itemize{
-#'        \item  \link{getClonalConsensus}:       Build clonal consensus sequence.
-#'        \item  \link{getObservedMutations}:     Compute observed mutation counts.
-#'        \item  \link{getExpectedMutationFreq}:  Compute expected mutation frequencies.
+#'        \item  \link{getDBClonalConsensus}:       Build clonal consensus sequence.
+#'        \item  \link{getDBObservedMutations}:     Compute observed mutation counts.
+#'        \item  \link{getDBExpectedMutations}:  Compute expected mutation frequencies.
 #'      }
 #'   \item  \link{calcBaseline}:           Calculate the BASELINe probability
 #'                                         density functions (PDFs).

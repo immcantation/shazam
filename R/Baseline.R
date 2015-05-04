@@ -370,28 +370,28 @@ calcBaseline <- function(db,
         
         # Collapse the sequences by the CLONE column (if present)
         if( "CLONE" %in% colnames(db) ) {                       
-            db <- getClonalConsensus( db, 
+          db <- getDBClonalConsensus( db, 
                                       cloneColumn="CLONE", 
                                       sequenceColumn=sequenceColumn,
                                       germlineColumn=germlineColumn,
-                                      collapseByClone=TRUE, nproc=nproc_arg)            
-            sequenceColumn="CLONAL_CONSENSUS_SEQUENCE"
+                                      collapseByClone=TRUE, nproc=nproc_arg )            
+          sequenceColumn="CLONAL_CONSENSUS_SEQUENCE"
         }
         
         # Calculate the numbers of observed mutations
-        db <- getObservedMutations( db,
-                                    sequenceColumn=sequenceColumn,
-                                    germlineColumn="GERMLINE_IMGT_D_MASK",
-                                    regionDefinition=regionDefinition,
-                                    nproc=0 )
+        db <- getDBObservedMutations( db,
+                                      sequenceColumn=sequenceColumn,
+                                      germlineColumn="GERMLINE_IMGT_D_MASK",
+                                      regionDefinition=regionDefinition,
+                                      nproc=0 )
         
         # Calculate the expected frequencies of mutations
-        db <- getExpectedMutationFreq( db,
-                                       sequenceColumn=sequenceColumn,
-                                       germlineColumn="GERMLINE_IMGT_D_MASK",
-                                       regionDefinition=regionDefinition,
-                                       targetingModel=targetingModel,
-                                       nproc=0 )
+        db <- getDBExpectedMutations( db,
+                                      sequenceColumn=sequenceColumn,
+                                      germlineColumn="GERMLINE_IMGT_D_MASK",
+                                      regionDefinition=regionDefinition,
+                                      targetingModel=targetingModel,
+                                      nproc=0 )
     }
     
     # Calculate PDFs for each sequence
