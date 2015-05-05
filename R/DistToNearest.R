@@ -513,39 +513,76 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
   db$L <- nchar(db[, sequenceColumn])
   
   # Create cluster of nproc size and export namespaces
-  cluster <- makeCluster(nproc, type = "SOCK")
-  registerDoSNOW(cluster)
-  clusterEvalQ(cluster, library(shm))
+  # If user wants to paralellize this function and specifies nproc > 1, then
+  # initialize and register slave R processes/clusters & 
+  # export all nesseary environment variables, functions and packages.
+  if( nproc==1 ) {
+    # If needed to run on a single core/cpu then, regsiter DoSEQ 
+    # (needed for 'foreach' in non-parallel mode)
+    registerDoSEQ()
+  } else {
+    if(nproc != 0) { cluster <- makeCluster(nproc, type="SOCK") }
+    cluster <- makeCluster(nproc, type = "SOCK")
+    registerDoSNOW(cluster)
+    clusterEvalQ(cluster, library(shm))
+  }
+  
+
   
   # Calculate distance to nearest neighbor
   # cat("Calculating distance to nearest neighbor\n")
+  
+  # Convert the db (data.frame) to a data.table & set keys
+  # This is an efficient way to get the groups of V J L, instead of doing dplyr
+  dt <- data.table(db)
+  # Get the group indexes
+  dt <- dt[ , list( yidx = list(.I) ) , by = list(V,J,L) ]
+  groups <- dt[,yidx]
+  lenGroups <- length(groups)
+  
+  # Export groups to the clusters
+  if (nproc>1) { clusterExport(cluster, list("db", 
+                                             "groups", 
+                                             "sequenceColumn"), envir=environment()) }
+  
   if (model %in% c("hs5f", "m3n")) {
     # Export targeting model to processes
-    clusterExport(cluster, list("targeting_model"), envir=environment())
-    
-    db <- arrange(ddply(db, .(V, J, L), function(piece) 
-                        mutate(piece, DIST_NEAREST=getClosestBy5mers(eval(parse(text=sequenceColumn)),
-                                                                     targeting_model=targeting_model,
-                                                                     normalize=normalize)),
-                        .parallel=TRUE),
-                  ROW_ID)
-  } else if (model == "m1n") {
-    db <- arrange(ddply(db, .(V, J, L), function(piece) 
-                        mutate(piece, DIST_NEAREST=getClosestM1N(eval(parse(text=sequenceColumn)),
-                                                                 normalize=normalize)),
-                        .parallel=TRUE),
-                  ROW_ID)
+    if (nproc>1) { clusterExport(cluster, list("targeting_model"), envir=environment()) }    
+    list_db <-
+      foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
+        db_group <- db[groups[[i]],]
+        db_group$DIST_NEAREST <-
+          getClosestBy5mers( db[groups[[i]],sequenceColumn],
+                             targeting_model=targeting_model,
+                             normalize=normalize )
+        return(db_group)
+      }    
+  } else if (model == "m1n") {    
+    list_db <-
+      foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
+        db_group <- db[groups[[i]],]
+        db_group$DIST_NEAREST <-
+          getClosestM1N( db[groups[[i]],sequenceColumn],
+                         normalize=normalize )
+        return(db_group)
+      } 
   } else if (model %in% c("ham", "aa")) {    
-    db <- arrange(ddply(db, .(V, J, L), function(piece) 
-                        mutate(piece, DIST_NEAREST=getClosestHam(eval(parse(text=sequenceColumn)),
-                                                                 model=model,
-                                                                 normalize=normalize)),
-                        .parallel=TRUE),
-                  ROW_ID)
+    list_db <-
+      foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
+        db_group <- db[groups[[i]],]
+        db_group$DIST_NEAREST <-
+          getClosestHam( db[groups[[i]],sequenceColumn],
+                         normalize=normalize )
+        return(db_group)
+      }        
   }
   
+  # Convert list from foreach into a db data.frame
+  db <- do.call(plyr::rbind.fill, list_db)
+  db <- db[order(db[,"ROW_ID"]),]
+  
   # Stop the cluster
-  stopCluster(cluster)
+  if( nproc>1) { stopCluster(cluster) }
   
   return(db[, !(names(db) %in% c("V", "J", "L", "ROW_ID", "V1", "J1"))])
 }

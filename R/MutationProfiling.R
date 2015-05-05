@@ -124,11 +124,11 @@ getDBClonalConsensus <- function(db,
     cat("Building clonal consensus sequences...\n")
     
     list_ClonalConsensus <-
-        foreach(i=icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass') %dopar% {
-            clonalConsensus(inputSeq = db[groups[[i]],sequenceColumn],
-                            germlineSeq = db[groups[[i]],germlineColumn],
-                            regionDefinition = regionDefinition)
-        }
+      foreach(i=icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass') %dopar% {
+        getClonalConsensus(inputSeq = db[groups[[i]],sequenceColumn],
+                           germlineSeq = db[groups[[i]],germlineColumn],
+                           regionDefinition = regionDefinition)
+      }
     
     # Stop SNOW cluster
     if(nproc > 1) { stopCluster(cluster) }
@@ -147,9 +147,9 @@ getDBClonalConsensus <- function(db,
 
 
 # Helper function for getDBClonalConsensus
-clonalConsensus <- function(inputSeq, germlineSeq, 
-                            regionDefinition=NULL, 
-                            nonTerminalOnly=0){    
+getClonalConsensus <- function(inputSeq, germlineSeq, 
+                               regionDefinition=NULL, 
+                               nonTerminalOnly=0){    
     
     # Find length of shortest input sequence
     # This is used to trim all the sequencesto that length
@@ -208,8 +208,8 @@ clonalConsensus <- function(inputSeq, germlineSeq,
 
 #' Calculate observed numbers of mutations
 #'
-#' \code{getDBObservedMutations} calculates the observed number of mutations for each sequence
-#' in the input \code{data.frame}.
+#' \code{getDBObservedMutations} calculates the observed number of mutations for each 
+#' sequence in the input \code{data.frame}.
 #'
 #' @param    db                 \code{data.frame} containing sequence data.
 #' @param    sequenceColumn     \code{character} name of the column containing input 
@@ -270,10 +270,10 @@ clonalConsensus <- function(inputSeq, germlineSeq,
 #'                      
 #' @export
 getDBObservedMutations <- function(db, 
-                                 sequenceColumn="SEQUENCE_IMGT",
-                                 germlineColumn="GERMLINE_IMGT_D_MASK",
-                                 regionDefinition=IMGT_V_NO_CDR3,
-                                 nproc=1) {
+                                   sequenceColumn="SEQUENCE_IMGT",
+                                   germlineColumn="GERMLINE_IMGT_D_MASK",
+                                   regionDefinition=IMGT_V_NO_CDR3,
+                                   nproc=1) {
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
