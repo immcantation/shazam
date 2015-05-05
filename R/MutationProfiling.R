@@ -630,7 +630,7 @@ calcDBExpectedMutations <- function(db,
 #' \link{calcDBExpectedMutations}. 
 #'
 #' @param    germlineSeq       germline (reference) sequence.
-#' @param    inputSeq          input (observed) sequences. If this is not \code{NULL}, 
+#' @param    inputSeq          input (observed) sequence. If this is not \code{NULL}, 
 #'                             then \code{germlineSeq} will be processed to be the same
 #'                             same length as \code{inputSeq} and positions in 
 #'                             \code{germlineSeq} corresponding to positions with Ns in 

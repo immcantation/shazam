@@ -627,11 +627,6 @@ calcBaselineBinomialPdf <- function ( x=3,
 #' # Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 
 #' # respectively to sample barcodes and the constant region isotype primers.
 #' baseline_two <- groupBaseline(db_baseline, groupBy=c("BARCODE", "CPRIMER"))
-
-#' 
-#' # Combine selection scores by samples barcode and isotype primer
-#' baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
-#' baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))   
 #'                   
 #' @export
 groupBaseline <- function(baseline,

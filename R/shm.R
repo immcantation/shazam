@@ -101,8 +101,8 @@
 #'  }
 #'
 #' @seealso
-#' The Change-O suite of tools includes three separate R packages: \link{alakazam}, 
-#' \link{tigger}, and \link{shm}.
+#' The Change-O suite of tools includes three separate R packages: \link[alakazam]{alakazam}, 
+#' \link[tigger]{tigger}, and \link[shm]{shm}.
 #' 
 #' @name     shm
 #' @docType  package
