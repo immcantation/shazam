@@ -370,7 +370,7 @@ calcBaseline <- function(db,
         
         # Collapse the sequences by the CLONE column (if present)
         if( "CLONE" %in% colnames(db) ) {                       
-          db <- getDBClonalConsensus( db, 
+          db <- claclDBClonalConsensus( db, 
                                       cloneColumn="CLONE", 
                                       sequenceColumn=sequenceColumn,
                                       germlineColumn=germlineColumn,
@@ -379,14 +379,14 @@ calcBaseline <- function(db,
         }
         
         # Calculate the numbers of observed mutations
-        db <- getDBObservedMutations( db,
+        db <- claclDBObservedMutations( db,
                                       sequenceColumn=sequenceColumn,
                                       germlineColumn="GERMLINE_IMGT_D_MASK",
                                       regionDefinition=regionDefinition,
                                       nproc=0 )
         
         # Calculate the expected frequencies of mutations
-        db <- getDBExpectedMutations( db,
+        db <- claclDBExpectedMutations( db,
                                       sequenceColumn=sequenceColumn,
                                       germlineColumn="GERMLINE_IMGT_D_MASK",
                                       regionDefinition=regionDefinition,
