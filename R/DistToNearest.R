@@ -35,8 +35,8 @@ slidingArrayOf5mers <- function(strSequence){
 # seq1 = c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
 # seq2 = c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
 #
-# distSeq5Mers(seq1, seq2, HS5FModel)
-distSeq5Mers <- function(seq1, seq2, targeting_model, 
+# distSeq5mers(seq1, seq2, HS5FModel)
+distSeq5mers <- function(seq1, seq2, targeting_model, 
                         normalize=c("none" ,"length", "mutations")) {
   # Evaluate choices
   normalize <- match.arg(normalize)
@@ -95,8 +95,8 @@ distSeq5Mers <- function(seq1, seq2, targeting_model,
 # seq1 = c("A", "C", "G", "T", "A", "C", "G", "T", "A", "C", "G", "T")
 # seq2 = c("A", "C", "G", "A", "A", "C", "G", "T", "A", "C", "G", "T")
 # 
-# distSeqM1n(seq1, seq2)
-distSeqM1n <- function(seq1, seq2, normalize=c("none" ,"length", "mutations")) {
+# distSeqM1N(seq1, seq2)
+distSeqM1N <- function(seq1, seq2, normalize=c("none" ,"length", "mutations")) {
   # Evaluate choices
   normalize <- match.arg(normalize)
   
@@ -229,15 +229,15 @@ getPairwiseDistances <- function(arrJunctions, targeting_model,
   # 12345   ABCDE   JKLMN
   # 23456   BCDEF   KLMNO
   # 34567   CDEFG   LMNOP
-  matSeqSlidingFiveMer <- sapply(arrJunctions, function(x) { slidingArrayOf5mers(x) }, simplify="matrix")
+  .matSeqSlidingFiveMer <- sapply(arrJunctions, function(x) { slidingArrayOf5mers(x) }, simplify="matrix")
 
   # Compute pairwise distance between all sequences' fivemers (by column)
   matDistance <-
     sapply(1:numbOfJunctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfJunctions, function(j) {
-      distSeq5Mers(matSeqSlidingFiveMer[,i],
-                  matSeqSlidingFiveMer[,j],
-                  targeting_model,
-                  normalize=normalize)
+      distSeq5mers(.matSeqSlidingFiveMer[,i],
+                   .matSeqSlidingFiveMer[,j],
+                   targeting_model,
+                   normalize=normalize)
     })))
   # Make distance matrix symmetric
   matDistance <- matDistance + t(matDistance)
@@ -342,7 +342,7 @@ getClosestM1N <- function(arrJunctions, normalize=c("none" ,"length", "mutations
     charDf <- ldply(strsplit(arrJunctionsUnique, ''))
     matDistance <-
       sapply(1:numbOfUniqueJunctions, function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJunctions, function(j) {
-        distSeqM1n(charDf[i,], charDf[j,], normalize=normalize)
+        distSeqM1N(charDf[i,], charDf[j,], normalize=normalize)
       })))
     matDistance <- matDistance + t(matDistance)
     # Find minimum distance for each sequence

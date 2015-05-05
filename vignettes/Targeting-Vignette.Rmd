@@ -1,26 +1,24 @@
 ---
-title: "SHM: Inferring SHM targeting models"
+title: 'SHM: Inferring SHM targeting models'
 author: "Namita Gupta"
-date: "`r Sys.Date()`"
+date: '`r Sys.Date()`'
 output:
+  pdf_document:
+    dev: pdf
+    fig_height: 4.5
+    fig_width: 7.5
+    highlight: pygments
+    toc: yes
   html_document:
     fig_height: 4.5
     fig_width: 7.5
     highlight: pygments
     theme: readable
     toc: yes
-  pdf_document:
-    fig_height: 4.5
-    fig_width: 7.5
-    highlight: pygments
-    toc: yes
-    dev: pdf
 geometry: margin=1in
 fontsize: 11pt
-vignette: >
-  %\VignetteIndexEntry{SHM Targeting models}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\usepackage[utf8]{inputenc}
+vignette: |
+  %\VignetteIndexEntry{SHM Targeting models} %\VignetteEngine{knitr::rmarkdown} %\usepackage[utf8]{inputenc}
 ---
 
 The targeting model is the background likelihood of a particular mutation, based 
@@ -113,10 +111,14 @@ mutability rates corresponds to the likelihood of a given base in the given
 5-mer mutability rates. If the mutability for only specific bases is required, 
 this can be specified via the `nucleotides` argument.
 
-```{r, eval=TRUE, warning=FALSE}
-# Generate mutability model plot
-plotMutability(model, nucleotides="A", style="bar")
-plotMutability(model, nucleotides="C", style="bar")
+```{r, eval=TRUE, warning=FALSE, fig.width=6, fig.height=7}
+# Generate hedgehog plot of mutability model
+plotMutability(model, nucleotides="A", style="hedgehog")
+plotMutability(model, nucleotides="C", style="hedgehog")
+```
+
+```{r, eval=TRUE, warning=FALSE, fig.width=7, fig.height=4.5}
+# Generate bar plot of mutability model
 plotMutability(model, nucleotides="G", style="bar")
 plotMutability(model, nucleotides="T", style="bar")
 ```

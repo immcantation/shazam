@@ -60,7 +60,7 @@ clonal groups.
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Collapse clonal groups into single sequences
 db_clone <- calcDBClonalConsensus(db, regionDefinition=IMGT_V_NO_CDR3, 
-                               collapseByClone=TRUE, nproc=3)
+                                  collapseByClone=TRUE, nproc=3)
 ```
 
 Following construction of an effective sequence for each clone, the observed
@@ -90,11 +90,11 @@ in the `shm` package:
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Count observed mutations and add OBSERVED columns to db_clone
 db_obs <- calcDBObservedMutations(db_clone, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
-                               regionDefinition=IMGT_V_NO_CDR3, nproc=3)
+                                  regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 # Calculate expected mutations and add EXPECTED columns to db_obs
 db_exp <- calcDBExpectedMutations(db_obs, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
-                                      targetingModel=HS5FModel,
-                                      regionDefinition=IMGT_V_NO_CDR3, nproc=3)
+                                  targetingModel=HS5FModel,
+                                  regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 ````
 
 The counts of observed and expected mutations can be combined to test for selection 

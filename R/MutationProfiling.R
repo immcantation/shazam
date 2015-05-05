@@ -629,10 +629,12 @@ calcDBExpectedMutations <- function(db,
 #' frequencies of a given sequence. This is primarily a helper function for
 #' \link{calcDBExpectedMutations}. 
 #'
-#' @param    germlineColumn    \code{character} name of the column containing 
-#'                             the germline or reference sequence.
-#' @param    sequenceColumn    \code{character} name of the column containing input 
-#'                             sequences.
+#' @param    germlineSeq       germline (reference) sequence.
+#' @param    inputSeq          input (observed) sequences. If this is not \code{NULL}, 
+#'                             then \code{germlineSeq} will be processed to be the same
+#'                             same length as \code{inputSeq} and positions in 
+#'                             \code{germlineSeq} corresponding to positions with Ns in 
+#'                             \code{inputSeq} will also be assigned an N. 
 #' @param    targetingModel    \link{TargetingModel} object. Default is \link{HS5FModel}.
 #' @param    regionDefinition  \link{RegionDefinition} object defining the regions
 #'                             and boundaries of the Ig sequences.
@@ -680,16 +682,16 @@ calcDBExpectedMutations <- function(db,
 #'
 #' @export
 calcExpectedMutations <- function(germlineSeq,
-                                 inputSeq=NULL,
-                                 targetingModel=HS5FModel,
-                                 regionDefinition=IMGT_V_NO_CDR3){
+                                  inputSeq=NULL,
+                                  targetingModel=HS5FModel,
+                                  regionDefinition=IMGT_V_NO_CDR3){
     
     
     targeting <- 
-        calculateTargeting( germlineSeq = germlineSeq, 
-                            inputSeq = inputSeq,
-                            targetingModel = targetingModel,
-                            regionDefinition = regionDefinition)
+        calculateTargeting(germlineSeq = germlineSeq, 
+                           inputSeq = inputSeq,
+                           targetingModel = targetingModel,
+                           regionDefinition = regionDefinition)
     
     # Determine the mutations paths (i.e. determine R and S mutation frequencies)
     mutationalPaths <- 
