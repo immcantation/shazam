@@ -1072,13 +1072,12 @@ writeTargetingDistance <- function(model, file) {
 #'                                                    circle. The 5-mer is read from the most interior 
 #'                                                    position of the 5-mer (5') to most exterior position 
 #'                                                    (3'), with the center nucleotide in the center ring.
-#'                                                    The 5' and 3' positions are reversed when the center
-#'                                                    nucleotides is either G or T.
+#'                                                    Note, the order in which the 5-mers are plotted is
+#'                                                    different for nucleotides \code{c("A", "C")} and 
+#'                                                    \code{c("G", "T")}.
 #'                          \item \code{"bar"}:       bar plot of mutability similar to the 
 #'                                                    \code{hedgehog} style with the most 5' positions
-#'                                                    of each 5-mer at the base of the plot. The 5' and 3' 
-#'                                                    positions are reversed when the center nucleotides 
-#'                                                    is either G or T.
+#'                                                    of each 5-mer at the base of the plot.
 #'                        }
 #' @param    size         numeric scaling factor for lines and text in the plot.
 #' @param    silent       if \code{TRUE} do not draw the plot and just return the ggplot2 
@@ -1107,7 +1106,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
                            ...) {
     # TODO:  add flag to label or highlight specific 5-mer or 5-mer over threshold.
     # model=HS5FModel
-    # nucleotides="T"
+    # nucleotides=c("A", "C", "G", "T")
     # style="hedgehog"
     # size=1
     # silent=FALSE
@@ -1131,8 +1130,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         theme(axis.ticks.margin=grid::unit(0, "lines")) +
         theme(text=element_text(size=10*size),
               title=element_text(size=10*size),
-              legend.margin=grid::unit(0, "lines"),
-              legend.position="top")
+              legend.margin=grid::unit(0, "lines"))
 
     
     # Scaling and layout parameters
@@ -1181,99 +1179,130 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     # Build plots for each center nucleotide
     plot_list <- list()
     for (center_nuc in nucleotides) {
-        # center_nuc <- nucleotides[1]
+        # center_nuc <- "C"
         # Subset data to center nucleotide
         sub_df <- subset(mut_df, pos3 == center_nuc)
-        sub_df$x <- 1:nrow(sub_df)
         
-        # Swap orientation of positions is center nucleotide is G or T
-        mut_names <- colnames(mut_positions)
-        if (center_nuc %in% c("G", "T")) {
-            names(sub_df)[names(sub_df) %in% mut_names] <- rev(mut_names)
-            mut_names <- rev(mut_names)
+        # Order 5-mers by positions, with reversed order if center nucleotide is G or T
+        if (center_nuc %in% c("A", "C")) {
+            sub_df <- sub_df[order(sub_df$pos1, sub_df$pos2), ]
+            sub_df$x <- 1:nrow(sub_df)            
+        } else if (center_nuc %in% c("G", "T")) {
+            sub_df <- sub_df[order(sub_df$pos5, sub_df$pos4), ]
+            sub_df$x <- 1:nrow(sub_df)
+        } else {
+            stop("Invalid nucleotide choice")
         }
         
         # Melt 5-mer position data
         sub_melt <- reshape2::melt(sub_df, id.vars=c("x"), 
-                                   measure.vars=mut_names,
+                                   measure.vars=colnames(mut_positions),
                                    variable.name="pos",
                                    value.name="char")
-        sub_melt$pos <- factor(sub_melt$pos, levels=mut_names)
-        sub_melt$pos <- as.numeric(sub_melt$pos)
+        #sub_melt$pos <- factor(sub_melt$pos, levels=mut_names)
+        #sub_melt$pos <- as.numeric(sub_melt$pos)
+        sub_melt$pos <- as.numeric(gsub("pos", "", sub_melt$pos))
 
-        # Define text position data
+
+        # Define nucleotide text and rectangle position data
         sub_text <- list()
         for (i in 1:5) {
-            tmp_rle <- rle(sub_melt$char[sub_melt$pos == i])
-            tmp_sum <- cumsum(tmp_rle$lengths)
-            tmp_pos <- tmp_sum - diff(c(0, tmp_sum)) / 2
-            if (length(tmp_pos) == 1) { max(tmp_sum) / 2 }
+            nuc_rle <- rle(sub_melt$char[sub_melt$pos == i])
+
+            # Set rectangle x limits
+            rect_max <- cumsum(nuc_rle$lengths)
+            rect_min <- rect_max - diff(c(0, rect_max))
             
-            tmp_df <- data.frame(text_x=tmp_pos, 
+            # Set text position
+            if (length(rect_max) > 1) { 
+                text_x <- rect_max - diff(c(0, rect_max)) / 2
+            } else { 
+                text_x <- rect_max / 2 
+            }
+        
+            tmp_df <- data.frame(text_x=text_x, 
                                  text_y=i,
-                                 text_label=tmp_rle$values)
+                                 text_label=nuc_rle$values,
+                                 rect_min=rect_min,
+                                 rect_max=rect_max)
             
             sub_text[[i]] <- tmp_df
         }
 
-        # Define text positions for inner circle
+        # Define text and rectangle positions for inner circle
         sub_melt$pos <- sub_melt$pos + text_offset
         sub_text <- lapply(sub_text, function(x) { transform(x, text_y=text_y + text_offset) })
+        sub_rect <- plyr::rbind.fill(sub_text)
         
-        # Plot mutability for center nucleotide
-        p1 <- ggplot(sub_df, aes(x=x)) + 
+        # Subset motif colors
+        motif_colors <- motif_colors[names(motif_colors) %in% sub_df$motif]
+
+        # Define base plot object
+        p1 <- ggplot(sub_df) + 
             base_theme + 
             ggtitle(paste0("NN", center_nuc, "NN")) +
             xlab("") +
             ylab("") + 
             scale_color_manual(name="Motif", values=motif_colors) +
-            scale_fill_manual(name="", values=dna_colors, guide=FALSE) +
-            #scale_fill_manual(name="", values=c(motif_colors, dna_colors), guide=FALSE) +
-            geom_segment(data=sub_df, mapping=aes(x=x, xend=x, yend=score, color=motif), 
-                         y=score_offset, size=0.75*size) +
-            #geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif), stat="identity", 
-            #         position="identity", size=0) +
+            #scale_fill_manual(name="", values=dna_colors, guide=FALSE) +
+            scale_fill_manual(name="", values=c(motif_colors, dna_colors), guide=FALSE) +
             #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=5, fill="white") +
             geom_tile(data=sub_melt, mapping=aes(x=x, y=pos, fill=char), size=0, show_guide=FALSE) +
-            geom_text(data=sub_text[[1]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=2*size) +
-            geom_text(data=sub_text[[2]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=2*size) +
+            #geom_tile(data=sub_rect, mapping=aes(x=text_x, y=text_y, fill=text_label), 
+            #          size=0, show_guide=FALSE) +
+            #geom_rect(data=sub_rect, mapping=aes(xmin=rect_min, xmax=rect_max, 
+            #                                     ymin=text_y - 0.5, ymax=text_y + 0.5, fill=text_label), 
+            #          size=0, show_guide=FALSE) +
             geom_text(data=sub_text[[3]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=3*size) +
-            geom_text(data=sub_text[[4]], mapping=aes(x=text_x, y=text_y, label=text_label), 
-                      color="black", hjust=0.5, vjust=0.5, size=1.5*size)
-            #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=0.5, fill="white")
+                      color="black", hjust=0.5, vjust=0.5, size=2*size, fontface=2)
         
+        # Add 5-mer nucleotide labels
+        if (center_nuc %in% c("A", "C")) {
+            p1 <- p1 + geom_text(data=sub_text[[1]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+                                 color="black", hjust=0.5, vjust=0.5, size=2*size) +
+                geom_text(data=sub_text[[2]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+                          color="black", hjust=0.5, vjust=0.5, size=2*size)
+        } else if (center_nuc %in% c("G", "T")) {
+            p1 <- p1 + geom_text(data=sub_text[[4]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+                                 color="black", hjust=0.5, vjust=0.5, size=2*size) +
+                geom_text(data=sub_text[[5]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+                          color="black", hjust=0.5, vjust=0.5, size=2*size)
+        }
+
+        # Add style options and mutability scores
         if (style == "hedgehog") {
             y_limits <- c(text_offset - 1, score_scale + score_offset)
             orient_x <- sub_text[[3]]$text_x[1]
             orient_y <- text_offset - 1
-            orient_label <- ifelse(center_nuc %in% c("G", "T"), "3'", "5'")
             p1 <- p1 + theme(panel.grid=element_blank(), 
                              panel.border=element_blank(),
                              axis.title=element_blank(),
                              axis.text=element_blank(), 
-                             axis.ticks=element_blank()) +
+                             axis.ticks=element_blank(),
+                             legend.position="top") +
+                guides(color=guide_legend(override.aes=list(linetype=1, size=2*size))) +
                 scale_x_continuous(expand=c(0, 0)) +
                 scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
                 coord_polar(theta="x") +
-                geom_text(x=orient_x, y=orient_y, label=orient_label, 
-                          color="black", fontface="plain",
-                          hjust=0.5, vjust=0.5, size=5*size)
+                geom_segment(data=sub_df, mapping=aes(x=x, xend=x, yend=score, color=motif), 
+                             y=score_offset, size=0.75*size)
+                #geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif, color=motif), 
+                #         stat="identity", position="identity", size=0, width=0.5)
         } else if (style == "bar") {
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
-            orient_label <- ifelse(center_nuc %in% c("G", "T"), "3'", "5'")
             p1 <- p1 + theme(panel.grid=element_blank(), 
                              panel.border=element_rect(color="black"),
                              axis.text.x=element_blank(), 
-                             axis.ticks.x=element_blank()) +
-                xlab(orient_label) +
+                             axis.ticks.x=element_blank(),
+                             legend.position="top") +
+                guides(color=guide_legend(override.aes=list(fill=motif_colors, linetype=0))) +
                 ylab("Mutability") +
                 scale_x_continuous(expand=c(0, 1)) +
                 scale_y_continuous(limits=y_limits, breaks=y_breaks, expand=c(0, 0.5),
-                                   labels=function(x) scales::scientific(.invert_score(x)))
+                                   labels=function(x) scales::scientific(.invert_score(x))) +
+                geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif, color=motif), 
+                         stat="identity", position="identity", size=0, width=0.7)
         }
 
         # Add additional theme elements
