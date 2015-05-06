@@ -1135,8 +1135,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
 
     # Set base plot settings
     base_theme <- theme_bw() +
-        theme(plot.margin=grid::unit(c(1, 1, 1, 1), "lines"),
-              panel.margin=grid::unit(0, "lines"),
+        theme(panel.margin=grid::unit(0, "lines"),
               panel.background=element_blank()) +
         theme(axis.ticks.margin=grid::unit(0, "lines")) +
         theme(text=element_text(size=10*size),
@@ -1251,7 +1250,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         # Define base plot object
         p1 <- ggplot(sub_df) + 
             base_theme + 
-            ggtitle(paste0("NN", center_nuc, "NN")) +
+            #ggtitle(paste0("NN", center_nuc, "NN")) +
             xlab("") +
             ylab("") + 
             scale_color_manual(name="Motif", values=motif_colors) +
@@ -1285,12 +1284,15 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             y_limits <- c(text_offset - 1, score_scale + score_offset)
             orient_x <- sub_text[[3]]$text_x[1]
             orient_y <- text_offset - 1
-            p1 <- p1 + theme(panel.grid=element_blank(), 
+            p1 <- p1 + theme(plot.margin=grid::unit(c(0, 0, 0, 0), "lines"),
+                             panel.grid=element_blank(), 
                              panel.border=element_blank(),
                              axis.title=element_blank(),
                              axis.text=element_blank(), 
                              axis.ticks=element_blank(),
-                             legend.position="top") +
+                             legend.direction="horizontal",
+                             legend.justification=c(0.5, 1),
+                             legend.position=c(0.5, 1)) +
                 guides(color=guide_legend(override.aes=list(linetype=1, size=2*size))) +
                 scale_x_continuous(expand=c(0, 0)) +
                 scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
@@ -1302,7 +1304,8 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         } else if (style == "bar") {
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
-            p1 <- p1 + theme(panel.grid=element_blank(), 
+            p1 <- p1 + theme(plot.margin=grid::unit(c(1, 1, 1, 1), "lines"),
+                             panel.grid=element_blank(), 
                              panel.border=element_rect(color="black"),
                              axis.text.x=element_blank(), 
                              axis.ticks.x=element_blank(),
