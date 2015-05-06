@@ -47,7 +47,18 @@ NULL
 "M3NModel"
 
 
-#' 5-mer targeting model.
+#' Uniform 5-mer targeting model.
+#'
+#' A null 5-mer model of somatic hypermutation targeting where all substitution, mutability
+#' and targeting rates are uniformly distributed.
+#'
+#' @format \code{\link{TargetingModel}} object.
+#' 
+#' @seealso  See \code{\link{HS5FModel}} the human 5-mer model.
+"U5NModel"
+
+
+#' Human 5-mer targeting model.
 #'
 #' 5-mer model of somatic hypermutation targeting based on analysis of silent mutations
 #' in functional Ig sequences from Homo sapiens.
@@ -1185,10 +1196,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         
         # Order 5-mers by positions, with reversed order if center nucleotide is G or T
         if (center_nuc %in% c("A", "C")) {
-            sub_df <- sub_df[order(sub_df$pos1, sub_df$pos2), ]
+            sub_df <- plyr::arrange(sub_df, pos1, pos2, pos4, pos5)
             sub_df$x <- 1:nrow(sub_df)            
         } else if (center_nuc %in% c("G", "T")) {
-            sub_df <- sub_df[order(sub_df$pos5, sub_df$pos4), ]
+            sub_df <- plyr::arrange(sub_df, pos5, pos4, pos2, pos1)
             sub_df$x <- 1:nrow(sub_df)
         } else {
             stop("Invalid nucleotide choice")

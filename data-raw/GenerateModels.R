@@ -18,6 +18,45 @@ M1NDistance <- matrix(c(0, 2.86, 1, 2.14, 0, 0, 0,
 devtools::use_data(M1NDistance, overwrite=TRUE)
 
 
+#### U5N ####
+
+# 5-mer null model
+
+# Define substitution matrix
+nuc_chars <- c("A", "C" ,"G", "T")
+nuc_words <- seqinr::words(5, nuc_chars)
+u5n_sub <- matrix(1/3, nrow=length(nuc_chars), ncol=length(nuc_words), 
+                  dimnames=list(nuc_chars, nuc_words))
+
+# Reassign no-change substitution entries to NA
+center_nuc <- gsub("..([ACGT])..", "\\1", colnames(u5n_sub))
+for (i in 1:length(center_nuc)) {
+    u5n_sub[center_nuc[i], i] <- NA
+}
+
+# Define mutability matrix
+u5n_mut <- array(1/length(nuc_words), dim=length(nuc_words), dimnames=list(nuc_words))
+
+# Extend substitution and mutability with N characters
+u5n_sub <- extendSubstitutionMatrix(u5n_sub)
+u5n_mut <- extendMutabilityMatrix(u5n_mut)
+
+# Compute targeting
+u5n_tar <- createTargetingMatrix(u5n_sub, u5n_mut)
+
+# Build and save TargetingModel object
+U5NModel <- new("TargetingModel",
+                 name="u5n",
+                 description="uniform 5-mer model",
+                 species="",
+                 date="2015-05-06",
+                 citation="",
+                 substitution=u5n_sub,
+                 mutability=u5n_mut,
+                 targeting=u5n_tar)
+devtools::use_data(U5NModel, overwrite=TRUE)
+
+
 #### M3N #####
 
 # Smith DS, et al. Di- and trinucleotide target preferences of somatic mutagenesis 
