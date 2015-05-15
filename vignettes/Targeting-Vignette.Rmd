@@ -3,17 +3,17 @@ title: 'SHM: Inferring SHM targeting models'
 author: "Namita Gupta"
 date: '`r Sys.Date()`'
 output:
-  html_document:
-    fig_height: 4.5
-    fig_width: 7.5
-    highlight: pygments
-    theme: readable
-    toc: yes
   pdf_document:
     dev: pdf
     fig_height: 4.5
     fig_width: 7.5
     highlight: pygments
+    toc: yes
+  html_document:
+    fig_height: 4.5
+    fig_width: 7.5
+    highlight: pygments
+    theme: readable
     toc: yes
 geometry: margin=1in
 fontsize: 11pt
@@ -83,10 +83,14 @@ by using the single function `createTargetingModel` to infer a `TargetingModel`
 object directly from the dataset.
 
 ```{r, eval=FALSE}
+
+# Create a consensus mutated sequence for each clone to avoid over-counting mutational events (optional)
+db_cons = calcDBClonalConsensus(db, collapseByClone = T)
+
 # Create substitution model using silent mutations
-sub_matrix <- createSubstitutionMatrix(db, model="S")
+sub_matrix <- createSubstitutionMatrix(db_cons, model="S")
 # Create mutability model using silent mutations
-mut_matrix <- createMutabilityMatrix(db, sub_matrix, model="S")
+mut_matrix <- createMutabilityMatrix(db_cons, sub_matrix, model="S")
 
 # Extend models to include ambiguous 5-mers
 sub_matrix <- extendSubstitutionMatrix(sub_matrix)
