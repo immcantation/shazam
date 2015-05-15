@@ -3,18 +3,18 @@ title: 'SHM: Inferring SHM targeting models'
 author: "Namita Gupta"
 date: '`r Sys.Date()`'
 output:
-  pdf_document:
-    dev: pdf
-    fig_height: 4.5
-    fig_width: 7.5
-    highlight: pygments
-    toc: yes
   html_document:
     fig_height: 4.5
     fig_width: 7.5
     highlight: pygments
     theme: readable
     toc: yes
+  pdf_document:
+    dev: pdf
+    fig_height: 4.5
+    fig_width: 7.5
+    highlight: pygments
+    toc: yes  
 geometry: margin=1in
 fontsize: 11pt
 vignette: |
@@ -84,7 +84,7 @@ object directly from the dataset.
 
 ```{r, eval=FALSE}
 
-# Create a consensus mutated sequence for each clone to avoid over-counting mutational events (optional)
+# Create a consensus sequence for each clone to avoid over-counting mutational events (optional)
 db_cons = calcDBClonalConsensus(db, collapseByClone = T)
 
 # Create substitution model using silent mutations
