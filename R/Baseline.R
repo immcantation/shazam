@@ -317,6 +317,15 @@ calcBaseline <- function(db,
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused"))
     
+    # Make sure the columns specified exist
+    if (!(sequenceColumn %in% names(db))) {
+        stop("The sequence column", sequenceColumn, "was not found.")
+    } 
+    if (!(germlineColumn %in% names(db))) {
+        stop("The germline column", germlineColumn, "was not found.")
+    } 
+    
+    
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
     # nproc_arg will be passeed to any function that has the nproc argument

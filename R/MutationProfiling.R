@@ -82,6 +82,17 @@ calcDBClonalConsensus <- function(db,
                                regionDefinition=IMGT_V_NO_CDR3,
                                nproc=1) {
     
+    # Make sure the columns specified exist
+    if (!(cloneColumn %in% names(db))) {
+        stop("The clone column", cloneColumn, "was not found.")
+    } 
+    if (!(sequenceColumn %in% names(db))) {
+        stop("The sequence column", sequenceColumn, "was not found.")
+    } 
+    if (!(germlineColumn %in% names(db))) {
+        stop("The germline column", germlineColumn, "was not found.")
+    } 
+    
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
         cluster = nproc 
@@ -274,6 +285,14 @@ calcDBObservedMutations <- function(db,
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
                                    regionDefinition=IMGT_V_NO_CDR3,
                                    nproc=1) {
+    
+    # Make sure the columns specified exist
+    if (!(sequenceColumn %in% names(db))) {
+        stop("The sequence column", sequenceColumn, "was not found.")
+    } 
+    if (!(germlineColumn %in% names(db))) {
+        stop("The germline column", germlineColumn, "was not found.")
+    } 
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
@@ -561,6 +580,15 @@ calcDBExpectedMutations <- function(db,
                                     targetingModel=HS5FModel,
                                     regionDefinition=IMGT_V_NO_CDR3,
                                     nproc=1) {
+    
+    # Make sure the columns specified exist
+    if (!(sequenceColumn %in% names(db))) {
+        stop("The sequence column", sequenceColumn, "was not found.")
+    } 
+    if (!(germlineColumn %in% names(db))) {
+        stop("The germline column", germlineColumn, "was not found.")
+    } 
+
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 

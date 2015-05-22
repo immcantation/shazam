@@ -179,12 +179,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                                      germlineColumn="GERMLINE_IMGT_D_MASK",
                                      vCallColumn="V_CALL",
                                      multipleMutation=c("independent", "ignore"))  {
-    # model="RS"
-    # sequenceColumn="SEQUENCE_IMGT"
-    # germlineColumn="GERMLINE_IMGT_D_MASK"
-    # vCallColumn="V_CALL"
-    # multipleMutation="independent"
-    
+ 
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
@@ -456,11 +451,6 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
                                    vCallColumn="V_CALL",
                                    multipleMutation=c("independent", "ignore")) {
-    # model="RS"
-    # sequenceColumn="SEQUENCE_IMGT"
-    # germlineColumn="GERMLINE_IMGT_D_MASK"
-    # vCallColumn="V_CALL"
-    # multipleMutation="independent"
     
     # Evaluate argument choices
     model <- match.arg(model)
@@ -1491,6 +1481,15 @@ listMutations <- function(seqInput, seqGL) {
 # @return  list of mutations in each clone
 listObservedMutations <- function(db, sequenceColumn="SEQUENCE_IMGT", 
                                   germlineColumn="GERMLINE_IMGT_D_MASK")  {
+    
+    # Make sure the columns specified exist 
+    if (!(sequenceColumn %in% names(db))) {
+        stop("The sequence column", sequenceColumn, "was not found.")
+    } 
+    if (!(germlineColumn %in% names(db))) {
+        stop("The germline column", germlineColumn, "was not found.")
+    } 
+    
     mutations <- mapply(listMutations, db[, sequenceColumn], db[, germlineColumn], 
                         USE.NAMES=FALSE)
     return(mutations)
