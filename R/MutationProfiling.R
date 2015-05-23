@@ -179,25 +179,44 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
     charInputSeqs <- sapply(inputSeq, function(x){ s2c(x)[1:len_shortest]})
     charGLSeq <- s2c(germlineSeq)
     matClone <- sapply(1:len_shortest, function(i){
+        
+        # Identify the nucleotides (in seqs and germline) at the current position
         posNucs = unique(charInputSeqs[i,])
         posGL = charGLSeq[i]
         error = FALSE
+        
+        # If the current position is a gap in both germline and the sequence,
+        # return a gap
         if(posGL=="-" & sum(!(posNucs%in%c("-","N")))==0 ){
             return(c("-",error))
         }
+        
+        # If all the sequences in the clone have the same nucleotide at the current
+        # position, return the value at the current positions
         if(length(posNucs)==1)
             return(c(posNucs[1],error))
-        else{
+        else{         
+            # if the nucleotides at the current position are not all the same
+            
+            # TODO: The error message is not doing anything currently... 
             if("N"%in%posNucs){
                 error=TRUE
             }
+            
+            # If the current nucleotide matches germline, return germline 
             if(sum(!posNucs[posNucs!="N"]%in%posGL)==0){
                 return( c(posGL,error) )
             }else{
                 #return( c(sample(posNucs[posNucs!="N"],1),error) )
+                
+                # If we look at all nodes (including terminal nodes), sample a nucleotide from the possible
+                # nucleotides in the clonal sequences at this position
                 if(nonTerminalOnly==0){
                     return( c(sample(charInputSeqs[i,charInputSeqs[i,]!="N" & charInputSeqs[i,]!=posGL],1),error) )
                 }else{
+                    
+                    # If we look at only non-terminal nodes, we only sample the nucleotides that appear more 
+                    # than once (this is a quick approximation)
                     posNucs = charInputSeqs[i,charInputSeqs[i,]!="N" & charInputSeqs[i,]!=posGL]
                     posNucsTable = table(posNucs)
                     if(sum(posNucsTable>1)==0){
