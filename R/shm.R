@@ -84,20 +84,17 @@
 #'
 #' @references
 #' \enumerate{
-#'   \item  Hershberg U, Uduman M, Shlomchik MJ and Kleinstein SH: Improved methods for 
-#'          detecting selection by mutation analysis of Ig V region sequences. 
-#'          Int Immunol. 2008 May;20 (5) :683-94. Epub 2008 Apr 7. PMID: 18397909
-#'   \item  Uduman M, Yaari G, Hershberg U, Stern JA, Shlomchik MJ and Kleinstein SH: 
-#'          Detecting selection in immunoglobulin sequences. Nucleic Acids Res. 2011 Jul;39 
-#'          (Web Server issue) :W499-504. Epub 2011 Jun 10. PMID: 21665923
-#'   \item  Yaari G, Uduman M and Kleinstein SH: Quantifying selection in high-throughput 
-#'          Immunoglobulin sequencing data sets. Nucleic Acids Res. 
-#'          2012 Sep 1;40 (17) :e134. Epub 2012 May 27. PMID: 22641856
-#'   \item  Yaari G, Vander Heiden JA, Uduman M, Gadala-Maria D, Gupta N, Stern JN, 
-#'          O'Connor KC, Hafler DA, Laserson U, Vigneault F and Kleinstein SH: Models of 
-#'          somatic hypermutation targeting and substitution based on synonymous mutations
-#'           from high-throughput immunoglobulin sequencing data. Front Immunol. 
-#'           2013;4 :358. Epub 2013 Nov 15. PMID: 24298272
+#'   \item  Hershberg U, et al. Improved methods for detecting selection by mutation 
+#'            analysis of Ig V region sequences. 
+#'            Int Immunol. 2008 20(5):683-94.
+#'   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
+#'            Nucleic Acids Res. 2011 39(Web Server issue):W499-504.
+#'   \item  Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
+#'            sequencing data sets. 
+#'            Nucleic Acids Res. 2012 40(17):e134.
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
+#'            Front Immunol. 2013 4:358.
 #'  }
 #'
 #' @seealso

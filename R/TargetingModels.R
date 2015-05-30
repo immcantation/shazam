@@ -415,9 +415,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
-#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
-#'            data. 
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
@@ -729,9 +728,8 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
-#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
-#'            data. 
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data.
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
@@ -794,9 +792,8 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution 
-#'            based on synonymous mutations from high-throughput immunoglobulin sequencing 
-#'            data. 
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data.
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 

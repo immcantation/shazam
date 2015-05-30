@@ -131,10 +131,9 @@ createRegionDefinition <- function(name="",
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, 
-#'            Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin 
-#'            and T cell receptor variable domains and Ig superfamily V-like domains. 
-#'            Developmental and comparative immunology. 2003;27:55-77.
+#'   \item  Lefranc MP, et al. IMGT unique numbering for immunoglobulin and T cell 
+#'            receptor variable domains and Ig superfamily V-like domains. 
+#'            Developmental and comparative immunology. 2003 27:55-77.
 #' }
 #' 
 #' @name IMGT_SCHEMES

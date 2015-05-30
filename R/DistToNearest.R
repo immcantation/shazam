@@ -438,13 +438,14 @@ getClosestHam <- function(arrJunctions, model=c("ham","aa"),
 #' \enumerate{
 #'   \item  Smith DS, et al. Di- and trinucleotide target preferences of somatic 
 #'            mutagenesis in normal and autoreactive B cells. 
-#'            J Immunol. 1996 156:2642–52. 
-#'   \item  Glanville J, Kuo TC, von Büdingen H-C, et al. Naive antibody gene-segment 
-#'            frequencies are heritable and unaltered by chronic lymphocyte ablation. 
-#'            Proc Natl Acad Sci USA. 2011 108(50):20066–71.
+#'            J Immunol. 1996 156:2642-52. 
+#'   \item  Glanville J, Kuo TC, von Budingen H-C, et al. 
+#'            Naive antibody gene-segment frequencies are heritable and unaltered by 
+#'            chronic lymphocyte ablation. 
+#'            Proc Natl Acad Sci USA. 2011 108(50):20066-71.
 #'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
 #'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
-#'            Front Immunol. 2013 4(November):358.
+#'            Front Immunol. 2013 4:358.
 #'  }
 #'  
 #' @seealso  See \link{calcTargetingDistance} for generating nucleotide distance matrices 
