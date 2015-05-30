@@ -179,21 +179,13 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                                      germlineColumn="GERMLINE_IMGT_D_MASK",
                                      vCallColumn="V_CALL",
                                      multipleMutation=c("independent", "ignore"))  {
- 
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
-    
-    # Make sure the columns specified exist
-    if (!(germlineColumn %in% names(db))) {
-        stop("Please specify the germline column name")
-    } 
-    if (!(sequenceColumn %in% names(db))) {
-        stop("Please specify the sequence column name")
-    } 
-    if (!(vCallColumn %in% names(db))) {
-        stop("Please specify the V call column name")
-    }   
+
+    # Check for valid columns
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
+    if (check != TRUE) { stop(check) }
     
     # Setup
     nuc_chars <- NUCLEOTIDES[1:4]
@@ -451,21 +443,13 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
                                    vCallColumn="V_CALL",
                                    multipleMutation=c("independent", "ignore")) {
-    
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
     
-    # Make sure the columns specified exist
-    if (!(germlineColumn %in% names(db))) {
-        stop("The germline column", germlineColumn, "was not found.")
-    } 
-    if (!(sequenceColumn %in% names(db))) {
-        stop("The sequence column", sequenceColumn, "was not found.")
-    } 
-    if (!(vCallColumn %in% names(db))) {
-        stop("The V-segment allele call column", vCallColumn, "was not found.")
-    } 
+    # Check for valid columns
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
+    if (check != TRUE) { stop(check) }
     
     # Count mutations
     nuc_chars <- NUCLEOTIDES[1:4]
@@ -842,16 +826,9 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
     
-    # Make sure the columns specified exist
-    if (!(germlineColumn %in% names(db))) {
-        stop("The germline column", germlineColumn, "was not found.")
-    } 
-    if (!(sequenceColumn %in% names(db))) {
-        stop("The sequence column", sequenceColumn, "was not found.")
-    } 
-    if (!(vCallColumn %in% names(db))) {
-        stop("The V-segment allele call column", vCallColumn, "was not found.")
-    } 
+    # Check for valid columns
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
+    if (check != TRUE) { stop(check) }
     
     # Set date
     if (is.null(modelDate)) { modelDate <- format(Sys.time(), "%Y-%m-%d") }
@@ -1099,7 +1076,7 @@ writeTargetingDistance <- function(model, file) {
 #' plotMutability(HS5FModel, "C")
 #' 
 #' # Plot one nucleotide in barchart style
-#' plotMutability(HS5FModel, "C", style="bar")
+#' plotMutability(HS5FModel, c("C", "A"), style="bar")
 #' 
 #' @export
 plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), 
@@ -1142,11 +1119,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     motif_colors <- setNames(c("#33a02c", "#e31a1c", "#6a3d9a", "#999999"),
                              c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
     dna_colors <- setNames(c("#b2df8a", "#fdbf6f", "#fb9a99", "#a6cee3", "#aaaaaa"),
-                           c("A", "C", "G", "T", "N"))    
-    #motif_colors <- setNames(c("#4daf4a", "#e41a1c", "#377eb8", "#999999"),
-    #                         c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
-    #dna_colors <- setNames(c("#ccebc5", "#fed9a6", "#fbb4ae", "#b3cde3"),
-    #                       c("A", "C", "G", "T"))
+                           c("A", "C", "G", "T", "N"))
     
     # Build data.frame of mutability scores
     mut_scores <- model[!grepl("N", names(model))]
@@ -1233,9 +1206,6 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         sub_melt$pos <- sub_melt$pos + text_offset
         sub_text <- lapply(sub_text, function(x) { transform(x, text_y=text_y + text_offset) })
         sub_rect <- plyr::rbind.fill(sub_text)
-        
-        # Subset motif colors
-        motif_colors <- motif_colors[names(motif_colors) %in% sub_df$motif]
 
         # Define base plot object
         p1 <- ggplot(sub_df) + 
@@ -1294,13 +1264,14 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         } else if (style == "bar") {
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
+            sub_colors <- motif_colors[names(motif_colors) %in% sub_df$motif]
             p1 <- p1 + theme(plot.margin=grid::unit(c(1, 1, 1, 1), "lines"),
                              panel.grid=element_blank(), 
                              panel.border=element_rect(color="black"),
                              axis.text.x=element_blank(), 
                              axis.ticks.x=element_blank(),
                              legend.position="top") +
-                guides(color=guide_legend(override.aes=list(fill=motif_colors, linetype=0))) +
+                guides(color=guide_legend(override.aes=list(fill=sub_colors, linetype=0))) +
                 ylab("Mutability") +
                 scale_x_continuous(expand=c(0, 1)) +
                 scale_y_continuous(limits=y_limits, breaks=y_breaks, expand=c(0, 0.5),

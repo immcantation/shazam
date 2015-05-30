@@ -18,8 +18,10 @@ output:
     toc: yes
 geometry: margin=1in
 fontsize: 11pt
-vignette: |
-  %\VignetteIndexEntry{Distance to nearest neighbor} %\VignetteEngine{knitr::rmarkdown} %\usepackage[utf8]{inputenc}
+vignette: >
+  %\VignetteIndexEntry{Distance to nearest neighbor} 
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\usepackage[utf8]{inputenc}
 ---
 
 Estimating the optimal distance threshold for partitioning clonally related 

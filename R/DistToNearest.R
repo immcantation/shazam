@@ -476,17 +476,9 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
   normalize <- match.arg(normalize)
   if (!is.data.frame(db)) { stop('Must submit a data frame') }
   
-  # Make sure the columns specified exist
-  if (!(vCallColumn %in% names(db))) {
-      stop("The V-segment allele call column", vCallColumn, "was not found.")
-  } 
-  if (!(jCallColumn %in% names(db))) {
-      stop("The J-segment allele call column", jCallColumn, "was not found.")
-  } 
-  if (!(sequenceColumn %in% names(db))) {
-      stop("The sequence column", sequenceColumn, "was not found.")
-  } 
-
+  # Check for valid columns
+  check <- checkColumns(db, c(sequenceColumn, vCallColumn, jCallColumn))
+  if (check != TRUE) { stop(check) }
   
   # Get targeting model
   if (model == "hs5f") {

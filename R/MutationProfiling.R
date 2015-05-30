@@ -81,17 +81,9 @@ calcDBClonalConsensus <- function(db,
                                collapseByClone=TRUE,
                                regionDefinition=IMGT_V_NO_CDR3,
                                nproc=1) {
-    
-    # Make sure the columns specified exist
-    if (!(cloneColumn %in% names(db))) {
-        stop("The clone column", cloneColumn, "was not found.")
-    } 
-    if (!(sequenceColumn %in% names(db))) {
-        stop("The sequence column", sequenceColumn, "was not found.")
-    } 
-    if (!(germlineColumn %in% names(db))) {
-        stop("The germline column", germlineColumn, "was not found.")
-    } 
+    # Check for valid columns
+    check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
+    if (check != TRUE) { stop(check) }
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
@@ -304,14 +296,9 @@ calcDBObservedMutations <- function(db,
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
                                    regionDefinition=IMGT_V_NO_CDR3,
                                    nproc=1) {
-    
-    # Make sure the columns specified exist
-    if (!(sequenceColumn %in% names(db))) {
-        stop("The sequence column", sequenceColumn, "was not found.")
-    } 
-    if (!(germlineColumn %in% names(db))) {
-        stop("The germline column", germlineColumn, "was not found.")
-    } 
+    # Check for valid columns
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn))
+    if (check != TRUE) { stop(check) }
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
@@ -599,15 +586,9 @@ calcDBExpectedMutations <- function(db,
                                     targetingModel=HS5FModel,
                                     regionDefinition=IMGT_V_NO_CDR3,
                                     nproc=1) {
-    
-    # Make sure the columns specified exist
-    if (!(sequenceColumn %in% names(db))) {
-        stop("The sequence column", sequenceColumn, "was not found.")
-    } 
-    if (!(germlineColumn %in% names(db))) {
-        stop("The germline column", germlineColumn, "was not found.")
-    } 
-
+    # Check for valid columns
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn))
+    if (check != TRUE) { stop(check) }
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
