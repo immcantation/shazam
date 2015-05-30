@@ -99,15 +99,14 @@ setClass("Baseline",
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Hershberg U, Uduman M, Shlomchik MJ and Kleinstein SH: Improved methods for 
-#'          detecting selection by mutation analysis of Ig V region sequences. 
-#'          Int Immunol. 2008 May;20 (5) :683-94. Epub 2008 Apr 7. PMID: 18397909
-#'   \item  Uduman M, Yaari G, Hershberg U, Stern JA, Shlomchik MJ and Kleinstein SH: 
-#'          Detecting selection in immunoglobulin sequences. Nucleic Acids Res. 2011 Jul;39 
-#'          (Web Server issue) :W499-504. Epub 2011 Jun 10. PMID: 21665923
-#'   \item  Yaari G, Uduman M and Kleinstein SH: Quantifying selection in high-throughput 
-#'          Immunoglobulin sequencing data sets. Nucleic Acids Res. 
-#'          2012 Sep 1;40 (17) :e134. Epub 2012 May 27. PMID: 22641856
+#'   \item  Hershberg U, et al. Improved methods for detecting selection by mutation 
+#'            analysis of Ig V region sequences. 
+#'            Int Immunol. 2008 20(5):683-94.
+#'   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
+#'            Nucleic Acids Res. 2011 39(Web Server issue):W499-504.
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data.
+#'            Front Immunol. 2013 4(November):358.
 #'  }
 #'  
 #' @examples
@@ -275,15 +274,14 @@ getBaselineStats <- function(baseline) {
 #'                              
 #' @references
 #' \enumerate{
-#'   \item  Hershberg U, Uduman M, Shlomchik MJ and Kleinstein SH: Improved methods for 
-#'          detecting selection by mutation analysis of Ig V region sequences. 
-#'          Int Immunol. 2008 May;20 (5) :683-94. Epub 2008 Apr 7. PMID: 18397909
-#'   \item  Uduman M, Yaari G, Hershberg U, Stern JA, Shlomchik MJ and Kleinstein SH: 
-#'          Detecting selection in immunoglobulin sequences. Nucleic Acids Res. 2011 Jul;39 
-#'          (Web Server issue) :W499-504. Epub 2011 Jun 10. PMID: 21665923
-#'   \item  Yaari G, Uduman M and Kleinstein SH: Quantifying selection in high-throughput 
-#'          Immunoglobulin sequencing data sets. Nucleic Acids Res. 
-#'          2012 Sep 1;40 (17) :e134. Epub 2012 May 27. PMID: 22641856
+#'   \item  Hershberg U, et al. Improved methods for detecting selection by mutation 
+#'            analysis of Ig V region sequences. 
+#'            Int Immunol. 2008 20(5):683-94.
+#'   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
+#'            Nucleic Acids Res. 2011 39(Web Server issue):W499-504.
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data.
+#'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
 #' @examples
@@ -317,13 +315,9 @@ calcBaseline <- function(db,
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused"))
     
-    # Make sure the columns specified exist
-    if (!(sequenceColumn %in% names(db))) {
-        stop("The sequence column", sequenceColumn, "was not found.")
-    } 
-    if (!(germlineColumn %in% names(db))) {
-        stop("The germline column", germlineColumn, "was not found.")
-    } 
+    # Check for valid columns
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn))
+    if (check != TRUE) { stop(check) }
     
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
@@ -604,9 +598,9 @@ calcBaselineBinomialPdf <- function ( x=3,
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Yaari G, Uduman M and Kleinstein SH: Quantifying selection in high-throughput 
-#'          Immunoglobulin sequencing data sets. Nucleic Acids Res. 
-#'          2012 Sep 1;40 (17) :e134. Epub 2012 May 27. PMID: 22641856
+#'   \item  Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
+#'            sequencing data sets. 
+#'            Nucleic Acids Res. 2012 40(17):e134.
 #'  }
 #' 
 #' @examples
@@ -652,7 +646,6 @@ groupBaseline <- function(baseline,
     dt <- dt[ , list( yidx = list(.I) ) , by=groupByFormatted ]
     groups <- dt[,yidx] 
     df <- as.data.frame(dt)    
-    
     
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
