@@ -472,122 +472,120 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                           jCallColumn="J_CALL", model=c("m1n", "ham", "aa", "m3n", "hs5f"), 
                           normalize=c("none", "length"), 
                           first=TRUE, nproc=1) {
-  # Initial checks
-  model <- match.arg(model)
-  normalize <- match.arg(normalize)
-  if (!is.data.frame(db)) { stop('Must submit a data frame') }
-  
-  # Check for valid columns
-  check <- checkColumns(db, c(sequenceColumn, vCallColumn, jCallColumn))
-  if (check != TRUE) { stop(check) }
-  
-  # Get targeting model
-  if (model == "hs5f") {
-    targeting_model <- HS5FModel
-  } else if (model == "m3n") {
-    targeting_model <- M3NModel            
-  }
-
-  # Parse V and J columns to get gene
-  # cat("V+J Column parsing\n")
-  if (first) {
-    db$V <- getGene(db[, vCallColumn])
-    db$J <- getGene(db[, jCallColumn])
-  } else {
-    db$V1 <- getGene(db[, vCallColumn], first=FALSE)
-    db$J1 <- getGene(db[, jCallColumn], first=FALSE)
-    db$V <- db$V1
-    db$J <- db$J1
-    # Reassign V genes to most general group of genes
-    for(ambig in unique(db$V1[grepl(',', db$V1)])) {
-      for(g in strsplit(ambig, split=',')[[1]]) {
-        db$V[grepl(g, db$V1)] = ambig
-      }
+    # Initial checks
+    model <- match.arg(model)
+    normalize <- match.arg(normalize)
+    if (!is.data.frame(db)) { stop('Must submit a data frame') }
+    
+    # Check for valid columns
+    check <- checkColumns(db, c(sequenceColumn, vCallColumn, jCallColumn))
+    if (check != TRUE) { stop(check) }
+    
+    # Get targeting model
+    if (model == "hs5f") {
+        targeting_model <- HS5FModel
+    } else if (model == "m3n") {
+        targeting_model <- M3NModel            
     }
-    # Reassign J genes to most general group of genes
-    for(ambig in unique(db$J1[grepl(',',db$J1)])) {
-      for(g in strsplit(ambig, split=',')) {
-        db$J[grepl(g, db$J1)] = ambig
-      }
+    
+    # Parse V and J columns to get gene
+    # cat("V+J Column parsing\n")
+    if (first) {
+        db$V <- getGene(db[, vCallColumn])
+        db$J <- getGene(db[, jCallColumn])
+    } else {
+        db$V1 <- getGene(db[, vCallColumn], first=FALSE)
+        db$J1 <- getGene(db[, jCallColumn], first=FALSE)
+        db$V <- db$V1
+        db$J <- db$J1
+        # Reassign V genes to most general group of genes
+        for(ambig in unique(db$V1[grepl(',', db$V1)])) {
+            for(g in strsplit(ambig, split=',')[[1]]) {
+                db$V[grepl(g, db$V1)] = ambig
+            }
+        }
+        # Reassign J genes to most general group of genes
+        for(ambig in unique(db$J1[grepl(',',db$J1)])) {
+            for(g in strsplit(ambig, split=',')) {
+                db$J[grepl(g, db$J1)] = ambig
+            }
+        }
     }
-  }
-
-  # Create new column for distance to nearest neighbor
-  db$DIST_NEAREST <- rep(NA, nrow(db))
-  db$ROW_ID <- 1:nrow(db)
-  db$L <- nchar(db[, sequenceColumn])
-  
-  # Create cluster of nproc size and export namespaces
-  # If user wants to paralellize this function and specifies nproc > 1, then
-  # initialize and register slave R processes/clusters & 
-  # export all nesseary environment variables, functions and packages.
-  if( nproc==1 ) {
-    # If needed to run on a single core/cpu then, regsiter DoSEQ 
-    # (needed for 'foreach' in non-parallel mode)
-    registerDoSEQ()
-  } else {
-    if(nproc != 0) { cluster <- makeCluster(nproc, type="SOCK") }
-    cluster <- makeCluster(nproc, type = "SOCK")
-    registerDoSNOW(cluster)
-    clusterEvalQ(cluster, library(shm))
-  }
-  
-
-  
-  # Calculate distance to nearest neighbor
-  # cat("Calculating distance to nearest neighbor\n")
-  
-  # Convert the db (data.frame) to a data.table & set keys
-  # This is an efficient way to get the groups of V J L, instead of doing dplyr
-  dt <- data.table(db)
-  # Get the group indexes
-  dt <- dt[ , list( yidx = list(.I) ) , by = list(V,J,L) ]
-  groups <- dt[,yidx]
-  lenGroups <- length(groups)
-  
-  # Export groups to the clusters
-  if (nproc>1) { clusterExport(cluster, list("db", 
-                                             "groups", 
-                                             "sequenceColumn"), envir=environment()) }
-  
-  if (model %in% c("hs5f", "m3n")) {
-    # Export targeting model to processes
-    if (nproc>1) { clusterExport(cluster, list("targeting_model"), envir=environment()) }    
-    list_db <-
-      foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
-        db_group <- db[groups[[i]],]
-        db_group$DIST_NEAREST <-
-          getClosestBy5mers( db[groups[[i]],sequenceColumn],
-                             targeting_model=targeting_model,
-                             normalize=normalize )
-        return(db_group)
-      }    
-  } else if (model == "m1n") {    
-    list_db <-
-      foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
-        db_group <- db[groups[[i]],]
-        db_group$DIST_NEAREST <-
-          getClosestM1N( db[groups[[i]],sequenceColumn],
-                         normalize=normalize )
-        return(db_group)
-      } 
-  } else if (model %in% c("ham", "aa")) {    
-    list_db <-
-      foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
-        db_group <- db[groups[[i]],]
-        db_group$DIST_NEAREST <-
-          getClosestHam( db[groups[[i]],sequenceColumn],
-                         normalize=normalize )
-        return(db_group)
-      }        
-  }
-  
-  # Convert list from foreach into a db data.frame
-  db <- do.call(plyr::rbind.fill, list_db)
-  db <- db[order(db[,"ROW_ID"]),]
-  
-  # Stop the cluster
-  if( nproc>1) { stopCluster(cluster) }
-  
-  return(db[, !(names(db) %in% c("V", "J", "L", "ROW_ID", "V1", "J1"))])
+    
+    # Create new column for distance to nearest neighbor
+    db$DIST_NEAREST <- rep(NA, nrow(db))
+    db$ROW_ID <- 1:nrow(db)
+    db$L <- nchar(db[, sequenceColumn])
+    
+    # Create cluster of nproc size and export namespaces
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.
+    if( nproc==1 ) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    } else {
+        if(nproc != 0) { cluster <- makeCluster(nproc, type="SOCK") }
+        cluster <- makeCluster(nproc, type = "SOCK")
+        registerDoSNOW(cluster)
+        clusterEvalQ(cluster, library(shm))
+    }
+    
+    # Calculate distance to nearest neighbor
+    # cat("Calculating distance to nearest neighbor\n")
+    
+    # Convert the db (data.frame) to a data.table & set keys
+    # This is an efficient way to get the groups of V J L, instead of doing dplyr
+    dt <- data.table(db)
+    # Get the group indexes
+    dt <- dt[, list( yidx = list(.I) ) , by = list(V,J,L) ]
+    groups <- dt[,yidx]
+    lenGroups <- length(groups)
+    
+    # Export groups to the clusters
+    if (nproc>1) { clusterExport(cluster, list("db", 
+                                               "groups", 
+                                               "sequenceColumn"), envir=environment()) }
+    
+    if (model %in% c("hs5f", "m3n")) {
+        # Export targeting model to processes
+        if (nproc>1) { clusterExport(cluster, list("targeting_model"), envir=environment()) }    
+        list_db <-
+            foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
+                db_group <- db[groups[[i]],]
+                db_group$DIST_NEAREST <-
+                    getClosestBy5mers( db[groups[[i]],sequenceColumn],
+                                       targeting_model=targeting_model,
+                                       normalize=normalize )
+                return(db_group)
+            }    
+    } else if (model == "m1n") {    
+        list_db <-
+            foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
+                db_group <- db[groups[[i]],]
+                db_group$DIST_NEAREST <-
+                    getClosestM1N( db[groups[[i]],sequenceColumn],
+                                   normalize=normalize )
+                return(db_group)
+            } 
+    } else if (model %in% c("ham", "aa")) {    
+        list_db <-
+            foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
+                db_group <- db[groups[[i]],]
+                db_group$DIST_NEAREST <-
+                    getClosestHam( db[groups[[i]],sequenceColumn],
+                                   normalize=normalize )
+                return(db_group)
+            }        
+    }
+    
+    # Convert list from foreach into a db data.frame
+    db <- do.call(plyr::rbind.fill, list_db)
+    db <- db[order(db[,"ROW_ID"]),]
+    
+    # Stop the cluster
+    if( nproc>1) { stopCluster(cluster) }
+    
+    return(db[, !(names(db) %in% c("V", "J", "L", "ROW_ID", "V1", "J1"))])
 }

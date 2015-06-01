@@ -17,7 +17,7 @@ Depends:
     ggplot2,
     plyr
 Imports:
-    data.table,
+    data.table (>= 1.9.4),
     foreach,
     grid,
     reshape2,

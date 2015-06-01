@@ -17,8 +17,10 @@ output:
     toc: yes
 geometry: margin=1in
 fontsize: 11pt
-vignette: |
-  %\VignetteIndexEntry{Selection quantification}   %\VignetteEngine{knitr::rmarkdown}   %\usepackage[utf8]{inputenc}
+vignette: >
+  %\VignetteIndexEntry{Selection quantification}   
+  %\VignetteEngine{knitr::rmarkdown}   
+  %\usepackage[utf8]{inputenc}
 ---
 
 BASELINe quantifies selection pressure by calculating the posterior probability 
