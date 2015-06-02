@@ -238,6 +238,8 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #'                              sequences.
 #' @param    germlineColumn     \code{character} name of the column containing 
 #'                              the germline or reference sequence.
+#' @param    frequency          \code{logical} indicating whether or not to calculate
+#'                              mutation frequencies. Default is \code{FALSE}.
 #' @param    regionDefinition   \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences. 
 #' @param    nproc              number of cores to distribute the operation over. If the 
@@ -287,6 +289,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' db_new <- calcDBObservedMutations(db,
 #'                                sequenceColumn="SEQUENCE_IMGT",
 #'                                germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                                frequency=TRUE,
 #'                                regionDefinition=IMGT_V_NO_CDR3,
 #'                                nproc=1)
 #'                      
@@ -294,6 +297,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 calcDBObservedMutations <- function(db, 
                                    sequenceColumn="SEQUENCE_IMGT",
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
+                                   frequency=FALSE,
                                    regionDefinition=IMGT_V_NO_CDR3,
                                    nproc=1) {
     # Check for valid columns
@@ -305,7 +309,9 @@ calcDBObservedMutations <- function(db,
         cluster = nproc 
         nproc = 0
     }
-    
+    if(frequency==TRUE){  
+      regionDefinition=NULL  
+    }
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
     
@@ -314,7 +320,7 @@ calcDBObservedMutations <- function(db,
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
         cluster <- makeCluster(nproc, type = "SOCK")
-        clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition'), envir=environment() )
+        clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition', 'frequency'), envir=environment() )
         clusterEvalQ( cluster, library("shm") )
         registerDoSNOW(cluster)
     } else if( nproc==1 ) {
@@ -334,20 +340,31 @@ calcDBObservedMutations <- function(db,
     observedMutations_list <-
         foreach( i=icount(numbOfSeqs) ) %dopar% {
             calcObservedMutations( db[i,sequenceColumn], 
-                            db[i,germlineColumn], 
+                            db[i,germlineColumn],
+                            frequency,
                             regionDefinition,
                             binByRegions=TRUE)
         }
     
     # Convert list of mutations to data.frame
-    labels_length <- length(regionDefinition@labels)
+    if(!is.null(regionDefinition)) {
+      labels_length <- length(regionDefinition@labels)
+    } else{
+      labels_length=1
+    }
     observed_mutations <- do.call(rbind, lapply(observedMutations_list, function(x){ 
         length(x) <- labels_length 
         return(x)
     })) 
     
+    sep <- ""
+    if(ncol(observed_mutations)>1) sep <- "_"
     observed_mutations[is.na(observed_mutations)] <- 0
-    colnames(observed_mutations) <- paste0("OBSERVED_", colnames(observed_mutations))
+    if(frequency==TRUE){
+      colnames(observed_mutations) <- paste0( paste0("MU_FREQ",sep), colnames(observed_mutations))
+    }else{
+      colnames(observed_mutations) <- paste0(paste0("OBSERVED_",sep), colnames(observed_mutations))
+    }
     
     # Properly shutting down the cluster
     if(nproc>1){ stopCluster(cluster) }
@@ -366,6 +383,8 @@ calcDBObservedMutations <- function(db,
 #'
 #' @param    inputSeq          input sequence.
 #' @param    germlineSeq       germline sequence.
+#' @param    frequency          \code{logical} indicating whether or not to calculate
+#'                              mutation frequencies. Default is \code{FALSE}.
 #' @param    regionDefinition  \link{RegionDefinition} object defining the regions
 #'                             and boundaries of the Ig sequences. Note, only the part of
 #'                             sequences defined in \code{regionDefinition} are analyzed.
@@ -400,9 +419,26 @@ calcDBObservedMutations <- function(db,
 #'  
 #' @export
 calcObservedMutations <- function(inputSeq, 
-                           germlineSeq, 
+                           germlineSeq,
+                           frequency=FALSE,
                            regionDefinition=NULL, 
                            binByRegions=FALSE) {
+    
+    # Removing IMGT gaps (they should come in threes)
+    # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
+    germlineSeq <- gsub("\\.\\.\\.", "XXX", germlineSeq)
+    #If there is a single gap left convert it to an N
+    germlineSeq <- gsub("\\.", "N", germlineSeq)
+    # Re-assigning s_germlineSeq (now has all "." that are not IMGT gaps converted to Ns)
+    germlineSeq <- gsub("XXX", "...", germlineSeq)
+    
+    # Removing IMGT gaps (they should come in threes)
+    # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
+    inputSeq <- gsub("\\.\\.\\.", "XXX", inputSeq)
+    #If there is a single gap left convert it to an N
+    inputSeq <- gsub("\\.", "N", inputSeq)
+    # Re-assigning s_germlineSeq (now has all "." that are not IMGT gaps converted to Ns)
+    inputSeq <- gsub("XXX", "...", inputSeq)    
     
     # Trim the input and germline sequence to the shortest
     len_inputSeq <- nchar(inputSeq)
@@ -451,10 +487,17 @@ calcObservedMutations <- function(inputSeq,
         mutations_array<- mutations_array[!is.na(mutations_array)]
         if(length(mutations_array)==sum(is.na(mutations_array))){
             mutations_array<-NA    
-        }else{
+        }else{ #If there are mutations present proceed to aggregate (if requested)
+          if(frequency==TRUE){
+            nonNLength <-length( c_inputSeq[ c_inputSeq%in%NUCLEOTIDES[1:4]] )
+            nMutations <- length(mutations_array)
+            mutations_array <- nMutations/nonNLength
+            if(nonNLength==0) mutations_array <- 0
+          }else{
             if(binByRegions & !is.null(regionDefinition)){ 
-                mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
+              mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
             }
+          }
         }        
     }    
     return(mutations_array)
@@ -897,4 +940,66 @@ getCodonNucs <- function(codonNumb){
 # Given a nucleotide postions return the position in the codon
 getContextInCodon <- function(nucPos){
   return( {nucPos-1}%%3+1 )
+}
+
+# Given a nuclotide position, returns the pos of the 3 nucs that made the codon
+# e.g. nuc 86 is part of nucs 85,86,87
+getCodonPos <- function(nucPos) {
+  codonNum =  (ceiling(nucPos/3))*3
+  return ((codonNum-2):codonNum)
+}
+
+# Translate codon to amino acid
+translateCodonToAminoAcid <- function(Codon) {
+  return (AMINO_ACIDS[Codon])
+}
+
+# Given two codons, tells you if the mutation is R or S (based on your definition)
+mutationType <- function(codonFrom, codonTo, testID=1) {
+  if (testID == 4) {
+    if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
+      return(NA)
+    } else {
+      mutationType = "S"
+      if( translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonFrom)) != translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonTo)) ){
+        mutationType = "R"
+      }
+      if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
+        mutationType = "Stop"
+      }
+      return(mutationType)
+    }
+  } else if (testID == 5) {
+    if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
+      return(NA)
+    } else {
+      if (codonFrom==codonTo) {
+        mutationType = "S"
+      } else {
+        codonFrom = s2c(codonFrom)
+        codonTo = s2c(codonTo)
+        mutationType = "Stop"
+        nucOfI = codonFrom[which(codonTo!=codonFrom)]
+        if(nucOfI=="C"){
+          mutationType = "R"
+        }else if(nucOfI=="G"){
+          mutationType = "S"
+        }
+      }
+      return(mutationType)
+    }
+  } else {
+    if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
+      return(NA)
+    } else {
+      mutationType = "S"
+      if( translateCodonToAminoAcid(codonFrom) != translateCodonToAminoAcid(codonTo) ){
+        mutationType = "R"
+      }
+      if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
+        mutationType = "Stop"
+      }
+      return(mutationType)
+    }
+  }
 }

@@ -1296,20 +1296,6 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
 
 #### Original BASELINe functions ####
 
-# Translate codon to amino acid
-translateCodonToAminoAcid <- function(Codon) {
-    return (AMINO_ACIDS[Codon])
-}
-
-
-# Given a nuclotide position, returns the pos of the 3 nucs that made the codon
-# e.g. nuc 86 is part of nucs 85,86,87
-getCodonPos <- function(nucPos) {
-    codonNum =  (ceiling(nucPos/3))*3
-    return ((codonNum-2):codonNum)
-}
-
-
 # Given a nuc, returns the other 3 nucs it can mutate to
 canMutateTo <- function(nuc) {
     NUCLEOTIDES[1:4][-which(NUCLEOTIDES[1:4] == nuc)]
@@ -1367,56 +1353,6 @@ analyzeMutations2NucUri <- function(in_matrix) {
     }
 }
 
-
-# Given two codons, tells you if the mutation is R or S (based on your definition)
-mutationType <- function(codonFrom, codonTo, testID=1) {
-    if (testID == 4) {
-        if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-            return(NA)
-        } else {
-            mutationType = "S"
-            if( translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonFrom)) != translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonTo)) ){
-                mutationType = "R"
-            }
-            if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
-                mutationType = "Stop"
-            }
-            return(mutationType)
-        }
-    } else if (testID == 5) {
-        if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-            return(NA)
-        } else {
-            if (codonFrom==codonTo) {
-                mutationType = "S"
-            } else {
-                codonFrom = s2c(codonFrom)
-                codonTo = s2c(codonTo)
-                mutationType = "Stop"
-                nucOfI = codonFrom[which(codonTo!=codonFrom)]
-                if(nucOfI=="C"){
-                    mutationType = "R"
-                }else if(nucOfI=="G"){
-                    mutationType = "S"
-                }
-            }
-            return(mutationType)
-        }
-    } else {
-        if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-            return(NA)
-        } else {
-            mutationType = "S"
-            if( translateCodonToAminoAcid(codonFrom) != translateCodonToAminoAcid(codonTo) ){
-                mutationType = "R"
-            }
-            if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
-                mutationType = "Stop"
-            }
-            return(mutationType)
-        }
-    }
-}
 
 
 # List mutations

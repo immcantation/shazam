@@ -49,8 +49,8 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
 
   # Compute distance only on fivemers that have mutations
   fivemersWithMu <- substr(seq1,3,3)!=substr(seq2,3,3)
-  fivemersWithNonNuc <- ( !is.na(match(substr(seq1,3,3),c("A","C","G","T"))) & !is.na(match(substr(seq2,3,3),c("A","C","G","T"))) )
-  fivemersWithMu <- fivemersWithMu & fivemersWithNonNuc
+  #fivemersWithNonNuc <- ( !is.na(match(substr(seq1,3,3),c("A","C","G","T"))) & !is.na(match(substr(seq2,3,3),c("A","C","G","T"))) )
+  #fivemersWithMu <- fivemersWithMu & fivemersWithNonNuc
   seq1 <- seq1[fivemersWithMu]
   seq2 <- seq2[fivemersWithMu]
   
@@ -68,6 +68,7 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
     }
     avgDist <- mean(c(seq1_to_seq2, seq2_to_seq1))
   },error = function(e){
+    warning("Invalid sequence. Cannot compute distance.")
     return(NA)
   })
 
@@ -481,6 +482,13 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     check <- checkColumns(db, c(sequenceColumn, vCallColumn, jCallColumn))
     if (check != TRUE) { stop(check) }
     
+    # Convert case check for invalid characters
+    db[, sequenceColumn] <- toupper(db[, sequenceColumn])
+    #check <- grepl("[^ACGTN]", db[, sequenceColumn], perl=TRUE)
+    #if (any(check)) {
+    #  stop("Invalid sequence characters in the ", sequenceColumn, " column.")
+    #}
+    
     # Get targeting model
     if (model == "hs5f") {
         targeting_model <- HS5FModel
@@ -581,7 +589,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     }
     
     # Convert list from foreach into a db data.frame
-    db <- do.call(plyr::rbind.fill, list_db)
+    db <- plyr::rbind.fill(list_db)
     db <- db[order(db[,"ROW_ID"]),]
     
     # Stop the cluster
