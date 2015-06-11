@@ -535,9 +535,9 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
         registerDoSEQ()
     } else {
         if(nproc != 0) { cluster <- makeCluster(nproc, type="SOCK") }
-        cluster <- makeCluster(nproc, type = "SOCK")
+        cluster <- snow::makeCluster(nproc, type = "SOCK")
         registerDoSNOW(cluster)
-        clusterEvalQ(cluster, library(shm))
+        snow::clusterEvalQ(cluster, library(shm))
     }
     
     # Calculate distance to nearest neighbor
@@ -552,15 +552,15 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     lenGroups <- length(groups)
     
     # Export groups to the clusters
-    if (nproc>1) { clusterExport(cluster, list("db", 
+    if (nproc>1) { snow::clusterExport(cluster, list("db", 
                                                "groups", 
                                                "sequenceColumn"), envir=environment()) }
     
     if (model %in% c("hs5f", "m3n")) {
         # Export targeting model to processes
-        if (nproc>1) { clusterExport(cluster, list("targeting_model"), envir=environment()) }    
+        if (nproc>1) { snow::clusterExport(cluster, list("targeting_model"), envir=environment()) }    
         list_db <-
-            foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
+            foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
                 db_group <- db[groups[[i]],]
                 db_group$DIST_NEAREST <-
                     getClosestBy5mers( db[groups[[i]],sequenceColumn],
@@ -579,7 +579,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
             } 
     } else if (model %in% c("ham", "aa")) {    
         list_db <-
-            foreach(i=icount(lenGroups), .errorhandling='pass') %dopar% {
+            foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
                 db_group <- db[groups[[i]],]
                 db_group$DIST_NEAREST <-
                     getClosestHam( db[groups[[i]],sequenceColumn],
@@ -593,7 +593,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     db <- db[order(db[,"ROW_ID"]),]
     
     # Stop the cluster
-    if( nproc>1) { stopCluster(cluster) }
+    if( nproc>1) { snow::stopCluster(cluster) }
     
     return(db[, !(names(db) %in% c("V", "J", "L", "ROW_ID", "V1", "J1"))])
 }

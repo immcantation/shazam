@@ -114,12 +114,12 @@ calcDBClonalConsensus <- function(db,
         registerDoSEQ()
     } else {
         if(nproc != 0) { cluster <- makeCluster(nproc, type="SOCK") }
-        clusterExport( cluster, list('db', 
+        snow::clusterExport( cluster, list('db', 
                                      'sequenceColumn', 'germlineColumn', "cloneColumn",
                                      'regionDefinition', 'groups'), 
                        envir=environment() )
-        clusterEvalQ(cluster, library(shm))
-        clusterEvalQ(cluster, library(seqinr))
+        snow::clusterEvalQ(cluster, library(shm))
+        snow::clusterEvalQ(cluster, library(seqinr))
         registerDoSNOW(cluster)
     }
     
@@ -127,14 +127,14 @@ calcDBClonalConsensus <- function(db,
     cat("Building clonal consensus sequences...\n")
     
     list_ClonalConsensus <-
-      foreach(i=icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass') %dopar% {
+      foreach(i=iterators::icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass') %dopar% {
         calcClonalConsensus(inputSeq = db[groups[[i]],sequenceColumn],
                            germlineSeq = db[groups[[i]],germlineColumn],
                            regionDefinition = regionDefinition)
       }
     
     # Stop SNOW cluster
-    if(nproc > 1) { stopCluster(cluster) }
+    if(nproc > 1) { snow::stopCluster(cluster) }
     
     # If collapseByClone is TRUE then collapse the db by clones
     if(collapseByClone){ 
@@ -319,9 +319,9 @@ calcDBObservedMutations <- function(db,
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
-        cluster <- makeCluster(nproc, type = "SOCK")
-        clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition', 'frequency'), envir=environment() )
-        clusterEvalQ( cluster, library("shm") )
+        cluster <- snow::makeCluster(nproc, type = "SOCK")
+        snow::clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition', 'frequency'), envir=environment() )
+        snow::clusterEvalQ( cluster, library("shm") )
         registerDoSNOW(cluster)
     } else if( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
@@ -338,7 +338,7 @@ calcDBObservedMutations <- function(db,
     # the nucleotide position of the mutations.
     numbOfSeqs <- nrow(db)
     observedMutations_list <-
-        foreach( i=icount(numbOfSeqs) ) %dopar% {
+        foreach( i=iterators::icount(numbOfSeqs) ) %dopar% {
             calcObservedMutations( db[i,sequenceColumn], 
                             db[i,germlineColumn],
                             frequency,
@@ -363,11 +363,11 @@ calcDBObservedMutations <- function(db,
     if(frequency==TRUE){
       colnames(observed_mutations) <- paste0( paste0("MU_FREQ",sep), colnames(observed_mutations))
     }else{
-      colnames(observed_mutations) <- paste0(paste0("OBSERVED_",sep), colnames(observed_mutations))
+      colnames(observed_mutations) <- paste0(paste0("OBSERVED",sep), colnames(observed_mutations))
     }
     
     # Properly shutting down the cluster
-    if(nproc>1){ stopCluster(cluster) }
+    if(nproc>1){ snow::stopCluster(cluster) }
     
     # Bind the observed mutations to db
     db_new <- cbind(db, observed_mutations)
@@ -646,10 +646,10 @@ calcDBExpectedMutations <- function(db,
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
-        cluster <- makeCluster(nproc, type = "SOCK")
-        clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 
+        cluster <- snow::makeCluster(nproc, type = "SOCK")
+        snow::clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 
                                      'regionDefinition','targetingModel'), envir=environment() )
-        clusterEvalQ( cluster, library("shm") )
+        snow::clusterEvalQ( cluster, library("shm") )
         registerDoSNOW(cluster)
     } else if( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
@@ -667,7 +667,7 @@ calcDBExpectedMutations <- function(db,
     numbOfSeqs <- nrow(db)
     
     targeting_list <-
-        foreach( i=icount(numbOfSeqs) ) %dopar% {
+        foreach( i=iterators::icount(numbOfSeqs) ) %dopar% {
           calcExpectedMutations( germlineSeq = db[i,germlineColumn],
                                 inputSeq = db[i,sequenceColumn],
                                 targetingModel = HS5FModel,
@@ -685,7 +685,7 @@ calcDBExpectedMutations <- function(db,
     colnames(expectedMutationFrequencies) <- paste0("EXPECTED_", colnames(expectedMutationFrequencies))
     
     # Properly shutting down the cluster
-    if(nproc>1){ stopCluster(cluster) }
+    if(nproc>1){ snow::stopCluster(cluster) }
     
     # Bind the observed mutations to db
     db_new <- cbind(db, expectedMutationFrequencies)

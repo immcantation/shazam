@@ -106,7 +106,7 @@ M3NModel <- new("TargetingModel",
                 description="3-mer targeting model.",
                 species="Mus musculus",
                 date="2015-01-06",
-                citation="Smith DS, et al. J Immunol. 1996 156:2642–52",
+                citation="Smith DS, et al. J Immunol. 1996 156:2642-52",
                 substitution=m3n_sub,
                 mutability=m3n_mut,
                 targeting=m3n_tar )

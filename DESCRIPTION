@@ -20,10 +20,13 @@ Imports:
     data.table (>= 1.9.4),
     foreach,
     grid,
+    iterators,
+    methods,
     reshape2,
     SDMTools,
     scales,
-    seqinr
+    seqinr,
+    snow
 Suggests:
     knitr
 VignetteBuilder: knitr

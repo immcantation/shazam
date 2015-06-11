@@ -110,14 +110,17 @@
 #' @import   foreach
 #' @import   grid
 #' @import   ggplot2
+#' @import   methods
 #' @import   plyr
 #' @import   reshape2
 #' @import   scales
-#' @importFrom  SDMTools  wt.sd 
-#' @importFrom  seqinr    c2s
-#' @importFrom  seqinr    s2c
-#' @importFrom  seqinr    words
-#' @importFrom  seqinr    translate
+#' @import   snow
+#' @importFrom  iterators  icount
+#' @importFrom  SDMTools   wt.sd
+#' @importFrom  seqinr     c2s
+#' @importFrom  seqinr     s2c
+#' @importFrom  seqinr     words
+#' @importFrom  seqinr     translate
 NULL
 
 

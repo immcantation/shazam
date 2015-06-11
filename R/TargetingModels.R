@@ -23,7 +23,7 @@ NULL
 #' \enumerate{
 #'   \item  Smith DS, et al. Di- and trinucleotide target preferences of somatic 
 #'            mutagenesis in normal and autoreactive B cells. 
-#'            J Immunol. 1996 156:2642–52. 
+#'            J Immunol. 1996 156:2642-52. 
 #' }
 #'
 #' @seealso  See \code{\link{M3NModel}} for the 3-mer model from same publication.
@@ -40,7 +40,7 @@ NULL
 #' \enumerate{
 #'   \item  Smith DS, et al. Di- and trinucleotide target preferences of somatic 
 #'            mutagenesis in normal and autoreactive B cells. 
-#'            J Immunol. 1996 156:2642–52. 
+#'            J Immunol. 1996 156:2642-52. 
 #' }
 #'
 #' @seealso  See \code{\link{HS5FModel}} for the 5-mer model.

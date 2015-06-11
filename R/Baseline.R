@@ -332,8 +332,8 @@ calcBaseline <- function(db,
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
-        cluster <- makeCluster(nproc, type = "SOCK")
-        clusterExport( cluster, list( 'db',
+        cluster <- snow::makeCluster(nproc, type = "SOCK")
+        snow::clusterExport( cluster, list( 'db',
                                       'sequenceColumn', 'germlineColumn', 
                                       'regionDefinition',
                                       'break2chunks', 'PowersOfTwo', 
@@ -344,8 +344,8 @@ calcBaseline <- function(db,
                                       'groupPosteriors', 'fastConv',
                                       'calcBaselineHelper'), 
                        envir=environment() )
-        clusterEvalQ(cluster, library(shm))
-        clusterEvalQ(cluster, library(seqinr))
+        snow::clusterEvalQ(cluster, library(shm))
+        snow::clusterEvalQ(cluster, library(seqinr))
         registerDoSNOW(cluster)
         nproc_arg <- cluster
     } else if( nproc==1 ) {
@@ -410,7 +410,7 @@ calcBaseline <- function(db,
     
     # Exporting additional environment variables and functions needed to run foreach 
     if( nproc!=1 ) {
-        clusterExport( 
+        snow::clusterExport( 
             cluster, list('cols_observed', 'cols_expected'), 
             envir=environment() 
         )
@@ -424,7 +424,7 @@ calcBaseline <- function(db,
         
         # Foreach returns a list of PDFs
         list_region_pdfs <- 
-            foreach( i=icount(totalNumbOfSequences) ) %dopar% {                
+            foreach( i=iterators::icount(totalNumbOfSequences) ) %dopar% {                
                 calcBaselineHelper( 
                     observed = db[i,cols_observed],
                     expected = db[i,cols_expected],
@@ -464,7 +464,7 @@ calcBaseline <- function(db,
                                 pdfs=list_pdfs )
     
     # Stop SNOW cluster
-    if(nproc > 1) { stopCluster(cluster) }
+    if(nproc > 1) { snow::stopCluster(cluster) }
     
     return(baseline)
     
@@ -651,8 +651,8 @@ groupBaseline <- function(baseline,
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
-        cluster <- makeCluster(nproc, type = "SOCK")
-        clusterExport( cluster, list( 'baseline', 'groups',
+        cluster <- snow::makeCluster(nproc, type = "SOCK")
+        snow::clusterExport( cluster, list( 'baseline', 'groups',
                                       'break2chunks', 'PowersOfTwo', 
                                       'convolutionPowersOfTwo', 
                                       'convolutionPowersOfTwoByTwos', 
@@ -660,7 +660,7 @@ groupBaseline <- function(baseline,
                                       'calculate_bayesGHelper', 
                                       'groupPosteriors', 'fastConv'), 
                        envir=environment() )
-        clusterEvalQ(cluster, library(shm))
+        snow::clusterEvalQ(cluster, library(shm))
         registerDoSNOW(cluster)
     } else if( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
@@ -690,7 +690,7 @@ groupBaseline <- function(baseline,
     for (region in regions) {
         
         list_region_pdfs  <-
-            foreach( i=icount(numbOfTotalGroups)) %dopar% {
+            foreach( i=iterators::icount(numbOfTotalGroups)) %dopar% {
                 matrix_GroupPdfs <- (baseline@pdfs[[region]])[groups[[i]],]
                 
                 list_GroupPdfs <- 
@@ -749,7 +749,7 @@ groupBaseline <- function(baseline,
     baseline <- summarizeBaseline(baseline,nproc=0)
     
     # Stop SNOW cluster
-    if(nproc > 1) { stopCluster(cluster) }
+    if(nproc > 1) { snow::stopCluster(cluster) }
     
     return(baseline)
     
@@ -817,13 +817,13 @@ summarizeBaseline <- function(baseline,
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.  
     if (nproc > 1){        
-        cluster <- makeCluster(nproc, type="SOCK")
-        clusterExport(cluster, list('baseline',
+        cluster <- snow::makeCluster(nproc, type="SOCK")
+        snow::clusterExport(cluster, list('baseline',
                                     'calcBaselineSigma',
                                     'calcBaselineCI',
                                     'calcBaselinePvalue'), 
                        envir=environment())
-        clusterEvalQ( cluster, library("shm") )
+        snow::clusterEvalQ( cluster, library("shm") )
         registerDoSNOW(cluster)
     } else if (nproc == 1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
@@ -840,7 +840,7 @@ summarizeBaseline <- function(baseline,
     db <- baseline@db
     if ("SEQUENCE_ID" %in% colnames(db)) { db <- subset(db, select="SEQUENCE_ID") }
     list_stats <-
-        foreach(i = icount(numbOfTotalSeqs)) %dopar% {
+        foreach(i = iterators::icount(numbOfTotalSeqs)) %dopar% {
             df_baseline_seq <- data.frame()
             db_seq <- data.frame(db[i, ])
             names(db_seq) <- names(db)
@@ -861,7 +861,7 @@ summarizeBaseline <- function(baseline,
         }
     
     # Stop SNOW cluster
-    if (nproc > 1) { stopCluster(cluster) }
+    if (nproc > 1) { snow::stopCluster(cluster) }
     
     # Convert list of BASELINe stats into a data.frame
     stats <- do.call(plyr::rbind.fill, list_stats)
