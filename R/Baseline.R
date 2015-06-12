@@ -34,8 +34,10 @@ NULL
 #'                              including: selection strength (Sigma), 95\% confidence 
 #'                              intervals, and P values.
 #'                          
-#' @name    Baseline
-#' @export
+#' @name         Baseline-class
+#' @rdname       Baseline-class
+#' @aliases      Baseline
+#' @exportClass  Baseline
 setClass("Baseline", 
          slots = c( description="character",
                     db="data.frame",
@@ -157,18 +159,19 @@ createBaseline <- function(description="",
 # 
 # \code{editBaseline} edits a \code{Baseline}.
 #
-# param   baseline     The \code{Baseline} S4 object to be edited.
-# param   field_name   Name of the field in the \code{Baseline} S4 object to be edited.
-# param   value        The value to set the \code{field_name}.
+# @param   baseline     The \code{Baseline} S4 object to be edited.
+# @param   field_name   Name of the field in the \code{Baseline} S4 object to be edited.
+# @param   value        The value to set the \code{field_name}.
 # 
-# return   A \code{Baseline} object.
+# @return   A \code{Baseline} object.
 # 
-# seealso  See \code{\link{Baseline}} for the return object.
-editBaseline <- function ( baseline,
-                           field_name,
-                           value ) {
-    if ( !match(field_name, slotNames(baseline)) ) { stop("field_name not part of BASELINe object!")}
+# @seealso  See \code{\link{Baseline}} for the return object.
+editBaseline <- function(baseline, field_name, value) {
+    if (!match(field_name, slotNames(baseline))) { 
+        stop("field_name not part of BASELINe object!")
+    }
     slot(baseline, field_name) = value
+    
     return(baseline)
 }
 

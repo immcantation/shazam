@@ -106,8 +106,10 @@ NULL
 #' 
 #' @seealso  See \link{createTargetingModel} building models from sequencing data.
 #'           
-#' @name TargetingModel
-#' @export
+#' @name         TargetingModel-class
+#' @rdname       TargetingModel-class
+#' @aliases      TargetingModel
+#' @exportClass  TargetingModel
 setClass("TargetingModel", 
          slots=c(name="character",
                  description="character",

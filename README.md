@@ -1,7 +1,7 @@
 shm
 -------------------------------------------------------------------------------
-March 6, 2015  
-Version 0.1
+June 12, 2015  
+Version 0.1.0
 
 Somatic hypermutation analysis package.
 
