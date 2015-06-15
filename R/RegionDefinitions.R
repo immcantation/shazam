@@ -39,8 +39,10 @@ REGION_PALETTE <-  c("CDR"="#377eb8",
 #'                          e.g., \code{c("CDR_R", "CDR_S", "FWR_R", "FWR_S")}.
 #' @slot    citation        publication source.
 #'    
-#' @name    RegionDefinition
-#' @export
+#' @name         RegionDefinition-class
+#' @rdname       RegionDefinition-class
+#' @aliases      RegionDefinition
+#' @exportClass  RegionDefinition
 setClass("RegionDefinition", 
          slots=c(name="character",
                  description="character",
@@ -136,17 +138,17 @@ createRegionDefinition <- function(name="",
 #'            Developmental and comparative immunology. 2003 27:55-77.
 #' }
 #' 
-#' @name IMGT_SCHEMES
+#' @name   IMGT_SCHEMES
 NULL
 
-#' @rdname IMGT_SCHEMES
+#' @rdname  IMGT_SCHEMES
 "IMGT_V"
 
-#' @rdname IMGT_SCHEMES
+#' @rdname  IMGT_SCHEMES
 "IMGT_V_BY_REGIONS"
 
-#' @rdname IMGT_SCHEMES
+#' @rdname  IMGT_SCHEMES
 "IMGT_V_NO_CDR3"
 
-#' @rdname IMGT_SCHEMES
+#' @rdname  IMGT_SCHEMES
 "IMGT_V_BY_REGIONS_NO_CDR3"
