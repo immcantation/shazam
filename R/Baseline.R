@@ -342,10 +342,10 @@ calcBaseline <- function(db,
                                       'weighted_conv', 
                                       'calculate_bayesGHelper', 
                                       'groupPosteriors', 'fastConv',
-                                      'calcBaselineHelper'), 
+                                      'calcBaselineHelper',
+                                      'c2s', 's2c', 'words', 'translate'), 
                        envir=environment() )
         snow::clusterEvalQ(cluster, library(shm))
-        snow::clusterEvalQ(cluster, library(seqinr))
         registerDoSNOW(cluster)
         nproc_arg <- cluster
     } else if( nproc==1 ) {

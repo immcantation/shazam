@@ -122,6 +122,7 @@ distSeqM1N <- function(seq1, seq2, normalize=c("none" ,"length", "mutations")) {
       dist <- sum( diag(M1NDistance[seq2,seq1]) )
     }
   },error = function(e){
+    warning("Invalid sequence. Cannot compute distance.")
     return(NA)
   })
   

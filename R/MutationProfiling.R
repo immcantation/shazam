@@ -116,10 +116,10 @@ calcDBClonalConsensus <- function(db,
         if(nproc != 0) { cluster <- makeCluster(nproc, type="SOCK") }
         snow::clusterExport( cluster, list('db', 
                                      'sequenceColumn', 'germlineColumn', "cloneColumn",
-                                     'regionDefinition', 'groups'), 
+                                     'regionDefinition', 
+                                     'groups', 'c2s', 's2c', 'words', 'translate'), 
                        envir=environment() )
         snow::clusterEvalQ(cluster, library(shm))
-        snow::clusterEvalQ(cluster, library(seqinr))
         registerDoSNOW(cluster)
     }
     
