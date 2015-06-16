@@ -18,6 +18,24 @@ M1NDistance <- matrix(c(0, 2.86, 1, 2.14, 0, 0, 0,
 devtools::use_data(M1NDistance, overwrite=TRUE)
 
 
+#### HS1F #####
+
+# Yaari G, et al. Models of somatic hypermutation targeting and substitution 
+#   based on synonymous mutations from high-throughput immunoglobulin sequencing data. 
+#   Front Immunol. 2013 4(November):358.
+
+nuc_chars <- c('A','C','G','T','N','.','-')
+HS1FDistance <- matrix(c(0, 2.08, 1, 1.75, 0, 0, 0, 
+                        2.08, 0, 1.75, 1, 0, 0, 0, 
+                        1, 1.75, 0, 2.08, 0, 0, 0, 
+                        1.75, 1, 2.08, 0, 0, 0, 0, 
+                        0, 0, 0, 0, 0, 0, 0, 
+                        0, 0, 0, 0, 0, 0, 0, 
+                        0, 0, 0, 0, 0, 0, 0),
+                      7, 7, dimnames=list(nuc_chars, nuc_chars))
+devtools::use_data(HS1FDistance, overwrite=TRUE)
+
+
 #### U5N ####
 
 # 5-mer null model

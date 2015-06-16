@@ -11,7 +11,7 @@ NULL
 
 #### Data ####
 
-#' Single nucleotide distance matrix.
+#' Mouse single nucleotide distance matrix.
 #'
 #' Single nucleotide distance matrix of somatic hypermutation targeting based on 
 #' Mus musculus Ig sequence data.
@@ -28,6 +28,25 @@ NULL
 #'
 #' @seealso  See \code{\link{M3NModel}} for the 3-mer model from same publication.
 "M1NDistance"
+
+
+#' Human single nucleotide distance matrix.
+#'
+#' Single nucleotide distance matrix of somatic hypermutation targeting based on 
+#' human Ig sequence data.
+#'
+#' @format   A symmetric matrix of nucleotide substitution distance scores with 
+#'           row names and column names definition the specific subsitution.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
+#'            Front Immunol. 2013 4(November):358.
+#' }
+#'
+#' @seealso  See \code{\link{HS5FModel}} for the 5-mer model from same publication.
+"HS1FDistance"
 
 
 #' 3-mer targeting model.

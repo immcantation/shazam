@@ -64,19 +64,19 @@ V(D)J segment calls, the parameter `first` can be set to `FALSE`. Setting
 `first=FALSE` will use the union of all possible genes to group sequences, rather 
 than the first gene in the field. The `model` parameter determines which 
 underlying SHM model is used to calculate the distance. The default model is 
-`m1n`, an Ig-specific single nucleotide model similar to a 
-transition/transversion model (Smith et al, J Immunol, 1996). Other options 
+`hs1f`, a human Ig-specific single nucleotide model similar to a 
+transition/transversion model (Yaari et al, Front Immunol, 2013). Other options 
 include nucleotide Hamming distance (`ham`), amino acid Hamming distance (`aa`), 
-a 3-mer mouse model (`m3n`) (Smith et al, J Immunol, 1996), and a 5-mer model 
-inferred from human data (`hs5f`) (Yaari et al, Front Immunol, 2013).
+single nucleotide (`m1n`) and 3-mer (`m3n`) mouse models (Smith et al, J Immunol, 1996), 
+and a 5-mer model inferred from human data (`hs5f`) (Yaari et al, Front Immunol, 2013).
 
 ```{r, eval=TRUE, warning=FALSE}
-# Use m1n model and normalize by junction length
-dist_m1n <- distToNearest(db, model="m1n", first=FALSE, normalize="length")
+# Use hs1f model and normalize by junction length
+dist_hs1f <- distToNearest(db, model="hs1f", first=FALSE, normalize="length")
 
 # Use genotyped V assignments and 5-mer model
 dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", 
-                           first=FALSE)
+                           first=FALSE, normalize="none")
 ```
 
 Generate histogram
@@ -90,14 +90,14 @@ without "near"" neighbor), which show up as two modes in a histogram.
 # Generate m1n histogram
 library(ggplot2)
 p1 <- ggplot() + theme_bw() + 
-    ggtitle("Distance to nearest: m1n") + xlab("distance") +
-    geom_histogram(data=dist_m1n, aes(x=DIST_NEAREST), binwidth=0.025, 
+    ggtitle("Distance to nearest: hs1f") + xlab("distance") +
+    geom_histogram(data=dist_hs1f, aes(x=DIST_NEAREST), binwidth=0.025, 
                    fill="steelblue", color="white") +
     geom_rug(aes(x=seq(0.0, 0.5, 0.1)), color="firebrick")
 plot(p1)
 ```
 
-In this example, the length normalized `m1n` model distance threshold would be 
+In this example, the length normalized `hs1f` model distance threshold would be 
 set to a value near 0.1.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
