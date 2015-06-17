@@ -137,11 +137,17 @@ calcDBClonalConsensus <- function(db,
     if(nproc > 1) { snow::stopCluster(cluster) }
     
     # If collapseByClone is TRUE then collapse the db by clones
-    if(collapseByClone){ 
+    if(collapseByClone==TRUE){ 
         uniqueCloneIDs <-  unique(db[,cloneColumn])
         indexOfFirstOccurenceOfClone <- match(uniqueCloneIDs, db[,cloneColumn])
         db_ClonalConsensus <- db[indexOfFirstOccurenceOfClone, ]
         db_ClonalConsensus$CLONAL_CONSENSUS_SEQUENCE <- unlist(list_ClonalConsensus)
+    }else{
+      # Match the ClonalConsensus to all the sequences in the clone
+      vec_ClonalConsensus <- unlist(list_ClonalConsensus)
+      expanded_ClonalConsensus <- tapply(db[,cloneColumn],1:nrow(db),function(x){return(vec_ClonalConsensus[x])})
+      db_ClonalConsensus <- db
+      db_ClonalConsensus$CLONAL_CONSENSUS_SEQUENCE <- unlist(expanded_ClonalConsensus)
     }
     
     return(db_ClonalConsensus)
@@ -220,7 +226,9 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
                 
             }
         }
+        if(error==TRUE){warning("Error while attempting to collapse by clone!")}
     })
+    
     return( c2s(matClone[1,]) )
 }
 
