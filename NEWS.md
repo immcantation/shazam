@@ -1,25 +1,54 @@
-Version 0.1.0:  June 17, 2015
+Version 0.1.0:  June 18, 2015
 -------------------------------------------------------------------------------
 
 Initial public release.
 
-Fixed bug in calcDBClonalConsensus. Now the function works correctly when called with
-collapseByClone=FALSE
+General:
+
++ Restructured the S4 class documentation.
++ Fixed bug wherein example `Influenza.tab` file did not load on Mac OS X.
++ Added citations for `citation("shm")` command.
++ Added dependency on data.table >= 1.9.4 to fix bug that occured with 
+  earlier versions of data.table.
+
+Distance Profiling:
+
++ Added a human 1-mer substitution matrix, `HS1FDistance`, based on the
+  Yaari et al, 2013 data.
++ Set the `hs1f` as the default distance model for `distToNearest()`.
++ Added conversion of sequences to uppercase in `distToNearest()`.
++ Fixed a bug wherein unrecongized (including lowercase) characters would
+  lead to silenting returning a distance of 0 to the neared neighbor. 
+  Unrecognized characters will now raise an error.
+
+Mutation Profiling:
+
++ Fixed bug in `calcDBClonalConsensus()` so that the function now works 
+  correctly when called with the argument `collapseByClone=FALSE`.
++ Added the `frequency` argument to `calcObservedMutations()` and
+  `calcDBObservedMutations()`, which enables return of mutation frequencies
+  rather the default of mutation counts.
+
 
 Version 0.1.0.beta-2015-05-30:  May 30, 2015
 -------------------------------------------------------------------------------
 
-Updated the targeting model workflow to include a clonal consensus step.
+General:
 
-Added more error checking.
++ Added more error checking.
+
+Targeting Models:
+
++ Updated the targeting model workflow to include a clonal consensus step.
 
 
 Version 0.1.0.beta-2015-05-11:  May 11, 2015
 -------------------------------------------------------------------------------
 
-Added the U5NModel, which is a uniform 5-mer model.
+Targeting Models:
 
-Improvements to plotMutability output.
++ Added the `U5NModel`, which is a uniform 5-mer model.
++ Improvements to `plotMutability()` output.
 
 
 Version 0.1.0.beta-2015-05-05:  May 05, 2015
