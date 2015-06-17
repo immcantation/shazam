@@ -3,6 +3,8 @@ Version 0.1.0:  June 17, 2015
 
 Initial public release.
 
+Fixed bug in calcDBClonalConsensus. Now the function works correctly when called with
+collapseByClone=FALSE
 
 Version 0.1.0.beta-2015-05-30:  May 30, 2015
 -------------------------------------------------------------------------------
