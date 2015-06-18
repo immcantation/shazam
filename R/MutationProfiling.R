@@ -67,20 +67,19 @@ NULL
 #' db <- readChangeoDb(dbPath)
 #' 
 #' # Run calcDBClonalConsensus
-#' db_new <- calcDBClonalConsensus(db, 
-#'                              cloneColumn="CLONE", 
-#'                              sequenceColumn="SEQUENCE_IMGT",
-#'                              germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                              collapseByClone=TRUE)
+#' db_new <- calcDBClonalConsensus(db, cloneColumn="CLONE", 
+#'                                 sequenceColumn="SEQUENCE_IMGT",
+#'                                 germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                                 collapseByClone=TRUE)
 #' 
 #' @export
 calcDBClonalConsensus <- function(db, 
-                               cloneColumn="CLONE", 
-                               sequenceColumn="SEQUENCE_IMGT",
-                               germlineColumn="GERMLINE_IMGT_D_MASK",
-                               collapseByClone=TRUE,
-                               regionDefinition=IMGT_V_NO_CDR3,
-                               nproc=1) {
+                                  cloneColumn="CLONE", 
+                                  sequenceColumn="SEQUENCE_IMGT",
+                                  germlineColumn="GERMLINE_IMGT_D_MASK",
+                                  collapseByClone=TRUE,
+                                  regionDefinition=IMGT_V_NO_CDR3,
+                                  nproc=1) {
     # Check for valid columns
     check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
@@ -294,12 +293,11 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' db <- readChangeoDb(dbPath)
 #'
 #' # Run calcDBObservedMutations()
-#' db_new <- calcDBObservedMutations(db,
-#'                                sequenceColumn="SEQUENCE_IMGT",
-#'                                germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                                frequency=TRUE,
-#'                                regionDefinition=IMGT_V_NO_CDR3,
-#'                                nproc=1)
+#' db_new <- calcDBObservedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+#'                                   germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                                   frequency=TRUE,
+#'                                   regionDefinition=IMGT_V_NO_CDR3,
+#'                                   nproc=1)
 #'                      
 #' @export
 calcDBObservedMutations <- function(db, 
@@ -328,10 +326,12 @@ calcDBObservedMutations <- function(db,
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
         cluster <- snow::makeCluster(nproc, type = "SOCK")
-        snow::clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 'regionDefinition', 'frequency'), envir=environment() )
-        snow::clusterEvalQ( cluster, library("shm") )
+        snow::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
+                                          'regionDefinition', 'frequency'), 
+                            envir=environment())
+        snow::clusterEvalQ(cluster, library("shm"))
         registerDoSNOW(cluster)
-    } else if( nproc==1 ) {
+    } else if (nproc==1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
@@ -346,42 +346,41 @@ calcDBObservedMutations <- function(db,
     # the nucleotide position of the mutations.
     numbOfSeqs <- nrow(db)
     observedMutations_list <-
-        foreach( i=iterators::icount(numbOfSeqs) ) %dopar% {
-            calcObservedMutations( db[i,sequenceColumn], 
-                            db[i,germlineColumn],
-                            frequency,
-                            regionDefinition,
-                            binByRegions=TRUE)
+        foreach(i=iterators::icount(numbOfSeqs)) %dopar% {
+            calcObservedMutations(db[i, sequenceColumn], 
+                                  db[i, germlineColumn],
+                                  frequency,
+                                  regionDefinition,
+                                  binByRegions=TRUE)
         }
     
     # Convert list of mutations to data.frame
-    if(!is.null(regionDefinition)) {
+    if (!is.null(regionDefinition)) {
       labels_length <- length(regionDefinition@labels)
     } else{
       labels_length=1
     }
-    observed_mutations <- do.call(rbind, lapply(observedMutations_list, function(x){ 
+    observed_mutations <- do.call(rbind, lapply(observedMutations_list, function(x) { 
         length(x) <- labels_length 
         return(x)
     })) 
     
     sep <- ""
-    if(ncol(observed_mutations)>1) sep <- "_"
+    if (ncol(observed_mutations) > 1) sep <- "_"
     observed_mutations[is.na(observed_mutations)] <- 0
-    if(frequency==TRUE){
-      colnames(observed_mutations) <- paste0( paste0("MU_FREQ",sep), colnames(observed_mutations))
-    }else{
-      colnames(observed_mutations) <- paste0(paste0("OBSERVED",sep), colnames(observed_mutations))
+    if (frequency == TRUE) {
+      colnames(observed_mutations) <- paste("MU_FREQ", colnames(observed_mutations), sep=sep)
+    } else {
+      colnames(observed_mutations) <- paste("OBSERVED", colnames(observed_mutations), sep=sep)
     }
     
     # Properly shutting down the cluster
-    if(nproc>1){ snow::stopCluster(cluster) }
+    if (nproc > 1) { snow::stopCluster(cluster) }
     
     # Bind the observed mutations to db
     db_new <- cbind(db, observed_mutations)
     return(db_new)    
 }
-
 
 
 #' Count the number of observed mutations in a sequence.

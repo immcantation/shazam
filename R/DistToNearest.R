@@ -313,7 +313,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' @param    vCallColumn     name of the column containing the V-segment allele calls.
 #' @param    jCallColumn     name of the column containing the J-segment allele calls.
 #' @param    model           underlying SHM model, which must be one of 
-#'                           \code{c("m1n", "ham", "aa", "m3n", "hs5f")}.
+#'                           \code{c("m1n", "ham", "aa", "hs5f")}.
 #'                           See Details for further information.
 #' @param    normalize       method of normalization. The default is "none". If the "length" 
 #'                           method is chosen, then distance is divided by the length of the 
@@ -331,7 +331,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
 #' with the ideal threshold being a value that separates the two modes.
 #' 
-#' "hs5f" and "m3n" use distance derived from the \link{HS5FModel} and \link{M3NModel} respectively 
+#' "hs5f" use distance derived from the \link{HS5FModel}
 #' using \link{calcTargetingDistance}. "hs1f" and "m1n" use \link{HS1FDistance} and \link{M1NDistance}
 #'  to calculate distances respectively. "ham" uses a nucleotide hamming distance matrix from 
 #'  \link{getDNADistMatrix}, with gaps being zero. "aa" uses an amino acid hamming distance matrix 
@@ -352,7 +352,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #'  }
 #'  
 #' @seealso  See \link{calcTargetingDistance} for generating nucleotide distance matrices 
-#'           from a \link{TargetingModel} object. See \link{M1NDistance}, \link{M3NModel}, 
+#'           from a \link{TargetingModel} object. See \link{M1NDistance}, 
 #'           \link{HS5FModel}, \link{getDNADistMatrix}, and \link{getAADistMatrix}
 #'           for individual model details.
 #' 
@@ -372,7 +372,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #'
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
-                          jCallColumn="J_CALL", model=c("hs1f", "m1n", "ham", "aa", "m3n", "hs5f"), 
+                          jCallColumn="J_CALL", model=c("hs1f", "m1n", "ham", "aa", "hs5f"), 
                           normalize=c("length", "none"), 
                           first=TRUE, nproc=1) {
     # Initial checks
@@ -394,8 +394,6 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     # Get targeting model
     if (model == "hs5f") {
         targeting_model <- HS5FModel
-    } else if (model == "m3n") {
-        targeting_model <- M3NModel            
     }
     
     # Parse V and J columns to get gene
@@ -458,7 +456,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                                                "groups", 
                                                "sequenceColumn"), envir=environment()) }
     
-    if (model %in% c("hs5f", "m3n")) {
+    if (model %in% c("hs5f")) {
         # Export targeting model to processes
         if (nproc>1) { snow::clusterExport(cluster, list("targeting_model"), envir=environment()) }    
         list_db <-

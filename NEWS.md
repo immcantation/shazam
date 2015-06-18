@@ -28,6 +28,10 @@ Mutation Profiling:
 + Added the `frequency` argument to `calcObservedMutations()` and
   `calcDBObservedMutations()`, which enables return of mutation frequencies
   rather the default of mutation counts.
+  
+Targeting Models:
+
++ Removed `M3NModel` and all options for using said model.
 
 Targeting Models:
 
