@@ -51,35 +51,36 @@
 #' 
 #' @section  Targeting models:
 #' \itemize{
-#'   \item  \link{createTargetingModel}:   Build a 5-mer targeting model.
-#'   \item  \link{plotMutability}:         Plot 5-mer mutability rates.
+#'   \item  \link{createTargetingModel}:     Build a 5-mer targeting model.
+#'   \item  \link{plotMutability}:           Plot 5-mer mutability rates.
 #' }
 #' 
+#' @section  Mutational profiling:
+#' \itemize{
+#'   \item  \link{calcDBClonalConsensus}:    Build clonal consensus sequence.
+#'   \item  \link{calcDBObservedMutations}:  Compute observed mutation counts.
+#'   \item  \link{calcDBExpectedMutations}:  Compute expected mutation frequencies.
+#' }
+#'
 #' @section  Selection analysis:
 #' \itemize{
-#'   \item  Mutational profiling
-#'      \itemize{
-#'        \item  \link{calcDBClonalConsensus}:       Build clonal consensus sequence.
-#'        \item  \link{calcDBObservedMutations}:     Compute observed mutation counts.
-#'        \item  \link{calcDBExpectedMutations}:  Compute expected mutation frequencies.
-#'      }
-#'   \item  \link{calcBaseline}:           Calculate the BASELINe probability
-#'                                         density functions (PDFs).
-#'   \item  \link{groupBaseline}:          Combine PDFs from sequences grouped
-#'                                         by biological or experimental relevance.
-#'   \item  \link{summarizeBaseline}:      Compute summary statistics from BASELINe PDFs.
-#'   \item  \link{plotBaselineDensity}:    Plot the probability density functions
-#'                                         resulting from selection analysis.
-#'   \item  \link{plotBaselineSummary}:    Plot summary stastistics resulting from 
-#'                                         selection analysis.
+#'   \item  \link{calcBaseline}:             Calculate the BASELINe probability
+#'                                           density functions (PDFs).
+#'   \item  \link{groupBaseline}:            Combine PDFs from sequences grouped
+#'                                           by biological or experimental relevance.
+#'   \item  \link{summarizeBaseline}:        Compute summary statistics from BASELINe PDFs.
+#'   \item  \link{plotBaselineDensity}:      Plot the probability density functions
+#'                                           resulting from selection analysis.
+#'   \item  \link{plotBaselineSummary}:      Plot summary stastistics resulting from 
+#'                                           selection analysis.
 #' }
 #'
 #' @section  Distance profiling:
 #' \itemize{
-#'   \item  \link{distToNearest}:          Tune clonal assignment thresholds by calculating 
-#'                                         distances to nearest-neighbors.
-#'   \item  \link{calcTargetingDistance}:  Construct a nucleotide distance matrix from a 
-#'                                         5-mer targeting model.
+#'   \item  \link{distToNearest}:            Tune clonal assignment thresholds by calculating 
+#'                                           distances to nearest-neighbors.
+#'   \item  \link{calcTargetingDistance}:    Construct a nucleotide distance matrix from a 
+#'                                           5-mer targeting model.
 #' }
 #'
 #' @references
