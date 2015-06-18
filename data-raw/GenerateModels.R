@@ -75,62 +75,6 @@ U5NModel <- new("TargetingModel",
 devtools::use_data(U5NModel, overwrite=TRUE)
 
 
-#### M3N #####
-
-# Smith DS, et al. Di- and trinucleotide target preferences of somatic mutagenesis 
-#    in normal and autoreactive B cells. 
-#    J Immunol. 1996 156:2642-52. 
-
-# Load data
-smith1996_sub <- as.matrix(read.csv("data-raw/M3N_Substitution.csv", row.names=1, as.is=TRUE))
-smith1996_mut <- read.csv("data-raw/M3N_Mutability.csv", row.names=1, as.is=TRUE)
-smith1996_mut <- setNames(smith1996_mut[, 2], rownames(smith1996_mut))
-
-# Define row and column names
-nuc_chars <- c("A", "C", "G", "T")
-nuc_words <- seqinr::words(5, alphabet=nuc_chars)
-
-# Creater 5-mer substitution matrix
-m3n_sub <- matrix(NA, nrow=length(nuc_chars), ncol=length(nuc_words), 
-                  dimnames=list(nuc_chars, nuc_words))
-for(mer in nuc_words) {
-    center_nuc <- substr(mer, 3, 3)
-    center_row <- which(nuc_chars == center_nuc)
-    m3n_sub[center_row, mer] <- NA
-    m3n_sub[-center_row, mer] <- smith1996_sub[center_nuc, -center_row]
-}
-# Normalize by column
-m3n_sub <- apply(m3n_sub, 2, function(x) { x / sum(x, na.rm=TRUE) })
-m3n_sub[!is.finite(m3n_sub)] <- NA
-
-# Create 5-mer mutability vector
-m3n_mut <- setNames(array(NA, length(nuc_words)), nuc_words)
-for(mer in nuc_words){
-    m3n_mut[mer]<- smith1996_mut[substr(mer, 2, 4)]
-}
-# Normalize
-m3n_mut <- m3n_mut / sum(m3n_mut, na.rm=TRUE)
-
-# Extend substitution and mutability with N characters
-m3n_sub <- extendSubstitutionMatrix(m3n_sub)
-m3n_mut <- extendMutabilityMatrix(m3n_mut)
-
-# Compute targeting
-m3n_tar <- createTargetingMatrix(m3n_sub, m3n_mut)
-
-# Build and save TargetingModel object
-M3NModel <- new("TargetingModel",
-                name="m3n",
-                description="3-mer targeting model.",
-                species="Mus musculus",
-                date="2015-01-06",
-                citation="Smith DS, et al. J Immunol. 1996 156:2642-52",
-                substitution=m3n_sub,
-                mutability=m3n_mut,
-                targeting=m3n_tar )
-devtools::use_data(M3NModel, overwrite=TRUE)
-
-
 #### HS5F ####
 
 # Yaari G, et al. Models of somatic hypermutation targeting and substitution 

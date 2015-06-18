@@ -26,7 +26,7 @@ NULL
 #'            J Immunol. 1996 156:2642-52. 
 #' }
 #'
-#' @seealso  See \code{\link{M3NModel}} for the 3-mer model from same publication.
+#' @seealso  See \code{\link{HS1FDistance}} for the human 1-mer distance matrix.
 "M1NDistance"
 
 
@@ -47,23 +47,6 @@ NULL
 #'
 #' @seealso  See \code{\link{HS5FModel}} for the 5-mer model from same publication.
 "HS1FDistance"
-
-
-#' 3-mer targeting model.
-#'
-#' 3-mer model of somatic hypermutation targeting based on Mus musculus Ig sequence data.
-#'
-#' @format \code{\link{TargetingModel}} object.
-#' 
-#' @references
-#' \enumerate{
-#'   \item  Smith DS, et al. Di- and trinucleotide target preferences of somatic 
-#'            mutagenesis in normal and autoreactive B cells. 
-#'            J Immunol. 1996 156:2642-52. 
-#' }
-#'
-#' @seealso  See \code{\link{HS5FModel}} for the 5-mer model.
-"M3NModel"
 
 
 #' Uniform 5-mer targeting model.
@@ -91,7 +74,8 @@ NULL
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #'  
-#' @seealso  See \code{\link{M3NModel}} for the 3-mer model.
+#' @seealso  See \code{\link{HS1FDistance}} for the 1-mer distance matrix from the same 
+#'           publication.
 "HS5FModel"
 
 
