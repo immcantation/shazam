@@ -230,8 +230,24 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                           gregexpr("IGH", db[, vCallColumn])[[1]][1] + 4)
     vh_families <- paste("VH", vh_families, sep="")
     
-    mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
-                                       germlineColumn=germlineColumn)
+    
+    
+    # Remove IMGT gaps in the germline & input sequences
+      matInput <- db[,c(sequenceColumn,germlineColumn)]
+      
+      matInputCollapsed<-t(apply(matInput,1,function(x){
+        L<-nchar(x[1])
+        apply(sapply(1:floor(L/3),function(i){
+          if(substr(x[1],((i-1)*3+1),i*3)!="..." & substr(x[2],((i-1)*3+1),i*3)!="..." )return(c(substr(x[1],((i-1)*3+1),i*3),substr(x[2],((i-1)*3+1),i*3)))
+          else return (c("",""))}
+        ),1,function(x)paste(x,collapse="")
+        )
+      }))
+      
+      db[,sequenceColumn] <- matInputCollapsed[,1]
+      db[,germlineColumn] <- matInputCollapsed[,2]
+      mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
+                                         germlineColumn=germlineColumn)
     
     
     if (model == "S") { # Silent model
@@ -470,6 +486,23 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
     if (check != TRUE) { stop(check) }
+    
+    # Remove IMGT gaps in the germline & input sequences
+    matInput <- db[,c(sequenceColumn,germlineColumn)]
+    
+    matInputCollapsed<-t(apply(matInput,1,function(x){
+      L<-nchar(x[1])
+      apply(sapply(1:floor(L/3),function(i){
+        if(substr(x[1],((i-1)*3+1),i*3)!="..." & substr(x[2],((i-1)*3+1),i*3)!="..." )return(c(substr(x[1],((i-1)*3+1),i*3),substr(x[2],((i-1)*3+1),i*3)))
+        else return (c("",""))}
+      ),1,function(x)paste(x,collapse="")
+      )
+    }))
+    
+    db[,sequenceColumn] <- matInputCollapsed[,1]
+    db[,germlineColumn] <- matInputCollapsed[,2]
+    mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
+                                       germlineColumn=germlineColumn)
     
     # Count mutations
     nuc_chars <- NUCLEOTIDES[1:4]

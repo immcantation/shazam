@@ -29,6 +29,9 @@ Mutation Profiling:
   `calcDBObservedMutations()`, which enables return of mutation frequencies
   rather the default of mutation counts.
 
+Targeting Models:
+
++ Fixed bug that did not handle IMGT Gaps when creating substitution and mutability models.
 
 Version 0.1.0.beta-2015-05-30:  May 30, 2015
 -------------------------------------------------------------------------------
