@@ -38,6 +38,9 @@ REGION_PALETTE <-  c("CDR"="#377eb8",
 #' @slot    labels          labels for the boundary and mutations combinations;
 #'                          e.g., \code{c("CDR_R", "CDR_S", "FWR_R", "FWR_S")}.
 #' @slot    citation        publication source.
+#' 
+#' @seealso
+#' See \link{IMGT_SCHEMES} for a set of predefined \code{RegionDefinition} objects.
 #'    
 #' @name         RegionDefinition-class
 #' @rdname       RegionDefinition-class

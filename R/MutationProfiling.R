@@ -60,6 +60,9 @@ NULL
 #' This function can be parallelized if \code{db} contains thousands of sequences. 
 #' Specify the number of cores available using the \code{nproc} parameter.
 #' 
+#' @seealso
+#' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
+#' 
 #' @examples
 #' # Load example data
 #' library("shm")
@@ -281,10 +284,13 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' nucleotide sequences. Mutation counts are appended to the input \code{db} as 
 #' additional columns.
 #' 
-#' @seealso  \link{calcObservedMutations} is called by this function to get the list of mutations 
-#'           in each sequence. \link{binMutationsByRegion} is called by this function to 
-#'           aggregate the mutations by the \code{regionDefinition}. 
-#'           See \link{calcDBExpectedMutations} for calculating expected mutation frequencies.
+#' @seealso  
+#' \link{calcObservedMutations} is called by this function to get the list of mutations 
+#' in each sequence. \link{binMutationsByRegion} is called by this function to 
+#' aggregate the mutations by the \link{regionDefinition}. 
+#' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
+#' See \link{calcDBExpectedMutations} for calculating expected mutation frequencies.
+#'           
 #' 
 #' @examples
 #' # Load example data
@@ -457,7 +463,7 @@ calcObservedMutations <- function(inputSeq,
     } else{
         length_regionDefinition <- max(len_inputSeq, len_germlineSeq, na.rm=TRUE)
     }
-    len_shortest <- min( c(len_inputSeq,len_germlineSeq,length_regionDefinition),  na.rm=TRUE)
+    len_shortest <- min(c(len_inputSeq, len_germlineSeq, length_regionDefinition), na.rm=TRUE)
     
     c_inputSeq <- s2c(inputSeq)[1:len_shortest]
     c_germlineSeq <- s2c(germlineSeq)[1:len_shortest]
@@ -610,9 +616,11 @@ binMutationsByRegion <- function(mutations_array,
 #' For example, when using the default \link{IMGT_V_NO_CDR3} definition, mutations in
 #' positions beyond 312 will be ignored.
 #' 
-#' @seealso  \link{calcExpectedMutations} is called by this function to calculate the
-#' expected mutation frequencies. See \link{calcDBObservedMutations} for getting observed 
-#' mutation counts.
+#' @seealso  
+#' \link{calcExpectedMutations} is called by this function to calculate the expected 
+#' mutation frequencies. See \link{calcDBObservedMutations} for getting observed 
+#' mutation counts. See \link{IMGT_SCHEMES} for a set of predefined 
+#' \link{RegionDefinition} objects.
 #' 
 #' @examples
 #' # Load example data

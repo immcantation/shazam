@@ -3,23 +3,23 @@ title: 'SHM: Quantifing selection pressures'
 author: "Namita Gupta"
 date: '`r Sys.Date()`'
 output:
-  html_document:
-    fig_height: 4
-    fig_width: 7.5
-    highlight: pygments
-    theme: readable
-    toc: yes
   pdf_document:
     dev: pdf
     fig_height: 4
     fig_width: 7.5
     highlight: pygments
     toc: yes
+  html_document:
+    fig_height: 4
+    fig_width: 7.5
+    highlight: pygments
+    theme: readable
+    toc: yes
 geometry: margin=1in
 fontsize: 11pt
 vignette: >
-  %\VignetteIndexEntry{Selection quantification}   
-  %\VignetteEngine{knitr::rmarkdown}   
+  %\VignetteIndexEntry{Selection quantification}    
+  %\VignetteEngine{knitr::rmarkdown}    
   %\usepackage[utf8]{inputenc}
 ---
 
@@ -89,10 +89,12 @@ in the `shm` package:
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Count observed mutations and add OBSERVED columns to db_clone
-db_obs <- calcDBObservedMutations(db_clone, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+db_obs <- calcDBObservedMutations(db_clone, 
+                                  sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
                                   regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 # Calculate expected mutations and add EXPECTED columns to db_obs
-db_exp <- calcDBExpectedMutations(db_obs, sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+db_exp <- calcDBExpectedMutations(db_obs, 
+                                  sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
                                   targetingModel=HS5FModel,
                                   regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 ````
