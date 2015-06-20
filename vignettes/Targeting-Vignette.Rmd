@@ -86,13 +86,13 @@ object directly from the dataset.
 
 ```{r, eval=FALSE}
 
-# Create a consensus sequence for each clone to avoid over-counting mutations
+# Create a consensus sequence for each clone to avoid over-counting mutations (add column "CLONAL_CONSENSUS_SEQUENCE")
 db_cons = calcDBClonalConsensus(db, collapseByClone=TRUE)
 
 # Create substitution model using silent mutations
-sub_matrix <- createSubstitutionMatrix(db_cons, model="S")
+sub_matrix <- createSubstitutionMatrix(db_cons, sequenceColumn = "CLONAL_CONSENSUS_SEQUENCE", model="S")
 # Create mutability model using silent mutations
-mut_matrix <- createMutabilityMatrix(db_cons, sub_matrix, model="S")
+mut_matrix <- createMutabilityMatrix(db_cons, sub_matrix, sequenceColumn = "CLONAL_CONSENSUS_SEQUENCE", model="S")
 
 # Extend models to include ambiguous 5-mers
 sub_matrix <- extendSubstitutionMatrix(sub_matrix)
