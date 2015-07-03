@@ -502,7 +502,8 @@ calcObservedMutations <- function(inputSeq,
             mutations_array<-NA    
         }else{ #If there are mutations present proceed to aggregate (if requested)
           if(frequency==TRUE){
-            nonNLength <-length( c_inputSeq[ c_inputSeq%in%NUCLEOTIDES[1:4]] )
+            # Freq = numb on mutations / numb of non N bases (in both seq and gl)
+            nonNLength <- sum( c_inputSeq%in%NUCLEOTIDES[1:4] &  c_germlineSeq%in%NUCLEOTIDES[1:4] )
             nMutations <- length(mutations_array)
             mutations_array <- nMutations/nonNLength
             if(nonNLength==0) mutations_array <- 0
