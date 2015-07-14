@@ -29,6 +29,8 @@ NULL
 #'                              \code{db} by the \code{cloneColumn}.
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
 #'                              and boundaries of the Ig sequences.
+#' @param   nonTerminalOnly     \code{logical} indicating whether to include mutations
+#'                              at the leaves.
 #' @param   nproc               Number of cores to distribute the operation over. If the 
 #'                              \code{cluster} has already been set earlier, then pass the 
 #'                              \code{cluster}. This will ensure that it is not reset.
@@ -82,6 +84,7 @@ calcDBClonalConsensus <- function(db,
                                   germlineColumn="GERMLINE_IMGT_D_MASK",
                                   collapseByClone=TRUE,
                                   regionDefinition=IMGT_V_NO_CDR3,
+                                  nonTerminalOnly = FALSE,
                                   nproc=1) {
     # Check for valid columns
     check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
@@ -93,6 +96,15 @@ calcDBClonalConsensus <- function(db,
         nproc = 0
     }
     
+    if (class(collapseByClone) != "logical") {
+        stop ("collapseByClone must be TRUE or FALSE.")
+    }
+        
+    if (class(nonTerminalOnly) != "logical") {
+        stop ("nonTerminalOnly must be TRUE or FALSE.")
+    }
+        
+      
     db[,cloneColumn] <- as.numeric(db[,cloneColumn])
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
@@ -132,7 +144,8 @@ calcDBClonalConsensus <- function(db,
       foreach(i=iterators::icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass') %dopar% {
         calcClonalConsensus(inputSeq = db[groups[[i]],sequenceColumn],
                            germlineSeq = db[groups[[i]],germlineColumn],
-                           regionDefinition = regionDefinition)
+                           regionDefinition = regionDefinition, 
+                           nonTerminalOnly = nonTerminalOnly)
       }
     
     # Stop SNOW cluster
@@ -160,7 +173,7 @@ calcDBClonalConsensus <- function(db,
 # Helper function for calcDBClonalConsensus
 calcClonalConsensus <- function(inputSeq, germlineSeq, 
                                regionDefinition=NULL, 
-                               nonTerminalOnly=0){    
+                               nonTerminalOnly=FALSE){    
     
     # Find length of shortest input sequence
     # This is used to trim all the sequencesto that length
@@ -168,6 +181,10 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
     len_inputSeq <- sapply(inputSeq, function(x){nchar(x)})
     len_shortest <- min(len_inputSeq, na.rm=TRUE)
     if(!is.null(regionDefinition)){len_shortest <- min(len_shortest, regionDefinition@seqLength, na.rm=TRUE)}        
+    
+    if (class(nonTerminalOnly) != "logical") {
+      stop ("nonTerminalOnly must be TRUE or FALSE.")
+    }
     
     #Find the length of the longest germline sequence
     len_germlineSeq <- sapply(germlineSeq, function(x){nchar(x)})
@@ -211,7 +228,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
                 
                 # If we look at all nodes (including terminal nodes), sample a nucleotide from the possible
                 # nucleotides in the clonal sequences at this position
-                if(nonTerminalOnly==0){
+                if(!nonTerminalOnly){
                     return( c(sample(charInputSeqs[i,charInputSeqs[i,]!="N" & charInputSeqs[i,]!=posGL],1),error) )
                 }else{
                     
