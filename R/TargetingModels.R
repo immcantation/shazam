@@ -195,25 +195,19 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     # Setup
     nuc_chars <- NUCLEOTIDES[1:4]
     nuc_words <- seqinr::words(4, nuc_chars)
-    vh_families <- paste(rep("VH", 7), 1:7, sep="")
     
+    # Define v_families (heavy or light chain) to only those found in the data
+    v_families <- gsub('^.*(IG.V[0-9]+).*$', "\\1", db[, vCallColumn])
+
     # Define empty return list of lists
     substitutionMatrix <- matrix(0, ncol=4, nrow=4, dimnames=list(nuc_chars, nuc_chars))
     substitutionList <- list()    
-    for(vh_fam in vh_families){
-        substitutionList[[vh_fam]] = list()
+    for(v_fam in unique(v_families)) {
+        substitutionList[[v_fam]] = list()
         for(word in nuc_words){
-            substitutionList[[vh_fam]][[word]] = substitutionMatrix
+            substitutionList[[v_fam]][[word]] = substitutionMatrix
         }
     }
-    
-    
-    # Redefine vh_families to only those found in the data
-    vh_families <- substr(db[, vCallColumn],
-                          gregexpr("IGH", db[, vCallColumn])[[1]][1] + 4,
-                          gregexpr("IGH", db[, vCallColumn])[[1]][1] + 4)
-    vh_families <- paste("VH", vh_families, sep="")
-    
     
     
     # Remove IMGT gaps in the germline & input sequences
@@ -235,13 +229,12 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
       mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
                                          germlineColumn=germlineColumn)
     
-    
     if (model == "S") { # Silent model
         for(index in 1:length(mutations)) {
             cSeq <-  s2c(db[index,sequenceColumn])
             cGL  <-  s2c(db[index,germlineColumn])
             indexMutation <- mutations[[index]]
-            vh_fam <- vh_families[index]
+            v_fam <- v_families[index]
             
             positions <- as.numeric(names(indexMutation))
             positions <- positions[positions<=VLENGTH]
@@ -266,7 +259,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                     muType <- mutationTypeOptimized(codonPermutate)
                     if(!length(grep("N",wrd))){
                         if( sum(muType=="S") == length(muType) ){
-                            substitutionList[[vh_fam]][[wrd]][glAtMutation,seqAtMutation] <- (substitutionList[[vh_fam]][[wrd]][glAtMutation,seqAtMutation] + 1)
+                            substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] <- (substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] + 1)
                         }
                     }
                 }
@@ -277,7 +270,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
             cSeq <-  s2c(db[index,sequenceColumn])
             cGL  <-  s2c(db[index,germlineColumn])
             indexMutation <- mutations[[index]]
-            vh_fam <- vh_families[index]
+            v_fam <- v_families[index]
             
             positions <- as.numeric(names(indexMutation))
             positions <- positions[positions<=VLENGTH]
@@ -296,28 +289,19 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                         codonSeq[muCodonPos] <- seqAtMutation
                     }
                     if(!length(grep("N",wrd))){
-                        substitutionList[[vh_fam]][[wrd]][glAtMutation,seqAtMutation] <- (substitutionList[[vh_fam]][[wrd]][glAtMutation,seqAtMutation] + 1)
+                        substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] <- (substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] + 1)
                     }
                 }
             }
         }
     }
     
-    # TODO: this is redundant code. can probably move the whole listSubstitution definition to the top of the function.
-    nuc_words = seqinr::words(4, nuc_chars)
-    vh_families <- paste(rep("VH", 7), 1:7, sep="")
+    # convert substitutionList to listSubstitution to facilitate the aggregation of mutations
+    arrNames <- c(outer(unique(v_families), nuc_words, paste, sep = "_"))
+    listSubstitution <- array(0, dim=c(length(arrNames),4,4), dimnames=list(arrNames, nuc_chars, nuc_chars))
     
-    X1 <- rep(nuc_words, 7)
-    X2 <- rep(vh_families, each=256)
-    arrNames <- paste(X2, X1, sep="_")
-    rm(X2, X1)
-    
-    listSubstitution <- array(0, dim=c(256*7,4,4), dimnames=list(arrNames, nuc_chars, nuc_chars))
-    
-    
-    # substitutionList
-    for(vh_fam in vh_families){
-        listSubstitution[paste(vh_fam,nuc_words,sep="_"),,]<-t(sapply(nuc_words,function(word){substitutionList[[vh_fam]][[word]]}))
+    for(v_fam in unique(v_families)){
+        listSubstitution[paste(v_fam, nuc_words, sep="_"),,]<-t(sapply(nuc_words,function(word){substitutionList[[v_fam]][[word]]}))
     }
     
     M<-list()
