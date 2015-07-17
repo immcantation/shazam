@@ -1,3 +1,20 @@
+Version 0.1.1.beta:  July 17, 2015
+-------------------------------------------------------------------------------
+
+Distance Profiling:
+
++ Changed underlying method of calcTargetingDistance to be negative log10 of
+  the probability that is then centered at one by dividing by the mean 
+  distance.
+
+Mutation Profiling:
+
++ Changed denominator in calcObservedMutations to be based on informative 
+  (unambiguous) positions only.
++ Added nonTerminalOnly parameter to calcDBClonalConsensus indicating whether
+  to consider mutations at leaves or not (defaults to false).
+
+
 Version 0.1.0:  June 18, 2015
 -------------------------------------------------------------------------------
 

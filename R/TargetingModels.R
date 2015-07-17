@@ -936,43 +936,20 @@ calcTargetingDistance <- function(model) {
     } else if (!is(model, "matrix")) {
         stop("Input must be either a targeting matrix or TargetingModel object.")
     }
-    # TODO: the indexing of A-->A etc positions can probably be done smarter/faster
-
-    # Get non-N containing 5-mer set
-    base_model <- model[NUCLEOTIDES[1:4], !grepl("N", colnames(model))]
     
-    # Transform rates to distance
-    #base_dist <- 1 - base_model
-    base_dist <- 1 / sqrt(base_model)
-    base_dist[!is.finite(base_dist)] <- NA
-    
-    # Assign A->A, C->C, G->G, T->T to NA
-    center_nuc <- gsub("..([ACGT])..", "\\1", colnames(base_model))
-    for (i in 1:length(center_nuc)) {
-        base_dist[center_nuc[i], i] <- NA
-    }
-    
-    # Get scaling and centering parameters from base model
-    base_sd <- sd(base_dist, na.rm=TRUE)
-    #base_mean <- mean(base_dist, na.rm=TRUE)
-    
-    # Convert full model to distance
-    model_dist <- 1 / sqrt(model)
-    
-    # Scale and center full model
-    #model_dist <- model_dist - base_mean
-    model_dist <- model_dist / base_sd
+    # Take negative log10 of all probabilities
+    model_dist <- -log10(model)
+    # Center distances on 1 (divide by mean)
+    model_dist <- model_dist/mean(model_dist, na.rm=T)
+    # Set infinite values to NA
     model_dist[!is.finite(model_dist)] <- NA
     
+    # TODO: the indexing of A-->A etc positions can probably be done smarter/faster
     # Assign no-change entries to distance 0
     center_nuc <- gsub("..([ACGTN])..", "\\1", colnames(model_dist))
     for (i in 1:length(center_nuc)) {
         model_dist[center_nuc[i], i] <- 0
     }
-    
-    # Bound extreme values at 5
-    model_dist[model_dist > 5] <- 5
-    model_dist <- round(model_dist, 2)
 
     return(model_dist)
 }
