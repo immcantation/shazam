@@ -136,8 +136,8 @@ plotMutability(model, nucleotides="T", style="bar")
 
 Calculate targeting distance matrix
 --------------------------------------------------------------------------------
-In the Change-O pipeline, the `hs5f` and `m3n` cloning methods rely on inferred 
-targeting models. If users wish to use a targeting model inferred from their 
+In the Change-O pipeline, the `hs5f` cloning method rely on an inferred 
+targeting model. If users wish to use a targeting model inferred from their 
 data to assign distance between sequences for clonal grouping, then the observed 
 SHM targeting rates must be transformed into distances. The 
 `calcTargetingDistance` function returns a matrix of distances between each 5-mer 

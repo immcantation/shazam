@@ -98,7 +98,7 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
 # seq1 = "ATG-C"
 # seq2 = "AT--C"
 # 
-# distSeqHam(seq1, seq2)
+# distSeqMat(seq1, seq2)
 distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
                        normalize=c("none" ,"length", "mutations")) {
   # Evaluate choices
@@ -107,7 +107,7 @@ distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
   
   # Get character distance matrix
   if (model == "ham") {
-    dist_mat <- getDNADistMatrix(gap=0)
+    dist_mat <- getDNAMatrix(gap=0)
   } else if (model == "m1n") {
     dist_mat <- M1NDistance
   } else if (model == "hs1f") {
@@ -120,7 +120,7 @@ distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
     seq1 <- translate(seq1, ambiguous=T)
     seq2 <- translate(seq2, ambiguous=T)
     
-    dist_mat <- getAADistMatrix()
+    dist_mat <- getAAMatrix()
   }
   
   # Calculate distance
@@ -334,8 +334,8 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' "hs5f" use distance derived from the \link{HS5FModel}
 #' using \link{calcTargetingDistance}. "hs1f" and "m1n" use \link{HS1FDistance} and \link{M1NDistance}
 #'  to calculate distances respectively. "ham" uses a nucleotide hamming distance matrix from 
-#'  \link{getDNADistMatrix}, with gaps being zero. "aa" uses an amino acid hamming distance matrix 
-#'  from \link{getAADistMatrix}.
+#'  \link{getDNAMatrix}, with gaps being zero. "aa" uses an amino acid hamming distance matrix 
+#'  from \link{getAAMatrix}.
 #' 
 #' @references
 #' \enumerate{
@@ -353,7 +353,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #'  
 #' @seealso  See \link{calcTargetingDistance} for generating nucleotide distance matrices 
 #'           from a \link{TargetingModel} object. See \link{M1NDistance}, 
-#'           \link{HS5FModel}, \link{getDNADistMatrix}, and \link{getAADistMatrix}
+#'           \link{HS5FModel}, \link{getDNAMatrix}, and \link{getAAMatrix}
 #'           for individual model details.
 #' 
 #' @examples
@@ -364,7 +364,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #'
 #' # Use genotyped V assignments and HS5F model
 #' dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
-#' hist(dist_hs5f$DIST_NEAREST, breaks=100, xlim=c(0, 60))
+#' hist(dist_hs5f$DIST_NEAREST, breaks=100, xlim=c(0, 0.7))
 #' 
 #' # Use HS1F model and normalize by junction length
 #' dist_hs1f <- distToNearest(db, model="hs1f", first=FALSE, normalize="length")
