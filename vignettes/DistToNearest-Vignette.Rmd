@@ -69,6 +69,10 @@ transition/transversion model (Yaari et al, Front Immunol, 2013). Other options
 include nucleotide Hamming distance (`ham`), amino acid Hamming distance (`aa`), 
 single nucleotide (`m1n`) and 3-mer (`m3n`) mouse models (Smith et al, J Immunol, 1996), 
 and a 5-mer model inferred from human data (`hs5f`) (Yaari et al, Front Immunol, 2013).
+For models that are not symmetric (e.g., distance from A to B is not equal to the
+distance from B to A), there is a `symmetry` parameter that allows the user to 
+specify taking the average or the minimum of the two distances to determine the
+overall distance.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Use hs1f model and normalize by junction length

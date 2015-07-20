@@ -29,6 +29,8 @@ slidingArrayOf5mers <- function(strSequence){
 # @param    targeting_model     targeting model.
 # @param    normalize           The method of normalization. Default is "none".
 #                               "length" = normalize distance by length of junction.
+# @param    symmetry            if model is hs5f, distance between seq1 and seq2 is either the
+#                               average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 # @return   distance between two sequences.
 #
 # @examples
@@ -37,9 +39,11 @@ slidingArrayOf5mers <- function(strSequence){
 #
 # distSeq5mers(seq1, seq2, HS5FModel)
 distSeq5mers <- function(seq1, seq2, targeting_model, 
-                        normalize=c("none" ,"length", "mutations")) {
+                         normalize=c("none" ,"length", "mutations"),
+                         symmetry=c("avg","min")) {
   # Evaluate choices
   normalize <- match.arg(normalize)
+  symmetry <- match.arg(symmetry)
   
   # Get distance from targeting model
   targeting_dist <- calcTargetingDistance(targeting_model)
@@ -57,7 +61,7 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
   # Number of mutations (for normalization, if specified)
   numbOfMutation <- sum(fivemersWithMu)
 
-  avgDist <- NA
+  dist <- NA
   a <- tryCatch({
     if (length(seq1)==1){
       seq1_to_seq2 <- targeting_dist[substr(seq2,3,3),seq1]
@@ -66,7 +70,11 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
       seq1_to_seq2 <- sum( diag(targeting_dist[substr(seq2,3,3),seq1]) )
       seq2_to_seq1 <- sum( diag(targeting_dist[substr(seq1,3,3),seq2]) )
     }
-    avgDist <- mean(c(seq1_to_seq2, seq2_to_seq1))
+    if (symmetry == "avg") {
+      dist <- mean(c(seq1_to_seq2, seq2_to_seq1))
+    } else if (symmetry == "min") {
+      dist <- min(c(seq1_to_seq2, seq2_to_seq1))
+    }
   },error = function(e){
     warning("Invalid sequence. Cannot compute distance.")
     return(NA)
@@ -74,12 +82,12 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
 
   # Normalize distances
   if (normalize == "length") { 
-      avgDist <- avgDist/juncLength
+      dist <- dist/juncLength
   } else if (normalize == "mutations") { 
-      avgDist <- avgDist/numbOfMutation 
+      dist <- dist/numbOfMutation 
   }
   
-  return(avgDist)
+  return(dist)
 }
 
 
@@ -143,6 +151,8 @@ distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
 # @param   model          SHM targeting model.
 # @param   normalize      The method of normalization. Default is "none".
 #                         "length" = normalize distance by length of junction.
+# @param    symmetry      if model is hs5f, distance between seq1 and seq2 is either the
+#                         average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 # @return  A matrix of pairwise distances between junction sequences.
 # 
 # @details
@@ -154,9 +164,11 @@ distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
 # # TODO
 # # working example
 getPairwiseDistances <- function(arrJunctions, targeting_model, 
-                                 normalize=c("none" ,"length", "mutations")) {
+                                 normalize=c("none" ,"length", "mutations"),
+                                 symmetry=c("avg","min")) {
   # Initial checks
   normalize <- match.arg(normalize)
+  symmetry <- match.arg(symmetry)
   
   # Convert junctions to uppercase
   arrJunctions <- toupper(arrJunctions)
@@ -181,7 +193,8 @@ getPairwiseDistances <- function(arrJunctions, targeting_model,
       distSeq5mers(.matSeqSlidingFiveMer[,i],
                    .matSeqSlidingFiveMer[,j],
                    targeting_model,
-                   normalize=normalize)
+                   normalize=normalize,
+                   symmetry=symmetry)
     })))
   # Make distance matrix symmetric
   matDistance <- matDistance + t(matDistance)
@@ -224,6 +237,8 @@ findUniqueJunctions <- function(arrJunctions) {
 # @param    normalize     method of normalization. Default is "none".
 #                         "length" = normalize distance by length of junction.
 #                         "mutations" = normalize distance by number of mutations in junction.
+# @param    symmetry      if model is hs5f, distance between seq1 and seq2 is either the
+#                         average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 # @return   A vector of distances to the closest sequence.
 # @examples
 # arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
@@ -231,9 +246,11 @@ findUniqueJunctions <- function(arrJunctions) {
 #                    "ACGAACGTATCC","AAAAAAAAAAAA")
 # getClosestBy5mers(arrJunctions, HS5FModel, normalize="none" )
 getClosestBy5mers <- function(arrJunctions, targeting_model, 
-                                 normalize=c("none" ,"length", "mutations")) {
+                              normalize=c("none" ,"length", "mutations"),
+                              symmetry=c("avg","min")) {
   # Initial checks
   normalize <- match.arg(normalize)
+  symmetry <- match.arg(symmetry)
   
   # Find unique sequences and return distance array with mapping
   l <- findUniqueJunctions(arrJunctions)
@@ -245,7 +262,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
   arrUniqueJunctionsDist <- rep(NA,numbOfUniqueJunctions)
   if (numbOfUniqueJunctions>1){
     # Calculate symmetric distance matrix
-    matDistance <- getPairwiseDistances(arrJunctionsUnique, targeting_model, normalize)
+    matDistance <- getPairwiseDistances(arrJunctionsUnique, targeting_model, normalize, symmetry)
     # Find minimum distance for each sequence
     arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJunctions, function(i){ min(matDistance[-i,i]) })
     names(arrUniqueJunctionsDist) <- arrJunctionsUnique
@@ -318,6 +335,8 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' @param    normalize       method of normalization. The default is "none". If the "length" 
 #'                           method is chosen, then distance is divided by the length of the 
 #'                           junction sequence.
+#' @param    symmetry        if model is hs5f, distance between seq1 and seq2 is either the
+#'                           average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 #' @param    first           if \code{TRUE} only the first call of the gene assignments is used.
 #'                           If \code{FALSE} the union of ambiguous gene assignments is used to 
 #'                           group all sequences with any overlapping gene calls.
@@ -373,11 +392,12 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
                           jCallColumn="J_CALL", model=c("hs1f", "m1n", "ham", "aa", "hs5f"), 
-                          normalize=c("length", "none"), 
+                          normalize=c("length", "none"), symmetry=c("avg","min"),
                           first=TRUE, nproc=1) {
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
+    symmetry <- match.arg(symmetry)
     if (!is.data.frame(db)) { stop('Must submit a data frame') }
     
     # Check for valid columns
@@ -465,7 +485,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                 db_group$DIST_NEAREST <-
                     getClosestBy5mers( db[groups[[i]],sequenceColumn],
                                        targeting_model=targeting_model,
-                                       normalize=normalize )
+                                       normalize=normalize,
+                                       symmetry=symmetry )
                 return(db_group)
             }    
     } else if (model %in% c("ham", "aa", "m1n", "hs1f")) {    

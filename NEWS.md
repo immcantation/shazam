@@ -1,4 +1,4 @@
-Version 0.1.1.beta:  July 17, 2015
+Version 0.1.1.beta:  July 20, 2015
 -------------------------------------------------------------------------------
 
 Distance Profiling:
@@ -6,6 +6,9 @@ Distance Profiling:
 + Changed underlying method of calcTargetingDistance to be negative log10 of
   the probability that is then centered at one by dividing by the mean 
   distance.
++ Added `symmetry` parameter to distToNearest to change behavior of how 
+  asymmetric distances (A->B != B->A) are combined to get distance 
+  between A and B. 
 
 Mutation Profiling:
 
