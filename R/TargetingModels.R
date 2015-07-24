@@ -529,10 +529,15 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                     muType <- mutationTypeOptimized(codonPermutate)
                     if (!length(grep("N", wrd5)) & !length(grep("-", wrd5))) {
                         for (m in 1:3) {
-                            if (muType[m] == "S") {
-                                BG_COUNT[[index]][wrd5]<- BG_COUNT[[index]][wrd5] + 
-                                    substitutionModel[substr(codonPermutate[m, 1], muCodonPos, muCodonPos), wrd5];
-                            }
+                           if (model == "S") {
+                              if (muType[m] == "S") {
+                                  BG_COUNT[[index]][wrd5]<- BG_COUNT[[index]][wrd5] + 
+                                      substitutionModel[substr(codonPermutate[m, 1], muCodonPos, muCodonPos), wrd5];
+                              }
+                           } else {
+                              BG_COUNT[[index]][wrd5]<- BG_COUNT[[index]][wrd5] + 
+                                 substitutionModel[substr(codonPermutate[m, 1], muCodonPos, muCodonPos), wrd5];
+                           }
                         }
                     }
                 }
