@@ -319,7 +319,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     
     # Aggregate mutations from neighboring bases for low frequency fivemers
     # fivemer=M; FIVEMER="CCATT"
-    .simplifivemer <- function(fivemer, FIVEMER, Thresh=20) {
+    .simplifivemer <- function(fivemer, FIVEMER, Thresh=50) {
         Nuc=substr(FIVEMER,3,3)
         Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
         
