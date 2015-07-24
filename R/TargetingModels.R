@@ -503,8 +503,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     for (index in 1:length(mutations)){
         #setTxtProgressBar(pb, index)
         BG_COUNT[[index]] <- template
-        sSeq <- gsub("\\.", "", db[index, sequenceColumn])
-        sGL <- gsub("\\.", "", db[index, germlineColumn])
+        sSeq <- gsub("\\.", "N", db[index, sequenceColumn])
+        sGL <- gsub("\\.", "N", db[index, germlineColumn])
         cSeq <-  s2c(sSeq)
         cGL  <-  s2c(sGL)[1:VLENGTH]
         positions <- 3:(length(cGL) - 2)
