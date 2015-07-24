@@ -296,7 +296,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
         }
     }
     
-    # convert substitutionList to listSubstitution to facilitate the aggregation of mutations
+
+    # Convert substitutionList to listSubstitution to facilitate the aggregation of mutations
     arrNames <- c(outer(unique(v_families), nuc_words, paste, sep = "_"))
     listSubstitution <- array(0, dim=c(length(arrNames),4,4), dimnames=list(arrNames, nuc_chars, nuc_chars))
     
@@ -304,78 +305,54 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
         listSubstitution[paste(v_fam, nuc_words, sep="_"),,]<-t(sapply(nuc_words,function(word){substitutionList[[v_fam]][[word]]}))
     }
     
+    # Aggregate mutations from all V families
     M<-list()
-    NAMES<-sapply(dimnames(listSubstitution)[[1]],function(x)strsplit(x,"_",fixed=TRUE)[[1]])
-    CTS<-list()
-    X1<-list()
+    M[["ALL"]] <- matrix(0,4,4) # a single substitution matrix for all fivemers
+    listSubNames<-sapply(dimnames(listSubstitution)[[1]],function(x)strsplit(x,"_",fixed=TRUE)[[1]])
     
-    CT_FiveMers <-
-        c( paste(substring(seqinr::words(3,nuc_chars),1,1), "C",substring(seqinr::words(3,nuc_chars),2,3),sep=""),
-           paste(substring(seqinr::words(3,nuc_chars),1,1),"G",substring(seqinr::words(3,nuc_chars),2,3),sep=""),
-           paste(substring(seqinr::words(3,nuc_chars),1,1),"T",substring(seqinr::words(3,nuc_chars),2,3),sep="")
-        )
-    
-    for(CT in CT_FiveMers){
-        CTS[[CT]]<-nuc_words[sapply(nuc_words,function(x)substring(x,1,4))== CT]
-        INDEx<-NAMES[2,]%in%CTS[[CT]]
-        M[[CT]]<- t(sapply(1:4,function(i)apply(listSubstitution[INDEx,i,],2,sum)))
-        rownames(M[[CT]]) <- nuc_chars
+    for (nuc_word in nuc_words) {
+        M[[nuc_word]] <- t(sapply(1:4,function(i)apply(listSubstitution[listSubNames[2,] == nuc_word,i,],2,sum))) # sums mutations from all families
+        rownames(M[[nuc_word]]) <- nuc_chars
+        M[["ALL"]] <- M[["ALL"]] + M[[nuc_word]]
     }
-    M[["E"]]<-M[[paste(substring(seqinr::words(3,nuc_chars),1,1),"C",substring(seqinr::words(3,nuc_chars),2,3),sep="")[1]]]
-    for(CT in c(paste(substring(seqinr::words(3,nuc_chars),1,1),"C",substring(seqinr::words(3,nuc_chars),2,3),sep=""),paste(substring(seqinr::words(3,nuc_chars),1,1),"G",substring(seqinr::words(3,nuc_chars),2,3),sep=""),paste(substring(seqinr::words(3,nuc_chars),1,1),"T",substring(seqinr::words(3,nuc_chars),2,3),sep=""))[-1]){
-        M[["E"]]<- M[["E"]]+M[[CT]]
-    }
-    rownames(M[["E"]]) <- nuc_chars
     
-    # TODO:  what's going on with the if !="A" and if =="A" business?  is this necessary?
+    
+    # Aggregate mutations from neighboring bases for low frequency fivemers
     # fivemer=M; FIVEMER="CCATT"
     .simplifivemer <- function(fivemer, FIVEMER, Thresh=20) {
         Nuc=substr(FIVEMER,3,3)
         Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
         
-        if(sum(fivemer[[Nei]][Nuc,])>Thresh & sum(fivemer[[Nei]][Nuc,]==0)==1){
+        # If the total number of mutation is greater than Thresh, and there are mutations to every other base
+        if(sum(fivemer[[Nei]][Nuc,])>Thresh && sum(fivemer[[Nei]][Nuc,]==0)==1){
             return(fivemer[[Nei]][Nuc,]);
         }
-        else{
-            if(substring(Nei,2,2)!="A"){ # Huh?
+        else{ # Otherwise aggregate mutations from the neighboring fivemers (keep the same inner 3-mer)
+            FIVE=fivemer[[Nei]][Nuc,]
+            for(i in 1:4){
+                for(j in 1:4){
+                    MutatedNeighbor=paste(nuc_chars[i],substring(Nei,2,3),nuc_chars[j],collapse="",sep="")
+                    FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
+                }
+            }
+            
+            # If the total number of mutations is still not enough, aggregate mutations from all fivemers 
+            # i.e., use 1-mer model
+            if(sum(FIVE) <= Thresh || sum(FIVE==0)!=1 ){
                 FIVE=fivemer[[Nei]][Nuc,]
-                for(i in 1:4){
-                    for(j in 1:4){
-                        MutatedNeighbor=paste(nuc_chars[i],substring(Nei,2,3),nuc_chars[j],collapse="",sep="")
-                        FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
-                    }
+                MutatedNeighbors = seqinr::words(4, nuc_chars)
+                for (MutatedNeighbor in MutatedNeighbors) {
+                    FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
                 }
-                return(FIVE)
-            }
-            if(substring(Nei,2,2)=="A"){ # Wah huh?
-                FIVE=fivemer[[paste(substring(Nei,1,1),canMutateTo(substring(Nei,2,2))[1],substring(Nei,3,4),collapse="",sep="")]][Nuc,]
-                for(i in 2){
-                    for(j in 2:3){
-                        MutatedNeighbor=paste(substring(Nei,1,(i-1)),canMutateTo(substring(Nei,i,i))[j],substring(Nei,(i+1),4),collapse="",sep="")
-                        FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
-                    }
-                }
-                if(sum(FIVE)>Thresh & sum(FIVE==0)==1){
-                    return(FIVE)
-                }
-                else{
-                    for(i in 1:3){
-                        for(j in 1:3){
-                            MutatedNeighbor=paste(canMutateTo(substring(Nei,1,1))[i],canMutateTo(substring(Nei,2,2))[j],substring(Nei,3,4),collapse="",sep="")
-                            FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
-                            MutatedNeighbor=paste(substring(Nei,1,1),canMutateTo(substring(Nei,2,2))[j],canMutateTo(substring(Nei,3,3))[i],substring(Nei,4,4),collapse="",sep="")
-                            FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
-                            MutatedNeighbor=paste(substring(Nei,1,1),canMutateTo(substring(Nei,2,2))[j],substring(Nei,3,3),canMutateTo(substring(Nei,4,4))[i],collapse="",sep="")
-                            FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
-                        }
-                    }
-                }
-                return(FIVE)
-            }
+            } 
+            
+            return(FIVE)
         }
     }
     
+    
     substitutionModel <- sapply(seqinr::words(5, nuc_chars), function(x) { .simplifivemer(M, x) })
+
 
     # TODO:  add imputation for missing values (0 count). options count=1, count=mean, count=min(!=0)
     # TODO:  use more complicated imputation (as per paper)
