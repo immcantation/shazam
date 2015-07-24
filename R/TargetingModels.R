@@ -153,6 +153,10 @@ setClass("TargetingModel",
 #'                             mutations within the same 5-mer are counted indepedently. 
 #'                             If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                             excluded from the total mutation tally.
+#' @param    minNumMutations   the minimum number of mutations required to compute the 5-mer 
+#'                             substitution rates. If the number of mutations for a 5-mer
+#'                             is below this threshold, its substitution rates will be 
+#'                             estimated from neighboring 5-mers. Default is 50.                            
 #' 
 #' @return   A 4x1024 matrix of column normalized substitution rates for each 5-mer motif with 
 #'           row names defining the center nucleotide, one of \code{c("A", "C", "G", "T")}, 
@@ -183,7 +187,8 @@ setClass("TargetingModel",
 createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENCE_IMGT",
                                      germlineColumn="GERMLINE_IMGT_D_MASK",
                                      vCallColumn="V_CALL",
-                                     multipleMutation=c("independent", "ignore"))  {
+                                     multipleMutation=c("independent", "ignore"),
+                                     minNumMutations=50)  {
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
@@ -351,7 +356,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     }
     
     
-    substitutionModel <- sapply(seqinr::words(5, nuc_chars), function(x) { .simplifivemer(M, x) })
+    substitutionModel <- sapply(seqinr::words(5, nuc_chars), function(x) { .simplifivemer(M, x, Thresh=minNumMutations) })
 
 
     # TODO:  add imputation for missing values (0 count). options count=1, count=mean, count=min(!=0)
@@ -393,6 +398,9 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #'                              mutations within the same 5-mer are counted indepedently. 
 #'                              If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                              excluded from the total mutation tally.
+#' @param    minNumSeqMutations minimum number of mutations in sequences containing the fivemer
+#'                              If the number is smaller than this threshold, the mutability 
+#'                              for the fivemer will be inferred. Default is 500.                              
 #'
 #' @return   A named numeric vector of 1024 normalized mutability rates for each 5-mer 
 #'           motif with names defining the 5-mer nucleotide sequence.
@@ -425,7 +433,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                                    sequenceColumn="SEQUENCE_IMGT", 
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
                                    vCallColumn="V_CALL",
-                                   multipleMutation=c("independent", "ignore")) {
+                                   multipleMutation=c("independent", "ignore"),
+                                   minNumSeqMutations = 500) {
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
@@ -570,6 +579,12 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     MutabilityWeights <- sapply(Mutability, function(x) x[[2]])
     Mutability_Mean <- apply(MutabilityMatrix, 1, weighted.mean, w=MutabilityWeights, na.rm=TRUE)
     Mutability_Mean[!is.finite(Mutability_Mean)] <- NA
+    
+    # Filter out fivemers with low number of observed mutations in the sequences
+    NumSeqMutations <- sapply(1:1024,function(i)sum(MutabilityWeights[!is.na(MutabilityMatrix[i,])])) 
+    Mutability_Mean[NumSeqMutations < minNumSeqMutations] <- NA
+    
+    
     
     # TODO:  add imputation for missing values (0 count). options count=1, count=mean, count=min(!=0)
     # TODO:  use more complicated imputation (as per paper)
