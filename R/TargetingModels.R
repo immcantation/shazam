@@ -398,9 +398,11 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #'                              mutations within the same 5-mer are counted indepedently. 
 #'                              If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                              excluded from the total mutation tally.
-#' @param    minNumSeqMutations minimum number of mutations in sequences containing the fivemer
+#' @param    minNumSeqMutations minimum number of mutations in sequences containing the 5-mer
 #'                              If the number is smaller than this threshold, the mutability 
-#'                              for the fivemer will be inferred. Default is 500.                              
+#'                              for the 5-mer will be inferred. Default is 500.     
+#' @param    returnSource       return the sources of 5-mer mutabilities (measured vs.
+#'                              inferred). Default is false.                          
 #'
 #' @return   A named numeric vector of 1024 normalized mutability rates for each 5-mer 
 #'           motif with names defining the 5-mer nucleotide sequence.
@@ -434,7 +436,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
                                    vCallColumn="V_CALL",
                                    multipleMutation=c("independent", "ignore"),
-                                   minNumSeqMutations = 500) {
+                                   minNumSeqMutations = 500, 
+                                   returnSource=FALSE) {
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
@@ -564,13 +567,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
         mut_mat[!is.finite(mut_mat)] <- NA
         wgt_mat <- length(mutations[[i]])
         Mutability[[i]] <- list(mut_mat, wgt_mat)
-        
-        #Mutability[[i]] <- list()
-        #Mutability[[i]][[1]]<-COUNT[[i]]/BG_COUNT[[i]]
-        #Mutability[[i]][[1]]<-Mutability[[i]][[1]]/sum(Mutability[[i]][[1]],na.rm=TRUE)
-        #Mutability[[i]][[2]]<-length( mutations[[i]])
-        #Mutability[[i]][[3]]<-sum(COUNT[[i]],na.rm=TRUE)
-        #Mutability[[i]][[1]][!is.finite(Mutability[[i]][[1]])] <- NA
+       
     }
     
     
@@ -580,25 +577,87 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     Mutability_Mean <- apply(MutabilityMatrix, 1, weighted.mean, w=MutabilityWeights, na.rm=TRUE)
     Mutability_Mean[!is.finite(Mutability_Mean)] <- NA
     
-    # Filter out fivemers with low number of observed mutations in the sequences
+    # Filter out 5-mers with low number of observed mutations in the sequences
     NumSeqMutations <- sapply(1:1024,function(i)sum(MutabilityWeights[!is.na(MutabilityMatrix[i,])])) 
     Mutability_Mean[NumSeqMutations < minNumSeqMutations] <- NA
     
     
+    # Infer mutability for missing 5-mers
+    .fillHot <-function(FIVEMER,mutability){
+       if(FIVEMER%in%names(mutability))if(!is.na(mutability[[FIVEMER]]))if(mutability[[FIVEMER]]>=0.0)return(mutability[[FIVEMER]])
+       Nuc=substr(FIVEMER,3,3)
+       Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
+       FIVE=0
+       COUNT=0
+       if(Nuc%in%c("A","T")){
+          for(i in 1:3){
+             for(j in 1:3){
+                MutatedNeighbor=paste(canMutateTo(substr(FIVEMER,1,1))[i],substr(FIVEMER,2,4),canMutateTo(substr(FIVEMER,5,5))[j],collapse="",sep="")
+                if(MutatedNeighbor%in%names(mutability)){
+                   FIVE=FIVE+mutability[[MutatedNeighbor]]
+                   COUNT=COUNT+1
+                }
+             }
+          }
+          return(FIVE/COUNT)
+       }
+       
+       if(Nuc%in%c("G","T")){
+          for(i in 1:3){
+             for(j in 1:3){
+                MutatedNeighbor=paste(canMutateTo(substr(FIVEMER,1,1))[i],canMutateTo(substr(FIVEMER,2,2))[j],substr(FIVEMER,3,5),collapse="",sep="")
+                if(MutatedNeighbor%in%names(mutability)){
+                   FIVE=FIVE+mutability[[MutatedNeighbor]]
+                   COUNT=COUNT+1
+                }
+             }
+          }
+          return(FIVE/COUNT)
+       }
+       
+       if(Nuc%in%c("C","A")){
+          for(i in 1:3){
+             for(j in 1:3){
+                MutatedNeighbor=paste(substr(FIVEMER,1,3),canMutateTo(substr(FIVEMER,4,4))[i],canMutateTo(substr(FIVEMER,5,5))[j],collapse="",sep="")
+                if(MutatedNeighbor%in%names(mutability)){
+                   FIVE=FIVE+mutability[[MutatedNeighbor]]
+                   COUNT=COUNT+1
+                }
+             }
+          }
+          return(FIVE/COUNT)
+       }
+    }
     
-    # TODO:  add imputation for missing values (0 count). options count=1, count=mean, count=min(!=0)
-    # TODO:  use more complicated imputation (as per paper)
+    Mutability_Mean_Complete <-sapply(words(5,nuc_chars), .fillHot, mutability = Mutability_Mean)
+    
+    for(i in names(which(is.na(Mutability_Mean_Complete)))){
+       Mutability_Mean_Complete[i]<- .fillHot(i,mutability=Mutability_Mean_Complete)
+    }
+    for(i in names(which((Mutability_Mean_Complete)<1e-6))){
+       Mutability_Mean_Complete[i]<- .fillHot(i,mutability=Mutability_Mean_Complete)
+    }
+    # If the neighboring 5-mers still don't have enough mutations, use 0 instead. 
+    if (length(is.na(Mutability_Mean_Complete)) > 0) {
+       warning("Insufficient number of mutations to infer some 5-mers. Filled with 0. ")
+       Mutability_Mean_Complete[is.na(Mutability_Mean_Complete)] = 0 
+    }
+    
     
     # Normalize
-    Mutability_Mean <- Mutability_Mean / sum(Mutability_Mean, na.rm=TRUE)
+    Mutability_Mean_Complete <- Mutability_Mean_Complete / sum(Mutability_Mean_Complete, na.rm=TRUE)
     
-    # TODO:  what is this?
-    # MutabilityMatrixNorm = Normalized by fivemers that are observed.
-    #Mutability_Mean <- sapply(1:1024, function(i) weighted.mean(MutabilityMatrix[i, ], MutabilityWeights[i, ], na.rm=TRUE))
-    #MutabilityMatrixNorm <- apply(MutabilityMatrix, 2, function(x) x/sum(x, na.rm=TRUE) * sum(!is.na(x)))
-    #Mutability_SD <- sapply(1:1024, function(i) SDMTools::wt.sd(MutabilityMatrixNorm[i, ], MutabilityWeights[i]))    
+    # Return whether the 5-mer mutability is measured or inferred
+    if (returnSource) {
+       Mutability_Mean_Complete_Source = data.frame(Fivemer = names(Mutability_Mean_Complete),
+                                                    Mutability = Mutability_Mean_Complete)
+       Mutability_Mean_Complete_Source$Source = "Measured"
+       Mutability_Mean_Complete_Source[Mutability_Mean_Complete_Source$Fivemer %in% 
+                                          names(which(is.na(Mutability_Mean))), "Source"] = "Inferred"
+       return(Mutability_Mean_Complete_Source)
+    }
     
-    return(Mutability_Mean)
+    return(Mutability_Mean_Complete)
 }
 
 
