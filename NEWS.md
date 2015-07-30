@@ -1,3 +1,27 @@
+Version 0.1.2.beta:  July 30, 2015
+------------------------------------------------------------------------------
+
+Targeting Models:
+
++ Added `minNumMutations` parameter to createSubstitutionMatrix. This is the 
+  minimum number of observed 5-mers required for the substituion model. 
+  The substitution rate of 5-mers with fewer number of observed mutations
+  will be inferred from other 5-mers. 
++ Added `minNumSeqMutations` parameter to createMutabilityMatrix. This is the 
+  minimum number of mutations required in sequences containing the 5-mers of 
+  interest. The mutability of 5-mers with fewer number of observed mutations 
+  in the sequences will be inferred. 
++ Changed inference procedure for the 5-mer substitution model.
++ Added inference procedure for 5-mers without enough observed mutations
+  in the mutability model.
++ Added `returnSource` parameter to createMutabilityMatrix. If TRUE, the 
+  code will return a data frame indicating whether each 5-mer mutability is 
+  observed or inferred. 
++ Fixed a bug in background 5-mer count for the RS model.
++ Fixed a bug in IMGT gap handling in createMutabilityMatrix.
+
+
+
 Version 0.1.1.beta:  July 20, 2015
 -------------------------------------------------------------------------------
 
