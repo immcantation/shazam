@@ -470,7 +470,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
                                        germlineColumn=germlineColumn)
     
-    # Do something
+    # Foreground Count: Count the number of observed mutations for each 5-mer
     template <- rep(0, 1024)
     names(template) <- seqinr::words(5, nuc_chars)
     COUNT <- list()
@@ -510,7 +510,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     #cat("          ")
     #pb <- txtProgressBar(min=1, max=length(mutations), width=20)
 
-    # Do something else
+    # Background Count: Count the number of occurrences of each 5-mer
     BG_COUNT <- list()
     for (index in 1:length(mutations)){
         #setTxtProgressBar(pb, index)
@@ -589,6 +589,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
        Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
        FIVE=0
        COUNT=0
+       
+       # For A/T, infer mutability using the 3-mer model. 
        if(Nuc%in%c("A","T")){
           for(i in 1:3){
              for(j in 1:3){
@@ -601,8 +603,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
           }
           return(FIVE/COUNT)
        }
-       
-       if(Nuc%in%c("G","T")){
+       # For G, infer using 5-mers with the same downstream nucleotides 
+       if(Nuc=="G"){
           for(i in 1:3){
              for(j in 1:3){
                 MutatedNeighbor=paste(canMutateTo(substr(FIVEMER,1,1))[i],canMutateTo(substr(FIVEMER,2,2))[j],substr(FIVEMER,3,5),collapse="",sep="")
@@ -615,7 +617,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
           return(FIVE/COUNT)
        }
        
-       if(Nuc%in%c("C","A")){
+       # For C, infer using 5-mers with the same upstream nucleotides 
+       if(Nuc=="C"){
           for(i in 1:3){
              for(j in 1:3){
                 MutatedNeighbor=paste(substr(FIVEMER,1,3),canMutateTo(substr(FIVEMER,4,4))[i],canMutateTo(substr(FIVEMER,5,5))[j],collapse="",sep="")
