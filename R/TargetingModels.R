@@ -188,11 +188,13 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                                      germlineColumn="GERMLINE_IMGT_D_MASK",
                                      vCallColumn="V_CALL",
                                      multipleMutation=c("independent", "ignore"),
+                                     returnModel=c("5mer", "1mer", "1mer_raw"),
                                      minNumMutations=50)  {
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
-
+    returnModel <- match.arg(returnModel)
+    
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
     if (check != TRUE) { stop(check) }
@@ -306,15 +308,22 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     
     # Aggregate mutations from all V families
     M<-list()
-    M[["ALL"]] <- matrix(0,4,4) # a single substitution matrix for all fivemers
+    subMat1mer <- matrix(0,4,4) # a single substitution matrix for all fivemers
     listSubNames<-sapply(dimnames(listSubstitution)[[1]],function(x)strsplit(x,"_",fixed=TRUE)[[1]])
     
     for (nuc_word in nuc_words) {
         M[[nuc_word]] <- t(sapply(1:4,function(i)apply(listSubstitution[listSubNames[2,] == nuc_word,i,],2,sum))) # sums mutations from all families
         rownames(M[[nuc_word]]) <- nuc_chars
-        M[["ALL"]] <- M[["ALL"]] + M[[nuc_word]]
+        subMat1mer <- subMat1mer + M[[nuc_word]]
     }
     
+    # Return 1-mer substitution model; this output cannot be used for createMutabilityMatrix
+    if (returnModel == "1mer") {
+       subMat1merNorm = t(apply(subMat1mer, 1, function(x){x/sum(x)}))
+       return (subMat1merNorm)
+    } else if (returnModel == "1mer_raw") {
+       return (subMat1mer)
+    } 
     
     # Aggregate mutations from neighboring bases for low frequency fivemers
     # fivemer=M; FIVEMER="CCATT"
@@ -439,6 +448,11 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
     if (check != TRUE) { stop(check) }
+    
+    # Check that the substitution model is valid
+    if (any(dim(substitutionModel) != c(4,1024))) {
+       stop ("Please supply a valid 5-mer substitutionModel.")
+    }
     
     # Remove IMGT gaps in the germline & input sequences
     matInput <- db[,c(sequenceColumn,germlineColumn)]
