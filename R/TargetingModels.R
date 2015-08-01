@@ -1,10 +1,10 @@
 # Targeting models
 # 
-# @author     Gur Yaari, Mohamed Uduman, Jason Anthony Vander Heiden
+# @author     Gur Yaari, Mohamed Uduman, Jason Anthony Vander Heiden, Ang Cui
 # @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
 # @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
 # @version    0.1
-# @date       2015.04.11
+# @date       2015.08.01
 
 #' @include shm.R
 NULL
@@ -232,8 +232,10 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
       db[,sequenceColumn] <- matInputCollapsed[,1]
       db[,germlineColumn] <- matInputCollapsed[,2]
       mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
-                                         germlineColumn=germlineColumn)
-    
+                                         germlineColumn=germlineColumn,
+                                         multipleMutation=multipleMutation,
+                                         model=model)
+      
     if (model == "S") { # Silent model
         for(index in 1:length(mutations)) {
             cSeq <-  s2c(db[index,sequenceColumn])
@@ -253,10 +255,6 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                 seqAtMutation <- codonSeq[muCodonPos]
                 glAtMutation <- codonGL[muCodonPos]
                 if( !any(codonGL=="N") & !any(codonSeq=="N") ){
-                    if(multipleMutation=="independent"){ # if independent mutations are included
-                        codonSeq <- codonGL
-                        codonSeq[muCodonPos] <- seqAtMutation
-                    }
                     codonPermutate <- matrix(rep(codonGL,3),ncol=3,byrow=T)
                     codonPermutate[,muCodonPos] <- canMutateTo(glAtMutation)[-4]
                     codonPermutate <- apply(codonPermutate,1,paste,collapse="")
@@ -289,12 +287,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                 seqAtMutation <- codonSeq[muCodonPos]
                 glAtMutation <- codonGL[muCodonPos]
                 if( !any(codonGL=="N") & !any(codonSeq=="N") ){
-                    if(multipleMutation=="independent"){ # if independent mutations are included
-                        codonSeq <- codonGL
-                        codonSeq[muCodonPos] <- seqAtMutation
-                    }
                     if(!length(grep("N",wrd))){
-                        substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] <- (substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] + 1)
+                        substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] <- substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] + 1
                     }
                 }
             }
@@ -332,7 +326,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
         if(sum(fivemer[[Nei]][Nuc,])>Thresh && sum(fivemer[[Nei]][Nuc,]==0)==1){
             return(fivemer[[Nei]][Nuc,]);
         }
-        else{ # Otherwise aggregate mutations from the neighboring fivemers (keep the same inner 3-mer)
+        else{ # Otherwise aggregate mutations from 5-mers with the same inner 3-mer
             FIVE=fivemer[[Nei]][Nuc,]
             for(i in 1:4){
                 for(j in 1:4){
@@ -340,8 +334,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                     FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
                 }
             }
-            
-            # If the total number of mutations is still not enough, aggregate mutations from all fivemers 
+           
+            # If the total number of mutations is still not enough, aggregate mutations from all 5-mers 
             # i.e., use 1-mer model
             if(sum(FIVE) <= Thresh || sum(FIVE==0)!=1 ){
                 FIVE=fivemer[[Nei]][Nuc,]
@@ -398,7 +392,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #'                              mutations within the same 5-mer are counted indepedently. 
 #'                              If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                              excluded from the total mutation tally.
-#' @param    minNumSeqMutations minimum number of mutations in sequences containing the 5-mer
+#' @param    minNumSeqMutations minimum number of mutations in sequences containing the 5-mer.
 #'                              If the number is smaller than this threshold, the mutability 
 #'                              for the 5-mer will be inferred. Default is 500.     
 #' @param    returnSource       return the sources of 5-mer mutabilities (measured vs.
@@ -462,13 +456,13 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     
     db[,sequenceColumn] <- matInputCollapsed[,1]
     db[,germlineColumn] <- matInputCollapsed[,2]
-    mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
-                                       germlineColumn=germlineColumn)
-    
+
     # Count mutations
     nuc_chars <- NUCLEOTIDES[1:4]
     mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
-                                       germlineColumn=germlineColumn)
+                                       germlineColumn=germlineColumn,
+                                       multipleMutation=multipleMutation,
+                                       model=model)
     
     # Foreground Count: Count the number of observed mutations for each 5-mer
     template <- rep(0, 1024)
@@ -493,10 +487,6 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                     seqAtMutation <- codonSeq[muCodonPos]
                     glAtMutation <- codonGL[muCodonPos]
                     if (!any(codonGL %in% c("N", "-", ".")) & !any(codonSeq %in% c("N", "-", "."))) {
-                        if (multipleMutation == "independent") { # if independent mutations are included
-                            codonSeq <- codonGL
-                            codonSeq[muCodonPos] <- seqAtMutation
-                        }
                         if (!length(grep("N", wrd5))) {
                             COUNT[[index]][wrd5]<- COUNT[[index]][wrd5] + 1;
                         }
@@ -530,10 +520,6 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                 seqAtMutation <- codonSeq[muCodonPos]
                 glAtMutation <- codonGL[muCodonPos]
                 if (!any(codonGL %in% c("N", "-")) & !any(codonSeq %in% c("N", "-"))) {
-                    if(multipleMutation == "independent") { # if independent mutations are included
-                        codonSeq <- codonGL
-                        codonSeq[muCodonPos] <- seqAtMutation
-                    }
                     codonPermutate <- matrix(rep(codonGL, 3), ncol=3, byrow=TRUE)
                     codonPermutate[, muCodonPos] <- canMutateTo(glAtMutation)[-4]
                     codonPermutate <- apply(codonPermutate, 1, paste,collapse="")
@@ -576,6 +562,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     MutabilityWeights <- sapply(Mutability, function(x) x[[2]])
     Mutability_Mean <- apply(MutabilityMatrix, 1, weighted.mean, w=MutabilityWeights, na.rm=TRUE)
     Mutability_Mean[!is.finite(Mutability_Mean)] <- NA
+    Mutability_Mean[Mutability_Mean == 0] <- NA
     
     # Filter out 5-mers with low number of observed mutations in the sequences
     NumSeqMutations <- sapply(1:1024,function(i)sum(MutabilityWeights[!is.na(MutabilityMatrix[i,])])) 
@@ -595,7 +582,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
           for(i in 1:3){
              for(j in 1:3){
                 MutatedNeighbor=paste(canMutateTo(substr(FIVEMER,1,1))[i],substr(FIVEMER,2,4),canMutateTo(substr(FIVEMER,5,5))[j],collapse="",sep="")
-                if(MutatedNeighbor%in%names(mutability)){
+                if(!is.na(mutability[[MutatedNeighbor]])){
                    FIVE=FIVE+mutability[[MutatedNeighbor]]
                    COUNT=COUNT+1
                 }
@@ -608,7 +595,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
           for(i in 1:3){
              for(j in 1:3){
                 MutatedNeighbor=paste(canMutateTo(substr(FIVEMER,1,1))[i],canMutateTo(substr(FIVEMER,2,2))[j],substr(FIVEMER,3,5),collapse="",sep="")
-                if(MutatedNeighbor%in%names(mutability)){
+                if(!is.na(mutability[[MutatedNeighbor]])){
                    FIVE=FIVE+mutability[[MutatedNeighbor]]
                    COUNT=COUNT+1
                 }
@@ -622,7 +609,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
           for(i in 1:3){
              for(j in 1:3){
                 MutatedNeighbor=paste(substr(FIVEMER,1,3),canMutateTo(substr(FIVEMER,4,4))[i],canMutateTo(substr(FIVEMER,5,5))[j],collapse="",sep="")
-                if(MutatedNeighbor%in%names(mutability)){
+                if(!is.na(mutability[[MutatedNeighbor]])){
                    FIVE=FIVE+mutability[[MutatedNeighbor]]
                    COUNT=COUNT+1
                 }
@@ -633,7 +620,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     }
     
     Mutability_Mean_Complete <-sapply(words(5,nuc_chars), .fillHot, mutability = Mutability_Mean)
-    
+
     for(i in names(which(is.na(Mutability_Mean_Complete)))){
        Mutability_Mean_Complete[i]<- .fillHot(i,mutability=Mutability_Mean_Complete)
     }
@@ -649,7 +636,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     
     # Normalize
     Mutability_Mean_Complete <- Mutability_Mean_Complete / sum(Mutability_Mean_Complete, na.rm=TRUE)
-    
+        
     # Return whether the 5-mer mutability is measured or inferred
     if (returnSource) {
        Mutability_Mean_Complete_Source = data.frame(Fivemer = names(Mutability_Mean_Complete),
@@ -1416,7 +1403,7 @@ analyzeMutations2NucUri <- function(in_matrix) {
 
 
 # List mutations
-listMutations <- function(seqInput, seqGL) {
+listMutations <- function(seqInput, seqGL, multipleMutation, model) {
     #if( is.na(c(seqInput, seqGL)) ) return(array(NA,4))
     if (is.na(seqInput) | is.na(seqGL)) { return(NA) }
     seqI = s2c(seqInput)
@@ -1426,6 +1413,17 @@ listMutations <- function(seqInput, seqGL) {
     mutations <- mutations[!is.na(mutations)]
     positions <- as.numeric(names(mutations))
     mutations <- mutations[positions <= VLENGTH]
+    
+    #remove the nucleotide mutations in the codons with multiple mutations
+    if (multipleMutation == "ignore") {
+       mutationCodons = getCodonNumb(as.numeric(names(mutations)))
+       tableMutationCodons <- table(mutationCodons)
+       codonsWithMultipleMutations <- as.numeric(names(tableMutationCodons[tableMutationCodons>1]))
+       mutations <- mutations[!(mutationCodons %in% codonsWithMultipleMutations)]
+    }
+    if (model == "S") {
+       mutations <- mutations[mutations == "S"]
+    }
     if (length(mutations) > 0) {
         return(mutations)
     } else {
@@ -1444,7 +1442,9 @@ listMutations <- function(seqInput, seqGL) {
 # 
 # @return  list of mutations in each clone
 listObservedMutations <- function(db, sequenceColumn="SEQUENCE_IMGT", 
-                                  germlineColumn="GERMLINE_IMGT_D_MASK")  {
+                                  germlineColumn="GERMLINE_IMGT_D_MASK",
+                                  multipleMutation=c("independent", "ignore"),
+                                  model = c("RS", "S"))  {
     
     # Make sure the columns specified exist 
     if (!(sequenceColumn %in% names(db))) {
@@ -1455,7 +1455,7 @@ listObservedMutations <- function(db, sequenceColumn="SEQUENCE_IMGT",
     } 
     
     mutations <- mapply(listMutations, db[, sequenceColumn], db[, germlineColumn], 
-                        USE.NAMES=FALSE)
+                        multipleMutation, model, USE.NAMES=FALSE)
     return(mutations)
 }
 
