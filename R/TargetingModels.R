@@ -198,6 +198,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
     if (check != TRUE) { stop(check) }
+    db[, sequenceColumn] = toupper(db[, sequenceColumn])
+    db[, germlineColumn] = toupper(db[, germlineColumn])
     
     # Setup
     nuc_chars <- NUCLEOTIDES[1:4]
@@ -448,6 +450,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
     if (check != TRUE) { stop(check) }
+    db[, sequenceColumn] = toupper(db[, sequenceColumn])
+    db[, germlineColumn] = toupper(db[, germlineColumn])
     
     # Check that the substitution model is valid
     if (any(dim(substitutionModel) != c(4,1024))) {
