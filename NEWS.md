@@ -1,6 +1,22 @@
-Version 0.1.2.beta:  July 30, 2015
-------------------------------------------------------------------------------
+Version 0.1.1.beta:  July 30, 2015
+-------------------------------------------------------------------------------
 
+Distance Profiling:
+
++ Changed underlying method of calcTargetingDistance to be negative log10 of
+  the probability that is then centered at one by dividing by the mean 
+  distance.
++ Added `symmetry` parameter to distToNearest to change behavior of how 
+  asymmetric distances (A->B != B->A) are combined to get distance 
+  between A and B. 
+
+Mutation Profiling:
+
++ Changed denominator in calcObservedMutations to be based on informative 
+  (unambiguous) positions only.
++ Added nonTerminalOnly parameter to calcDBClonalConsensus indicating whether
+  to consider mutations at leaves or not (defaults to false).
+  
 Targeting Models:
 
 + Added `minNumMutations` parameter to createSubstitutionMatrix. This is the 
@@ -19,27 +35,6 @@ Targeting Models:
   observed or inferred. 
 + Fixed a bug in background 5-mer count for the RS model.
 + Fixed a bug in IMGT gap handling in createMutabilityMatrix.
-
-
-
-Version 0.1.1.beta:  July 20, 2015
--------------------------------------------------------------------------------
-
-Distance Profiling:
-
-+ Changed underlying method of calcTargetingDistance to be negative log10 of
-  the probability that is then centered at one by dividing by the mean 
-  distance.
-+ Added `symmetry` parameter to distToNearest to change behavior of how 
-  asymmetric distances (A->B != B->A) are combined to get distance 
-  between A and B. 
-
-Mutation Profiling:
-
-+ Changed denominator in calcObservedMutations to be based on informative 
-  (unambiguous) positions only.
-+ Added nonTerminalOnly parameter to calcDBClonalConsensus indicating whether
-  to consider mutations at leaves or not (defaults to false).
 
 
 Version 0.1.0:  June 18, 2015
