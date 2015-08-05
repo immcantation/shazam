@@ -27,14 +27,19 @@ Targeting Models:
   minimum number of mutations required in sequences containing the 5-mers of 
   interest. The mutability of 5-mers with fewer number of observed mutations 
   in the sequences will be inferred. 
-+ Changed inference procedure for the 5-mer substitution model.
-+ Added inference procedure for 5-mers without enough observed mutations
-  in the mutability model.
++ Added `returnModel` parameter to createSubstitutionMatrix. This gives user 
+  the option to return 1-mer or 5-mer model.
 + Added `returnSource` parameter to createMutabilityMatrix. If TRUE, the 
   code will return a data frame indicating whether each 5-mer mutability is 
   observed or inferred. 
++ In createSubstitutionMatrix and createMutabilityMatrix, fixed a bug when
+  multipleMutation is set to "ignore".
++ Changed inference procedure for the 5-mer substitution model.
++ Added inference procedure for 5-mers without enough observed mutations
+  in the mutability model.
 + Fixed a bug in background 5-mer count for the RS model.
 + Fixed a bug in IMGT gap handling in createMutabilityMatrix.
++ Fixed a bug that occurs when sequences are in lower cases.
 
 
 Version 0.1.0:  June 18, 2015
