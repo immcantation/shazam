@@ -810,9 +810,10 @@ calcExpectedMutations <- function(germlineSeq,
         for(typeOfMutation in typesOfMutations){
             region_mutation <- paste(region,typeOfMutation,sep="_")    
             
+            targeting_region <- targeting[1:4, regionDefinition@boundaries%in%region]
+            mutationalPaths_region <- mutationalPaths[,regionDefinition@boundaries%in%region]
             targeting_typeOfMutation_region <- 
-                sum(targeting[ regionDefinition@boundaries%in%region & 
-                                   mutationalPaths%in%typeOfMutation ], na.rm=TRUE )
+              sum( targeting_region[mutationalPaths_region==typeOfMutation], na.rm=TRUE )
             
             listExpectedMutationFrequencies[[region_mutation]] <- targeting_typeOfMutation_region
             
