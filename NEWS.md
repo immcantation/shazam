@@ -1,3 +1,14 @@
+Version 0.1.x.beta:  Aug xx, 2015
+-------------------------------------------------------------------------------
+
+Mutation Profiling:
+
++ Fixed a (major) bug in calcExpectedMutations. 
+
+Basline:
+
++ Added "imbalance" test statistic to the Baseline selection calculation.
+
 Version 0.1.1.beta:  July 30, 2015
 -------------------------------------------------------------------------------
 

@@ -305,7 +305,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' \link{calcObservedMutations} is called by this function to get the list of mutations 
 #' in each sequence. \link{binMutationsByRegion} is called by this function to 
 #' aggregate the mutations by the \link{regionDefinition}. 
-#' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
+#' See \link{IMGT_SCHEMES} for a set of predefined \link{regionDefinition} objects.
 #' See \link{calcDBExpectedMutations} for calculating expected mutation frequencies.
 #'           
 #' 
