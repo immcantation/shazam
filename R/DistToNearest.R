@@ -434,7 +434,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
         }
         # Reassign J genes to most general group of genes
         for(ambig in unique(db$J1[grepl(',',db$J1)])) {
-            for(g in strsplit(ambig, split=',')) {
+            for(g in strsplit(ambig, split=',')[[1]]) {
                 db$J[grepl(g, db$J1)] = ambig
             }
         }
