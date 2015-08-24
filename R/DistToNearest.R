@@ -223,10 +223,11 @@ findUniqueJunctions <- function(arrJunctions) {
   names(arrJunctionsDist) <- arrJunctions
   
   # Subset unique junctions to those that are only observed once
-  arrJunctionsUnique <- arrJunctionsUnique[indexJunctionsCounts==1]
+  #arrJunctionsUnique <- arrJunctionsUnique[indexJunctionsCounts==1]
   
   return(list('arrJunctionsDist'=arrJunctionsDist, 
-              'arrJunctionsUnique'=arrJunctionsUnique))
+              'arrJunctionsUnique'=arrJunctionsUnique,
+              'indexJunctionsCounts'=indexJunctionsCounts))
 }
 
 
@@ -256,6 +257,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
   l <- findUniqueJunctions(arrJunctions)
   arrJunctionsDist <- l$arrJunctionsDist
   arrJunctionsUnique <- l$arrJunctionsUnique
+  indexJunctionsCounts <- l$indexJunctionsCounts
 
   # Compute distances between junctions
   numbOfUniqueJunctions <- length(arrJunctionsUnique)
@@ -269,7 +271,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
   }
 
   # Fill the distances for unique sequences
-  arrJunctionsDist[is.na(arrJunctionsDist)] <- arrUniqueJunctionsDist
+  arrJunctionsDist[is.na(arrJunctionsDist)] <- arrUniqueJunctionsDist[indexJunctionsCounts==1]
   return(round(arrJunctionsDist,4))
 }
 
@@ -298,6 +300,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
   l <- findUniqueJunctions(arrJunctions)
   arrJunctionsDist <- l$arrJunctionsDist
   arrJunctionsUnique <- l$arrJunctionsUnique
+  indexJunctionsCounts <- l$indexJunctionsCounts
   
   # Compute distances between junctions
   numbOfUniqueJunctions <- length(arrJunctionsUnique)
@@ -315,7 +318,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
   }
   
   # Fill the distances for unique sequences
-  arrJunctionsDist[is.na(arrJunctionsDist)] <- arrUniqueJunctionsDist
+  arrJunctionsDist[is.na(arrJunctionsDist)] <- arrUniqueJunctionsDist[indexJunctionsCounts==1]
   return(round(arrJunctionsDist,4))
 }
 
