@@ -423,6 +423,8 @@ calcBaseline <- function(db,
   }
   
   list_pdfs <- list()
+  list_numbOfSeqs <- list()
+  
   regions <- regionDefinition@regions
   # For every region (e.g. CDR, FWR etc.)
   for (region in regions) {
@@ -438,6 +440,11 @@ calcBaseline <- function(db,
           regionDefinition = regionDefinition
         )
       }
+    
+    # Count the number of non NA PDFs 
+    list_numbOfSeqs[[region]] <- rep(1,totalNumbOfSequences)
+    list_numbOfSeqs[[region]][is.na(list_region_pdfs)] <- 0
+    
     # Convert the list of the region's PDFs into a matrix                
     list_pdfs[[region]] <- 
       do.call( rbind, 
@@ -455,9 +462,12 @@ calcBaseline <- function(db,
   # This holds the number of non NA sequences
   numbOfSeqs <- matrix( NA, 
                         ncol=length(regions), 
-                        nrow=1,
-                        dimnames=list( 1, regions )
+                        nrow=totalNumbOfSequences,
+                        dimnames=list( 1:totalNumbOfSequences, regions )
   )
+  for(region in regions){
+    numbOfSeqs[,region] <-   list_numbOfSeqs[[region]]
+  }
   
   # Create a Baseline object with the above results to return
   baseline <- createBaseline( description="",
@@ -706,24 +716,141 @@ groupBaseline <- function(baseline,
   # For every region (e.g. CDR, FWR etc.)
   for (region in regions) {
     
+    # Group (convolute) all the PDFS and get one single PDF
     list_region_pdfs  <-
       foreach( i=iterators::icount(numbOfTotalGroups)) %dopar% {
+        
+        # Get a matrix (r=numb of sequences/groups * c=4001(i,e. the length of the PDFS))
         matrix_GroupPdfs <- (baseline@pdfs[[region]])[groups[[i]],]
         
+        # A list version of 
         list_GroupPdfs <- 
           lapply( 1:nrow(matrix_GroupPdfs), 
                   function(rowIndex) {
                     rowVals <- matrix_GroupPdfs[rowIndex,]
                     if( !all(is.na(rowVals)) ) { matrix_GroupPdfs[rowIndex,] }
                   })
-        
+        # Determine the number of sequences that went into creating each of the PDFs
+        # If running groupBaseline for the first time after calcBaseline, then
+        # each PDF should have a numbOfSeqs=1. 
+        numbOfSeqs_region <- baseline@numbOfSeqs[groups[[i]],region]
+        numbOfSeqs_region <- numbOfSeqs_region[numbOfSeqs_region>0]
+        if(any(numbOfSeqs_region>0)) { 
+          names(numbOfSeqs_region) <- 1:length(numbOfSeqs_region) 
+        }
         list_GroupPdfs <- Filter(Negate(is.null), list_GroupPdfs)
         numbOfNonNASeqs <- length(list_GroupPdfs)
         
-        # If all the sequences in the group are NAs, return a PDF of NAs
-        if( length(list_GroupPdfs) == 0 ) { list_GroupPdfs = list((rep(NA,4001))) }
+        # If all the PDFs in the group are NAs, return a PDF of NAs
+        if( length(list_GroupPdfs) == 0 ) { 
+          return( c( rep(NA,4001), 0 ) )
+        }
         
-        return( c( groupPosteriors(list_GroupPdfs), numbOfNonNASeqs ) )
+        # If all the PDFs in the group have a numbOfSeqs=1 then
+        # call groupPosteriors, which groups PDFs with equal weight
+        if( sum(numbOfSeqs_region) == length(numbOfSeqs_region) ) { 
+          return( c( groupPosteriors(list_GroupPdfs), numbOfNonNASeqs ) )
+        }
+        
+        # If all the PDFs in the group different numbOfSeqs then call 
+        # combineWeigthedPosteriors, which groups PDFs weighted by the number of seqs/PDFs
+        # that went into creating those PDFs
+        if( sum(numbOfSeqs_region) > length(numbOfSeqs_region) ) {
+          
+          # sort by number of items
+          len_numbOfSeqs_region <- length(numbOfSeqs_region)
+          sorted_numbOfSeqs_region <- sort(numbOfSeqs_region)
+          sorted_list_GroupPdfs <- list()
+          for(newIndex in 1:len_numbOfSeqs_region){
+            sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
+          }
+          
+          # Group all the PDFs that are created with the equal numbers of seqs/PDFs (i.e. of equal weight)                  
+          repeat {
+            # Count the numb of PDFs with the same weights
+            table_sorted_numbOfSeqs_region <- table(sorted_numbOfSeqs_region)
+            # Weight of interest (the first in the list)
+            pdfWeight <- names(table_sorted_numbOfSeqs_region[table_sorted_numbOfSeqs_region>1])[1]
+            if(is.na(pdfWeight)) { 
+              break
+            }
+            # The corresponding idexes of these PDFs with the same weight
+            indexesOfWeight <- which(sorted_numbOfSeqs_region==pdfWeight)
+            # Convolute these PDFs together
+            list_sameWeightPdfs <- sorted_list_GroupPdfs[indexesOfWeight]
+            updatedPdf <- groupPosteriors(list_sameWeightPdfs)
+            # The new updated weights for this convoluted PDF
+            updatedWeight <- as.numeric(pdfWeight) * length(indexesOfWeight)
+            
+            # remove these from sorted_numbOfSeqs_region & sorted_list_GroupPdfs
+            sorted_numbOfSeqs_region  <- sorted_numbOfSeqs_region[-indexesOfWeight]
+            sorted_list_GroupPdfs <- sorted_list_GroupPdfs[-indexesOfWeight]
+            
+            # add the convoluted PDF and its new weight
+            newLength <- length(sorted_numbOfSeqs_region)+1
+            sorted_numbOfSeqs_region[newLength] <- updatedWeight
+            sorted_list_GroupPdfs[[newLength]] <- updatedPdf
+            
+            
+            # sort by number of items
+            len_sorted_numbOfSeqs_region <- length(sorted_numbOfSeqs_region)
+            sorted_numbOfSeqs_region <- sort(sorted_numbOfSeqs_region)
+            names(sorted_numbOfSeqs_region) <- as.character(1:len_sorted_numbOfSeqs_region)
+            list_GroupPdfs <- sorted_list_GroupPdfs
+            sorted_list_GroupPdfs <- list()
+            for(newIndex in 1:len_numbOfSeqs_region){
+              sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
+            }
+            
+            table_sorted_numbOfSeqs_region <- table(sorted_numbOfSeqs_region)
+            
+            if(sum(table_sorted_numbOfSeqs_region>1)>0){
+              break
+            }
+          }
+          
+          #return( c( groupPosteriors(sorted_list_GroupPdfs), 10 ) )
+          
+          # Do pairwise grouping of PDFs based on weight
+          # 1. sort by weights
+          # 2. group the lowest two weighted PDFs
+          # 3. resort, and repete till you get one PDFs
+          if(length(list_GroupPdfs)>1){
+            repeat{
+              
+              updatedPdf <- combineWeigthedPosteriors(list_GroupPdfs[[1]], 
+                                                      sorted_numbOfSeqs_region[1], 
+                                                      list_GroupPdfs[[2]], 
+                                                      sorted_numbOfSeqs_region[2])
+              updatedWeight <- sorted_numbOfSeqs_region[1] + sorted_numbOfSeqs_region[2]
+              # remove these from sorted_numbOfSeqs_region & sorted_list_GroupPdfs
+              sorted_numbOfSeqs_region  <- sorted_numbOfSeqs_region[-c(1,2)]
+              sorted_list_GroupPdfs <- sorted_list_GroupPdfs[-c(1,2)]
+              
+              # add the convoluted PDF and its new weight
+              newLength <- length(sorted_numbOfSeqs_region)+1
+              sorted_numbOfSeqs_region[newLength] <- updatedWeight
+              sorted_list_GroupPdfs[[newLength]] <- updatedPdf
+              
+              # sort by number of items
+              len_sorted_numbOfSeqs_region <- length(sorted_numbOfSeqs_region)
+              sorted_numbOfSeqs_region <- sort(sorted_numbOfSeqs_region)
+              names(sorted_numbOfSeqs_region) <- as.character(1:len_sorted_numbOfSeqs_region)
+              list_GroupPdfs <- sorted_list_GroupPdfs
+              sorted_list_GroupPdfs <- list()
+              for(newIndex in 1:len_numbOfSeqs_region){
+                sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
+              }
+              
+              if(length(list_GroupPdfs)==1){
+                break
+              }
+            }
+          }
+          
+          return( c( list_GroupPdfs[[1]], as.numeric(sorted_numbOfSeqs_region) ) )
+        }
+        
       }
     
     # Convert the list of the region's PDFs into a matrix                
@@ -743,10 +870,11 @@ groupBaseline <- function(baseline,
     numbOfSeqs[,region] <- matrix_region_pdfs[,4002]        
   }
   
-  colnames(numbOfSeqs) <- paste0("NUMB_SEQUENCES_", colnames(numbOfSeqs))
+  #colnames(numbOfSeqs) <- paste0("NUMB_SEQUENCES_", colnames(numbOfSeqs))
   
   # Create the db, which will now contain the group information
-  db <- cbind( df[,groupBy], numbOfSeqs)
+  db <- df[,groupBy]
+  #db <- cbind( df[,groupBy], numbOfSeqs)
   if(!class(db)=="data.frame") { 
     db <- as.data.frame(db) 
     colnames(db)[1] <- groupBy
@@ -763,7 +891,7 @@ groupBaseline <- function(baseline,
                               pdfs=list_pdfs )
   
   # Calculate BASELINe stats and update slot
-  baseline <- summarizeBaseline(baseline,nproc=0)
+  baseline <- summarizeBaseline(baseline)
   
   # Stop SNOW cluster
   if(nproc > 1) { snow::stopCluster(cluster) }
@@ -1379,6 +1507,18 @@ weighted_conv<-function(x,y,w=1,m=100,length_sigma=4001){
   tmp<-approx(x=1:(lx+ly-1),y=convolve(x1,rev(y1),type="open"),xout=seq(1,lx+ly-1,length.out=length_sigma))$y
   tmp[tmp<=0] = 0
   return(tmp/sum(tmp))
+}
+
+
+combineWeigthedPosteriors<-function(PDF1,NumberOfSeq1,PDF2,NumberOfSeq2,length_sigma=4001){
+  #return(list(calculate_bayesGHelper(list(cbind(PDF1,PDF2),c(log(NumberOfSeq1,2),log(NumberOfSeq2,2))),
+  #                                   length_sigma=length_sigma),NumberOfSeq1+NumberOfSeq2))
+  return( calculate_bayesGHelper( list( cbind(PDF1,PDF2),
+                                        c(log(NumberOfSeq1,2),
+                                          log(NumberOfSeq2,2))
+                                        ),
+                                  length_sigma=length_sigma
+                                  ))
 }
 
 calculate_bayesGHelper <- function( listMatG,length_sigma=4001 ){

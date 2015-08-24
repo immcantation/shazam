@@ -151,7 +151,7 @@ calcDBClonalConsensus <- function(db,
     # Stop SNOW cluster
     if(nproc > 1) { snow::stopCluster(cluster) }
     
-    # If collapseByClone is TRUE then collapse the db by clones
+#     # If collapseByClone is TRUE then collapse the db by clones
     if(collapseByClone==TRUE){ 
         uniqueCloneIDs <-  unique(db[,cloneColumn])
         indexOfFirstOccurenceOfClone <- match(uniqueCloneIDs, db[,cloneColumn])
@@ -304,8 +304,8 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' @seealso  
 #' \link{calcObservedMutations} is called by this function to get the list of mutations 
 #' in each sequence. \link{binMutationsByRegion} is called by this function to 
-#' aggregate the mutations by the \link{regionDefinition}. 
-#' See \link{IMGT_SCHEMES} for a set of predefined \link{regionDefinition} objects.
+#' aggregate the mutations by the \link{RegionDefinition}. 
+#' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
 #' See \link{calcDBExpectedMutations} for calculating expected mutation frequencies.
 #'           
 #' 
