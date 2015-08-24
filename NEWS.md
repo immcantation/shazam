@@ -1,15 +1,4 @@
-Version 0.1.x.beta:  Aug xx, 2015
--------------------------------------------------------------------------------
-
-Mutation Profiling:
-
-+ Fixed a (major) bug in calcExpectedMutations. 
-
-Basline:
-
-+ Added "imbalance" test statistic to the Baseline selection calculation.
-
-Version 0.1.1.beta:  July 30, 2015
+Version 0.1.1.beta:  August 21, 2015
 -------------------------------------------------------------------------------
 
 Distance Profiling:
@@ -23,11 +12,16 @@ Distance Profiling:
 
 Mutation Profiling:
 
++ Fixed a (major) bug in calcExpectedMutations. 
 + Changed denominator in calcObservedMutations to be based on informative 
   (unambiguous) positions only.
 + Added nonTerminalOnly parameter to calcDBClonalConsensus indicating whether
   to consider mutations at leaves or not (defaults to false).
   
+Selection Analysis:
+
++ Added "imbalance" test statistic to the Baseline selection calculation.
+
 Targeting Models:
 
 + Added `minNumMutations` parameter to createSubstitutionMatrix. This is the 
