@@ -378,12 +378,12 @@ calcBaseline <- function(db,
     
     # Collapse the sequences by the CLONE column (if present)
     if( "CLONE" %in% colnames(db) ) {                       
-      db <- calcDBClonalConsensus(db, 
-                                  cloneColumn="CLONE", 
-                                  sequenceColumn=sequenceColumn,
-                                  germlineColumn=germlineColumn,
-                                  collapseByClone=TRUE, nproc=nproc_arg)            
-      sequenceColumn="CLONAL_CONSENSUS_SEQUENCE"
+      db <- collapseByClone(db, 
+                            cloneColumn="CLONE", 
+                            sequenceColumn=sequenceColumn,
+                            germlineColumn=germlineColumn,
+                            expandedDb=TRUE, nproc=nproc_arg)            
+      sequenceColumn="CLONAL_SEQUENCE"
     }
     
     # Calculate the numbers of observed mutations

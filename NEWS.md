@@ -12,7 +12,11 @@ Distance Profiling:
 
 Mutation Profiling:
 
-+ Fixed a (major) bug in calcExpectedMutations. 
++ Renamed calcDBClonalConsensus to collapseByClone
+  Also, renamed argument collapseByClone to expandedDb.
++ Fixed a (major) bug in calcExpectedMutations. Previously, the targeting calculation
+  was incorrect and resulted in incorrect expected mutation frequencies. Note, that this
+  also resulted in incorrect BASELINe Selection (Sigma) values.
 + Changed denominator in calcObservedMutations to be based on informative 
   (unambiguous) positions only.
 + Added nonTerminalOnly parameter to calcDBClonalConsensus indicating whether
@@ -20,6 +24,8 @@ Mutation Profiling:
   
 Selection Analysis:
 
++ Updated groupBaseline. Now when regrouping a Baseline object (i.e. grouping previously
+  grouped PDFs, weighted convolution is performed). 
 + Added "imbalance" test statistic to the Baseline selection calculation.
 
 Targeting Models:

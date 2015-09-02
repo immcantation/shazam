@@ -153,7 +153,8 @@ getnproc <-function(){
     platform <- getPlatform()
     nproc <- 1
     if(platform=="windows") nproc <- Sys.getenv('NUMBER_OF_PROCESSORS')
-    if(platform=="unix") nproc <- system("nproc", intern=TRUE)
+    if(platform=="unix") nproc <- parallel::detectCores()
+    #nproc <- system("nproc", intern=TRUE)
     return(as.numeric(nproc))
 }
 

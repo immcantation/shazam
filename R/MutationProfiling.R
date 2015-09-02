@@ -14,7 +14,9 @@ NULL
 
 #' Identifies clonal consensus sequences
 #'
-#' \code{calcDBClonalConsensus} identifies the consensus sequence of each clonal 
+#' Identifies effective/consensus sequences collapsed by clone
+#'
+#' \code{collapseByClone} identifies the consensus sequence of each clonal 
 #' group and appends a column to the input \code{data.frame} containing the clonal 
 #' consensus for each sequence.
 #'
@@ -25,8 +27,9 @@ NULL
 #'                              sequences.
 #' @param   germlineColumn      \code{character} name of the column containing germline 
 #'                              sequences.
-#' @param   collapseByClone     \code{logical} indicating whether or not to collapse the 
-#'                              \code{db} by the \code{cloneColumn}.
+#' @param   expandedDb          \code{logical} indicating whether or not to return the 
+#'                              expanded \code{db}, containing all the sequences (as opposed
+#'                              to returning just one sequence per clone collapsed by )
 #' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
 #'                              and boundaries of the Ig sequences.
 #' @param   nonTerminalOnly     \code{logical} indicating whether to include mutations
@@ -37,7 +40,7 @@ NULL
 #'                              
 #' 
 #' @return   A modified \code{db} data.frame with clonal consensus sequences in the
-#'           CLONAL_CONSENSUS_SEQUENCE column.
+#'           CLONAL_SEQUENCE column.
 #'
 #' @details
 #' For sequences identified to be part of the same clone, this function defines an 
@@ -71,21 +74,20 @@ NULL
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' 
-#' # Run calcDBClonalConsensus
-#' db_new <- calcDBClonalConsensus(db, cloneColumn="CLONE", 
+#' # Run collapseByClone
+#' db_new <- collapseByClone(db, cloneColumn="CLONE", 
 #'                                 sequenceColumn="SEQUENCE_IMGT",
-#'                                 germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                                 collapseByClone=TRUE)
+#'                                 germlineColumn="GERMLINE_IMGT_D_MASK")
 #' 
 #' @export
-calcDBClonalConsensus <- function(db, 
-                                  cloneColumn="CLONE", 
-                                  sequenceColumn="SEQUENCE_IMGT",
-                                  germlineColumn="GERMLINE_IMGT_D_MASK",
-                                  collapseByClone=TRUE,
-                                  regionDefinition=IMGT_V_NO_CDR3,
-                                  nonTerminalOnly = FALSE,
-                                  nproc=1) {
+collapseByClone <- function(db, 
+                            cloneColumn="CLONE", 
+                            sequenceColumn="SEQUENCE_IMGT",
+                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                            expandedDb=FALSE,
+                            regionDefinition=IMGT_V_NO_CDR3,
+                            nonTerminalOnly = FALSE,
+                            nproc=1) {
     # Check for valid columns
     check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
@@ -96,8 +98,8 @@ calcDBClonalConsensus <- function(db,
         nproc = 0
     }
     
-    if (class(collapseByClone) != "logical") {
-        stop ("collapseByClone must be TRUE or FALSE.")
+    if (class(expandedDb) != "logical") {
+      stop ("expandedDb must be TRUE or FALSE.")
     }
         
     if (class(nonTerminalOnly) != "logical") {
@@ -138,7 +140,7 @@ calcDBClonalConsensus <- function(db,
     }
     
     # Printing status to console
-    cat("Building clonal consensus sequences...\n")
+    cat("Collapsing clonal sequences...\n")
     
     list_ClonalConsensus <-
       foreach(i=iterators::icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass') %dopar% {
@@ -151,18 +153,18 @@ calcDBClonalConsensus <- function(db,
     # Stop SNOW cluster
     if(nproc > 1) { snow::stopCluster(cluster) }
     
-#     # If collapseByClone is TRUE then collapse the db by clones
-    if(collapseByClone==TRUE){ 
-        uniqueCloneIDs <-  unique(db[,cloneColumn])
-        indexOfFirstOccurenceOfClone <- match(uniqueCloneIDs, db[,cloneColumn])
-        db_ClonalConsensus <- db[indexOfFirstOccurenceOfClone, ]
-        db_ClonalConsensus$CLONAL_CONSENSUS_SEQUENCE <- unlist(list_ClonalConsensus)
+    # If expandedDb is FALSE then collapse the db by clones
+    if(expandedDb==FALSE){ 
+      uniqueCloneIDs <-  unique(db[,cloneColumn])
+      indexOfFirstOccurenceOfClone <- match(uniqueCloneIDs, db[,cloneColumn])
+      db_ClonalConsensus <- db[indexOfFirstOccurenceOfClone, ]
+      db_ClonalConsensus$CLONAL_SEQUENCE <- unlist(list_ClonalConsensus)
     }else{
       # Match the ClonalConsensus to all the sequences in the clone
       vec_ClonalConsensus <- unlist(list_ClonalConsensus)
       expanded_ClonalConsensus <- tapply(db[,cloneColumn],1:nrow(db),function(x){return(vec_ClonalConsensus[x])})
       db_ClonalConsensus <- db
-      db_ClonalConsensus$CLONAL_CONSENSUS_SEQUENCE <- unlist(expanded_ClonalConsensus)
+      db_ClonalConsensus$CLONAL_SEQUENCE <- unlist(expanded_ClonalConsensus)
     }
     
     return(db_ClonalConsensus)

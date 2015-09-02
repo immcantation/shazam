@@ -22,6 +22,7 @@ Imports:
     grid,
     iterators,
     methods,
+    parallel,
     reshape2,
     SDMTools,
     scales,

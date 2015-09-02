@@ -57,7 +57,7 @@
 #' 
 #' @section  Mutational profiling:
 #' \itemize{
-#'   \item  \link{calcDBClonalConsensus}:    Build clonal consensus sequence.
+#'   \item  \link{collapseByClone}:    Build clonal consensus sequence.
 #'   \item  \link{calcDBObservedMutations}:  Compute observed mutation counts.
 #'   \item  \link{calcDBExpectedMutations}:  Compute expected mutation frequencies.
 #' }
