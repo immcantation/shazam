@@ -25,6 +25,18 @@ NULL
 #'                              sequences or PDFs in each region, where:\cr
 #'                              \code{r} = number of rows = number of groups or sequences.\cr
 #'                              \code{c} = number of columns = number of regions.
+#' @slot    binomK              \code{matrix} of dimensions \code{r x c} containing the number of 
+#'                              successes in the binomial trials in each region, where:\cr
+#'                              \code{r} = number of rows = number of groups or sequences.\cr
+#'                              \code{c} = number of columns = number of regions.
+#' @slot    binomN              \code{matrix} of dimensions \code{r x c} containing the total 
+#'                              number of trials in the binomial in each region, where:\cr
+#'                              \code{r} = number of rows = number of groups or sequences.\cr
+#'                              \code{c} = number of columns = number of regions.
+#' @slot    binomP              \code{matrix} of dimensions \code{r x c} containing the probability 
+#'                              of success in one binomial trial in each region, where:\cr
+#'                              \code{r} = number of rows = number of groups or sequences.\cr
+#'                              \code{c} = number of columns = number of regions.
 #' @slot    pdfs                \code{list} of matrices containing PDFs with one item for each 
 #'                              defined region (e.g. "CDR" and "FWR"). Matrices have dimensions
 #'                              \code{r x c} dementions, where:\cr
@@ -45,6 +57,9 @@ setClass("Baseline",
                     testStatistic="character",
                     regions="character",
                     numbOfSeqs="matrix",
+                    binomK="matrix",
+                    binomN="matrix",
+                    binomP="matrix",
                     pdfs="list",
                     stats="data.frame"
          )
@@ -71,6 +86,18 @@ setClass("Baseline",
 #'                              then regions will be determined automatically from \code{regionDefinition}.
 #' @param   numbOfSeqs          \code{matrix} of dimensions \code{r x c} containing the number of 
 #'                              sequences or PDFs in each region, where:\cr
+#'                              \code{r} = number of rows = number of groups or sequences.\cr
+#'                              \code{c} = number of columns = number of regions.
+#' @param   binomK              \code{matrix} of dimensions \code{r x c} containing the number of 
+#'                              successes in the binomial trials in each region, where:\cr
+#'                              \code{r} = number of rows = number of groups or sequences.\cr
+#'                              \code{c} = number of columns = number of regions.
+#' @param   binomN              \code{matrix} of dimensions \code{r x c} containing the total 
+#'                              number of trials in the binomial in each region, where:\cr
+#'                              \code{r} = number of rows = number of groups or sequences.\cr
+#'                              \code{c} = number of columns = number of regions.
+#' @param   binomP              \code{matrix} of dimensions \code{r x c} containing the probability 
+#'                              of success in one binomial trial in each region, where:\cr
 #'                              \code{r} = number of rows = number of groups or sequences.\cr
 #'                              \code{c} = number of columns = number of regions.
 #' @param   pdfs                \code{list} of matrices containing PDFs with one item for each 
@@ -123,6 +150,9 @@ createBaseline <- function(description="",
                            testStatistic="",
                            regions=NULL,
                            numbOfSeqs=matrix(),
+                           binomK=matrix(),
+                           binomN=matrix(),
+                           binomP=matrix(),
                            pdfs=list(),
                            stats=data.frame()) {
   
@@ -149,6 +179,9 @@ createBaseline <- function(description="",
                   testStatistic=testStatistic,
                   regions=regionDefinition@regions,
                   numbOfSeqs=numbOfSeqs,
+                  binomK=binomK,
+                  binomN=binomN,
+                  binomP=binomP,
                   pdfs=pdfs,
                   stats=stats)
   
@@ -241,6 +274,9 @@ getBaselineStats <- function(baseline) {
 #' @param   regionDefinition    \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences.
 #' @param   targetingModel      \link{TargetingModel} object. Default is  \link{HS5FModel}.
+#' @param   calcStats           \code{logical} indicating whether or not to calculate the 
+#'                              summary statistics \code{data.frame} stored in the 
+#'                              \code{stats} slot of a \link{Baseline} object.
 #' @param   nproc               number of cores to distribute the operation over. If 
 #'                              \code{nproc} = 0 then the \code{cluster} has already been
 #'                              set and will not be reset.
@@ -315,6 +351,7 @@ calcBaseline <- function(db,
                          testStatistic=c("local", "focused","imbalance"),
                          regionDefinition=IMGT_V_NO_CDR3,
                          targetingModel=HS5FModel,
+                         calcStats=FALSE,
                          nproc=1) {
   
   # Evaluate argument choices
@@ -382,7 +419,7 @@ calcBaseline <- function(db,
                             cloneColumn="CLONE", 
                             sequenceColumn=sequenceColumn,
                             germlineColumn=germlineColumn,
-                            expandedDb=TRUE, nproc=nproc_arg)            
+                            expandedDb=FALSE, nproc=nproc_arg)            
       sequenceColumn="CLONAL_SEQUENCE"
     }
     
@@ -424,6 +461,9 @@ calcBaseline <- function(db,
   
   list_pdfs <- list()
   list_numbOfSeqs <- list()
+  list_k <- list()
+  list_n <- list()
+  list_p <- list()
   
   regions <- regionDefinition@regions
   # For every region (e.g. CDR, FWR etc.)
@@ -443,31 +483,64 @@ calcBaseline <- function(db,
     
     # Count the number of non NA PDFs 
     list_numbOfSeqs[[region]] <- rep(1,totalNumbOfSequences)
-    list_numbOfSeqs[[region]][is.na(list_region_pdfs)] <- 0
+    #is.na(list_region_pdfs)] <- 0
     
     # Convert the list of the region's PDFs into a matrix                
-    list_pdfs[[region]] <- 
+    
+    mat_pdfs_binom <- 
       do.call( rbind, 
                lapply( 
                  list_region_pdfs, 
                  function(x) { 
-                   length(x) <- 4001 
+                   length(x) <- 4004 
                    return(x)
                  }
                )
-      ) 
+      )
+    
+    list_pdfs[[region]] <- mat_pdfs_binom[,1:4001]
+    list_k[[region]] <- mat_pdfs_binom[,4002]
+    list_n[[region]] <- mat_pdfs_binom[,4003]
+    list_p[[region]] <- mat_pdfs_binom[,4004]
+    list_numbOfSeqs[[region]][is.na(list_k[[region]])] <- 0
   }
   
-  # Initialize numbOfSeqs
-  # This holds the number of non NA sequences
-  numbOfSeqs <- matrix( NA, 
+  
+  # Template for values for the regions
+  mat_template <- matrix( NA, 
                         ncol=length(regions), 
                         nrow=totalNumbOfSequences,
                         dimnames=list( 1:totalNumbOfSequences, regions )
   )
+  
+  # numbOfSeqs
+  # This holds the number of non NA sequences
+  numbOfSeqs <- mat_template
   for(region in regions){
     numbOfSeqs[,region] <-   list_numbOfSeqs[[region]]
   }
+  
+  # binomK
+  # This holds the number of exact successin in the binomial trials
+  binomK <- mat_template
+  for(region in regions){
+    binomK[,region] <-   list_k[[region]]
+  }
+  
+  # binomN
+  # This holds the total numbers trials in the binomial
+  binomN <- mat_template
+  for(region in regions){
+    binomN[,region] <-   list_n[[region]]
+  }
+    
+  # binomP
+  # This holds the prob of successin in the binomial trials
+  binomP <- mat_template
+  for(region in regions){
+    binomP[,region] <-   list_p[[region]]
+  }
+  
   
   # Create a Baseline object with the above results to return
   baseline <- createBaseline( description="",
@@ -476,7 +549,15 @@ calcBaseline <- function(db,
                               testStatistic=testStatistic,
                               regions=regionDefinition@regions,
                               numbOfSeqs=numbOfSeqs,
+                              binomK=binomK,
+                              binomN=binomN,
+                              binomP=binomP,
                               pdfs=list_pdfs )
+  
+  # Calculate BASELINe stats and update slot
+  if( calcStats==TRUE ){
+    baseline <- summarizeBaseline(baseline)
+  }
   
   # Stop SNOW cluster
   if(nproc > 1) { snow::stopCluster(cluster) }
@@ -564,7 +645,7 @@ calcBaselineHelper  <- function(observed,
     )
   
   
-  return( calcBaselineBinomialPdf( x=obsX, n=obsN, p=expP ))
+  return( c( calcBaselineBinomialPdf( x=obsX, n=obsN, p=expP ), obsX, obsN, expP ) )
 }
 
 # Calculate the BASELINe probability function in a binomial framework.
@@ -712,6 +793,7 @@ groupBaseline <- function(baseline,
                         dimnames=list( 1:numbOfTotalGroups, regions )
   )    
   
+  templateBinom <- numbOfSeqs
   
   # For every region (e.g. CDR, FWR etc.)
   for (region in regions) {
@@ -738,6 +820,8 @@ groupBaseline <- function(baseline,
         if(any(numbOfSeqs_region>0)) { 
           names(numbOfSeqs_region) <- 1:length(numbOfSeqs_region) 
         }
+        
+        list_GroupPdfs <- list_GroupPdfs[!unlist(lapply(list_GroupPdfs,function(x){any(is.na(x))}))]
         list_GroupPdfs <- Filter(Negate(is.null), list_GroupPdfs)
         numbOfNonNASeqs <- length(list_GroupPdfs)
         
@@ -888,6 +972,9 @@ groupBaseline <- function(baseline,
                               testStatistic=baseline@testStatistic,
                               regions=regions,
                               numbOfSeqs=numbOfSeqs,
+                              binomK=templateBinom,
+                              binomN=templateBinom,
+                              binomP=templateBinom,
                               pdfs=list_pdfs )
   
   # Calculate BASELINe stats and update slot

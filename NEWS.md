@@ -27,7 +27,10 @@ Selection Analysis:
 + Updated groupBaseline. Now when regrouping a Baseline object (i.e. grouping previously
   grouped PDFs, weighted convolution is performed). 
 + Added "imbalance" test statistic to the Baseline selection calculation.
-
++ Extended the Baseline Object to include binomK, binomN and binomP
+  Similar to numbOfSeqs, each of these are a matrix. They contain binomial inputs for 
+  each sequence and region. 
+  
 Targeting Models:
 
 + Added `minNumMutations` parameter to createSubstitutionMatrix. This is the 
