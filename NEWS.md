@@ -1,3 +1,11 @@
+Version 0.1.2.beta:  September 24, 2015
+-------------------------------------------------------------------------------
+
+Distance Profiling:
+
++ Updated error handling in distToNearest to issue warning when unrecognized
+  character is in the sequence and return an NA.
+
 Version 0.1.1.beta:  August 21, 2015
 -------------------------------------------------------------------------------
 

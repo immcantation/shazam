@@ -132,7 +132,11 @@ distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
   }
   
   # Calculate distance
-  dist <- getSeqDistance(seq1, seq2, dist_mat=dist_mat)
+  dist <- tryCatch(getSeqDistance(seq1, seq2, dist_mat=dist_mat),
+                   error=function(e) {
+                       warning("Invalid character in sequence. Cannot compute distance.")
+                       return(NA)
+                   })
   
   # Normalize distances
   if (normalize == "length") { 
