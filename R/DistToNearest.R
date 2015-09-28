@@ -140,7 +140,7 @@ distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
   
   # Normalize distances
   if (normalize == "length") { 
-    dist <- dist/nchar(seq1)
+    dist <- dist/sum(nchar(seq1))
   } else if (normalize == "mutations") {
     dist <- dist/sum(strsplit(seq1,"")[[1]] != strsplit(seq2,"")[[1]])
   }
