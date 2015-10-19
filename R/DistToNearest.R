@@ -460,11 +460,12 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
-    } else {
-        if(nproc != 0) { cluster <- makeCluster(nproc, type="SOCK") }
-        cluster <- snow::makeCluster(nproc, type = "SOCK")
+    } else if( nproc > 1 ) {
+        cluster <- snow::makeCluster(nproc, type="SOCK")
         registerDoSNOW(cluster)
         snow::clusterEvalQ(cluster, library(shm))
+    } else {
+        stop('Nproc must be positive.')
     }
     
     # Calculate distance to nearest neighbor
