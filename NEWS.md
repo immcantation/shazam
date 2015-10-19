@@ -1,14 +1,4 @@
-Version 0.1.2.beta:  September 28, 2015
--------------------------------------------------------------------------------
-
-Distance Profiling:
-
-+ Updated error handling in distToNearest to issue warning when unrecognized
-  character is in the sequence and return an NA.
-+ Fixed bug in 'aa' model in distToNearest that was calculating distance
-  incorrectly when normalizing by length.
-
-Version 0.1.1.beta:  August 21, 2015
+Version 0.1.1.beta:  September 28, 2015
 -------------------------------------------------------------------------------
 
 Distance Profiling:
@@ -19,6 +9,10 @@ Distance Profiling:
 + Added `symmetry` parameter to distToNearest to change behavior of how 
   asymmetric distances (A->B != B->A) are combined to get distance 
   between A and B. 
++ Updated error handling in distToNearest to issue warning when unrecognized
+  character is in the sequence and return an NA.
++ Fixed bug in 'aa' model in distToNearest that was calculating distance
+  incorrectly when normalizing by length.
 
 Mutation Profiling:
 

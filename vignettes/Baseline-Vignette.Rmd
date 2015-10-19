@@ -59,14 +59,14 @@ clonal groups.
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Collapse clonal groups into single sequences
-db_clone <- calcDBClonalConsensus(db, regionDefinition=IMGT_V_NO_CDR3, 
-                                  collapseByClone=TRUE, nproc=3)
+db_clone <- collapseByClone(db, regionDefinition=IMGT_V_NO_CDR3, 
+                            expandedDb=TRUE, nproc=3)
 ```
 
 Following construction of an effective sequence for each clone, the observed
 and expected mutation counts are calculated for each sequence of the 
-`CLONAL_CONSENSUS_SEQUENCE` column adding in the previous step. 
-`calcDBObservedMutations` is used to calculate the number of observed mutations 
+`CLONAL_SEQUENCE` column adding in the previous step. `calcDBObservedMutations` 
+is used to calculate the number of observed mutations 
 and `calcDBExpectedMutations` calculates the expected frequency of mutations. 
 The underlying targeting model for calculating expectation can be specified 
 using the `targetingModel` parameter. In the example below, the default 
@@ -90,11 +90,11 @@ in the `shm` package:
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Count observed mutations and add OBSERVED columns to db_clone
 db_obs <- calcDBObservedMutations(db_clone, 
-                                  sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+                                  sequenceColumn="CLONAL_SEQUENCE",
                                   regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 # Calculate expected mutations and add EXPECTED columns to db_obs
 db_exp <- calcDBExpectedMutations(db_obs, 
-                                  sequenceColumn="CLONAL_CONSENSUS_SEQUENCE",
+                                  sequenceColumn="CLONAL_SEQUENCE",
                                   targetingModel=HS5FModel,
                                   regionDefinition=IMGT_V_NO_CDR3, nproc=3)
 ````
