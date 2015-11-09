@@ -1,6 +1,10 @@
 Version 0.1.1.beta:  September 28, 2015
 -------------------------------------------------------------------------------
 
+General:
+
++ Swapped dependency on doSNOW for doParallel.
+
 Distance Profiling:
 
 + Changed underlying method of calcTargetingDistance to be negative log10 of

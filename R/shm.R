@@ -107,7 +107,7 @@
 #'
 #' @import   alakazam
 #' @import   data.table
-#' @import   doSNOW
+#' @import   doParallel
 #' @import   foreach
 #' @import   grid
 #' @import   ggplot2
@@ -115,7 +115,6 @@
 #' @import   plyr
 #' @import   reshape2
 #' @import   scales
-#' @import   snow
 #' @importFrom  iterators  icount
 #' @importFrom  SDMTools   wt.sd
 #' @importFrom  seqinr     c2s
