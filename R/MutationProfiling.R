@@ -131,7 +131,7 @@ collapseByClone <- function(db,
     } else {
         if(nproc != 0) { 
             #cluster <- makeCluster(nproc, type="SOCK") 
-            cluster <- makeCluster(nproc, type= "PSOCK")
+            cluster <- parallel::makeCluster(nproc, type= "PSOCK")
         }
         parallel::clusterExport( cluster, list('db', 
                                      'sequenceColumn', 'germlineColumn', "cloneColumn",
@@ -154,7 +154,7 @@ collapseByClone <- function(db,
     
     # Stop cluster
     if(nproc > 1) { #
-        stopCluster(cluster) 
+        parallel::stopCluster(cluster) 
     }
     
     # If expandedDb is FALSE then collapse the db by clones
@@ -355,7 +355,7 @@ calcDBObservedMutations <- function(db,
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
-        cluster <- parallel::makeCluster(nproc, type = "SOCK")
+        cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
                                           'regionDefinition', 'frequency'), 
                             envir=environment())
@@ -404,7 +404,7 @@ calcDBObservedMutations <- function(db,
     }
     
     # Properly shutting down the cluster
-    if (nproc > 1) { stopCluster(cluster) }
+    if (nproc > 1) { parallel::stopCluster(cluster) }
     
     # Bind the observed mutations to db
     db_new <- cbind(db, observed_mutations)
@@ -723,7 +723,7 @@ calcDBExpectedMutations <- function(db,
     colnames(expectedMutationFrequencies) <- paste0("EXPECTED_", colnames(expectedMutationFrequencies))
     
     # Properly shutting down the cluster
-    if(nproc>1){ stopCluster(cluster) }
+    if(nproc>1){ parallel::stopCluster(cluster) }
     
     # Bind the observed mutations to db
     db_new <- cbind(db, expectedMutationFrequencies)

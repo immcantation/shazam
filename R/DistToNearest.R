@@ -461,7 +461,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     } else if( nproc > 1 ) {
-        cluster <- makeCluster(nproc, type="PSOCK")
+        cluster <- parallel::makeCluster(nproc, type="PSOCK")
         registerDoParallel(cluster)
     } else {
         stop('Nproc must be positive.')
@@ -513,7 +513,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     db <- db[order(db[,"ROW_ID"]),]
     
     # Stop the cluster
-    if( nproc>1) { stopCluster(cluster) }
+    if( nproc>1) { parallel::stopCluster(cluster) }
     
     return(db[, !(names(db) %in% c("V", "J", "L", "ROW_ID", "V1", "J1"))])
 }
