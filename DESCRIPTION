@@ -14,8 +14,7 @@ URL: http://clip.med.yale.edu/changeo
 Depends:
     R (>= 3.0.0),
     alakazam (>= 0.2.0),
-    ggplot2,
-    plyr
+    ggplot2
 Imports:
     data.table (>= 1.9.4),
     doParallel,
@@ -24,6 +23,7 @@ Imports:
     iterators,
     methods,
     parallel,
+    plyr,
     reshape2,
     SDMTools,
     scales,
