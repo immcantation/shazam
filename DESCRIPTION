@@ -40,3 +40,4 @@ Collate:
     'DistToNearest.R'
     'MutationProfiling.R'
     'TargetingModels.R'
+RoxygenNote: 5.0.1

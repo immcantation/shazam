@@ -104,7 +104,6 @@
 #' 
 #' @name     shm
 #' @docType  package
-#'
 #' @import   alakazam
 #' @import   data.table
 #' @import   doParallel
