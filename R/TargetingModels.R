@@ -1220,10 +1220,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         
         # Order 5-mers by positions, with reversed order if center nucleotide is G or T
         if (center_nuc %in% c("A", "C")) {
-            sub_df <- plyr::arrange(sub_df, pos1, pos2, pos4, pos5)
+            sub_df <- dplyr::arrange(sub_df, pos1, pos2, pos4, pos5)
             sub_df$x <- 1:nrow(sub_df)            
         } else if (center_nuc %in% c("G", "T")) {
-            sub_df <- plyr::arrange(sub_df, pos5, pos4, pos2, pos1)
+            sub_df <- dplyr::arrange(sub_df, pos5, pos4, pos2, pos1)
             sub_df$x <- 1:nrow(sub_df)
         } else {
             stop("Invalid nucleotide choice")
@@ -1267,7 +1267,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         # Define text and rectangle positions for inner circle
         sub_melt$pos <- sub_melt$pos + text_offset
         sub_text <- lapply(sub_text, function(x) { transform(x, text_y=text_y + text_offset) })
-        sub_rect <- plyr::rbind.fill(sub_text)
+        sub_rect <- dplyr::bind_rows(sub_text)
 
         # Define base plot object
         p1 <- ggplot(sub_df) + 

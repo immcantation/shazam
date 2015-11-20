@@ -4,6 +4,10 @@ NULL
 
 #### Classes ####
 
+setOldClass("data.frame")
+setOldClass("tbl_df")
+setClassUnion("data.frameORtbl_df", c("data.frame", "tbl_df"))
+
 #' S4 class defining a BASELINe (selection) object
 #' 
 #' \code{Baseline} defines a common data structure the results of selection
@@ -61,7 +65,7 @@ setClass("Baseline",
                     binomN="matrix",
                     binomP="matrix",
                     pdfs="list",
-                    stats="data.frame"
+                    stats="data.frameORtbl_df"
          )
 )
 
@@ -937,7 +941,7 @@ groupBaseline <- function(baseline,
     
     # Convert the list of the region's PDFs into a matrix                
     matrix_region_pdfs <- 
-      do.call( rbind, 
+      do.call( rbind,
                lapply( 
                  list_region_pdfs, 
                  function(x) { 
@@ -1084,7 +1088,7 @@ summarizeBaseline <- function(baseline,
                      BASELINE_CI_UPPER=baseline_ci[2],
                      BASELINE_CI_PVALUE=calcBaselinePvalue(baseline_pdf)
           )
-        df_baseline_seq <- plyr::rbind.fill(df_baseline_seq, df_baseline_seq_region)
+        df_baseline_seq <- dplyr::bind_rows(df_baseline_seq, df_baseline_seq_region)
       }
       return(df_baseline_seq)
     }
@@ -1093,7 +1097,7 @@ summarizeBaseline <- function(baseline,
   if (nproc > 1) { parallel::stopCluster(cluster) }
   
   # Convert list of BASELINe stats into a data.frame
-  stats <- do.call(plyr::rbind.fill, list_stats)
+  stats <- dplyr::bind_rows(list_stats)
   
   if (returnType == "df") {
     return(stats)    
@@ -1294,7 +1298,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
                                  value.name="DENSITY")
       melt_list[[n]] <- tmp_melt
     }
-    dens_df <- ldply(melt_list, .id="REGION")
+    dens_df <- dplyr::bind_rows(melt_list, .id="REGION")
     
     # Assign id and group columns to density data.frame
     dens_df[, idColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 

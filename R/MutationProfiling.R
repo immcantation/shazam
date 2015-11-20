@@ -389,10 +389,11 @@ calcDBObservedMutations <- function(db,
     } else{
       labels_length=1
     }
-    observed_mutations <- do.call(rbind, lapply(observedMutations_list, function(x) { 
+    observed_mutations <- do.call( rbind, lapply(observedMutations_list, function(x) { 
         length(x) <- labels_length 
         return(x)
-    })) 
+    }))
+    
     
     sep <- ""
     if (ncol(observed_mutations) > 1) sep <- "_"
@@ -714,7 +715,7 @@ calcDBExpectedMutations <- function(db,
     
     # Convert list of expected mutation freq to data.frame
     labels_length <- length(regionDefinition@labels)
-    expectedMutationFrequencies <- do.call(rbind, lapply(targeting_list, function(x){ 
+    expectedMutationFrequencies <- do.call( rbind, lapply(targeting_list, function(x){ 
         length(x) <- labels_length 
         return(x)
     })) 

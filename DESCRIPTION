@@ -1,7 +1,7 @@
 Package: shm
 Type: Package
 Version: 0.1.0.999
-Date: 2015-11-09
+Date: 2015-11-20
 Author: Mohamed Uduman, Gur Yaari, Namita Gupta, Jason Anthony Vander Heiden
 Maintainer: Mohamed Uduman <mohamed.uduman@yale.edu>
 Title: Somatic Hypermutation Analysis
@@ -14,11 +14,11 @@ URL: http://clip.med.yale.edu/changeo
 Depends:
     R (>= 3.0.0),
     alakazam (>= 0.2.0),
-    ggplot2,
-    plyr
+    ggplot2
 Imports:
     data.table (>= 1.9.4),
     doParallel,
+    dplyr,    
     foreach,
     grid,
     iterators,
@@ -40,3 +40,4 @@ Collate:
     'DistToNearest.R'
     'MutationProfiling.R'
     'TargetingModels.R'
+RoxygenNote: 5.0.1

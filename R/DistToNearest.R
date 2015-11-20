@@ -509,7 +509,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     }
     
     # Convert list from foreach into a db data.frame
-    db <- plyr::rbind.fill(list_db)
+    db <- dplyr::bind_rows(list_db)
     db <- db[order(db[,"ROW_ID"]),]
     
     # Stop the cluster

@@ -104,15 +104,14 @@
 #' 
 #' @name     shm
 #' @docType  package
-#'
 #' @import   alakazam
 #' @import   data.table
 #' @import   doParallel
+#' @import   dplyr
 #' @import   foreach
 #' @import   grid
 #' @import   ggplot2
 #' @import   methods
-#' @import   plyr
 #' @import   reshape2
 #' @import   scales
 #' @importFrom  iterators  icount
