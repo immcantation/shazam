@@ -24,6 +24,7 @@ Imports:
     iterators,
     methods,
     parallel,
+    plyr,
     reshape2,
     SDMTools,
     scales,

@@ -534,6 +534,8 @@ calcObservedMutations <- function(inputSeq,
           }else{
             if(binByRegions & !is.null(regionDefinition)){ 
               mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
+            } else {
+              mutations_array <- length(mutations_array)
             }
           }
         }        
