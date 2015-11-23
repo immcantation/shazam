@@ -510,7 +510,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     
     # Convert list from foreach into a db data.frame
     db <- dplyr::bind_rows(list_db)
-    db <- db[order(db[,"ROW_ID"]),]
+    db <- db[order(db$ROW_ID),]
     
     # Stop the cluster
     if( nproc>1) { parallel::stopCluster(cluster) }
