@@ -112,7 +112,6 @@
 #' @import   grid
 #' @import   ggplot2
 #' @import   methods
-#' @import   reshape2
 #' @import   scales
 #' @importFrom  iterators  icount
 #' @importFrom  SDMTools   wt.sd

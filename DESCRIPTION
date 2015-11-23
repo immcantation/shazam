@@ -24,11 +24,10 @@ Imports:
     iterators,
     methods,
     parallel,
-    plyr,
-    reshape2,
     SDMTools,
     scales,
-    seqinr
+    seqinr,
+    tidyr
 Suggests:
     knitr
 VignetteBuilder: knitr

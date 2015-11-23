@@ -1187,7 +1187,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     mut_scores <- model[!grepl("N", names(model))]
     mut_scores[!is.finite(mut_scores)] <- 0
     mut_words <- names(mut_scores)
-    mut_positions <- as.data.frame(t(sapply(mut_words, s2c)))
+    mut_positions <- as.data.frame(t(sapply(mut_words, seqinr::s2c)))
     colnames(mut_positions) <- paste0("pos", 1:ncol(mut_positions))
     mut_df <- data.frame(word=mut_words, 
                          score=mut_scores, 
@@ -1230,10 +1230,9 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         }
         
         # Melt 5-mer position data
-        sub_melt <- reshape2::melt(sub_df, id.vars=c("x"), 
-                                   measure.vars=colnames(mut_positions),
-                                   variable.name="pos",
-                                   value.name="char")
+        sub_melt <- sub_df %>% 
+            tidyr::gather(pos, char, starts_with('pos')) %>% 
+            select(x, pos, char)
         #sub_melt$pos <- factor(sub_melt$pos, levels=mut_names)
         #sub_melt$pos <- as.numeric(sub_melt$pos)
         sub_melt$pos <- as.numeric(gsub("pos", "", sub_melt$pos))

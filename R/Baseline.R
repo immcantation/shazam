@@ -1294,8 +1294,9 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
     # Melt density matrices
     melt_list <- list()
     for (n in dens_names) {
-      tmp_melt <- reshape2::melt(dens_list[[n]], varnames=c("GROUP_COLLAPSE", "SIGMA"), 
-                                 value.name="DENSITY")
+        tmp_melt <- as.data.frame(dens_list[[n]]) %>%  
+                cbind(GROUP_COLLAPSE = rownames(dens_list[[n]])) %>%
+                tidyr::gather(SIGMA,DENSITY,-GROUP_COLLAPSE,convert=TRUE)
       melt_list[[n]] <- tmp_melt
     }
     dens_df <- dplyr::bind_rows(melt_list, .id="REGION")
