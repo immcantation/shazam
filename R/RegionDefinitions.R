@@ -144,14 +144,18 @@ createRegionDefinition <- function(name="",
 #' @name   IMGT_SCHEMES
 NULL
 
+#' @name    IMGT_V
 #' @rdname  IMGT_SCHEMES
-"IMGT_V"
+NULL
 
+#' @name    IMGT_V_BY_REGIONS
 #' @rdname  IMGT_SCHEMES
-"IMGT_V_BY_REGIONS"
+NULL
 
+#' @name    IMGT_V_NO_CDR3
 #' @rdname  IMGT_SCHEMES
-"IMGT_V_NO_CDR3"
+NULL
 
+#' @name    IMGT_V_BY_REGIONS_NO_CDR3
 #' @rdname  IMGT_SCHEMES
-"IMGT_V_BY_REGIONS_NO_CDR3"
+NULL
