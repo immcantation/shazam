@@ -1,7 +1,7 @@
 Package: shm
 Type: Package
 Version: 0.1.0.999
-Date: 2015-11-20
+Date: 2015-11-23
 Author: Mohamed Uduman, Gur Yaari, Namita Gupta, Jason Anthony Vander Heiden
 Maintainer: Mohamed Uduman <mohamed.uduman@yale.edu>
 Title: Somatic Hypermutation Analysis

@@ -1082,7 +1082,7 @@ summarizeBaseline <- function(baseline,
         baseline_ci <- calcBaselineCI(baseline_pdf)
         df_baseline_seq_region <- 
           data.frame(db_seq,
-                     REGION=region,
+                     REGION=factor(region,levels=unique(regions)),
                      BASELINE_SIGMA=calcBaselineSigma(baseline_pdf),
                      BASELINE_CI_LOWER=baseline_ci[1],
                      BASELINE_CI_UPPER=baseline_ci[2],
