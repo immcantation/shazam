@@ -1231,7 +1231,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         
         # Melt 5-mer position data
         sub_melt <- sub_df %>% 
-            tidyr::gather(pos, char, starts_with('pos')) %>% 
+            tidyr::gather(pos, char, one_of(colnames(mut_positions))) %>% 
             select(x, pos, char)
         #sub_melt$pos <- factor(sub_melt$pos, levels=mut_names)
         #sub_melt$pos <- as.numeric(sub_melt$pos)
