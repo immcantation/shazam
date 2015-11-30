@@ -1256,7 +1256,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         
             tmp_df <- data.frame(text_x=text_x, 
                                  text_y=i,
-                                 text_label=nuc_rle$values,
+                                 text_label=factor(nuc_rle$values, levels=nucleotides),
                                  rect_min=rect_min,
                                  rect_max=rect_max)
             
