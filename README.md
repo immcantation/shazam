@@ -52,8 +52,8 @@ Building from the R console:
 ```R
 library(roxygen2)
 library(devtools)
-document()
 install_deps()
+document()
 build(vignettes=FALSE)
 install()
 ```
