@@ -487,7 +487,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
         # Export targeting model to processes
         if (nproc>1) { parallel::clusterExport(cluster, list("targeting_model"), envir=environment()) }    
         list_db <-
-            foreach(i=iterators::icount(lenGroups), .errorhandling='pass', .packages = "shm") %dopar% {
+            foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
                 db_group <- db[groups[[i]],]
                 db_group$DIST_NEAREST <-
                     getClosestBy5mers( db[groups[[i]],sequenceColumn],
@@ -498,7 +498,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
             }    
     } else if (model %in% c("ham", "aa", "m1n", "hs1f")) {    
         list_db <-
-            foreach(i=iterators::icount(lenGroups), .errorhandling='pass', .packages = "shm") %dopar% {
+            foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
                 db_group <- db[groups[[i]],]
                 db_group$DIST_NEAREST <-
                     getClosestMat( db[groups[[i]],sequenceColumn],

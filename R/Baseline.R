@@ -389,7 +389,17 @@ calcBaseline <- function(db,
                                         'calculate_bayesGHelper', 
                                         'groupPosteriors', 'fastConv',
                                         'calcBaselineHelper',
-                                        'c2s', 's2c', 'words', 'translate'), 
+                                        'c2s', 's2c', 'words', 'translate',
+                                        'calcBaselineBinomialPdf','CONST_I',
+                                        'BAYESIAN_FITTED','calcClonalConsensus',
+                                        'calcObservedMutations','NUCLEOTIDES',
+                                        'getCodonPos','getContextInCodon',
+                                        'mutationType','translateCodonToAminoAcid',
+                                        'AMINO_ACIDS','binMutationsByRegion',
+                                        'collapseMatrixToVector','calcExpectedMutations',
+                                        'calculateTargeting','HS5FModel','calculateMutationalPaths',
+                                        'CODON_TABLE'
+                                        ), 
                          envir=environment() )    
     registerDoParallel(cluster, cores=nproc)
     nproc_arg <- cluster
@@ -474,7 +484,7 @@ calcBaseline <- function(db,
     
     # Foreach returns a list of PDFs
     list_region_pdfs <- 
-      foreach( i=iterators::icount(totalNumbOfSequences) ,.packages="shm") %dopar% {                
+      foreach( i=iterators::icount(totalNumbOfSequences)) %dopar% {                
         calcBaselineHelper( 
           observed = db[i,cols_observed],
           expected = db[i,cols_expected],
@@ -802,7 +812,7 @@ groupBaseline <- function(baseline,
     
     # Group (convolute) all the PDFS and get one single PDF
     list_region_pdfs  <-
-      foreach( i=iterators::icount(numbOfTotalGroups), .packages="shm") %dopar% {
+      foreach( i=iterators::icount(numbOfTotalGroups)) %dopar% {
         
         # Get a matrix (r=numb of sequences/groups * c=4001(i,e. the length of the PDFS))
         matrix_GroupPdfs <- (baseline@pdfs[[region]])[groups[[i]],]
@@ -1073,7 +1083,7 @@ summarizeBaseline <- function(baseline,
   db <- baseline@db
   if ("SEQUENCE_ID" %in% colnames(db)) { db <- subset(db, select="SEQUENCE_ID") }
   list_stats <-
-    foreach(i = iterators::icount(numbOfTotalSeqs), .packages="shm") %dopar% {
+    foreach(i = iterators::icount(numbOfTotalSeqs)) %dopar% {
       df_baseline_seq <- data.frame()
       db_seq <- data.frame(db[i, ])
       names(db_seq) <- names(db)
@@ -1251,7 +1261,7 @@ calcBaselinePvalue <- function ( baseline_pdf,
 plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
                                 subsetRegions=NULL, sigmaLimits=c(-5, 5), 
                                 facetBy=c("region", "group"), style=c("density"), size=1, 
-                                silent=FALSE, ...) {
+                                 silent=FALSE, ...) {
   # Check input
   style <- match.arg(style)
   facetBy <- match.arg(facetBy)
@@ -1328,7 +1338,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
     } else {
       stop("Cannot facet by group if groupColumn=NULL")
     }
-  }
+ }
   
   # Add additional theme elements
   p1 <- p1 + do.call(theme, list(...))
@@ -1475,12 +1485,12 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
           panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(),
           panel.border=element_rect(color="black", size=0.5)) +
-    theme(strip.background=element_rect(fill="white", color="black", size=0.5))
-  #theme(axis.title.x=element_blank(),
-  #      axis.text.x=element_blank(), 
-  #      axis.ticks.x=element_blank()) +
-  #theme(legend.position="top")
-  #theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1))
+    theme(strip.background=element_rect(fill="white", color="black", size=0.5)) +
+    theme(axis.title.x=element_blank(),
+       axis.text.x=element_blank(), 
+       axis.ticks.x=element_blank()) +
+    theme(legend.position="top") +
+    theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1))
   
   if (style == "mean") { 
     # Plot mean and confidence intervals
@@ -1512,12 +1522,13 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
   # Add additional theme elements
   p1 <- p1 + do.call(theme, list(...))
   
-  # Plot
-  if (!silent) { 
-    plot(p1)
-  }
+#   # Plot
+#   if (!silent) { 
+       p1
+#   } else {
+#       invisible(p1)
+#   }
   
-  invisible(p1)
 }
 
 

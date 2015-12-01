@@ -145,7 +145,7 @@ collapseByClone <- function(db,
     cat("Collapsing clonal sequences...\n")
     
     list_ClonalConsensus <-
-      foreach(i=iterators::icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass', .packages = "shm") %dopar% {
+      foreach(i=iterators::icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass') %dopar% {
         calcClonalConsensus(inputSeq = db[groups[[i]],sequenceColumn],
                            germlineSeq = db[groups[[i]],germlineColumn],
                            regionDefinition = regionDefinition, 
@@ -357,7 +357,11 @@ calcDBObservedMutations <- function(db,
     if(nproc>1){        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
-                                          'regionDefinition', 'frequency'), 
+                                          'regionDefinition', 'frequency',
+                                          'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
+                                          'getCodonPos','getContextInCodon','mutationType',
+                                          'translateCodonToAminoAcid','AMINO_ACIDS','binMutationsByRegion',
+                                          'collapseMatrixToVector'), 
                             envir=environment())
         registerDoParallel(cluster)
     } else if (nproc==1) {
@@ -375,7 +379,7 @@ calcDBObservedMutations <- function(db,
     # the nucleotide position of the mutations.
     numbOfSeqs <- nrow(db)
     observedMutations_list <-
-        foreach(i=iterators::icount(numbOfSeqs), .packages= "shm") %dopar% {
+        foreach(i=iterators::icount(numbOfSeqs)) %dopar% {
             calcObservedMutations(db[i, sequenceColumn], 
                                   db[i, germlineColumn],
                                   frequency,
@@ -690,7 +694,11 @@ calcDBExpectedMutations <- function(db,
     if(nproc>1){        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 
-                                     'regionDefinition','targetingModel'), envir=environment() )
+                                     'regionDefinition','targetingModel',
+                                     'calcExpectedMutations','calculateTargeting',
+                                     's2c','c2s','NUCLEOTIDES','HS5FModel',
+                                     'calculateMutationalPaths','CODON_TABLE')
+                                 , envir=environment() )
         registerDoParallel(cluster)
     } else if( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
@@ -708,7 +716,7 @@ calcDBExpectedMutations <- function(db,
     numbOfSeqs <- nrow(db)
     
     targeting_list <-
-        foreach( i=iterators::icount(numbOfSeqs) , .packages="shm") %dopar% {
+        foreach( i=iterators::icount(numbOfSeqs) ) %dopar% {
           calcExpectedMutations( germlineSeq = db[i,germlineColumn],
                                 inputSeq = db[i,sequenceColumn],
                                 targetingModel = HS5FModel,
