@@ -134,8 +134,8 @@ collapseByClone <- function(db,
             cluster <- parallel::makeCluster(nproc, type= "PSOCK")
         }
         parallel::clusterExport( cluster, list('db', 
-                                     'sequenceColumn', 'germlineColumn', "cloneColumn",
-                                     'regionDefinition', 
+                                     'sequenceColumn', 'germlineColumn', 'cloneColumn',
+                                     'regionDefinition', 'calcClonalConsensus',
                                      'groups', 'c2s', 's2c', 'words', 'translate'), 
                        envir=environment() )
         registerDoParallel(cluster)
