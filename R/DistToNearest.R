@@ -481,11 +481,15 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     # Export groups to the clusters
     if (nproc>1) { parallel::clusterExport(cluster, list("db", 
                                                "groups", 
-                                               "sequenceColumn"), envir=environment()) }
+                                               "sequenceColumn","model",
+                                               "normalize","symmetry","getClosestMat", 
+                                               "HS1FDistance","distSeqMat",
+                                               "calcTargetingDistance",
+                                               "findUniqueJunctions","getPairwiseDistances"), envir=environment()) }
     
     if (model %in% c("hs5f")) {
         # Export targeting model to processes
-        if (nproc>1) { parallel::clusterExport(cluster, list("targeting_model"), envir=environment()) }    
+        if (nproc>1) { parallel::clusterExport(cluster, list("targeting_model","getClosestBy5mers"), envir=environment()) }    
         list_db <-
             foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
                 db_group <- db[groups[[i]],]
