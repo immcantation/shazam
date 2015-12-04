@@ -113,7 +113,7 @@
 #' @import   ggplot2
 #' @import   methods
 #' @import   scales
-#' @import   tidyr
+#' @importFrom  tidyr      gather
 #' @importFrom  iterators  icount
 #' @importFrom  SDMTools   wt.sd
 #' @importFrom  seqinr     c2s

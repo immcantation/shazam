@@ -76,7 +76,7 @@ overall distance.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Use hs1f model and normalize by junction length
-dist_hs1f <- distToNearest(db, model="hs1f", first=FALSE, normalize="length", nproc=3)
+dist_hs1f <- distToNearest(db, model="hs1f", first=FALSE, normalize="length", nproc=1)
 
 # Use genotyped V assignments and 5-mer model
 dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE, normalize="none", nproc=1)

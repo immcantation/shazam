@@ -60,7 +60,7 @@ clonal groups.
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Collapse clonal groups into single sequences
 db_clone <- collapseByClone(db, regionDefinition=IMGT_V_NO_CDR3, 
-                            expandedDb=TRUE, nproc=3)
+                            expandedDb=TRUE, nproc=1)
 ```
 
 Following construction of an effective sequence for each clone, the observed
@@ -91,12 +91,12 @@ in the `shm` package:
 # Count observed mutations and add OBSERVED columns to db_clone
 db_obs <- calcDBObservedMutations(db_clone, 
                                   sequenceColumn="CLONAL_SEQUENCE",
-                                  regionDefinition=IMGT_V_NO_CDR3, nproc=3)
+                                  regionDefinition=IMGT_V_NO_CDR3, nproc=1)
 # Calculate expected mutations and add EXPECTED columns to db_obs
 db_exp <- calcDBExpectedMutations(db_obs, 
                                   sequenceColumn="CLONAL_SEQUENCE",
                                   targetingModel=HS5FModel,
-                                  regionDefinition=IMGT_V_NO_CDR3, nproc=3)
+                                  regionDefinition=IMGT_V_NO_CDR3, nproc=1)
 ```
 
 The counts of observed and expected mutations can be combined to test for selection 
@@ -109,14 +109,14 @@ the `CLONE` column.
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Calculate selection scores using the output from calcDBExpectedMutations
-baseline <- calcBaseline(db_exp, testStatistic="focused", nproc=3)
+baseline <- calcBaseline(db_exp, testStatistic="focused", nproc=1)
 
 # Subset the original data to two time-points and switched isotypes
 db_sub <- subset(db, CPRIMER %in% c("IGHA", "IGHG") & 
                      BARCODE %in% c("RL013", "RL018"))
 # Calculate selection scores from scratch on subset
 baseline_sub <- calcBaseline(db_sub, testStatistic="focused", 
-                             regionDefinition=IMGT_V_NO_CDR3, nproc=3)
+                             regionDefinition=IMGT_V_NO_CDR3, nproc=1)
 ```
 
 Selection scores can be used to compare selection pressures between different 

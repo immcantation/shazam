@@ -153,7 +153,15 @@ setClass("TargetingModel",
 #'                             mutations within the same 5-mer are counted indepedently. 
 #'                             If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                             excluded from the total mutation tally.
-#' @param    minNumMutations   the minimum number of mutations required to compute the 5-mer 
+#' @param    returnModel       string specifying what type of model to return; one of
+#'                             \code{c("5mer", "1mer", "1mer_raw")}. If \code{"5mer"} 
+#'                             (the default) then a 5-mer nucleotide context model is 
+#'                             returned. If \code{"1mer"} or \code{"1mer_raw"} then a single 
+#'                             nucleotide substitution matrix (no context) is returned;
+#'                             where \code{"1mer_raw"} is the unnormalized version of the 
+#'                             \code{"1mer"} model. Note, neither 1-mer model may be used
+#'                             as input to \link{createMutabilityMatrix}.
+#' @param    minNumMutations   minimum number of mutations required to compute the 5-mer 
 #'                             substitution rates. If the number of mutations for a 5-mer
 #'                             is below this threshold, its substitution rates will be 
 #'                             estimated from neighboring 5-mers. Default is 50.                            
