@@ -371,12 +371,6 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     
     substitutionModel <- sapply(seqinr::words(5, nuc_chars), function(x) { .simplifivemer(M, x, Thresh=minNumMutations) })
 
-
-    # TODO:  add imputation for missing values (0 count). options count=1, count=mean, count=min(!=0)
-    # TODO:  use more complicated imputation (as per paper)
-    
-    
-    # TODO:  where is the value for A->A etc set?  this should be done there instead.
     # Assign A->A, C->C, G->G, T->T to NA
     center_nuc <- gsub("..([ACGT])..", "\\1", colnames(substitutionModel))
     for (i in 1:length(center_nuc)) {
@@ -944,7 +938,6 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
     sub_mat <- extendSubstitutionMatrix(sub_mat)
     mut_mat <- extendMutabilityMatrix(mut_mat)
     
-    # TODO: this is wrong somehow
     tar_mat <- createTargetingMatrix(sub_mat, mut_mat) 
     
     # Define TargetingModel object
@@ -1152,7 +1145,6 @@ writeTargetingDistance <- function(model, file) {
 plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), 
                            style=c("hedgehog", "bar"), size=1, silent=FALSE, 
                            ...) {
-    # TODO:  add flag to label or highlight specific 5-mer or 5-mer over threshold.
     # model=HS5FModel
     # nucleotides=c("A", "C", "G", "T")
     # style="hedgehog"

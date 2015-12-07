@@ -198,7 +198,6 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
     germlineSeq <- germlineSeq[(which(len_longest==len_germlineSeq))[1]]    
     
     # Identify the consensus sequence
-    # TODO: Figure out the T/F
     inputSeq <- unique(inputSeq)
     charInputSeqs <- sapply(inputSeq, function(x){ s2c(x)[1:len_shortest]})
     charGLSeq <- s2c(germlineSeq)
@@ -220,9 +219,6 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
         if(length(posNucs)==1)
             return(c(posNucs[1],error))
         else{         
-            # if the nucleotides at the current position are not all the same
-            
-            # TODO: The error message is not doing anything currently... 
             if("N"%in%posNucs){
                 error=TRUE
             }
@@ -275,7 +271,8 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' @param    frequency          \code{logical} indicating whether or not to calculate
 #'                              mutation frequencies. Default is \code{FALSE}.
 #' @param    regionDefinition   \link{RegionDefinition} object defining the regions
-#'                              and boundaries of the Ig sequences. 
+#'                              and boundaries of the Ig sequences. If NULL, mutations 
+#'                              are counted for entire sequence.
 #' @param    nproc              number of cores to distribute the operation over. If the 
 #'                              cluster has already been set the call function with 
 #'                              \code{nproc} = 0 to not reset or reinitialize. Default is 
@@ -383,8 +380,7 @@ calcDBObservedMutations <- function(db,
             calcObservedMutations(db[i, sequenceColumn], 
                                   db[i, germlineColumn],
                                   frequency,
-                                  regionDefinition,
-                                  binByRegions=TRUE)
+                                  regionDefinition)
         }
     
     # Convert list of mutations to data.frame
@@ -429,9 +425,7 @@ calcDBObservedMutations <- function(db,
 #' @param    regionDefinition  \link{RegionDefinition} object defining the regions
 #'                             and boundaries of the Ig sequences. Note, only the part of
 #'                             sequences defined in \code{regionDefinition} are analyzed.
-#'                             This argument is required if \code{binByRegions = TRUE}.                      
-#' @param    binByRegions      if \code{TRUE} then aggregate the mutations by 
-#'                             the regions defined in \code{regionDefinition}.
+#'                             If NULL, mutations are counted for entire sequence.
 #' @return   An \code{array} of the mutations, replacement (R) or silent(S), with the 
 #'           names indicatng the nucleotide postion of the mutations in the sequence.
 #'           
@@ -462,8 +456,7 @@ calcDBObservedMutations <- function(db,
 calcObservedMutations <- function(inputSeq, 
                            germlineSeq,
                            frequency=FALSE,
-                           regionDefinition=NULL, 
-                           binByRegions=FALSE) {
+                           regionDefinition=NULL) {
     
     # Removing IMGT gaps (they should come in threes)
     # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
@@ -536,7 +529,7 @@ calcObservedMutations <- function(inputSeq,
             mutations_array <- nMutations/nonNLength
             if(nonNLength==0) mutations_array <- 0
           }else{
-            if(binByRegions & !is.null(regionDefinition)){ 
+            if(!is.null(regionDefinition)){ 
               mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
             } else {
               mutations_array <- length(mutations_array)
