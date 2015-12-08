@@ -4,10 +4,6 @@ NULL
 
 #### Classes ####
 
-setOldClass("data.frame")
-setOldClass("tbl_df")
-setClassUnion("data.frameORtbl_df", c("data.frame", "tbl_df"))
-
 #' S4 class defining a BASELINe (selection) object
 #' 
 #' \code{Baseline} defines a common data structure the results of selection
@@ -55,19 +51,18 @@ setClassUnion("data.frameORtbl_df", c("data.frame", "tbl_df"))
 #' @aliases      Baseline
 #' @exportClass  Baseline
 setClass("Baseline", 
-         slots = c( description="character",
-                    db="data.frame",
-                    regionDefinition="RegionDefinition",
-                    testStatistic="character",
-                    regions="character",
-                    numbOfSeqs="matrix",
-                    binomK="matrix",
-                    binomN="matrix",
-                    binomP="matrix",
-                    pdfs="list",
-                    stats="data.frameORtbl_df"
-         )
-)
+         slots=c(description="character",
+                 db="data.frame",
+                 regionDefinition="RegionDefinition",
+                 testStatistic="character",
+                 regions="character",
+                 numbOfSeqs="matrix",
+                 binomK="matrix",
+                 binomN="matrix",
+                 binomP="matrix",
+                 pdfs="list",
+                 stats="data.frame"))
+
 
 #### Baseline object methods #####
 
@@ -178,7 +173,7 @@ createBaseline <- function(description="",
   # Define RegionDefinition object
   baseline <- new("Baseline",
                   description=description,
-                  db=db,
+                  db=as.data.frame(db),
                   regionDefinition=regionDefinition,
                   testStatistic=testStatistic,
                   regions=regionDefinition@regions,
@@ -187,7 +182,7 @@ createBaseline <- function(description="",
                   binomN=binomN,
                   binomP=binomP,
                   pdfs=pdfs,
-                  stats=stats)
+                  stats=as.data.frame(stats))
   
   return(baseline)
 }
@@ -208,7 +203,7 @@ editBaseline <- function(baseline, field_name, value) {
   if (!match(field_name, slotNames(baseline))) { 
     stop("field_name not part of BASELINe object!")
   }
-  slot(baseline, field_name) = value
+  slot(baseline, field_name) <- value
   
   return(baseline)
 }
@@ -556,24 +551,24 @@ calcBaseline <- function(db,
   
   
   # Create a Baseline object with the above results to return
-  baseline <- createBaseline( description="",
-                              db=db,
-                              regionDefinition=regionDefinition,
-                              testStatistic=testStatistic,
-                              regions=regionDefinition@regions,
-                              numbOfSeqs=numbOfSeqs,
-                              binomK=binomK,
-                              binomN=binomN,
-                              binomP=binomP,
-                              pdfs=list_pdfs )
+  baseline <- createBaseline(description="",
+                             db=as.data.frame(db),
+                             regionDefinition=regionDefinition,
+                             testStatistic=testStatistic,
+                             regions=regionDefinition@regions,
+                             numbOfSeqs=numbOfSeqs,
+                             binomK=binomK,
+                             binomN=binomN,
+                             binomP=binomP,
+                             pdfs=list_pdfs )
   
   # Calculate BASELINe stats and update slot
-  if( calcStats==TRUE ){
+  if (calcStats==TRUE) {
     baseline <- summarizeBaseline(baseline)
   }
   
   # Stop cluster
-  if(nproc > 1) { parallel::stopCluster(cluster) }
+  if (nproc > 1) { parallel::stopCluster(cluster) }
   
   return(baseline)
   
@@ -978,16 +973,16 @@ groupBaseline <- function(baseline,
   
   
   # Create a Baseline object with the above results to return
-  baseline <- createBaseline( description="",
-                              db=db,
-                              regionDefinition=baseline@regionDefinition,
-                              testStatistic=baseline@testStatistic,
-                              regions=regions,
-                              numbOfSeqs=numbOfSeqs,
-                              binomK=templateBinom,
-                              binomN=templateBinom,
-                              binomP=templateBinom,
-                              pdfs=list_pdfs )
+  baseline <- createBaseline(description="",
+                             db=as.data.frame(db),
+                             regionDefinition=baseline@regionDefinition,
+                             testStatistic=baseline@testStatistic,
+                             regions=regions,
+                             numbOfSeqs=numbOfSeqs,
+                             binomK=templateBinom,
+                             binomN=templateBinom,
+                             binomP=templateBinom,
+                             pdfs=list_pdfs )
   
   # Calculate BASELINe stats and update slot
   baseline <- summarizeBaseline(baseline)
@@ -1063,11 +1058,11 @@ summarizeBaseline <- function(baseline,
   if (nproc > 1){        
     cluster <- parallel::makeCluster(nproc, type="PSOCK")
     parallel::clusterExport(cluster, list('baseline',
-                                      'calcBaselineSigma',
-                                      'calcBaselineCI',
-                                      'calcBaselinePvalue'), 
-                        envir=environment())
-    registerDoParallel(cluster,cores=nproc)
+                                          'calcBaselineSigma',
+                                          'calcBaselineCI',
+                                          'calcBaselinePvalue'), 
+                            envir=environment())
+    registerDoParallel(cluster, cores=nproc)
   } else if (nproc == 1) {
     # If needed to run on a single core/cpu then, regsiter DoSEQ 
     # (needed for 'foreach' in non-parallel mode)
@@ -1107,15 +1102,15 @@ summarizeBaseline <- function(baseline,
   if (nproc > 1) { parallel::stopCluster(cluster) }
   
   # Convert list of BASELINe stats into a data.frame
-  stats <- dplyr::bind_rows(list_stats)
+  stats <- as.data.frame(dplyr::bind_rows(list_stats))
   
   if (returnType == "df") {
-    return(stats)    
+      return(stats)    
   } else if (returnType == "baseline") {
-    # Append stats to baseline object
-    return(editBaseline(baseline, field_name = "stats", stats))
+      # Append stats to baseline object
+      return(editBaseline(baseline, field_name = "stats", stats))
   } else {
-    return(NULL)
+      return(NULL)
   }
 }
 
