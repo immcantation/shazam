@@ -165,7 +165,6 @@ distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
 # @seealso needs links
 # 
 # @examples
-# # TODO
 # # working example
 getPairwiseDistances <- function(arrJunctions, targeting_model, 
                                  normalize=c("none" ,"length", "mutations"),
