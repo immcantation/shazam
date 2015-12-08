@@ -20,6 +20,7 @@ Distance Profiling:
   character is in the sequence and return an NA.
 + Fixed bug in 'aa' model in distToNearest that was calculating distance
   incorrectly when normalizing by length.
++ Changed behavior to return nearest nonzero distance neighbor.
 
 Mutation Profiling:
 
