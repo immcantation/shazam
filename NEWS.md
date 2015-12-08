@@ -1,9 +1,12 @@
-Version 0.1.1.beta:  September 28, 2015
+Version 0.1.1:  December 8, 2015
 -------------------------------------------------------------------------------
 
 General:
 
 + Swapped dependency on doSNOW for doParallel.
++ Swapped dependency on plyr for dplyr.
++ Swapped dependency on reshape2 for tidyr.
++ Documentation clean up.
 
 Distance Profiling:
 
@@ -33,7 +36,7 @@ Mutation Profiling:
 Selection Analysis:
 
 + Updated groupBaseline. Now when regrouping a Baseline object (i.e. grouping previously
-  grouped PDFs, weighted convolution is performed). 
+  grouped PDFs) weighted convolution is performed. 
 + Added "imbalance" test statistic to the Baseline selection calculation.
 + Extended the Baseline Object to include binomK, binomN and binomP
   Similar to numbOfSeqs, each of these are a matrix. They contain binomial inputs for 

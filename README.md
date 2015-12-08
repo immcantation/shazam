@@ -1,7 +1,7 @@
 shm
 -------------------------------------------------------------------------------
-June 12, 2015  
-Version 0.1.0
+December 8, 2015  
+Version 0.1.1
 
 Somatic hypermutation analysis package.
 
@@ -10,16 +10,17 @@ Dependencies
 R 3.0  
 R packages
 
-  -  alakazam
-  -  data.table
-  -  doSNOW
-  -  ggplot2
-  -  foreach
-  -  plyr
-  -  reshape2
-  -  scales  
-  -  SDMTools
-  -  seqinr
+  - alakazam
+  - data.table
+  - doParallel
+  - dplyr
+  - foreach
+  - ggplot2
+  - iterators
+  - scales  
+  - SDMTools
+  - seqinr
+  - tidyr
 
 Mercurial Configuration
 -------------------------------------------------------------------------------
