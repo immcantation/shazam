@@ -349,6 +349,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #'                           If \code{FALSE} the union of ambiguous gene assignments is used to 
 #'                           group all sequences with any overlapping gene calls.
 #' @param    nproc           number of cores to distribute the function over.
+#' @param    fields          Additional fields to use for grouping
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
 #'           \code{DIST_NEAREST} column.
@@ -401,7 +402,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
                           jCallColumn="J_CALL", model=c("hs1f", "m1n", "ham", "aa", "hs5f"), 
                           normalize=c("length", "none"), symmetry=c("avg","min"),
-                          first=TRUE, nproc=1) {
+                          first=TRUE, nproc=1, fields=NULL) {
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
@@ -409,7 +410,10 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     if (!is.data.frame(db)) { stop('Must submit a data frame') }
     
     # Check for valid columns
-    check <- checkColumns(db, c(sequenceColumn, vCallColumn, jCallColumn))
+    columns <- c(sequenceColumn, vCallColumn, jCallColumn,fields)
+    columns <- columns[!is.null(columns)]
+    
+    check <- checkColumns(db, columns)
     if (check != TRUE) { stop(check) }
     
     # Convert case check for invalid characters
@@ -475,7 +479,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     # This is an efficient way to get the groups of V J L, instead of doing dplyr
     dt <- data.table(db)
     # Get the group indexes
-    dt <- dt[, list( yidx = list(.I) ) , by = list(V,J,L) ]
+    group_cols <- c("V","J","L")
+    if (!is.null(fields)) {
+        group_cols <- append(group_cols,fields)
+    }
+    dt <- dt[, list( yidx = list(.I) ) , by = group_cols ]
     groups <- dt[,yidx]
     lenGroups <- length(groups)
     
