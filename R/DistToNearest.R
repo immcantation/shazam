@@ -340,9 +340,9 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' @param    model           underlying SHM model, which must be one of 
 #'                           \code{c("m1n", "ham", "aa", "hs5f")}.
 #'                           See Details for further information.
-#' @param    normalize       method of normalization. The default is "none". If the "length" 
-#'                           method is chosen, then distance is divided by the length of the 
-#'                           junction sequence.
+#' @param    normalize       method of normalization. The default is \code{"length"}, which 
+#'                           divides the distance by the length of the sequence group. If 
+#'                           \code{"none"} then no normalization if performed
 #' @param    symmetry        if model is hs5f, distance between seq1 and seq2 is either the
 #'                           average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 #' @param    first           if \code{TRUE} only the first call of the gene assignments is used.
