@@ -1146,6 +1146,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
                            style=c("hedgehog", "bar"), size=1, silent=FALSE, 
                            ...) {
     # model=HS5FModel
+    # nucleotides=c("C")
     # nucleotides=c("A", "C", "G", "T")
     # style="hedgehog"
     # size=1
@@ -1256,7 +1257,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         
             tmp_df <- data.frame(text_x=text_x, 
                                  text_y=i,
-                                 text_label=factor(nuc_rle$values, levels=nucleotides),
+                                 text_label=factor(nuc_rle$values, levels=names(dna_colors)),
                                  rect_min=rect_min,
                                  rect_max=rect_max)
             
