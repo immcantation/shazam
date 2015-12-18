@@ -1,6 +1,6 @@
 shm
 -------------------------------------------------------------------------------
-December 8, 2015  
+December 18, 2015  
 Version 0.1.1
 
 Somatic hypermutation analysis package.
@@ -21,17 +21,6 @@ R packages
   - SDMTools
   - seqinr
   - tidyr
-
-Mercurial Configuration
--------------------------------------------------------------------------------
-Update Mercurial .hgignore file with:  
-```
-syntax: glob
-  .*
-  *.Rproj
-  man/*.Rd
-  inst/doc/*
-```
 
 Build Instructions
 -------------------------------------------------------------------------------
