@@ -88,7 +88,7 @@ object directly from the dataset.
 
 # Create a consensus sequence for each clone to avoid over-counting mutations
 # Adds the CLONAL_CONSENSUS_SEQUENCE column
-db_cons = calcDBClonalConsensus(db, collapseByClone=TRUE)
+db_cons <- collapseByClone(db)
 
 # Create substitution model using silent mutations
 sub_matrix <- createSubstitutionMatrix(db_cons, 
