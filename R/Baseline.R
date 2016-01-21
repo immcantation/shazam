@@ -1494,7 +1494,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
       base_theme + 
       xlab("") +
       ylab(expression(Sigma)) +
-      geom_hline(yintercept=0, size=1*size, linestyle=2, color="grey") +
+      geom_hline(yintercept=0, size=1*size, linetype=2, color="grey") +
       geom_point(size=3*size, position=position_dodge(0.6)) +
       geom_errorbar(aes(ymin=BASELINE_CI_LOWER, ymax=BASELINE_CI_UPPER), 
                     width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.6))
