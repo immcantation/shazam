@@ -9,7 +9,7 @@ Description: A new computational framework for Bayesian estimation of
     Antigen-driven selection in Immunoglobulin sequences, provides a more
     intuitive means of analyzing selection by actually quantifying it. Along
     with advanced analysis of SHM in Ig sequences.
-License: CC BY-NC-SA 3.0
+License: CC BY-NC-SA 4.0
 URL: http://clip.med.yale.edu/changeo
 Depends:
     R (>= 3.0.0),
