@@ -1,5 +1,9 @@
-Version 0.1.1.999:  January 16, 2016
+Version 0.1.1.999:  January 25, 2016
 -------------------------------------------------------------------------------
+
+General:
+
++ Internal changes to conform to CRAN policies.
 
 Targeting Models:
 

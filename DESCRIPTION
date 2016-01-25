@@ -1,9 +1,17 @@
 Package: shm
 Type: Package
 Version: 0.1.1.999
-Date: 2016-01-16
-Author: Mohamed Uduman, Gur Yaari, Namita Gupta, Jason Anthony Vander Heiden
-Maintainer: Mohamed Uduman <mohamed.uduman@yale.edu>
+Date: 2016-01-25
+Authors@R: c(person("Mohamed", "Uduman", role=c("aut", "cre"), 
+                    email="mohamed.uduman@yale.edu"),
+             person("Gur", "Yaari", role=c("ctb"), 
+                    email="gur.yaari@biu.ac.il"),
+             person("Jason", "Vander Heiden", role=c("ctb"), 
+                    email="jason.vanderheiden@yale.edu"),
+             person("Namita", "Gupta", role=c("ctb"), 
+                    email="namita.gupta@yale.edu"),
+             person("Susanna", "Marquez", role=c("ctb"), 
+                    email="susanna.marquez@yale.edu"))
 Title: Somatic Hypermutation Analysis
 Description: A new computational framework for Bayesian estimation of
     Antigen-driven selection in Immunoglobulin sequences, provides a more
