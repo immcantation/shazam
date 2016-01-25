@@ -389,14 +389,17 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' library(alakazam)
 #' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
 #' db <- readChangeoDb(file)
-#'
-#' # Use genotyped V assignments and HS5F model
-#' dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE)
-#' hist(dist_hs5f$DIST_NEAREST, breaks=100, xlim=c(0, 0.7))
 #' 
-#' # Use HS1F model and normalize by junction length
-#' dist_hs1f <- distToNearest(db, model="hs1f", first=FALSE, normalize="length")
-#' hist(dist_hs1f$DIST_NEAREST, breaks=25, xlim=c(0, 1))
+#' # Use genotyped V assignments, HS1F model, and normalize by junction length
+#' dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
+#'                            model="hs1f", first=FALSE, normalize="length")
+#'                            
+#' # Plot histogram of non-NA distances
+#' p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
+#'     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
+#'     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
+#'                    fill="steelblue", color="white")
+#' plot(p1)
 #'
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 

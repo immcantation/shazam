@@ -19,6 +19,7 @@ Description: A new computational framework for Bayesian estimation of
     with advanced analysis of SHM in Ig sequences.
 License: CC BY-NC-SA 4.0
 URL: http://clip.med.yale.edu/changeo
+BugReports: https://bitbucket.org/kleinstein/shm/issues
 Depends:
     R (>= 3.0.0),
     alakazam (>= 0.2.1),

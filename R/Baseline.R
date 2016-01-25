@@ -228,6 +228,8 @@ editBaseline <- function(baseline, field_name, value) {
 #' library("alakazam")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
+#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #' 
 #' # Calculate BASELINe
 #' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
@@ -329,6 +331,8 @@ getBaselineStats <- function(baseline) {
 #' library("alakazam")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
+#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #' 
 #' # Calculate BASELINe
 #' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
@@ -724,6 +728,8 @@ calcBaselineBinomialPdf <- function ( x=3,
 #' library("alakazam")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
+#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #' 
 #' # Calculate BASELINe
 #' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
@@ -1020,6 +1026,8 @@ groupBaseline <- function(baseline,
 #' library("alakazam")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
+#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #' 
 #' # Calculate BASELINe
 #' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
@@ -1219,6 +1227,8 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' library("alakazam")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
+#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #' 
 #' # Calculate BASELINe
 #' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
@@ -1399,6 +1409,8 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #' library("alakazam")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
+#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #' 
 #' # Calculate BASELINe
 #' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
@@ -1429,11 +1441,11 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="mean")
 #' 
 #' # Reorder and recolor groups
-#' group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
+#' group_colors <- c("IGHM"="darkorchid", "IGHA"="steelblue")
 #' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
 #' 
 #' # Plot subset of data
-#' stats <- subset(getBaselineStats(baseline_two), BARCODE %in% c("RL013", "RL014"))
+#' stats <- subset(getBaselineStats(baseline_two), BARCODE %in% c("RL018", "RL019"))
 #' plotBaselineSummary(stats, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
 #' 
 #' @export

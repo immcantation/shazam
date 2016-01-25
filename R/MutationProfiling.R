@@ -73,6 +73,9 @@ NULL
 #' library("shm")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
+#' # Subset data for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
+#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #' 
 #' # Run collapseByClone
 #' db_new <- collapseByClone(db, cloneColumn="CLONE", 
@@ -318,6 +321,9 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' library("shm")
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
+#' # Subset data for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
+#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #'
 #' # Run calcDBObservedMutations()
 #' db_new <- calcDBObservedMutations(db, sequenceColumn="SEQUENCE_IMGT",
@@ -449,7 +455,7 @@ calcDBObservedMutations <- function(db,
 #' # Identify all mutations in the sequence
 #' mutations <- calcObservedMutations(inputSeq, germlineSeq)
 #' 
-#' #Identify only mutations the V segment minus CDR3
+#' # Identify only mutations the V segment minus CDR3
 #' mutations <- calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
 #'  
 #' @export
@@ -652,7 +658,8 @@ binMutationsByRegion <- function(mutations_array,
 #' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes
-#' db <- db[1:10, ]
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
+#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #'
 #' # Run calcDBExpectedMutations()
 #' db <- calcDBExpectedMutations(db,

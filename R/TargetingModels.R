@@ -184,9 +184,8 @@ setClass("TargetingModel",
 #' library(alakazam)
 #' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
-#' 
-#' # Create model using all mutations
-#' sub <- createSubstitutionMatrix(db)
+#' # Subset data for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG"), BARCODE != "RL013")
 #' 
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -428,14 +427,14 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #' library(alakazam)
 #' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
-#' 
-#' # Create model using all mutations
-#' sub_model <- createSubstitutionMatrix(db)
-#' mut_model <- createMutabilityMatrix(db, sub_model)
+#' # Subset data for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
+#'                  BARCODE != "RL013")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
-#' mut_model <- createMutabilityMatrix(db, sub_model, model="S", multipleMutation="ignore")
+#' mut_model <- createMutabilityMatrix(db, sub_model, model="S", multipleMutation="ignore",
+#'                                     minNumSeqMutations=10)
 #' 
 #' @export
 createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
@@ -516,14 +515,16 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
         }
     }
     
-    #cat("Progress: 0%      50%     100%\n")
-    #cat("          ")
-    #pb <- txtProgressBar(min=1, max=length(mutations), width=20)
+#     cat("Progress: 0%      50%     100%\n")
+#     cat("          ")
+#     pb <- txtProgressBar(min=1, max=length(mutations), width=20)
 
     # Background Count: Count the number of occurrences of each 5-mer
     BG_COUNT <- list()
     for (index in 1:length(mutations)){
-        #setTxtProgressBar(pb, index)
+        
+        # setTxtProgressBar(pb, index)
+        
         BG_COUNT[[index]] <- template
         sSeq <- gsub("\\.", "N", db[index, sequenceColumn])
         sGL <- gsub("\\.", "N", db[index, germlineColumn])
@@ -563,8 +564,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
         }
         BG_COUNT[[index]][BG_COUNT[[index]] == 0] <- NA
     }
-    #close(pb)
-    #cat("\n")
+#     close(pb)
+#     cat("\n")
     
     Mutability<-list()
     for(i in 1:length(mutations)){
@@ -690,9 +691,11 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #' library(alakazam)
 #' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
-#' 
-#' # Create model using all mutations
-#' sub_model <- createSubstitutionMatrix(db)
+#' # Subset data for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG"), BARCODE != "RL013")
+#'
+#' # Create model using only silent mutations and ignore multiple mutations
+#' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
 #' ext_model <- extendSubstitutionMatrix(sub_model)
 #' 
 #' @export
@@ -752,10 +755,14 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' library(alakazam)
 #' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
-#' 
-#' # Create model using all mutations
-#' sub_model <- createSubstitutionMatrix(db)
-#' mut_model <- createMutabilityMatrix(db, sub_model)
+#' # Subset data for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
+#'                  BARCODE != "RL013")
+#'
+#' # Create model using only silent mutations and ignore multiple mutations
+#' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
+#' mut_model <- createMutabilityMatrix(db, sub_model, model="S", multipleMutation="ignore",
+#'                                     minNumSeqMutations=10)
 #' ext_model <- extendMutabilityMatrix(mut_model)
 #' 
 #' @export
@@ -832,10 +839,14 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' library(alakazam)
 #' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
-#' 
-#' # Create 4x1024 model using all mutations
-#' sub_model <- createSubstitutionMatrix(db)
-#' mut_model <- createMutabilityMatrix(db, sub_model)
+#' # Subset data for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
+#'                  BARCODE != "RL013")
+#'
+#' # Create 4x1024 model using only silent mutations and ignore multiple mutations
+#' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
+#' mut_model <- createMutabilityMatrix(db, sub_model, model="S", multipleMutation="ignore",
+#'                                     minNumSeqMutations=10)
 #' tar_model <- createTargetingMatrix(sub_model, mut_model)
 #' 
 #' # Create 5x3125 model including Ns
@@ -897,9 +908,9 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' library(alakazam)
 #' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
-#' 
-#' # Create model using all mutations
-#' model <- createTargetingModel(db)
+#' # Subset data for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
+#'                  BARCODE != "RL013")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' model <- createTargetingModel(db, model="S", multipleMutation="ignore")
@@ -984,9 +995,12 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #' library(alakazam)
 #' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
-#' 
+#' # Subset data for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
+#'                  BARCODE != "RL013")
+#'
 #' # Calculate targeting distance of custom model
-#' model <- createTargetingModel(db)
+#' model <- createTargetingModel(db, model="S", multipleMutation="ignore")
 #' dist <- calcTargetingDistance(model)
 #' 
 #' # Calculate targeting distance of built-model
@@ -1037,9 +1051,12 @@ calcTargetingDistance <- function(model) {
 #' library(alakazam)
 #' file <- system.file("extdata", "Influenza.tab", package="shm")
 #' db <- readChangeoDb(file)
-#' 
-#' # Create model and get targeting distance
-#' model <- createTargetingModel(db)
+#' # Subset data for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
+#'                  BARCODE != "RL013")
+#'
+#' # Create model and rescale mutabilities
+#' model <- createTargetingModel(db, model="S", multipleMutation="ignore")
 #' mut <- rescaleMutability(model)
 #' 
 #' @export
@@ -1132,13 +1149,10 @@ writeTargetingDistance <- function(model, file) {
 #' @family   targeting model functions
 #' 
 #' @examples
-#' # Plot all nucleotides in circular style
-#' plotMutability(HS5FModel)
-#' 
 #' # Plot one nucleotide in circular style
 #' plotMutability(HS5FModel, "C")
 #' 
-#' # Plot one nucleotide in barchart style
+#' # Plot two nucleotides in barchart style
 #' plotMutability(HS5FModel, c("C", "A"), style="bar")
 #' 
 #' @export
