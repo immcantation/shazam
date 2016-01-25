@@ -109,10 +109,9 @@
 #' @import   doParallel
 #' @import   dplyr
 #' @import   foreach
-#' @import   grid
 #' @import   ggplot2
 #' @import   methods
-#' @import   scales
+#' @importFrom  scales     scientific
 #' @importFrom  tidyr      gather
 #' @importFrom  iterators  icount
 #' @importFrom  SDMTools   wt.sd
