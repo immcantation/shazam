@@ -1,3 +1,5 @@
+# Miscellaneous common functions
+
 #### Transformation functions ####
 
 # Converts a matrix to a vector

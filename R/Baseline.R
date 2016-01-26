@@ -1,3 +1,5 @@
+# Selection analysis using BASELINe
+
 #' @include RegionDefinitions.R
 #' @include shm.R
 NULL

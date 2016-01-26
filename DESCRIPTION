@@ -1,7 +1,7 @@
 Package: shm
 Type: Package
 Version: 0.1.1.999
-Date: 2016-01-25
+Date: 2016-01-26
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut", "cre"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("ctb"), 
