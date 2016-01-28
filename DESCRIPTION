@@ -1,7 +1,7 @@
 Package: shm
 Type: Package
 Version: 0.1.1.999
-Date: 2016-01-26
+Date: 2016-01-28
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut", "cre"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("ctb"), 
@@ -38,7 +38,8 @@ Imports:
     seqinr,
     tidyr
 Suggests:
-    knitr
+    knitr,
+    rmarkdown
 VignetteBuilder: knitr
 LazyData: true
 Collate:

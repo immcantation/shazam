@@ -19,8 +19,8 @@ output:
 geometry: margin=1in
 fontsize: 11pt
 vignette: >
-  %\VignetteIndexEntry{Distance to nearest neighbor}    
-  %\VignetteEngine{knitr::rmarkdown}    
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteIndexEntry{Distance to nearest neighbor} 
   %\usepackage[utf8]{inputenc}
 ---
 

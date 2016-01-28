@@ -516,7 +516,8 @@ calcObservedMutations <- function(inputSeq,
         c_inputSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
         
         # Determine whether the mutations are R or S
-        mutations_array <- apply(rbind(c_germlineSeq_codons , c_inputSeq_codons),2,function(x){mutationType(c2s(x[1]),c2s(x[2]))})
+        mutations_array <- apply(rbind(c_germlineSeq_codons, c_inputSeq_codons), 2, 
+                                 function(x) { mutationType(c2s(x[1]), c2s(x[2])) })
         names(mutations_array) = mutations_pos
         mutations_array<- mutations_array[!is.na(mutations_array)]
         if(length(mutations_array)==sum(is.na(mutations_array))){
@@ -566,13 +567,13 @@ calcObservedMutations <- function(inputSeq,
 #' See \code{\link{calcDBObservedMutations}} for identifying and counting the 
 #' number of observed mutations.
 #' This function is also used in \code{\link{calcObservedMutations}}.
-#' 
+#' mutationType
 #' @examples
 #' # Generate a random mutation array
 #' numbOfMutations <- sample(3:10, 1) 
 #' posOfMutations <- sort(sample(330, numbOfMutations))
-#' mutationTypes <- sample(c("R","S"), length(posOfMutations), replace=TRUE)
-#' mutations_array <- array(mutationTypes, dimnames=list(posOfMutations))
+#' mutation_types <- sample(c("R","S"), length(posOfMutations), replace=TRUE)
+#' mutations_array <- array(mutation_types, dimnames=list(posOfMutations))
 #' 
 #' # Random mutations
 #' binMutationsByRegion(mutations_array, regionDefinition=IMGT_V_NO_CDR3)
@@ -999,51 +1000,45 @@ translateCodonToAminoAcid <- function(Codon) {
 }
 
 # Given two codons, tells you if the mutation is R or S (based on your definition)
-mutationType <- function(codonFrom, codonTo, testID=1) {
-  if (testID == 4) {
-    if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-      return(NA)
-    } else {
-      mutationType = "S"
-      if( translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonFrom)) != translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonTo)) ){
-        mutationType = "R"
-      }
-      if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
-        mutationType = "Stop"
-      }
-      return(mutationType)
+#
+# @param   codonFrom         starting codon
+# @param   codonTo           ending codon
+# @param   aminoAcidClasses  vector of amino acid trait classes
+#                            if NULL then R or S is determined by amino acid identity
+# @return  Mutation type as "R" (replacement), "S" (silent), "Stop" (stop) or NA (input is NA).
+#
+# @examples
+# shm:::mutationType("TTT", "TTC")
+# shm:::mutationType("TTT", "TTA")
+# shm:::mutationType("TTT", "TGA")
+# shm:::mutationType("TTT", "TTC", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
+# shm:::mutationType("TTT", "TTA", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
+# shm:::mutationType("TTT", "TCT", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
+# shm:::mutationType("TTT", "TGA", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
+mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
+    # codonFrom="TTT"; codonTo="TTA"
+    # codonFrom="TTT"; codonTo="TGA"
+    
+    # Translate codons
+    aaFrom <- translateCodonToAminoAcid(codonFrom)
+    aaTo <- translateCodonToAminoAcid(codonTo)
+    
+    # If any codon is NA then return NA
+    if (any(is.na(c(codonFrom, codonTo, aaFrom, aaTo)))) { 
+        return(NA) 
     }
-  } else if (testID == 5) {
-    if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-      return(NA)
-    } else {
-      if (codonFrom==codonTo) {
-        mutationType = "S"
-      } else {
-        codonFrom = s2c(codonFrom)
-        codonTo = s2c(codonTo)
-        mutationType = "Stop"
-        nucOfI = codonFrom[which(codonTo!=codonFrom)]
-        if(nucOfI=="C"){
-          mutationType = "R"
-        }else if(nucOfI=="G"){
-          mutationType = "S"
-        }
-      }
-      return(mutationType)
+    
+    # If any amino acid is Stop then return "Stop"
+    if (any(c(aaFrom, aaTo) == "*")) { 
+        return("Stop") 
     }
-  } else {
-    if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-      return(NA)
+    
+    if (is.null(classes)) {
+        # Check for exact identity if no amino acid classes are specified
+        mutation <- if (aaFrom == aaTo) { "S" } else { "R" }
     } else {
-      mutationType = "S"
-      if( translateCodonToAminoAcid(codonFrom) != translateCodonToAminoAcid(codonTo) ){
-        mutationType = "R"
-      }
-      if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
-        mutationType = "Stop"
-      }
-      return(mutationType)
+        # Check for class identity if amino acid classes are specified
+        mutation <- if (aminoAcidClasses[aaFrom] == aminoAcidClasses[aaTo]) { "S" } else { "R" }
     }
-  }
+    return(mutation)
 }
