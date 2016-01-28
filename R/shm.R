@@ -90,10 +90,6 @@
 #'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
 #'            Front Immunol. 2013 4:358.
 #'  }
-#'
-#' @seealso
-#' The Change-O suite of tools includes three separate R packages: \link[alakazam]{alakazam}, 
-#' \link[tigger]{tigger}, and \link[shm]{shm}.
 #' 
 #' @name     shm
 #' @docType  package
