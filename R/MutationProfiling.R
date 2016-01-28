@@ -270,6 +270,12 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' @param    regionDefinition   \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences. If NULL, mutations 
 #'                              are counted for entire sequence.
+#' @param    aminoAcidClasses   named character vector of amino acid trait classes where 
+#'                              names are single character amino acid codes and value are
+#'                              discrete class labels. If \code{NULL} then replacement (R)
+#'                              or silent (S) will be determined by amino acid identity.
+#'                              If this vector is specified, then replacement (R) will be
+#'                              defined as a change in the amino acid class.
 #' @param    nproc              number of cores to distribute the operation over. If the 
 #'                              cluster has already been set the call function with 
 #'                              \code{nproc} = 0 to not reset or reinitialize. Default is 
@@ -332,6 +338,7 @@ calcDBObservedMutations <- function(db,
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
                                    frequency=FALSE,
                                    regionDefinition=IMGT_V_NO_CDR3,
+                                   aminoAcidClasses=NULL,
                                    nproc=1) {
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
@@ -358,7 +365,10 @@ calcDBObservedMutations <- function(db,
                                           'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
                                           'getCodonPos','getContextInCodon','mutationType',
                                           'translateCodonToAminoAcid','AMINO_ACIDS','binMutationsByRegion',
-                                          'collapseMatrixToVector'), 
+                                          'collapseMatrixToVector',
+                                          'AMINO_ACID_HYDROPATHY',
+                                          'AMINO_ACID_POLARITY',
+                                          'AMINO_ACID_CHARGE'), 
                             envir=environment())
         registerDoParallel(cluster)
     } else if (nproc==1) {
@@ -379,8 +389,9 @@ calcDBObservedMutations <- function(db,
         foreach(i=iterators::icount(numbOfSeqs)) %dopar% {
             calcObservedMutations(db[i, sequenceColumn], 
                                   db[i, germlineColumn],
-                                  frequency,
-                                  regionDefinition)
+                                  frequency=frequency,
+                                  regionDefinition=regionDefinition,
+                                  aminoAcidClasses=aminoAcidClasses)
         }
     
     # Convert list of mutations to data.frame
@@ -420,14 +431,20 @@ calcDBObservedMutations <- function(db,
 #'
 #' @param    inputSeq          input sequence.
 #' @param    germlineSeq       germline sequence.
-#' @param    frequency          \code{logical} indicating whether or not to calculate
-#'                              mutation frequencies. Default is \code{FALSE}.
+#' @param    frequency         \code{logical} indicating whether or not to calculate
+#'                             mutation frequencies. Default is \code{FALSE}.
 #' @param    regionDefinition  \link{RegionDefinition} object defining the regions
 #'                             and boundaries of the Ig sequences. Note, only the part of
 #'                             sequences defined in \code{regionDefinition} are analyzed.
 #'                             If NULL, mutations are counted for entire sequence.
+#' @param    aminoAcidClasses  named character vector of amino acid trait classes where 
+#'                             names are single character amino acid codes and value are
+#'                             discrete class labels. If \code{NULL} then replacement (R)
+#'                             or silent (S) will be determined by amino acid identity.
+#'                             If this vector is specified, then replacement (R) will be
+#'                             defined as a change in the amino acid class.
 #' @return   An \code{array} of the mutations, replacement (R) or silent(S), with the 
-#'           names indicatng the nucleotide postion of the mutations in the sequence.
+#'           names indicating the nucleotide postion of the mutations in the sequence.
 #'           
 #' @details
 #' Each mutation is considered independently in its codon context. Note, only the part of 
@@ -453,11 +470,8 @@ calcDBObservedMutations <- function(db,
 #' mutations <- calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
 #'  
 #' @export
-calcObservedMutations <- function(inputSeq, 
-                           germlineSeq,
-                           frequency=FALSE,
-                           regionDefinition=NULL) {
-    
+calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
+                                  regionDefinition=NULL, aminoAcidClasses=NULL) {
     # Removing IMGT gaps (they should come in threes)
     # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
     germlineSeq <- gsub("\\.\\.\\.", "XXX", germlineSeq)
@@ -517,7 +531,7 @@ calcObservedMutations <- function(inputSeq,
         
         # Determine whether the mutations are R or S
         mutations_array <- apply(rbind(c_germlineSeq_codons, c_inputSeq_codons), 2, 
-                                 function(x) { mutationType(c2s(x[1]), c2s(x[2])) })
+                                 function(x) { mutationType(c2s(x[1]), c2s(x[2]), aminoAcidClasses=aminoAcidClasses) })
         names(mutations_array) = mutations_pos
         mutations_array<- mutations_array[!is.na(mutations_array)]
         if(length(mutations_array)==sum(is.na(mutations_array))){
@@ -567,7 +581,7 @@ calcObservedMutations <- function(inputSeq,
 #' See \code{\link{calcDBObservedMutations}} for identifying and counting the 
 #' number of observed mutations.
 #' This function is also used in \code{\link{calcObservedMutations}}.
-#' mutationType
+#' 
 #' @examples
 #' # Generate a random mutation array
 #' numbOfMutations <- sample(3:10, 1) 
@@ -1033,7 +1047,7 @@ mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
         return("Stop") 
     }
     
-    if (is.null(classes)) {
+    if (is.null(aminoAcidClasses)) {
         # Check for exact identity if no amino acid classes are specified
         mutation <- if (aaFrom == aaTo) { "S" } else { "R" }
     } else {
