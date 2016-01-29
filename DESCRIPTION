@@ -2,16 +2,18 @@ Package: shm
 Type: Package
 Version: 0.1.1.999
 Date: 2016-01-28
-Authors@R: c(person("Mohamed", "Uduman", role=c("aut", "cre"), 
+Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
+             person("Jason", "Vander Heiden", role=c("ctb", "cre"), 
+                    email="jason.vanderheiden@yale.edu"),
              person("Gur", "Yaari", role=c("ctb"), 
                     email="gur.yaari@biu.ac.il"),
-             person("Jason", "Vander Heiden", role=c("ctb"), 
-                    email="jason.vanderheiden@yale.edu"),
              person("Namita", "Gupta", role=c("ctb"), 
                     email="namita.gupta@yale.edu"),
              person("Susanna", "Marquez", role=c("ctb"), 
-                    email="susanna.marquez@yale.edu"))
+                    email="susanna.marquez@yale.edu"),
+             person("Steven", "Kleinstein", role=c("ctb"), 
+                    email="steven.kleinstein@yale.edu"))
 Title: Somatic Hypermutation Analysis
 Description: A new computational framework for Bayesian estimation of
     Antigen-driven selection in Immunoglobulin sequences, provides a more

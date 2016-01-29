@@ -92,11 +92,11 @@ db_cons <- collapseByClone(db)
 
 # Create substitution model using silent mutations
 sub_matrix <- createSubstitutionMatrix(db_cons, 
-                                       sequenceColumn="CLONAL_CONSENSUS_SEQUENCE", 
+                                       sequenceColumn="CLONAL_SEQUENCE", 
                                        model="S")
 # Create mutability model using silent mutations
 mut_matrix <- createMutabilityMatrix(db_cons, sub_matrix, 
-                                     sequenceColumn="CLONAL_CONSENSUS_SEQUENCE", 
+                                     sequenceColumn="CLONAL_SEQUENCE", 
                                      model="S")
 
 # Extend models to include ambiguous 5-mers

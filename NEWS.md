@@ -4,6 +4,13 @@ Version 0.1.1.999:  January 26, 2016
 General:
 
 + Internal changes to conform to CRAN policies.
++ Compressed and renamed example database file `extdata/Influenza.tab` to 
+  `extdata/InfluenzaDb.gz`
+
+Distance Profiling:
+
++ Fixed a bug wherein `distToNearest()` did not return the nearest neighbor 
+  with a non-zero distance.
 
 Targeting Models:
 

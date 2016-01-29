@@ -1322,8 +1322,8 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
     dens_df[, idColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
                                     idColumn]
     if (!is.null(groupColumn)) {
-      dens_df[, groupColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
-                                         groupColumn]
+        dens_df[, groupColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
+                                           groupColumn]
     }    
     
     # Plot probability density curve

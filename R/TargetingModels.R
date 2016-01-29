@@ -1145,9 +1145,11 @@ writeTargetingDistance <- function(model, file) {
 #' @examples
 #' # Plot one nucleotide in circular style
 #' plotMutability(HS5FModel, "C")
+#' plotMutability(HS5FModel, "G")
 #' 
 #' # Plot two nucleotides in barchart style
 #' plotMutability(HS5FModel, c("C", "A"), style="bar")
+#' plotMutability(HS5FModel, c("G", "T"), style="bar")
 #' 
 #' @export
 plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), 
@@ -1170,7 +1172,6 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         stop("Input must be either a mutability vector or TargetingModel object.")
     }
     
-
     # Set base plot settings
     base_theme <- theme_bw() +
         theme(panel.margin=grid::unit(0, "lines"),
@@ -1178,9 +1179,9 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         theme(axis.text=element_text(margin=grid::unit(0, "lines"))) +
         theme(text=element_text(size=10*size),
               title=element_text(size=10*size),
-              legend.margin=grid::unit(0, "lines"))
+              legend.margin=grid::unit(0, "lines"),
+              legend.background=element_blank())
 
-    
     # Scaling and layout parameters
     score_offset <- 0
     score_scale <- 15
@@ -1232,7 +1233,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             sub_df <- dplyr::arrange_(sub_df, .dots=c("pos1", "pos2", "pos4", "pos5"))
             sub_df$x <- 1:nrow(sub_df)            
         } else if (center_nuc %in% c("G", "T")) {
-            sub_df <- dplyr::arrange(sub_df, .dots=c("pos5", "pos4", "pos2", "pos1"))
+            sub_df <- dplyr::arrange_(sub_df, .dots=c("pos5", "pos4", "pos2", "pos1"))
             sub_df$x <- 1:nrow(sub_df)
         } else {
             stop("Invalid nucleotide choice")
