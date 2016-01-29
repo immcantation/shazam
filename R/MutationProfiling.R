@@ -65,7 +65,7 @@ NULL
 #' @examples
 #' # Load example data
 #' library("shm")
-#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
@@ -319,7 +319,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' @examples
 #' # Load example data
 #' library("shm")
-#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
@@ -456,7 +456,7 @@ calcDBObservedMutations <- function(db,
 #'           See \link{binMutationsByRegion} for aggregation of mutations by region. 
 #' 
 #' @examples
-#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' 
 #' # Extracting the first entry in the sample db to use for input and germline sequences.
@@ -664,7 +664,7 @@ binMutationsByRegion <- function(mutations_array,
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
@@ -795,7 +795,7 @@ calcDBExpectedMutations <- function(db,
 #' See \link{calcObservedMutations} for getting observed mutation counts.
 #' 
 #' @examples
-#' dbPath <- system.file("extdata", "Influenza.tab", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' 
 #' # Extracting the first entry in the sample db to use for input and germline sequences.

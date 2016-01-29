@@ -93,21 +93,21 @@
 #' 
 #' @name     shm
 #' @docType  package
+#' 
 #' @import   alakazam
 #' @import   data.table
 #' @import   doParallel
 #' @import   dplyr
 #' @import   foreach
 #' @import   ggplot2
+#' @import   graphics
 #' @import   methods
+#' @import   utils
 #' @importFrom  scales     scientific
 #' @importFrom  tidyr      gather
 #' @importFrom  iterators  icount
 #' @importFrom  SDMTools   wt.sd
-#' @importFrom  seqinr     c2s
-#' @importFrom  seqinr     s2c
-#' @importFrom  seqinr     words
-#' @importFrom  seqinr     translate
+#' @importFrom  seqinr     c2s s2c words translate
 NULL
 
 #### Classes ####

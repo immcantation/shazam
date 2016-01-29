@@ -176,7 +176,7 @@ setClass("TargetingModel",
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza.tab", package="shm")
+#' file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(file)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHG"), BARCODE != "RL013")
@@ -419,7 +419,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza.tab", package="shm")
+#' file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(file)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
@@ -683,7 +683,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza.tab", package="shm")
+#' file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(file)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHG"), BARCODE != "RL013")
@@ -747,7 +747,7 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza.tab", package="shm")
+#' file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(file)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
@@ -831,7 +831,7 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza.tab", package="shm")
+#' file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(file)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
@@ -900,7 +900,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza.tab", package="shm")
+#' file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(file)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
@@ -987,7 +987,7 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza.tab", package="shm")
+#' file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(file)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
@@ -1043,7 +1043,7 @@ calcTargetingDistance <- function(model) {
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "Influenza.tab", package="shm")
+#' file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(file)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 

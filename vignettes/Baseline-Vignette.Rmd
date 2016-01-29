@@ -47,7 +47,7 @@ library(alakazam)
 library(shm)
 
 # Load Change-O file
-file <- system.file("extdata", "Influenza.tab", package="shm")
+file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 db <- readChangeoDb(file)
 ```
 
