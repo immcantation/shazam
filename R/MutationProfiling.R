@@ -1,10 +1,4 @@
 # Mutation profiling
-# 
-# @author     Mohamed Uduman, Gur Yaari
-# @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
-# @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
-# @version    0.1
-# @date       2015.03.08
 
 #' @include shm.R
 NULL
@@ -276,6 +270,12 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' @param    regionDefinition   \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences. If NULL, mutations 
 #'                              are counted for entire sequence.
+#' @param    aminoAcidClasses   named character vector of amino acid trait classes where 
+#'                              names are single character amino acid codes and value are
+#'                              discrete class labels. If \code{NULL} then replacement (R)
+#'                              or silent (S) will be determined by amino acid identity.
+#'                              If this vector is specified, then replacement (R) will be
+#'                              defined as a change in the amino acid class.
 #' @param    nproc              number of cores to distribute the operation over. If the 
 #'                              cluster has already been set the call function with 
 #'                              \code{nproc} = 0 to not reset or reinitialize. Default is 
@@ -338,6 +338,7 @@ calcDBObservedMutations <- function(db,
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
                                    frequency=FALSE,
                                    regionDefinition=IMGT_V_NO_CDR3,
+                                   aminoAcidClasses=NULL,
                                    nproc=1) {
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
@@ -364,7 +365,10 @@ calcDBObservedMutations <- function(db,
                                           'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
                                           'getCodonPos','getContextInCodon','mutationType',
                                           'translateCodonToAminoAcid','AMINO_ACIDS','binMutationsByRegion',
-                                          'collapseMatrixToVector'), 
+                                          'collapseMatrixToVector',
+                                          'AMINO_ACID_HYDROPATHY',
+                                          'AMINO_ACID_POLARITY',
+                                          'AMINO_ACID_CHARGE'), 
                             envir=environment())
         registerDoParallel(cluster)
     } else if (nproc==1) {
@@ -385,8 +389,9 @@ calcDBObservedMutations <- function(db,
         foreach(i=iterators::icount(numbOfSeqs)) %dopar% {
             calcObservedMutations(db[i, sequenceColumn], 
                                   db[i, germlineColumn],
-                                  frequency,
-                                  regionDefinition)
+                                  frequency=frequency,
+                                  regionDefinition=regionDefinition,
+                                  aminoAcidClasses=aminoAcidClasses)
         }
     
     # Convert list of mutations to data.frame
@@ -426,14 +431,20 @@ calcDBObservedMutations <- function(db,
 #'
 #' @param    inputSeq          input sequence.
 #' @param    germlineSeq       germline sequence.
-#' @param    frequency          \code{logical} indicating whether or not to calculate
-#'                              mutation frequencies. Default is \code{FALSE}.
+#' @param    frequency         \code{logical} indicating whether or not to calculate
+#'                             mutation frequencies. Default is \code{FALSE}.
 #' @param    regionDefinition  \link{RegionDefinition} object defining the regions
 #'                             and boundaries of the Ig sequences. Note, only the part of
 #'                             sequences defined in \code{regionDefinition} are analyzed.
 #'                             If NULL, mutations are counted for entire sequence.
+#' @param    aminoAcidClasses  named character vector of amino acid trait classes where 
+#'                             names are single character amino acid codes and value are
+#'                             discrete class labels. If \code{NULL} then replacement (R)
+#'                             or silent (S) will be determined by amino acid identity.
+#'                             If this vector is specified, then replacement (R) will be
+#'                             defined as a change in the amino acid class.
 #' @return   An \code{array} of the mutations, replacement (R) or silent(S), with the 
-#'           names indicatng the nucleotide postion of the mutations in the sequence.
+#'           names indicating the nucleotide postion of the mutations in the sequence.
 #'           
 #' @details
 #' Each mutation is considered independently in its codon context. Note, only the part of 
@@ -459,11 +470,8 @@ calcDBObservedMutations <- function(db,
 #' mutations <- calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
 #'  
 #' @export
-calcObservedMutations <- function(inputSeq, 
-                           germlineSeq,
-                           frequency=FALSE,
-                           regionDefinition=NULL) {
-    
+calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
+                                  regionDefinition=NULL, aminoAcidClasses=NULL) {
     # Removing IMGT gaps (they should come in threes)
     # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
     germlineSeq <- gsub("\\.\\.\\.", "XXX", germlineSeq)
@@ -522,7 +530,8 @@ calcObservedMutations <- function(inputSeq,
         c_inputSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
         
         # Determine whether the mutations are R or S
-        mutations_array <- apply(rbind(c_germlineSeq_codons , c_inputSeq_codons),2,function(x){mutationType(c2s(x[1]),c2s(x[2]))})
+        mutations_array <- apply(rbind(c_germlineSeq_codons, c_inputSeq_codons), 2, 
+                                 function(x) { mutationType(c2s(x[1]), c2s(x[2]), aminoAcidClasses=aminoAcidClasses) })
         names(mutations_array) = mutations_pos
         mutations_array<- mutations_array[!is.na(mutations_array)]
         if(length(mutations_array)==sum(is.na(mutations_array))){
@@ -577,8 +586,8 @@ calcObservedMutations <- function(inputSeq,
 #' # Generate a random mutation array
 #' numbOfMutations <- sample(3:10, 1) 
 #' posOfMutations <- sort(sample(330, numbOfMutations))
-#' mutationTypes <- sample(c("R","S"), length(posOfMutations), replace=TRUE)
-#' mutations_array <- array(mutationTypes, dimnames=list(posOfMutations))
+#' mutation_types <- sample(c("R","S"), length(posOfMutations), replace=TRUE)
+#' mutations_array <- array(mutation_types, dimnames=list(posOfMutations))
 #' 
 #' # Random mutations
 #' binMutationsByRegion(mutations_array, regionDefinition=IMGT_V_NO_CDR3)
@@ -693,12 +702,12 @@ calcDBExpectedMutations <- function(db,
     # export all nesseary environment variables, functions and packages.  
     if(nproc>1){        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
-        parallel::clusterExport( cluster, list('db', 'sequenceColumn', 'germlineColumn', 
+        parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
                                      'regionDefinition','targetingModel',
                                      'calcExpectedMutations','calculateTargeting',
                                      's2c','c2s','NUCLEOTIDES','HS5FModel',
-                                     'calculateMutationalPaths','CODON_TABLE')
-                                 , envir=environment() )
+                                     'calculateMutationalPaths','CODON_TABLE'),
+                                envir=environment() )
         registerDoParallel(cluster)
     } else if( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
@@ -717,7 +726,7 @@ calcDBExpectedMutations <- function(db,
     
     targeting_list <-
         foreach( i=iterators::icount(numbOfSeqs) ) %dopar% {
-          calcExpectedMutations( germlineSeq = db[i,germlineColumn],
+          calcExpectedMutations(germlineSeq = db[i,germlineColumn],
                                 inputSeq = db[i,sequenceColumn],
                                 targetingModel = HS5FModel,
                                 regionDefinition = regionDefinition)
@@ -725,10 +734,9 @@ calcDBExpectedMutations <- function(db,
     
     # Convert list of expected mutation freq to data.frame
     labels_length <- length(regionDefinition@labels)
-    expectedMutationFrequencies <- do.call( rbind, lapply(targeting_list, function(x){ 
+    expectedMutationFrequencies <- do.call(rbind, lapply(targeting_list, function(x) { 
         length(x) <- labels_length 
-        return(x)
-    })) 
+        return(x) })) 
     
     expectedMutationFrequencies[is.na(expectedMutationFrequencies)] <- 0
     colnames(expectedMutationFrequencies) <- paste0("EXPECTED_", colnames(expectedMutationFrequencies))
@@ -807,29 +815,27 @@ calcExpectedMutations <- function(germlineSeq,
                                   regionDefinition=IMGT_V_NO_CDR3){
     
     
-    targeting <- 
-        calculateTargeting(germlineSeq = germlineSeq, 
-                           inputSeq = inputSeq,
-                           targetingModel = targetingModel,
-                           regionDefinition = regionDefinition)
+    targeting <- calculateTargeting(germlineSeq = germlineSeq, 
+                                    inputSeq = inputSeq,
+                                    targetingModel = targetingModel,
+                                    regionDefinition = regionDefinition)
     
     # Determine the mutations paths (i.e. determine R and S mutation frequencies)
-    mutationalPaths <- 
-        calculateMutationalPaths( germlineSeq = c2s(colnames(targeting)), 
-                                  regionDefinition = regionDefinition)
+    mutationalPaths <- calculateMutationalPaths(germlineSeq = c2s(colnames(targeting)), 
+                                                regionDefinition = regionDefinition)
     
-    typesOfMutations <- c("R","S")
+    typesOfMutations <- c("R", "S")
     mutationalPaths[!(mutationalPaths%in%typesOfMutations)] <- NA
     
     listExpectedMutationFrequencies <- list()
     for(region in regionDefinition@regions){
         for(typeOfMutation in typesOfMutations){
-            region_mutation <- paste(region,typeOfMutation,sep="_")    
+            region_mutation <- paste(region, typeOfMutation, sep="_")    
             
             targeting_region <- targeting[1:4, regionDefinition@boundaries%in%region]
             mutationalPaths_region <- mutationalPaths[,regionDefinition@boundaries%in%region]
-            targeting_typeOfMutation_region <- 
-              sum( targeting_region[mutationalPaths_region==typeOfMutation], na.rm=TRUE )
+            targeting_typeOfMutation_region <- sum(targeting_region[mutationalPaths_region == typeOfMutation], 
+                                                   na.rm=TRUE )
             
             listExpectedMutationFrequencies[[region_mutation]] <- targeting_typeOfMutation_region
             
@@ -906,20 +912,20 @@ calculateTargeting <- function(germlineSeq,
     gaplessSeqLen <- nchar(gaplessSeq)
     
     #Slide through 5-mers and look up targeting
-    gaplessSeq <- paste("NN",gaplessSeq,"NN",sep="")
+    gaplessSeq <- paste("NN", gaplessSeq, "NN", sep="")
     gaplessSeqLen <- nchar(gaplessSeq)
-    pos<- 3:(gaplessSeqLen-2)
-    subSeq =  substr(rep(gaplessSeq,gaplessSeqLen-4),(pos-2),(pos+2))    
-    germlineSeqTargeting_gapless <- sapply(subSeq,function(x){ 
-        targetingModel@targeting[,x] 
-    })
+    pos<- 3:(gaplessSeqLen - 2)
+    subSeq =  substr(rep(gaplessSeq, gaplessSeqLen - 4), (pos - 2),(pos + 2))    
+    germlineSeqTargeting_gapless <- sapply(subSeq, function(x) { 
+        targetingModel@targeting[, x] })
     
-    germlineSeqTargeting[,c_germlineSeq!="."] <- germlineSeqTargeting_gapless  
+    germlineSeqTargeting[, c_germlineSeq != "."] <- germlineSeqTargeting_gapless  
     
     # Set self-mutating targeting values to be NA
     mutatingToSelf <- colnames(germlineSeqTargeting)
-    mutatingToSelf[ !(mutatingToSelf%in%NUCLEOTIDES[1:5])  ] <- "N"
-    tmp <- sapply( 1:ncol(germlineSeqTargeting), function(pos){ germlineSeqTargeting[ mutatingToSelf[pos],pos ] <<- NA })
+    mutatingToSelf[!(mutatingToSelf %in% NUCLEOTIDES[1:5])] <- "N"
+    # TODO: What's with this <<-?
+    tmp <- sapply(1:ncol(germlineSeqTargeting), function(pos) { germlineSeqTargeting[mutatingToSelf[pos], pos] <<- NA })
     
     germlineSeqTargeting[!is.finite(germlineSeqTargeting)] <- NA
     return(germlineSeqTargeting)
@@ -959,18 +965,18 @@ calculateMutationalPaths <- function(germlineSeq,
         }
         
         # Mask germline with Ns where input sequence has Ns
-        c_germlineSeq[ c_inputSeq=="N" |  !c_inputSeq%in%c(NUCLEOTIDES[1:5],".") ] = "N"    
+        c_germlineSeq[c_inputSeq=="N" |  !c_inputSeq %in% c(NUCLEOTIDES[1:5], ".") ] = "N"    
         s_germlineSeq <- c2s(c_germlineSeq)
-    }else{
+    } else {
         s_germlineSeq <- germlineSeq
         c_germlineSeq <- s2c(s_germlineSeq)
     }
     
     s_germlineSeq_len <- nchar(s_germlineSeq)    
-    vecCodons = sapply({1:(s_germlineSeq_len/3)}*3-2,function(x){substr(s_germlineSeq,x,x+2)})
+    vecCodons = sapply({1:(s_germlineSeq_len/3)}*3 - 2, function(x) { substr(s_germlineSeq, x, x + 2) })
     vecCodons[!vecCodons %in% colnames(CODON_TABLE)] = "NNN"
-    matMutationTypes = matrix( CODON_TABLE[,vecCodons], nrow=4, byrow=F,
-                               dimnames=list(NUCLEOTIDES[1:4], c_germlineSeq))
+    matMutationTypes = matrix(CODON_TABLE[, vecCodons], nrow=4, byrow=F,
+                              dimnames=list(NUCLEOTIDES[1:4], c_germlineSeq))
     
     return(matMutationTypes)
 }
@@ -1005,51 +1011,45 @@ translateCodonToAminoAcid <- function(Codon) {
 }
 
 # Given two codons, tells you if the mutation is R or S (based on your definition)
-mutationType <- function(codonFrom, codonTo, testID=1) {
-  if (testID == 4) {
-    if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-      return(NA)
-    } else {
-      mutationType = "S"
-      if( translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonFrom)) != translateAminoAcidToTraitChange(translateCodonToAminoAcid(codonTo)) ){
-        mutationType = "R"
-      }
-      if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
-        mutationType = "Stop"
-      }
-      return(mutationType)
+#
+# @param   codonFrom         starting codon
+# @param   codonTo           ending codon
+# @param   aminoAcidClasses  vector of amino acid trait classes
+#                            if NULL then R or S is determined by amino acid identity
+# @return  Mutation type as "R" (replacement), "S" (silent), "Stop" (stop) or NA (input is NA).
+#
+# @examples
+# shm:::mutationType("TTT", "TTC")
+# shm:::mutationType("TTT", "TTA")
+# shm:::mutationType("TTT", "TGA")
+# shm:::mutationType("TTT", "TTC", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
+# shm:::mutationType("TTT", "TTA", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
+# shm:::mutationType("TTT", "TCT", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
+# shm:::mutationType("TTT", "TGA", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
+mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
+    # codonFrom="TTT"; codonTo="TTA"
+    # codonFrom="TTT"; codonTo="TGA"
+    
+    # Translate codons
+    aaFrom <- translateCodonToAminoAcid(codonFrom)
+    aaTo <- translateCodonToAminoAcid(codonTo)
+    
+    # If any codon is NA then return NA
+    if (any(is.na(c(codonFrom, codonTo, aaFrom, aaTo)))) { 
+        return(NA) 
     }
-  } else if (testID == 5) {
-    if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-      return(NA)
-    } else {
-      if (codonFrom==codonTo) {
-        mutationType = "S"
-      } else {
-        codonFrom = s2c(codonFrom)
-        codonTo = s2c(codonTo)
-        mutationType = "Stop"
-        nucOfI = codonFrom[which(codonTo!=codonFrom)]
-        if(nucOfI=="C"){
-          mutationType = "R"
-        }else if(nucOfI=="G"){
-          mutationType = "S"
-        }
-      }
-      return(mutationType)
+    
+    # If any amino acid is Stop then return "Stop"
+    if (any(c(aaFrom, aaTo) == "*")) { 
+        return("Stop") 
     }
-  } else {
-    if (is.na(codonFrom) | is.na(codonTo) | is.na(translateCodonToAminoAcid(codonFrom)) | is.na(translateCodonToAminoAcid(codonTo)) ){
-      return(NA)
+    
+    if (is.null(aminoAcidClasses)) {
+        # Check for exact identity if no amino acid classes are specified
+        mutation <- if (aaFrom == aaTo) { "S" } else { "R" }
     } else {
-      mutationType = "S"
-      if( translateCodonToAminoAcid(codonFrom) != translateCodonToAminoAcid(codonTo) ){
-        mutationType = "R"
-      }
-      if(translateCodonToAminoAcid(codonTo)=="*" | translateCodonToAminoAcid(codonFrom)=="*"){
-        mutationType = "Stop"
-      }
-      return(mutationType)
+        # Check for amino acid class identity if classes are specified
+        mutation <- if (aminoAcidClasses[aaFrom] == aminoAcidClasses[aaTo]) { "S" } else { "R" }
     }
-  }
+    return(mutation)
 }

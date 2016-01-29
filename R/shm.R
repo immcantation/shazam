@@ -1,11 +1,4 @@
-# Project documentation for shm
-# 
-# @author     Mohamed Uduman, Gur Yaari, Namita Gupta, Jason Anthony Vander Heiden
-# @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
-# @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
-# @version    0.1
-# @date       2015.03.07
-
+# shm package documentation and import directives
 
 #' The shm package
 #'
@@ -97,10 +90,6 @@
 #'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
 #'            Front Immunol. 2013 4:358.
 #'  }
-#'
-#' @seealso
-#' The Change-O suite of tools includes three separate R packages: \link[alakazam]{alakazam}, 
-#' \link[tigger]{tigger}, and \link[shm]{shm}.
 #' 
 #' @name     shm
 #' @docType  package

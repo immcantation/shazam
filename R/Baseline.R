@@ -1,3 +1,5 @@
+# Selection analysis using BASELINe
+
 #' @include RegionDefinitions.R
 #' @include shm.R
 NULL
@@ -346,7 +348,7 @@ getBaselineStats <- function(baseline) {
 #'                             testStatistic="focused",
 #'                             regionDefinition=IMGT_V_NO_CDR3,
 #'                             targetingModel = HS5FModel,
-#'                             nproc = 1)
+#'                             nproc=1)
 #' @export
 calcBaseline <- function(db,
                          sequenceColumn="SEQUENCE_IMGT",

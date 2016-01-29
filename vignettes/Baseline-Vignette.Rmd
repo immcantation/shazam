@@ -18,8 +18,8 @@ output:
 geometry: margin=1in
 fontsize: 11pt
 vignette: >
-  %\VignetteIndexEntry{Selection quantification}    
-  %\VignetteEngine{knitr::rmarkdown}    
+  %\VignetteIndexEntry{Selection quantification} 
+  %\VignetteEngine{knitr::rmarkdown} 
   %\usepackage[utf8]{inputenc}
 ---
 

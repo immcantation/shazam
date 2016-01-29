@@ -1,10 +1,4 @@
 # Targeting models
-# 
-# @author     Gur Yaari, Mohamed Uduman, Jason Anthony Vander Heiden, Ang Cui
-# @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
-# @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
-# @version    0.1
-# @date       2015.08.01
 
 #' @include shm.R
 NULL

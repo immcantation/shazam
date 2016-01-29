@@ -1,9 +1,4 @@
-# S4 Class defining RegionDefinitions
-# @author     Mohamed Uduman, Gur Yaari
-# @copyright  Copyright 2014 Kleinstein Lab, Yale University. All rights reserved
-# @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
-# @version    0.1
-# @date       2015.03.08
+# Class definitions for sequence regions
 
 #' @include shm.R
 NULL

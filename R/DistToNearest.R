@@ -1,9 +1,4 @@
-# Generates distance to nearest neighbor by using S5F mutability model
-#
-# @author     Namita Gupta, Gur Yaari, Mohamed Uduman
-# @copyright  Copyright 2013 Kleinstein Lab, Yale University. All rights reserved
-# @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported
-# @date       2015.03.09
+# Generates distance to nearest neighbor
 
 #' @include shm.R
 NULL
