@@ -269,7 +269,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
     # Calculate symmetric distance matrix
     matDistance <- getPairwiseDistances(arrJunctionsUnique, targeting_model, normalize, symmetry)
     # Find minimum distance for each sequence
-    arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJunctions, function(i){ min(matDistance[-i,i]) })
+    arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJunctions, function(i){ min(matDistance[,i][matDistance[,i]>0]) })
     names(arrUniqueJunctionsDist) <- arrJunctionsUnique
   }
 
@@ -317,7 +317,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
       })))
     matDistance <- matDistance + t(matDistance)
     # Find minimum distance for each sequence
-    arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJunctions, function(i){ min(matDistance[-i,i]) })
+    arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJunctions, function(i){ min(matDistance[,i][matDistance[,i]>0]) })
     names(arrUniqueJunctionsDist) <- arrJunctionsUnique
   }
   
