@@ -382,7 +382,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
+#' file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(file)
 #' 
 #' # Use genotyped V assignments, HS1F model, and normalize by junction length

@@ -1175,7 +1175,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     base_theme <- theme_bw() +
         theme(panel.margin=grid::unit(0, "lines"),
               panel.background=element_blank()) +
-        theme(axis.ticks.margin=grid::unit(0, "lines")) +
+        theme(axis.text=element_text(margin=grid::unit(0, "lines"))) +
         theme(text=element_text(size=10*size),
               title=element_text(size=10*size),
               legend.margin=grid::unit(0, "lines"))
@@ -1229,10 +1229,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         
         # Order 5-mers by positions, with reversed order if center nucleotide is G or T
         if (center_nuc %in% c("A", "C")) {
-            sub_df <- dplyr::arrange(sub_df, pos1, pos2, pos4, pos5)
+            sub_df <- dplyr::arrange_(sub_df, .dots=c("pos1", "pos2", "pos4", "pos5"))
             sub_df$x <- 1:nrow(sub_df)            
         } else if (center_nuc %in% c("G", "T")) {
-            sub_df <- dplyr::arrange(sub_df, pos5, pos4, pos2, pos1)
+            sub_df <- dplyr::arrange(sub_df, .dots=c("pos5", "pos4", "pos2", "pos1"))
             sub_df$x <- 1:nrow(sub_df)
         } else {
             stop("Invalid nucleotide choice")
@@ -1241,7 +1241,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         # Melt 5-mer position data
         sub_melt <- sub_df %>% 
             tidyr::gather(pos, char, one_of(colnames(mut_positions))) %>% 
-            select(x, pos, char)
+            select_(.dots=c("x", "pos", "char"))
         #sub_melt$pos <- factor(sub_melt$pos, levels=mut_names)
         #sub_melt$pos <- as.numeric(sub_melt$pos)
         sub_melt$pos <- as.numeric(gsub("pos", "", sub_melt$pos))
@@ -1284,28 +1284,21 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             xlab("") +
             ylab("") + 
             scale_color_manual(name="Motif", values=motif_colors) +
-            #scale_fill_manual(name="", values=dna_colors, guide=FALSE) +
             scale_fill_manual(name="", values=c(motif_colors, dna_colors), guide=FALSE) +
-            #geom_rect(xmin=0, xmax = Inf, ymin=0, ymax=5, fill="white") +
-            geom_tile(data=sub_melt, mapping=aes(x=x, y=pos, fill=char), size=0, show_guide=FALSE) +
-            #geom_tile(data=sub_rect, mapping=aes(x=text_x, y=text_y, fill=text_label), 
-            #          size=0, show_guide=FALSE) +
-            #geom_rect(data=sub_rect, mapping=aes(xmin=rect_min, xmax=rect_max, 
-            #                                     ymin=text_y - 0.5, ymax=text_y + 0.5, fill=text_label), 
-            #          size=0, show_guide=FALSE) +
-            geom_text(data=sub_text[[3]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+            geom_tile(data=sub_melt, mapping=aes_string(x="x", y="pos", fill="char"), size=0, show.legend=FALSE) +
+            geom_text(data=sub_text[[3]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
                       color="black", hjust=0.5, vjust=0.5, size=2*size, fontface=2)
         
         # Add 5-mer nucleotide labels
         if (center_nuc %in% c("A", "C")) {
-            p1 <- p1 + geom_text(data=sub_text[[1]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+            p1 <- p1 + geom_text(data=sub_text[[1]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
                                  color="black", hjust=0.5, vjust=0.5, size=2*size) +
-                geom_text(data=sub_text[[2]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+                geom_text(data=sub_text[[2]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
                           color="black", hjust=0.5, vjust=0.5, size=2*size)
         } else if (center_nuc %in% c("G", "T")) {
-            p1 <- p1 + geom_text(data=sub_text[[4]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+            p1 <- p1 + geom_text(data=sub_text[[4]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
                                  color="black", hjust=0.5, vjust=0.5, size=2*size) +
-                geom_text(data=sub_text[[5]], mapping=aes(x=text_x, y=text_y, label=text_label), 
+                geom_text(data=sub_text[[5]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
                           color="black", hjust=0.5, vjust=0.5, size=2*size)
         }
 
@@ -1327,10 +1320,8 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
                 scale_x_continuous(expand=c(0, 0)) +
                 scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
                 coord_polar(theta="x") +
-                geom_segment(data=sub_df, mapping=aes(x=x, xend=x, yend=score, color=motif), 
+                geom_segment(data=sub_df, mapping=aes_string(x="x", xend="x", yend="score", color="motif"), 
                              y=score_offset, size=0.75*size)
-                #geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif, color=motif), 
-                #         stat="identity", position="identity", size=0, width=0.5)
         } else if (style == "bar") {
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
@@ -1346,7 +1337,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
                 scale_x_continuous(expand=c(0, 1)) +
                 scale_y_continuous(limits=y_limits, breaks=y_breaks, expand=c(0, 0.5),
                                    labels=function(x) scales::scientific(.invert_score(x))) +
-                geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif, color=motif), 
+                geom_bar(data=sub_df, mapping=aes_string(x="x", y="score", fill="motif", color="motif"), 
                          stat="identity", position="identity", size=0, width=0.7)
         }
 

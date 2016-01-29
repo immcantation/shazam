@@ -76,6 +76,8 @@
 #'                                           5-mer targeting model.
 #' }
 #'
+#' @name     shm
+#' @docType  package
 #' @references
 #' \enumerate{
 #'   \item  Hershberg U, et al. Improved methods for detecting selection by mutation 
@@ -91,23 +93,28 @@
 #'            Front Immunol. 2013 4:358.
 #'  }
 #' 
-#' @name     shm
-#' @docType  package
-#' 
 #' @import   alakazam
-#' @import   data.table
-#' @import   doParallel
-#' @import   dplyr
-#' @import   foreach
 #' @import   ggplot2
 #' @import   graphics
 #' @import   methods
 #' @import   utils
-#' @importFrom  scales     scientific
-#' @importFrom  tidyr      gather
-#' @importFrom  iterators  icount
-#' @importFrom  SDMTools   wt.sd
-#' @importFrom  seqinr     c2s s2c words translate
+#' @importFrom  data.table  data.table setkey setkeyv
+#' @importFrom  doParallel  registerDoParallel
+#' @importFrom  dplyr       do n desc %>%
+#'                          as_data_frame data_frame data_frame_
+#'                          bind_cols bind_rows combine
+#'                          filter filter_ select select_ arrange arrange_
+#'                          group_by group_by_ ungroup
+#'                          mutate mutate_ transmute transmute_
+#'                          rename rename_ summarize summarize_
+#' @importFrom  foreach     foreach %dopar% registerDoSEQ
+#' @importFrom  lazyeval    interp
+#' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format
+#'                          math_format percent scientific
+#' @importFrom  tidyr       gather
+#' @importFrom  iterators   icount
+#' @importFrom  SDMTools    wt.sd
+#' @importFrom  seqinr      c2s s2c words translate
 NULL
 
 #### Classes ####

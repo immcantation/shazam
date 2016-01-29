@@ -36,6 +36,7 @@ Imports:
     grid,
     iterators,
     methods,
+    lazyeval,
     parallel,
     SDMTools,
     scales,

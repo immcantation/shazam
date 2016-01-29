@@ -1341,7 +1341,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
         aes_string(color=groupColumn) + facet_grid(REGION ~ .)
     } else if (!is.null(groupColumn) & facetBy == "group") {
       p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
-        aes(color=REGION) + facet_grid(paste(groupColumn, "~ ."))
+        aes_string(color="REGION") + facet_grid(paste(groupColumn, "~ ."))
     } else {
       stop("Cannot facet by group if groupColumn=NULL")
     }
@@ -1510,7 +1510,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
       ylab(expression(Sigma)) +
       geom_hline(yintercept=0, size=1*size, linetype=2, color="grey") +
       geom_point(size=3*size, position=position_dodge(0.6)) +
-      geom_errorbar(aes(ymin=BASELINE_CI_LOWER, ymax=BASELINE_CI_UPPER), 
+      geom_errorbar(aes_string(ymin="BASELINE_CI_LOWER", ymax="BASELINE_CI_UPPER"), 
                     width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.6))
     if (is.null(groupColumn) & facetBy == "region") {
       p1 <- p1 + facet_grid(REGION ~ .)
@@ -1522,7 +1522,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
       p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
     } else if (!is.null(groupColumn) & facetBy == "group") {
       p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
-        aes(color=REGION) + facet_grid(paste(groupColumn, "~ ."))
+        aes_string(color="REGION") + facet_grid(paste(groupColumn, "~ ."))
     } else {
       stop("Cannot facet by group if groupColumn=NULL")
     }
