@@ -1211,8 +1211,8 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     mut_df$motif <- factor(mut_df$motif, levels=c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
     
     # Subset to nucleotides of interest
-    mut_df <- subset(mut_df, pos3 %in% nucleotides)
-    
+    mut_df <- mut_df[mut_df$pos3 %in% nucleotides, ]
+
     # Functions to transform and revert score for plotting
     score_max <- max(mut_df$score, na.rm=TRUE)
     .transform_score <- function(x) { x / score_max * score_scale + score_offset }
@@ -1226,7 +1226,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     for (center_nuc in nucleotides) {
         # center_nuc <- "C"
         # Subset data to center nucleotide
-        sub_df <- subset(mut_df, pos3 == center_nuc)
+        sub_df <- mut_df[mut_df$pos3 == center_nuc, ]
         
         # Order 5-mers by positions, with reversed order if center nucleotide is G or T
         if (center_nuc %in% c("A", "C")) {
@@ -1241,7 +1241,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         
         # Melt 5-mer position data
         sub_melt <- sub_df %>% 
-            tidyr::gather(pos, char, one_of(colnames(mut_positions))) %>% 
+            tidyr::gather_("pos", "char", colnames(mut_positions)) %>% 
             select_(.dots=c("x", "pos", "char"))
         #sub_melt$pos <- factor(sub_melt$pos, levels=mut_names)
         #sub_melt$pos <- as.numeric(sub_melt$pos)
@@ -1275,8 +1275,9 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
 
         # Define text and rectangle positions for inner circle
         sub_melt$pos <- sub_melt$pos + text_offset
-        sub_text <- lapply(sub_text, function(x) { transform(x, text_y=text_y + text_offset) })
-        sub_rect <- dplyr::bind_rows(sub_text)
+        sub_text <- lapply(sub_text, function(x) { dplyr::mutate_(x, text_y=interp(~ y + text_offset, y=as.name("text_y"))) })
+        #sub_text <- lapply(sub_text, function(x) { transform(x, text_y=text_y + text_offset) })
+        #sub_rect <- dplyr::bind_rows(sub_text)
 
         # Define base plot object
         p1 <- ggplot(sub_df) + 
@@ -1306,8 +1307,8 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         # Add style options and mutability scores
         if (style == "hedgehog") {
             y_limits <- c(text_offset - 1, score_scale + score_offset)
-            orient_x <- sub_text[[3]]$text_x[1]
-            orient_y <- text_offset - 1
+            #orient_x <- sub_text[[3]]$text_x[1]
+            #orient_y <- text_offset - 1
             p1 <- p1 + theme(plot.margin=grid::unit(c(0, 0, 0, 0), "lines"),
                              panel.grid=element_blank(), 
                              panel.border=element_blank(),

@@ -1,8 +1,10 @@
 #### Region boundaries ####
-#VLENGTH <- 312
+
+VLENGTH <- 312
 
 #### Nucleotide characters ####
-#NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
+
+NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
 
 #### Codon translations ####
 
@@ -49,12 +51,14 @@ load("data-raw/BAYESIAN_FITTED.RData")
 load("data-raw/CONST_I.RData")
 
 #### Save to R/sysdata.rda ####
-devtools::use_data(CDR_Nuc_Mat, 
+devtools::use_data(NUCLEOTIDES,
+                   VLENGTH,
+                   CDR_Nuc_Mat, 
                    FWR_Nuc_Mat, 
-                   CODON_TABLE,
-                   AMINO_ACIDS,
                    BAYESIAN_FITTED,
                    CONST_I,
+                   CODON_TABLE,
+                   AMINO_ACIDS,
                    AMINO_ACIDS_HYDROPATHY,
                    AMINO_ACIDS_POLARITY,
                    AMINO_ACIDS_CHARGE,

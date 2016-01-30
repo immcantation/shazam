@@ -108,8 +108,8 @@ checkColumns <- function(data, columns, logic=c("all", "any")) {
 #' getPlatform()
 #' 
 #' @export
-getPlatform <-function(){
-    return(.Platform$OS.typ)
+getPlatform <- function() {
+    return(.Platform$OS.type)
 }
 
 
@@ -123,11 +123,15 @@ getPlatform <-function(){
 #' @export
 getnproc <-function(){
     platform <- getPlatform()
-    nproc <- 1
-    if(platform=="windows") nproc <- Sys.getenv('NUMBER_OF_PROCESSORS')
-    if(platform=="unix") nproc <- parallel::detectCores()
-    #nproc <- system("nproc", intern=TRUE)
-    return(as.numeric(nproc))
+    if (platform == "windows") {
+        nproc <- as.numeric(Sys.getenv('NUMBER_OF_PROCESSORS'))
+    } else if (platform == "unix") { 
+        nproc <- parallel::detectCores()
+    } else {
+        nproc <- 1    
+    }
+
+    return(nproc)
 }
 
 
@@ -141,7 +145,9 @@ getnproc <-function(){
 #' @export
 clearConsole <- function(){
     platform <- getPlatform()
-    nproc <- 1
-    if(platform=="windows") cat("\014")
-    if(platform=="unix") system('clear')
+    if (platform == "windows") {
+        cat("\014")
+    } else if (platform == "unix") {
+        system('clear')
+    }
 }

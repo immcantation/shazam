@@ -117,42 +117,14 @@
 #' @importFrom  seqinr      c2s s2c words translate
 NULL
 
-#### Classes ####
-
-#setOldClass("data.frame")
-#setOldClass("tbl_df")
-#setClassUnion("GenericDataFrame", c("data.frame", "tbl_df"))
-
-#### Constants ####
-
-# IMGT V-region definitions
-#VREGIONS <- factor(c(rep("FWR", 78), 
-#                     rep("CDR", 36), 
-#                     rep("FWR", 51), 
-#                     rep("CDR", 30), 
-#                     rep("FWR", 117)), 
-#                   levels=c("FWR", "CDR"))
-
-# IMGT V-region length
-#readEnd <- 312
-#VLENGTH <- length(VREGIONS)
-VLENGTH <- 312
-
-# Nucleotide characters
-NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
-
-# Amino acid characters
-#AMINO_ACIDS <- c("F", "F", "L", "L", "S", "S", "S", "S", "Y", "Y", "*", "*", "C", "C", "*", "W", "L", "L", "L", "L", "P", "P", "P", "P", "H", "H", "Q", "Q", "R", "R", "R", "R", "I", "I", "I", "M", "T", "T", "T", "T", "N", "N", "K", "K", "S", "S", "R", "R", "V", "V", "V", "V", "A", "A", "A", "A", "D", "D", "E", "E", "G", "G", "G", "G")
-#names(AMINO_ACIDS) <- c("TTT", "TTC", "TTA", "TTG", "TCT", "TCC", "TCA", "TCG", "TAT", "TAC", "TAA", "TAG", "TGT", "TGC", "TGA", "TGG", "CTT", "CTC", "CTA", "CTG", "CCT", "CCC", "CCA", "CCG", "CAT", "CAC", "CAA", "CAG", "CGT", "CGC", "CGA", "CGG", "ATT", "ATC", "ATA", "ATG", "ACT", "ACC", "ACA", "ACG", "AAT", "AAC", "AAA", "AAG", "AGT", "AGC", "AGA", "AGG", "GTT", "GTC", "GTA", "GTG", "GCT", "GCC", "GCA", "GCG", "GAT", "GAC", "GAA", "GAG", "GGT", "GGC", "GGA", "GGG")
-
-#Amino Acid Traits
-#"*" "A" "C" "D" "E" "F" "G" "H" "I" "K" "L" "M" "N" "P" "Q" "R" "S" "T" "V" "W" "Y"
-#B = "Hydrophobic/Burried"  N = "Intermediate/Neutral"  S="Hydrophilic/Surface")
-#TRAITS_AMINO_ACIDS_CHOTHIA98 <- c("*","N","B","S","S","B","N","N","B","S","B","B","S","N","S","S","N","N","B","B","N")
-#names(TRAITS_AMINO_ACIDS_CHOTHIA98) <- sort(unique(AMINO_ACIDS))
-#TRAITS_AMINO_ACIDS <- array(NA, 21)
 
 #### Sysdata ####
+
+# Ordered nucleotide character set
+# NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
+
+# IMGT V segment length
+# VLENGTH <- 312
 
 # 5x312 logical matrix of CDR positions
 # CDR_Nuc_Mat
@@ -160,8 +132,20 @@ NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
 # 5x312 logical matrix of FWR positions
 # FWR_Nuc_Mat
 
-# Vector of codon amino acid translations
-# CODON_AA_TABLE
-
 # 12x216 matrix of replacement and silent mutation permutations
 # CODON_TABLE
+
+# 1x24 vector of amino acid charge classes
+# AMINO_ACIDS_CHARGE
+
+# 1x24 vector of amino acid hydropathy classes
+# AMINO_ACIDS_HYDROPATHY
+
+# 1x24 vector of amino acid polarity classes
+# AMINO_ACIDS_POLARITY
+
+# TODO: What is this?
+# CONST_I
+
+# TODO: And what is this?
+# BAYESIAN_FITTED

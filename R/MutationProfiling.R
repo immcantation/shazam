@@ -85,6 +85,9 @@ collapseByClone <- function(db,
                             regionDefinition=IMGT_V_NO_CDR3,
                             nonTerminalOnly = FALSE,
                             nproc=1) {
+    # Hack for visibility of data.table and foreach index variables
+    idx <- yidx <- .I <- NULL
+
     # Check for valid columns
     check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
@@ -96,15 +99,15 @@ collapseByClone <- function(db,
     }
     
     if (class(expandedDb) != "logical") {
-      stop ("expandedDb must be TRUE or FALSE.")
+        stop ("expandedDb must be TRUE or FALSE.")
     }
-        
+    
     if (class(nonTerminalOnly) != "logical") {
         stop ("nonTerminalOnly must be TRUE or FALSE.")
     }
-        
-      
-    db[,cloneColumn] <- as.numeric(db[,cloneColumn])
+    
+    # TODO: Why is this converted to numeric?  Won't that break?
+    db[, cloneColumn] <- as.numeric(db[, cloneColumn])
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
@@ -112,29 +115,30 @@ collapseByClone <- function(db,
     # Convert the db (data.frame) to a data.table & set keys
     # This is an efficient way to get the groups of CLONES, instead of doing dplyr
     dt <- data.table(db)
-    setkeyv(dt, cloneColumn )
+    setkeyv(dt, cloneColumn)
     # Get the group indexes
-    dt <- dt[ , list( yidx = list(.I) ) , by = list(CLONE) ]
-    groups <- dt[,yidx]
+    #dt <- dt[, list(yidx=list(.I)), by=list(CLONE)]
+    dt <- dt[, list(yidx=list(.I)), by=cloneColumn]
+    groups <- dt[, yidx]
     lenGroups <- length(groups)
     
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.
-    if( nproc==1 ) {
+    if (nproc == 1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     } else {
-        if(nproc != 0) { 
+        if (nproc != 0) { 
             #cluster <- makeCluster(nproc, type="SOCK") 
             cluster <- parallel::makeCluster(nproc, type= "PSOCK")
         }
         parallel::clusterExport( cluster, list('db', 
-                                     'sequenceColumn', 'germlineColumn', 'cloneColumn',
-                                     'regionDefinition', 'calcClonalConsensus',
-                                     'groups', 'c2s', 's2c', 'words', 'translate'), 
-                       envir=environment() )
+                                               'sequenceColumn', 'germlineColumn', 'cloneColumn',
+                                               'regionDefinition', 'calcClonalConsensus',
+                                               'groups', 'c2s', 's2c', 'words', 'translate'), 
+                                 envir=environment() )
         registerDoParallel(cluster)
     }
     
@@ -142,12 +146,12 @@ collapseByClone <- function(db,
     cat("Collapsing clonal sequences...\n")
     
     list_ClonalConsensus <-
-      foreach(i=iterators::icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass') %dopar% {
-        calcClonalConsensus(inputSeq = db[groups[[i]],sequenceColumn],
-                           germlineSeq = db[groups[[i]],germlineColumn],
-                           regionDefinition = regionDefinition, 
-                           nonTerminalOnly = nonTerminalOnly)
-      }
+        foreach(idx=iterators::icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass') %dopar% {
+            calcClonalConsensus(inputSeq = db[groups[[idx]],sequenceColumn],
+                                germlineSeq = db[groups[[idx]],germlineColumn],
+                                regionDefinition = regionDefinition, 
+                                nonTerminalOnly = nonTerminalOnly)
+        }
     
     # Stop cluster
     if(nproc > 1) { #
@@ -156,16 +160,16 @@ collapseByClone <- function(db,
     
     # If expandedDb is FALSE then collapse the db by clones
     if(expandedDb==FALSE){ 
-      uniqueCloneIDs <-  unique(db[,cloneColumn])
-      indexOfFirstOccurenceOfClone <- match(uniqueCloneIDs, db[,cloneColumn])
-      db_ClonalConsensus <- db[indexOfFirstOccurenceOfClone, ]
-      db_ClonalConsensus$CLONAL_SEQUENCE <- unlist(list_ClonalConsensus)
+        uniqueCloneIDs <-  unique(db[,cloneColumn])
+        indexOfFirstOccurenceOfClone <- match(uniqueCloneIDs, db[,cloneColumn])
+        db_ClonalConsensus <- db[indexOfFirstOccurenceOfClone, ]
+        db_ClonalConsensus$CLONAL_SEQUENCE <- unlist(list_ClonalConsensus)
     }else{
-      # Match the ClonalConsensus to all the sequences in the clone
-      vec_ClonalConsensus <- unlist(list_ClonalConsensus)
-      expanded_ClonalConsensus <- tapply(db[,cloneColumn],1:nrow(db),function(x){return(vec_ClonalConsensus[x])})
-      db_ClonalConsensus <- db
-      db_ClonalConsensus$CLONAL_SEQUENCE <- unlist(expanded_ClonalConsensus)
+        # Match the ClonalConsensus to all the sequences in the clone
+        vec_ClonalConsensus <- unlist(list_ClonalConsensus)
+        expanded_ClonalConsensus <- tapply(db[,cloneColumn],1:nrow(db),function(x){return(vec_ClonalConsensus[x])})
+        db_ClonalConsensus <- db
+        db_ClonalConsensus$CLONAL_SEQUENCE <- unlist(expanded_ClonalConsensus)
     }
     
     return(db_ClonalConsensus)
@@ -334,12 +338,15 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #'                      
 #' @export
 calcDBObservedMutations <- function(db, 
-                                   sequenceColumn="SEQUENCE_IMGT",
-                                   germlineColumn="GERMLINE_IMGT_D_MASK",
-                                   frequency=FALSE,
-                                   regionDefinition=IMGT_V_NO_CDR3,
-                                   aminoAcidClasses=NULL,
-                                   nproc=1) {
+                                    sequenceColumn="SEQUENCE_IMGT",
+                                    germlineColumn="GERMLINE_IMGT_D_MASK",
+                                    frequency=FALSE,
+                                    regionDefinition=IMGT_V_NO_CDR3,
+                                    aminoAcidClasses=NULL,
+                                    nproc=1) {
+    # Hack for visibility of data.table and foreach index variables
+    idx <- NULL
+    
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
@@ -350,7 +357,7 @@ calcDBObservedMutations <- function(db,
         nproc = 0
     }
     if(frequency==TRUE){  
-      regionDefinition=NULL  
+        regionDefinition=NULL  
     }
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
@@ -361,15 +368,15 @@ calcDBObservedMutations <- function(db,
     if(nproc>1){        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
-                                          'regionDefinition', 'frequency',
-                                          'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
-                                          'getCodonPos','getContextInCodon','mutationType',
-                                          'translateCodonToAminoAcid','AMINO_ACIDS','binMutationsByRegion',
-                                          'collapseMatrixToVector',
-                                          'AMINO_ACID_HYDROPATHY',
-                                          'AMINO_ACID_POLARITY',
-                                          'AMINO_ACID_CHARGE'), 
-                            envir=environment())
+                                              'regionDefinition', 'frequency',
+                                              'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
+                                              'getCodonPos','getContextInCodon','mutationType',
+                                              'translateCodonToAminoAcid','AMINO_ACIDS','binMutationsByRegion',
+                                              'collapseMatrixToVector',
+                                              'AMINO_ACID_HYDROPATHY',
+                                              'AMINO_ACID_POLARITY',
+                                              'AMINO_ACID_CHARGE'), 
+                                envir=environment())
         registerDoParallel(cluster)
     } else if (nproc==1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
@@ -386,9 +393,9 @@ calcDBObservedMutations <- function(db,
     # the nucleotide position of the mutations.
     numbOfSeqs <- nrow(db)
     observedMutations_list <-
-        foreach(i=iterators::icount(numbOfSeqs)) %dopar% {
-            calcObservedMutations(db[i, sequenceColumn], 
-                                  db[i, germlineColumn],
+        foreach(idx=iterators::icount(numbOfSeqs)) %dopar% {
+            calcObservedMutations(db[idx, sequenceColumn], 
+                                  db[idx, germlineColumn],
                                   frequency=frequency,
                                   regionDefinition=regionDefinition,
                                   aminoAcidClasses=aminoAcidClasses)
@@ -396,9 +403,9 @@ calcDBObservedMutations <- function(db,
     
     # Convert list of mutations to data.frame
     if (!is.null(regionDefinition)) {
-      labels_length <- length(regionDefinition@labels)
+        labels_length <- length(regionDefinition@labels)
     } else{
-      labels_length=1
+        labels_length=1
     }
     observed_mutations <- do.call( rbind, lapply(observedMutations_list, function(x) { 
         length(x) <- labels_length 
@@ -410,9 +417,9 @@ calcDBObservedMutations <- function(db,
     if (ncol(observed_mutations) > 1) sep <- "_"
     observed_mutations[is.na(observed_mutations)] <- 0
     if (frequency == TRUE) {
-      colnames(observed_mutations) <- paste("MU_FREQ", colnames(observed_mutations), sep=sep)
+        colnames(observed_mutations) <- paste("MU_FREQ", colnames(observed_mutations), sep=sep)
     } else {
-      colnames(observed_mutations) <- paste("OBSERVED", colnames(observed_mutations), sep=sep)
+        colnames(observed_mutations) <- paste("OBSERVED", colnames(observed_mutations), sep=sep)
     }
     
     # Properly shutting down the cluster
@@ -684,6 +691,9 @@ calcDBExpectedMutations <- function(db,
                                     targetingModel=HS5FModel,
                                     regionDefinition=IMGT_V_NO_CDR3,
                                     nproc=1) {
+    # Hack for visibility of data.table and foreach index variables
+    idx <- NULL
+    
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
@@ -700,16 +710,16 @@ calcDBExpectedMutations <- function(db,
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.  
-    if(nproc>1){        
+    if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
-                                     'regionDefinition','targetingModel',
-                                     'calcExpectedMutations','calculateTargeting',
-                                     's2c','c2s','NUCLEOTIDES','HS5FModel',
-                                     'calculateMutationalPaths','CODON_TABLE'),
+                                              'regionDefinition','targetingModel',
+                                              'calcExpectedMutations','calculateTargeting',
+                                              's2c','c2s','NUCLEOTIDES','HS5FModel',
+                                              'calculateMutationalPaths','CODON_TABLE'),
                                 envir=environment() )
         registerDoParallel(cluster)
-    } else if( nproc==1 ) {
+    } else if (nproc == 1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
@@ -725,11 +735,11 @@ calcDBExpectedMutations <- function(db,
     numbOfSeqs <- nrow(db)
     
     targeting_list <-
-        foreach( i=iterators::icount(numbOfSeqs) ) %dopar% {
-          calcExpectedMutations(germlineSeq = db[i,germlineColumn],
-                                inputSeq = db[i,sequenceColumn],
-                                targetingModel = HS5FModel,
-                                regionDefinition = regionDefinition)
+        foreach (idx=iterators::icount(numbOfSeqs)) %dopar% {
+            calcExpectedMutations(germlineSeq = db[idx, germlineColumn],
+                                  inputSeq = db[idx, sequenceColumn],
+                                  targetingModel = HS5FModel,
+                                  regionDefinition = regionDefinition)
         }
     
     # Convert list of expected mutation freq to data.frame

@@ -358,226 +358,228 @@ calcBaseline <- function(db,
                          targetingModel=HS5FModel,
                          calcStats=FALSE,
                          nproc=1) {
-  
-  # Evaluate argument choices
-  testStatistic <- match.arg(testStatistic, c("local", "focused","imbalance"))
-  
-  # Check for valid columns
-  check <- checkColumns(db, c(sequenceColumn, germlineColumn))
-  if (check != TRUE) { stop(check) }
-  
-  
-  # Ensure that the nproc does not exceed the number of cores/CPUs available
-  nproc <- min(nproc, getnproc())
-  # nproc_arg will be passeed to any function that has the nproc argument
-  # If the cluster is already being set by the parent function then 
-  # this will be set to 'cluster', that way the child function does not close
-  # the connections and reset the cluster.
-  nproc_arg <- nproc
-  
-  # If user wants to paralellize this function and specifies nproc > 1, then
-  # initialize and register slave R processes/clusters & 
-  # export all nesseary environment variables, functions and packages.  
-  if(nproc>1){        
-    cluster <- parallel::makeCluster(nproc, type= "PSOCK")
-    parallel::clusterExport( cluster, list( 'db',
-                                        'sequenceColumn', 'germlineColumn', 
-                                        'regionDefinition',
-                                        'break2chunks', 'PowersOfTwo', 
-                                        'convolutionPowersOfTwo', 
-                                        'convolutionPowersOfTwoByTwos', 
-                                        'weighted_conv', 
-                                        'calculate_bayesGHelper', 
-                                        'groupPosteriors', 'fastConv',
-                                        'calcBaselineHelper',
-                                        'c2s', 's2c', 'words', 'translate',
-                                        'calcBaselineBinomialPdf','CONST_I',
-                                        'BAYESIAN_FITTED','calcClonalConsensus',
-                                        'calcObservedMutations','NUCLEOTIDES',
-                                        'getCodonPos','getContextInCodon',
-                                        'mutationType','translateCodonToAminoAcid',
-                                        'AMINO_ACIDS','binMutationsByRegion',
-                                        'collapseMatrixToVector','calcExpectedMutations',
-                                        'calculateTargeting','HS5FModel','calculateMutationalPaths',
-                                        'CODON_TABLE'
-                                        ), 
-                         envir=environment() )    
-    registerDoParallel(cluster, cores=nproc)
-    nproc_arg <- cluster
-  } else if( nproc==1 ) {
-    # If needed to run on a single core/cpu then, regsiter DoSEQ 
-    # (needed for 'foreach' in non-parallel mode)
-    registerDoSEQ()
-  }
-  
-  # If db does not contain the required columns to calculate the PDFs (namely OBSERVED 
-  # & EXPECTED mutations), then the function will:
-  #          1. Collapse the sequences by the CLONE column (if present)
-  #          2. Calculate the numbers of observed mutations
-  #          3. Calculate the expected frequencies of mutations    
-  # After that BASELINe prob. densities can be calcualted per seqeunce.    
-  observedColumns <- paste0("OBSERVED_", regionDefinition@labels)
-  expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
-  
-  if( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
+    # Hack for visibility of data.table and foreach index variables
+    idx <- NULL
     
-    # If the germlineColumn & sequenceColumn are not found in the db error and quit
-    if( !all( c(sequenceColumn, germlineColumn) %in% colnames(db) ) ) {
-      stop( paste0("Both ", sequenceColumn, " & ", germlineColumn, 
-                   " columns need to be present in the db") )
+    # Evaluate argument choices
+    testStatistic <- match.arg(testStatistic, c("local", "focused","imbalance"))
+    
+    # Check for valid columns
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn))
+    if (check != TRUE) { stop(check) }
+    
+    
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, getnproc())
+    # nproc_arg will be passeed to any function that has the nproc argument
+    # If the cluster is already being set by the parent function then 
+    # this will be set to 'cluster', that way the child function does not close
+    # the connections and reset the cluster.
+    nproc_arg <- nproc
+    
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.  
+    if (nproc > 1) {        
+        cluster <- parallel::makeCluster(nproc, type= "PSOCK")
+        parallel::clusterExport(cluster, list('db',
+                                              'sequenceColumn', 'germlineColumn', 
+                                              'regionDefinition',
+                                              'break2chunks', 'PowersOfTwo', 
+                                              'convolutionPowersOfTwo', 
+                                              'convolutionPowersOfTwoByTwos', 
+                                              'weighted_conv', 
+                                              'calculate_bayesGHelper', 
+                                              'groupPosteriors', 'fastConv',
+                                              'calcBaselineHelper',
+                                              'c2s', 's2c', 'words', 'translate',
+                                              'calcBaselineBinomialPdf','CONST_I',
+                                              'BAYESIAN_FITTED','calcClonalConsensus',
+                                              'calcObservedMutations','NUCLEOTIDES',
+                                              'getCodonPos','getContextInCodon',
+                                              'mutationType','translateCodonToAminoAcid',
+                                              'AMINO_ACIDS','binMutationsByRegion',
+                                              'collapseMatrixToVector','calcExpectedMutations',
+                                              'calculateTargeting','HS5FModel','calculateMutationalPaths',
+                                              'CODON_TABLE'
+        ), 
+        envir=environment() )    
+        registerDoParallel(cluster, cores=nproc)
+        nproc_arg <- cluster
+    } else if( nproc==1 ) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
     }
     
-    # Collapse the sequences by the CLONE column (if present)
-    if( "CLONE" %in% colnames(db) ) {                       
-      db <- collapseByClone(db, 
-                            cloneColumn="CLONE", 
-                            sequenceColumn=sequenceColumn,
-                            germlineColumn=germlineColumn,
-                            expandedDb=FALSE, nproc=nproc_arg)            
-      sequenceColumn="CLONAL_SEQUENCE"
-    }
+    # If db does not contain the required columns to calculate the PDFs (namely OBSERVED 
+    # & EXPECTED mutations), then the function will:
+    #          1. Collapse the sequences by the CLONE column (if present)
+    #          2. Calculate the numbers of observed mutations
+    #          3. Calculate the expected frequencies of mutations    
+    # After that BASELINe prob. densities can be calcualted per seqeunce.    
+    observedColumns <- paste0("OBSERVED_", regionDefinition@labels)
+    expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
     
-    # Calculate the numbers of observed mutations
-    db <- calcDBObservedMutations(db,
+    if( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
+        
+        # If the germlineColumn & sequenceColumn are not found in the db error and quit
+        if( !all( c(sequenceColumn, germlineColumn) %in% colnames(db) ) ) {
+            stop( paste0("Both ", sequenceColumn, " & ", germlineColumn, 
+                         " columns need to be present in the db") )
+        }
+        
+        # Collapse the sequences by the CLONE column (if present)
+        if( "CLONE" %in% colnames(db) ) {                       
+            db <- collapseByClone(db, 
+                                  cloneColumn="CLONE", 
                                   sequenceColumn=sequenceColumn,
-                                  germlineColumn="GERMLINE_IMGT_D_MASK",
-                                  regionDefinition=regionDefinition,
-                                  nproc=0)
+                                  germlineColumn=germlineColumn,
+                                  expandedDb=FALSE, nproc=nproc_arg)            
+            sequenceColumn="CLONAL_SEQUENCE"
+        }
+        
+        # Calculate the numbers of observed mutations
+        db <- calcDBObservedMutations(db,
+                                      sequenceColumn=sequenceColumn,
+                                      germlineColumn="GERMLINE_IMGT_D_MASK",
+                                      regionDefinition=regionDefinition,
+                                      nproc=0)
+        
+        # Calculate the expected frequencies of mutations
+        db <- calcDBExpectedMutations( db,
+                                       sequenceColumn=sequenceColumn,
+                                       germlineColumn="GERMLINE_IMGT_D_MASK",
+                                       regionDefinition=regionDefinition,
+                                       targetingModel=targetingModel,
+                                       nproc=0 )
+    }
     
-    # Calculate the expected frequencies of mutations
-    db <- calcDBExpectedMutations( db,
-                                   sequenceColumn=sequenceColumn,
-                                   germlineColumn="GERMLINE_IMGT_D_MASK",
-                                   regionDefinition=regionDefinition,
-                                   targetingModel=targetingModel,
-                                   nproc=0 )
-  }
-  
-  # Calculate PDFs for each sequence
-  
-  # Print status to console
-  cat("Calculating BASELINe probability density functions...\n")
-  
-  # Number of sequences (used in foreach)
-  totalNumbOfSequences <- nrow(db)
-  # The column indexes of the OBSERVED_ and EXPECTED_
-  cols_observed <- grep( paste0("OBSERVED_"),  colnames(db) ) 
-  cols_expected <- grep( paste0("EXPECTED_"),  colnames(db) ) 
-  
-  # Exporting additional environment variables and functions needed to run foreach 
-  if( nproc!=1 ) {
-    parallel::clusterExport( 
-      cluster, list('cols_observed', 'cols_expected'), 
-      envir=environment() 
-    )
-    registerDoParallel(cluster)
-  }
-  
-  list_pdfs <- list()
-  list_numbOfSeqs <- list()
-  list_k <- list()
-  list_n <- list()
-  list_p <- list()
-  
-  regions <- regionDefinition@regions
-  # For every region (e.g. CDR, FWR etc.)
-  for (region in regions) {
+    # Calculate PDFs for each sequence
     
-    # Foreach returns a list of PDFs
-    list_region_pdfs <- 
-      foreach( i=iterators::icount(totalNumbOfSequences)) %dopar% {                
-        calcBaselineHelper( 
-          observed = db[i,cols_observed],
-          expected = db[i,cols_expected],
-          region = region,
-          testStatistic = testStatistic,
-          regionDefinition = regionDefinition
+    # Print status to console
+    cat("Calculating BASELINe probability density functions...\n")
+    
+    # Number of sequences (used in foreach)
+    totalNumbOfSequences <- nrow(db)
+    # The column indexes of the OBSERVED_ and EXPECTED_
+    cols_observed <- grep( paste0("OBSERVED_"),  colnames(db) ) 
+    cols_expected <- grep( paste0("EXPECTED_"),  colnames(db) ) 
+    
+    # Exporting additional environment variables and functions needed to run foreach 
+    if( nproc!=1 ) {
+        parallel::clusterExport( 
+            cluster, list('cols_observed', 'cols_expected'), 
+            envir=environment() 
         )
-      }
+        registerDoParallel(cluster)
+    }
     
-    # Count the number of non NA PDFs 
-    list_numbOfSeqs[[region]] <- rep(1,totalNumbOfSequences)
-    #is.na(list_region_pdfs)] <- 0
+    list_pdfs <- list()
+    list_numbOfSeqs <- list()
+    list_k <- list()
+    list_n <- list()
+    list_p <- list()
     
-    # Convert the list of the region's PDFs into a matrix                
+    regions <- regionDefinition@regions
+    # For every region (e.g. CDR, FWR etc.)
+    for (region in regions) {
+        
+        # Foreach returns a list of PDFs
+        list_region_pdfs <- 
+            foreach(idx=iterators::icount(totalNumbOfSequences)) %dopar% {                
+                calcBaselineHelper( 
+                    observed = db[idx, cols_observed],
+                    expected = db[idx, cols_expected],
+                    region = region,
+                    testStatistic = testStatistic,
+                    regionDefinition = regionDefinition
+                )
+            }
+        
+        # Count the number of non NA PDFs 
+        list_numbOfSeqs[[region]] <- rep(1,totalNumbOfSequences)
+        #is.na(list_region_pdfs)] <- 0
+        
+        # Convert the list of the region's PDFs into a matrix                
+        
+        mat_pdfs_binom <- 
+            do.call( rbind, 
+                     lapply( 
+                         list_region_pdfs, 
+                         function(x) { 
+                             length(x) <- 4004 
+                             return(x)
+                         }
+                     )
+            )
+        
+        list_pdfs[[region]] <- mat_pdfs_binom[,1:4001]
+        list_k[[region]] <- mat_pdfs_binom[,4002]
+        list_n[[region]] <- mat_pdfs_binom[,4003]
+        list_p[[region]] <- mat_pdfs_binom[,4004]
+        list_numbOfSeqs[[region]][is.na(list_k[[region]])] <- 0
+    }
     
-    mat_pdfs_binom <- 
-      do.call( rbind, 
-               lapply( 
-                 list_region_pdfs, 
-                 function(x) { 
-                   length(x) <- 4004 
-                   return(x)
-                 }
-               )
-      )
     
-    list_pdfs[[region]] <- mat_pdfs_binom[,1:4001]
-    list_k[[region]] <- mat_pdfs_binom[,4002]
-    list_n[[region]] <- mat_pdfs_binom[,4003]
-    list_p[[region]] <- mat_pdfs_binom[,4004]
-    list_numbOfSeqs[[region]][is.na(list_k[[region]])] <- 0
-  }
-  
-  
-  # Template for values for the regions
-  mat_template <- matrix( NA, 
-                        ncol=length(regions), 
-                        nrow=totalNumbOfSequences,
-                        dimnames=list( 1:totalNumbOfSequences, regions )
-  )
-  
-  # numbOfSeqs
-  # This holds the number of non NA sequences
-  numbOfSeqs <- mat_template
-  for(region in regions){
-    numbOfSeqs[,region] <-   list_numbOfSeqs[[region]]
-  }
-  
-  # binomK
-  # This holds the number of exact successin in the binomial trials
-  binomK <- mat_template
-  for(region in regions){
-    binomK[,region] <-   list_k[[region]]
-  }
-  
-  # binomN
-  # This holds the total numbers trials in the binomial
-  binomN <- mat_template
-  for(region in regions){
-    binomN[,region] <-   list_n[[region]]
-  }
+    # Template for values for the regions
+    mat_template <- matrix( NA, 
+                            ncol=length(regions), 
+                            nrow=totalNumbOfSequences,
+                            dimnames=list( 1:totalNumbOfSequences, regions )
+    )
     
-  # binomP
-  # This holds the prob of successin in the binomial trials
-  binomP <- mat_template
-  for(region in regions){
-    binomP[,region] <-   list_p[[region]]
-  }
-  
-  
-  # Create a Baseline object with the above results to return
-  baseline <- createBaseline(description="",
-                             db=as.data.frame(db),
-                             regionDefinition=regionDefinition,
-                             testStatistic=testStatistic,
-                             regions=regionDefinition@regions,
-                             numbOfSeqs=numbOfSeqs,
-                             binomK=binomK,
-                             binomN=binomN,
-                             binomP=binomP,
-                             pdfs=list_pdfs )
-  
-  # Calculate BASELINe stats and update slot
-  if (calcStats==TRUE) {
-    baseline <- summarizeBaseline(baseline)
-  }
-  
-  # Stop cluster
-  if (nproc > 1) { parallel::stopCluster(cluster) }
-  
-  return(baseline)
-  
+    # numbOfSeqs
+    # This holds the number of non NA sequences
+    numbOfSeqs <- mat_template
+    for(region in regions){
+        numbOfSeqs[,region] <-   list_numbOfSeqs[[region]]
+    }
+    
+    # binomK
+    # This holds the number of exact successin in the binomial trials
+    binomK <- mat_template
+    for(region in regions){
+        binomK[,region] <-   list_k[[region]]
+    }
+    
+    # binomN
+    # This holds the total numbers trials in the binomial
+    binomN <- mat_template
+    for(region in regions){
+        binomN[,region] <-   list_n[[region]]
+    }
+    
+    # binomP
+    # This holds the prob of successin in the binomial trials
+    binomP <- mat_template
+    for(region in regions){
+        binomP[,region] <-   list_p[[region]]
+    }
+    
+    
+    # Create a Baseline object with the above results to return
+    baseline <- createBaseline(description="",
+                               db=as.data.frame(db),
+                               regionDefinition=regionDefinition,
+                               testStatistic=testStatistic,
+                               regions=regionDefinition@regions,
+                               numbOfSeqs=numbOfSeqs,
+                               binomK=binomK,
+                               binomN=binomN,
+                               binomP=binomP,
+                               pdfs=list_pdfs )
+    
+    # Calculate BASELINe stats and update slot
+    if (calcStats==TRUE) {
+        baseline <- summarizeBaseline(baseline)
+    }
+    
+    # Stop cluster
+    if (nproc > 1) { parallel::stopCluster(cluster) }
+    
+    return(baseline)
+    
 }
 
 
@@ -756,250 +758,251 @@ calcBaselineBinomialPdf <- function ( x=3,
 #' baseline_two <- groupBaseline(db_baseline, groupBy=c("BARCODE", "CPRIMER"))
 #'                   
 #' @export
-groupBaseline <- function(baseline,
-                          groupBy,
-                          nproc=1 ) {
-  # Ensure that the nproc does not exceed the number of cores/CPUs available
-  nproc <- min(nproc, getnproc())
-  
-  # Convert the db (data.frame) to a data.table & set keys
-  # This is an efficient way to get the groups of CLONES, instead of doing dplyr
-  dt <- data.table(baseline@db)
-  # Get the group indexes
-  groupByFormatted <- paste(groupBy, collapse=",", sep=",")
-  dt <- dt[ , list( yidx = list(.I) ) , by=groupByFormatted ]
-  groups <- dt[,yidx] 
-  df <- as.data.frame(dt)    
-  
-  # If user wants to paralellize this function and specifies nproc > 1, then
-  # initialize and register slave R processes/clusters & 
-  # export all nesseary environment variables, functions and packages.  
-  if(nproc>1){        
-    cluster <- parallel::makeCluster(nproc, type = "PSOCK")
-    parallel::clusterExport( cluster, list( 'baseline', 'groups',
-                                        'break2chunks', 'PowersOfTwo', 
-                                        'convolutionPowersOfTwo', 
-                                        'convolutionPowersOfTwoByTwos', 
-                                        'weighted_conv', 
-                                        'calculate_bayesGHelper', 
-                                        'groupPosteriors', 'fastConv'), 
-                         envir=environment() )
-    registerDoParallel(cluster, cores=nproc)
-  } else if( nproc==1 ) {
-    # If needed to run on a single core/cpu then, regsiter DoSEQ 
-    # (needed for 'foreach' in non-parallel mode)
-    registerDoSEQ()
-  }
-  
-  
-  # Print status to console
-  cat("Grouping BASELINe probability density functions...\n")
-  
-  # Number of total groups
-  numbOfTotalGroups <- length(groups)
-  list_pdfs <- list()
-  regions <- baseline@regions
-  
-  # Initialize numbOfSeqs
-  # This holds the number of non NA sequences
-  numbOfSeqs <- matrix( NA, 
-                        ncol=length(baseline@regions), 
-                        nrow=numbOfTotalGroups,
-                        dimnames=list( 1:numbOfTotalGroups, regions )
-  )    
-  
-  templateBinom <- numbOfSeqs
-  
-  # For every region (e.g. CDR, FWR etc.)
-  for (region in regions) {
+groupBaseline <- function(baseline, groupBy, nproc=1) {
+    # Hack for visibility of data.table and foreach index variables
+    idx <- yidx <- .I <- NULL
+
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, getnproc())
     
-    # Group (convolute) all the PDFS and get one single PDF
-    list_region_pdfs  <-
-      foreach( i=iterators::icount(numbOfTotalGroups)) %dopar% {
-        
-        # Get a matrix (r=numb of sequences/groups * c=4001(i,e. the length of the PDFS))
-        matrix_GroupPdfs <- (baseline@pdfs[[region]])[groups[[i]],]
-        
-        # A list version of 
-        list_GroupPdfs <- 
-          lapply( 1:nrow(matrix_GroupPdfs), 
-                  function(rowIndex) {
-                    rowVals <- matrix_GroupPdfs[rowIndex,]
-                    if( !all(is.na(rowVals)) ) { matrix_GroupPdfs[rowIndex,] }
-                  })
-        # Determine the number of sequences that went into creating each of the PDFs
-        # If running groupBaseline for the first time after calcBaseline, then
-        # each PDF should have a numbOfSeqs=1. 
-        numbOfSeqs_region <- baseline@numbOfSeqs[groups[[i]],region]
-        numbOfSeqs_region <- numbOfSeqs_region[numbOfSeqs_region>0]
-        if(any(numbOfSeqs_region>0)) { 
-          names(numbOfSeqs_region) <- 1:length(numbOfSeqs_region) 
-        }
-        
-        list_GroupPdfs <- list_GroupPdfs[!unlist(lapply(list_GroupPdfs,function(x){any(is.na(x))}))]
-        list_GroupPdfs <- Filter(Negate(is.null), list_GroupPdfs)
-        numbOfNonNASeqs <- length(list_GroupPdfs)
-        
-        # If all the PDFs in the group are NAs, return a PDF of NAs
-        if( length(list_GroupPdfs) == 0 ) { 
-          return( c( rep(NA,4001), 0 ) )
-        }
-        
-        # If all the PDFs in the group have a numbOfSeqs=1 then
-        # call groupPosteriors, which groups PDFs with equal weight
-        if( sum(numbOfSeqs_region) == length(numbOfSeqs_region) ) { 
-          return( c( groupPosteriors(list_GroupPdfs), numbOfNonNASeqs ) )
-        }
-        
-        # If all the PDFs in the group different numbOfSeqs then call 
-        # combineWeigthedPosteriors, which groups PDFs weighted by the number of seqs/PDFs
-        # that went into creating those PDFs
-        if( sum(numbOfSeqs_region) > length(numbOfSeqs_region) ) {
-          
-          # sort by number of items
-          len_numbOfSeqs_region <- length(numbOfSeqs_region)
-          sorted_numbOfSeqs_region <- sort(numbOfSeqs_region)
-          sorted_list_GroupPdfs <- list()
-          for(newIndex in 1:len_numbOfSeqs_region){
-            sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
-          }
-          
-          # Group all the PDFs that are created with the equal numbers of seqs/PDFs (i.e. of equal weight)                  
-          repeat {
-            # Count the numb of PDFs with the same weights
-            table_sorted_numbOfSeqs_region <- table(sorted_numbOfSeqs_region)
-            # Weight of interest (the first in the list)
-            pdfWeight <- names(table_sorted_numbOfSeqs_region[table_sorted_numbOfSeqs_region>1])[1]
-            if(is.na(pdfWeight)) { 
-              break
-            }
-            # The corresponding idexes of these PDFs with the same weight
-            indexesOfWeight <- which(sorted_numbOfSeqs_region==pdfWeight)
-            # Convolute these PDFs together
-            list_sameWeightPdfs <- sorted_list_GroupPdfs[indexesOfWeight]
-            updatedPdf <- groupPosteriors(list_sameWeightPdfs)
-            # The new updated weights for this convoluted PDF
-            updatedWeight <- as.numeric(pdfWeight) * length(indexesOfWeight)
-            
-            # remove these from sorted_numbOfSeqs_region & sorted_list_GroupPdfs
-            sorted_numbOfSeqs_region  <- sorted_numbOfSeqs_region[-indexesOfWeight]
-            sorted_list_GroupPdfs <- sorted_list_GroupPdfs[-indexesOfWeight]
-            
-            # add the convoluted PDF and its new weight
-            newLength <- length(sorted_numbOfSeqs_region)+1
-            sorted_numbOfSeqs_region[newLength] <- updatedWeight
-            sorted_list_GroupPdfs[[newLength]] <- updatedPdf
-            
-            
-            # sort by number of items
-            len_sorted_numbOfSeqs_region <- length(sorted_numbOfSeqs_region)
-            sorted_numbOfSeqs_region <- sort(sorted_numbOfSeqs_region)
-            names(sorted_numbOfSeqs_region) <- as.character(1:len_sorted_numbOfSeqs_region)
-            list_GroupPdfs <- sorted_list_GroupPdfs
-            sorted_list_GroupPdfs <- list()
-            for(newIndex in 1:len_numbOfSeqs_region){
-              sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
-            }
-            
-            table_sorted_numbOfSeqs_region <- table(sorted_numbOfSeqs_region)
-            
-            if(sum(table_sorted_numbOfSeqs_region>1)>0){
-              break
-            }
-          }
-          
-          #return( c( groupPosteriors(sorted_list_GroupPdfs), 10 ) )
-          
-          # Do pairwise grouping of PDFs based on weight
-          # 1. sort by weights
-          # 2. group the lowest two weighted PDFs
-          # 3. resort, and repete till you get one PDFs
-          if(length(list_GroupPdfs)>1){
-            repeat{
-              
-              updatedPdf <- combineWeigthedPosteriors(list_GroupPdfs[[1]], 
-                                                      sorted_numbOfSeqs_region[1], 
-                                                      list_GroupPdfs[[2]], 
-                                                      sorted_numbOfSeqs_region[2])
-              updatedWeight <- sorted_numbOfSeqs_region[1] + sorted_numbOfSeqs_region[2]
-              # remove these from sorted_numbOfSeqs_region & sorted_list_GroupPdfs
-              sorted_numbOfSeqs_region  <- sorted_numbOfSeqs_region[-c(1,2)]
-              sorted_list_GroupPdfs <- sorted_list_GroupPdfs[-c(1,2)]
-              
-              # add the convoluted PDF and its new weight
-              newLength <- length(sorted_numbOfSeqs_region)+1
-              sorted_numbOfSeqs_region[newLength] <- updatedWeight
-              sorted_list_GroupPdfs[[newLength]] <- updatedPdf
-              
-              # sort by number of items
-              len_sorted_numbOfSeqs_region <- length(sorted_numbOfSeqs_region)
-              sorted_numbOfSeqs_region <- sort(sorted_numbOfSeqs_region)
-              names(sorted_numbOfSeqs_region) <- as.character(1:len_sorted_numbOfSeqs_region)
-              list_GroupPdfs <- sorted_list_GroupPdfs
-              sorted_list_GroupPdfs <- list()
-              for(newIndex in 1:len_numbOfSeqs_region){
-                sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
-              }
-              
-              if(length(list_GroupPdfs)==1){
-                break
-              }
-            }
-          }
-          
-          return( c( list_GroupPdfs[[1]], as.numeric(sorted_numbOfSeqs_region) ) )
-        }
-        
-      }
+    # Convert the db (data.frame) to a data.table & set keys
+    # This is an efficient way to get the groups of CLONES, instead of doing dplyr
+    dt <- data.table(baseline@db)
+    # Get the group indexes
+    groupByFormatted <- paste(groupBy, collapse=",", sep=",")
+    dt <- dt[, list(yidx=list(.I)), by=groupByFormatted]
+    groups <- dt[, yidx] 
+    df <- as.data.frame(dt)    
     
-    # Convert the list of the region's PDFs into a matrix                
-    matrix_region_pdfs <- 
-      do.call( rbind,
-               lapply( 
-                 list_region_pdfs, 
-                 function(x) { 
-                   length(x) <- 4002 
-                   return(x)
-                 }
-               )
-      )
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.  
+    if (nproc > 1){        
+        cluster <- parallel::makeCluster(nproc, type = "PSOCK")
+        parallel::clusterExport( cluster, list('baseline', 'groups',
+                                               'break2chunks', 'PowersOfTwo', 
+                                               'convolutionPowersOfTwo', 
+                                               'convolutionPowersOfTwoByTwos', 
+                                               'weighted_conv', 
+                                               'calculate_bayesGHelper', 
+                                               'groupPosteriors', 'fastConv'), 
+                                 envir=environment() )
+        registerDoParallel(cluster, cores=nproc)
+    } else if (nproc == 1) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    }
     
     
-    list_pdfs[[region]] <- matrix_region_pdfs[,1:4001]
-    numbOfSeqs[,region] <- matrix_region_pdfs[,4002]        
-  }
-  
-  #colnames(numbOfSeqs) <- paste0("NUMB_SEQUENCES_", colnames(numbOfSeqs))
-  
-  # Create the db, which will now contain the group information
-  db <- df[,groupBy]
-  #db <- cbind( df[,groupBy], numbOfSeqs)
-  if(!class(db)=="data.frame") { 
-    db <- as.data.frame(db) 
-    colnames(db)[1] <- groupBy
-  }
-  
-  
-  # Create a Baseline object with the above results to return
-  baseline <- createBaseline(description="",
-                             db=as.data.frame(db),
-                             regionDefinition=baseline@regionDefinition,
-                             testStatistic=baseline@testStatistic,
-                             regions=regions,
-                             numbOfSeqs=numbOfSeqs,
-                             binomK=templateBinom,
-                             binomN=templateBinom,
-                             binomP=templateBinom,
-                             pdfs=list_pdfs )
-  
-  # Calculate BASELINe stats and update slot
-  baseline <- summarizeBaseline(baseline)
-  
-  # Stop cluster
-  if(nproc > 1) { parallel::stopCluster(cluster) }
-  
-  return(baseline)
-  
+    # Print status to console
+    cat("Grouping BASELINe probability density functions...\n")
+    
+    # Number of total groups
+    numbOfTotalGroups <- length(groups)
+    list_pdfs <- list()
+    regions <- baseline@regions
+    
+    # Initialize numbOfSeqs
+    # This holds the number of non NA sequences
+    numbOfSeqs <- matrix( NA, 
+                          ncol=length(baseline@regions), 
+                          nrow=numbOfTotalGroups,
+                          dimnames=list( 1:numbOfTotalGroups, regions )
+    )    
+    
+    templateBinom <- numbOfSeqs
+    
+    # For every region (e.g. CDR, FWR etc.)
+    for (region in regions) {
+        
+        # Group (convolute) all the PDFS and get one single PDF
+        list_region_pdfs  <-
+            foreach(idx=iterators::icount(numbOfTotalGroups)) %dopar% {
+                
+                # Get a matrix (r=numb of sequences/groups * c=4001(i,e. the length of the PDFS))
+                matrix_GroupPdfs <- (baseline@pdfs[[region]])[groups[[idx]],]
+                
+                # A list version of 
+                list_GroupPdfs <- 
+                    lapply( 1:nrow(matrix_GroupPdfs), 
+                            function(rowIndex) {
+                                rowVals <- matrix_GroupPdfs[rowIndex,]
+                                if( !all(is.na(rowVals)) ) { matrix_GroupPdfs[rowIndex,] }
+                            })
+                # Determine the number of sequences that went into creating each of the PDFs
+                # If running groupBaseline for the first time after calcBaseline, then
+                # each PDF should have a numbOfSeqs=1. 
+                numbOfSeqs_region <- baseline@numbOfSeqs[groups[[idx]],region]
+                numbOfSeqs_region <- numbOfSeqs_region[numbOfSeqs_region>0]
+                if(any(numbOfSeqs_region>0)) { 
+                    names(numbOfSeqs_region) <- 1:length(numbOfSeqs_region) 
+                }
+                
+                list_GroupPdfs <- list_GroupPdfs[!unlist(lapply(list_GroupPdfs,function(x){any(is.na(x))}))]
+                list_GroupPdfs <- Filter(Negate(is.null), list_GroupPdfs)
+                numbOfNonNASeqs <- length(list_GroupPdfs)
+                
+                # If all the PDFs in the group are NAs, return a PDF of NAs
+                if( length(list_GroupPdfs) == 0 ) { 
+                    return( c( rep(NA,4001), 0 ) )
+                }
+                
+                # If all the PDFs in the group have a numbOfSeqs=1 then
+                # call groupPosteriors, which groups PDFs with equal weight
+                if( sum(numbOfSeqs_region) == length(numbOfSeqs_region) ) { 
+                    return( c( groupPosteriors(list_GroupPdfs), numbOfNonNASeqs ) )
+                }
+                
+                # If all the PDFs in the group different numbOfSeqs then call 
+                # combineWeigthedPosteriors, which groups PDFs weighted by the number of seqs/PDFs
+                # that went into creating those PDFs
+                if( sum(numbOfSeqs_region) > length(numbOfSeqs_region) ) {
+                    
+                    # sort by number of items
+                    len_numbOfSeqs_region <- length(numbOfSeqs_region)
+                    sorted_numbOfSeqs_region <- sort(numbOfSeqs_region)
+                    sorted_list_GroupPdfs <- list()
+                    for(newIndex in 1:len_numbOfSeqs_region){
+                        sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
+                    }
+                    
+                    # Group all the PDFs that are created with the equal numbers of seqs/PDFs (i.e. of equal weight)                  
+                    repeat {
+                        # Count the numb of PDFs with the same weights
+                        table_sorted_numbOfSeqs_region <- table(sorted_numbOfSeqs_region)
+                        # Weight of interest (the first in the list)
+                        pdfWeight <- names(table_sorted_numbOfSeqs_region[table_sorted_numbOfSeqs_region>1])[1]
+                        if(is.na(pdfWeight)) { 
+                            break
+                        }
+                        # The corresponding idexes of these PDFs with the same weight
+                        indexesOfWeight <- which(sorted_numbOfSeqs_region==pdfWeight)
+                        # Convolute these PDFs together
+                        list_sameWeightPdfs <- sorted_list_GroupPdfs[indexesOfWeight]
+                        updatedPdf <- groupPosteriors(list_sameWeightPdfs)
+                        # The new updated weights for this convoluted PDF
+                        updatedWeight <- as.numeric(pdfWeight) * length(indexesOfWeight)
+                        
+                        # remove these from sorted_numbOfSeqs_region & sorted_list_GroupPdfs
+                        sorted_numbOfSeqs_region  <- sorted_numbOfSeqs_region[-indexesOfWeight]
+                        sorted_list_GroupPdfs <- sorted_list_GroupPdfs[-indexesOfWeight]
+                        
+                        # add the convoluted PDF and its new weight
+                        newLength <- length(sorted_numbOfSeqs_region)+1
+                        sorted_numbOfSeqs_region[newLength] <- updatedWeight
+                        sorted_list_GroupPdfs[[newLength]] <- updatedPdf
+                        
+                        
+                        # sort by number of items
+                        len_sorted_numbOfSeqs_region <- length(sorted_numbOfSeqs_region)
+                        sorted_numbOfSeqs_region <- sort(sorted_numbOfSeqs_region)
+                        names(sorted_numbOfSeqs_region) <- as.character(1:len_sorted_numbOfSeqs_region)
+                        list_GroupPdfs <- sorted_list_GroupPdfs
+                        sorted_list_GroupPdfs <- list()
+                        for(newIndex in 1:len_numbOfSeqs_region){
+                            sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
+                        }
+                        
+                        table_sorted_numbOfSeqs_region <- table(sorted_numbOfSeqs_region)
+                        
+                        if(sum(table_sorted_numbOfSeqs_region>1)>0){
+                            break
+                        }
+                    }
+                    
+                    #return( c( groupPosteriors(sorted_list_GroupPdfs), 10 ) )
+                    
+                    # Do pairwise grouping of PDFs based on weight
+                    # 1. sort by weights
+                    # 2. group the lowest two weighted PDFs
+                    # 3. resort, and repete till you get one PDFs
+                    if(length(list_GroupPdfs)>1){
+                        repeat{
+                            
+                            updatedPdf <- combineWeigthedPosteriors(list_GroupPdfs[[1]], 
+                                                                    sorted_numbOfSeqs_region[1], 
+                                                                    list_GroupPdfs[[2]], 
+                                                                    sorted_numbOfSeqs_region[2])
+                            updatedWeight <- sorted_numbOfSeqs_region[1] + sorted_numbOfSeqs_region[2]
+                            # remove these from sorted_numbOfSeqs_region & sorted_list_GroupPdfs
+                            sorted_numbOfSeqs_region  <- sorted_numbOfSeqs_region[-c(1,2)]
+                            sorted_list_GroupPdfs <- sorted_list_GroupPdfs[-c(1,2)]
+                            
+                            # add the convoluted PDF and its new weight
+                            newLength <- length(sorted_numbOfSeqs_region)+1
+                            sorted_numbOfSeqs_region[newLength] <- updatedWeight
+                            sorted_list_GroupPdfs[[newLength]] <- updatedPdf
+                            
+                            # sort by number of items
+                            len_sorted_numbOfSeqs_region <- length(sorted_numbOfSeqs_region)
+                            sorted_numbOfSeqs_region <- sort(sorted_numbOfSeqs_region)
+                            names(sorted_numbOfSeqs_region) <- as.character(1:len_sorted_numbOfSeqs_region)
+                            list_GroupPdfs <- sorted_list_GroupPdfs
+                            sorted_list_GroupPdfs <- list()
+                            for(newIndex in 1:len_numbOfSeqs_region){
+                                sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
+                            }
+                            
+                            if(length(list_GroupPdfs)==1){
+                                break
+                            }
+                        }
+                    }
+                    
+                    return( c( list_GroupPdfs[[1]], as.numeric(sorted_numbOfSeqs_region) ) )
+                }
+                
+            }
+        
+        # Convert the list of the region's PDFs into a matrix                
+        matrix_region_pdfs <- 
+            do.call( rbind,
+                     lapply( 
+                         list_region_pdfs, 
+                         function(x) { 
+                             length(x) <- 4002 
+                             return(x)
+                         }
+                     )
+            )
+        
+        
+        list_pdfs[[region]] <- matrix_region_pdfs[,1:4001]
+        numbOfSeqs[,region] <- matrix_region_pdfs[,4002]        
+    }
+    
+    #colnames(numbOfSeqs) <- paste0("NUMB_SEQUENCES_", colnames(numbOfSeqs))
+    
+    # Create the db, which will now contain the group information
+    db <- df[, groupBy]
+    #db <- cbind( df[,groupBy], numbOfSeqs)
+    if(!class(db)=="data.frame") { 
+        db <- as.data.frame(db) 
+        colnames(db)[1] <- groupBy
+    }
+    
+    
+    # Create a Baseline object with the above results to return
+    baseline <- createBaseline(description="",
+                               db=as.data.frame(db),
+                               regionDefinition=baseline@regionDefinition,
+                               testStatistic=baseline@testStatistic,
+                               regions=regions,
+                               numbOfSeqs=numbOfSeqs,
+                               binomK=templateBinom,
+                               binomN=templateBinom,
+                               binomP=templateBinom,
+                               pdfs=list_pdfs )
+    
+    # Calculate BASELINe stats and update slot
+    baseline <- summarizeBaseline(baseline)
+    
+    # Stop cluster
+    if(nproc > 1) { parallel::stopCluster(cluster) }
+    
+    return(baseline)
+    
 }
 
 
@@ -1053,75 +1056,76 @@ groupBaseline <- function(baseline,
 #' baseline_stats <- summarizeBaseline(baseline_group, returnType="df")
 #'                      
 #' @export
-summarizeBaseline <- function(baseline,
-                              returnType=c("baseline", "df"),
-                              nproc=1) {
-  # Check arguments
-  returnType <- match.arg(returnType)
-  
-  # Ensure that the nproc does not exceed the number of cores/CPUs available
-  nproc <- min(nproc, getnproc())
-  
-  # If user wants to paralellize this function and specifies nproc > 1, then
-  # initialize and register slave R processes/clusters & 
-  # export all nesseary environment variables, functions and packages.  
-  if (nproc > 1){        
-    cluster <- parallel::makeCluster(nproc, type="PSOCK")
-    parallel::clusterExport(cluster, list('baseline',
-                                          'calcBaselineSigma',
-                                          'calcBaselineCI',
-                                          'calcBaselinePvalue'), 
-                            envir=environment())
-    registerDoParallel(cluster, cores=nproc)
-  } else if (nproc == 1) {
-    # If needed to run on a single core/cpu then, regsiter DoSEQ 
-    # (needed for 'foreach' in non-parallel mode)
-    registerDoSEQ()
-  }
-  
-  # Printing status to console
-  cat("Calculating BASELINe statistics...\n")
-  
-  # Calculate stats for each sequence/group
-  numbOfTotalSeqs <- nrow(baseline@db)
-  regions <- baseline@regions
-  db <- baseline@db
-  if ("SEQUENCE_ID" %in% colnames(db)) { db <- subset(db, select="SEQUENCE_ID") }
-  list_stats <-
-    foreach(i = iterators::icount(numbOfTotalSeqs)) %dopar% {
-      df_baseline_seq <- data.frame()
-      db_seq <- data.frame(db[i, ])
-      names(db_seq) <- names(db)
-      for (region in regions) {
-        baseline_pdf <- baseline@pdfs[[region]][i,]
-        baseline_ci <- calcBaselineCI(baseline_pdf)
-        df_baseline_seq_region <- 
-          data.frame(db_seq,
-                     REGION=factor(region,levels=regions),
-                     BASELINE_SIGMA=calcBaselineSigma(baseline_pdf),
-                     BASELINE_CI_LOWER=baseline_ci[1],
-                     BASELINE_CI_UPPER=baseline_ci[2],
-                     BASELINE_CI_PVALUE=calcBaselinePvalue(baseline_pdf)
-          )
-        df_baseline_seq <- dplyr::bind_rows(df_baseline_seq, df_baseline_seq_region)
-      }
-      return(df_baseline_seq)
+summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1) {
+    # Hack for visibility of data.table and foreach index variables
+    idx <- NULL
+    
+    # Check arguments
+    returnType <- match.arg(returnType)
+    
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, getnproc())
+    
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.  
+    if (nproc > 1){        
+        cluster <- parallel::makeCluster(nproc, type="PSOCK")
+        parallel::clusterExport(cluster, list('baseline',
+                                              'calcBaselineSigma',
+                                              'calcBaselineCI',
+                                              'calcBaselinePvalue'), 
+                                envir=environment())
+        registerDoParallel(cluster, cores=nproc)
+    } else if (nproc == 1) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
     }
-  
-  # Stop cluster
-  if (nproc > 1) { parallel::stopCluster(cluster) }
-  
-  # Convert list of BASELINe stats into a data.frame
-  stats <- as.data.frame(dplyr::bind_rows(list_stats))
-  
-  if (returnType == "df") {
-      return(stats)    
-  } else if (returnType == "baseline") {
-      # Append stats to baseline object
-      return(editBaseline(baseline, field_name = "stats", stats))
-  } else {
-      return(NULL)
-  }
+    
+    # Printing status to console
+    cat("Calculating BASELINe statistics...\n")
+    
+    # Calculate stats for each sequence/group
+    numbOfTotalSeqs <- nrow(baseline@db)
+    regions <- baseline@regions
+    db <- baseline@db
+    if ("SEQUENCE_ID" %in% colnames(db)) { db <- subset(db, select="SEQUENCE_ID") }
+    list_stats <-
+        foreach(idx=iterators::icount(numbOfTotalSeqs)) %dopar% {
+            df_baseline_seq <- data.frame()
+            db_seq <- data.frame(db[idx, ])
+            names(db_seq) <- names(db)
+            for (region in regions) {
+                baseline_pdf <- baseline@pdfs[[region]][idx, ]
+                baseline_ci <- calcBaselineCI(baseline_pdf)
+                df_baseline_seq_region <- 
+                    data.frame(db_seq,
+                               REGION=factor(region,levels=regions),
+                               BASELINE_SIGMA=calcBaselineSigma(baseline_pdf),
+                               BASELINE_CI_LOWER=baseline_ci[1],
+                               BASELINE_CI_UPPER=baseline_ci[2],
+                               BASELINE_CI_PVALUE=calcBaselinePvalue(baseline_pdf)
+                    )
+                df_baseline_seq <- dplyr::bind_rows(df_baseline_seq, df_baseline_seq_region)
+            }
+            return(df_baseline_seq)
+        }
+    
+    # Stop cluster
+    if (nproc > 1) { parallel::stopCluster(cluster) }
+    
+    # Convert list of BASELINe stats into a data.frame
+    stats <- as.data.frame(dplyr::bind_rows(list_stats))
+    
+    if (returnType == "df") {
+        return(stats)    
+    } else if (returnType == "baseline") {
+        # Append stats to baseline object
+        return(editBaseline(baseline, field_name = "stats", stats))
+    } else {
+        return(NULL)
+    }
 }
 
 
@@ -1268,7 +1272,7 @@ calcBaselinePvalue <- function ( baseline_pdf,
 plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
                                 subsetRegions=NULL, sigmaLimits=c(-5, 5), 
                                 facetBy=c("region", "group"), style=c("density"), size=1, 
-                                 silent=FALSE, ...) {
+                                silent=FALSE, ...) {
   # Check input
   style <- match.arg(style)
   facetBy <- match.arg(facetBy)
@@ -1312,9 +1316,9 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
     melt_list <- list()
     for (n in dens_names) {
         tmp_melt <- as.data.frame(dens_list[[n]]) %>%  
-                cbind(GROUP_COLLAPSE=rownames(dens_list[[n]])) %>%
-                tidyr::gather(SIGMA, DENSITY, -GROUP_COLLAPSE, convert=TRUE)
-      melt_list[[n]] <- tmp_melt
+            cbind(GROUP_COLLAPSE=rownames(dens_list[[n]])) %>%
+            tidyr::gather(SIGMA, DENSITY, -GROUP_COLLAPSE, convert=TRUE)
+        melt_list[[n]] <- tmp_melt
     }
     dens_df <- dplyr::bind_rows(melt_list, .id="REGION")
     
@@ -1328,31 +1332,31 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
     
     # Plot probability density curve
     p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="DENSITY")) +
-      base_theme + 
-      xlab(expression(Sigma)) +
-      ylab("Density") +
-      geom_line(aes_string(linetype=idColumn), size=1*size)
+        base_theme + 
+        xlab(expression(Sigma)) +
+        ylab("Density") +
+        geom_line(aes_string(linetype=idColumn), size=1*size)
     if (is.null(groupColumn) & facetBy == "region") {
-      p1 <- p1 + facet_grid(REGION ~ .)
+        p1 <- p1 + facet_grid("REGION ~ .")
     } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
-      p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+        p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
     } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
-      p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
-        aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+        p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
+            aes_string(color=groupColumn) + facet_grid(REGION ~ .)
     } else if (!is.null(groupColumn) & facetBy == "group") {
-      p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
-        aes_string(color="REGION") + facet_grid(paste(groupColumn, "~ ."))
+        p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
+            aes_string(color="REGION") + facet_grid(paste(groupColumn, "~ ."))
     } else {
-      stop("Cannot facet by group if groupColumn=NULL")
+        stop("Cannot facet by group if groupColumn=NULL")
     }
- }
+  }
   
   # Add additional theme elements
   p1 <- p1 + do.call(theme, list(...))
   
   # Plot
   if (!silent) { 
-    plot(p1)
+      plot(p1)
   }
   
   invisible(p1)
@@ -1485,7 +1489,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
   
   # Subset to regions of interest
   if (!is.null(subsetRegions)) {
-    stats_df <- subset(stats_df, REGION %in% subsetRegions)
+      stats_df <- stats_df[stats_df$REGION %in% subsetRegions, ]
   }
   
   # Set base plot settings
@@ -1503,7 +1507,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
   
   if (style == "mean") { 
     # Plot mean and confidence intervals
-    stats_df <- subset(stats_df, !is.na(BASELINE_SIGMA))
+    stats_df <- stats_df[!is.na(stats_df$BASELINE_SIGMA), ]
     p1 <- ggplot(stats_df, aes_string(x=idColumn, y="BASELINE_SIGMA", ymax=max("BASELINE_SIGMA"))) +
       base_theme + 
       xlab("") +

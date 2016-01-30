@@ -401,6 +401,9 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                           jCallColumn="J_CALL", model=c("hs1f", "m1n", "ham", "aa", "hs5f"), 
                           normalize=c("length", "none"), symmetry=c("avg","min"),
                           first=TRUE, nproc=1, fields=NULL) {
+    # Hack for visibility of data.table and foreach index variables
+    idx <- yidx <- .I <- NULL
+
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
@@ -459,11 +462,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.
-    if( nproc==1 ) {
+    if (nproc == 1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
-    } else if( nproc > 1 ) {
+    } else if (nproc > 1) {
         cluster <- parallel::makeCluster(nproc, type="PSOCK")
         registerDoParallel(cluster)
     } else {
@@ -481,27 +484,27 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     if (!is.null(fields)) {
         group_cols <- append(group_cols,fields)
     }
-    dt <- dt[, list( yidx = list(.I) ) , by = group_cols ]
-    groups <- dt[,yidx]
+    dt <- dt[, list(yidx=list(.I)), by=group_cols]
+    groups <- dt[, yidx]
     lenGroups <- length(groups)
     
     # Export groups to the clusters
     if (nproc>1) { parallel::clusterExport(cluster, list("db", 
-                                               "groups", 
-                                               "sequenceColumn","model",
-                                               "normalize","symmetry","getClosestMat", 
-                                               "HS1FDistance","distSeqMat",
-                                               "calcTargetingDistance",
-                                               "findUniqueJunctions","getPairwiseDistances"), envir=environment()) }
+                                                         "groups", 
+                                                         "sequenceColumn","model",
+                                                         "normalize","symmetry","getClosestMat", 
+                                                         "HS1FDistance","distSeqMat",
+                                                         "calcTargetingDistance",
+                                                         "findUniqueJunctions","getPairwiseDistances"), envir=environment()) }
     
     if (model %in% c("hs5f")) {
         # Export targeting model to processes
         if (nproc>1) { parallel::clusterExport(cluster, list("targeting_model","getClosestBy5mers"), envir=environment()) }    
         list_db <-
-            foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
-                db_group <- db[groups[[i]],]
+            foreach(idx=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
+                db_group <- db[groups[[idx]],]
                 db_group$DIST_NEAREST <-
-                    getClosestBy5mers( db[groups[[i]],sequenceColumn],
+                    getClosestBy5mers( db[groups[[idx]],sequenceColumn],
                                        targeting_model=targeting_model,
                                        normalize=normalize,
                                        symmetry=symmetry )
@@ -509,10 +512,10 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
             }    
     } else if (model %in% c("ham", "aa", "m1n", "hs1f")) {    
         list_db <-
-            foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
-                db_group <- db[groups[[i]],]
+            foreach(idx=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
+                db_group <- db[groups[[idx]],]
                 db_group$DIST_NEAREST <-
-                    getClosestMat( db[groups[[i]],sequenceColumn],
+                    getClosestMat( db[groups[[idx]],sequenceColumn],
                                    model=model,
                                    normalize=normalize )
                 return(db_group)
