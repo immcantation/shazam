@@ -1273,6 +1273,11 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
                                 subsetRegions=NULL, sigmaLimits=c(-5, 5), 
                                 facetBy=c("region", "group"), style=c("density"), size=1, 
                                 silent=FALSE, ...) {
+  # Test variable settings
+  # baseline=baseline_two
+  # idColumn="BARCODE"; groupColumn="CPRIMER"; subsetRegions=NULL; sigmaLimits=c(-5, 5)
+  # facetBy="region"; style="density"; size=1; silent=FALSE
+    
   # Check input
   style <- match.arg(style)
   facetBy <- match.arg(facetBy)
@@ -1315,10 +1320,10 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
     # Melt density matrices
     melt_list <- list()
     for (n in dens_names) {
-        tmp_melt <- as.data.frame(dens_list[[n]]) %>%  
-            cbind(GROUP_COLLAPSE=rownames(dens_list[[n]])) %>%
-            tidyr::gather(SIGMA, DENSITY, -GROUP_COLLAPSE, convert=TRUE)
-        melt_list[[n]] <- tmp_melt
+        tmp_df <- as.data.frame(dens_list[[n]])
+        tmp_df$GROUP_COLLAPSE <- rownames(dens_list[[n]])
+        gather_cols <- names(tmp_df)[names(tmp_df) != "GROUP_COLLAPSE"]
+        melt_list[[n]] <- tidyr::gather_(tmp_df, "SIGMA", "DENSITY", gather_cols, convert=TRUE)
     }
     dens_df <- dplyr::bind_rows(melt_list, .id="REGION")
     

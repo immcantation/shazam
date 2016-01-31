@@ -4,6 +4,37 @@
 NULL
 
 
+#### Data ####
+
+#' Amino acid classes
+#' 
+#' A set of default amino acid classes for assigning replacement (R) or silent (S)
+#' annotations to mutations using physicochemical property changes. 
+#' 
+#' @format   Named character vectors with single-letter amino acid codes as names
+#'           and classes as values, with \code{NA} assigned to set of characters
+#'           \code{c("X", "*", "-", ".")}
+#' 
+#' @seealso  \link{calcObservedMutations} and \link{calcDBObservedMutations}.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  \url{http://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html} 
+#' }
+#' 
+#' @name   AMINO_ACID_CLASSES
+NULL
+
+#' @rdname   AMINO_ACID_CLASSES
+"AMINO_ACID_CHARGE"
+
+#' @rdname   AMINO_ACID_CLASSES
+"AMINO_ACID_HYDROPATHY"
+
+#' @rdname   AMINO_ACID_CLASSES
+"AMINO_ACID_POLARITY"
+
+
 #### Clonal Consensus building functions ####
 
 #' Identifies clonal consensus sequences
@@ -73,8 +104,8 @@ NULL
 #' 
 #' # Run collapseByClone
 #' db_new <- collapseByClone(db, cloneColumn="CLONE", 
-#'                                 sequenceColumn="SEQUENCE_IMGT",
-#'                                 germlineColumn="GERMLINE_IMGT_D_MASK")
+#'                           sequenceColumn="SEQUENCE_IMGT",
+#'                           germlineColumn="GERMLINE_IMGT_D_MASK")
 #' 
 #' @export
 collapseByClone <- function(db, 
@@ -471,11 +502,15 @@ calcDBObservedMutations <- function(db,
 #' germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
 #' 
 #' # Identify all mutations in the sequence
-#' mutations <- calcObservedMutations(inputSeq, germlineSeq)
+#' calcObservedMutations(inputSeq, germlineSeq)
 #' 
 #' # Identify only mutations the V segment minus CDR3
-#' mutations <- calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
+#' calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
 #'  
+#' # Identify mutations by change in hydropathy class
+#' calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3,
+#'                       aminoAcidClasses=AMINO_ACID_HYDROPATHY)
+#' 
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
                                   regionDefinition=NULL, aminoAcidClasses=NULL) {
@@ -520,7 +555,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
     
     mutations_array <- NA
     mutations = (c_germlineSeq != c_inputSeq) & (c_germlineSeq%in%NUCLEOTIDES[1:5]) & (c_inputSeq%in%NUCLEOTIDES[1:5])
-    if(sum(mutations)>0){
+    if (sum(mutations) > 0) {
         # The nucleotide positions of the mutations
         mutations_pos <- which(mutations==TRUE)
         # For every mutations_pos, extract the entire codon from germline
@@ -528,10 +563,10 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
         c_germlineSeq_codons <- c_germlineSeq[mutations_pos_codons]
         # For every mutations_pos, extract the codon from germline (without other mutations 
         # at the same codon, if any).
-        c_inputSeq_codons <- array(sapply(mutations_pos, function(x){
+        c_inputSeq_codons <- array(sapply(mutations_pos, function(x) {
             seqP = c_germlineSeq[getCodonPos(x)]
             seqP[getContextInCodon(x)] = c_inputSeq[x]
-            return(seqP)}))
+            return(seqP) }))
         # split the string of codons into vector of codons
         c_germlineSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_germlineSeq_codons)), " ")[[1]]
         c_inputSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
@@ -544,25 +579,23 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
         if(length(mutations_array)==sum(is.na(mutations_array))){
             mutations_array<-NA    
         }else{ #If there are mutations present proceed to aggregate (if requested)
-          if(frequency==TRUE){
-            # Freq = numb on mutations / numb of non N bases (in both seq and gl)
-            nonNLength <- sum( c_inputSeq%in%NUCLEOTIDES[1:4] &  c_germlineSeq%in%NUCLEOTIDES[1:4] )
-            nMutations <- length(mutations_array)
-            mutations_array <- nMutations/nonNLength
-            if(nonNLength==0) mutations_array <- 0
-          }else{
-            if(!is.null(regionDefinition)){ 
-              mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
+            if (frequency==TRUE) {
+                # Freq = numb on mutations / numb of non N bases (in both seq and gl)
+                nonNLength <- sum(c_inputSeq%in%NUCLEOTIDES[1:4] &  c_germlineSeq%in%NUCLEOTIDES[1:4])
+                nMutations <- length(mutations_array)
+                mutations_array <- nMutations/nonNLength
+                if (nonNLength==0) mutations_array <- 0
             } else {
-              mutations_array <- length(mutations_array)
+                if (!is.null(regionDefinition)) { 
+                    mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
+                } else {
+                    mutations_array <- length(mutations_array)
+                }
             }
-          }
         }        
     }    
     return(mutations_array)
 }
-
-
 
 
 #' Aggregate mutations by region
@@ -813,17 +846,16 @@ calcDBExpectedMutations <- function(db,
 #' germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
 #' 
 #' # Identify all mutations in the sequence
-#' expectedFreq <- calcExpectedMutations(inputSeq, germlineSeq)
+#' calcExpectedMutations(inputSeq, germlineSeq)
 #' 
 #' # Identify only mutations the V segment minus CDR3
-#' expectedFreq <- calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
+#' calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
 #'
 #' @export
 calcExpectedMutations <- function(germlineSeq,
                                   inputSeq=NULL,
                                   targetingModel=HS5FModel,
-                                  regionDefinition=IMGT_V_NO_CDR3){
-    
+                                  regionDefinition=IMGT_V_NO_CDR3) {
     
     targeting <- calculateTargeting(germlineSeq = germlineSeq, 
                                     inputSeq = inputSeq,
@@ -1032,10 +1064,10 @@ translateCodonToAminoAcid <- function(Codon) {
 # shm:::mutationType("TTT", "TTC")
 # shm:::mutationType("TTT", "TTA")
 # shm:::mutationType("TTT", "TGA")
-# shm:::mutationType("TTT", "TTC", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
-# shm:::mutationType("TTT", "TTA", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
-# shm:::mutationType("TTT", "TCT", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
-# shm:::mutationType("TTT", "TGA", aminoAcidClasses=AMINO_ACIDS_HYDROPATHY)
+# shm:::mutationType("TTT", "TTC", aminoAcidClasses=AMINO_ACID_HYDROPATHY)
+# shm:::mutationType("TTT", "TTA", aminoAcidClasses=AMINO_ACID_HYDROPATHY)
+# shm:::mutationType("TTT", "TCT", aminoAcidClasses=AMINO_ACID_HYDROPATHY)
+# shm:::mutationType("TTT", "TGA", aminoAcidClasses=AMINO_ACID_HYDROPATHY)
 mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
     # codonFrom="TTT"; codonTo="TTA"
     # codonFrom="TTT"; codonTo="TGA"

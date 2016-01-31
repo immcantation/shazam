@@ -111,7 +111,7 @@
 #' @importFrom  lazyeval    interp
 #' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format
 #'                          math_format percent scientific
-#' @importFrom  tidyr       gather
+#' @importFrom  tidyr       gather gather_ spread spread_
 #' @importFrom  iterators   icount
 #' @importFrom  SDMTools    wt.sd
 #' @importFrom  seqinr      c2s s2c words translate
