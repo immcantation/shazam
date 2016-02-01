@@ -967,7 +967,7 @@ calculateTargeting <- function(germlineSeq,
     mutatingToSelf <- colnames(germlineSeqTargeting)
     mutatingToSelf[!(mutatingToSelf %in% NUCLEOTIDES[1:5])] <- "N"
     # TODO: What's with this <<-?
-    tmp <- sapply(1:ncol(germlineSeqTargeting), function(pos) { germlineSeqTargeting[mutatingToSelf[pos], pos] <<- NA })
+    sapply(1:ncol(germlineSeqTargeting), function(pos) { germlineSeqTargeting[mutatingToSelf[pos], pos] <<- NA })
     
     germlineSeqTargeting[!is.finite(germlineSeqTargeting)] <- NA
     return(germlineSeqTargeting)

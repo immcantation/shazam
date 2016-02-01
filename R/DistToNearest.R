@@ -57,7 +57,7 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
   numbOfMutation <- sum(fivemersWithMu)
 
   dist <- NA
-  a <- tryCatch({
+  tryCatch({
     if (length(seq1)==1){
       seq1_to_seq2 <- targeting_dist[substr(seq2,3,3),seq1]
       seq2_to_seq1 <- targeting_dist[substr(seq1,3,3),seq2]
@@ -255,7 +255,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
   l <- findUniqueJunctions(arrJunctions)
   arrJunctionsDist <- l$arrJunctionsDist
   arrJunctionsUnique <- l$arrJunctionsUnique
-  indexJunctionsCounts <- l$indexJunctionsCounts
+  #indexJunctionsCounts <- l$indexJunctionsCounts
 
   # Compute distances between junctions
   numbOfUniqueJunctions <- length(arrJunctionsUnique)
@@ -299,7 +299,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
   l <- findUniqueJunctions(arrJunctions)
   arrJunctionsDist <- l$arrJunctionsDist
   arrJunctionsUnique <- l$arrJunctionsUnique
-  indexJunctionsCounts <- l$indexJunctionsCounts
+  #indexJunctionsCounts <- l$indexJunctionsCounts
   
   # Compute distances between junctions
   numbOfUniqueJunctions <- length(arrJunctionsUnique)

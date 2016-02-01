@@ -497,7 +497,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                     codonGL = cGL[codonNucs]
                     codonSeq = cSeq[codonNucs]
                     muCodonPos = {position - 1} %% 3 + 1
-                    seqAtMutation <- codonSeq[muCodonPos]
+                    #seqAtMutation <- codonSeq[muCodonPos]
                     glAtMutation <- codonGL[muCodonPos]
                     if (!any(codonGL %in% c("N", "-", ".")) & !any(codonSeq %in% c("N", "-", "."))) {
                         if (!length(grep("N", wrd5))) {
@@ -532,7 +532,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                 codonGL = cGL[codonNucs]
                 codonSeq = cSeq[codonNucs]
                 muCodonPos = {position - 1} %% 3 + 1
-                seqAtMutation <- codonSeq[muCodonPos]
+                #seqAtMutation <- codonSeq[muCodonPos] 
                 glAtMutation <- codonGL[muCodonPos]
                 if (!any(codonGL %in% c("N", "-")) & !any(codonSeq %in% c("N", "-"))) {
                     codonPermutate <- matrix(rep(codonGL, 3), ncol=3, byrow=TRUE)
@@ -588,7 +588,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     .fillHot <-function(FIVEMER,mutability){
        if(FIVEMER%in%names(mutability))if(!is.na(mutability[[FIVEMER]]))if(mutability[[FIVEMER]]>=0.0)return(mutability[[FIVEMER]])
        Nuc=substr(FIVEMER,3,3)
-       Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
+       #Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
        FIVE=0
        COUNT=0
        
@@ -1381,7 +1381,6 @@ mutationTypeOptimized <- function(matOfCodons) {
 analyzeMutations2NucUri <- function(in_matrix) {
     paramGL = in_matrix[2,]
     paramSeq = in_matrix[1,]
-    paramSeqUri = paramGL
     #mutations = apply(rbind(paramGL,paramSeq), 2, function(x){!x[1]==x[2]})
     mutations_val = paramGL != paramSeq
     if (any(mutations_val)) {
