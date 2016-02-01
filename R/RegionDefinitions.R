@@ -120,12 +120,12 @@ createRegionDefinition <- function(name="",
 # \code{makeNullRegionDefinition} takes an array of observed mutations 
 # and makes an empty RegionDefinition object.
 #
-# @param   mutations_array    \code{array} containing the mutations (R/S) with the names                           
+# @param   mutationsArray    \code{array} containing the mutations (R/S) with the names                           
 #                             indicating the nucleotide positions of the mutations.
 # 
 # @return A \code{RegionDefinition} object
-makeNullRegionDefinition <- function(mutations_array) {
-    array_length <- max(as.numeric(names(mutations_array)))
+makeNullRegionDefinition <- function(mutationsArray) {
+    array_length <- max(as.numeric(names(mutationsArray)))
     rd <- createRegionDefinition(name="",
                                  boundaries=factor(c(rep("SEQ", array_length)),
                                                     levels = c("SEQ")),

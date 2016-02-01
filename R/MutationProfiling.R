@@ -604,7 +604,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 #' \code{\link{calcObservedMutations}}) and bins them by the different regions defined in the 
 #' \code{regionDefinition}.
 #'
-#' @param   mutations_array    \code{array} containing the mutations (R/S) with the names
+#' @param   mutationsArray     \code{array} containing the mutations (R/S) with the names
 #'                             indicating the nucleotide positions of the mutations.                             
 #' @param   regionDefinition   \code{\link{RegionDefinition}} object defining the regions
 #'                             and boundaries of the Ig sequences.
@@ -634,17 +634,17 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 #' binMutationsByRegion(mutations_array, regionDefinition=IMGT_V_NO_CDR3)
 #' 
 #' @export
-binMutationsByRegion <- function(mutations_array, 
+binMutationsByRegion <- function(mutationsArray, 
                                  regionDefinition=NULL) {
     # Create full sequence RegionDefinition object
     if (is.null(regionDefinition)) {
-        regionDefinition <- makeNullRegionDefinition(mutations_array)
+        regionDefinition <- makeNullRegionDefinition(mutationsArray)
     }
     
     # Make a factor of R/S
-    mutatedPositions <- as.numeric(names(mutations_array))
+    mutatedPositions <- as.numeric(names(mutationsArray))
     mutations <- array(NA,  dim=regionDefinition@seqLength)
-    mutations[mutatedPositions] <- mutations_array
+    mutations[mutatedPositions] <- mutationsArray
     mutations <- mutations[1:regionDefinition@seqLength]
     mutations <- factor(mutations,levels=c("R", "S"))
     
