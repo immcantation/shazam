@@ -634,7 +634,10 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 #' 
 #' @export
 binMutationsByRegion <- function(mutations_array, 
-                                 regionDefinition=IMGT_V_NO_CDR3) {
+                                 regionDefinition=NULL) {
+    if (is.null(regionDefinition)) {
+        regionDefinition <- makeNULLRegionDefinition(mutations_array)
+    }
     # Make a factor of R/S
     mutatedPositions <- as.numeric(names(mutations_array))
     mutations <- array(NA,  dim=regionDefinition@seqLength)
@@ -649,7 +652,6 @@ binMutationsByRegion <- function(mutations_array,
     mutations_region_counts <- mutations_region_counts[sortingOrder]
     return(mutations_region_counts)
 }
-
 
 
 #### Expected frequencies calculating functions ####

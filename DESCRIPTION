@@ -47,7 +47,8 @@ Imports:
     utils
 Suggests:
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat
 Collate:
     'shm.R'
     'RegionDefinitions.R'
