@@ -874,17 +874,17 @@ calcExpectedMutations <- function(germlineSeq,
                                                 regionDefinition = regionDefinition)
     
     typesOfMutations <- c("R", "S")
-    mutationalPaths[!(mutationalPaths%in%typesOfMutations)] <- NA
+    mutationalPaths[!(mutationalPaths %in% typesOfMutations)] <- NA
     
     listExpectedMutationFrequencies <- list()
     for(region in regionDefinition@regions){
         for(typeOfMutation in typesOfMutations){
             region_mutation <- paste(region, typeOfMutation, sep="_")    
             
-            targeting_region <- targeting[1:4, regionDefinition@boundaries%in%region]
-            mutationalPaths_region <- mutationalPaths[,regionDefinition@boundaries%in%region]
+            targeting_region <- targeting[1:4, regionDefinition@boundaries %in% region]
+            mutationalPaths_region <- mutationalPaths[, regionDefinition@boundaries %in% region]
             targeting_typeOfMutation_region <- sum(targeting_region[mutationalPaths_region == typeOfMutation], 
-                                                   na.rm=TRUE )
+                                                   na.rm=TRUE)
             
             listExpectedMutationFrequencies[[region_mutation]] <- targeting_typeOfMutation_region
             
@@ -892,7 +892,7 @@ calcExpectedMutations <- function(germlineSeq,
     }
     expectedMutationFrequencies <- unlist(listExpectedMutationFrequencies)
     expectedMutationFrequencies[!is.finite(expectedMutationFrequencies)] <- NA
-    expectedMutationFrequencies <- expectedMutationFrequencies/sum(expectedMutationFrequencies,na.rm=TRUE)
+    expectedMutationFrequencies <- expectedMutationFrequencies/sum(expectedMutationFrequencies, na.rm=TRUE)
     return(expectedMutationFrequencies)    
 }
 
@@ -951,7 +951,7 @@ calculateTargeting <- function(germlineSeq,
     germlineSeqTargeting <- matrix(NA, 
                                    ncol=nchar(s_germlineSeq), 
                                    nrow=length(NUCLEOTIDES[1:5]),
-                                   dimnames=list( NUCLEOTIDES[1:5], c_germlineSeq))
+                                   dimnames=list(NUCLEOTIDES[1:5], c_germlineSeq))
     
     # Now remove the IMGT gaps so that the correct 5mers can be made to calculate
     # targeting. e.g.
@@ -964,7 +964,7 @@ calculateTargeting <- function(germlineSeq,
     gaplessSeq <- paste("NN", gaplessSeq, "NN", sep="")
     gaplessSeqLen <- nchar(gaplessSeq)
     pos<- 3:(gaplessSeqLen - 2)
-    subSeq =  substr(rep(gaplessSeq, gaplessSeqLen - 4), (pos - 2),(pos + 2))    
+    subSeq =  substr(rep(gaplessSeq, gaplessSeqLen - 4), (pos - 2), (pos + 2))    
     germlineSeqTargeting_gapless <- sapply(subSeq, function(x) { 
         targetingModel@targeting[, x] })
     
@@ -973,7 +973,7 @@ calculateTargeting <- function(germlineSeq,
     # Set self-mutating targeting values to be NA
     mutatingToSelf <- colnames(germlineSeqTargeting)
     mutatingToSelf[!(mutatingToSelf %in% NUCLEOTIDES[1:5])] <- "N"
-    # TODO: What's with this <<-?
+    # TODO: What's with this <<- business?
     sapply(1:ncol(germlineSeqTargeting), function(pos) { germlineSeqTargeting[mutatingToSelf[pos], pos] <<- NA })
     
     germlineSeqTargeting[!is.finite(germlineSeqTargeting)] <- NA
@@ -984,8 +984,8 @@ calculateMutationalPaths <- function(germlineSeq,
                                      inputSeq=NULL,
                                      regionDefinition=IMGT_V_NO_CDR3) {    
     
-    # If an inputSequence is passed then process the germlienSequence
-    # to be the same legth, mask germlienSequence with Ns where inputSequence is also N
+    # If an inputSequence is passed then process the germlineSequence
+    # to be the same length, mask germlineSequence with Ns where inputSequence is also N
     # If this function is being called after running calculateTargeting you may skip
     # this step by passing in inputSequence=NULL (which is default). This way you save
     # some processing time.
@@ -1021,9 +1021,10 @@ calculateMutationalPaths <- function(germlineSeq,
         c_germlineSeq <- s2c(s_germlineSeq)
     }
     
+    # TODO: CODON_TABLE appears to control R/S. Is this position 1,2,3 to A,C,G,T for the rows?
     s_germlineSeq_len <- nchar(s_germlineSeq)    
-    vecCodons = sapply({1:(s_germlineSeq_len/3)}*3 - 2, function(x) { substr(s_germlineSeq, x, x + 2) })
-    vecCodons[!vecCodons %in% colnames(CODON_TABLE)] = "NNN"
+    vecCodons <- sapply({1:(s_germlineSeq_len/3)}*3 - 2, function(x) { substr(s_germlineSeq, x, x + 2) })
+    vecCodons[!vecCodons %in% colnames(CODON_TABLE)] <- "NNN"
     matMutationTypes = matrix(CODON_TABLE[, vecCodons], nrow=4, byrow=F,
                               dimnames=list(NUCLEOTIDES[1:4], c_germlineSeq))
     
