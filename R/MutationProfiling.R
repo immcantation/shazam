@@ -630,23 +630,25 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 #' mutations_array <- array(mutation_types, dimnames=list(posOfMutations))
 #' 
 #' # Random mutations
+#' binMutationsByRegion(mutations_array, regionDefinition=NULL)
 #' binMutationsByRegion(mutations_array, regionDefinition=IMGT_V_NO_CDR3)
 #' 
 #' @export
 binMutationsByRegion <- function(mutations_array, 
                                  regionDefinition=NULL) {
+    # Create full sequence RegionDefinition object
     if (is.null(regionDefinition)) {
-        regionDefinition <- makeNULLRegionDefinition(mutations_array)
+        regionDefinition <- makeNullRegionDefinition(mutations_array)
     }
+    
     # Make a factor of R/S
     mutatedPositions <- as.numeric(names(mutations_array))
     mutations <- array(NA,  dim=regionDefinition@seqLength)
     mutations[mutatedPositions] <- mutations_array
     mutations <- mutations[1:regionDefinition@seqLength]
-    mutations <- factor(mutations,levels=c("R","S"))
+    mutations <- factor(mutations,levels=c("R", "S"))
     
-    mutations_region_counts <-  
-        collapseMatrixToVector( table(regionDefinition@boundaries, mutations) )
+    mutations_region_counts <- collapseMatrixToVector(table(regionDefinition@boundaries, mutations))
     
     sortingOrder <- match(regionDefinition@labels, names(mutations_region_counts))
     mutations_region_counts <- mutations_region_counts[sortingOrder]
