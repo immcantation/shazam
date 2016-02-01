@@ -95,7 +95,7 @@ NULL
 #' 
 #' @examples
 #' # Load example data
-#' library("shm")
+#' library("alakazam")
 #' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes

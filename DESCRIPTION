@@ -28,7 +28,7 @@ VignetteBuilder: knitr
 Depends:
     R (>= 3.0.0),
     alakazam (>= 0.2.1),
-    ggplot2
+    ggplot2 (>= 2.0.0)
 Imports:
     data.table (>= 1.9.4),
     doParallel,
