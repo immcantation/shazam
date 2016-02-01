@@ -1,10 +1,6 @@
 file <- system.file("extdata", "ExampleDb.gz", package="alakazam")
 db <- readChangeoDb(file)
 
-test_that("regionDefinition",{
-    
-})
-
 test_that("binMutationsByRegion", {
     set.seed(8)
     numbOfMutations <- sample(3:10, 1) 
@@ -21,7 +17,7 @@ test_that("binMutationsByRegion", {
     
      observed_bin <- binMutationsByRegion(mutations_array, regionDefinition=NULL)
      expected_bin <- c(4,2)
-     names(expected_bin) <- c("_R","_S")
+     names(expected_bin) <- c("SEQ_R","SEQ_S")
      expect_equal(observed_bin,expected_bin)
     
 })
