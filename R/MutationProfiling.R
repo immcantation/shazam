@@ -105,7 +105,10 @@ NULL
 #' # Run collapseByClone
 #' db_new <- collapseByClone(db, cloneColumn="CLONE", 
 #'                           sequenceColumn="SEQUENCE_IMGT",
-#'                           germlineColumn="GERMLINE_IMGT_D_MASK")
+#'                           germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                           expandedDb=FALSE,
+#'                           regionDefinition=IMGT_V_NO_CDR3,
+#'                           nproc=1)
 #' 
 #' @export
 collapseByClone <- function(db, 
@@ -114,7 +117,7 @@ collapseByClone <- function(db,
                             germlineColumn="GERMLINE_IMGT_D_MASK",
                             expandedDb=FALSE,
                             regionDefinition=IMGT_V_NO_CDR3,
-                            nonTerminalOnly = FALSE,
+                            nonTerminalOnly=FALSE,
                             nproc=1) {
     # Hack for visibility of data.table and foreach index variables
     idx <- yidx <- .I <- NULL
@@ -138,7 +141,7 @@ collapseByClone <- function(db,
     }
     
     # TODO: Why is this converted to numeric?  Won't that break?
-    db[, cloneColumn] <- as.numeric(db[, cloneColumn])
+    db[[cloneColumn]] <- as.numeric(db[[cloneColumn]])
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
@@ -165,11 +168,11 @@ collapseByClone <- function(db,
             #cluster <- makeCluster(nproc, type="SOCK") 
             cluster <- parallel::makeCluster(nproc, type= "PSOCK")
         }
-        parallel::clusterExport( cluster, list('db', 
-                                               'sequenceColumn', 'germlineColumn', 'cloneColumn',
-                                               'regionDefinition', 'calcClonalConsensus',
-                                               'groups', 'c2s', 's2c', 'words', 'translate'), 
-                                 envir=environment() )
+        parallel::clusterExport(cluster, list('db', 
+                                              'sequenceColumn', 'germlineColumn', 'cloneColumn',
+                                              'regionDefinition', 'calcClonalConsensus',
+                                              'groups', 'c2s', 's2c', 'words', 'translate'), 
+                                envir=environment() )
         registerDoParallel(cluster)
     }
     
@@ -178,8 +181,8 @@ collapseByClone <- function(db,
     
     list_ClonalConsensus <-
         foreach(idx=iterators::icount(lenGroups), .combine=c, .verbose=FALSE, .errorhandling='pass') %dopar% {
-            calcClonalConsensus(inputSeq = db[groups[[idx]],sequenceColumn],
-                                germlineSeq = db[groups[[idx]],germlineColumn],
+            calcClonalConsensus(inputSeq = db[[sequenceColumn]][groups[[idx]]],
+                                germlineSeq = db[[germlineColumn]][groups[[idx]]],
                                 regionDefinition = regionDefinition, 
                                 nonTerminalOnly = nonTerminalOnly)
         }
@@ -191,14 +194,14 @@ collapseByClone <- function(db,
     
     # If expandedDb is FALSE then collapse the db by clones
     if(expandedDb==FALSE){ 
-        uniqueCloneIDs <-  unique(db[,cloneColumn])
-        indexOfFirstOccurenceOfClone <- match(uniqueCloneIDs, db[,cloneColumn])
+        uniqueCloneIDs <-  unique(db[[cloneColumn]])
+        indexOfFirstOccurenceOfClone <- match(uniqueCloneIDs, db[[cloneColumn]])
         db_ClonalConsensus <- db[indexOfFirstOccurenceOfClone, ]
         db_ClonalConsensus$CLONAL_SEQUENCE <- unlist(list_ClonalConsensus)
     }else{
         # Match the ClonalConsensus to all the sequences in the clone
         vec_ClonalConsensus <- unlist(list_ClonalConsensus)
-        expanded_ClonalConsensus <- tapply(db[,cloneColumn],1:nrow(db),function(x){return(vec_ClonalConsensus[x])})
+        expanded_ClonalConsensus <- tapply(db[[cloneColumn]], 1:nrow(db),function(x){return(vec_ClonalConsensus[x])})
         db_ClonalConsensus <- db
         db_ClonalConsensus$CLONAL_SEQUENCE <- unlist(expanded_ClonalConsensus)
     }
@@ -210,8 +213,8 @@ collapseByClone <- function(db,
 
 # Helper function for calcDBClonalConsensus
 calcClonalConsensus <- function(inputSeq, germlineSeq, 
-                               regionDefinition=NULL, 
-                               nonTerminalOnly=FALSE){    
+                                regionDefinition=NULL, 
+                                nonTerminalOnly=FALSE){    
     
     # Find length of shortest input sequence
     # This is used to trim all the sequencesto that length
@@ -221,7 +224,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
     if(!is.null(regionDefinition)){len_shortest <- min(len_shortest, regionDefinition@seqLength, na.rm=TRUE)}        
     
     if (class(nonTerminalOnly) != "logical") {
-      stop ("nonTerminalOnly must be TRUE or FALSE.")
+        stop ("nonTerminalOnly must be TRUE or FALSE.")
     }
     
     #Find the length of the longest germline sequence
