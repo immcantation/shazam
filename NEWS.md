@@ -1,4 +1,4 @@
-Version 0.1.1.999:  January 26, 2016
+Version 0.1.1.999:  February 2, 2016
 -------------------------------------------------------------------------------
 
 General:
@@ -6,6 +6,8 @@ General:
 + Internal changes to conform to CRAN policies.
 + Compressed and renamed example database file `extdata/Influenza.tab` to 
   `extdata/InfluenzaDb.gz`
++ Fixed several bugs where functions would not work properly when passed 
+  a `dplyr::tbl_df` object instead of a `data.frame`.
 
 Distance Profiling:
 
@@ -16,6 +18,15 @@ Targeting Models:
 
 + Fixed errors in the targeting models vignette.
 
+Mutation Profiling:
+
++ Added the `MutationDefinition` objects `MUTATIONS_CHARGE`, 
+  `MUTATIONS_HYDROPATHY`, `MUTATIONS_POLARITY` providing alternate approaches
+  to defining replacement and silent annotations to mutations when calling
+  `calcDBObservedMutations()` and `calcDBExpectedMutations()`.
++ Fixed a few bugs where column names, region definitions or mutation models
+  were not being recognized properly when non-default values were used.
+  
 
 Version 0.1.1:  December 18, 2015
 -------------------------------------------------------------------------------
