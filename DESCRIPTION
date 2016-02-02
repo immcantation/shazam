@@ -32,7 +32,7 @@ Depends:
 Imports:
     data.table (>= 1.9.4),
     doParallel,
-    dplyr,    
+    dplyr,
     foreach,
     graphics,
     grid,
@@ -55,6 +55,7 @@ Collate:
     'Baseline.R'
     'Core.R'
     'DistToNearest.R'
+    'MutationDefinitions.R'
     'MutationProfiling.R'
     'TargetingModels.R'
 RoxygenNote: 5.0.1
