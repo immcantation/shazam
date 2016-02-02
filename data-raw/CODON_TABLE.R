@@ -1,3 +1,13 @@
+# Returns a vector of codons 1 mutation away from the given codon
+permutateAllCodon <- function(codon){
+    cCodon = seqinr::s2c(codon)
+    matCodons = t(array(cCodon,dim=c(3,12)))
+    matCodons[1:4,1] = NUCLEOTIDES[1:4]
+    matCodons[5:8,2] = NUCLEOTIDES[1:4]
+    matCodons[9:12,3] = NUCLEOTIDES[1:4]
+    apply(matCodons, 1, seqinr::c2s)
+}
+
 CODON_TABLE <- as.data.frame(matrix(NA,ncol=64,nrow=12))
 
 intCounter = 1
@@ -7,7 +17,7 @@ for(pOne in NUCLEOTIDES[1:4]){
       codon = paste(pOne,pTwo,pThree,sep="")
       colnames(CODON_TABLE)[intCounter] =  codon
       intCounter = intCounter + 1
-      CODON_TABLE[,codon] = mutationTypeOptimized(cbind(permutateAllCodon(codon),rep(codon,12)))
+      CODON_TABLE[,codon] = shm:::mutationTypeOptimized(cbind(permutateAllCodon(codon),rep(codon,12)))
     }  
   }
 }

@@ -3,38 +3,6 @@
 #' @include shm.R
 NULL
 
-
-#### Data ####
-
-#' Amino acid classes
-#' 
-#' A set of default amino acid classes for assigning replacement (R) or silent (S)
-#' annotations to mutations using physicochemical property changes. 
-#' 
-#' @format   Named character vectors with single-letter amino acid codes as names
-#'           and classes as values, with \code{NA} assigned to set of characters
-#'           \code{c("X", "*", "-", ".")}
-#' 
-#' @seealso  \link{calcObservedMutations} and \link{calcDBObservedMutations}.
-#' 
-#' @references
-#' \enumerate{
-#'   \item  \url{http://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html} 
-#' }
-#' 
-#' @name   AMINO_ACID_CLASSES
-NULL
-
-#' @rdname   AMINO_ACID_CLASSES
-"AMINO_ACID_CHARGE"
-
-#' @rdname   AMINO_ACID_CLASSES
-"AMINO_ACID_HYDROPATHY"
-
-#' @rdname   AMINO_ACID_CLASSES
-"AMINO_ACID_POLARITY"
-
-
 #### Clonal Consensus building functions ####
 
 #' Identifies clonal consensus sequences
@@ -298,26 +266,24 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' \code{calcDBObservedMutations} calculates the observed number of mutations for each 
 #' sequence in the input \code{data.frame}.
 #'
-#' @param    db                 \code{data.frame} containing sequence data.
-#' @param    sequenceColumn     \code{character} name of the column containing input 
-#'                              sequences.
-#' @param    germlineColumn     \code{character} name of the column containing 
-#'                              the germline or reference sequence.
-#' @param    frequency          \code{logical} indicating whether or not to calculate
-#'                              mutation frequencies. Default is \code{FALSE}.
-#' @param    regionDefinition   \link{RegionDefinition} object defining the regions
-#'                              and boundaries of the Ig sequences. If NULL, mutations 
-#'                              are counted for entire sequence.
-#' @param    aminoAcidClasses   named character vector of amino acid trait classes where 
-#'                              names are single character amino acid codes and value are
-#'                              discrete class labels. If \code{NULL} then replacement (R)
-#'                              or silent (S) will be determined by amino acid identity.
-#'                              If this vector is specified, then replacement (R) will be
-#'                              defined as a change in the amino acid class.
-#' @param    nproc              number of cores to distribute the operation over. If the 
-#'                              cluster has already been set the call function with 
-#'                              \code{nproc} = 0 to not reset or reinitialize. Default is 
-#'                              \code{nproc} = 1.
+#' @param    db                  \code{data.frame} containing sequence data.
+#' @param    sequenceColumn      \code{character} name of the column containing input 
+#'                               sequences.
+#' @param    germlineColumn      \code{character} name of the column containing 
+#'                               the germline or reference sequence.
+#' @param    frequency           \code{logical} indicating whether or not to calculate
+#'                               mutation frequencies. Default is \code{FALSE}.
+#' @param    regionDefinition    \link{RegionDefinition} object defining the regions
+#'                               and boundaries of the Ig sequences. If NULL, mutations 
+#'                               are counted for entire sequence.
+#' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
+#'                               and silent mutation criteria. If \code{NULL} then 
+#'                               replacement and silent are determined by exact 
+#'                               amino acid identity.
+#' @param    nproc               number of cores to distribute the operation over. If the 
+#'                               cluster has already been set the call function with 
+#'                               \code{nproc} = 0 to not reset or reinitialize. Default is 
+#'                               \code{nproc} = 1.
 #' 
 #' @return   A modified \code{db} \code{data.frame} with observed mutation counts for each 
 #'           sequence listed. The columns names are dynamically created based on the
@@ -376,7 +342,7 @@ calcDBObservedMutations <- function(db,
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     frequency=FALSE,
                                     regionDefinition=IMGT_V_NO_CDR3,
-                                    aminoAcidClasses=NULL,
+                                    mutationDefinition=NULL,
                                     nproc=1) {
     # Hack for visibility of data.table and foreach index variables
     idx <- NULL
@@ -406,10 +372,7 @@ calcDBObservedMutations <- function(db,
                                               'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
                                               'getCodonPos','getContextInCodon','mutationType',
                                               'translateCodonToAminoAcid','AMINO_ACIDS','binMutationsByRegion',
-                                              'collapseMatrixToVector',
-                                              'AMINO_ACID_HYDROPATHY',
-                                              'AMINO_ACID_POLARITY',
-                                              'AMINO_ACID_CHARGE'), 
+                                              'collapseMatrixToVector'), 
                                 envir=environment())
         registerDoParallel(cluster)
     } else if (nproc==1) {
@@ -432,7 +395,7 @@ calcDBObservedMutations <- function(db,
                                   db[idx, germlineColumn],
                                   frequency=frequency,
                                   regionDefinition=regionDefinition,
-                                  aminoAcidClasses=aminoAcidClasses)
+                                  mutationDefinition=mutationDefinition)
         }
     
     # Convert list of mutations to data.frame
@@ -470,20 +433,19 @@ calcDBObservedMutations <- function(db,
 #' \code{calcObservedMutations} determines all the mutations in a given input seqeunce compared
 #' to its germline sequence.
 #'
-#' @param    inputSeq          input sequence.
-#' @param    germlineSeq       germline sequence.
-#' @param    frequency         \code{logical} indicating whether or not to calculate
-#'                             mutation frequencies. Default is \code{FALSE}.
-#' @param    regionDefinition  \link{RegionDefinition} object defining the regions
-#'                             and boundaries of the Ig sequences. Note, only the part of
-#'                             sequences defined in \code{regionDefinition} are analyzed.
-#'                             If NULL, mutations are counted for entire sequence.
-#' @param    aminoAcidClasses  named character vector of amino acid trait classes where 
-#'                             names are single character amino acid codes and value are
-#'                             discrete class labels. If \code{NULL} then replacement (R)
-#'                             or silent (S) will be determined by amino acid identity.
-#'                             If this vector is specified, then replacement (R) will be
-#'                             defined as a change in the amino acid class.
+#' @param    inputSeq            input sequence.
+#' @param    germlineSeq         germline sequence.
+#' @param    frequency           \code{logical} indicating whether or not to calculate
+#'                               mutation frequencies. Default is \code{FALSE}.
+#' @param    regionDefinition    \link{RegionDefinition} object defining the regions
+#'                               and boundaries of the Ig sequences. Note, only the part of
+#'                               sequences defined in \code{regionDefinition} are analyzed.
+#'                               If NULL, mutations are counted for entire sequence.
+#' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
+#'                               and silent mutation criteria. If \code{NULL} then 
+#'                               replacement and silent are determined by exact 
+#'                               amino acid identity.
+#'                               
 #' @return   An \code{array} of the mutations, replacement (R) or silent(S), with the 
 #'           names indicating the nucleotide postion of the mutations in the sequence.
 #'           
@@ -497,6 +459,7 @@ calcDBObservedMutations <- function(db,
 #'           See \link{binMutationsByRegion} for aggregation of mutations by region. 
 #' 
 #' @examples
+#' library(alakazam)
 #' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' 
@@ -512,11 +475,14 @@ calcDBObservedMutations <- function(db,
 #'  
 #' # Identify mutations by change in hydropathy class
 #' calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3,
-#'                       aminoAcidClasses=AMINO_ACID_HYDROPATHY)
+#'                       mutationDefinition=HYDROPATHY_MUTATIONS)
 #' 
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
-                                  regionDefinition=NULL, aminoAcidClasses=NULL) {
+                                  regionDefinition=NULL, mutationDefinition=NULL) {
+    # Assign mutation definition
+    aminoAcidClasses <- if (is.null(mutationDefinition)) { NULL } else { mutationDefinition@classes }
+        
     # Removing IMGT gaps (they should come in threes)
     # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
     germlineSeq <- gsub("\\.\\.\\.", "XXX", germlineSeq)
@@ -536,6 +502,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
     # Trim the input and germline sequence to the shortest
     len_inputSeq <- nchar(inputSeq)
     len_germlineSeq <- nchar(germlineSeq)
+    
     # If a regionDefinition is passed,
     # then only analyze till the end of the defined length
     if(!is.null(regionDefinition)){
@@ -666,18 +633,22 @@ binMutationsByRegion <- function(mutationsArray,
 #' \code{calcDBExpectedMutations} calculates the expected mutation frequencies for each 
 #' sequence in the input \code{data.frame}.
 #'
-#' @param    db                \code{data.frame} containing sequence data.
-#' @param    sequenceColumn    \code{character} name of the column containing input 
-#'                             sequences.
-#' @param    germlineColumn    \code{character} name of the column containing 
-#'                             the germline or reference sequence.
-#' @param    targetingModel    \link{TargetingModel} object. Default is \link{HS5FModel}.
-#' @param    regionDefinition  \link{RegionDefinition} object defining the regions
-#'                             and boundaries of the Ig sequences.
-#' @param    nproc             \code{numeric} number of cores to distribute the operation
-#'                             over. If the cluster has already been set the call function with 
-#'                             \code{nproc} = 0 to not reset or reinitialize. Default is 
-#'                             \code{nproc} = 1.
+#' @param    db                  \code{data.frame} containing sequence data.
+#' @param    sequenceColumn      \code{character} name of the column containing input 
+#'                               sequences.
+#' @param    germlineColumn      \code{character} name of the column containing 
+#'                               the germline or reference sequence.
+#' @param    targetingModel      \link{TargetingModel} object. Default is \link{HS5FModel}.
+#' @param    regionDefinition    \link{RegionDefinition} object defining the regions
+#'                               and boundaries of the Ig sequences.
+#' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
+#'                               and silent mutation criteria. If \code{NULL} then 
+#'                               replacement and silent are determined by exact 
+#'                               amino acid identity.
+#' @param    nproc               \code{numeric} number of cores to distribute the operation
+#'                               over. If the cluster has already been set the call function with 
+#'                               \code{nproc} = 0 to not reset or reinitialize. Default is 
+#'                               \code{nproc} = 1.
 #' 
 #' @return   A modified \code{db} \code{data.frame} with expected mutation frequencies 
 #'           for each region defined in \code{regionDefinition}.
@@ -717,11 +688,19 @@ binMutationsByRegion <- function(mutationsArray,
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
 #'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #'
-#' # Run calcDBExpectedMutations()
+#' # Calculate expected mutations over V region
 #' db <- calcDBExpectedMutations(db,
 #'                               sequenceColumn="SEQUENCE_IMGT",
 #'                               germlineColumn="GERMLINE_IMGT_D_MASK",
 #'                               regionDefinition=IMGT_V_NO_CDR3,
+#'                               nproc=1)
+#' 
+#' # Calculate hydropathy expected mutations over V region
+#' db <- calcDBExpectedMutations(db,
+#'                               sequenceColumn="SEQUENCE_IMGT",
+#'                               germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                               regionDefinition=IMGT_V_NO_CDR3,
+#'                               mutationDefinition=HYDROPATHY_MUTATIONS,
 #'                               nproc=1)
 #'
 #' @export
@@ -730,6 +709,7 @@ calcDBExpectedMutations <- function(db,
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     targetingModel=HS5FModel,
                                     regionDefinition=IMGT_V_NO_CDR3,
+                                    mutationDefinition=NULL,
                                     nproc=1) {
     # Hack for visibility of data.table and foreach index variables
     idx <- NULL
@@ -776,10 +756,11 @@ calcDBExpectedMutations <- function(db,
     
     targeting_list <-
         foreach (idx=iterators::icount(numbOfSeqs)) %dopar% {
-            calcExpectedMutations(germlineSeq = db[idx, germlineColumn],
-                                  inputSeq = db[idx, sequenceColumn],
-                                  targetingModel = HS5FModel,
-                                  regionDefinition = regionDefinition)
+            calcExpectedMutations(germlineSeq=db[idx, germlineColumn],
+                                  inputSeq=db[idx, sequenceColumn],
+                                  targetingModel=targetingModel,
+                                  regionDefinition=regionDefinition,
+                                  mutationDefinition=mutationDefinition)
         }
     
     # Convert list of expected mutation freq to data.frame
@@ -807,15 +788,19 @@ calcDBExpectedMutations <- function(db,
 #' frequencies of a given sequence. This is primarily a helper function for
 #' \link{calcDBExpectedMutations}. 
 #'
-#' @param    germlineSeq       germline (reference) sequence.
-#' @param    inputSeq          input (observed) sequence. If this is not \code{NULL}, 
-#'                             then \code{germlineSeq} will be processed to be the same
-#'                             same length as \code{inputSeq} and positions in 
-#'                             \code{germlineSeq} corresponding to positions with Ns in 
-#'                             \code{inputSeq} will also be assigned an N. 
-#' @param    targetingModel    \link{TargetingModel} object. Default is \link{HS5FModel}.
-#' @param    regionDefinition  \link{RegionDefinition} object defining the regions
-#'                             and boundaries of the Ig sequences.
+#' @param    germlineSeq         germline (reference) sequence.
+#' @param    inputSeq            input (observed) sequence. If this is not \code{NULL}, 
+#'                               then \code{germlineSeq} will be processed to be the same
+#'                               same length as \code{inputSeq} and positions in 
+#'                               \code{germlineSeq} corresponding to positions with Ns in 
+#'                               \code{inputSeq} will also be assigned an N. 
+#' @param    targetingModel      \link{TargetingModel} object. Default is \link{HS5FModel}.
+#' @param    regionDefinition    \link{RegionDefinition} object defining the regions
+#'                               and boundaries of the Ig sequences.
+#' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
+#'                               and silent mutation criteria. If \code{NULL} then 
+#'                               replacement and silent are determined by exact 
+#'                               amino acid identity.
 #'                               
 #' @return   A \code{numeric} vector of the expected frequencies of mutations in the 
 #'           regions in the \code{regionDefinition}. For example, when using the default 
@@ -845,6 +830,7 @@ calcDBExpectedMutations <- function(db,
 #' See \link{calcObservedMutations} for getting observed mutation counts.
 #' 
 #' @examples
+#' library(alakazam)
 #' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' 
@@ -856,22 +842,31 @@ calcDBExpectedMutations <- function(db,
 #' calcExpectedMutations(inputSeq, germlineSeq)
 #' 
 #' # Identify only mutations the V segment minus CDR3
-#' calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
-#'
+#' calcExpectedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
+#' 
+#' # Define mutations based on hydropathy
+#' calcExpectedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3,
+#'                       mutationDefinition=HYDROPATHY_MUTATIONS)
+#' 
 #' @export
 calcExpectedMutations <- function(germlineSeq,
                                   inputSeq=NULL,
                                   targetingModel=HS5FModel,
-                                  regionDefinition=IMGT_V_NO_CDR3) {
+                                  regionDefinition=IMGT_V_NO_CDR3,
+                                  mutationDefinition=NULL) {
+    # Assign codon table
+    codonTable <- if (is.null(mutationDefinition)) { CODON_TABLE } else { mutationDefinition@codonTable }
     
-    targeting <- calculateTargeting(germlineSeq = germlineSeq, 
-                                    inputSeq = inputSeq,
-                                    targetingModel = targetingModel,
-                                    regionDefinition = regionDefinition)
+    # Get targeting
+    targeting <- calculateTargeting(germlineSeq=germlineSeq, 
+                                    inputSeq=inputSeq,
+                                    targetingModel=targetingModel,
+                                    regionDefinition=regionDefinition)
     
     # Determine the mutations paths (i.e. determine R and S mutation frequencies)
-    mutationalPaths <- calculateMutationalPaths(germlineSeq = c2s(colnames(targeting)), 
-                                                regionDefinition = regionDefinition)
+    mutationalPaths <- calculateMutationalPaths(germlineSeq=c2s(colnames(targeting)), 
+                                                regionDefinition=regionDefinition,
+                                                codonTable=codonTable)
     
     typesOfMutations <- c("R", "S")
     mutationalPaths[!(mutationalPaths %in% typesOfMutations)] <- NA
@@ -982,7 +977,8 @@ calculateTargeting <- function(germlineSeq,
 
 calculateMutationalPaths <- function(germlineSeq,
                                      inputSeq=NULL,
-                                     regionDefinition=IMGT_V_NO_CDR3) {    
+                                     regionDefinition=IMGT_V_NO_CDR3,
+                                     codonTable=CODON_TABLE) {    
     
     # If an inputSequence is passed then process the germlineSequence
     # to be the same length, mask germlineSequence with Ns where inputSequence is also N
@@ -1021,11 +1017,10 @@ calculateMutationalPaths <- function(germlineSeq,
         c_germlineSeq <- s2c(s_germlineSeq)
     }
     
-    # TODO: CODON_TABLE appears to control R/S. Is this position 1,2,3 to A,C,G,T for the rows?
     s_germlineSeq_len <- nchar(s_germlineSeq)    
     vecCodons <- sapply({1:(s_germlineSeq_len/3)}*3 - 2, function(x) { substr(s_germlineSeq, x, x + 2) })
-    vecCodons[!vecCodons %in% colnames(CODON_TABLE)] <- "NNN"
-    matMutationTypes = matrix(CODON_TABLE[, vecCodons], nrow=4, byrow=F,
+    vecCodons[!vecCodons %in% colnames(codonTable)] <- "NNN"
+    matMutationTypes = matrix(codonTable[, vecCodons], nrow=4, byrow=F,
                               dimnames=list(NUCLEOTIDES[1:4], c_germlineSeq))
     
     return(matMutationTypes)
@@ -1069,13 +1064,17 @@ translateCodonToAminoAcid <- function(Codon) {
 # @return  Mutation type as "R" (replacement), "S" (silent), "Stop" (stop) or NA (input is NA).
 #
 # @examples
+# # Without classes
 # shm:::mutationType("TTT", "TTC")
 # shm:::mutationType("TTT", "TTA")
 # shm:::mutationType("TTT", "TGA")
-# shm:::mutationType("TTT", "TTC", aminoAcidClasses=AMINO_ACID_HYDROPATHY)
-# shm:::mutationType("TTT", "TTA", aminoAcidClasses=AMINO_ACID_HYDROPATHY)
-# shm:::mutationType("TTT", "TCT", aminoAcidClasses=AMINO_ACID_HYDROPATHY)
-# shm:::mutationType("TTT", "TGA", aminoAcidClasses=AMINO_ACID_HYDROPATHY)
+#
+# # With classes
+# classes <- HYDROPATHY_MUTATIONS@classes
+# shm:::mutationType("TTT", "TTC", aminoAcidClasses=classes)
+# shm:::mutationType("TTT", "TTA", aminoAcidClasses=classes)
+# shm:::mutationType("TTT", "TCT", aminoAcidClasses=classes)
+# shm:::mutationType("TTT", "TGA", aminoAcidClasses=classes)
 mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
     # codonFrom="TTT"; codonTo="TTA"
     # codonFrom="TTT"; codonTo="TGA"

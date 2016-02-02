@@ -38,11 +38,28 @@ aa_imgt <- read.csv("data-raw/IMGT_AminoAcidClasses.csv", as.is=TRUE)
 
 # Set vectors or hydropathy, polarity and charge classes
 aa_ambig <- setNames(rep(NA, 4), c("X", "-", ".", "*"))
-AMINO_ACID_HYDROPATHY <- c(setNames(aa_imgt$HYDROPATHY, aa_imgt$IUPAC), aa_ambig)
-AMINO_ACID_POLARITY <- c(setNames(aa_imgt$POLARITY, aa_imgt$IUPAC), aa_ambig)
-AMINO_ACID_CHARGE <- c(setNames(aa_imgt$CHARGE, aa_imgt$IUPAC), aa_ambig)
+aa_hydropathy <- c(setNames(aa_imgt$HYDROPATHY, aa_imgt$IUPAC), aa_ambig)
+aa_polarity <- c(setNames(aa_imgt$POLARITY, aa_imgt$IUPAC), aa_ambig)
+aa_charge <- c(setNames(aa_imgt$CHARGE, aa_imgt$IUPAC), aa_ambig)
 
-devtools::use_data(AMINO_ACID_HYDROPATHY,
-                   AMINO_ACID_POLARITY,
-                   AMINO_ACID_CHARGE,
+# Make objects
+# TODO: Need to figure out exactly which publications they used!
+imgt_cite <- "http://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html"
+HYDROPATHY_MUTATIONS <- createMutationDefinition(name="Hydropathy", 
+                                                 description="Hydropathy mutation definition",
+                                                 classes=aa_hydropathy,
+                                                 citation=imgt_cite)
+POLARITY_MUTATIONS <- createMutationDefinition(name="Polarity", 
+                                               description="Polarity mutation definition",
+                                               classes=aa_polarity,
+                                               citation=imgt_cite)
+CHARGE_MUTATIONS <- createMutationDefinition(name="Charge", 
+                                             description="Charge mutation definition",
+                                             classes=aa_charge,
+                                             citation=imgt_cite)
+
+# Save data
+devtools::use_data(HYDROPATHY_MUTATIONS,
+                   POLARITY_MUTATIONS,
+                   CHARGE_MUTATIONS,
                    overwrite=TRUE)
