@@ -354,7 +354,7 @@ calcBaseline <- function(db,
                          sequenceColumn="SEQUENCE_IMGT",
                          germlineColumn="GERMLINE_IMGT_D_MASK",
                          testStatistic=c("local", "focused","imbalance"),
-                         regionDefinition=IMGT_V_NO_CDR3,
+                         regionDefinition=NULL,
                          targetingModel=HS5FModel,
                          calcStats=FALSE,
                          nproc=1) {
@@ -417,9 +417,14 @@ calcBaseline <- function(db,
     #          1. Collapse the sequences by the CLONE column (if present)
     #          2. Calculate the numbers of observed mutations
     #          3. Calculate the expected frequencies of mutations    
-    # After that BASELINe prob. densities can be calcualted per seqeunce.    
-    observedColumns <- paste0("OBSERVED_", regionDefinition@labels)
-    expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
+    # After that BASELINe prob. densities can be calcualted per sequence. 
+    if (is.null(regionDefinition)) {
+        observedColumns <- paste0("OBSERVED_", makeNullRegionDefinition()@labels)
+        expectedColumns <- paste0("EXPECTED_", makeNullRegionDefinition()@labels)
+    } else {
+        observedColumns <- paste0("OBSERVED_", regionDefinition@labels)
+        expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
+    }
     
     if( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
         

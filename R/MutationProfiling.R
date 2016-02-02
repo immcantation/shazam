@@ -641,7 +641,7 @@ binMutationsByRegion <- function(mutationsArray,
                                  regionDefinition=NULL) {
     # Create full sequence RegionDefinition object
     if (is.null(regionDefinition)) {
-        regionDefinition <- makeNullRegionDefinition(mutationsArray)
+        regionDefinition <- makeNullRegionDefinition(max(as.numeric(names(mutationsArray))))
     }
     
     # Make a factor of R/S
@@ -783,7 +783,11 @@ calcDBExpectedMutations <- function(db,
         }
     
     # Convert list of expected mutation freq to data.frame
-    labels_length <- length(regionDefinition@labels)
+    if (is.null(regionDefinition)) {
+        labels_length <- length(makeNullRegionDefinition()@labels)
+    } else {
+        labels_length <- length(regionDefinition@labels)
+    }
     expectedMutationFrequencies <- do.call(rbind, lapply(targeting_list, function(x) { 
         length(x) <- labels_length 
         return(x) })) 
@@ -876,13 +880,17 @@ calcExpectedMutations <- function(germlineSeq,
     typesOfMutations <- c("R", "S")
     mutationalPaths[!(mutationalPaths %in% typesOfMutations)] <- NA
     
+    if (is.null(regionDefinition)) {
+        rdLength <- max(nchar(inputSeq), nchar(germlineSeq), na.rm=TRUE)
+        regionDefinition <- makeNullRegionDefinition(rdLength)
+    }
     listExpectedMutationFrequencies <- list()
     for(region in regionDefinition@regions){
         for(typeOfMutation in typesOfMutations){
             region_mutation <- paste(region, typeOfMutation, sep="_")    
             
             targeting_region <- targeting[1:4, regionDefinition@boundaries %in% region]
-            mutationalPaths_region <- mutationalPaths[, regionDefinition@boundaries %in% region]
+            mutationalPaths_region <- mutationalPaths[, regionDefinition@boundaries[1:ncol(mutationalPaths)] %in% region]
             targeting_typeOfMutation_region <- sum(targeting_region[mutationalPaths_region == typeOfMutation], 
                                                    na.rm=TRUE)
             
@@ -1026,7 +1034,7 @@ calculateMutationalPaths <- function(germlineSeq,
     vecCodons <- sapply({1:(s_germlineSeq_len/3)}*3 - 2, function(x) { substr(s_germlineSeq, x, x + 2) })
     vecCodons[!vecCodons %in% colnames(CODON_TABLE)] <- "NNN"
     matMutationTypes = matrix(CODON_TABLE[, vecCodons], nrow=4, byrow=F,
-                              dimnames=list(NUCLEOTIDES[1:4], c_germlineSeq))
+                              dimnames=list(NUCLEOTIDES[1:4], c_germlineSeq[ 1:(3 * length(vecCodons))]))
     
     return(matMutationTypes)
 }
