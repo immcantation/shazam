@@ -1128,6 +1128,8 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
                     )
                 df_baseline_seq <- dplyr::bind_rows(df_baseline_seq, df_baseline_seq_region)
             }
+            df_baseline_seq[,1] <- as.vector(unlist(df_baseline_seq[,1]))
+            df_baseline_seq[,2] <- as.vector(unlist(df_baseline_seq[,2]))
             return(df_baseline_seq)
         }
     
