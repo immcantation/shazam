@@ -341,7 +341,7 @@ calcDBObservedMutations <- function(db,
                                     sequenceColumn="SEQUENCE_IMGT",
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     frequency=FALSE,
-                                    regionDefinition=NULL,
+                                    regionDefinition=IMGT_V_NO_CDR3,
                                     mutationDefinition=NULL,
                                     nproc=1) {
     # Hack for visibility of data.table and foreach index variables
@@ -710,7 +710,7 @@ calcDBExpectedMutations <- function(db,
                                     sequenceColumn="SEQUENCE_IMGT",
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     targetingModel=HS5FModel,
-                                    regionDefinition=NULL,
+                                    regionDefinition=IMGT_V_NO_CDR3,
                                     mutationDefinition=NULL,
                                     nproc=1) {
     # Hack for visibility of data.table and foreach index variables
@@ -988,7 +988,9 @@ calculateTargeting <- function(germlineSeq,
 calculateMutationalPaths <- function(germlineSeq,
                                      inputSeq=NULL,
                                      regionDefinition=NULL,
-                                     codonTable=CODON_TABLE) {    
+                                     codonTable=NULL) {    
+    # Set codon table if required
+    if (is.null(codonTable)) { codonTable <- CODON_TABLE }
     
     # If an inputSequence is passed then process the germlineSequence
     # to be the same length, mask germlineSequence with Ns where inputSequence is also N
