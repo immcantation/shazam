@@ -608,13 +608,19 @@ calcBaselineHelper  <- function(observed,
                                 expected,
                                 region,
                                 testStatistic="local",
-                                regionDefinition=IMGT_V_NO_CDR3) {
+                                regionDefinition=NULL) {
+    
+  if (is.null(regionDefinition)) {
+      regions <- makeNullRegionDefinition()@regions
+  } else {
+      regions <- regionDefinition@regions
+  }
   
   # Evaluate argument choices
   testStatistic <- match.arg(testStatistic, c("local", "focused","imbalance"))
   
   #If there are more than two regions (e.g. CDR and FWR then you cannot perform the focused test)
-  if (testStatistic=="focused" & length(regionDefinition@regions)!=2) {
+  if (testStatistic=="focused" & length(regions)!=2) {
     testStatistic="local"    
   }    
   
@@ -634,7 +640,7 @@ calcBaselineHelper  <- function(observed,
       grep( 
         paste0( 
           "OBSERVED_", region, "|", 
-          "OBSERVED_", regionDefinition@regions[regionDefinition@regions!=region], "_S"
+          "OBSERVED_", regions[regions!=region], "_S"
         ),
         names(observed) 
       )
@@ -644,7 +650,7 @@ calcBaselineHelper  <- function(observed,
       grep( 
         paste0( 
           "EXPECTED_", region, "|", 
-          "EXPECTED_",  regionDefinition@regions[regionDefinition@regions!=region], "_S"
+          "EXPECTED_",  regions[regions!=region], "_S"
         ),
         names(expected) 
       )        
