@@ -211,7 +211,10 @@ test_that("calcBaseline works with regionDefinition==NULL", {
                                 regionDefinition=IMGT_V_NO_CDR3,
                                 targetingModel = HS5FModel,
                                 nproc = 1,
-                                calcStats = F)
+                                calcStats = T)
+    
+    ## Check if the stats slot has been filled
+    expect_gt(nrow(slot(db_baseline,"stats")),0)
     
     ## Check 5 examples for each, at different positions
     ## CDR_R, first 5
