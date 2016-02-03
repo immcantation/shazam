@@ -74,7 +74,7 @@ checkColumns <- function(data, columns, logic=c("all", "any")) {
         }        
         # Check that all values are not NA
         for (f in columns) {
-            if (all(is.na(data[, f]))) { 
+            if (all(is.na(data[[f]]))) { 
                 msg <- paste("The column", f, "contains no data") 
                 return(msg)
             }
@@ -86,7 +86,7 @@ checkColumns <- function(data, columns, logic=c("all", "any")) {
             return(msg)
         }
         # Check that all values are not NA
-        invalid <- sapply(columns, function(f) all(is.na(data_names[, f])))
+        invalid <- sapply(columns, function(f) all(is.na(data_names[[f]])))
         if (all(invalid)) { 
             msg <- paste("None of the columns", paste(columns, collapse=", "), "contain data") 
             return(msg)
