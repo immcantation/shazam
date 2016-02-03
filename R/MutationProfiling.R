@@ -988,7 +988,9 @@ calculateTargeting <- function(germlineSeq,
 calculateMutationalPaths <- function(germlineSeq,
                                      inputSeq=NULL,
                                      regionDefinition=IMGT_V_NO_CDR3,
-                                     codonTable=CODON_TABLE) {    
+                                     codonTable=NULL) {    
+    # Set codon table if required
+    if (is.null(codonTable)) { codonTable <- CODON_TABLE }
     
     # If an inputSequence is passed then process the germlineSequence
     # to be the same length, mask germlineSequence with Ns where inputSequence is also N
