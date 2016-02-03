@@ -419,8 +419,9 @@ calcBaseline <- function(db,
     #          3. Calculate the expected frequencies of mutations    
     # After that BASELINe prob. densities can be calcualted per sequence. 
     if (is.null(regionDefinition)) {
-        observedColumns <- paste0("OBSERVED_", makeNullRegionDefinition()@labels)
-        expectedColumns <- paste0("EXPECTED_", makeNullRegionDefinition()@labels)
+        rd_labels <- makeNullRegionDefinition()@labels
+        observedColumns <- paste0("OBSERVED_", rd_labels)
+        expectedColumns <- paste0("EXPECTED_", rd_labels)
     } else {
         observedColumns <- paste0("OBSERVED_", regionDefinition@labels)
         expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
@@ -486,7 +487,11 @@ calcBaseline <- function(db,
     list_n <- list()
     list_p <- list()
     
-    regions <- regionDefinition@regions
+    if (is.null(regionDefinition)) {
+        regions <- makeNullRegionDefinition()@regions   
+    } else {
+        regions <- regionDefinition@regions
+    }
     # For every region (e.g. CDR, FWR etc.)
     for (region in regions) {
         
@@ -568,7 +573,7 @@ calcBaseline <- function(db,
                                db=as.data.frame(db),
                                regionDefinition=regionDefinition,
                                testStatistic=testStatistic,
-                               regions=regionDefinition@regions,
+                               regions=regions,
                                numbOfSeqs=numbOfSeqs,
                                binomK=binomK,
                                binomN=binomN,
