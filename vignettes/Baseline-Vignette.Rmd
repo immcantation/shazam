@@ -109,7 +109,9 @@ the `CLONE` column.
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Calculate selection scores using the output from calcDBExpectedMutations
-baseline <- calcBaseline(db_exp, testStatistic="focused", nproc=1)
+baseline <- calcBaseline(db_exp, testStatistic="focused", 
+                         regionDefinition=IMGT_V_NO_CDR3,
+                         nproc=1)
 
 # Subset the original data to two time-points and switched isotypes
 db_sub <- subset(db, CPRIMER %in% c("IGHA", "IGHG") & 
