@@ -402,7 +402,8 @@ calcDBObservedMutations <- function(db,
     if (!is.null(regionDefinition)) {
         labels_length <- length(regionDefinition@labels)
     } else{
-        labels_length=1
+        #labels_length=1
+        labels_length <- length(makeNullRegionDefinition()@labels)
     }
     observed_mutations <- do.call( rbind, lapply(observedMutations_list, function(x) { 
         length(x) <- labels_length 
@@ -410,7 +411,7 @@ calcDBObservedMutations <- function(db,
     }))
     
     
-    sep <- ""
+    sep <- "_"
     if (ncol(observed_mutations) > 1) sep <- "_"
     observed_mutations[is.na(observed_mutations)] <- 0
     if (frequency == TRUE) {
@@ -559,7 +560,8 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
                 if (!is.null(regionDefinition)) { 
                     mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
                 } else {
-                    mutations_array <- length(mutations_array)
+                    #mutations_array <- length(mutations_array)
+                    mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
                 }
             }
         }        

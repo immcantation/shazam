@@ -59,6 +59,11 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     expect_equal(obs_mpath_null, exp_mpath_null)
 })
 
+
+##--
+## Expected
+##--
+
 test_that("calcExpectedMutations works with regionDefinition==NULL",{
     inputSeq <- db[1, "SEQUENCE_IMGT"]
     germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
@@ -123,6 +128,80 @@ test_that("calcDBExpectedMutations works with regionDefinition==NULL",{
     
 })
 
+##--
+## Observed
+##--
+
+test_that("calcObservedMutations works with regionDefinition==NULL",{
+    inputSeq <- db[1, "SEQUENCE_IMGT"]
+    germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
+    
+    obs_mutations <- calcObservedMutations(inputSeq, germlineSeq, 
+                                           regionDefinition=IMGT_V_NO_CDR3,
+                                           frequency=F)
+    
+    ## TODO: should sum(exp_mutations) and sum(exp_mutations_null) match?
+    exp_mutations <- c(2, 2, 8, 1)
+    names(exp_mutations) <- c("CDR_R", "CDR_S", "FWR_R", "FWR_S")
+    expect_equal(obs_mutations, exp_mutations, tolerance=0.001)
+    
+    obs_mutations_null <- calcObservedMutations(inputSeq, germlineSeq, 
+                            regionDefinition=NULL, frequency=F)
+    exp_mutations_null <- c(12, 5)
+    names(exp_mutations_null) <- c("SEQ_R", "SEQ_S")
+    expect_equal(obs_mutations_null, exp_mutations_null, tolerance=0.001)
+})
+
+test_that("calcDBObservedMutations works with regionDefinition==NULL",{
+    db_subset <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
+                            BARCODE %in% c("RL016","RL018","RL019","RL021"))
+    db_mutations <- calcDBObservedMutations( db_subset,
+                                             sequenceColumn="SEQUENCE_IMGT",
+                                             germlineColumn="GERMLINE_IMGT_D_MASK",
+                                             regionDefinition=IMGT_V_NO_CDR3,
+                                             nproc=1)
+    ## Check 5 examples for each
+    ## CDR_R, first 5
+    obs_cdr_r <- db_mutations$OBSERVED_CDR_R[1:5]
+    exp_cdr_r <- c(2, 0, 0, 0, 0)
+    expect_equal(obs_cdr_r, exp_cdr_r)
+    
+    ## CDR_S 311:315
+    obs_cdr_s <- db_mutations$OBSERVED_CDR_S[311:315]
+    exp_cdr_s <- c(0, 0, 0, 0, 0)
+    expect_equal(obs_cdr_r, exp_cdr_r)
+    
+    ## FWR_R, 120:124
+    obs_fwr_r <- db_mutations$OBSERVED_FWR_R[120:124]
+    exp_fwr_r<- c(0, 0, 0, 0, 0)
+    expect_equal(obs_fwr_r, exp_fwr_r)
+    
+    ## FWR_S, 40:44
+    obs_fwr_s <- db_mutations$OBSERVED_FWR_S[40:44]
+    exp_fwr_s<- c(0, 0, 0, 1, 0)
+    expect_equal(obs_fwr_s, exp_fwr_s)
+     
+    db_mutations_null <- calcDBObservedMutations( db_subset,
+                                                  sequenceColumn="SEQUENCE_IMGT",
+                                                  germlineColumn="GERMLINE_IMGT_D_MASK",
+                                                  regionDefinition=NULL,
+                                                  nproc=1)
+    ## SEQ_R, first 5
+    obs_seq_r <- db_mutations_null$OBSERVED_SEQ_R[1:5]
+    exp_seq_r <- c(12, 0, 0, 0, 0)
+    expect_equal(obs_seq_r, exp_seq_r)
+    
+    ## SEQ_S 38:42
+    obs_seq_s <- db_mutations_null$OBSERVED_SEQ_S[38:42]
+    exp_seq_s <- c(0, 2, 2, 0, 0)
+    expect_equal(obs_seq_s, exp_seq_s)
+    
+})
+
+##--
+## Baseline
+##--
+
 test_that("calcBaseline works with regionDefinition==NULL", {
     set.seed(82)
     db_baseline <- calcBaseline(db, 
@@ -131,7 +210,8 @@ test_that("calcBaseline works with regionDefinition==NULL", {
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V_NO_CDR3,
                                 targetingModel = HS5FModel,
-                                nproc = 1)
+                                nproc = 1,
+                                calcStats = F)
     
     ## Check 5 examples for each, at different positions
     ## CDR_R, first 5

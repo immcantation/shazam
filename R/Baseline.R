@@ -409,7 +409,7 @@ calcBaseline <- function(db,
         envir=environment() )    
         registerDoParallel(cluster, cores=nproc)
         nproc_arg <- cluster
-    } else if( nproc==1 ) {
+    } else if ( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
@@ -430,7 +430,7 @@ calcBaseline <- function(db,
         expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
     }
     
-    if( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
+    if ( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
         
         # If the germlineColumn & sequenceColumn are not found in the db error and quit
         if( !all( c(sequenceColumn, germlineColumn) %in% colnames(db) ) ) {
@@ -439,7 +439,7 @@ calcBaseline <- function(db,
         }
         
         # Collapse the sequences by the CLONE column (if present)
-        if( "CLONE" %in% colnames(db) ) {                       
+        if ( "CLONE" %in% colnames(db) ) {                       
             db <- collapseByClone(db, 
                                   cloneColumn="CLONE", 
                                   sequenceColumn=sequenceColumn,
@@ -501,7 +501,7 @@ calcBaseline <- function(db,
         # Foreach returns a list of PDFs
         list_region_pdfs <- 
             foreach(idx=iterators::icount(totalNumbOfSequences)) %dopar% {                
-                shm:::calcBaselineHelper( 
+                calcBaselineHelper( 
                     observed = db[idx, cols_observed],
                     expected = db[idx, cols_expected],
                     region = region,
