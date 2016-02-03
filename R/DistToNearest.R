@@ -57,7 +57,7 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
   numbOfMutation <- sum(fivemersWithMu)
 
   dist <- NA
-  tryCatch({
+  a <- tryCatch({
     if (length(seq1)==1){
       seq1_to_seq2 <- targeting_dist[substr(seq2,3,3),seq1]
       seq2_to_seq1 <- targeting_dist[substr(seq1,3,3),seq2]
@@ -255,7 +255,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
   l <- findUniqueJunctions(arrJunctions)
   arrJunctionsDist <- l$arrJunctionsDist
   arrJunctionsUnique <- l$arrJunctionsUnique
-  #indexJunctionsCounts <- l$indexJunctionsCounts
+  indexJunctionsCounts <- l$indexJunctionsCounts
 
   # Compute distances between junctions
   numbOfUniqueJunctions <- length(arrJunctionsUnique)
@@ -299,7 +299,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
   l <- findUniqueJunctions(arrJunctions)
   arrJunctionsDist <- l$arrJunctionsDist
   arrJunctionsUnique <- l$arrJunctionsUnique
-  #indexJunctionsCounts <- l$indexJunctionsCounts
+  indexJunctionsCounts <- l$indexJunctionsCounts
   
   # Compute distances between junctions
   numbOfUniqueJunctions <- length(arrJunctionsUnique)
@@ -382,7 +382,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' @examples
 #' # Load example data
 #' library(alakazam)
-#' file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' file <- system.file("extdata", "changeo_demo.tab", package="alakazam")
 #' db <- readChangeoDb(file)
 #' 
 #' # Use genotyped V assignments, HS1F model, and normalize by junction length
@@ -401,9 +401,6 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                           jCallColumn="J_CALL", model=c("hs1f", "m1n", "ham", "aa", "hs5f"), 
                           normalize=c("length", "none"), symmetry=c("avg","min"),
                           first=TRUE, nproc=1, fields=NULL) {
-    # Hack for visibility of data.table and foreach index variables
-    idx <- yidx <- .I <- NULL
-
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
@@ -418,8 +415,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     if (check != TRUE) { stop(check) }
     
     # Convert case check for invalid characters
-    db[, sequenceColumn] <- toupper(db[, sequenceColumn])
-    #check <- grepl("[^ACGTN]", db[, sequenceColumn], perl=TRUE)
+    db[, sequenceColumn] <- toupper(db[[sequenceColumn]])
+    #check <- grepl("[^ACGTN]", db[[sequenceColumn]], perl=TRUE)
     #if (any(check)) {
     #  stop("Invalid sequence characters in the ", sequenceColumn, " column.")
     #}
@@ -432,11 +429,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     # Parse V and J columns to get gene
     # cat("V+J Column parsing\n")
     if (first) {
-        db$V <- getGene(db[, vCallColumn])
-        db$J <- getGene(db[, jCallColumn])
+        db$V <- getGene(db[[vCallColumn]])
+        db$J <- getGene(db[[jCallColumn]])
     } else {
-        db$V1 <- getGene(db[, vCallColumn], first=FALSE)
-        db$J1 <- getGene(db[, jCallColumn], first=FALSE)
+        db$V1 <- getGene(db[[vCallColumn]], first=FALSE)
+        db$J1 <- getGene(db[[jCallColumn]], first=FALSE)
         db$V <- db$V1
         db$J <- db$J1
         # Reassign V genes to most general group of genes
@@ -456,17 +453,17 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     # Create new column for distance to nearest neighbor
     db$DIST_NEAREST <- rep(NA, nrow(db))
     db$ROW_ID <- 1:nrow(db)
-    db$L <- nchar(db[, sequenceColumn])
+    db$L <- nchar(db[[sequenceColumn]])
     
     # Create cluster of nproc size and export namespaces
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.
-    if (nproc == 1) {
+    if( nproc==1 ) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
-    } else if (nproc > 1) {
+    } else if( nproc > 1 ) {
         cluster <- parallel::makeCluster(nproc, type="PSOCK")
         registerDoParallel(cluster)
     } else {
@@ -484,27 +481,27 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     if (!is.null(fields)) {
         group_cols <- append(group_cols,fields)
     }
-    dt <- dt[, list(yidx=list(.I)), by=group_cols]
-    groups <- dt[, yidx]
+    dt <- dt[, list( yidx = list(.I) ) , by = group_cols ]
+    groups <- dt[,yidx]
     lenGroups <- length(groups)
     
     # Export groups to the clusters
     if (nproc>1) { parallel::clusterExport(cluster, list("db", 
-                                                         "groups", 
-                                                         "sequenceColumn","model",
-                                                         "normalize","symmetry","getClosestMat", 
-                                                         "HS1FDistance","distSeqMat",
-                                                         "calcTargetingDistance",
-                                                         "findUniqueJunctions","getPairwiseDistances"), envir=environment()) }
+                                               "groups", 
+                                               "sequenceColumn","model",
+                                               "normalize","symmetry","getClosestMat", 
+                                               "HS1FDistance","distSeqMat",
+                                               "calcTargetingDistance",
+                                               "findUniqueJunctions","getPairwiseDistances"), envir=environment()) }
     
     if (model %in% c("hs5f")) {
         # Export targeting model to processes
         if (nproc>1) { parallel::clusterExport(cluster, list("targeting_model","getClosestBy5mers"), envir=environment()) }    
         list_db <-
-            foreach(idx=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
-                db_group <- db[groups[[idx]],]
+            foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
+                db_group <- db[groups[[i]],]
                 db_group$DIST_NEAREST <-
-                    getClosestBy5mers( db[groups[[idx]],sequenceColumn],
+                    getClosestBy5mers( db[groups[[i]],sequenceColumn],
                                        targeting_model=targeting_model,
                                        normalize=normalize,
                                        symmetry=symmetry )
@@ -512,10 +509,10 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
             }    
     } else if (model %in% c("ham", "aa", "m1n", "hs1f")) {    
         list_db <-
-            foreach(idx=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
-                db_group <- db[groups[[idx]],]
+            foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
+                db_group <- db[groups[[i]],]
                 db_group$DIST_NEAREST <-
-                    getClosestMat( db[groups[[idx]],sequenceColumn],
+                    getClosestMat( db[groups[[i]],sequenceColumn],
                                    model=model,
                                    normalize=normalize )
                 return(db_group)

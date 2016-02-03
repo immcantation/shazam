@@ -101,11 +101,13 @@ computeCodonTable <- function(aminoAcidClasses=NULL) {
 #' 
 #' \code{createMutationDefinition} creates a \code{MutationDefinition}.
 #'
-#' @param    name           name of the region definition.
-#' @param    boundaries     \code{factor} defining the region boundaries of the sequence.
-#'                          The levels and values of \code{boundaries} determine the 
-#'                          number of regions (e.g. CDR and FWR).
-#' @param    description    description of the region definition and its source data.
+#' @param    name           name of the mutation definition.
+#' @param    classes        named character vectors with single-letter amino acid codes as names
+#'                          and amino acid classes as values, with \code{NA} assigned to set of 
+#'                          characters \code{c("X", "*", "-", ".")}. Replacement (R) is be 
+#'                          defined as a change in amino acid class and silent (S) as no 
+#'                          change in class. 
+#' @param    description    description of the mutation definition and its source data.
 #' @param    citation       publication source.
 #' 
 #' @return   A \code{MutationDefinition} object.

@@ -199,15 +199,15 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
     if (check != TRUE) { stop(check) }
-    db[, sequenceColumn] = toupper(db[, sequenceColumn])
-    db[, germlineColumn] = toupper(db[, germlineColumn])
+    db[[sequenceColumn]] = toupper(db[[sequenceColumn]])
+    db[[germlineColumn]] = toupper(db[[germlineColumn]])
     
     # Setup
     nuc_chars <- NUCLEOTIDES[1:4]
     nuc_words <- seqinr::words(4, nuc_chars)
     
     # Define v_families (heavy or light chain) to only those found in the data
-    v_families <- gsub('^.*(IG.V[0-9]+).*$', "\\1", db[, vCallColumn])
+    v_families <- getFamily(db[[vCallColumn]])
 
     # Define empty return list of lists
     substitutionMatrix <- matrix(0, ncol=4, nrow=4, dimnames=list(nuc_chars, nuc_chars))
@@ -234,8 +234,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
           1, function(x) { paste(x, collapse="") })
       }))
       
-      db[,sequenceColumn] <- matInputCollapsed[,1]
-      db[,germlineColumn] <- matInputCollapsed[,2]
+      db[[sequenceColumn]] <- matInputCollapsed[,1]
+      db[[germlineColumn]] <- matInputCollapsed[,2]
       mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
                                          germlineColumn=germlineColumn,
                                          multipleMutation=multipleMutation,
@@ -445,8 +445,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
     if (check != TRUE) { stop(check) }
-    db[, sequenceColumn] = toupper(db[, sequenceColumn])
-    db[, germlineColumn] = toupper(db[, germlineColumn])
+    db[[sequenceColumn]] = toupper(db[[sequenceColumn]])
+    db[[germlineColumn]] = toupper(db[[germlineColumn]])
     
     # Check that the substitution model is valid
     if (any(dim(substitutionModel) != c(4,1024))) {
@@ -467,8 +467,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
             1, function(x) { paste(x, collapse="") })
       }))
     
-    db[,sequenceColumn] <- matInputCollapsed[,1]
-    db[,germlineColumn] <- matInputCollapsed[,2]
+    db[[sequenceColumn]] <- matInputCollapsed[,1]
+    db[[germlineColumn]] <- matInputCollapsed[,2]
 
     # Count mutations
     nuc_chars <- NUCLEOTIDES[1:4]
@@ -1472,7 +1472,7 @@ listObservedMutations <- function(db, sequenceColumn="SEQUENCE_IMGT",
         stop("The germline column", germlineColumn, "was not found.")
     } 
     
-    mutations <- mapply(listMutations, db[, sequenceColumn], db[, germlineColumn], 
+    mutations <- mapply(listMutations, db[[sequenceColumn]], db[[germlineColumn]], 
                         multipleMutation, model, USE.NAMES=FALSE)
     return(mutations)
 }
