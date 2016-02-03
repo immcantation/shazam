@@ -157,6 +157,9 @@ createBaseline <- function(description="",
                            pdfs=list(),
                            stats=data.frame()) {
   
+  if (is.null(regionDefinition)) {
+      regionDefinition <- makeNullRegionDefinition()
+  }
   # Get regions if not passing in               
   if (is.null(regions)) {
     regions <- regionDefinition@regions
@@ -498,7 +501,7 @@ calcBaseline <- function(db,
         # Foreach returns a list of PDFs
         list_region_pdfs <- 
             foreach(idx=iterators::icount(totalNumbOfSequences)) %dopar% {                
-                calcBaselineHelper( 
+                shm:::calcBaselineHelper( 
                     observed = db[idx, cols_observed],
                     expected = db[idx, cols_expected],
                     region = region,
