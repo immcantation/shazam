@@ -314,8 +314,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' 
 #' @seealso  
 #' \link{calcObservedMutations} is called by this function to get the list of mutations 
-#' in each sequence. \link{binMutationsByRegion} is called by this function to 
-#' aggregate the mutations by the \link{RegionDefinition}. 
+#' in each sequence grouped by the \link{RegionDefinition}. 
 #' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
 #' See \link{calcDBExpectedMutations} for calculating expected mutation frequencies.
 #'           
@@ -456,8 +455,7 @@ calcDBObservedMutations <- function(db,
 #' the default \link{IMGT_V_NO_CDR3} definition, then mutations in positions beyond 
 #' 312 will be ignored.
 #' 
-#' @seealso  See \link{calcDBObservedMutations} for counting the number of observed mutations. 
-#'           See \link{binMutationsByRegion} for aggregation of mutations by region. 
+#' @seealso  See \link{calcDBObservedMutations} for counting the number of observed mutations.
 #' 
 #' @examples
 #' library(alakazam)
@@ -568,42 +566,40 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 }
 
 
-#' Aggregate mutations by region
-#'
-#' \code{binMutationsByRegion} takes an array of observed mutations (e.g. from 
-#' \code{\link{calcObservedMutations}}) and bins them by the different regions defined in the 
-#' \code{regionDefinition}.
-#'
-#' @param   mutationsArray     \code{array} containing the mutations (R/S) with the names
-#'                             indicating the nucleotide positions of the mutations.                             
-#' @param   regionDefinition   \code{\link{RegionDefinition}} object defining the regions
-#'                             and boundaries of the Ig sequences.
-#' 
-#' @return An \code{array} of R/S mutations binned across all the unique regions defined
-#' by \code{regionDefinition}.
-#' 
-#' @details
-#' Note, only the part of sequences defined in \code{regionDefinition} are analyzed.
-#' For example, if the default \link{IMGT_V_NO_CDR3} definition is used, then mutations
-#' in positions beyond 312 will be ignored.
-#' 
-#' @seealso  
-#' See \code{\link{calcDBObservedMutations}} for identifying and counting the 
-#' number of observed mutations.
-#' This function is also used in \code{\link{calcObservedMutations}}.
-#' 
-#' @examples
-#' # Generate a random mutation array
-#' numbOfMutations <- sample(3:10, 1) 
-#' posOfMutations <- sort(sample(330, numbOfMutations))
-#' mutation_types <- sample(c("R","S"), length(posOfMutations), replace=TRUE)
-#' mutations_array <- array(mutation_types, dimnames=list(posOfMutations))
-#' 
-#' # Random mutations
-#' binMutationsByRegion(mutations_array, regionDefinition=NULL)
-#' binMutationsByRegion(mutations_array, regionDefinition=IMGT_V_NO_CDR3)
-#' 
-#' @export
+# Aggregate mutations by region
+#
+# \code{binMutationsByRegion} takes an array of observed mutations (e.g. from 
+# \code{\link{calcObservedMutations}}) and bins them by the different regions defined in the 
+# \code{regionDefinition}.
+#
+# @param   mutationsArray     \code{array} containing the mutations (R/S) with the names
+#                             indicating the nucleotide positions of the mutations.                             
+# @param   regionDefinition   \code{\link{RegionDefinition}} object defining the regions
+#                             and boundaries of the Ig sequences.
+# 
+# @return An \code{array} of R/S mutations binned across all the unique regions defined
+# by \code{regionDefinition}.
+# 
+# @details
+# Note, only the part of sequences defined in \code{regionDefinition} are analyzed.
+# For example, if the default \link{IMGT_V_NO_CDR3} definition is used, then mutations
+# in positions beyond 312 will be ignored.
+# 
+# @seealso  
+# See \code{\link{calcDBObservedMutations}} for identifying and counting the 
+# number of observed mutations.
+# This function is also used in \code{\link{calcObservedMutations}}.
+# 
+# @examples
+# # Generate a random mutation array
+# numbOfMutations <- sample(3:10, 1) 
+# posOfMutations <- sort(sample(330, numbOfMutations))
+# mutation_types <- sample(c("R","S"), length(posOfMutations), replace=TRUE)
+# mutations_array <- array(mutation_types, dimnames=list(posOfMutations))
+# 
+# # Random mutations
+# binMutationsByRegion(mutations_array, regionDefinition=NULL)
+# binMutationsByRegion(mutations_array, regionDefinition=IMGT_V_NO_CDR3)
 binMutationsByRegion <- function(mutationsArray, 
                                  regionDefinition=NULL) {
     # Create full sequence RegionDefinition object 
