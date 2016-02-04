@@ -322,7 +322,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' 
 #' @examples
 #' # Load example data
-#' library("shm")
+#' library("alakazam")
 #' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
 #' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes
@@ -476,7 +476,7 @@ calcDBObservedMutations <- function(db,
 #'  
 #' # Identify mutations by change in hydropathy class
 #' calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3,
-#'                       mutationDefinition=HYDROPATHY_MUTATIONS)
+#'                       mutationDefinition=HYDROPATHY_MUTATIONS, frequency=TRUE)
 #' 
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
@@ -507,19 +507,21 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
     # If a regionDefinition is passed,
     # then only analyze till the end of the defined length
     if(!is.null(regionDefinition)){
-        length_regionDefinition  <- regionDefinition@seqLength
+        rdLength  <- regionDefinition@seqLength
     } else{
-        length_regionDefinition <- max(len_inputSeq, len_germlineSeq, na.rm=TRUE)
+        rdLength <- max(len_inputSeq, len_germlineSeq, na.rm=TRUE)
+        # Create full sequence RegionDefinition object
+        regionDefinition <- makeNullRegionDefinition(rdLength)
     }
-    len_shortest <- min(c(len_inputSeq, len_germlineSeq, length_regionDefinition), na.rm=TRUE)
+    len_shortest <- min(c(len_inputSeq, len_germlineSeq, rdLength), na.rm=TRUE)
     
     c_inputSeq <- s2c(inputSeq)[1:len_shortest]
     c_germlineSeq <- s2c(germlineSeq)[1:len_shortest]
     
     # If the sequence and germline (which now should be the same length) is shorter
-    # than the length_regionDefinition, pad it with Ns
-    if(len_shortest<length_regionDefinition){
-        fillWithNs <- array("N",length_regionDefinition-len_shortest)
+    # than the rdLength, pad it with Ns
+    if(len_shortest<rdLength){
+        fillWithNs <- array("N",rdLength-len_shortest)
         c_inputSeq <- c( c_inputSeq, fillWithNs)
         c_germlineSeq <- c( c_germlineSeq, fillWithNs)
     }
@@ -549,20 +551,16 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
         mutations_array<- mutations_array[!is.na(mutations_array)]
         if(length(mutations_array)==sum(is.na(mutations_array))){
             mutations_array<-NA    
-        }else{ #If there are mutations present proceed to aggregate (if requested)
+        } else {
+            mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
             if (frequency==TRUE) {
-                # Freq = numb on mutations / numb of non N bases (in both seq and gl)
-                nonNLength <- sum(c_inputSeq%in%NUCLEOTIDES[1:4] &  c_germlineSeq%in%NUCLEOTIDES[1:4])
-                nMutations <- length(mutations_array)
-                mutations_array <- nMutations/nonNLength
-                if (nonNLength==0) mutations_array <- 0
-            } else {
-                if (!is.null(regionDefinition)) { 
-                    mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
-                } else {
-                    #mutations_array <- length(mutations_array)
-                    mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
-                }
+                tempNames <- sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) })
+                # Subset boundaries to only non N bases (in both seq and gl)
+                boundaries <- regionDefinition@boundaries[c_inputSeq%in%NUCLEOTIDES[1:4] &  
+                                                              c_germlineSeq%in%NUCLEOTIDES[1:4]]
+                # Freq = numb of mutations / numb of non N bases (in both seq and gl)
+                denoms <- sapply(tempNames, function(x) { sum(boundaries==x) })
+                mutations_array <- mutations_array/denoms
             }
         }        
     }    
@@ -608,7 +606,8 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 #' @export
 binMutationsByRegion <- function(mutationsArray, 
                                  regionDefinition=NULL) {
-    # Create full sequence RegionDefinition object
+    # Create full sequence RegionDefinition object 
+    # The seqLength will be the largest index of a mutation
     if (is.null(regionDefinition)) {
         regionDefinition <- makeNullRegionDefinition(max(as.numeric(names(mutationsArray))))
     }
