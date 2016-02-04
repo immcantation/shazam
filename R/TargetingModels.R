@@ -383,26 +383,27 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #' \code{createMutabilityMatrix} builds a 5-mer nucleotide mutability model by counting 
 #' the number of mutations occuring in the center position for all 5-mer motifs.
 #'
-#' @param    db                 data.frame containing sequence data.
-#' @param    substitutionModel  matrix of 5-mer substitution rates built by 
-#'                              \code{\link{createSubstitutionMatrix}}.
-#' @param    model              type of model to create. The default model, "RS", creates 
-#'                              a model by counting both replacement and silent mutations.
-#'                              The "S" specification builds a model by counting only 
-#'                              silent mutations.
-#' @param    sequenceColumn     name of the column containing IMGT-gapped sample sequences.
-#' @param    germlineColumn     name of the column containing IMGT-gapped germline sequences.
-#' @param    vCallColumn        name of the column containing the V-segment allele call.
-#' @param    multipleMutation   string specifying how to handle multiple mutations occuring 
-#'                              within the same 5-mer. If \code{"independent"} then multiple 
-#'                              mutations within the same 5-mer are counted indepedently. 
-#'                              If \code{"ignore"} then 5-mers with multiple mutations are 
-#'                              excluded from the total mutation tally.
-#' @param    minNumSeqMutations minimum number of mutations in sequences containing the 5-mer.
-#'                              If the number is smaller than this threshold, the mutability 
-#'                              for the 5-mer will be inferred. Default is 500.     
-#' @param    returnSource       return the sources of 5-mer mutabilities (measured vs.
-#'                              inferred). Default is false.                          
+#' @param    db                  data.frame containing sequence data.
+#' @param    substitutionModel   matrix of 5-mer substitution rates built by 
+#'                               \code{\link{createSubstitutionMatrix}}.
+#' @param    model               type of model to create. The default model, "RS", creates 
+#'                               a model by counting both replacement and silent mutations.
+#'                               The "S" specification builds a model by counting only 
+#'                               silent mutations.
+#' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
+#' @param    germlineColumn      name of the column containing IMGT-gapped germline sequences.
+#' @param    vCallColumn         name of the column containing the V-segment allele call.
+#' @param    multipleMutation    string specifying how to handle multiple mutations occuring 
+#'                               within the same 5-mer. If \code{"independent"} then multiple 
+#'                               mutations within the same 5-mer are counted indepedently. 
+#'                               If \code{"ignore"} then 5-mers with multiple mutations are 
+#'                               excluded from the total mutation tally.
+#' @param    minNumSeqMutations  minimum number of mutations in sequences containing each 5-mer
+#'                               to compute the mutability rates. If the number is smaller 
+#'                               than this threshold, the mutability for the 5-mer will be 
+#'                               inferred. Default is 500.    
+#' @param    returnSource        return the sources of 5-mer mutabilities (measured vs.
+#'                               inferred). Default is false.                          
 #'
 #' @return   A named numeric vector of 1024 normalized mutability rates for each 5-mer 
 #'           motif with names defining the 5-mer nucleotide sequence.
@@ -436,7 +437,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
                                    vCallColumn="V_CALL",
                                    multipleMutation=c("independent", "ignore"),
-                                   minNumSeqMutations = 500, 
+                                   minNumSeqMutations=500, 
                                    returnSource=FALSE) {
     # Evaluate argument choices
     model <- match.arg(model)
@@ -449,7 +450,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     db[[germlineColumn]] = toupper(db[[germlineColumn]])
     
     # Check that the substitution model is valid
-    if (any(dim(substitutionModel) != c(4,1024))) {
+    if (any(dim(substitutionModel) != c(4, 1024))) {
        stop ("Please supply a valid 5-mer substitutionModel.")
     }
     
@@ -863,27 +864,35 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 
 #' Creates a TargetingModel
 #' 
-#' \code{createTargetingModel} creates a \code{TargetingModel}.
+#' \code{createTargetingModel} creates a 5-mer \code{TargetingModel}.
 #'
-#' @param    db                 data.frame containing sequence data.
-#' @param    model              type of model to create. The default model, "RS", creates 
-#'                              a model by counting both replacement and silent mutations.
-#'                              The "S" specification builds a model by counting only 
-#'                              silent mutations.
-#' @param    sequenceColumn     name of the column containing IMGT-gapped sample sequences.
-#' @param    germlineColumn     name of the column containing IMGT-gapped germline sequences.
-#' @param    vCallColumn        name of the column containing the V-segment allele calls.
-#' @param    multipleMutation   string specifying how to handle multiple mutations occuring 
-#'                              within the same 5-mer. If \code{"independent"} then multiple 
-#'                              mutations within the same 5-mer are counted indepedently. 
-#'                              If \code{"ignore"} then 5-mers with multiple mutations are 
-#'                              excluded from the total mutation tally.
-#' @param    modelName          name of the model.
-#' @param    modelDescription   description of the model and its source data.
-#' @param    modelSpecies       genus and species of the source sequencing data.
-#' @param    modelDate          date the model was built. If \code{NULL} the current date
-#'                              will be used.
-#' @param    modelCitation      publication source.
+#' @param    db                  data.frame containing sequence data.
+#' @param    model               type of model to create. The default model, "RS", creates 
+#'                               a model by counting both replacement and silent mutations.
+#'                               The "S" specification builds a model by counting only 
+#'                               silent mutations.
+#' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
+#' @param    germlineColumn      name of the column containing IMGT-gapped germline sequences.
+#' @param    vCallColumn         name of the column containing the V-segment allele calls.
+#' @param    multipleMutation    string specifying how to handle multiple mutations occuring 
+#'                               within the same 5-mer. If \code{"independent"} then multiple 
+#'                               mutations within the same 5-mer are counted indepedently. 
+#'                               If \code{"ignore"} then 5-mers with multiple mutations are 
+#'                               excluded from the otal mutation tally.
+#' @param    minNumMutations     minimum number of mutations required to compute the 5-mer 
+#'                               substitution rates. If the number of mutations for a 5-mer
+#'                               is below this threshold, its substitution rates will be 
+#'                               estimated from neighboring 5-mers. Default is 50.   
+#' @param    minNumSeqMutations  minimum number of mutations in sequences containing each 5-mer
+#'                               to compute the mutability rates. If the number is smaller 
+#'                               than this threshold, the mutability for the 5-mer will be 
+#'                               inferred. Default is 500.   
+#' @param    modelName           name of the model.
+#' @param    modelDescription    description of the model and its source data.
+#' @param    modelSpecies        genus and species of the source sequencing data.
+#' @param    modelDate           date the model was built. If \code{NULL} the current date
+#'                               will be used.
+#' @param    modelCitation       publication source.
 #' 
 #' @return   A \code{\link{TargetingModel}} object.
 #' 
@@ -914,6 +923,7 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
                                  germlineColumn="GERMLINE_IMGT_D_MASK",
                                  vCallColumn="V_CALL",
                                  multipleMutation=c("independent", "ignore"),
+                                 minNumMutations=50, minNumSeqMutations=500,
                                  modelName="", modelDescription="", modelSpecies="", 
                                  modelCitation="", modelDate=NULL) {
     # Evaluate argument choices
@@ -929,15 +939,19 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 
     # Create models
     sub_mat<- createSubstitutionMatrix(db, model=model, 
-                                          sequenceColumn=sequenceColumn,
-                                          germlineColumn=germlineColumn,
-                                          vCallColumn=vCallColumn,
-                                          multipleMutation=multipleMutation)
+                                       sequenceColumn=sequenceColumn,
+                                       germlineColumn=germlineColumn,
+                                       vCallColumn=vCallColumn,
+                                       multipleMutation=multipleMutation,
+                                       minNumMutations=minNumMutations,
+                                       returnModel="5mer")
     mut_mat <- createMutabilityMatrix(db, sub_mat, model=model,
-                                        sequenceColumn=sequenceColumn,
-                                        germlineColumn=germlineColumn,
-                                        vCallColumn=vCallColumn,
-                                        multipleMutation=multipleMutation)
+                                      sequenceColumn=sequenceColumn,
+                                      germlineColumn=germlineColumn,
+                                      vCallColumn=vCallColumn,
+                                      multipleMutation=multipleMutation,
+                                      minNumSeqMutations=minNumSeqMutations,
+                                      returnSource=FALSE)
 
     # Extend 5-mers with Ns
     sub_mat <- extendSubstitutionMatrix(sub_mat)
