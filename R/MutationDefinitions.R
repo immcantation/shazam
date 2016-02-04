@@ -115,12 +115,20 @@ computeCodonTable <- function(aminoAcidClasses=NULL) {
 #' @seealso  See \code{\link{MutationDefinition}} for the return object.
 #' 
 #' @examples
-#' # Creates an empty MutationDefinition object
-#' createMutationDefinition()
+#' # Define hydropathy classes
+#' library(alakazam)
+#' hydropathy <- list(hydrophobic=c("A", "I", "L", "M", "F", "W", "V"),
+#'                    hydrophilic=c("R", "N", "D", "C", "Q", "E", "K"),
+#'                    neutral=c("G", "H", "P", "S", "T", "Y"))
+#' chars <- unlist(hydropathy, use.names=F)
+#' classes <- setNames(translateStrings(chars, hydropathy), chars)
+#'
+#' # Create hydropathy mutation definition
+#' md <- createMutationDefinition("Hydropathy", classes)
 #' 
 #' @export
-createMutationDefinition <- function(name="",
-                                     classes="",
+createMutationDefinition <- function(name,
+                                     classes,
                                      description="",
                                      citation="") {
     # Build the codon table
