@@ -84,7 +84,7 @@ collapseByClone <- function(db,
                             sequenceColumn="SEQUENCE_IMGT",
                             germlineColumn="GERMLINE_IMGT_D_MASK",
                             expandedDb=FALSE,
-                            regionDefinition=IMGT_V_NO_CDR3,
+                            regionDefinition=NULL,
                             nonTerminalOnly=FALSE,
                             nproc=1) {
     # Hack for visibility of data.table and foreach index variables
@@ -287,7 +287,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' 
 #' @return   A modified \code{db} \code{data.frame} with observed mutation counts for each 
 #'           sequence listed. The columns names are dynamically created based on the
-#'           regions in the \code{regionDefinition}. For example, when using the default
+#'           regions in the \code{regionDefinition}. For example, when using the
 #'           \link{IMGT_V_NO_CDR3} definition, which defines positions for CDR and
 #'           FWR, the following columns are added:
 #'           \itemize{
@@ -340,7 +340,7 @@ calcDBObservedMutations <- function(db,
                                     sequenceColumn="SEQUENCE_IMGT",
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     frequency=FALSE,
-                                    regionDefinition=IMGT_V_NO_CDR3,
+                                    regionDefinition=NULL,
                                     mutationDefinition=NULL,
                                     nproc=1) {
     # Hack for visibility of data.table and foreach index variables
@@ -651,7 +651,7 @@ binMutationsByRegion <- function(mutationsArray,
 #'           for each region defined in \code{regionDefinition}.
 #'          
 #'           The columns names are dynamically created based on the regions in  
-#'           \code{regionDefinition}. For example, when using the default \link{IMGT_V_NO_CDR3}
+#'           \code{regionDefinition}. For example, when using the \link{IMGT_V_NO_CDR3}
 #'           definition, which defines positions for CDR and FWR, the following columns are
 #'           added:  
 #'           \itemize{
@@ -667,7 +667,7 @@ binMutationsByRegion <- function(mutationsArray,
 #'           
 #' @details
 #' Only the part of the sequences defined in \code{regionDefinition} are analyzed. 
-#' For example, when using the default \link{IMGT_V_NO_CDR3} definition, mutations in
+#' For example, when using the \link{IMGT_V_NO_CDR3} definition, mutations in
 #' positions beyond 312 will be ignored.
 #' 
 #' @seealso  
@@ -705,7 +705,7 @@ calcDBExpectedMutations <- function(db,
                                     sequenceColumn="SEQUENCE_IMGT",
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     targetingModel=HS5FModel,
-                                    regionDefinition=IMGT_V_NO_CDR3,
+                                    regionDefinition=NULL,
                                     mutationDefinition=NULL,
                                     nproc=1) {
     # Hack for visibility of data.table and foreach index variables

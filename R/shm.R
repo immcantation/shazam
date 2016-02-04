@@ -149,3 +149,7 @@ NULL
 
 # TODO: And what is this?
 # BAYESIAN_FITTED
+
+# Add built-in variables to global variables environment
+utils::globalVariables(c("M1NDistance", "HS1FDistance", 
+                         "U5NModel", "HS5FModel"), package="shm")

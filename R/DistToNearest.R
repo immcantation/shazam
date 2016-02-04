@@ -57,7 +57,7 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
   numbOfMutation <- sum(fivemersWithMu)
 
   dist <- NA
-  a <- tryCatch({
+  tryCatch({
     if (length(seq1)==1){
       seq1_to_seq2 <- targeting_dist[substr(seq2,3,3),seq1]
       seq2_to_seq1 <- targeting_dist[substr(seq1,3,3),seq2]
@@ -255,7 +255,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
   l <- findUniqueJunctions(arrJunctions)
   arrJunctionsDist <- l$arrJunctionsDist
   arrJunctionsUnique <- l$arrJunctionsUnique
-  indexJunctionsCounts <- l$indexJunctionsCounts
+  # indexJunctionsCounts <- l$indexJunctionsCounts
 
   # Compute distances between junctions
   numbOfUniqueJunctions <- length(arrJunctionsUnique)
@@ -299,7 +299,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
   l <- findUniqueJunctions(arrJunctions)
   arrJunctionsDist <- l$arrJunctionsDist
   arrJunctionsUnique <- l$arrJunctionsUnique
-  indexJunctionsCounts <- l$indexJunctionsCounts
+  # indexJunctionsCounts <- l$indexJunctionsCounts
   
   # Compute distances between junctions
   numbOfUniqueJunctions <- length(arrJunctionsUnique)
@@ -404,6 +404,9 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                           jCallColumn="J_CALL", model=c("hs1f", "m1n", "ham", "aa", "hs5f"), 
                           normalize=c("length", "none"), symmetry=c("avg","min"),
                           first=TRUE, nproc=1, fields=NULL) {
+    # Hack for visibility of data.table and foreach index variables
+    idx <- yidx <- .I <- NULL
+    
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
@@ -501,10 +504,10 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
         # Export targeting model to processes
         if (nproc>1) { parallel::clusterExport(cluster, list("targeting_model","getClosestBy5mers"), envir=environment()) }    
         list_db <-
-            foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
-                db_group <- db[groups[[i]],]
+            foreach(idx=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
+                db_group <- db[groups[[idx]],]
                 db_group$DIST_NEAREST <-
-                    getClosestBy5mers( db[groups[[i]],sequenceColumn],
+                    getClosestBy5mers( db[groups[[idx]],sequenceColumn],
                                        targeting_model=targeting_model,
                                        normalize=normalize,
                                        symmetry=symmetry )
@@ -512,10 +515,10 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
             }    
     } else if (model %in% c("ham", "aa", "m1n", "hs1f")) {    
         list_db <-
-            foreach(i=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
-                db_group <- db[groups[[i]],]
+            foreach(idx=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
+                db_group <- db[groups[[idx]],]
                 db_group$DIST_NEAREST <-
-                    getClosestMat( db[groups[[i]],sequenceColumn],
+                    getClosestMat( db[groups[[idx]],sequenceColumn],
                                    model=model,
                                    normalize=normalize )
                 return(db_group)
