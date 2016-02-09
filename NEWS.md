@@ -8,6 +8,7 @@ General:
   `extdata/InfluenzaDb.gz`
 + Fixed several bugs where functions would not work properly when passed 
   a `dplyr::tbl_df` object instead of a `data.frame`.
++ Changed R dependency to R >= 3.1.2.
 
 Distance Profiling:
 
