@@ -1,5 +1,8 @@
 # Loads and converts model data
 
+# Imports
+library(seqinr)
+
 #### M1N #####
 
 # Smith DS, et al. Di- and trinucleotide target preferences of somatic mutagenesis 
