@@ -1,6 +1,6 @@
 # Mutation profiling
 
-#' @include shm.R
+#' @include shazam.R
 NULL
 
 #### Clonal Consensus building functions ####
@@ -64,7 +64,7 @@ NULL
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
@@ -322,7 +322,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
@@ -459,7 +459,7 @@ calcDBObservedMutations <- function(db,
 #' 
 #' @examples
 #' library(alakazam)
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' 
 #' # Extracting the first entry in the sample db to use for input and germline sequences.
@@ -679,7 +679,7 @@ binMutationsByRegion <- function(mutationsArray,
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
@@ -832,7 +832,7 @@ calcDBExpectedMutations <- function(db,
 #' 
 #' @examples
 #' library(alakazam)
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' 
 #' # Extracting the first entry in the sample db to use for input and germline sequences.
@@ -1073,16 +1073,16 @@ translateCodonToAminoAcid <- function(Codon) {
 #
 # @examples
 # # Without classes
-# shm:::mutationType("TTT", "TTC")
-# shm:::mutationType("TTT", "TTA")
-# shm:::mutationType("TTT", "TGA")
+# shazam:::mutationType("TTT", "TTC")
+# shazam:::mutationType("TTT", "TTA")
+# shazam:::mutationType("TTT", "TGA")
 #
 # # With classes
 # classes <- HYDROPATHY_MUTATIONS@classes
-# shm:::mutationType("TTT", "TTC", aminoAcidClasses=classes)
-# shm:::mutationType("TTT", "TTA", aminoAcidClasses=classes)
-# shm:::mutationType("TTT", "TCT", aminoAcidClasses=classes)
-# shm:::mutationType("TTT", "TGA", aminoAcidClasses=classes)
+# shazam:::mutationType("TTT", "TTC", aminoAcidClasses=classes)
+# shazam:::mutationType("TTT", "TTA", aminoAcidClasses=classes)
+# shazam:::mutationType("TTT", "TCT", aminoAcidClasses=classes)
+# shazam:::mutationType("TTT", "TGA", aminoAcidClasses=classes)
 mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
     # codonFrom="TTT"; codonTo="TTA"
     # codonFrom="TTT"; codonTo="TGA"

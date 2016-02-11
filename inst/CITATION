@@ -1,6 +1,6 @@
 bibentry(bibtype = "Article",
          style   = "citation",
-         header  = "To cite the shm package in publications, please use:",
+         header  = "To cite the shazam package in publications, please use:",
          title   = "Change-O: a toolkit for analyzing large-scale B cell immunoglobulin 
                     repertoire sequencing data.",
          author  = c(person("Namita T.", "Gupta"),

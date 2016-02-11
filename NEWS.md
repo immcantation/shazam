@@ -1,8 +1,9 @@
-Version 0.1.1.999:  February 2, 2016
+Version 0.1.1.999:  February 11, 2016
 -------------------------------------------------------------------------------
 
 General:
 
++ Renamed package from shm to shazam.
 + Internal changes to conform to CRAN policies.
 + Compressed and renamed example database file `extdata/Influenza.tab` to 
   `extdata/InfluenzaDb.gz`
@@ -108,7 +109,7 @@ General:
 
 + Restructured the S4 class documentation.
 + Fixed bug wherein example `Influenza.tab` file did not load on Mac OS X.
-+ Added citations for `citation("shm")` command.
++ Added citations for `citation("shazam")` command.
 + Added dependency on data.table >= 1.9.4 to fix bug that occured with 
   earlier versions of data.table.
 

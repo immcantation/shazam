@@ -1,13 +1,13 @@
-shm
+shazam
 -------------------------------------------------------------------------------
-January 26, 2016
+February 11, 2016
 Version 0.1.1.999
 
 Somatic hypermutation analysis package.
 
 Dependencies
 -------------------------------------------------------------------------------
-R 3.0  
+R 3.1.2  
 R packages
 
   - alakazam
@@ -31,19 +31,22 @@ install.packages(c("devtools", "roxygen2", "testthat", "knitr", "rmarkdown"))
 
 Building with Rstudio:
 
--  Build -> Configure Build Tools
--  Check use devtools option
--  Check use roxygen option
--  Select configure roxygen options and check everything.
--  Build -> Build and Reload
+- _Build_ -> _Configure Build Tools_
+- Check the _Use devtools package functions_ option
+- Check the _Generate documentation with Roxygen_ option
+- Select _Configure..._ Roxygen options and check everything.
+- _Build_ -> _Build and Reload_
 
 Building from the R console:
 
 ```R
-library(roxygen2)
-library(devtools)
-install_deps()
-document()
-build(vignettes=FALSE)
-install()
+devtools::install_deps()
+devtools::document()
+devtools::build()
+devtools::install()
+```
+
+Optionally, you can skip the vignettes:
+```R
+devtools::build(vignettes=FALSE)
 ```

@@ -1,4 +1,4 @@
 library(testthat)
-library(shm)
+library(shazam)
 
-test_check("shm")
+test_check("shazam")

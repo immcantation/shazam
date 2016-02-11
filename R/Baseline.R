@@ -1,7 +1,7 @@
 # Selection analysis using BASELINe
 
 #' @include RegionDefinitions.R
-#' @include shm.R
+#' @include shazam.R
 NULL
 
 #### Classes ####
@@ -231,7 +231,7 @@ editBaseline <- function(baseline, field_name, value) {
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
 #'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
@@ -334,7 +334,7 @@ getBaselineStats <- function(baseline) {
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
 #'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
@@ -749,7 +749,7 @@ calcBaselineBinomialPdf <- function ( x=3,
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
 #'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
@@ -1048,7 +1048,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
 #'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
@@ -1252,7 +1252,7 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
 #'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
@@ -1439,7 +1439,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
 #'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))

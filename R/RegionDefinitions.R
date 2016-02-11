@@ -1,6 +1,6 @@
 # Class definitions for sequence regions
 
-#' @include shm.R
+#' @include shazam.R
 NULL
 
 #### Constants ####

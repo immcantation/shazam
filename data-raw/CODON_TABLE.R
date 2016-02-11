@@ -17,7 +17,7 @@ for(pOne in NUCLEOTIDES[1:4]){
       codon = paste(pOne,pTwo,pThree,sep="")
       colnames(CODON_TABLE)[intCounter] =  codon
       intCounter = intCounter + 1
-      CODON_TABLE[,codon] = shm:::mutationTypeOptimized(cbind(permutateAllCodon(codon),rep(codon,12)))
+      CODON_TABLE[,codon] = shazam:::mutationTypeOptimized(cbind(permutateAllCodon(codon),rep(codon,12)))
     }  
   }
 }

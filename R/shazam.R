@@ -1,8 +1,8 @@
-# shm package documentation and import directives
+# shazam package documentation and import directives
 
-#' The shm package
+#' The shazam package
 #'
-#' Provides tools for advanced anaylisis of Immunoglobulin (Ig) Somatic HyperMutation 
+#' Provides tools for advanced anaylisis of immunoglobulin (Ig) somatic hypermutation 
 #' (SHM), including BASELINe, a novel method for quantifying antigen-driven selection in 
 #' high-throughput Ig sequencing data.
 #' 
@@ -10,7 +10,7 @@
 #' large-scale characterization of Ig repertoires, defined as the collection of transmembrane 
 #' antigen-receptor proteins located on the surface of T and B lymphocytes.
 #' 
-#' The \code{shm} package provides tools for advanced analysis of Ig sequences following 
+#' The \code{shazam} package provides tools for advanced analysis of Ig sequences following 
 #' germline segment assignment. Namely, the analysis of SHM. 
 #' Which includes:
 #'  \itemize{
@@ -21,25 +21,25 @@
 #'                  \item  A mutability model that defines where mutations occur.
 #'                  \item  A nucleotide substitution model that defines the resulting mutation.
 #'              }
-#'              Collectively these are what form the targeting model of SHM. \code{shm} 
+#'              Collectively these are what form the targeting model of SHM. \code{shazam} 
 #'              provides tools to build these mutability and substitution (i.e. targeting) 
 #'              models.
 #'                  
 #'      \item   BASELINe \cr
 #'              Bayesian Estimation of Antigen-driven Selection in Ig Sequences is a 
 #'              novel method for quantifying antigen-driven selection in high-throughput
-#'              Ig sequence data. The targeting model created using \code{shm} is used 
+#'              Ig sequence data. The targeting model created using \code{shazam} is used 
 #'              to estimate the null distribution of expected mutation frequencies in 
 #'              BASELINe.
 #'              
 #'      \item   Distance calculations \cr
-#'              Based on the underlying SHM targeting (calculated using \code{shm}) one 
+#'              Based on the underlying SHM targeting (calculated using \code{shazam}) one 
 #'              can compute evolutionary distances between sequences or groups of 
 #'              sequences. This information is particularly useful in understanding and 
 #'              defining clonal relationships.
 #'  }
 #' 
-#' Below are the functions in \code{shm} broken down by the three main tasks described
+#' Below are the functions in \code{shazam} broken down by the three main tasks described
 #' above:
 #' 
 #' @section  Targeting models:
@@ -76,7 +76,7 @@
 #'                                           5-mer targeting model.
 #' }
 #'
-#' @name     shm
+#' @name     shazam
 #' @docType  package
 #' @references
 #' \enumerate{
@@ -152,4 +152,4 @@ NULL
 
 # Add built-in variables to global variables environment
 utils::globalVariables(c("M1NDistance", "HS1FDistance", 
-                         "U5NModel", "HS5FModel"), package="shm")
+                         "U5NModel", "HS5FModel"), package="shazam")

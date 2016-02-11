@@ -1,5 +1,5 @@
 ---
-title: 'SHM: Quantifing selection pressures'
+title: 'Shazam: Quantifing selection pressures'
 author: "Namita Gupta"
 date: '`r Sys.Date()`'
 output:
@@ -34,7 +34,7 @@ quantified via the following steps:
 
 Load Change-O data
 --------------------------------------------------------------------------------
-A small example Change-O tab-delimited database file is included in the `shm` 
+A small example Change-O tab-delimited database file is included in the `shazam` 
 package. The example dataset consists of a subset of Ig sequencing data from an 
 influenza vaccination study (Laserson et al., PNAS, 2014). The data include 
 sequences from multiple time-points before and after the subject received an 
@@ -44,10 +44,10 @@ influenza vaccination. Quantifying selection requires the following fields
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 library(alakazam)
-library(shm)
+library(shazam)
 
 # Load Change-O file
-file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 db <- readChangeoDb(file)
 ```
 
@@ -77,7 +77,7 @@ Mutations are counted by these functions separately for complementarity
 determining (CDR) and framework (FWR) regions. If Ig sequences are not gapped 
 according to IMGT numbering, the region boundaries may be defined using the 
 `regionDefinition` parameter. There are four built-in region definitions 
-in the `shm` package: 
+in the `shazam` package: 
 
 *  `IMGT_V` is all regions in the V-segment grouped as either CDR or FWR.
 *  `IMGT_V_BY_REGIONS` is all CDR and FWR regions in the V-segment treated as 

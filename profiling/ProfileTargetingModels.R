@@ -1,11 +1,11 @@
 # Imports
 library(alakazam)
-library(shm)
+library(shazam)
 library(profvis)
 
 #### Load example data ####
 
-file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 db <- readChangeoDb(file)
 # Subset data for demo purposes
 db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 

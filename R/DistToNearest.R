@@ -1,6 +1,6 @@
 # Generates distance to nearest neighbor
 
-#' @include shm.R
+#' @include shazam.R
 NULL
 
 
@@ -382,7 +382,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' @examples
 #' # Load example data
 #' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes
 #' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 

@@ -1,4 +1,4 @@
-dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 db <- readChangeoDb(dbPath)
 
 test_that("calculateTargeting and calculateMutationalPaths with regionDefinition==NULL", {
@@ -12,7 +12,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     inputSeq <- db[1, "SEQUENCE_IMGT"]
     germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
     
-    targeting <- shm:::calculateTargeting(germlineSeq = germlineSeq, 
+    targeting <- shazam:::calculateTargeting(germlineSeq = germlineSeq, 
                                     inputSeq = inputSeq,
                                     targetingModel = HS5FModel,
                                     regionDefinition = IMGT_V_NO_CDR3)
@@ -23,7 +23,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     names(exp_targeting) <- c("G", "C", "G", "T", "T")
     expect_equal(obs_targeting, exp_targeting, tolerance=0.001)
         
-    mutationalPaths <- shm:::calculateMutationalPaths(
+    mutationalPaths <- shazam:::calculateMutationalPaths(
                             germlineSeq = seqinr::c2s(colnames(targeting)), 
                             regionDefinition = IMGT_V_NO_CDR3)
     
@@ -38,7 +38,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     ## calculateTargeting and calculateMutationalPaths 
     ## as used by calcExpectedMutations
     
-    targeting_null <- shm:::calculateTargeting(germlineSeq = germlineSeq, 
+    targeting_null <- shazam:::calculateTargeting(germlineSeq = germlineSeq, 
                                           inputSeq = inputSeq,
                                           targetingModel = HS5FModel,
                                           regionDefinition = NULL)
@@ -49,7 +49,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     names(exp_targeting_null) <- c("G", "C", "G", "T", "T")
     expect_equal(obs_targeting_null, exp_targeting_null, tolerance=0.001)
     
-    mutationalPaths_null <- shm:::calculateMutationalPaths(
+    mutationalPaths_null <- shazam:::calculateMutationalPaths(
         germlineSeq = seqinr::c2s(colnames(targeting_null)), 
         regionDefinition = NULL)
     

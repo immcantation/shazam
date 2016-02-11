@@ -1,5 +1,5 @@
 ---
-title: 'SHM: Tuning clonal assignment thresholds by calculating distance to nearest
+title: 'Shazam: Tuning clonal assignment thresholds by calculating distance to nearest
   neighbor'
 author: "Namita Gupta"
 date: '`r Sys.Date()`'
@@ -37,17 +37,17 @@ This is done via the following steps:
 
 Load Change-O data
 --------------------------------------------------------------------------------
-A small example Change-O tab-delimited database file is included in the `shm` 
+A small example Change-O tab-delimited database file is included in the `shazam` 
 package. Calculating the nearest neighbor distances requires the following 
 fields (columns) to be present in the Change-O file: `V_CALL`, `J_CALL`, 
 `JUNCTION_LENGTH`, and `JUNCTION`.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 library(alakazam)
-library(shm)
+library(shazam)
 
 # Load Change-O file
-file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 db <- readChangeoDb(file)
 ```
 

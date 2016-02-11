@@ -1,7 +1,7 @@
-Package: shm
+Package: shazam
 Type: Package
 Version: 0.1.1.999
-Date: 2016-02-03
+Date: 2016-02-11
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Jason", "Vander Heiden", role=c("ctb", "cre"), 
@@ -21,7 +21,7 @@ Description: A new computational framework for Bayesian estimation of
     with advanced analysis of SHM in Ig sequences.
 License: CC BY-NC-SA 4.0
 URL: http://clip.med.yale.edu/changeo
-BugReports: https://bitbucket.org/kleinstein/shm/issues
+BugReports: https://bitbucket.org/kleinstein/shazam/issues
 LazyData: true
 BuildVignettes: true
 VignetteBuilder: knitr
@@ -50,7 +50,7 @@ Suggests:
     rmarkdown,
     testthat
 Collate:
-    'shm.R'
+    'shazam.R'
     'RegionDefinitions.R'
     'Baseline.R'
     'Core.R'

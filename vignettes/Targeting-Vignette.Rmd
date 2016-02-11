@@ -1,5 +1,5 @@
 ---
-title: 'SHM: Inferring SHM targeting models'
+title: 'Shazam: Inferring SHM targeting models'
 author: "Namita Gupta"
 date: '`r Sys.Date()`'
 output:
@@ -39,17 +39,17 @@ likelihood of the observed mutations. This is done via the following steps:
 
 Load Change-O data
 --------------------------------------------------------------------------------
-A small example Change-O tab-delimited database file is included in the `shm` 
+A small example Change-O tab-delimited database file is included in the `shazam` 
 package. Inferring a targeting model requires the following fields (columns) to 
 be present in the Change-O file: `SEQUENCE_IMGT`, `GERMLINE_IMGT_D_MASK` and 
 `V_CALL`.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 library(alakazam)
-library(shm)
+library(shazam)
 
 # Load Change-O file
-file <- system.file("extdata", "InfluenzaDb.gz", package="shm")
+file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 db <- readChangeoDb(file)
 ```
 
