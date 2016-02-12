@@ -355,9 +355,6 @@ calcDBObservedMutations <- function(db,
         cluster = nproc 
         nproc = 0
     }
-    if(frequency==TRUE){  
-        regionDefinition=NULL  
-    }
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
     
@@ -504,9 +501,9 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
     
     # If a regionDefinition is passed,
     # then only analyze till the end of the defined length
-    if(!is.null(regionDefinition)){
+    if(!is.null(regionDefinition)) {
         rdLength  <- regionDefinition@seqLength
-    } else{
+    } else {
         rdLength <- max(len_inputSeq, len_germlineSeq, na.rm=TRUE)
         # Create full sequence RegionDefinition object
         regionDefinition <- makeNullRegionDefinition(rdLength)
