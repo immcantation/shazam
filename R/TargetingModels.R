@@ -1032,34 +1032,33 @@ calcTargetingDistance <- function(model) {
 }
 
 
-#' Rescales mutability probabilities from a TargetingModel
-#' 
-#' \code{rescaleMutability} renormalizes the mutability probabilities
-#' in a TargetingModel model and returns a rescaled matrix of mutability scores.
-#' 
-#' @param    model     \link{TargetingModel} object with mutation likelihood information.
-#' @param    mean      the mean value for the rescaled mutability scores.
-#'                                                
-#' @return   A named vector of mutability scores for each 5-mer motif with mean
-#'           equal to \code{mean}.
-#'           
-#' @seealso  Takes as input a \link{TargetingModel} object.
-#' @family   targeting model functions
-#' 
-#' @examples
-#' # Load example data
-#' library(alakazam)
-#' file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-#' db <- readChangeoDb(file)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
-#'                  BARCODE != "RL013")
-#'
-#' # Create model and rescale mutabilities
-#' model <- createTargetingModel(db, model="S", multipleMutation="ignore")
-#' mut <- rescaleMutability(model)
-#' 
-#' @export
+# Rescales mutability probabilities from a TargetingModel
+# 
+# \code{rescaleMutability} renormalizes the mutability probabilities
+# in a TargetingModel model and returns a rescaled matrix of mutability scores.
+# 
+# @param    model     \link{TargetingModel} object with mutation likelihood information.
+# @param    mean      the mean value for the rescaled mutability scores.
+#                                                
+# @return   A named vector of mutability scores for each 5-mer motif with mean
+#           equal to \code{mean}.
+#           
+# @seealso  Takes as input a \link{TargetingModel} object.
+# @family   targeting model functions
+# 
+# @examples
+# # Load example data
+# library(alakazam)
+#file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
+# db <- readChangeoDb(file)
+# # Subset data for demo purposes
+# db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
+#                  BARCODE != "RL013")
+#
+# # Create model and rescale mutabilities
+# model <- createTargetingModel(db, model="S", multipleMutation="ignore")
+# mut <- rescaleMutability(model)
+#
 rescaleMutability <- function(model, mean=1.0) {
     if (is(model, "TargetingModel")) {
         model <- model@mutability
@@ -1151,10 +1150,8 @@ writeTargetingDistance <- function(model, file) {
 #' @examples
 #' # Plot one nucleotide in circular style
 #' plotMutability(HS5FModel, "C")
-#' plotMutability(HS5FModel, "G")
 #' 
 #' # Plot two nucleotides in barchart style
-#' plotMutability(HS5FModel, c("C", "A"), style="bar")
 #' plotMutability(HS5FModel, c("G", "T"), style="bar")
 #' 
 #' @export
