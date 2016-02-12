@@ -1270,24 +1270,19 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #'                             regionDefinition=IMGT_V_NO_CDR3,
 #'                             targetingModel = HS5FModel,
 #'                             nproc = 1)
-#' 
-#' # Grouping the PDFs by the BARCODE column in the db, corresponding 
-#' # to sample barcodes.
-#' baseline_one <- groupBaseline(db_baseline, groupBy="BARCODE")
 #'  
 #' # Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 
 #' # respectively to sample barcodes and the constant region isotype primers.
-#' baseline_two <- groupBaseline(db_baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' baseline <- groupBaseline(db_baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Plot mean and confidence interval
-#' plotBaselineDensity(baseline_one, "BARCODE", style="density")
-#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", style="density")
-#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
-#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="density")
+#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", style="density")
+#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
+#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", facetBy="group", style="density")
 #'
 #' # Reorder and recolor groups
 #' group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
-#' plotBaselineDensity(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
+#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
 #' 
 #' @export
 plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
@@ -1457,27 +1452,22 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #'                             regionDefinition=IMGT_V_NO_CDR3,
 #'                             targetingModel = HS5FModel,
 #'                             nproc = 1)
-#' 
-#' # Grouping the PDFs by the BARCODE column in the db, corresponding 
-#' # to sample barcodes.
-#' baseline_one <- groupBaseline(db_baseline, groupBy="BARCODE")
 #'  
 #' # Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 
 #' # respectively to sample barcodes and the constant region isotype primers.
-#' baseline_two <- groupBaseline(db_baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' baseline <- groupBaseline(db_baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Plot mean and confidence interval
-#' plotBaselineSummary(baseline_one, "BARCODE", style="mean")
-#' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", style="mean")
-#' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR", style="mean")
-#' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", facetBy="group", style="mean")
+#' plotBaselineSummary(baseline, "BARCODE", "CPRIMER", style="mean")
+#' plotBaselineSummary(baseline, "BARCODE", "CPRIMER", subsetRegions="CDR", style="mean")
+#' plotBaselineSummary(baseline, "BARCODE", "CPRIMER", facetBy="group", style="mean")
 #' 
 #' # Reorder and recolor groups
 #' group_colors <- c("IGHM"="darkorchid", "IGHA"="steelblue")
-#' plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
+#' plotBaselineSummary(baseline, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
 #' 
 #' # Plot subset of data
-#' stats <- subset(getBaselineStats(baseline_two), BARCODE %in% c("RL018", "RL019"))
+#' stats <- subset(getBaselineStats(baseline), BARCODE %in% c("RL018", "RL019"))
 #' plotBaselineSummary(stats, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
 #' 
 #' @export

@@ -182,14 +182,20 @@ collapseByClone <- function(db,
 # Helper function for calcDBClonalConsensus
 calcClonalConsensus <- function(inputSeq, germlineSeq, 
                                 regionDefinition=NULL, 
-                                nonTerminalOnly=FALSE){    
+                                nonTerminalOnly=FALSE) {
+    # If only one sequence in clone, return it
+    if(length(inputSeq) == 1) {
+        return(inputSeq)
+    }
     
     # Find length of shortest input sequence
-    # This is used to trim all the sequencesto that length
+    # This is used to trim all the sequences to that length
     # or, if a regionDefinition is passed, then only analyze till the end of the defined length
     len_inputSeq <- sapply(inputSeq, function(x){nchar(x)})
     len_shortest <- min(len_inputSeq, na.rm=TRUE)
-    if(!is.null(regionDefinition)){len_shortest <- min(len_shortest, regionDefinition@seqLength, na.rm=TRUE)}        
+    if(!is.null(regionDefinition)) {
+        len_shortest <- min(len_shortest, regionDefinition@seqLength, na.rm=TRUE)
+    }
     
     if (class(nonTerminalOnly) != "logical") {
         stop ("nonTerminalOnly must be TRUE or FALSE.")
@@ -961,17 +967,19 @@ calculateTargeting <- function(germlineSeq,
     gaplessSeq <- paste("NN", gaplessSeq, "NN", sep="")
     gaplessSeqLen <- nchar(gaplessSeq)
     pos<- 3:(gaplessSeqLen - 2)
-    subSeq =  substr(rep(gaplessSeq, gaplessSeqLen - 4), (pos - 2), (pos + 2))    
-    germlineSeqTargeting_gapless <- sapply(subSeq, function(x) { 
-        targetingModel@targeting[, x] })
+    subSeq =  substr(rep(gaplessSeq, gaplessSeqLen - 4), (pos - 2), (pos + 2))
+    germlineSeqTargeting_gapless <- targetingModel@targeting[,subSeq]
+#     germlineSeqTargeting_gapless <- sapply(subSeq, function(x) { 
+#         targetingModel@targeting[, x] })
     
     germlineSeqTargeting[, c_germlineSeq != "."] <- germlineSeqTargeting_gapless  
     
     # Set self-mutating targeting values to be NA
     mutatingToSelf <- colnames(germlineSeqTargeting)
     mutatingToSelf[!(mutatingToSelf %in% NUCLEOTIDES[1:5])] <- "N"
-    # TODO: What's with this <<- business?
-    sapply(1:ncol(germlineSeqTargeting), function(pos) { germlineSeqTargeting[mutatingToSelf[pos], pos] <<- NA })
+#     # TODO: What's with this <<- business?
+#     # TODO: I think this is assigning NA to all self-mutations, which are already NA
+#     sapply(1:ncol(germlineSeqTargeting), function(pos) { germlineSeqTargeting[mutatingToSelf[pos], pos] <<- NA })
     
     germlineSeqTargeting[!is.finite(germlineSeqTargeting)] <- NA
     return(germlineSeqTargeting)
