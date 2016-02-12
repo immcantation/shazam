@@ -30,6 +30,9 @@ profvis({
     # Plot one nucleotide in circular style
     plotMutability(HS5FModel, "C")
     
+})
+
+profvis({
     # Plot one nucleotide in barchart style
     plotMutability(HS5FModel, "T", style="bar")
-})
+})    
