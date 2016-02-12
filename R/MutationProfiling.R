@@ -1059,8 +1059,8 @@ getContextInCodon <- function(nucPos){
 # Given a nuclotide position, returns the pos of the 3 nucs that made the codon
 # e.g. nuc 86 is part of nucs 85,86,87
 getCodonPos <- function(nucPos) {
-  codonNum =  (ceiling(nucPos/3))*3
-  return ((codonNum-2):codonNum)
+  codonNum =  (ceiling(nucPos / 3)) * 3
+  return ((codonNum - 2):codonNum)
 }
 
 # Translate codon to amino acid

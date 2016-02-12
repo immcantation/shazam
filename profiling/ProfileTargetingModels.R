@@ -8,8 +8,7 @@ library(profvis)
 file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 db <- readChangeoDb(file)
 # Subset data for demo purposes
-db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
-                 BARCODE != "RL013")
+db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & BARCODE != "RL013")
 
 #### createSubstitutionMatrix ####
 

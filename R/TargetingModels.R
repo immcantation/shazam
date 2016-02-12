@@ -439,6 +439,9 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                                    multipleMutation=c("independent", "ignore"),
                                    minNumSeqMutations=500, 
                                    returnSource=FALSE) {
+    # substitutionModel=sub_model; model="S"; sequenceColumn="SEQUENCE_IMGT"; germlineColumn="GERMLINE_IMGT_D_MASK"
+    # vCallColumn="V_CALL"; multipleMutation="ignore"; minNumSeqMutations=10; returnSource=FALSE
+    
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
@@ -451,28 +454,30 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     
     # Check that the substitution model is valid
     if (any(dim(substitutionModel) != c(4, 1024))) {
-       stop ("Please supply a valid 5-mer substitutionModel.")
+        stop ("Please supply a valid 5-mer substitutionModel.")
     }
     
     # Remove IMGT gaps in the germline & input sequences
-    matInput <- db[,c(sequenceColumn,germlineColumn)]
+    matInput <- db[, c(sequenceColumn, germlineColumn)]
     
+    # TODO: Slow
     matInputCollapsed <- t(apply(matInput, 1, function(x) {
-      L <- nchar(x[1])
-      apply(sapply(1:floor(L/3), function(i) {
-          if (substr(x[1],((i-1)*3+1),i*3)!="..." & substr(x[2],((i-1)*3+1),i*3)!="...") {
-              c(substr(x[1], ((i-1)*3+1), i*3), substr(x[2], ((i-1)*3+1), i*3))
-          } else {
-            c("","")
-          }}),
+        L <- nchar(x[1])
+        apply(sapply(1:floor(L/3), function(i) {
+            if (substr(x[1], ((i - 1)*3 + 1), i*3) != "..." & substr(x[2], ((i - 1)*3 + 1), i*3) != "...") {
+                c(substr(x[1], ((i - 1)*3 + 1), i*3), substr(x[2], ((i - 1)*3 + 1), i*3))
+            } else {
+                c("", "")
+            }}),
             1, function(x) { paste(x, collapse="") })
-      }))
+    }))
     
-    db[[sequenceColumn]] <- matInputCollapsed[,1]
-    db[[germlineColumn]] <- matInputCollapsed[,2]
-
+    db[[sequenceColumn]] <- matInputCollapsed[, 1]
+    db[[germlineColumn]] <- matInputCollapsed[, 2]
+    
     # Count mutations
     nuc_chars <- NUCLEOTIDES[1:4]
+    # TODO: this could be listMutations() instead, and skip the conversion from matInputCollapsed back to a data.frame
     mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
                                        germlineColumn=germlineColumn,
                                        multipleMutation=multipleMutation,
@@ -509,67 +514,54 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
             }
         }
     }
-    
-#     cat("Progress: 0%      50%     100%\n")
-#     cat("          ")
-#     pb <- txtProgressBar(min=1, max=length(mutations), width=20)
 
+    # Replace dots with Ns
+    sSeqVec <- gsub("\\.", "N", db[[sequenceColumn]])
+    sGermVec <- gsub("\\.", "N", db[[germlineColumn]])
+    
     # Background Count: Count the number of occurrences of each 5-mer
     BG_COUNT <- list()
-    for (index in 1:length(mutations)){
-        
-        # setTxtProgressBar(pb, index)
-        
+    for (index in 1:length(mutations)) {
         BG_COUNT[[index]] <- template
-        sSeq <- gsub("\\.", "N", db[index, sequenceColumn])
-        sGL <- gsub("\\.", "N", db[index, germlineColumn])
-        cSeq <-  s2c(sSeq)
+        sGL <- sGermVec[index]
+        cSeq <-  s2c(sSeqVec[index])
         cGL  <-  s2c(sGL)[1:VLENGTH]
         positions <- 3:(length(cGL) - 2)
-        for (position in  positions) {
-            wrd5 <- substr(sGL, position - 2, position + 2)
-            if (!grepl("[^ACGT]", wrd5) & nchar(wrd5) == 5 ) {
-                codonNucs = getCodonPos(position)
-                codonGL = cGL[codonNucs]
-                codonSeq = cSeq[codonNucs]
-                muCodonPos = {position - 1} %% 3 + 1
+        for (pos in  positions) {
+            wrd5 <- substr(sGL, pos - 2, pos + 2)
+            if (!grepl("[^ACGT]", wrd5) & nchar(wrd5) == 5) {
+                codonNucs <- getCodonPos(pos)
+                codonGL <- cGL[codonNucs]
+                codonSeq <- cSeq[codonNucs]
+                muCodonPos <- (pos - 1) %% 3 + 1
                 #seqAtMutation <- codonSeq[muCodonPos] 
                 glAtMutation <- codonGL[muCodonPos]
                 if (!any(codonGL %in% c("N", "-")) & !any(codonSeq %in% c("N", "-"))) {
-                    codonPermutate <- matrix(rep(codonGL, 3), ncol=3, byrow=TRUE)
-                    codonPermutate[, muCodonPos] <- canMutateTo(glAtMutation)[-4]
-                    codonPermutate <- apply(codonPermutate, 1, paste,collapse="")
-                    codonPermutate <- matrix(c(codonPermutate, rep(c2s(codonGL), 3)), ncol=2, byrow=FALSE)
-                    muType <- mutationTypeOptimized(codonPermutate)
-                    if (!length(grep("N", wrd5)) & !length(grep("-", wrd5))) {
-                        for (m in 1:3) {
-                           if (model == "S") {
-                              if (muType[m] == "S") {
-                                  BG_COUNT[[index]][wrd5]<- BG_COUNT[[index]][wrd5] + 
-                                      substitutionModel[substr(codonPermutate[m, 1], muCodonPos, muCodonPos), wrd5];
-                              }
-                           } else {
-                              BG_COUNT[[index]][wrd5]<- BG_COUNT[[index]][wrd5] + 
-                                 substitutionModel[substr(codonPermutate[m, 1], muCodonPos, muCodonPos), wrd5];
-                           }
-                        }
+                    # Determine mutation types for NUCLEOTIDES[1:4]
+                    muType <- CODON_TABLE[1:4 + 4*(muCodonPos - 1), paste(codonGL, collapse="")]
+
+                    # Set characters that meet mutation criteria
+                    if (model == "S") {
+                        muChars <- NUCLEOTIDES[1:4][NUCLEOTIDES[1:4] != glAtMutation & muType == "S"]
+                    } else { 
+                        muChars <- NUCLEOTIDES[1:4][NUCLEOTIDES[1:4] != glAtMutation]
                     }
+                    
+                    # Update counts
+                    BG_COUNT[[index]][wrd5] <- BG_COUNT[[index]][wrd5] + sum(substitutionModel[muChars, wrd5])
                 }
             }
         }
         BG_COUNT[[index]][BG_COUNT[[index]] == 0] <- NA
     }
-#     close(pb)
-#     cat("\n")
     
-    Mutability<-list()
-    for(i in 1:length(mutations)){
+    Mutability <- list()
+    for(i in 1:length(mutations)) {
         mut_mat <- COUNT[[i]] / BG_COUNT[[i]]
         mut_mat <- mut_mat / sum(mut_mat, na.rm=TRUE)
         mut_mat[!is.finite(mut_mat)] <- NA
         wgt_mat <- length(mutations[[i]])
         Mutability[[i]] <- list(mut_mat, wgt_mat)
-       
     }
     
     
@@ -587,80 +579,80 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     
     # Infer mutability for missing 5-mers
     .fillHot <-function(FIVEMER,mutability){
-       if(FIVEMER%in%names(mutability))if(!is.na(mutability[[FIVEMER]]))if(mutability[[FIVEMER]]>=0.0)return(mutability[[FIVEMER]])
-       Nuc=substr(FIVEMER,3,3)
-       #Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
-       FIVE=0
-       COUNT=0
-       
-       # For A/T, infer mutability using the 3-mer model. 
-       if(Nuc%in%c("A","T")){
-          for(i in 1:3){
-             for(j in 1:3){
-                MutatedNeighbor=paste(canMutateTo(substr(FIVEMER,1,1))[i],substr(FIVEMER,2,4),canMutateTo(substr(FIVEMER,5,5))[j],collapse="",sep="")
-                if(!is.na(mutability[[MutatedNeighbor]])){
-                   FIVE=FIVE+mutability[[MutatedNeighbor]]
-                   COUNT=COUNT+1
+        if(FIVEMER%in%names(mutability))if(!is.na(mutability[[FIVEMER]]))if(mutability[[FIVEMER]]>=0.0)return(mutability[[FIVEMER]])
+        Nuc=substr(FIVEMER,3,3)
+        #Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
+        FIVE=0
+        COUNT=0
+        
+        # For A/T, infer mutability using the 3-mer model. 
+        if(Nuc%in%c("A","T")){
+            for(i in 1:3){
+                for(j in 1:3){
+                    MutatedNeighbor=paste(canMutateTo(substr(FIVEMER,1,1))[i],substr(FIVEMER,2,4),canMutateTo(substr(FIVEMER,5,5))[j],collapse="",sep="")
+                    if(!is.na(mutability[[MutatedNeighbor]])){
+                        FIVE=FIVE+mutability[[MutatedNeighbor]]
+                        COUNT=COUNT+1
+                    }
                 }
-             }
-          }
-          return(FIVE/COUNT)
-       }
-       # For G, infer using 5-mers with the same downstream nucleotides 
-       if(Nuc=="G"){
-          for(i in 1:3){
-             for(j in 1:3){
-                MutatedNeighbor=paste(canMutateTo(substr(FIVEMER,1,1))[i],canMutateTo(substr(FIVEMER,2,2))[j],substr(FIVEMER,3,5),collapse="",sep="")
-                if(!is.na(mutability[[MutatedNeighbor]])){
-                   FIVE=FIVE+mutability[[MutatedNeighbor]]
-                   COUNT=COUNT+1
+            }
+            return(FIVE/COUNT)
+        }
+        # For G, infer using 5-mers with the same downstream nucleotides 
+        if(Nuc=="G"){
+            for(i in 1:3){
+                for(j in 1:3){
+                    MutatedNeighbor=paste(canMutateTo(substr(FIVEMER,1,1))[i],canMutateTo(substr(FIVEMER,2,2))[j],substr(FIVEMER,3,5),collapse="",sep="")
+                    if(!is.na(mutability[[MutatedNeighbor]])){
+                        FIVE=FIVE+mutability[[MutatedNeighbor]]
+                        COUNT=COUNT+1
+                    }
                 }
-             }
-          }
-          return(FIVE/COUNT)
-       }
-       
-       # For C, infer using 5-mers with the same upstream nucleotides 
-       if(Nuc=="C"){
-          for(i in 1:3){
-             for(j in 1:3){
-                MutatedNeighbor=paste(substr(FIVEMER,1,3),canMutateTo(substr(FIVEMER,4,4))[i],canMutateTo(substr(FIVEMER,5,5))[j],collapse="",sep="")
-                if(!is.na(mutability[[MutatedNeighbor]])){
-                   FIVE=FIVE+mutability[[MutatedNeighbor]]
-                   COUNT=COUNT+1
+            }
+            return(FIVE/COUNT)
+        }
+        
+        # For C, infer using 5-mers with the same upstream nucleotides 
+        if(Nuc=="C"){
+            for(i in 1:3){
+                for(j in 1:3){
+                    MutatedNeighbor=paste(substr(FIVEMER,1,3),canMutateTo(substr(FIVEMER,4,4))[i],canMutateTo(substr(FIVEMER,5,5))[j],collapse="",sep="")
+                    if(!is.na(mutability[[MutatedNeighbor]])){
+                        FIVE=FIVE+mutability[[MutatedNeighbor]]
+                        COUNT=COUNT+1
+                    }
                 }
-             }
-          }
-          return(FIVE/COUNT)
-       }
+            }
+            return(FIVE/COUNT)
+        }
     }
     
     Mutability_Mean_Complete <-sapply(words(5,nuc_chars), .fillHot, mutability = Mutability_Mean)
-
+    
     for(i in names(which(is.na(Mutability_Mean_Complete)))){
-       Mutability_Mean_Complete[i]<- .fillHot(i,mutability=Mutability_Mean_Complete)
+        Mutability_Mean_Complete[i]<- .fillHot(i,mutability=Mutability_Mean_Complete)
     }
     for(i in names(which((Mutability_Mean_Complete)<1e-6))){
-       Mutability_Mean_Complete[i]<- .fillHot(i,mutability=Mutability_Mean_Complete)
+        Mutability_Mean_Complete[i]<- .fillHot(i,mutability=Mutability_Mean_Complete)
     }
     # If the neighboring 5-mers still don't have enough mutations, use 0 instead. 
     if (length(is.na(Mutability_Mean_Complete)) > 0) {
-       warning("Insufficient number of mutations to infer some 5-mers. Filled with 0. ")
-       Mutability_Mean_Complete[is.na(Mutability_Mean_Complete)] = 0 
+        warning("Insufficient number of mutations to infer some 5-mers. Filled with 0. ")
+        Mutability_Mean_Complete[is.na(Mutability_Mean_Complete)] = 0 
     }
     
     
     # Normalize
     Mutability_Mean_Complete <- Mutability_Mean_Complete / sum(Mutability_Mean_Complete, na.rm=TRUE)
-        
+    
     # Return whether the 5-mer mutability is measured or inferred
     if (returnSource) {
-       Mutability_Mean_Complete_Source = data.frame(Fivemer = names(Mutability_Mean_Complete),
-                                                    Mutability = Mutability_Mean_Complete)
-       Mutability_Mean_Complete_Source$Source = "Measured"
-       Mutability_Mean_Complete_Source[Mutability_Mean_Complete_Source$Fivemer %in% 
-                                          names(which(is.na(Mutability_Mean))), "Source"] = "Inferred"
-       return(Mutability_Mean_Complete_Source)
+        Mutability_Mean_Complete_Source = data.frame(Fivemer = names(Mutability_Mean_Complete),
+                                                     Mutability = Mutability_Mean_Complete)
+        Mutability_Mean_Complete_Source$Source = "Measured"
+        Mutability_Mean_Complete_Source[Mutability_Mean_Complete_Source$Fivemer %in% 
+                                            names(which(is.na(Mutability_Mean))), "Source"] = "Inferred"
+        return(Mutability_Mean_Complete_Source)
     }
     
     return(Mutability_Mean_Complete)
@@ -1378,7 +1370,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
 
 # Given a nuc, returns the other 3 nucs it can mutate to
 canMutateTo <- function(nuc) {
-    NUCLEOTIDES[1:4][-which(NUCLEOTIDES[1:4] == nuc)]
+    NUCLEOTIDES[1:4][NUCLEOTIDES[1:4] != nuc]
 }
 
 
