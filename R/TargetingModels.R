@@ -178,8 +178,9 @@ setClass("TargetingModel",
 #' library(alakazam)
 #' file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(file)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG"), BARCODE != "RL013")
+#' 
+#' # Subset data to one isotype and sample for demo purposes
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & BARCODE != "RL013")
 #' 
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -208,7 +209,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     
     # Define v_families (heavy or light chain) to only those found in the data
     v_families <- getFamily(db[[vCallColumn]])
-
+    
     # Define empty return list of lists
     substitutionMatrix <- matrix(0, ncol=4, nrow=4, dimnames=list(nuc_chars, nuc_chars))
     substitutionList <- list()    
@@ -219,33 +220,18 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
         }
     }
     
-    
     # Remove IMGT gaps in the germline & input sequences
-      matInput <- db[,c(sequenceColumn,germlineColumn)]
-      
-      matInputCollapsed <- t(apply(matInput, 1, function(x) {
-        L <- nchar(x[1])
-        cods <- strsplit(c(x[1],x[2]), '(?<=.{3})', perl=TRUE)
-        scodons <- cods[[1]]
-        gcodons <- cods[[2]]
-        apply(sapply(1:length(scodons), function(i) {
-            scod <- scodons[i]
-            gcod <- gcodons[i]
-          if (scod != "..." & gcod != "...") {
-            c(scod, gcod)
-          } else {
-            c("","")
-          }}),
-          1, function(x) { paste(x, collapse="") })
-      }))
-      
-      db[[sequenceColumn]] <- matInputCollapsed[,1]
-      db[[germlineColumn]] <- matInputCollapsed[,2]
-      mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
-                                         germlineColumn=germlineColumn,
-                                         multipleMutation=multipleMutation,
-                                         model=model)
-      
+    matInputCollapsed <- removeCodonGaps(db[, c(sequenceColumn, germlineColumn)])
+    # TODO: Unnecessary conversion
+    db[[sequenceColumn]] <- matInputCollapsed[, 1]
+    db[[germlineColumn]] <- matInputCollapsed[, 2]
+    
+    # Get mutations
+    mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
+                                       germlineColumn=germlineColumn,
+                                       multipleMutation=multipleMutation,
+                                       model=model)
+    
     if (model == "S") { # Silent model
         for(index in 1:length(mutations)) {
             cSeq <-  s2c(db[index,sequenceColumn])
@@ -305,7 +291,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
         }
     }
     
-
+    
     # Convert substitutionList to listSubstitution to facilitate the aggregation of mutations
     arrNames <- c(outer(unique(v_families), nuc_words, paste, sep = "_"))
     listSubstitution <- array(0, dim=c(length(arrNames),4,4), dimnames=list(arrNames, nuc_chars, nuc_chars))
@@ -327,10 +313,10 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     
     # Return 1-mer substitution model; this output cannot be used for createMutabilityMatrix
     if (returnModel == "1mer") {
-       subMat1merNorm = t(apply(subMat1mer, 1, function(x){x/sum(x)}))
-       return (subMat1merNorm)
+        subMat1merNorm = t(apply(subMat1mer, 1, function(x){x/sum(x)}))
+        return (subMat1merNorm)
     } else if (returnModel == "1mer_raw") {
-       return (subMat1mer)
+        return (subMat1mer)
     } 
     
     # Aggregate mutations from neighboring bases for low frequency fivemers
@@ -351,7 +337,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
                     FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
                 }
             }
-           
+            
             # If the total number of mutations is still not enough, aggregate mutations from all 5-mers 
             # i.e., use 1-mer model
             if(sum(FIVE) <= Thresh || sum(FIVE==0)!=1 ){
@@ -368,7 +354,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     
     
     substitutionModel <- sapply(seqinr::words(5, nuc_chars), function(x) { .simplifivemer(M, x, Thresh=minNumMutations) })
-
+    
     # Assign A->A, C->C, G->G, T->T to NA
     center_nuc <- gsub("..([ACGT])..", "\\1", colnames(substitutionModel))
     for (i in 1:length(center_nuc)) {
@@ -428,8 +414,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #' file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(file)
 #' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
-#'                  BARCODE != "RL013")
+#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & BARCODE != "RL013")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -461,27 +446,17 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     if (any(dim(substitutionModel) != c(4, 1024))) {
         stop ("Please supply a valid 5-mer substitutionModel.")
     }
+
+    # Set constants for function
+    nuc_chars <- NUCLEOTIDES[1:4]
     
     # Remove IMGT gaps in the germline & input sequences
-    matInput <- db[, c(sequenceColumn, germlineColumn)]
-    
-    # TODO: Slow
-    matInputCollapsed <- t(apply(matInput, 1, function(x) {
-        L <- nchar(x[1])
-        apply(sapply(1:floor(L/3), function(i) {
-            if (substr(x[1], ((i - 1)*3 + 1), i*3) != "..." & substr(x[2], ((i - 1)*3 + 1), i*3) != "...") {
-                c(substr(x[1], ((i - 1)*3 + 1), i*3), substr(x[2], ((i - 1)*3 + 1), i*3))
-            } else {
-                c("", "")
-            }}),
-            1, function(x) { paste(x, collapse="") })
-    }))
-    
+    matInputCollapsed <- removeCodonGaps(db[, c(sequenceColumn, germlineColumn)])
+    # TODO: Unnecessary conversion
     db[[sequenceColumn]] <- matInputCollapsed[, 1]
     db[[germlineColumn]] <- matInputCollapsed[, 2]
     
     # Count mutations
-    nuc_chars <- NUCLEOTIDES[1:4]
     # TODO: this could be listMutations() instead, and skip the conversion from matInputCollapsed back to a data.frame
     mutations <- listObservedMutations(db, sequenceColumn=sequenceColumn, 
                                        germlineColumn=germlineColumn,
@@ -503,7 +478,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
             positions <- positions[!is.na(positions)]
             for (position in  positions){
                 wrd5 <- substr(db[index, germlineColumn], position - 2, position + 2)
-                if(!grepl("[^ACGT]", wrd5) & nchar(wrd5)==5){
+                if(!grepl("[^ACGT]", wrd5) & nchar(wrd5) == 5){
                     codonNucs = getCodonPos(position)
                     codonGL = cGL[codonNucs]
                     codonSeq = cSeq[codonNucs]
@@ -547,9 +522,9 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 
                     # Set characters that meet mutation criteria
                     if (model == "S") {
-                        muChars <- NUCLEOTIDES[1:4][NUCLEOTIDES[1:4] != glAtMutation & muType == "S"]
+                        muChars <- nuc_chars[1:4][nuc_chars[1:4] != glAtMutation & muType == "S"]
                     } else { 
-                        muChars <- NUCLEOTIDES[1:4][NUCLEOTIDES[1:4] != glAtMutation]
+                        muChars <- nuc_chars[1:4][nuc_chars[1:4] != glAtMutation]
                     }
                     
                     # Update counts
@@ -632,7 +607,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
         }
     }
     
-    Mutability_Mean_Complete <-sapply(words(5,nuc_chars), .fillHot, mutability = Mutability_Mean)
+    Mutability_Mean_Complete <-sapply(words(5, nuc_chars), .fillHot, mutability = Mutability_Mean)
     
     for(i in names(which(is.na(Mutability_Mean_Complete)))){
         Mutability_Mean_Complete[i]<- .fillHot(i,mutability=Mutability_Mean_Complete)
@@ -996,19 +971,7 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #' @family   targeting model functions
 #' 
 #' @examples
-#' # Load example data
-#' library(alakazam)
-#' file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-#' db <- readChangeoDb(file)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
-#'                  BARCODE != "RL013")
-#'
-#' # Calculate targeting distance of custom model
-#' model <- createTargetingModel(db, model="S", multipleMutation="ignore")
-#' dist <- calcTargetingDistance(model)
-#' 
-#' # Calculate targeting distance of built-model
+#' # Calculate targeting distance of HS5FModel
 #' dist <- calcTargetingDistance(HS5FModel)
 #' 
 #' @export
@@ -1077,6 +1040,40 @@ rescaleMutability <- function(model, mean=1.0) {
     rescaled[!is.finite(rescaled)] <- NA
     
     return(rescaled)
+}
+
+
+# Remove in-frame IMGT gaps
+# 
+# @param    matInput  Nx2 matrix with input and germline sequences in each column
+# @return   A two column matrix with "..." codons removed.
+removeCodonGaps <- function(matInput) {
+    # Function to return valid codon sets
+    # i = position, x = codon list 1, y = codon list 2
+    .f1 <- function(i, x, y) {
+        xcod <- x[i]
+        ycod <- y[i]
+        if (xcod != "..." & ycod != "...") {
+            c(xcod, ycod)
+        } else {
+            c("", "")
+        }
+    }
+    
+    substr(c("ABDGHCD", "DHCBCHDJD"), ((1:312 - 1)*3 + 1), 1:312*3)
+    
+    # Function to parse sequences
+    # z = vector of 2 sequences
+    .f2 <- function(z) {
+        # Split strings into 3-mers
+        cods <- stri_extract_all_regex(c(z[1], z[2]), ".{3}")
+        cmat <- sapply(1:length(cods[[1]]), .f1, x=cods[[1]], y=cods[[2]])
+        apply(cmat, 1, paste, collapse="")
+    }
+    
+    matCollapsed <- t(apply(matInput, 1, .f2))
+    
+    return(matCollapsed)
 }
 
 
@@ -1157,7 +1154,7 @@ writeTargetingDistance <- function(model, file) {
 #' plotMutability(HS5FModel, "C")
 #' 
 #' # Plot two nucleotides in barchart style
-#' plotMutability(HS5FModel, c("G", "T"), style="bar")
+#' plotMutability(HS5FModel, c("G","T"), style="bar")
 #' 
 #' @export
 plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), 
