@@ -180,7 +180,7 @@ setClass("TargetingModel",
 #' db <- readChangeoDb(file)
 #' 
 #' # Subset data to one isotype and sample for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & BARCODE != "RL013")
+#' db <- subset(db, CPRIMER == "IGHA" & BARCODE == "RL013")
 #' 
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -413,8 +413,9 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #' library(alakazam)
 #' file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(file)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & BARCODE != "RL013")
+#' 
+#' # Subset data to one isotype and sample for demo purposes
+#' db <- subset(db, CPRIMER == "IGHA" & BARCODE == "RL013")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -658,8 +659,9 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #' library(alakazam)
 #' file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(file)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG"), BARCODE != "RL013")
+#' 
+#' # Subset data to one isotype and sample for demo purposes
+#' db <- subset(db, CPRIMER == "IGHA" & BARCODE == "RL013")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -722,9 +724,9 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' library(alakazam)
 #' file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(file)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
-#'                  BARCODE != "RL013")
+#' 
+#' # Subset data to one isotype and sample for demo purposes
+#' db <- subset(db, CPRIMER == "IGHA" & BARCODE == "RL013")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -806,9 +808,9 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' library(alakazam)
 #' file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(file)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
-#'                  BARCODE != "RL013")
+#' 
+#' # Subset data to one isotype and sample for demo purposes
+#' db <- subset(db, CPRIMER == "IGHA" & BARCODE == "RL013")
 #'
 #' # Create 4x1024 model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -883,9 +885,9 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' library(alakazam)
 #' file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 #' db <- readChangeoDb(file)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
-#'                  BARCODE != "RL013")
+#' 
+#' # Subset data to one isotype and sample for demo purposes
+#' db <- subset(db, CPRIMER == "IGHA" & BARCODE == "RL013")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' model <- createTargetingModel(db, model="S", multipleMutation="ignore")
@@ -1017,11 +1019,11 @@ calcTargetingDistance <- function(model) {
 # @examples
 # # Load example data
 # library(alakazam)
-#file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
+# file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
 # db <- readChangeoDb(file)
-# # Subset data for demo purposes
-# db <- subset(db, CPRIMER %in% c("IGHA","IGHG") & 
-#                  BARCODE != "RL013")
+# 
+# # Subset data to one isotype and sample for demo purposes
+# db <- subset(db, CPRIMER == "IGHA" & BARCODE == "RL013")
 #
 # # Create model and rescale mutabilities
 # model <- createTargetingModel(db, model="S", multipleMutation="ignore")

@@ -23,3 +23,13 @@ profvis({
     mut_model <- createMutabilityMatrix(db, sub_model, model="S", multipleMutation="ignore",
                                         minNumSeqMutations=10)
 })
+
+#### Plot mutability ####
+
+profvis({
+    # Plot one nucleotide in circular style
+    plotMutability(HS5FModel, "C")
+    
+    # Plot one nucleotide in barchart style
+    plotMutability(HS5FModel, "T", style="bar")
+})
