@@ -225,9 +225,14 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
       
       matInputCollapsed <- t(apply(matInput, 1, function(x) {
         L <- nchar(x[1])
-        apply(sapply(1:floor(L/3), function(i) {
-          if (substr(x[1],((i-1)*3+1),i*3)!="..." & substr(x[2],((i-1)*3+1),i*3)!="...") {
-            c(substr(x[1], ((i-1)*3+1), i*3), substr(x[2], ((i-1)*3+1), i*3))
+        cods <- strsplit(c(x[1],x[2]), '(?<=.{3})', perl=TRUE)
+        scodons <- cods[[1]]
+        gcodons <- cods[[2]]
+        apply(sapply(1:length(scodons), function(i) {
+            scod <- scodons[i]
+            gcod <- gcodons[i]
+          if (scod != "..." & gcod != "...") {
+            c(scod, gcod)
           } else {
             c("","")
           }}),
@@ -1382,8 +1387,13 @@ mutationTypeOptimized <- function(matOfCodons) {
 # in_matrix <- matrix(c(c("A","A","A","C","C","C"), c("A","G","G","C","C","A")), 2 ,6, byrow=T)
 # analyzeMutations2NucUri(in_matrix)
 analyzeMutations2NucUri <- function(in_matrix) {
-    paramGL = in_matrix[2,]
-    paramSeq = in_matrix[1,]
+    if(ncol(in_matrix) > VLENGTH) {
+        paramGL = in_matrix[2,1:VLENGTH]
+        paramSeq = in_matrix[1,1:VLENGTH]
+    } else {
+        paramGL = in_matrix[2,]
+        paramSeq = in_matrix[1,]
+    }
     #mutations = apply(rbind(paramGL,paramSeq), 2, function(x){!x[1]==x[2]})
     mutations_val = paramGL != paramSeq
     if (any(mutations_val)) {
@@ -1433,7 +1443,7 @@ listMutations <- function(seqInput, seqGL, multipleMutation, model) {
     mutations <- analyzeMutations2NucUri(matIGL)
     mutations <- mutations[!is.na(mutations)]
     positions <- as.numeric(names(mutations))
-    mutations <- mutations[positions <= VLENGTH]
+    # mutations <- mutations[positions <= VLENGTH]
     
     #remove the nucleotide mutations in the codons with multiple mutations
     if (multipleMutation == "ignore") {
