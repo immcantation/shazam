@@ -535,7 +535,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                 glAtMutation <- codonGL[muCodonPos]
                 if (!any(codonGL %in% c("N", "-")) & !any(codonSeq %in% c("N", "-"))) {
                     # Determine mutation types for NUCLEOTIDES[1:4]
-                    muType <- CODON_TABLE[1:4 + 4*(muCodonPos - 1), paste(codonGL, collapse="")]
+                    muType <- CODON_TABLE[1:4 + 4*(muCodonPos - 1), stri_flatten(codonGL)]
 
                     # Set characters that meet mutation criteria
                     if (model == "S") {
@@ -546,7 +546,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                     
                     # Update counts
                     if (length(muChars) > 0) {
-                        tmpCounts[pos, wrd5] <- substitutionSums[paste(muChars, collapse=""), wrd5]
+                        tmpCounts[pos, wrd5] <- substitutionSums[stri_flatten(muChars), wrd5]
                     }
                     #BG_COUNT[[index]][wrd5] <- BG_COUNT[[index]][wrd5] + sum(substitutionModel[muChars, wrd5])
                 }
@@ -1081,9 +1081,7 @@ removeCodonGaps <- function(matInput) {
             c("", "")
         }
     }
-    
-    substr(c("ABDGHCD", "DHCBCHDJD"), ((1:312 - 1)*3 + 1), 1:312*3)
-    
+
     # Function to parse sequences
     # z = vector of 2 sequences
     .f2 <- function(z) {

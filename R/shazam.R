@@ -115,7 +115,7 @@
 #' @importFrom  iterators   icount
 #' @importFrom  SDMTools    wt.sd
 #' @importFrom  seqinr      c2s s2c words translate
-#' @importFrom  stringi     stri_length stri_join 
+#' @importFrom  stringi     stri_dup stri_flatten stri_join stri_length
 #'                          stri_count_boundaries stri_count_regex 
 #'                          stri_extract_all_regex stri_extract_first_regex  
 #'                          stri_replace_all_regex stri_replace_first_regex
