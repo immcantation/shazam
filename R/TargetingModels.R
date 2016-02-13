@@ -496,14 +496,31 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
         }
     }
 
+    #nuc_chars <- c("A", "C", "G", "T")
+    #substitutionModel <- sub_model
+    # Define sum of rates for nucleotide sets from substitution model
+    # Two character sets
+    wrd2Index <- combn(1:4, 2)
+    wrd2Sums <- t(apply(wrd2Index, 2, function(x) colSums(substitutionModel[x, ], na.rm=TRUE)))
+    rownames(wrd2Sums) <- apply(wrd2Index, 2, function(x) paste(nuc_chars[x], collapse=""))
+    # Three character sets
+    wrd3Index <- combn(1:4, 3)
+    wrd3Sums <- t(apply(wrd3Index, 2, function(x) colSums(substitutionModel[x, ], na.rm=TRUE)))
+    rownames(wrd3Sums) <- apply(wrd3Index, 2, function(x) paste(nuc_chars[x], collapse=""))
+    # Merge single character, two character and three character sets
+    substitutionSums <- rbind(substitutionModel, wrd2Sums, wrd3Sums)
+        
     # Replace dots with Ns
     sSeqVec <- gsub("\\.", "N", db[[sequenceColumn]])
     sGermVec <- gsub("\\.", "N", db[[germlineColumn]])
     
     # Background Count: Count the number of occurrences of each 5-mer
     BG_COUNT <- list()
+    # Define template for 5-mer sums
+    countTemplate <- matrix(0, VLENGTH, 1024, dimnames=list(1:VLENGTH, names(template)))
     for (index in 1:length(mutations)) {
-        BG_COUNT[[index]] <- template
+        #BG_COUNT[[index]] <- template
+        tmpCounts <- countTemplate
         sGL <- sGermVec[index]
         cSeq <-  s2c(sSeqVec[index])
         cGL  <-  s2c(sGL)[1:VLENGTH]
@@ -515,7 +532,6 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                 codonGL <- cGL[codonNucs]
                 codonSeq <- cSeq[codonNucs]
                 muCodonPos <- (pos - 1) %% 3 + 1
-                #seqAtMutation <- codonSeq[muCodonPos] 
                 glAtMutation <- codonGL[muCodonPos]
                 if (!any(codonGL %in% c("N", "-")) & !any(codonSeq %in% c("N", "-"))) {
                     # Determine mutation types for NUCLEOTIDES[1:4]
@@ -529,10 +545,14 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                     }
                     
                     # Update counts
-                    BG_COUNT[[index]][wrd5] <- BG_COUNT[[index]][wrd5] + sum(substitutionModel[muChars, wrd5])
+                    if (length(muChars) > 0) {
+                        tmpCounts[pos, wrd5] <- substitutionSums[paste(muChars, collapse=""), wrd5]
+                    }
+                    #BG_COUNT[[index]][wrd5] <- BG_COUNT[[index]][wrd5] + sum(substitutionModel[muChars, wrd5])
                 }
             }
         }
+        BG_COUNT[[index]] <- colSums(tmpCounts)
         BG_COUNT[[index]][BG_COUNT[[index]] == 0] <- NA
     }
     
