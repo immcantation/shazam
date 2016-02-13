@@ -496,8 +496,6 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
         }
     }
 
-    #nuc_chars <- c("A", "C", "G", "T")
-    #substitutionModel <- sub_model
     # Define sum of rates for nucleotide sets from substitution model
     # Two character sets
     wrd2Index <- combn(1:4, 2)
@@ -514,12 +512,12 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     sSeqVec <- gsub("\\.", "N", db[[sequenceColumn]])
     sGermVec <- gsub("\\.", "N", db[[germlineColumn]])
     
+    # Define template for 5-mer sums by position
+    countTemplate <- matrix(0, VLENGTH, 1024, dimnames=list(1:VLENGTH, names(template)))
+    
     # Background Count: Count the number of occurrences of each 5-mer
     BG_COUNT <- list()
-    # Define template for 5-mer sums
-    countTemplate <- matrix(0, VLENGTH, 1024, dimnames=list(1:VLENGTH, names(template)))
     for (index in 1:length(mutations)) {
-        #BG_COUNT[[index]] <- template
         tmpCounts <- countTemplate
         sGL <- sGermVec[index]
         cSeq <-  s2c(sSeqVec[index])
@@ -548,7 +546,6 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                     if (length(muChars) > 0) {
                         tmpCounts[pos, wrd5] <- substitutionSums[stri_flatten(muChars), wrd5]
                     }
-                    #BG_COUNT[[index]][wrd5] <- BG_COUNT[[index]][wrd5] + sum(substitutionModel[muChars, wrd5])
                 }
             }
         }
