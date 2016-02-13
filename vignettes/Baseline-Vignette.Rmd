@@ -36,19 +36,16 @@ Load Change-O data
 --------------------------------------------------------------------------------
 A small example Change-O tab-delimited database file is included in the `shazam` 
 package. The example dataset consists of a subset of Ig sequencing data from an 
-influenza vaccination study (Laserson et al., PNAS, 2014). The data include 
-sequences from multiple time-points before and after the subject received an 
-influenza vaccination. Quantifying selection requires the following fields 
-(columns) to be present in the Change-O file: `SEQUENCE_IMGT` and 
+influenza vaccination study (Laserson and Vigneault et al., PNAS, 2014). The 
+data include sequences from multiple time-points before and after the subject 
+received an influenza vaccination. Quantifying selection requires the following 
+fields (columns) to be present in the Change-O file: `SEQUENCE_IMGT` and 
 `GERMLINE_IMGT_D_MASK`.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
-library(alakazam)
-library(shazam)
-
 # Load Change-O file
-file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-db <- readChangeoDb(file)
+library(shazam)
+db <- InfluenzaDb
 ```
 
 Calculate selection scores and group by relevant fields for comparison
@@ -58,6 +55,8 @@ collapse sequences by the `CLONE` column, if the data has been divided into
 clonal groups. 
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
+library(shazam)
+
 # Collapse clonal groups into single sequences
 db_clone <- collapseByClone(db, regionDefinition=IMGT_V_NO_CDR3, 
                             expandedDb=TRUE, nproc=1)

@@ -1,5 +1,4 @@
-dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-db <- readChangeoDb(dbPath)
+db <- InfluenzaDb
 
 test_that("calculateTargeting and calculateMutationalPaths with regionDefinition==NULL", {
     

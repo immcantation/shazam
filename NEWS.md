@@ -5,8 +5,7 @@ General:
 
 + Renamed package from shm to shazam.
 + Internal changes to conform to CRAN policies.
-+ Compressed and renamed example database file `extdata/Influenza.tab` to 
-  `extdata/InfluenzaDb.gz`
++ Compressed and moved example database to the data object `InfluenzaDb`.
 + Fixed several bugs where functions would not work properly when passed 
   a `dplyr::tbl_df` object instead of a `data.frame`.
 + Changed R dependency to R >= 3.1.2.

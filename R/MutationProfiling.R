@@ -62,13 +62,9 @@ NULL
 #' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
 #' 
 #' @examples
-#' # Load example data
-#' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-#' db <- readChangeoDb(dbPath)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
-#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
+#' # Subset example data
+#' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
+#'                           BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #' 
 #' # Run collapseByClone
 #' db_new <- collapseByClone(db, cloneColumn="CLONE", 
@@ -326,13 +322,9 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #'           
 #' 
 #' @examples
-#' # Load example data
-#' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-#' db <- readChangeoDb(dbPath)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
-#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
+#' # Subset example data
+#' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
+#'                           BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #'
 #' # Run calcDBObservedMutations()
 #' db_new <- calcDBObservedMutations(db, sequenceColumn="SEQUENCE_IMGT",
@@ -461,13 +453,9 @@ calcDBObservedMutations <- function(db,
 #' @seealso  See \link{calcDBObservedMutations} for counting the number of observed mutations.
 #' 
 #' @examples
-#' library(alakazam)
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-#' db <- readChangeoDb(dbPath)
-#' 
-#' # Extracting the first entry in the sample db to use for input and germline sequences.
-#' inputSeq <- db[1, "SEQUENCE_IMGT"]
-#' germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
+#' # Extracting the first entry in the example data to use for input and germline sequences.
+#' inputSeq <- InfluenzaDb[1, "SEQUENCE_IMGT"]
+#' germlineSeq <-  InfluenzaDb[1, "GERMLINE_IMGT_D_MASK"]
 #' 
 #' # Identify all mutations in the sequence
 #' calcObservedMutations(inputSeq, germlineSeq)
@@ -680,13 +668,9 @@ binMutationsByRegion <- function(mutationsArray,
 #' \link{RegionDefinition} objects.
 #' 
 #' @examples
-#' # Load example data
-#' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-#' db <- readChangeoDb(dbPath)
-#' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
-#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
+#' # Subset example data
+#' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
+#'                           BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #'
 #' # Calculate expected mutations over V region
 #' db <- calcDBExpectedMutations(db,
@@ -834,13 +818,9 @@ calcDBExpectedMutations <- function(db,
 #' See \link{calcObservedMutations} for getting observed mutation counts.
 #' 
 #' @examples
-#' library(alakazam)
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-#' db <- readChangeoDb(dbPath)
-#' 
-#' # Extracting the first entry in the sample db to use for input and germline sequences.
-#' inputSeq <- db[1, "SEQUENCE_IMGT"]
-#' germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
+#' # Extracting the first entry in the exampled data to use for input and germline sequences.
+#' inputSeq <- InfluenzaDb[1, "SEQUENCE_IMGT"]
+#' germlineSeq <-  InfluenzaDb[1, "GERMLINE_IMGT_D_MASK"]
 #' 
 #' # Identify all mutations in the sequence
 #' calcExpectedMutations(inputSeq, germlineSeq)

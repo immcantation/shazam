@@ -1,15 +1,12 @@
 # Imports
-library(alakazam)
 library(shazam)
 library(profvis)
 
 #### Load example data ####
 
-file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-db <- readChangeoDb(file)
 # Subset data for demo purposes
-db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
-                 BARCODE != "RL013")
+db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & BARCODE != "RL013")
+
 # Extracting the first entry in the sample db to use for input and germline sequences.
 inputSeq <- db[1, "SEQUENCE_IMGT"]
 germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]

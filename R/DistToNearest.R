@@ -380,13 +380,9 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #'           for individual model details.
 #' 
 #' @examples
-#' # Load example data
-#' library("alakazam")
-#' dbPath <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-#' db <- readChangeoDb(dbPath)
 #' # Subset data for demo purposes
-#' db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
-#'                  BARCODE %in% c("RL016","RL018","RL019","RL021"))
+#' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
+#'              BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #' 
 #' # Use genotyped V assignments, HS1F model, and normalize by junction length
 #' dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 

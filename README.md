@@ -20,6 +20,7 @@ R packages
   - scales  
   - SDMTools
   - seqinr
+  - stringi
   - tidyr
 
 Build Instructions

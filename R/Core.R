@@ -1,4 +1,23 @@
-# Miscellaneous common functions
+# Miscellaneous common functions and data
+
+#### Data ####
+
+#' Example Change-O database
+#'
+#' A small example database subset from Laserson and Vigneault et al, 2014.
+#'
+#' @format   A data.frame containing Change-O style data.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Laserson U and Vigneault F, et al. High-resolution antibody dynamics of 
+#'            vaccine-induced immune responses. 
+#'            Proc Natl Acad Sci USA. 2014 111:4928-33.
+#' }
+#'
+#' @seealso  See \code{\link{HS1FDistance}} for the human 1-mer distance matrix.
+"InfluenzaDb"
+
 
 #### Transformation functions ####
 

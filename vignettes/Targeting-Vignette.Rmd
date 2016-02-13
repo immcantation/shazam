@@ -45,12 +45,9 @@ be present in the Change-O file: `SEQUENCE_IMGT`, `GERMLINE_IMGT_D_MASK` and
 `V_CALL`.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
-library(alakazam)
-library(shazam)
-
 # Load Change-O file
-file <- system.file("extdata", "InfluenzaDb.gz", package="shazam")
-db <- readChangeoDb(file)
+library(shazam)
+db <- InfluenzaDb
 ```
 
 Infer targeting model (substitution and mutability)
