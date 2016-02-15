@@ -1175,11 +1175,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     text_offset <- -5.6
     
     # Set guide colors
-    motif_colors <- setNames(c("#4daf4a", "#e41a1c", "#984ea3", "#999999"),
+    motif_colors <- setNames(c("#4daf4a", "#e41a1c", "#094d85", "#999999"),
                              c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
-    dna_colors <- setNames(c("#4daf4a", "#ff7f00", "#e41a1c", "#377eb8", "#999999"),
+    dna_colors <- setNames(c("#7bce77", "#ff9b39", "#f04949", "#5796ca", "#c4c4c4"),
                            c("A", "C", "G", "T", "N"))
-
     
     # Build data.frame of mutability scores
     mut_scores <- model[!grepl("N", names(model))]
@@ -1263,8 +1262,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
         # Define text and rectangle positions for inner circle
         sub_melt$pos <- sub_melt$pos + text_offset
         sub_text <- lapply(sub_text, function(x) { dplyr::mutate_(x, text_y=interp(~ y + text_offset, y=as.name("text_y"))) })
-        #sub_rect <- dplyr::bind_rows(sub_text) %>%
-        #    mutate_(rect_width=interp(~ y - x, x=as.name("rect_min"), y=as.name("rect_max")))
+        sub_rect <- dplyr::bind_rows(sub_text) %>%
+            mutate_(rect_width=interp(~ y - x, x=as.name("rect_min"), y=as.name("rect_max")),
+                    ymin=interp(~ y - 0.5, y=as.name("text_y")),
+                    ymax=interp(~ y + 0.5, y=as.name("text_y")))
         
 
         # Define base plot object
@@ -1273,16 +1274,20 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
             #ggtitle(paste0("NN", center_nuc, "NN")) +
             xlab("") +
             ylab("") + 
-            scale_color_manual(name="Motif", values=motif_colors) +
+            scale_color_manual(name="Motif", values=c(motif_colors, dna_colors), 
+                               breaks=names(motif_colors)) +
             scale_fill_manual(name="", values=c(motif_colors, dna_colors), guide=FALSE) +
+            geom_rect(data=sub_rect, 
+                      mapping=aes_string(xmin="rect_min", xmax="rect_max", ymin="ymin", ymax="ymax", 
+                                         fill="text_label", color="text_label"), 
+                      size=0.5*size, alpha=1, show.legend=FALSE) +
             #geom_tile(data=sub_rect, 
             #          mapping=aes_string(x="text_x", y="text_y", width="rect_width", fill="text_label"), 
             #          size=0, alpha=0.7, show.legend=FALSE) +
-            geom_tile(data=sub_melt, mapping=aes_string(x="x", y="pos", fill="char"), size=0, alpha=0.7,
-                      show.legend=FALSE) +
+            #geom_tile(data=sub_melt, mapping=aes_string(x="x", y="pos", fill="char"), size=0, alpha=0.7,
+            #          show.legend=FALSE) +
             geom_text(data=sub_text[[3]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
                       color="black", hjust=0.5, vjust=0.5, size=3*size, fontface=2)
-        plot(p1)
         
         # Add 5-mer nucleotide labels
         if (center_nuc %in% c("A", "C")) {
