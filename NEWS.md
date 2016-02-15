@@ -1,4 +1,4 @@
-Version 0.1.1.999:  February 11, 2016
+Version 0.1.1.999:  February 15, 2016
 -------------------------------------------------------------------------------
 
 General:
@@ -17,7 +17,10 @@ Distance Profiling:
 
 Targeting Models:
 
++ Performance improvements to `createSubstitutionMatrix()` and 
+  `createMutabilityMatrix()`.
 + Fixed errors in the targeting models vignette.
++ Modified color scheme in `plotMutability()`.
 
 Mutation Profiling:
 
