@@ -1,15 +1,15 @@
 Package: shazam
 Type: Package
 Version: 0.1.1.999
-Date: 2016-02-15
+Date: 2016-02-18
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
-             person("Jason", "Vander Heiden", role=c("ctb", "cre"), 
+             person("Namita", "Gupta", role=c("ctb", "cre"), 
+                    email="namita.gupta@yale.edu"),
+             person("Jason", "Vander Heiden", role=c("ctb"), 
                     email="jason.vanderheiden@yale.edu"),
              person("Gur", "Yaari", role=c("ctb"), 
                     email="gur.yaari@biu.ac.il"),
-             person("Namita", "Gupta", role=c("ctb"), 
-                    email="namita.gupta@yale.edu"),
              person("Susanna", "Marquez", role=c("ctb"), 
                     email="susanna.marquez@yale.edu"),
              person("Steven", "Kleinstein", role=c("ctb"), 
@@ -43,6 +43,7 @@ Imports:
     SDMTools,
     scales,
     seqinr,
+    stats,
     stringi,
     tidyr,
     utils
