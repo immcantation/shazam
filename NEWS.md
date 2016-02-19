@@ -30,6 +30,9 @@ Mutation Profiling:
   `calcDBObservedMutations()` and `calcDBExpectedMutations()`.
 + Fixed a few bugs where column names, region definitions or mutation models
   were not being recognized properly when non-default values were used.
++ Added consistent behavior such that when `regionDefinition=NULL` for any 
+  of these functions, the entire sequence is used as the region and
+  calculations are made accordingly.
   
 
 Version 0.1.1:  December 18, 2015
