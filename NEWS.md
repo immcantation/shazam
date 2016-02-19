@@ -1,4 +1,4 @@
-Version 0.1.1.999:  February 18, 2016
+Version 0.1.2:  February 19, 2016
 -------------------------------------------------------------------------------
 
 General:
@@ -9,6 +9,7 @@ General:
 + Fixed several bugs where functions would not work properly when passed 
   a `dplyr::tbl_df` object instead of a `data.frame`.
 + Changed R dependency to R >= 3.1.2.
++ Added stringi dependency.
 
 Distance Profiling:
 
@@ -17,10 +18,10 @@ Distance Profiling:
 
 Targeting Models:
 
-+ Performance improvements to `createSubstitutionMatrix()` and 
-  `createMutabilityMatrix()`.
-+ Fixed errors in the targeting models vignette.
++ Performance improvements to `createSubstitutionMatrix()`,  
+  `createMutabilityMatrix()`, and `plotMutability()`.
 + Modified color scheme in `plotMutability()`.
++ Fixed errors in the targeting models vignette.
 
 Mutation Profiling:
 

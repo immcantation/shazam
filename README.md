@@ -1,7 +1,7 @@
 shazam
 -------------------------------------------------------------------------------
-February 18, 2016
-Version 0.1.1.999
+February 19, 2016
+Version 0.1.2
 
 Somatic hypermutation analysis package.
 
