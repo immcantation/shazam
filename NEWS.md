@@ -34,7 +34,12 @@ Mutation Profiling:
 + Added consistent behavior such that when `regionDefinition=NULL` for any 
   of these functions, the entire sequence is used as the region and
   calculations are made accordingly.
-  
++ `calcDBObservedMutations()` returns R and S mutations also 
+  when `regionDefinition=NULL`. Older versions reported the sum of R and S 
+  mutations. The function will add the columns `OBSERVED_SEQ_R` and
+  `OBSERVED_SEQ_S` when `frequency=FALSE`, and `MU_FREQ_SEQ_R` and 
+  `MU_FREQ_SEQ_R` when `frequency=TRUE`.
+    
 
 Version 0.1.1:  December 18, 2015
 -------------------------------------------------------------------------------
