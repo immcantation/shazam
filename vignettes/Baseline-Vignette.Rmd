@@ -43,7 +43,7 @@ fields (columns) to be present in the Change-O file: `SEQUENCE_IMGT` and
 `GERMLINE_IMGT_D_MASK`.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
-# Load Change-O file
+# Set example data
 library(shazam)
 db <- InfluenzaDb
 ```

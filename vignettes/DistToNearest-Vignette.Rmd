@@ -43,9 +43,9 @@ fields (columns) to be present in the Change-O file: `V_CALL`, `J_CALL`,
 `JUNCTION_LENGTH`, and `JUNCTION`.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
-# Load Change-O file
+# Subset example data to one sample
 library(shazam)
-db <- InfluenzaDb
+db <- subset(InfluenzaDb, BARCODE == "RL013")
 ```
 
 Calculate nearest neighbor distances
@@ -62,10 +62,10 @@ V(D)J segment calls, the parameter `first` can be set to `FALSE`. Setting
 than the first gene in the field. The `model` parameter determines which 
 underlying SHM model is used to calculate the distance. The default model is 
 `hs1f`, a human Ig-specific single nucleotide model similar to a 
-transition/transversion model (Yaari et al, Front Immunol, 2013). Other options 
+transition/transversion model (Yaari et al, 2013). Other options 
 include nucleotide Hamming distance (`ham`), amino acid Hamming distance (`aa`), 
-single nucleotide (`m1n`) and 3-mer (`m3n`) mouse models (Smith et al, J Immunol, 1996), 
-and a 5-mer model inferred from human data (`hs5f`) (Yaari et al, Front Immunol, 2013).
+single nucleotide (`m1n`) and 3-mer (`m3n`) mouse models (Smith et al, 1996), 
+and a 5-mer model inferred from human data (`hs5f`) (Yaari et al, 2013).
 For models that are not symmetric (e.g., distance from A to B is not equal to the
 distance from B to A), there is a `symmetry` parameter that allows the user to 
 specify taking the average or the minimum of the two distances to determine the
@@ -73,10 +73,12 @@ overall distance.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Use hs1f model and normalize by junction length
-dist_hs1f <- distToNearest(db, model="hs1f", first=FALSE, normalize="length", nproc=1)
+dist_hs1f <- distToNearest(db, model="hs1f", first=FALSE, normalize="length", 
+                           nproc=1)
 
 # Use genotyped V assignments and 5-mer model
-dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", first=FALSE, normalize="none", nproc=1)
+dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", 
+                           first=FALSE, normalize="none", nproc=1)
 ```
 
 Generate histogram
@@ -115,4 +117,4 @@ plot(p3)
 ```
 
 In this example, the unnormalized `hs5f` model distance threshold would be 
-set to a value near 5.
+set to a value near 4.

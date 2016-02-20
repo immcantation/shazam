@@ -45,7 +45,7 @@ be present in the Change-O file: `SEQUENCE_IMGT`, `GERMLINE_IMGT_D_MASK` and
 `V_CALL`.
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
-# Load Change-O file
+# Set example data
 library(shazam)
 db <- InfluenzaDb
 ```
@@ -119,7 +119,7 @@ mutability rates corresponds to the likelihood of a given base in the given
 5-mer mutability rates. If the mutability for only specific bases is required, 
 this can be specified via the `nucleotides` argument.
 
-```{r, eval=TRUE, warning=FALSE, fig.width=6, fig.height=7}
+```{r, eval=TRUE, warning=FALSE, fig.width=7, fig.height=7.5}
 # Generate hedgehog plot of mutability model
 plotMutability(model, nucleotides="A", style="hedgehog")
 plotMutability(model, nucleotides="C", style="hedgehog")

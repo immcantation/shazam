@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 0.1.2
-Date: 2016-02-19
+Date: 2016-02-20
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
@@ -16,11 +16,13 @@ Authors@R: c(person("Mohamed", "Uduman", role=c("aut"),
                     email="susanna.marquez@yale.edu"),
              person("Steven", "Kleinstein", role=c("aut", "cph"), 
                     email="steven.kleinstein@yale.edu"))
-Title: Somatic Hypermutation Analysis
-Description: A new computational framework for Bayesian estimation of
-    Antigen-driven selection in Immunoglobulin sequences, provides a more
-    intuitive means of analyzing selection by actually quantifying it. Along
-    with advanced analysis of SHM in Ig sequences.
+Title: Immunoglobulin Somatic Hypermutation Analysis
+Description: Provides a computational framework for Bayesian estimation of
+    antigen-driven selection in immunoglobulin (Ig) sequences, providing an
+    intuitive means of analyzing selection by quantifying the degree of 
+    selective pressure. Also provides tools to profile mutations in Ig
+    sequences, build models of somatic hypermutation (SHM) in Ig sequences, 
+    and make model-dependent distance comparisons of Ig repertoires. 
 License: CC BY-NC-SA 4.0
 URL: http://clip.med.yale.edu/changeo
 BugReports: https://bitbucket.org/kleinstein/shazam/issues

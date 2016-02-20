@@ -1,4 +1,4 @@
-Version 0.1.2:  February 19, 2016
+Version 0.1.2:  February 20, 2016
 -------------------------------------------------------------------------------
 
 General:
@@ -31,8 +31,8 @@ Mutation Profiling:
   `calcDBObservedMutations()` and `calcDBExpectedMutations()`.
 + Fixed a few bugs where column names, region definitions or mutation models
   were not being recognized properly when non-default values were used.
-+ Added consistent behavior such that when `regionDefinition=NULL` for any 
-  of these functions, the entire sequence is used as the region and
++ Made the behavior of `regionDefinition=NULL` consistent for all mutation
+  profiling functions. Now the entire sequence is used as the region and
   calculations are made accordingly.
 + `calcDBObservedMutations()` returns R and S mutations also 
   when `regionDefinition=NULL`. Older versions reported the sum of R and S 
