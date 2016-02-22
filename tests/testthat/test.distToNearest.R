@@ -133,26 +133,3 @@ test_that("Test cross distToNearest with model hs5f", {
                                    model="hs1f", first=FALSE, normalize="none",cross="SAMPLE")
     expect_equal(db3_1_316_630_hs5f$CROSS_DIST_NEAREST,c(1.75,1.75,1.75), tolerance=0.001)
 })
-
-
-if (FALSE) {
-    
-    library(shazam)
-    library(testthat)
-    library(doParallel)
-    library(dplyr)
-    library(data.table)
-    sequenceColumn="JUNCTION"
-    vCallColumn="V_CALL"
-    jCallColumn="J_CALL"
-    model=c("hs1f")
-    normalize=c("length")
-    symmetry=c("avg")
-    first=TRUE
-    nproc=5
-    fields=NULL
-    cross="SAMPLE"
-    idx <- 156
-    db <- readChangeoDb("/home/susanna/Documents/Work/Yale/projects/Katz/B-cell/katz_mcl/05.Changeo/01.MakeDB/all_samples_db-pass.tab")
-    db <- db2
-}
