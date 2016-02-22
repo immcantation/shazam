@@ -1,42 +1,39 @@
-shazam
+Shazam - Immunoglobulin somatic hypermutation analysis
 -------------------------------------------------------------------------------
-February 20, 2016
-Version 0.1.2
 
-Somatic hypermutation analysis package.
+Shazam provides tools for advanced analysis of somatic hypermutation (SHM) in 
+immunoglobulin (Ig) sequences. Shazam focuses on the following four 
+analysis tops:
 
-Dependencies
--------------------------------------------------------------------------------
-R 3.1.2  
-R packages
+1. Statistical analysis of SHM patterns  
+   Shazam provides tools to build SHM targeting models. Models of SHM may be 
+   divided into two independent components: (a) a mutability model that defines 
+   where mutations occur and (b) a nucleotide substitution model that defines 
+   the resulting mutation. Collectively these two components define an SHM 
+   targeting model.
+2. Quantification of mutations  
+   Shazam includes methods for determine the rate of observed and expected 
+   mutations under various criteria. Mutational profiling criteria include 
+   rates under SHM targeting models, mutations specific to CDR and FWR 
+   regions, and physicochemical property dependent substitution rates.
+3. BASELINe  
+   Bayesian Estimation of Antigen-driven Selection in Ig sequences is a 
+   method for quantifying selection pressure in high-throughput Ig 
+   sequencing data. Targeting models created using Shazam may be used 
+   to estimate the null distribution of expected mutation frequencies in 
+   BASELINe.
+4. Model-dependent distance calculations  
+   Based on the underlying SHM targeting model one can compute evolutionary 
+   distances between sequences or groups of sequences. This information is 
+   particularly useful in understanding and defining clonal relationships.
 
-  - alakazam
-  - data.table
-  - doParallel
-  - dplyr
-  - foreach
-  - ggplot2
-  - iterators
-  - scales  
-  - SDMTools
-  - seqinr
-  - stringi
-  - tidyr
-
+    
 Build Instructions
 -------------------------------------------------------------------------------
 Install build dependencies:
 ```R
 install.packages(c("devtools", "roxygen2", "testthat", "knitr", "rmarkdown"))
 ```
-
-Building with Rstudio:
-
-- _Build_ -> _Configure Build Tools_
-- Check the _Use devtools package functions_ option
-- Check the _Generate documentation with Roxygen_ option
-- Select _Configure..._ Roxygen options and check everything.
-- _Build_ -> _Build and Reload_
 
 Building from the R console:
 
