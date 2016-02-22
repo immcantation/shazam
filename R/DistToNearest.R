@@ -417,7 +417,8 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' @param    crossGroups   Columns for grouping to calculate distances across groups (self vs others)
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
-#'           \code{DIST_NEAREST} column.
+#'           \code{DIST_NEAREST} column if \code{crossGrups=NULL} or in the \code{CROSS_DIST_NEAREST}
+#'           column if \code{crossGroups} was specified.
 #'
 #' @details
 #' The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
