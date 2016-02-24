@@ -55,8 +55,6 @@ collapse sequences by the `CLONE` column, if the data has been divided into
 clonal groups. 
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
-library(shazam)
-
 # Collapse clonal groups into single sequences
 db_clone <- collapseByClone(db, regionDefinition=IMGT_V_NO_CDR3, 
                             expandedDb=TRUE, nproc=1)
