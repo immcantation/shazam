@@ -34,6 +34,7 @@ Depends:
     alakazam (>= 0.2.1),
     ggplot2 (>= 2.0.0)
 Imports:
+    ape,
     data.table (>= 1.9.4),
     doParallel,
     dplyr,
