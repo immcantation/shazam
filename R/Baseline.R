@@ -1217,6 +1217,7 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #'                          plot by, either values in \code{groupColumn} ("group") or regions
 #'                          defined in \code{baseline} ("region"). The data that is not used
 #'                          for faceting will be color coded.
+#' @param    title          string defining the plot title.
 #' @param    style          type of plot to draw. One of:
 #'                          \itemize{
 #'                            \item \code{"density"}:  plots a set of curves for each probability 
@@ -1271,7 +1272,7 @@ calcBaselinePvalue <- function ( baseline_pdf,
 #' 
 #' @export
 plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
-                                subsetRegions=NULL, sigmaLimits=c(-5, 5), 
+                                subsetRegions=NULL, sigmaLimits=c(-5, 5), title=NULL,
                                 facetBy=c("region", "group"), style=c("density"), size=1, 
                                 silent=FALSE, ...) {
   # Test variable settings
@@ -1342,6 +1343,9 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
         xlab(expression(Sigma)) +
         ylab("Density") +
         geom_line(aes_string(linetype=idColumn), size=1*size)
+    if (!is.null(title)) {
+        p1 <- p1 + ggtitle(title)
+    }    
     if (is.null(groupColumn) & facetBy == "region") {
         p1 <- p1 + facet_grid("REGION ~ .")
     } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
@@ -1396,6 +1400,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #'                          plot by, either values in \code{groupColumn} ("group") or regions
 #'                          defined in \code{baseline} ("region"). The data that is not used
 #'                          for faceting will be color coded.
+#' @param    title          string defining the plot title.
 #' @param    style          type of plot to draw. One of:
 #'                          \itemize{
 #'                            \item \code{"mean"}:     plots the mean and confidence interval for
@@ -1455,7 +1460,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #' @export
 plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
                                 subsetRegions=NULL, facetBy=c("region", "group"), 
-                                style=c("mean"), size=1, silent=FALSE, ...) {
+                                title=NULL, style=c("mean"), size=1, silent=FALSE, ...) {
   # Check arguments
   style <- match.arg(style)
   facetBy <- match.arg(facetBy)
@@ -1514,6 +1519,9 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
       geom_point(size=3*size, position=position_dodge(0.6)) +
       geom_errorbar(aes_string(ymin="BASELINE_CI_LOWER", ymax="BASELINE_CI_UPPER"), 
                     width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.6))
+    if (!is.null(title)) {
+        p1 <- p1 + ggtitle(title)
+    }    
     if (is.null(groupColumn) & facetBy == "region") {
       p1 <- p1 + facet_grid(REGION ~ .)
     } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
