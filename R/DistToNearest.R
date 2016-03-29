@@ -464,8 +464,8 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' "hs5f" use distance derived from the \link{HS5FModel}
 #' using \link{calcTargetingDistance}. "hs1f" and "m1n" use \link{HS1FDistance} and \link{M1NDistance}
 #'  to calculate distances respectively. "ham" uses a nucleotide hamming distance matrix from 
-#'  \link{getDNAMatrix}, with gaps being zero. "aa" uses an amino acid hamming distance matrix 
-#'  from \link{getAAMatrix}.
+#'  \link[alakazam]{getDNAMatrix}, with gaps being zero. "aa" uses an amino acid hamming distance matrix 
+#'  from \link[alakazam]{getAAMatrix}.
 #' 
 #' @references
 #' \enumerate{
@@ -483,7 +483,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #'  
 #' @seealso  See \link{calcTargetingDistance} for generating nucleotide distance matrices 
 #'           from a \link{TargetingModel} object. See \link{M1NDistance}, 
-#'           \link{HS5FModel}, \link{getDNAMatrix}, and \link{getAAMatrix}
+#'           \link{HS5FModel}, \link[alakazam]{getDNAMatrix}, and \link[alakazam]{getAAMatrix}
 #'           for individual model details.
 #' 
 #' @examples

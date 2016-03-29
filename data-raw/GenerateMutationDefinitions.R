@@ -41,6 +41,7 @@ aa_ambig <- setNames(rep(NA, 4), c("X", "-", ".", "*"))
 aa_hydropathy <- c(setNames(aa_imgt$HYDROPATHY, aa_imgt$IUPAC), aa_ambig)
 aa_polarity <- c(setNames(aa_imgt$POLARITY, aa_imgt$IUPAC), aa_ambig)
 aa_charge <- c(setNames(aa_imgt$CHARGE, aa_imgt$IUPAC), aa_ambig)
+aa_volume <- c(setNames(aa_imgt$VOLUME, aa_imgt$IUPAC), aa_ambig)
 
 # Make objects
 # TODO: Need to figure out exactly which publications they used!
@@ -57,9 +58,13 @@ CHARGE_MUTATIONS <- createMutationDefinition(name="Charge",
                                              description="Charge mutation definition",
                                              classes=aa_charge,
                                              citation=imgt_cite)
-
+VOLUME_MUTATIONS <- createMutationDefinition(name="Volume", 
+                                             description="Volume mutation definition",
+                                             classes=aa_volume,
+                                             citation=imgt_cite)
 # Save data
 devtools::use_data(HYDROPATHY_MUTATIONS,
                    POLARITY_MUTATIONS,
                    CHARGE_MUTATIONS,
+                   VOLUME_MUTATIONS,
                    overwrite=TRUE)

@@ -156,11 +156,13 @@ createMutationDefinition <- function(name,
 #' @format A \code{\link{MutationDefinition}} object defining:
 #' \itemize{
 #'   \item  \code{CHARGE_MUTATIONS}:      Amino acid mutations are defined by changes
-#'                                        in charge classes.
+#'                                        in side chain charge class.
 #'   \item  \code{HYDROPATHY_MUTATIONS}:  Amino acid mutations are defined by changes
-#'                                        in hydrophobicitity classes.
+#'                                        in side chain hydrophobicitity class.
 #'   \item  \code{POLARITY_MUTATIONS}:    Amino acid mutations are defined by changes
-#'                                        in polarity classes.
+#'                                        in side chain polarity class.
+#'   \item  \code{VOLUME_MUTATIONS}:      Amino acid mutations are defined by changes
+#'                                        in side chain volume class.
 #' }
 #' 
 #' @references
@@ -180,5 +182,9 @@ NULL
 NULL
 
 #' @name    POLARITY_MUTATIONS
+#' @rdname  MUTATION_SCHEMES
+NULL
+
+#' @name    VOLUME_MUTATIONS
 #' @rdname  MUTATION_SCHEMES
 NULL

@@ -1,12 +1,12 @@
 ABBREV,IUPAC,HYDROPATHY,VOLUME,CHEMICAL,PHYSICOCHEMICAL,CHARGE,POLARITY,H_DONOR
-Ala,A,hydrophobic,very small,aliphatic,aliphatic,uncharged,nonpolar,none
+Ala,A,hydrophobic,very_small,aliphatic,aliphatic,uncharged,nonpolar,none
 Arg,R,hydrophilic,large,basic,basic,positive,polar,donor
 Asn,N,hydrophilic,small,amide,amide,uncharged,polar,donor_and_acceptor
 Asp,D,hydrophilic,small,acidic,acidic,negative,polar,acceptor
 Cys,C,hydrophobic,small,sulfur,sulfur,uncharged,nonpolar,none
 Gln,Q,hydrophilic,medium,amide,amide,uncharged,polar,donor_and_acceptor
 Glu,E,hydrophilic,medium,acidic,acidic,negative,polar,acceptor
-Gly,G,neutral,very small,aliphatic,G,uncharged,nonpolar,none
+Gly,G,neutral,very_small,aliphatic,G,uncharged,nonpolar,none
 His,H,neutral,medium,basic,basic,positive,polar,donor_and_acceptor
 Ile,I,hydrophobic,large,aliphatic,aliphatic,uncharged,nonpolar,none
 Leu,L,hydrophobic,large,aliphatic,aliphatic,uncharged,nonpolar,none
@@ -14,7 +14,7 @@ Lys,K,hydrophilic,large,basic,basic,positive,polar,donor
 Met,M,hydrophobic,large,sulfur,sulfur,uncharged,nonpolar,none
 Phe,F,hydrophobic,very large,aromatic,F,uncharged,nonpolar,none
 Pro,P,neutral,small,aliphatic,P,uncharged,nonpolar,none
-Ser,S,neutral,very small,hydroxyl,hydroxyl,uncharged,polar,donor_and_acceptor
+Ser,S,neutral,very_small,hydroxyl,hydroxyl,uncharged,polar,donor_and_acceptor
 Thr,T,neutral,small,hydroxyl,hydroxyl,uncharged,polar,donor_and_acceptor
 Trp,W,hydrophobic,very large,aromatic,W,uncharged,nonpolar,donor
 Tyr,Y,neutral,very large,aromatic,Y,uncharged,polar,donor_and_acceptor

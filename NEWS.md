@@ -10,6 +10,10 @@ Distance Profiling:
 + Added `mst` flag to `distToNearest()`, which will return all distances to 
   neighboring nodes in a minimum spanning tree.
 
+Mutation Profiling:
+
++ Added the `MutationDefinition` `VOLUME_MUTATIONS`.
+
 Selection Analysis:
 
 + Added `title` options to `plotBaselineSummary()` and `plotBaselineDensity()`.
