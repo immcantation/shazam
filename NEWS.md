@@ -1,4 +1,4 @@
-Version 0.1.3:  March 3, 2016
+Version 0.1.2.999:  March 29, 2016
 -------------------------------------------------------------------------------
 
 General:
@@ -10,6 +10,9 @@ Distance Profiling:
 + Added `mst` flag to `distToNearest()`, which will return all distances to 
   neighboring nodes in a minimum spanning tree.
 
+Selection Analysis:
+
++ Added `title` options to `plotBaselineSummary()` and `plotBaselineDensity()`.
 
 Version 0.1.2:  February 20, 2016
 -------------------------------------------------------------------------------

@@ -1139,7 +1139,7 @@ writeTargetingDistance <- function(model, file) {
 #' plotMutability(HS5FModel, c("G","T"), style="bar")
 #' 
 #' @export
-plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), 
+plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
                            style=c("hedgehog", "bar"), size=1, silent=FALSE, 
                            ...) {
     # model=HS5FModel
