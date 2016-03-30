@@ -14,6 +14,9 @@ test_that("Test cross distToNearest with model hs1f", {
     
     dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
                                     model="hs1f", first=FALSE, normalize="length")
+    dist_hs1f_rcpp <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
+                               model="hs1f", first=FALSE, normalize="length", rcpp=T)
+    expect_equal(dist_hs1f, dist_hs1f_rcpp)
     ## Test if the updated function reproduces results
     expect_equal(dist_hs1f$DIST_NEAREST[test_idx],
                  c(NA,NA,NA,NA,0.6396,0.7027,0.6479,0.5563,0.4879,
@@ -23,6 +26,11 @@ test_that("Test cross distToNearest with model hs1f", {
     ## There's only one donor, hence cross-donor will return all NA
     dist_hs1f_cross_donor <- distToNearest(db2, vCallColumn="V_CALL_GENOTYPED", 
                                            model="hs1f", first=FALSE, normalize="none", nproc=1, cross="DONOR")
+    dist_hs1f_cross_donor_rcpp <- distToNearest(db2, vCallColumn="V_CALL_GENOTYPED", 
+                                           model="hs1f", first=FALSE, normalize="none", nproc=1, cross="DONOR",
+                                           rcpp=T) 
+    expect_equal(dist_hs1f_cross_donor, dist_hs1f_cross_donor_rcpp)
+    
     expect_true(all(is.na(dist_hs1f_cross_donor$CROSS_DIST_NEAREST)))
     
     ## fields=NULL and fields=DONOR should give same results

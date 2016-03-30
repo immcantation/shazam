@@ -95,6 +95,7 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
 # @param    normalize     The method of normalization. Default is "none".
 #                         "length" = normalize distance by length of junction.
 #                         "mutations" = normalize distance by number of mutations in junction.
+# @param    rcpp          Use the Rccp version of getSeqDistance 
 # @return   distance between two sequences.
 #
 # @examples
@@ -103,7 +104,7 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
 # 
 # distSeqMat(seq1, seq2)
 distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
-                       normalize=c("none" ,"length", "mutations")) {
+                       normalize=c("none" ,"length", "mutations"), rcpp=F) {
   # Evaluate choices
   model <- match.arg(model)
   normalize <- match.arg(normalize)
@@ -127,7 +128,7 @@ distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
   }
   
   # Calculate distance
-  dist <- tryCatch(getSeqDistance(seq1, seq2, dist_mat=dist_mat),
+  dist <- tryCatch(getSeqDistance(seq1, seq2, dist_mat=dist_mat, rcpp=rcpp),
                    error=function(e) {
                        warning("Invalid character in sequence. Cannot compute distance.")
                        return(NA)
@@ -336,6 +337,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
 #                         "mutations" = normalize distance by number of mutations in junction.
 # @param    crossGroups   column for grouping to calculate distances across groups (self vs others)
 # @param    mst           if true, return comma-separated branch lengths from minimum spanning tree
+# @param    rcpp          Use the Rcpp version of distSeqMat
 # @return   A vector of distances to the closest sequence.
 # @examples
 # arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
@@ -344,7 +346,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
 # getClosestMat(arrJunctions, normalize="none" )
 getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
                           normalize=c("none" ,"length", "mutations"),
-                          crossGroups=NULL, mst=FALSE) {
+                          crossGroups=NULL, mst=FALSE, rcpp=F) {
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
@@ -370,7 +372,10 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
         matDistance <-
             sapply(1:numbOfUniqueJunctions, 
                    function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJunctions, function(j) {
-                       distSeqMat(arrJunctionsUnique[i], arrJunctionsUnique[j], model=model, normalize=normalize)
+                       distSeqMat(arrJunctionsUnique[i], 
+                                  arrJunctionsUnique[j], 
+                                  model=model, normalize=normalize, 
+                                  rcpp=rcpp)
                    })))
         matDistance <- matDistance + t(matDistance)
         # Find minimum distance for each sequence
@@ -451,6 +456,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' @param    fields          additional fields to use for grouping
 #' @param    cross           columns for grouping to calculate distances across groups (self vs others)
 #' @param    mst             if true, return comma-separated branch lengths from minimum spanning tree
+#' @param    rcpp            Use the Rcpp version of the code
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
 #'           \code{DIST_NEAREST} column if \code{crossGrups=NULL} or in the \code{CROSS_DIST_NEAREST}
@@ -506,7 +512,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
                           jCallColumn="J_CALL", model=c("hs1f", "m1n", "ham", "aa", "hs5f"), 
                           normalize=c("length", "none"), symmetry=c("avg","min"),
-                          first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE) {
+                          first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE, rcpp=F) {
     # Hack for visibility of data.table and foreach index variables
     idx <- yidx <- .I <- NULL
     
@@ -644,7 +650,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                                   model=model,
                                   normalize=normalize,
                                   crossGroups=crossGroups,
-                                  mst=mst)
+                                  mst=mst, rcpp=rcpp)
                 return(db_group)
             }        
     }
