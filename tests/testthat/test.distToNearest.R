@@ -65,7 +65,7 @@ test_that("Test cross distToNearest with model hs1f", {
     db2_1_316_630 <- distToNearest(db2[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
                   model="hs1f", first=FALSE, normalize="length",cross="SAMPLE")
     ## Exactly same seq, returns NA
-    expect_equal(db2_1_316_630$CROSS_DIST_NEAREST,as.numeric(c(NA,NA,NA)))
+    expect_equal(db2_1_316_630$CROSS_DIST_NEAREST,c(NA,NA,NA))
     
     ## One seq has been edited, will return distance values
     db3_1_316_630 <- distToNearest(db3[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
@@ -134,7 +134,7 @@ test_that("Test cross distToNearest with model hs5f", {
     db2_1_316_630_hs5f <- distToNearest(db2[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
                                    model="hs5f", first=FALSE, normalize="none",cross="SAMPLE")
     ## Exactly same seq, returns NA
-    expect_equal(db2_1_316_630_hs5f$CROSS_DIST_NEAREST,as.numeric(c(NA,NA,NA)))
+    expect_equal(db2_1_316_630_hs5f$CROSS_DIST_NEAREST,c(NA,NA,NA))
     
     ## One seq has been edited, will return distance values
     db3_1_316_630_hs5f <- distToNearest(db3[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
