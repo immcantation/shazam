@@ -368,16 +368,48 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
     numbOfUniqueJunctions <- length(c(arrJunctionsUnique))
     arrUniqueJunctionsDist <- rep(NA,numbOfUniqueJunctions)
     if (numbOfUniqueJunctions>1){
-        # Calculate symmetric distance matrix
-        matDistance <-
-            sapply(1:numbOfUniqueJunctions, 
-                   function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJunctions, function(j) {
-                       distSeqMat(arrJunctionsUnique[i], 
-                                  arrJunctionsUnique[j], 
-                                  model=model, normalize=normalize, 
-                                  rcpp=rcpp)
-                   })))
-        matDistance <- matDistance + t(matDistance)
+        
+        if (rcpp) {
+            if (model == "ham") {
+                dist_mat <- getDNAMatrix(gap=0)
+            } else if (model == "m1n") {
+                dist_mat <- M1NDistance
+            } else if (model == "hs1f") {
+                dist_mat <- HS1FDistance
+            } else if (model == "aa") {
+                # Translate sequences
+                arrJunctionsUnique <- strsplit(tolower(gsub("[-.]","N",arrJunctionsUnique)), "")
+                arrJunctionsUnique <- lapply(seqs, function(s) {
+                    paste(seqinr::translate(s, ambiguous=T),collapse="")
+                })
+                dist_mat <- getAAMatrix()
+            }
+            matDistance <- getSeqMatrix(arrJunctionsUnique, dist_mat, rcpp=rcpp)
+    
+            junction_length <-  unique(nchar(arrJunctionsUnique))
+            if (length(junction_length)>1) {
+                stop("Unexpected. Different junction lengths found")
+            }
+            # Normalize distances
+            if (normalize == "length") { 
+                matDistance <- matDistance/junction_length
+            } else if (normalize == "mutations") {
+                #dist <- dist/sum(strsplit(seq1,"")[[1]] != strsplit(seq2,"")[[1]])
+                stop("Sorry! nomalize==mutation not available when using rcpp=TRUE")
+            }
+        } else {
+            # Calculate symmetric distance matrix
+            matDistance <-
+                sapply(1:numbOfUniqueJunctions,
+                       function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJunctions, function(j) {
+                           distSeqMat(arrJunctionsUnique[i],
+                                      arrJunctionsUnique[j],
+                                      model=model, normalize=normalize,
+                                      rcpp=rcpp)
+                       })))
+            matDistance <- matDistance + t(matDistance)
+        }
+        
         # Find minimum distance for each sequence
         if (is.null(crossGroups)) {
             if(!mst) {
