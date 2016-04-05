@@ -848,20 +848,20 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                 numbOfNonNASeqs <- length(list_GroupPdfs)
                 
                 # If all the PDFs in the group are NAs, return a PDF of NAs
-                if( length(list_GroupPdfs) == 0 ) { 
-                    return( c( rep(NA,4001), 0 ) )
+                if (length(list_GroupPdfs) == 0) { 
+                    return(c(rep(NA, 4001), 0))
                 }
                 
                 # If all the PDFs in the group have a numbOfSeqs=1 then
                 # call groupPosteriors, which groups PDFs with equal weight
-                if( sum(numbOfSeqs_region) == length(numbOfSeqs_region) ) { 
-                    return( c( groupPosteriors(list_GroupPdfs), numbOfNonNASeqs ) )
+                if (sum(numbOfSeqs_region) == length(numbOfSeqs_region)) { 
+                    return(c(groupPosteriors(list_GroupPdfs), numbOfNonNASeqs ) )
                 }
                 
                 # If all the PDFs in the group different numbOfSeqs then call 
                 # combineWeigthedPosteriors, which groups PDFs weighted by the number of seqs/PDFs
                 # that went into creating those PDFs
-                if( sum(numbOfSeqs_region) > length(numbOfSeqs_region) ) {
+                if (sum(numbOfSeqs_region) > length(numbOfSeqs_region)) {
                     
                     # sort by number of items
                     len_numbOfSeqs_region <- length(numbOfSeqs_region)
@@ -1122,13 +1122,12 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 calcBaselineSigma <- function(baseline_pdf,
                               max_sigma=20,
                               length_sigma=4001) {
-    
     if (any(is.na(baseline_pdf))) { return(NA) }
     
     sigma_s <- seq(-max_sigma, max_sigma, length.out=length_sigma)
-    norm <- (length_sigma - 1) / 2 / max_sigma
+    #norm <- (length_sigma - 1) / 2 / max_sigma
+    norm <- sum(baseline_pdf, na.rm=TRUE)
     return(baseline_pdf %*% sigma_s / norm)
-    #return(baseline_pdf %*% sigma_s)
 }
 
 
@@ -1159,7 +1158,8 @@ calcBaselinePvalue <- function (baseline_pdf,
                                 length_sigma=4001, 
                                 max_sigma=20 ){
     if (!any(is.na(baseline_pdf))) {
-        norm <- (length_sigma - 1) / 2 / max_sigma
+        #norm <- (length_sigma - 1) / 2 / max_sigma
+        norm <- sum(baseline_pdf, na.rm=TRUE)
         pVal <- sum(baseline_pdf[1:((length_sigma - 1)/2)] + baseline_pdf[((length_sigma + 1) / 2)] / 2) / norm
         if (pVal > 0.5) {
             pVal <- pVal - 1
