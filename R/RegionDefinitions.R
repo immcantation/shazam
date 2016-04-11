@@ -78,7 +78,7 @@ setClass("RegionDefinition",
 #' 
 #' @return   A \code{RegionDefinition} object.
 #' 
-#' @seealso  See \code{\link{RegionDefinition}} for the return object.
+#' @seealso  See \link{RegionDefinition} for the return object.
 #' 
 #' @examples
 #' # Creates an empty RegionDefinition object
@@ -139,7 +139,7 @@ makeNullRegionDefinition <- function(regionLength) {
 #'
 #' Definitions of the CDR and FWR, according to the IMGT unique numbering scheme.
 #'
-#' @format A \code{\link{RegionDefinition}} object containing:
+#' @format A \link{RegionDefinition} object containing:
 #' \itemize{
 #'   \item  \code{IMGT_V}:                     Grouped CDR and FWR V-segment regions including CDR3.
 #'   \item  \code{IMGT_V_BY_REGIONS}:          Individual CDR and FWR V-segment regions including CDR3.

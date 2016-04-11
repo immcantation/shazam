@@ -15,7 +15,7 @@
 #'            Proc Natl Acad Sci USA. 2014 111:4928-33.
 #' }
 #'
-#' @seealso  See \code{\link{HS1FDistance}} for the human 1-mer distance matrix.
+#' @seealso  See \link{HS1FDistance} for the human 1-mer distance matrix.
 "InfluenzaDb"
 
 

@@ -1,0 +1,96 @@
+
+
+
+
+
+
+**plotMutability** - *Plot mutability probabilities*
+
+Description
+--------------------
+
+`plotMutability` plots the mutability rates of a `TargetingModel`.
+
+Usage
+--------------------
+
+```
+plotMutability(model, nucleotides = c("A", "C", "G", "T"),
+style = c("hedgehog", "bar"), size = 1, silent = FALSE, ...)
+```
+
+Arguments
+-------------------
+
+model
+:   [TargetingModel](TargetingModel-class.md) object or matrix containing normalized 
+mutability rates.
+
+nucleotides
+:   vector of center nucleotide characters to plot.
+
+style
+:   type of plot to draw. One of:
+
++  `"hedgehog"`:  circular plot showing higher mutability
+scores further from the circle. The 5-mer
+is denoted by the values of the inner 
+circle. The 5-mer is read from the most interior 
+position of the 5-mer (5') to most exterior position 
+(3'), with the center nucleotide in the center ring.
+Note, the order in which the 5-mers are plotted is
+different for nucleotides `c("A", "C")` and 
+`c("G", "T")`.
++  `"bar"`:       bar plot of mutability similar to the 
+`hedgehog` style with the most 5' positions
+of each 5-mer at the base of the plot.
+
+
+size
+:   numeric scaling factor for lines and text in the plot.
+
+silent
+:   if `TRUE` do not draw the plot and just return the ggplot2 
+objects; if `FALSE` draw the plot.
+
+...
+:   additional arguments to pass to ggplot2::theme.
+
+
+
+Value
+-------------------
+
+A named list of ggplot objects defining the plots, with names defined by the 
+center nucleotide for the plot object.
+
+
+
+Examples
+-------------------
+
+```R
+# Plot one nucleotide in circular style
+plotMutability(HS5FModel, "C")
+
+```
+
+![2](plotMutability-2.png)
+
+```R
+
+# Plot two nucleotides in barchart style
+plotMutability(HS5FModel, c("G","T"), style="bar")
+```
+
+![4](plotMutability-4.png)
+
+
+See also
+-------------------
+
+Takes as input a [TargetingModel](TargetingModel-class.md) object. 
+See [createTargetingModel](createTargetingModel.md) for model building.
+
+
+

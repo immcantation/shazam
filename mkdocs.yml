@@ -1,0 +1,71 @@
+site_name: shazam
+theme: readthedocs
+markdown_extensions:
+  - def_list
+  - sane_lists
+  - smarty
+  - toc:
+      permalink: True
+docs_dir: docs
+pages:
+  - About:
+    - 'Introduction': index.md
+    - 'Download & Installation': install.md
+    - 'Package Overview': topics/shazam.md
+  - Vignettes:
+    - 'Selection quantification': vignettes/Baseline-Vignette.md
+    - 'Distance to nearest neighbor': vignettes/DistToNearest-Vignette.md
+    - 'SHM targeting models': vignettes/Targeting-Vignette.md
+  - Help Topics:
+    - 'Mutation Profiling':
+      - topics/collapseByClone.md
+      - topics/calcDBExpectedMutations.md
+      - topics/calcDBObservedMutations.md
+      - topics/calcExpectedMutations.md
+      - topics/calcObservedMutations.md
+    - 'Targeting Models':
+      - topics/createMutabilityMatrix.md
+      - topics/createSubstitutionMatrix.md
+      - topics/extendMutabilityMatrix.md
+      - topics/extendSubstitutionMatrix.md
+      - topics/createTargetingMatrix.md
+      - topics/createTargetingModel.md
+      - topics/plotMutability.md
+      - topics/HS5FModel.md
+      - topics/U5NModel.md
+      - topics/TargetingModel-class.md
+    - 'Selection Analysis':
+      - topics/calcBaseline.md
+      - topics/groupBaseline.md
+      - topics/summarizeBaseline.md
+      - topics/getBaselineStats.md
+      - topics/plotBaselineDensity.md
+      - topics/plotBaselineSummary.md
+      - topics/createBaseline.md
+      - topics/Baseline-class.md
+    - 'Distance Profiling':
+      - topics/distToNearest.md
+      - topics/calcTargetingDistance.md
+      - topics/writeTargetingDistance.md
+      - topics/HS1FDistance.md
+      - topics/M1NDistance.md
+    - 'Mutation & Region Definitions':
+      - topics/MUTATION_SCHEMES.md
+      - topics/IMGT_SCHEMES.md
+      - topics/createMutationDefinition.md
+      - topics/createRegionDefinition.md
+      - topics/MutationDefinition-class.md
+      - topics/RegionDefinition-class.md
+    - 'Miscellaneous':
+      - topics/clearConsole.md
+      - topics/getnproc.md
+      - topics/getPlatform.md
+    - 'Data':
+      - topics/InfluenzaDb.md
+
+
+
+
+
+
+

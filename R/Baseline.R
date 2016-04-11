@@ -203,7 +203,7 @@ createBaseline <- function(description="",
 # 
 # @return   A \code{Baseline} object.
 # 
-# @seealso  See \code{\link{Baseline}} for the return object.
+# @seealso  See \link{Baseline} for the return object.
 editBaseline <- function(baseline, field_name, value) {
   if (!match(field_name, slotNames(baseline))) { 
     stop("field_name not part of BASELINe object!")
@@ -281,7 +281,7 @@ getBaselineStats <- function(baseline) {
 #'                              summary statistics \code{data.frame} stored in the 
 #'                              \code{stats} slot of a \link{Baseline} object.
 #' @param   nproc               number of cores to distribute the operation over. If 
-#'                              \code{nproc} = 0 then the \code{cluster} has already been
+#'                              \code{nproc=0} then the \code{cluster} has already been
 #'                              set and will not be reset.
 #' 
 #' @return  A \code{Baseline} object containing the modified \code{db} and BASELINe 
@@ -299,12 +299,9 @@ getBaselineStats <- function(baseline) {
 #'   \item  Calculate the numbers of observed mutations.
 #'   \item  Calculate the expected frequencies of mutations and modify the provided 
 #'          \code{db}. The modified \code{db} will be included as part of the 
-#'          returned \code{Baseline} object).
+#'          returned \code{Baseline} object.
 #' }
 #'          
-#' @family  selection analysis functions
-#' 
-#' @details
 #' The \code{testStatistic} indicates the statistical framework used to test for selection. 
 #' E.g.
 #' \itemize{
@@ -328,6 +325,7 @@ getBaselineStats <- function(baseline) {
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
+#' @seealso 
 #' @examples
 #' # Subset example data
 #' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
@@ -599,7 +597,7 @@ calcBaseline <- function(db,
 # @param   testStatistic
 # @param   regionDefinition
 # 
-# @return  A modified \code{\link{Baseline}} object with the BASELINe probability 
+# @return  A modified \link{Baseline} object with the BASELINe probability 
 #          density function calculated for the regions defined in the \code{regionDefinition}.
 calcBaselineHelper  <- function(observed,
                                 expected,
@@ -729,9 +727,9 @@ calcBaselineBinomialPdf <- function ( x=3,
 #' from each sample may be combined together, allowing you to compare selection  across 
 #' samples. This is accomplished through a fast numerical convolution technique.
 #'               
-#' @seealso  To calculate BASELINe statistics, such as the mean selection strength
+#' @seealso  To generate the baseline object see \link{calcBaseline}.
+#'           To calculate BASELINe statistics, such as the mean selection strength
 #'           and the 95\% confidence interval, see \link{summarizeBaseline}.
-#' @family   selection analysis functions
 #' 
 #' @references
 #' \enumerate{
@@ -1021,7 +1019,9 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #' @return   Either a modified \code{Baseline} object or data.frame containing the 
 #'           BASELINe selection strength, 95\% confidence intervals and P-value.  
 #'           
-#' @family   selection analysis functions
+#' @seealso  See \link{calcBaseline} for generating \code{Baseline} objects and
+#'           \link{groupBaseline} for convolving groups of BASELINe PDFs.
+#'           
 #' 
 #' @examples
 #' # Subset example data
@@ -1218,7 +1218,6 @@ calcBaselinePvalue <- function (baseline_pdf,
 #' @return   A ggplot object defining the plot.
 #'
 #' @seealso  Takes as input a \link{Baseline} object returned from \link{groupBaseline}.
-#' @family   selection analysis functions
 #' 
 #' @examples
 #' # Subset example data
@@ -1401,7 +1400,6 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
 #'
 #' @seealso  Takes as input either a \link{Baseline} object returned by \link{groupBaseline} 
 #'           or a data.frame returned from \link{summarizeBaseline}.
-#' @family   selection analysis functions
 #' 
 #' @examples
 #' # Subset example data

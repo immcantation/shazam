@@ -23,7 +23,7 @@ NULL
 #' @param   expandedDb          \code{logical} indicating whether or not to return the 
 #'                              expanded \code{db}, containing all the sequences (as opposed
 #'                              to returning just one sequence per clone collapsed by )
-#' @param   regionDefinition    \code{\link{RegionDefinition}} object defining the regions
+#' @param   regionDefinition    \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences.
 #' @param   nonTerminalOnly     \code{logical} indicating whether to include mutations
 #'                              at the leaves.
@@ -560,12 +560,12 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 # Aggregate mutations by region
 #
 # \code{binMutationsByRegion} takes an array of observed mutations (e.g. from 
-# \code{\link{calcObservedMutations}}) and bins them by the different regions defined in the 
+# \code{calcObservedMutations}) and bins them by the different regions defined in the 
 # \code{regionDefinition}.
 #
 # @param   mutationsArray     \code{array} containing the mutations (R/S) with the names
 #                             indicating the nucleotide positions of the mutations.                             
-# @param   regionDefinition   \code{\link{RegionDefinition}} object defining the regions
+# @param   regionDefinition   \link{RegionDefinition} object defining the regions
 #                             and boundaries of the Ig sequences.
 # 
 # @return An \code{array} of R/S mutations binned across all the unique regions defined
@@ -577,9 +577,9 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 # in positions beyond 312 will be ignored.
 # 
 # @seealso  
-# See \code{\link{calcDBObservedMutations}} for identifying and counting the 
+# See \link{calcDBObservedMutations} for identifying and counting the 
 # number of observed mutations.
-# This function is also used in \code{\link{calcObservedMutations}}.
+# This function is also used in \link{calcObservedMutations}.
 # 
 # @examples
 # # Generate a random mutation array

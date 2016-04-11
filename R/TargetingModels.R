@@ -20,7 +20,7 @@ NULL
 #'            J Immunol. 1996 156:2642-52. 
 #' }
 #'
-#' @seealso  See \code{\link{HS1FDistance}} for the human 1-mer distance matrix.
+#' @seealso  See \link{HS1FDistance} for the human 1-mer distance matrix.
 "M1NDistance"
 
 
@@ -39,7 +39,7 @@ NULL
 #'            Front Immunol. 2013 4(November):358.
 #' }
 #'
-#' @seealso  See \code{\link{HS5FModel}} for the 5-mer model from same publication.
+#' @seealso  See \link{HS5FModel} for the 5-mer model from same publication.
 "HS1FDistance"
 
 
@@ -48,9 +48,9 @@ NULL
 #' A null 5-mer model of somatic hypermutation targeting where all substitution, mutability
 #' and targeting rates are uniformly distributed.
 #'
-#' @format \code{\link{TargetingModel}} object.
+#' @format \link{TargetingModel} object.
 #' 
-#' @seealso  See \code{\link{HS5FModel}} the human 5-mer model.
+#' @seealso  See \link{HS5FModel} the human 5-mer model.
 "U5NModel"
 
 
@@ -59,7 +59,7 @@ NULL
 #' 5-mer model of somatic hypermutation targeting based on analysis of silent mutations
 #' in functional Ig sequences from Homo sapiens.
 #'
-#' @format \code{\link{TargetingModel}} object.
+#' @format \link{TargetingModel} object.
 #' 
 #' @references
 #' \enumerate{
@@ -68,7 +68,7 @@ NULL
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #'  
-#' @seealso  See \code{\link{HS1FDistance}} for the 1-mer distance matrix from the same 
+#' @seealso  See \link{HS1FDistance} for the 1-mer distance matrix from the same 
 #'           publication.
 "HS5FModel"
 
@@ -171,7 +171,8 @@ setClass("TargetingModel",
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #'
-#' @family   targeting model functions
+#' @seealso  \link{extendSubstitutionMatrix}, \link{createMutabilityMatrix}, 
+#'           \link{createTargetingMatrix}, \link{createTargetingModel}
 #' 
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
@@ -371,7 +372,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #'
 #' @param    db                  data.frame containing sequence data.
 #' @param    substitutionModel   matrix of 5-mer substitution rates built by 
-#'                               \code{\link{createSubstitutionMatrix}}.
+#'                               \link{createSubstitutionMatrix}.
 #' @param    model               type of model to create. The default model, "RS", creates 
 #'                               a model by counting both replacement and silent mutations.
 #'                               The "S" specification builds a model by counting only 
@@ -401,7 +402,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
-#' @family   targeting model functions
+#' @seealso  \link{extendMutabilityMatrix}, \link{createSubstitutionMatrix}, 
+#'           \link{createTargetingMatrix}, \link{createTargetingModel}
 #' 
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
@@ -653,13 +655,13 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #' with 5-mers that include Ns by averaging over all corresponding 5-mers without Ns.
 #'
 #' @param    substitutionModel  matrix of 5-mers substitution counts built by 
-#'                              \code{\link{createSubstitutionMatrix}}.
+#'                              \link{createSubstitutionMatrix}.
 #' 
 #' @return   A 5x3125 matrix of normalized substitution rate for each 5-mer motif with 
 #'           rows names defining the center nucleotide, one of \code{c("A", "C", "G", "T", "N")}, 
 #'           and column names defining the 5-mer nucleotide sequence.
 #' 
-#' @family   targeting model functions
+#' @seealso  \link{createSubstitutionMatrix}, \link{extendMutabilityMatrix}
 #' 
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
@@ -714,12 +716,12 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' with 5-mers that include Ns by averaging over all corresponding 5-mers without Ns.
 #'
 #' @param    mutabilityModel  vector of 5-mer mutability rates built by 
-#'                            \code{\link{createMutabilityMatrix}}.
+#'                            \link{createMutabilityMatrix}.
 #' 
 #' @return   A 3125 vector of normalized mutability rates for each 5-mer motif with 
 #'           names defining the 5-mer nucleotide sequence.
 #' 
-#' @family   targeting model functions
+#' @seealso  \link{createMutabilityMatrix}, \link{extendSubstitutionMatrix}
 #' 
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
@@ -776,11 +778,11 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' combined probability of mutability and substitution.
 #'
 #' @param    substitutionModel  matrix of 5-mers substitution rates built by 
-#'                              \code{\link{createSubstitutionMatrix}} or 
-#'                              \code{\link{extendSubstitutionMatrix}}.
+#'                              \link{createSubstitutionMatrix} or 
+#'                              \link{extendSubstitutionMatrix}.
 #' @param    mutabilityModel    vector of 5-mers mutability rates built by 
-#'                              \code{\link{createMutabilityMatrix}} or 
-#'                              \code{\link{extendMutabilityMatrix}}.
+#'                              \link{createMutabilityMatrix} or 
+#'                              \link{extendMutabilityMatrix}.
 #' 
 #' @return   A matrix with the same dimensions as the input \code{substitutionModel} 
 #'           containing normalized targeting probabilities for each 5-mer motif with 
@@ -798,7 +800,9 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
-#' @family   targeting model functions
+#' @seealso  \link{createSubstitutionMatrix}, \link{extendSubstitutionMatrix}, 
+#'           \link{createMutabilityMatrix}, \link{extendMutabilityMatrix}, 
+#'           \link{createTargetingModel}
 #' 
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
@@ -860,7 +864,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #'                               will be used.
 #' @param    modelCitation       publication source.
 #' 
-#' @return   A \code{\link{TargetingModel}} object.
+#' @return   A \link{TargetingModel} object.
 #' 
 #' @references
 #' \enumerate{
@@ -869,8 +873,11 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
-#' @seealso  See \link{TargetingModel} for the return object.
-#' @family   targeting model functions
+#' @seealso  See \link{TargetingModel} for the return object. 
+#'           See \link{plotMutability} plotting a mutability model.
+#'           See \link{createSubstitutionMatrix}, \link{extendSubstitutionMatrix}, 
+#'           \link{createMutabilityMatrix}, \link{extendMutabilityMatrix} and 
+#'           \link{createTargetingMatrix} for component steps in building a model.
 #' 
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
@@ -956,8 +963,8 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #'          zero.
 #' }
 #' 
-#' @seealso  Takes as input a \link{TargetingModel} object.
-#' @family   targeting model functions
+#' @seealso  Takes as input a \link{TargetingModel} object. See \link{createTargetingModel}
+#'           for building a model.
 #' 
 #' @examples
 #' # Calculate targeting distance of HS5FModel
@@ -1001,7 +1008,6 @@ calcTargetingDistance <- function(model) {
 #           equal to \code{mean}.
 #           
 # @seealso  Takes as input a \link{TargetingModel} object.
-# @family   targeting model functions
 # 
 # @examples
 # # Subset example data to one isotype and sample as a demo
@@ -1066,7 +1072,7 @@ removeCodonGaps <- function(matInput) {
 #' \code{writeTargetingDistance} writes a 5-mer targeting distance matrix 
 #' to a tab-delimited file.
 #' 
-#' @param    model     \code{\link{TargetingModel}} object with 
+#' @param    model     \link{TargetingModel} object with 
 #'                     mutation likelihood information.
 #' @param    file      name of file to write.
 #'                                                
@@ -1078,9 +1084,8 @@ removeCodonGaps <- function(matInput) {
 #' and columns define the complete 5-mer of the unmutated nucleotide sequence. 
 #' \code{NA} values in the distance matrix are replaced with distance 0.
 #'    
-#' @seealso  Takes as input a \code{\link{TargetingModel}} object and calculates  
+#' @seealso  Takes as input a \link{TargetingModel} object and calculates  
 #'           distances using \link{calcTargetingDistance}.
-#' @family   targeting model functions
 #' 
 #' @examples
 #' \dontrun{
@@ -1128,8 +1133,9 @@ writeTargetingDistance <- function(model, file) {
 #' @return   A named list of ggplot objects defining the plots, with names defined by the 
 #'           center nucleotide for the plot object.
 #'    
-#' @seealso  Takes as input a \code{\link{TargetingModel}} object.
-#' @family   targeting model functions
+#' @seealso  Takes as input a \link{TargetingModel} object. 
+#'           See \link{createTargetingModel} for model building.
+#' 
 #' 
 #' @examples
 #' # Plot one nucleotide in circular style

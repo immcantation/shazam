@@ -39,3 +39,42 @@ Related Projects
   physicochemical property analysis
 * [TIgGER](http://clip.med.yale.edu/tigger) - 
   Polymorphism detection and genotyping
+
+Dependencies
+---------------
+
+**Depends:** alakazam, ggplot2  
+**Imports:** ape, data.table, doParallel, dplyr, foreach, graphics, grid, iterators, methods, lazyeval, parallel, SDMTools, scales, seqinr, stats, stringi, tidyr, utils  
+**Suggests:** knitr, rmarkdown, testthat
+
+Authors
+---------------
+
+[Mohamed Uduman](mailto:mohamed.uduman@yale.edu) (aut)  
+[Gur Yaari](mailto:gur.yaari@biu.ac.il) (aut)  
+[Namita Gupta](mailto:namita.gupta@yale.edu) (aut)  
+[Jason Vander Heiden](mailto:jason.vanderheiden@yale.edu) (aut, cre)  
+[Ang Cui](mailto:angcui@mit.edu) (ctb)  
+[Susanna Marquez](mailto:susanna.marquez@yale.edu) (ctb)  
+[Steven Kleinstein](mailto:steven.kleinstein@yale.edu) (aut, cph)
+
+Citing
+---------------
+
+
+To cite the SHazaM package in publications, please use:
+
+Gupta N, Vander Heiden J, Uduman M, Gadala-Maria D, Yaari G and Kleinstein S (2015). “Change-O: a toolkit for analyzing
+large-scale B cell immunoglobulin repertoire sequencing data.” _Bioinformatics_, pp. 1-3. [http://doi.org/10.1093/bioinformatics/btv359](http://doi.org/10.1093/bioinformatics/btv359).
+
+To cite the selection analysis methods, please use:
+
+Yaari G, Uduman M and Kleinstein S (2012). “Quantifying selection in high-throughput Immunoglobulin sequencing data
+sets.” _Nucleic acids research_, *40*(17), pp. e134. [http://doi.org/10.1093/nar/gks457](http://doi.org/10.1093/nar/gks457).
+
+To cite the HS5F model and the targeting model generation methods, please use:
+
+Yaari G, Vander Heiden J, Uduman M, Gadala-Maria D, Gupta N, Stern J, O'Connor K, Hafler D, Lasserson U, Vigneault F and
+Kleinstein S (2013). “Models of somatic hypermutation targeting and substitution based on synonymous mutations from
+high-throughput immunoglobulin sequencing data.” _Frontiers in Immunology_, *4*(358), pp. 1-11. [http://doi.org/10.3389/fimmu.2013.00358](http://doi.org/10.3389/fimmu.2013.00358).
+
