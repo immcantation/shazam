@@ -12,9 +12,9 @@ Description
 `extendSubstitutionMatrix` extends a 5-mer nucleotide substitution model 
 with 5-mers that include Ns by averaging over all corresponding 5-mers without Ns.
 
+
 Usage
 --------------------
-
 ```
 extendSubstitutionMatrix(substitutionModel)
 ```

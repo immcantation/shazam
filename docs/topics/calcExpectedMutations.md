@@ -13,9 +13,9 @@ Description
 frequencies of a given sequence. This is primarily a helper function for
 [calcDBExpectedMutations](calcDBExpectedMutations.md).
 
+
 Usage
 --------------------
-
 ```
 calcExpectedMutations(germlineSeq, inputSeq = NULL,
 targetingModel = HS5FModel, regionDefinition = NULL,

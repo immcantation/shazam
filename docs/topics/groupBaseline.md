@@ -12,9 +12,9 @@ Description
 `groupBaseline` convolves groups of BASELINe posterior probability density 
 functions (PDFs) to get combined PDFs for each group.
 
+
 Usage
 --------------------
-
 ```
 groupBaseline(baseline, groupBy, nproc = 1)
 ```

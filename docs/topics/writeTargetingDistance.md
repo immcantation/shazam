@@ -12,9 +12,9 @@ Description
 `writeTargetingDistance` writes a 5-mer targeting distance matrix 
 to a tab-delimited file.
 
+
 Usage
 --------------------
-
 ```
 writeTargetingDistance(model, file)
 ```

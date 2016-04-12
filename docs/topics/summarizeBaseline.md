@@ -12,9 +12,9 @@ Description
 `summarizeBaseline` calculates BASELINe statistics such as the selection strength
 (Sigma), the 95% confidence intervals and P-values.
 
+
 Usage
 --------------------
-
 ```
 summarizeBaseline(baseline, returnType = c("baseline", "df"), nproc = 1)
 ```

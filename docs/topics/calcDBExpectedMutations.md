@@ -12,9 +12,9 @@ Description
 `calcDBExpectedMutations` calculates the expected mutation frequencies for each 
 sequence in the input `data.frame`.
 
+
 Usage
 --------------------
-
 ```
 calcDBExpectedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", targetingModel = HS5FModel,

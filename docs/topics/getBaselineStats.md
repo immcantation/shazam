@@ -13,9 +13,9 @@ Description
 summary statistics `data.frame` stored in the `stats` slot of a 
 [Baseline](Baseline-class.md) object - provided [groupBaseline](groupBaseline.md) has already been run.
 
+
 Usage
 --------------------
-
 ```
 getBaselineStats(baseline)
 ```

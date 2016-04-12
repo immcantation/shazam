@@ -11,9 +11,9 @@ Description
 
 Identifies effective/consensus sequences collapsed by clone
 
+
 Usage
 --------------------
-
 ```
 collapseByClone(db, cloneColumn = "CLONE", sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", expandedDb = FALSE,

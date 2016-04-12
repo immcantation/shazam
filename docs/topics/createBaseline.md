@@ -11,9 +11,9 @@ Description
 
 `createBaseline` creates and initialize a `Baseline` object.
 
+
 Usage
 --------------------
-
 ```
 createBaseline(description = "", db = data.frame(),
 regionDefinition = createRegionDefinition(), testStatistic = "",

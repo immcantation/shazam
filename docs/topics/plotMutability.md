@@ -11,9 +11,9 @@ Description
 
 `plotMutability` plots the mutability rates of a `TargetingModel`.
 
+
 Usage
 --------------------
-
 ```
 plotMutability(model, nucleotides = c("A", "C", "G", "T"),
 style = c("hedgehog", "bar"), size = 1, silent = FALSE, ...)

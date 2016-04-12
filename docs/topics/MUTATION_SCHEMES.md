@@ -12,9 +12,6 @@ Description
 Definitions of replacement (R) and silent (S) mutations for different amino acid
 physicochemical classes.
 
-Usage
---------------------
-
 
 
 Format

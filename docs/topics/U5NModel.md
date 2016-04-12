@@ -12,9 +12,9 @@ Description
 A null 5-mer model of somatic hypermutation targeting where all substitution, mutability
 and targeting rates are uniformly distributed.
 
+
 Usage
 --------------------
-
 ```
 U5NModel
 ```

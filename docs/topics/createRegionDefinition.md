@@ -11,9 +11,9 @@ Description
 
 `createRegionDefinition` creates a `RegionDefinition`.
 
+
 Usage
 --------------------
-
 ```
 createRegionDefinition(name = "", boundaries = factor(), description = "",
 citation = "")

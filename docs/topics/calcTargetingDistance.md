@@ -12,9 +12,9 @@ Description
 `calcTargetingDistance` converts the targeting rates in a TargetingModel model 
 to a matrix of 5-mer to single-nucleotide mutation distances.
 
+
 Usage
 --------------------
-
 ```
 calcTargetingDistance(model)
 ```

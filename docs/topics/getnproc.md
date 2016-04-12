@@ -11,9 +11,9 @@ Description
 
 Determines the numbers of CPU cores available
 
+
 Usage
 --------------------
-
 ```
 getnproc()
 ```

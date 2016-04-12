@@ -12,9 +12,9 @@ Description
 `calcObservedMutations` determines all the mutations in a given input seqeunce compared
 to its germline sequence.
 
+
 Usage
 --------------------
-
 ```
 calcObservedMutations(inputSeq, germlineSeq, frequency = FALSE,
 regionDefinition = NULL, mutationDefinition = NULL)

@@ -12,9 +12,9 @@ Description
 `createTargetingMatrix` calculates the targeting model matrix as the
 combined probability of mutability and substitution.
 
+
 Usage
 --------------------
-
 ```
 createTargetingMatrix(substitutionModel, mutabilityModel)
 ```

@@ -12,9 +12,9 @@ Description
 `calcBaseline` calculates the BASELINe posterior probability density 
 functions (PDFs) for sequences in the given Change-O `data.frame`.
 
+
 Usage
 --------------------
-
 ```
 calcBaseline(db, sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", testStatistic = c("local",

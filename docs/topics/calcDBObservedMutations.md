@@ -12,9 +12,9 @@ Description
 `calcDBObservedMutations` calculates the observed number of mutations for each 
 sequence in the input `data.frame`.
 
+
 Usage
 --------------------
-
 ```
 calcDBObservedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", frequency = FALSE,

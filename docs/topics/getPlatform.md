@@ -11,9 +11,9 @@ Description
 
 Determines the OS platform being used
 
+
 Usage
 --------------------
-
 ```
 getPlatform()
 ```

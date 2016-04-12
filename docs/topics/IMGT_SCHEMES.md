@@ -11,9 +11,6 @@ Description
 
 Definitions of the CDR and FWR, according to the IMGT unique numbering scheme.
 
-Usage
---------------------
-
 
 
 Format

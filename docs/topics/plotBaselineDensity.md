@@ -12,9 +12,9 @@ Description
 `plotBaselineDensity` plots the probability density functions resulting from selection 
 analysis using the BASELINe method.
 
+
 Usage
 --------------------
-
 ```
 plotBaselineDensity(baseline, idColumn, groupColumn = NULL,
 groupColors = NULL, subsetRegions = NULL, sigmaLimits = c(-5, 5),

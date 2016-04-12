@@ -11,9 +11,9 @@ Description
 
 `clearConsole` clears the console.
 
+
 Usage
 --------------------
-
 ```
 clearConsole()
 ```

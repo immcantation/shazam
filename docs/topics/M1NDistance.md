@@ -12,9 +12,9 @@ Description
 Single nucleotide distance matrix of somatic hypermutation targeting based on 
 Mus musculus Ig sequence data.
 
+
 Usage
 --------------------
-
 ```
 M1NDistance
 ```

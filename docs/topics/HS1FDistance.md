@@ -12,9 +12,9 @@ Description
 Single nucleotide distance matrix of somatic hypermutation targeting based on 
 human Ig sequence data.
 
+
 Usage
 --------------------
-
 ```
 HS1FDistance
 ```

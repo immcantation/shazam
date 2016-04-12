@@ -13,9 +13,9 @@ Description
 the number of substitution mutations occuring in the center position for all 5-mer 
 motifs.
 
+
 Usage
 --------------------
-
 ```
 createSubstitutionMatrix(db, model = c("RS", "S"),
 sequenceColumn = "SEQUENCE_IMGT", germlineColumn = "GERMLINE_IMGT_D_MASK",

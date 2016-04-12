@@ -12,9 +12,9 @@ Description
 5-mer model of somatic hypermutation targeting based on analysis of silent mutations
 in functional Ig sequences from Homo sapiens.
 
+
 Usage
 --------------------
-
 ```
 HS5FModel
 ```

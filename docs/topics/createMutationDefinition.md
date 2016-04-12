@@ -11,9 +11,9 @@ Description
 
 `createMutationDefinition` creates a `MutationDefinition`.
 
+
 Usage
 --------------------
-
 ```
 createMutationDefinition(name, classes, description = "", citation = "")
 ```

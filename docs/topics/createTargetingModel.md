@@ -11,9 +11,9 @@ Description
 
 `createTargetingModel` creates a 5-mer `TargetingModel`.
 
+
 Usage
 --------------------
-
 ```
 createTargetingModel(db, model = c("RS", "S"),
 sequenceColumn = "SEQUENCE_IMGT", germlineColumn = "GERMLINE_IMGT_D_MASK",

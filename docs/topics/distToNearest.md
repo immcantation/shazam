@@ -12,9 +12,9 @@ Description
 Get distance of every sequence to its nearest sequence sharing same V gene, J gene, and
 sequence length.
 
+
 Usage
 --------------------
-
 ```
 distToNearest(db, sequenceColumn = "JUNCTION", vCallColumn = "V_CALL",
 jCallColumn = "J_CALL", model = c("hs1f", "m1n", "ham", "aa", "hs5f"),

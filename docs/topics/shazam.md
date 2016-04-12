@@ -13,9 +13,6 @@ Provides tools for advanced anaylisis of immunoglobulin (Ig) somatic hypermutati
 (SHM), including BASELINe, a novel method for quantifying antigen-driven selection in 
 high-throughput Ig sequencing data.
 
-Usage
---------------------
-
 
 
 Details

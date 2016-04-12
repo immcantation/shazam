@@ -12,9 +12,9 @@ Description
 `plotBaselineSummary` plots a summary of the results of selection analysis 
 using the BASELINe method.
 
+
 Usage
 --------------------
-
 ```
 plotBaselineSummary(baseline, idColumn, groupColumn = NULL,
 groupColors = NULL, subsetRegions = NULL, facetBy = c("region",
