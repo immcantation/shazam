@@ -24,7 +24,7 @@ Description: Provides a computational framework for Bayesian estimation of
     sequences, build models of somatic hypermutation (SHM) in Ig sequences, 
     and make model-dependent distance comparisons of Ig repertoires. 
 License: CC BY-NC-SA 4.0
-URL: http://clip.med.yale.edu/changeo
+URL: http://shazam.readthedocs.org
 BugReports: https://bitbucket.org/kleinstein/shazam/issues
 LazyData: true
 BuildVignettes: true
