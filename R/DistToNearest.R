@@ -71,7 +71,7 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
       dist <- min(c(seq1_to_seq2, seq2_to_seq1))
     }
   },error = function(e){
-    warning("Invalid sequence. Cannot compute distance.")
+    warning(e)
     return(NA)
   })
 
