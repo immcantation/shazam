@@ -95,7 +95,6 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
 # @param    normalize     The method of normalization. Default is "none".
 #                         "length" = normalize distance by length of junction.
 #                         "mutations" = normalize distance by number of mutations in junction.
-# @param    rcpp          Use the Rccp version of getSeqDistance 
 # @return   distance between two sequences.
 #
 # @examples
@@ -104,7 +103,7 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
 # 
 # distSeqMat(seq1, seq2)
 distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
-                       normalize=c("none" ,"length", "mutations"), rcpp=F) {
+                       normalize=c("none" ,"length", "mutations")) {
   # Evaluate choices
   model <- match.arg(model)
   normalize <- match.arg(normalize)
@@ -128,9 +127,9 @@ distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
   }
   
   # Calculate distance
-  dist <- tryCatch(getSeqDistance(seq1, seq2, dist_mat=dist_mat, rcpp=rcpp),
+  dist <- tryCatch(getSeqDistance(seq1, seq2, dist_mat=dist_mat),
                    error=function(e) {
-                       warning("Invalid character in sequence. Cannot compute distance.")
+                       warning(e)
                        return(NA)
                    })
   
@@ -337,7 +336,6 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
 #                         "mutations" = normalize distance by number of mutations in junction.
 # @param    crossGroups   column for grouping to calculate distances across groups (self vs others)
 # @param    mst           if true, return comma-separated branch lengths from minimum spanning tree
-# @param    rcpp          Use the Rcpp version of distSeqMat
 # @return   A vector of distances to the closest sequence.
 # @examples
 # arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
@@ -346,7 +344,7 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
 # getClosestMat(arrJunctions, normalize="none" )
 getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
                           normalize=c("none" ,"length", "mutations"),
-                          crossGroups=NULL, mst=FALSE, rcpp=F) {
+                          crossGroups=NULL, mst=FALSE) {
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
@@ -369,45 +367,32 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
     arrUniqueJunctionsDist <- rep(NA,numbOfUniqueJunctions)
     if (numbOfUniqueJunctions>1){
         
-        if (rcpp) {
-            if (model == "ham") {
-                dist_mat <- getDNAMatrix(gap=0)
-            } else if (model == "m1n") {
-                dist_mat <- M1NDistance
-            } else if (model == "hs1f") {
-                dist_mat <- HS1FDistance
-            } else if (model == "aa") {
-                # Translate sequences
-                arrJunctionsUnique <- strsplit(tolower(gsub("[-.]","N",arrJunctionsUnique)), "")
-                arrJunctionsUnique <- lapply(seqs, function(s) {
-                    paste(seqinr::translate(s, ambiguous=T),collapse="")
-                })
-                dist_mat <- getAAMatrix()
-            }
-            matDistance <- getSeqMatrix(arrJunctionsUnique, dist_mat, rcpp=rcpp)
-    
-            junction_length <-  unique(nchar(arrJunctionsUnique))
-            if (length(junction_length)>1) {
-                stop("Unexpected. Different junction lengths found")
-            }
-            # Normalize distances
-            if (normalize == "length") { 
-                matDistance <- matDistance/junction_length
-            } else if (normalize == "mutations") {
-                #dist <- dist/sum(strsplit(seq1,"")[[1]] != strsplit(seq2,"")[[1]])
-                stop("Sorry! nomalize==mutation not available when using rcpp=TRUE")
-            }
-        } else {
-            # Calculate symmetric distance matrix
-            matDistance <-
-                sapply(1:numbOfUniqueJunctions,
-                       function(i) c(rep.int(0,i-1), sapply(i:numbOfUniqueJunctions, function(j) {
-                           distSeqMat(arrJunctionsUnique[i],
-                                      arrJunctionsUnique[j],
-                                      model=model, normalize=normalize,
-                                      rcpp=rcpp)
-                       })))
-            matDistance <- matDistance + t(matDistance)
+        if (model == "ham") {
+            dist_mat <- getDNAMatrix(gap=0)
+        } else if (model == "m1n") {
+            dist_mat <- M1NDistance
+        } else if (model == "hs1f") {
+            dist_mat <- HS1FDistance
+        } else if (model == "aa") {
+            # Translate sequences
+            arrJunctionsUnique <- strsplit(tolower(gsub("[-.]","N",arrJunctionsUnique)), "")
+            arrJunctionsUnique <- lapply(seqs, function(s) {
+                paste(seqinr::translate(s, ambiguous=T),collapse="")
+            })
+            dist_mat <- getAAMatrix()
+        }
+        matDistance <- getSeqMatrix(arrJunctionsUnique, dist_mat)
+        
+        junction_length <-  unique(nchar(arrJunctionsUnique))
+        if (length(junction_length)>1) {
+            stop("Unexpected. Different junction lengths found")
+        }
+        # Normalize distances
+        if (normalize == "length") { 
+            matDistance <- matDistance/junction_length
+        } else if (normalize == "mutations") {
+            #dist <- dist/sum(strsplit(seq1,"")[[1]] != strsplit(seq2,"")[[1]])
+            stop("Sorry! nomalize=mutations not available")
         }
         
         # Find minimum distance for each sequence
@@ -488,7 +473,6 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 #' @param    fields          additional fields to use for grouping
 #' @param    cross           columns for grouping to calculate distances across groups (self vs others)
 #' @param    mst             if true, return comma-separated branch lengths from minimum spanning tree
-#' @param    rcpp            Use the Rcpp version of the code
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
 #'           \code{DIST_NEAREST} column if \code{crossGrups=NULL} or in the \code{CROSS_DIST_NEAREST}
@@ -544,7 +528,7 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
                           jCallColumn="J_CALL", model=c("hs1f", "m1n", "ham", "aa", "hs5f"), 
                           normalize=c("length", "none"), symmetry=c("avg","min"),
-                          first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE, rcpp=F) {
+                          first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE) {
     # Hack for visibility of data.table and foreach index variables
     idx <- yidx <- .I <- NULL
     
@@ -682,7 +666,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                                   model=model,
                                   normalize=normalize,
                                   crossGroups=crossGroups,
-                                  mst=mst, rcpp=rcpp)
+                                  mst=mst)
                 return(db_group)
             }        
     }
