@@ -156,40 +156,40 @@ createBaseline <- function(description="",
                            binomP=matrix(),
                            pdfs=list(),
                            stats=data.frame()) {
-  
-  if (is.null(regionDefinition)) {
-      regionDefinition <- makeNullRegionDefinition()
-  }
-  # Get regions if not passing in               
-  if (is.null(regions)) {
-    regions <- regionDefinition@regions
-  }
-  # Define empty stats data.frame if not passed in
-  if (nrow(stats) == 0) {
-    stats <- data.frame(GROUP=character(),
-                        REGION=character(),
-                        BASELINE_SIGMA=character(),
-                        BASELINE_CI_LOWER=character(),
-                        BASELINE_CI_UPPER=character(),
-                        BASELINE_CI_PVALUE=character(),
-                        stringsAsFactors=FALSE) 
-  }
-  
-  # Define RegionDefinition object
-  baseline <- new("Baseline",
-                  description=description,
-                  db=as.data.frame(db),
-                  regionDefinition=regionDefinition,
-                  testStatistic=testStatistic,
-                  regions=regionDefinition@regions,
-                  numbOfSeqs=numbOfSeqs,
-                  binomK=binomK,
-                  binomN=binomN,
-                  binomP=binomP,
-                  pdfs=pdfs,
-                  stats=as.data.frame(stats))
-  
-  return(baseline)
+    
+    if (is.null(regionDefinition)) {
+        regionDefinition <- makeNullRegionDefinition()
+    }
+    # Get regions if not passing in               
+    if (is.null(regions)) {
+        regions <- regionDefinition@regions
+    }
+    # Define empty stats data.frame if not passed in
+    if (nrow(stats) == 0) {
+        stats <- data.frame(GROUP=character(),
+                            REGION=character(),
+                            BASELINE_SIGMA=character(),
+                            BASELINE_CI_LOWER=character(),
+                            BASELINE_CI_UPPER=character(),
+                            BASELINE_CI_PVALUE=character(),
+                            stringsAsFactors=FALSE) 
+    }
+    
+    # Define RegionDefinition object
+    baseline <- new("Baseline",
+                    description=description,
+                    db=as.data.frame(db),
+                    regionDefinition=regionDefinition,
+                    testStatistic=testStatistic,
+                    regions=regionDefinition@regions,
+                    numbOfSeqs=numbOfSeqs,
+                    binomK=binomK,
+                    binomN=binomN,
+                    binomP=binomP,
+                    pdfs=pdfs,
+                    stats=as.data.frame(stats))
+    
+    return(baseline)
 }
 
 
@@ -205,12 +205,12 @@ createBaseline <- function(description="",
 # 
 # @seealso  See \link{Baseline} for the return object.
 editBaseline <- function(baseline, field_name, value) {
-  if (!match(field_name, slotNames(baseline))) { 
-    stop("field_name not part of BASELINe object!")
-  }
-  slot(baseline, field_name) <- value
-  
-  return(baseline)
+    if (!match(field_name, slotNames(baseline))) { 
+        stop("field_name not part of BASELINe object!")
+    }
+    slot(baseline, field_name) <- value
+    
+    return(baseline)
 }
 
 
@@ -256,7 +256,7 @@ editBaseline <- function(baseline, field_name, value) {
 #' 
 #' @export
 getBaselineStats <- function(baseline) {
-  return(baseline@stats)
+    return(baseline@stats)
 }
 
 
@@ -325,7 +325,10 @@ getBaselineStats <- function(baseline) {
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #' 
-#' @seealso 
+#' @seealso See \link{Baseline} for the return object.
+#'          See \link{groupBaseline} and \link{summarizeBaseline} for further processing.
+#'          See \link{plotBaselineSummary} and \link{plotBaselineDensity} for plotting results.
+#' 
 #' @examples
 #' # Subset example data
 #' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
@@ -605,74 +608,74 @@ calcBaselineHelper  <- function(observed,
                                 testStatistic="local",
                                 regionDefinition=NULL) {
     
-  if (is.null(regionDefinition)) {
-      regions <- makeNullRegionDefinition()@regions
-  } else {
-      regions <- regionDefinition@regions
-  }
-  
-  # Evaluate argument choices
-  testStatistic <- match.arg(testStatistic, c("local", "focused","imbalance"))
-  
-  #If there are more than two regions (e.g. CDR and FWR then you cannot perform the focused test)
-  if (testStatistic=="focused" & length(regions)!=2) {
-    testStatistic="local"    
-  }    
-  
-  # local test statistic
-  if (testStatistic == "local") { 
-    obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(observed) )
-    obsN_Index <- grep( paste0("OBSERVED_", region),  names(observed) )
+    if (is.null(regionDefinition)) {
+        regions <- makeNullRegionDefinition()@regions
+    } else {
+        regions <- regionDefinition@regions
+    }
     
-    expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(expected) )
-    expN_Index <- grep( paste0("EXPECTED_", region),  names(expected) )       
-  }
-  
-  # focused test statistic
-  if (testStatistic == "focused") { 
-    obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(observed) )
-    obsN_Index <- 
-      grep( 
-        paste0( 
-          "OBSERVED_", region, "|", 
-          "OBSERVED_", regions[regions!=region], "_S"
-        ),
-        names(observed) 
-      )
+    # Evaluate argument choices
+    testStatistic <- match.arg(testStatistic, c("local", "focused","imbalance"))
     
-    expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(expected) )
-    expN_Index <- 
-      grep( 
-        paste0( 
-          "EXPECTED_", region, "|", 
-          "EXPECTED_",  regions[regions!=region], "_S"
-        ),
-        names(expected) 
-      )        
-  }     
-  
-  # imbalance test statistic
-  if (testStatistic == "imbalance") { 
-    obsX_Index <- grep( paste0("OBSERVED_", region),  names(observed) )
-    obsN_Index <- grep( "OBSERVED_",names(observed))  
+    #If there are more than two regions (e.g. CDR and FWR then you cannot perform the focused test)
+    if (testStatistic=="focused" & length(regions)!=2) {
+        testStatistic="local"    
+    }    
     
-    expX_Index <- grep( paste0("EXPECTED_", region),  names(expected) )
-    expN_Index <-   grep( "EXPECTED_",names(expected)) 
+    # local test statistic
+    if (testStatistic == "local") { 
+        obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(observed) )
+        obsN_Index <- grep( paste0("OBSERVED_", region),  names(observed) )
+        
+        expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(expected) )
+        expN_Index <- grep( paste0("EXPECTED_", region),  names(expected) )       
+    }
     
-  }
-  
-  
-  obsX <- sum(as.numeric( observed[obsX_Index] ))
-  obsN <- sum(as.numeric(observed[obsN_Index]), na.rm=T )
-  
-  expP <-
-    as.numeric( 
-      sum(expected[expX_Index]) / 
-        sum( expected[expN_Index], na.rm=T )
-    )
-  
-  
-  return( c( calcBaselineBinomialPdf( x=obsX, n=obsN, p=expP ), obsX, obsN, expP ) )
+    # focused test statistic
+    if (testStatistic == "focused") { 
+        obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(observed) )
+        obsN_Index <- 
+            grep( 
+                paste0( 
+                    "OBSERVED_", region, "|", 
+                    "OBSERVED_", regions[regions!=region], "_S"
+                ),
+                names(observed) 
+            )
+        
+        expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(expected) )
+        expN_Index <- 
+            grep( 
+                paste0( 
+                    "EXPECTED_", region, "|", 
+                    "EXPECTED_",  regions[regions!=region], "_S"
+                ),
+                names(expected) 
+            )        
+    }     
+    
+    # imbalance test statistic
+    if (testStatistic == "imbalance") { 
+        obsX_Index <- grep( paste0("OBSERVED_", region),  names(observed) )
+        obsN_Index <- grep( "OBSERVED_",names(observed))  
+        
+        expX_Index <- grep( paste0("EXPECTED_", region),  names(expected) )
+        expN_Index <-   grep( "EXPECTED_",names(expected)) 
+        
+    }
+    
+    
+    obsX <- sum(as.numeric( observed[obsX_Index] ))
+    obsN <- sum(as.numeric(observed[obsN_Index]), na.rm=T )
+    
+    expP <-
+        as.numeric( 
+            sum(expected[expX_Index]) / 
+                sum( expected[expN_Index], na.rm=T )
+        )
+    
+    
+    return( c( calcBaselineBinomialPdf( x=obsX, n=obsN, p=expP ), obsX, obsN, expP ) )
 }
 
 # Calculate the BASELINe probability function in a binomial framework.
@@ -682,20 +685,20 @@ calcBaselineBinomialPdf <- function ( x=3,
                                       CONST_i=CONST_I,
                                       max_sigma=20,
                                       length_sigma=4001 ) {
-  if(n!=0){
-    sigma_s<-seq(-max_sigma,max_sigma,length.out=length_sigma)
-    sigma_1<-log({CONST_i/{1-CONST_i}}/{p/{1-p}})
-    index<-min(n,60)
-    y<- dbeta(CONST_i,x+BAYESIAN_FITTED[index],n+BAYESIAN_FITTED[index]-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
-    if(!sum(is.na(y))){
-      tmp<-approx(sigma_1,y,sigma_s)$y
-      tmp/sum(tmp)/{2*max_sigma/{length_sigma-1}}
+    if(n!=0){
+        sigma_s<-seq(-max_sigma,max_sigma,length.out=length_sigma)
+        sigma_1<-log({CONST_i/{1-CONST_i}}/{p/{1-p}})
+        index<-min(n,60)
+        y<- dbeta(CONST_i,x+BAYESIAN_FITTED[index],n+BAYESIAN_FITTED[index]-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
+        if(!sum(is.na(y))){
+            tmp<-approx(sigma_1,y,sigma_s)$y
+            tmp/sum(tmp)/{2*max_sigma/{length_sigma-1}}
+        }else{
+            return(NA)
+        }
     }else{
-      return(NA)
+        return(NA)
     }
-  }else{
-    return(NA)
-  }
 }
 
 
@@ -765,7 +768,7 @@ calcBaselineBinomialPdf <- function ( x=3,
 groupBaseline <- function(baseline, groupBy, nproc=1) {
     # Hack for visibility of data.table and foreach index variables
     idx <- yidx <- .I <- NULL
-
+    
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
     
@@ -960,11 +963,11 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
         # Convert the list of the region's PDFs into a matrix                
         matrix_region_pdfs <- 
             do.call(rbind, lapply(list_region_pdfs, 
-                           function(x) { 
-                             length(x) <- 4002 
-                             return(x)
-                           }))
-
+                                  function(x) { 
+                                      length(x) <- 4002 
+                                      return(x)
+                                  }))
+        
         list_pdfs[[region]] <- matrix_region_pdfs[, 1:4001]
         numbOfSeqs[, region] <- matrix_region_pdfs[, 4002]
     }
@@ -1185,29 +1188,32 @@ calcBaselinePvalue <- function (baseline_pdf,
 #' @param    groupColumn    name of the column in the \code{db} slot of \code{baseline} 
 #'                          containing secondary grouping identifiers. If \code{NULL}, 
 #'                          organize the plot only on values in \code{idColumn}.
-#' @param    groupColors    named vector of colors for entries in \code{groupColumn}, with 
-#'                          names defining unique values in the \code{groupColumn} and values
-#'                          being colors. Also controls the order in which groups appear on the
+#' @param    colorElement   one of \code{c("id", "group")} specifying whether the 
+#'                          \code{idColumn} or \code{groupColumn} will be used for color coding. 
+#'                          The other entry, if present, will be coded by line style.
+#' @param    colorValues    named vector of colors for entries in \code{colorElement}, with 
+#'                          names defining unique values in the \code{colorElement} column and values
+#'                          being colors. Also controls the order in which values appear on the
 #'                          plot. If \code{NULL} alphabetical ordering and a default color palette 
-#'                          will be used. Has no effect if \code{facetBy="group"}.
+#'                          will be used.
+#' @param    facetBy        one of \code{c("region", "group")} specifying which category to facet the
+#'                          plot by, either values in \code{groupColumn} ("group") or regions
+#'                          defined in the \code{regions} slot of the \code{baseline} object ("region").
+#'                          If this is set to "group", then the region will behave as the \code{groupColumn}
+#'                          for purposes of the \code{colorElement} argument.
+#' @param    title          string defining the plot title.
 #' @param    subsetRegions  character vector defining a subset of regions to plot, correspoding 
 #'                          to the regions for which the \code{baseline} data was calculated. If
 #'                          \code{NULL} all regions in \code{baseline} are plotted.
 #' @param    sigmaLimits    numeric vector containing two values defining the \code{c(lower, upper)}
 #'                          bounds of the selection scores to plot.
-#' @param    facetBy        one of c("group", "region") specifying which category to facet the
-#'                          plot by, either values in \code{groupColumn} ("group") or regions
-#'                          defined in \code{baseline} ("region"). The data that is not used
-#'                          for faceting will be color coded.
-#' @param    title          string defining the plot title.
 #' @param    style          type of plot to draw. One of:
 #'                          \itemize{
 #'                            \item \code{"density"}:  plots a set of curves for each probability 
 #'                                                     density function in \code{baseline}, 
-#'                                                     with the line type determined by \code{idColumn}.
-#'                                                     Faceting and coloring are determine by values in 
-#'                                                     \code{groupColumn} and regions defined in 
-#'                                                     \code{baseline}, depending upon the 
+#'                                                     with colors determined by values in the
+#'                                                     \code{colorElement} column.
+#'                                                     Faceting is determined by the 
 #'                                                     \code{facetBy} argument.
 #'                          }
 #' @param    size           numeric scaling factor for lines, points and text in the plot.
@@ -1243,114 +1249,133 @@ calcBaselinePvalue <- function (baseline_pdf,
 #' baseline <- groupBaseline(db_baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Plot mean and confidence interval
-#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", style="density")
-#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
-#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", facetBy="group", style="density")
+#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER")
+#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", subsetRegions="CDR")
+#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", facetBy="group")
 #'
 #' # Reorder and recolor groups
 #' group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
-#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
+#' plotBaselineDensity(baseline, "BARCODE", "CPRIMER", colorElement="group", colorValues=group_colors)
 #' 
 #' @export
-plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
-                                subsetRegions=NULL, sigmaLimits=c(-5, 5), title=NULL,
+plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorElement=c("id", "group"), 
+                                colorValues=NULL, title=NULL, subsetRegions=NULL, sigmaLimits=c(-5, 5), 
                                 facetBy=c("region", "group"), style=c("density"), size=1, 
                                 silent=FALSE, ...) {
-  # Test variable settings
-  # baseline=baseline_two
-  # idColumn="BARCODE"; groupColumn="CPRIMER"; subsetRegions=NULL; sigmaLimits=c(-5, 5)
-  # facetBy="region"; style="density"; size=1; silent=FALSE
+    # Test variable settings
+    # baseline=baseline_two
+    # idColumn="BARCODE"; groupColumn="CPRIMER"; subsetRegions=NULL; sigmaLimits=c(-5, 5)
+    # facetBy="region"; style="density"; size=1; silent=FALSE
     
-  # Check input
-  style <- match.arg(style)
-  facetBy <- match.arg(facetBy)
-  
-  # Set base plot settings
-  base_theme <- theme_bw() +
-    theme(panel.background=element_blank(),
-          panel.grid.major=element_blank(),
-          panel.grid.minor=element_blank(),
-          panel.border=element_rect(color="black", size=0.5)) +
-    theme(strip.background=element_rect(fill="white", color="black", size=0.5))
-  
-  if (style == "density") {
-    # Check for proper grouping
-    if (any(duplicated(baseline@db[, c(idColumn, groupColumn)]))) {
-      stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
+    # Check input
+    colorElement <- match.arg(colorElement)
+    style <- match.arg(style)
+    facetBy <- match.arg(facetBy)
+    
+    
+    # Set base plot settings
+    base_theme <- theme_bw() +
+        theme(panel.background=element_blank(),
+              panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank(),
+              panel.border=element_rect(color="black", size=0.5)) +
+        theme(strip.background=element_rect(fill="white", color="black", size=0.5))
+    
+    if (style == "density") {
+        # Check for proper grouping
+        if (any(duplicated(baseline@db[, c(idColumn, groupColumn)]))) {
+            stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
+        }
+        
+        # Subset to regions of interest
+        dens_names <- baseline@regions        
+        if (!is.null(subsetRegions)) {
+            dens_names <- dens_names[dens_names %in% subsetRegions]        
+        }
+        dens_list <- baseline@pdfs[dens_names]
+        
+        # Get row and column names for PDF matrices
+        group_df <- subset(baseline@db, select=c(idColumn, groupColumn))
+        group_df$GROUP_COLLAPSE <- apply(subset(group_df, select=c(idColumn, groupColumn)), 
+                                         1, paste, collapse=",")
+        col_names <- seq(-20, 20, length.out=ncol(dens_list[[1]]))
+        
+        # Update column and rownames for PDF matrices and subset to Sigma in -5:5
+        for (i in 1:length(dens_list)) {
+            rownames(dens_list[[i]]) <- group_df$GROUP_COLLAPSE
+            colnames(dens_list[[i]]) <- col_names
+            dens_list[[i]] <- dens_list[[i]][, col_names >= sigmaLimits[1] & 
+                                                 col_names <= sigmaLimits[2]]
+        }
+        
+        # Melt density matrices
+        melt_list <- list()
+        for (n in dens_names) {
+            tmp_df <- as.data.frame(dens_list[[n]])
+            tmp_df$GROUP_COLLAPSE <- rownames(dens_list[[n]])
+            gather_cols <- names(tmp_df)[names(tmp_df) != "GROUP_COLLAPSE"]
+            melt_list[[n]] <- tidyr::gather_(tmp_df, "SIGMA", "DENSITY", gather_cols, convert=TRUE)
+        }
+        dens_df <- dplyr::bind_rows(melt_list, .id="REGION")
+        
+        # Assign id and group columns to density data.frame
+        dens_df[, idColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
+                                        idColumn]
+        if (!is.null(groupColumn)) {
+            dens_df[, groupColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
+                                               groupColumn]
+        }    
+        
+        # Set secondary grouping and faceting columns
+        if (facetBy == "group") { 
+            secondaryColumn <- "REGION"
+            facetColumn <- groupColumn
+        } else if (facetBy == "region") {
+            secondaryColumn <- groupColumn
+            facetColumn <- "REGION" 
+        }
+        
+        # Plot probability density curve
+        p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="DENSITY")) +
+            base_theme + 
+            xlab(expression(Sigma)) +
+            ylab("Density") +
+            geom_line(size=1*size)
+        # Add line
+        if (colorElement == "id" & is.null(secondaryColumn)) {
+            p1 <- p1 + aes_string(color=idColumn)
+        } else if (colorElement == "id" & !is.null(secondaryColumn)) {
+            p1 <- p1 + aes_string(color=idColumn, linetype=secondaryColumn)
+        } else if (colorElement == "group") {
+            p1 <- p1 + aes_string(color=secondaryColumn, linetype=idColumn)
+        } else {
+            stop("Incompatible arguments for groupColumn, colorElement and facetBy")
+        }
+        # Add colors
+        if (!is.null(colorValues)) {
+            p1 <- p1 + scale_color_manual(values=colorValues)
+        }   
+        # Add title
+        if (!is.null(title)) {
+            p1 <- p1 + ggtitle(title)
+        }
+        # Add facet
+        if (is.null(facetColumn)) {
+            stop("Cannot facet by group if groupColumn=NULL")
+        } else {
+            p1 <- p1 + facet_grid(paste(facetColumn, "~ ."))
+        }
     }
     
-    # Subset to regions of interest
-    dens_names <- baseline@regions        
-    if (!is.null(subsetRegions)) {
-      dens_names <- dens_names[dens_names %in% subsetRegions]        
-    }
-    dens_list <- baseline@pdfs[dens_names]
+    # Add additional theme elements
+    p1 <- p1 + do.call(theme, list(...))
     
-    # Get row and column names for PDF matrices
-    group_df <- subset(baseline@db, select=c(idColumn, groupColumn))
-    group_df$GROUP_COLLAPSE <- apply(subset(group_df, select=c(idColumn, groupColumn)), 
-                                     1, paste, collapse=",")
-    col_names <- seq(-20, 20, length.out=ncol(dens_list[[1]]))
-    
-    # Update column and rownames for PDF matrices and subset to Sigma in -5:5
-    for (i in 1:length(dens_list)) {
-      rownames(dens_list[[i]]) <- group_df$GROUP_COLLAPSE
-      colnames(dens_list[[i]]) <- col_names
-      dens_list[[i]] <- dens_list[[i]][, col_names >= sigmaLimits[1] & 
-                                         col_names <= sigmaLimits[2]]
+    # Plot
+    if (!silent) { 
+        plot(p1)
     }
     
-    # Melt density matrices
-    melt_list <- list()
-    for (n in dens_names) {
-        tmp_df <- as.data.frame(dens_list[[n]])
-        tmp_df$GROUP_COLLAPSE <- rownames(dens_list[[n]])
-        gather_cols <- names(tmp_df)[names(tmp_df) != "GROUP_COLLAPSE"]
-        melt_list[[n]] <- tidyr::gather_(tmp_df, "SIGMA", "DENSITY", gather_cols, convert=TRUE)
-    }
-    dens_df <- dplyr::bind_rows(melt_list, .id="REGION")
-    
-    # Assign id and group columns to density data.frame
-    dens_df[, idColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
-                                    idColumn]
-    if (!is.null(groupColumn)) {
-        dens_df[, groupColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
-                                           groupColumn]
-    }    
-    
-    # Plot probability density curve
-    p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="DENSITY")) +
-        base_theme + 
-        xlab(expression(Sigma)) +
-        ylab("Density") +
-        geom_line(aes_string(linetype=idColumn), size=1*size)
-    if (!is.null(title)) {
-        p1 <- p1 + ggtitle(title)
-    }    
-    if (is.null(groupColumn) & facetBy == "region") {
-        p1 <- p1 + facet_grid("REGION ~ .")
-    } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
-        p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
-    } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
-        p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
-            aes_string(color=groupColumn) + facet_grid(REGION ~ .)
-    } else if (!is.null(groupColumn) & facetBy == "group") {
-        p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
-            aes_string(color="REGION") + facet_grid(paste(groupColumn, "~ ."))
-    } else {
-        stop("Cannot facet by group if groupColumn=NULL")
-    }
-  }
-  
-  # Add additional theme elements
-  p1 <- p1 + do.call(theme, list(...))
-  
-  # Plot
-  if (!silent) { 
-      plot(p1)
-  }
-  
-  invisible(p1)
+    invisible(p1)
 }
 
 
@@ -1441,93 +1466,93 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, groupColor
 plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
                                 subsetRegions=NULL, facetBy=c("region", "group"), 
                                 title=NULL, style=c("mean"), size=1, silent=FALSE, ...) {
-  # Check arguments
-  style <- match.arg(style)
-  facetBy <- match.arg(facetBy)
-  
-  # Check input object
-  if (is(baseline, "Baseline")) {
-    stats_df <- baseline@stats
-  } else if (is(baseline, "data.frame")) {
-    stats_df <- baseline
-  } else {
-    stop("Input must be either a data.frame or Baseline object.")
-  }
-  
-  # Check for required columns
-  baseline_cols <- c("REGION", 
-                     "BASELINE_SIGMA", 
-                     "BASELINE_CI_LOWER", 
-                     "BASELINE_CI_LOWER", 
-                     "BASELINE_CI_LOWER", 
-                     "BASELINE_CI_PVALUE")
-  if (!(all(baseline_cols %in% names(stats_df)))) {
-    stop("Input must contain columns defined by summarizeBaseline.")
-  }
-  
-  # Check for proper grouping
-  if (any(duplicated(stats_df[, c(idColumn, groupColumn, "REGION")]))) {
-    stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
-  }
-  
-  # Subset to regions of interest
-  if (!is.null(subsetRegions)) {
-      stats_df <- stats_df[stats_df$REGION %in% subsetRegions, ]
-  }
-  
-  # Set base plot settings
-  base_theme <- theme_bw() +
-    theme(panel.background=element_blank(),
-          panel.grid.major=element_blank(),
-          panel.grid.minor=element_blank(),
-          panel.border=element_rect(color="black", size=0.5)) +
-    theme(strip.background=element_rect(fill="white", color="black", size=0.5)) +
-    theme(axis.title.x=element_blank(),
-       axis.text.x=element_blank(), 
-       axis.ticks.x=element_blank()) +
-    theme(legend.position="top") +
-    theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1))
-  
-  if (style == "mean") { 
-    # Plot mean and confidence intervals
-    stats_df <- stats_df[!is.na(stats_df$BASELINE_SIGMA), ]
-    p1 <- ggplot(stats_df, aes_string(x=idColumn, y="BASELINE_SIGMA", ymax=max("BASELINE_SIGMA"))) +
-      base_theme + 
-      xlab("") +
-      ylab(expression(Sigma)) +
-      geom_hline(yintercept=0, size=1*size, linetype=2, color="grey") +
-      geom_point(size=3*size, position=position_dodge(0.6)) +
-      geom_errorbar(aes_string(ymin="BASELINE_CI_LOWER", ymax="BASELINE_CI_UPPER"), 
-                    width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.6))
-    if (!is.null(title)) {
-        p1 <- p1 + ggtitle(title)
-    }    
-    if (is.null(groupColumn) & facetBy == "region") {
-      p1 <- p1 + facet_grid(REGION ~ .)
-    } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
-      #groupColors <- factor(groupColors, levels=groupColors)
-      p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
-        aes_string(color=groupColumn) + facet_grid(REGION ~ .)
-    } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
-      p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
-    } else if (!is.null(groupColumn) & facetBy == "group") {
-      p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
-        aes_string(color="REGION") + facet_grid(paste(groupColumn, "~ ."))
+    # Check arguments
+    style <- match.arg(style)
+    facetBy <- match.arg(facetBy)
+    
+    # Check input object
+    if (is(baseline, "Baseline")) {
+        stats_df <- baseline@stats
+    } else if (is(baseline, "data.frame")) {
+        stats_df <- baseline
     } else {
-      stop("Cannot facet by group if groupColumn=NULL")
+        stop("Input must be either a data.frame or Baseline object.")
     }
-  }
-  
-  # Add additional theme elements
-  p1 <- p1 + do.call(theme, list(...))
-  
-#   # Plot
-#   if (!silent) { 
-       p1
-#   } else {
-#       invisible(p1)
-#   }
-  
+    
+    # Check for required columns
+    baseline_cols <- c("REGION", 
+                       "BASELINE_SIGMA", 
+                       "BASELINE_CI_LOWER", 
+                       "BASELINE_CI_LOWER", 
+                       "BASELINE_CI_LOWER", 
+                       "BASELINE_CI_PVALUE")
+    if (!(all(baseline_cols %in% names(stats_df)))) {
+        stop("Input must contain columns defined by summarizeBaseline.")
+    }
+    
+    # Check for proper grouping
+    if (any(duplicated(stats_df[, c(idColumn, groupColumn, "REGION")]))) {
+        stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
+    }
+    
+    # Subset to regions of interest
+    if (!is.null(subsetRegions)) {
+        stats_df <- stats_df[stats_df$REGION %in% subsetRegions, ]
+    }
+    
+    # Set base plot settings
+    base_theme <- theme_bw() +
+        theme(panel.background=element_blank(),
+              panel.grid.major=element_blank(),
+              panel.grid.minor=element_blank(),
+              panel.border=element_rect(color="black", size=0.5)) +
+        theme(strip.background=element_rect(fill="white", color="black", size=0.5)) +
+        theme(axis.title.x=element_blank(),
+              axis.text.x=element_blank(), 
+              axis.ticks.x=element_blank()) +
+        theme(legend.position="top") +
+        theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1))
+    
+    if (style == "mean") { 
+        # Plot mean and confidence intervals
+        stats_df <- stats_df[!is.na(stats_df$BASELINE_SIGMA), ]
+        p1 <- ggplot(stats_df, aes_string(x=idColumn, y="BASELINE_SIGMA", ymax=max("BASELINE_SIGMA"))) +
+            base_theme + 
+            xlab("") +
+            ylab(expression(Sigma)) +
+            geom_hline(yintercept=0, size=1*size, linetype=2, color="grey") +
+            geom_point(size=3*size, position=position_dodge(0.6)) +
+            geom_errorbar(aes_string(ymin="BASELINE_CI_LOWER", ymax="BASELINE_CI_UPPER"), 
+                          width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.6))
+        if (!is.null(title)) {
+            p1 <- p1 + ggtitle(title)
+        }    
+        if (is.null(groupColumn) & facetBy == "region") {
+            p1 <- p1 + facet_grid(REGION ~ .)
+        } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
+            #groupColors <- factor(groupColors, levels=groupColors)
+            p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
+                aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+        } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
+            p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+        } else if (!is.null(groupColumn) & facetBy == "group") {
+            p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
+                aes_string(color="REGION") + facet_grid(paste(groupColumn, "~ ."))
+        } else {
+            stop("Cannot facet by group if groupColumn=NULL")
+        }
+    }
+    
+    # Add additional theme elements
+    p1 <- p1 + do.call(theme, list(...))
+    
+    #   # Plot
+    #   if (!silent) { 
+    p1
+    #   } else {
+    #       invisible(p1)
+    #   }
+    
 }
 
 
@@ -1535,155 +1560,155 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
 
 ##Covolution
 break2chunks<-function(G=1000){
-  base<-2^round(log(sqrt(G),2),0)
-  return(c(rep(base,floor(G/base)-1),base+G-(floor(G/base)*base)))
+    base<-2^round(log(sqrt(G),2),0)
+    return(c(rep(base,floor(G/base)-1),base+G-(floor(G/base)*base)))
 }
 
 PowersOfTwo <- function(G=100){
-  exponents <- array()
-  i = 0
-  while(G > 0){
-    i=i+1
-    exponents[i] <- floor( log2(G) )
-    G <- G-2^exponents[i]
-  }
-  return(exponents)
+    exponents <- array()
+    i = 0
+    while(G > 0){
+        i=i+1
+        exponents[i] <- floor( log2(G) )
+        G <- G-2^exponents[i]
+    }
+    return(exponents)
 }
 
 convolutionPowersOfTwo <- function( cons, length_sigma=4001 ){
-  G = ncol(cons)
-  if(G>1){
-    for(gen in log(G,2):1){
-      ll<-seq(from=2,to=2^gen,by=2)
-      sapply(ll,function(l){cons[,l/2]<<-weighted_conv(cons[,l],cons[,l-1],length_sigma=length_sigma)})
+    G = ncol(cons)
+    if(G>1){
+        for(gen in log(G,2):1){
+            ll<-seq(from=2,to=2^gen,by=2)
+            sapply(ll,function(l){cons[,l/2]<<-weighted_conv(cons[,l],cons[,l-1],length_sigma=length_sigma)})
+        }
     }
-  }
-  return( cons[,1] )
+    return( cons[,1] )
 }
 
 convolutionPowersOfTwoByTwos <- function( cons, length_sigma=4001,G=1 ){
-  if(length(ncol(cons))) G<-ncol(cons)
-  groups <- PowersOfTwo(G)
-  matG <- matrix(NA, ncol=length(groups), nrow=length(cons)/G )
-  startIndex = 1
-  for( i in 1:length(groups) ){
-    stopIndex <- 2^groups[i] + startIndex - 1
-    if(stopIndex!=startIndex){
-      matG[,i] <- convolutionPowersOfTwo( cons[,startIndex:stopIndex], length_sigma=length_sigma )
-      startIndex = stopIndex + 1
+    if(length(ncol(cons))) G<-ncol(cons)
+    groups <- PowersOfTwo(G)
+    matG <- matrix(NA, ncol=length(groups), nrow=length(cons)/G )
+    startIndex = 1
+    for( i in 1:length(groups) ){
+        stopIndex <- 2^groups[i] + startIndex - 1
+        if(stopIndex!=startIndex){
+            matG[,i] <- convolutionPowersOfTwo( cons[,startIndex:stopIndex], length_sigma=length_sigma )
+            startIndex = stopIndex + 1
+        }
+        else {
+            if(G>1) matG[,i] <- cons[,startIndex:stopIndex]
+            else matG[,i] <- cons
+            #startIndex = stopIndex + 1
+        }
     }
-    else {
-      if(G>1) matG[,i] <- cons[,startIndex:stopIndex]
-      else matG[,i] <- cons
-      #startIndex = stopIndex + 1
-    }
-  }
-  return( list( matG, groups ) )
+    return( list( matG, groups ) )
 }
 
 weighted_conv<-function(x,y,w=1,m=100,length_sigma=4001){
-  lx<-length(x)
-  ly<-length(y)
-  if({lx<m}| {{lx*w}<m}| {{ly}<m}| {{ly*w}<m}){
-    if(w<1){
-      y1<-approx(1:ly,y,seq(1,ly,length.out=m))$y
-      x1<-approx(1:lx,x,seq(1,lx,length.out=m/w))$y
-      lx<-length(x1)
-      ly<-length(y1)
+    lx<-length(x)
+    ly<-length(y)
+    if({lx<m}| {{lx*w}<m}| {{ly}<m}| {{ly*w}<m}){
+        if(w<1){
+            y1<-approx(1:ly,y,seq(1,ly,length.out=m))$y
+            x1<-approx(1:lx,x,seq(1,lx,length.out=m/w))$y
+            lx<-length(x1)
+            ly<-length(y1)
+        }
+        else {
+            y1<-approx(1:ly,y,seq(1,ly,length.out=m*w))$y
+            x1<-approx(1:lx,x,seq(1,lx,length.out=m))$y
+            lx<-length(x1)
+            ly<-length(y1)
+        }
     }
-    else {
-      y1<-approx(1:ly,y,seq(1,ly,length.out=m*w))$y
-      x1<-approx(1:lx,x,seq(1,lx,length.out=m))$y
-      lx<-length(x1)
-      ly<-length(y1)
+    else{
+        x1<-x
+        y1<-approx(1:ly,y,seq(1,ly,length.out=floor(lx*w)))$y
+        ly<-length(y1)
     }
-  }
-  else{
-    x1<-x
-    y1<-approx(1:ly,y,seq(1,ly,length.out=floor(lx*w)))$y
-    ly<-length(y1)
-  }
-  tmp<-approx(x=1:(lx+ly-1),y=convolve(x1,rev(y1),type="open"),xout=seq(1,lx+ly-1,length.out=length_sigma))$y
-  tmp[tmp<=0] = 0
-  return(tmp/sum(tmp))
+    tmp<-approx(x=1:(lx+ly-1),y=convolve(x1,rev(y1),type="open"),xout=seq(1,lx+ly-1,length.out=length_sigma))$y
+    tmp[tmp<=0] = 0
+    return(tmp/sum(tmp))
 }
 
 
 combineWeigthedPosteriors<-function(PDF1,NumberOfSeq1,PDF2,NumberOfSeq2,length_sigma=4001){
-  #return(list(calculate_bayesGHelper(list(cbind(PDF1,PDF2),c(log(NumberOfSeq1,2),log(NumberOfSeq2,2))),
-  #                                   length_sigma=length_sigma),NumberOfSeq1+NumberOfSeq2))
-  return( calculate_bayesGHelper( list( cbind(PDF1,PDF2),
-                                        c(log(NumberOfSeq1,2),
-                                          log(NumberOfSeq2,2))
-                                        ),
-                                  length_sigma=length_sigma
-                                  ))
+    #return(list(calculate_bayesGHelper(list(cbind(PDF1,PDF2),c(log(NumberOfSeq1,2),log(NumberOfSeq2,2))),
+    #                                   length_sigma=length_sigma),NumberOfSeq1+NumberOfSeq2))
+    return( calculate_bayesGHelper( list( cbind(PDF1,PDF2),
+                                          c(log(NumberOfSeq1,2),
+                                            log(NumberOfSeq2,2))
+    ),
+    length_sigma=length_sigma
+    ))
 }
 
 calculate_bayesGHelper <- function( listMatG,length_sigma=4001 ){
-  matG <- listMatG[[1]]
-  groups <- listMatG[[2]]
-  i = 1
-  resConv <- matG[,i]
-  denom <- 2^groups[i]
-  if(length(groups)>1){
-    while( i<length(groups) ){
-      i = i + 1
-      resConv <- weighted_conv(resConv, matG[,i], w= {{2^groups[i]}/denom} ,length_sigma=length_sigma)
-      #cat({{2^groups[i]}/denom},"\n")
-      denom <- denom + 2^groups[i]
+    matG <- listMatG[[1]]
+    groups <- listMatG[[2]]
+    i = 1
+    resConv <- matG[,i]
+    denom <- 2^groups[i]
+    if(length(groups)>1){
+        while( i<length(groups) ){
+            i = i + 1
+            resConv <- weighted_conv(resConv, matG[,i], w= {{2^groups[i]}/denom} ,length_sigma=length_sigma)
+            #cat({{2^groups[i]}/denom},"\n")
+            denom <- denom + 2^groups[i]
+        }
     }
-  }
-  return(resConv)
+    return(resConv)
 }
 
 # Given a list of PDFs, returns a convoluted PDF
 groupPosteriors <- function( listPosteriors, max_sigma=20, length_sigma=4001 ,Threshold=2 ){
-  listPosteriors = listPosteriors[ !is.na(listPosteriors) ]
-  Length_Postrior<-length(listPosteriors)
-  if(Length_Postrior>1 & Length_Postrior<=Threshold){
-    cons = matrix(unlist(listPosteriors),length(listPosteriors[[1]]),length(listPosteriors))
-    listMatG <- convolutionPowersOfTwoByTwos(cons,length_sigma=length_sigma)
-    y<-calculate_bayesGHelper(listMatG,length_sigma=length_sigma)
-    return( y/sum(y)/(2*max_sigma/(length_sigma-1)) )
-  }else if(Length_Postrior==1) return(listPosteriors[[1]])
-  else  if(Length_Postrior==0) return(NA)
-  else {
-    cons = matrix(unlist(listPosteriors),length(listPosteriors[[1]]),length(listPosteriors))
-    y = fastConv(cons,max_sigma=max_sigma, length_sigma=length_sigma )
-    return( y/sum(y)/(2*max_sigma/(length_sigma-1)) )
-  }
+    listPosteriors = listPosteriors[ !is.na(listPosteriors) ]
+    Length_Postrior<-length(listPosteriors)
+    if(Length_Postrior>1 & Length_Postrior<=Threshold){
+        cons = matrix(unlist(listPosteriors),length(listPosteriors[[1]]),length(listPosteriors))
+        listMatG <- convolutionPowersOfTwoByTwos(cons,length_sigma=length_sigma)
+        y<-calculate_bayesGHelper(listMatG,length_sigma=length_sigma)
+        return( y/sum(y)/(2*max_sigma/(length_sigma-1)) )
+    }else if(Length_Postrior==1) return(listPosteriors[[1]])
+    else  if(Length_Postrior==0) return(NA)
+    else {
+        cons = matrix(unlist(listPosteriors),length(listPosteriors[[1]]),length(listPosteriors))
+        y = fastConv(cons,max_sigma=max_sigma, length_sigma=length_sigma )
+        return( y/sum(y)/(2*max_sigma/(length_sigma-1)) )
+    }
 }
 
 fastConv<-function(cons, max_sigma=20, length_sigma=4001){
-  chunks<-break2chunks(G=ncol(cons))
-  if(ncol(cons)==3) chunks<-2:1
-  index_chunks_end <- cumsum(chunks)
-  index_chunks_start <- c(1,index_chunks_end[-length(index_chunks_end)]+1)
-  index_chunks <- cbind(index_chunks_start,index_chunks_end)
-  
-  case <- sum(chunks!=chunks[1])
-  if(case==1) End <- max(1,((length(index_chunks)/2)-1))
-  else End <- max(1,((length(index_chunks)/2)))
-  
-  firsts <- sapply(1:End,function(i){
-    indexes<-index_chunks[i,1]:index_chunks[i,2]
-    convolutionPowersOfTwoByTwos(cons[ ,indexes])[[1]]
-  })
-  if(case==0){
-    result<-calculate_bayesGHelper( convolutionPowersOfTwoByTwos(firsts) )
-  }else if(case==1){
-    last<-list(calculate_bayesGHelper(
-      convolutionPowersOfTwoByTwos( cons[ ,index_chunks[length(index_chunks)/2,1]:index_chunks[length(index_chunks)/2,2]] )
-    ),0)
-    result_first<-calculate_bayesGHelper(convolutionPowersOfTwoByTwos(firsts))
-    result<-calculate_bayesGHelper(
-      list(
-        cbind(
-          result_first,last[[1]]),
-        c(log(index_chunks_end[length(index_chunks)/2-1],2),log(index_chunks[length(index_chunks)/2,2]-index_chunks[length(index_chunks)/2,1]+1,2))
-      )
-    )
-  }
-  return(as.vector(result))
+    chunks<-break2chunks(G=ncol(cons))
+    if(ncol(cons)==3) chunks<-2:1
+    index_chunks_end <- cumsum(chunks)
+    index_chunks_start <- c(1,index_chunks_end[-length(index_chunks_end)]+1)
+    index_chunks <- cbind(index_chunks_start,index_chunks_end)
+    
+    case <- sum(chunks!=chunks[1])
+    if(case==1) End <- max(1,((length(index_chunks)/2)-1))
+    else End <- max(1,((length(index_chunks)/2)))
+    
+    firsts <- sapply(1:End,function(i){
+        indexes<-index_chunks[i,1]:index_chunks[i,2]
+        convolutionPowersOfTwoByTwos(cons[ ,indexes])[[1]]
+    })
+    if(case==0){
+        result<-calculate_bayesGHelper( convolutionPowersOfTwoByTwos(firsts) )
+    }else if(case==1){
+        last<-list(calculate_bayesGHelper(
+            convolutionPowersOfTwoByTwos( cons[ ,index_chunks[length(index_chunks)/2,1]:index_chunks[length(index_chunks)/2,2]] )
+        ),0)
+        result_first<-calculate_bayesGHelper(convolutionPowersOfTwoByTwos(firsts))
+        result<-calculate_bayesGHelper(
+            list(
+                cbind(
+                    result_first,last[[1]]),
+                c(log(index_chunks_end[length(index_chunks)/2-1],2),log(index_chunks[length(index_chunks)/2,2]-index_chunks[length(index_chunks)/2,1]+1,2))
+            )
+        )
+    }
+    return(as.vector(result))
 }
