@@ -1,4 +1,5 @@
 site_name: shazam
+repo_url: https://bitbucket.org/kleinstein/shazam
 theme: readthedocs
 markdown_extensions:
   - def_list
