@@ -30,12 +30,12 @@ analysis topics:
 Related Projects
 -------------------------------------------------------------------------------
 
-* [pRESTO](http://presto.readthedocs.org) - 
+* [pRESTO](http://presto.readthedocs.io) - 
   Raw read assembly, quality control and UMI processing 
-* [Change-O](http://changeo.readthedocs.org) - 
+* [Change-O](http://changeo.readthedocs.io) - 
   V(D)J alignment standardization and clonal clustering
-* [Alakazam](http://alakazam.readthedocs.org) - 
+* [Alakazam](http://alakazam.readthedocs.io) - 
   Lineage reconstruction, V(D)J gene usage, repertoire diversity and 
   physicochemical property analysis
-* [TIgGER](http://clip.med.yale.edu/tigger) - 
+* [TIgGER](http://tigger.readthedocs.io) - 
   Polymorphism detection and genotyping
