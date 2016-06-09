@@ -19,8 +19,7 @@ Usage
 distToNearest(db, sequenceColumn = "JUNCTION", vCallColumn = "V_CALL",
 jCallColumn = "J_CALL", model = c("hs1f", "m1n", "ham", "aa", "hs5f"),
 normalize = c("length", "none"), symmetry = c("avg", "min"),
-first = TRUE, nproc = 1, fields = NULL, cross = NULL, mst = FALSE,
-rcpp = F)
+first = TRUE, nproc = 1, fields = NULL, cross = NULL, mst = FALSE)
 ```
 
 Arguments
@@ -69,9 +68,6 @@ cross
 
 mst
 :   if true, return comma-separated branch lengths from minimum spanning tree
-
-rcpp
-:   Use the Rcpp version of the code
 
 
 

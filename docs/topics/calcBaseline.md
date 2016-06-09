@@ -143,4 +143,12 @@ Calculating BASELINe probability density functions...
 
 
 
+See also
+-------------------
+
+See [Baseline](Baseline-class.md) for the return object.
+See [groupBaseline](groupBaseline.md) and [summarizeBaseline](summarizeBaseline.md) for further processing.
+See [plotBaselineSummary](plotBaselineSummary.md) and [plotBaselineDensity](plotBaselineDensity.md) for plotting results.
+
+
 

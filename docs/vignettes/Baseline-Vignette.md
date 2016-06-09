@@ -175,8 +175,8 @@ function is shown.
 ```r
 # Plot selection PDFs for a subset of the data
 group_colors <- c("RL013"="steelblue", "RL018"="firebrick")
-plotBaselineDensity(baseline_sub, "CPRIMER", "BARCODE",
-                    groupColors=group_colors, sigmaLimits=c(-3, 3))
+plotBaselineDensity(baseline_sub, "CPRIMER", groupColumn="BARCODE", colorElement="group", 
+                    colorValues=group_colors, sigmaLimits=c(-3, 3))
 ```
 
 ![plot of chunk Baseline-Vignette-7](figure/Baseline-Vignette-7-1.png)

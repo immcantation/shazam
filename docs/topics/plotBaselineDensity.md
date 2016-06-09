@@ -17,9 +17,9 @@ Usage
 --------------------
 ```
 plotBaselineDensity(baseline, idColumn, groupColumn = NULL,
-groupColors = NULL, subsetRegions = NULL, sigmaLimits = c(-5, 5),
-title = NULL, facetBy = c("region", "group"), style = c("density"),
-size = 1, silent = FALSE, ...)
+colorElement = c("id", "group"), colorValues = NULL, title = NULL,
+subsetRegions = NULL, sigmaLimits = c(-5, 5), facetBy = c("region",
+"group"), style = c("density"), size = 1, silent = FALSE, ...)
 ```
 
 Arguments
@@ -38,12 +38,20 @@ groupColumn
 containing secondary grouping identifiers. If `NULL`, 
 organize the plot only on values in `idColumn`.
 
-groupColors
-:   named vector of colors for entries in `groupColumn`, with 
-names defining unique values in the `groupColumn` and values
-being colors. Also controls the order in which groups appear on the
+colorElement
+:   one of `c("id", "group")` specifying whether the 
+`idColumn` or `groupColumn` will be used for color coding. 
+The other entry, if present, will be coded by line style.
+
+colorValues
+:   named vector of colors for entries in `colorElement`, with 
+names defining unique values in the `colorElement` column and values
+being colors. Also controls the order in which values appear on the
 plot. If `NULL` alphabetical ordering and a default color palette 
-will be used. Has no effect if `facetBy="group"`.
+will be used.
+
+title
+:   string defining the plot title.
 
 subsetRegions
 :   character vector defining a subset of regions to plot, correspoding 
@@ -54,24 +62,21 @@ sigmaLimits
 :   numeric vector containing two values defining the `c(lower, upper)`
 bounds of the selection scores to plot.
 
-title
-:   string defining the plot title.
-
 facetBy
-:   one of c("group", "region") specifying which category to facet the
+:   one of `c("region", "group")` specifying which category to facet the
 plot by, either values in `groupColumn` ("group") or regions
-defined in `baseline` ("region"). The data that is not used
-for faceting will be color coded.
+defined in the `regions` slot of the `baseline` object ("region").
+If this is set to "group", then the region will behave as the `groupColumn`
+for purposes of the `colorElement` argument.
 
 style
 :   type of plot to draw. One of:
 
 +  `"density"`:  plots a set of curves for each probability 
 density function in `baseline`, 
-with the line type determined by `idColumn`.
-Faceting and coloring are determine by values in 
-`groupColumn` and regions defined in 
-`baseline`, depending upon the 
+with colors determined by values in the
+`colorElement` column.
+Faceting is determined by the 
 `facetBy` argument.
 
 
@@ -147,21 +152,21 @@ Calculating BASELINe statistics...
 ```R
 
 # Plot mean and confidence interval
-plotBaselineDensity(baseline, "BARCODE", "CPRIMER", style="density")
+plotBaselineDensity(baseline, "BARCODE", "CPRIMER")
 
 ```
 
 ![6](plotBaselineDensity-6.png)
 
 ```R
-plotBaselineDensity(baseline, "BARCODE", "CPRIMER", subsetRegions="CDR", style="density")
+plotBaselineDensity(baseline, "BARCODE", "CPRIMER", subsetRegions="CDR")
 
 ```
 
 ![8](plotBaselineDensity-8.png)
 
 ```R
-plotBaselineDensity(baseline, "BARCODE", "CPRIMER", facetBy="group", style="density")
+plotBaselineDensity(baseline, "BARCODE", "CPRIMER", facetBy="group")
 
 ```
 
@@ -171,7 +176,7 @@ plotBaselineDensity(baseline, "BARCODE", "CPRIMER", facetBy="group", style="dens
 
 # Reorder and recolor groups
 group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", "IGHG"="seagreen", "IGHA"="steelblue")
-plotBaselineDensity(baseline, "BARCODE", "CPRIMER", groupColors=group_colors, style="density")
+plotBaselineDensity(baseline, "BARCODE", "CPRIMER", colorElement="group", colorValues=group_colors)
 ```
 
 ![12](plotBaselineDensity-12.png)

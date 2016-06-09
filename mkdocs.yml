@@ -9,15 +9,16 @@ markdown_extensions:
       permalink: True
 docs_dir: docs
 pages:
-  - About:
+  - 'About':
     - 'Introduction': index.md
     - 'Download & Installation': install.md
+    - 'Release Notes': news.md
     - 'Package Overview': topics/shazam.md
-  - Vignettes:
+  - 'Vignettes':
     - 'Selection quantification': vignettes/Baseline-Vignette.md
     - 'Distance to nearest neighbor': vignettes/DistToNearest-Vignette.md
     - 'SHM targeting models': vignettes/Targeting-Vignette.md
-  - Help Topics:
+  - 'Help Topics':
     - 'Mutation Profiling':
       - topics/collapseByClone.md
       - topics/calcDBExpectedMutations.md
@@ -63,10 +64,3 @@ pages:
       - topics/getPlatform.md
     - 'Data':
       - topics/InfluenzaDb.md
-
-
-
-
-
-
-
