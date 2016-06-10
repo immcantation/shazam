@@ -13,8 +13,8 @@ This is done via the following steps:
 3. Generate a histogram of the nearest neighbor distances and inspect for the 
    threshold separating the two modes.
 
-Load Change-O data
---------------------------------------------------------------------------------
+## Load Change-O data
+
 A small example Change-O tab-delimited database file is included in the `shazam` 
 package. Calculating the nearest neighbor distances requires the following 
 fields (columns) to be present in the Change-O file: `V_CALL`, `J_CALL`, 
@@ -27,8 +27,8 @@ library(shazam)
 db <- subset(InfluenzaDb, BARCODE == "RL013")
 ```
 
-Calculate nearest neighbor distances
---------------------------------------------------------------------------------
+## Calculate nearest neighbor distances
+
 The function for calculating distance between every sequence and its nearest
 neighbor takes a few parameters to adjust how the distance is measured. If a 
 genotype has been inferred using the methods in the `tigger` package, and a 
@@ -61,8 +61,8 @@ dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f",
                            first=FALSE, normalize="none", nproc=1)
 ```
 
-Generate histogram
---------------------------------------------------------------------------------
+## Generate histogram
+
 The primary use of the distance to nearest calculation in the Change-O pipeline 
 is to determine the optimal threshold for separating clonally related sequences 
 (represented by sequences with "near"" neighbors) from singletons (sequences 

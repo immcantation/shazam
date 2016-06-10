@@ -11,8 +11,8 @@ quantified via the following steps:
 2. Calculate the selection scores and group by relevant fields for comparison.
 3. Plot and compare selection scores of different groups of sequences.
 
-Load Change-O data
---------------------------------------------------------------------------------
+## Load Change-O data
+
 A small example Change-O tab-delimited database file is included in the `shazam` 
 package. The example dataset consists of a subset of Ig sequencing data from an 
 influenza vaccination study (Laserson and Vigneault et al., PNAS, 2014). The 
@@ -28,8 +28,8 @@ library(shazam)
 db <- InfluenzaDb
 ```
 
-Calculate selection scores and group by relevant fields for comparison
---------------------------------------------------------------------------------
+## Calculate selection scores and group by relevant fields for comparison
+
 The first step to calculate selection is to call `calcDBClonalConsensus` to 
 collapse sequences by the `CLONE` column, if the data has been divided into 
 clonal groups. 
@@ -123,8 +123,8 @@ baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
 baseline_sub <- groupBaseline(baseline_sub, groupBy=c("BARCODE", "CPRIMER"))
 ```
 
-Plot and compare selection scores of different groups of sequences
---------------------------------------------------------------------------------
+## Plot and compare selection scores of different groups of sequences
+
 `plotBaselineSummary` plots the mean and confidence interval of selection scores 
 for the given groups. The `idColumn` argument specifies the field that contains 
 identifiers of the groups of sequences. If there is a secondary field by which 

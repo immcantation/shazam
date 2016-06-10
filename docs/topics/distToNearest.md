@@ -53,9 +53,10 @@ symmetry
 average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 
 first
-:   if `TRUE` only the first call of the gene assignments is used.
-if `FALSE` the union of ambiguous gene assignments is used to 
-group all sequences with any overlapping gene calls.
+:   if `TRUE` only the first call of the gene assignments 
+is used. if `FALSE` the union of ambiguous gene 
+assignments is used to group all sequences with any 
+overlapping gene calls.
 
 nproc
 :   number of cores to distribute the function over.
@@ -64,10 +65,12 @@ fields
 :   additional fields to use for grouping
 
 cross
-:   columns for grouping to calculate distances across groups (self vs others)
+:   columns for grouping to calculate distances across groups 
+(self vs others)
 
 mst
-:   if true, return comma-separated branch lengths from minimum spanning tree
+:   if true, return comma-separated branch lengths from minimum 
+spanning tree
 
 
 
@@ -75,8 +78,8 @@ Value
 -------------------
 
 Returns a modified `db` data.frame with nearest neighbor distances in the 
-`DIST_NEAREST` column if `crossGrups=NULL` or in the `CROSS_DIST_NEAREST`
-column if `crossGroups` was specified.
+`DIST_NEAREST` column if `crossGrups=NULL` or in the 
+`CROSS_DIST_NEAREST` column if `crossGroups` was specified.
 
 Details
 -------------------
@@ -86,10 +89,10 @@ sequences to clonal groups. A histogram of the resulting vector is often bimodal
 with the ideal threshold being a value that separates the two modes.
 
 "hs5f" use distance derived from the [HS5FModel](HS5FModel.md)
-using [calcTargetingDistance](calcTargetingDistance.md). "hs1f" and "m1n" use [HS1FDistance](HS1FDistance.md) and [M1NDistance](M1NDistance.md)
- to calculate distances respectively. "ham" uses a nucleotide hamming distance matrix from 
- [getDNAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getDNAMatrix), with gaps being zero. "aa" uses an amino acid hamming distance matrix 
- from [getAAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getAAMatrix).
+using [calcTargetingDistance](calcTargetingDistance.md). "hs1f" and "m1n" use [HS1FDistance](HS1FDistance.md) and 
+[M1NDistance](M1NDistance.md) to calculate distances respectively. "ham" uses a nucleotide 
+hamming distance matrix from [getDNAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getDNAMatrix), with gaps being zero. 
+"aa" uses an amino acid hamming distance matrix from [getAAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getAAMatrix).
 
 References
 -------------------

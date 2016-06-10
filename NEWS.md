@@ -14,6 +14,10 @@ Distance Profiling:
   neighboring nodes in a minimum spanning tree.
 + Updated single nucleotide distance models to use the new C++ distance
   methods in alakazam for better performance.
++ Fixed a bug leading to failed distance calculations for the `aa` model 
+  of `distToNearest()`.
++ Fixed a bug wherein gap characters where being translated into Ns (Asn) 
+  rather than Xs within the `aa` model of `distToNearest()`.
 
 Mutation Profiling:
 

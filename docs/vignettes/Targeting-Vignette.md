@@ -16,8 +16,8 @@ likelihood of the observed mutations. This is done via the following steps:
 4. Visualize the mutability model to identify hot and cold spots.
 5. Calculate a nucleotide distance matrix based on the underlying SHM models.
 
-Load Change-O data
---------------------------------------------------------------------------------
+## Load Change-O data
+
 A small example Change-O tab-delimited database file is included in the `shazam` 
 package. Inferring a targeting model requires the following fields (columns) to 
 be present in the Change-O file: `SEQUENCE_IMGT`, `GERMLINE_IMGT_D_MASK` and 
@@ -30,8 +30,8 @@ library(shazam)
 db <- InfluenzaDb
 ```
 
-Infer targeting model (substitution and mutability)
---------------------------------------------------------------------------------
+## Infer targeting model (substitution and mutability)
+
 The function for inferring substitution rates (`createSubstitutionMatrix`) 
 counts the number of mutations from a given base to all others occurring in the 
 center position for all 5-mer motifs in the dataset. The `model` argument of 
@@ -90,8 +90,8 @@ tar_matrix <- createTargetingMatrix(sub_matrix, mut_matrix)
 model <- createTargetingModel(db, model="S")
 ```
 
-Visualize targeting model
---------------------------------------------------------------------------------
+## Visualize targeting model
+
 The visualization of a dataset's underlying SHM mutability model can be used to 
 investigate hot and cold spot motifs. The length of the bars on the plot of 
 mutability rates corresponds to the likelihood of a given base in the given 
@@ -128,8 +128,8 @@ plotMutability(model, nucleotides="T", style="bar")
 
 ![plot of chunk Targeting-Vignette-5](figure/Targeting-Vignette-5-2.png)
 
-Calculate targeting distance matrix
---------------------------------------------------------------------------------
+## Calculate targeting distance matrix
+
 In the Change-O pipeline, the `hs5f` cloning method rely on an inferred 
 targeting model. If users wish to use a targeting model inferred from their 
 data to assign distance between sequences for clonal grouping, then the observed 
