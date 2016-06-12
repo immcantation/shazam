@@ -30,13 +30,13 @@ slidingArrayOf5mers <- function(strSequence){
 # @return   distance between two sequences.
 #
 # @examples
-# seq1 = c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", 
+# seq1 <- c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", 
 #          "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
-# seq2 = c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", 
+# seq2 <- c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", 
 #          "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
 #
-# distSeq5mers(seq1, seq2, HS5FModel)
-distSeq5mers <- function(seq1, seq2, targeting_model, 
+# shazam:::dist5Mers(seq1, seq2, HS5FModel)
+dist5Mers <- function(seq1, seq2, targeting_model, 
                          normalize=c("none" ,"length", "mutations"),
                          symmetry=c("avg","min")) {
     # Evaluate choices
@@ -103,11 +103,12 @@ distSeq5mers <- function(seq1, seq2, targeting_model,
 #
 # @examples
 # seq <- c("ATG-C", "AT--C", "ATC-C", "ATQ-C")
-# shazam:::distSeqMat(seq[1], seq[2])
-# shazam:::distSeqMat(seq[1], seq[3])
-# shazam:::distSeqMat(seq[1], seq[4])
-distSeqMat <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
+# shazam:::dist1Mers(seq[1], seq[2])
+# shazam:::dist1Mers(seq[1], seq[3])
+# shazam:::dist1Mers(seq[1], seq[4])
+dist1Mers <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
                        normalize=c("none" ,"length", "mutations")) {
+    # TODO: No longer used.
     # Evaluate choices
     model <- match.arg(model)
     normalize <- match.arg(normalize)
@@ -191,7 +192,7 @@ getPairwiseDistances <- function(arrJunctions, targeting_model,
     matDistance <-
         sapply(1:numbOfJunctions, function(i) c(rep.int(0,i-1), 
                                                 sapply(i:numbOfJunctions, function(j) {
-            distSeq5mers(.matSeqSlidingFiveMer[,i],
+            dist5Mers(.matSeqSlidingFiveMer[,i],
                          .matSeqSlidingFiveMer[,j],
                          targeting_model,
                          normalize=normalize,
@@ -208,7 +209,8 @@ getPairwiseDistances <- function(arrJunctions, targeting_model,
 # are only observed once
 findUniqueJunctions <- function(arrJunctions) {
     # Initialize array of distances
-    arrJunctionsDist <- rep(NA,length(arrJunctions))
+    # TODO: arrJunctionsDist is always NA? Not needed.
+    arrJunctionsDist <- rep(NA, length(arrJunctions))
     
     # Filter unique junctions
     arrJunctionsUnique <- unique(arrJunctions)
@@ -246,13 +248,15 @@ findUniqueJunctions <- function(arrJunctions) {
 #                         (self vs others)
 # @param    mst           if true, return comma-separated branch lengths from minimum 
 #                         spanning tree
+#
 # @return   A vector of distances to the closest sequence.
+# 
 # @examples
 # arrJunctions <- c( "ACGTACGTACGT","ACGAACGTACGT",
 #                    "ACGAACGTATGT", "ACGAACGTATGC",
 #                    "ACGAACGTATCC","AAAAAAAAAAAA")
-# getClosestBy5mers(arrJunctions, HS5FModel, normalize="none" )
-getClosestBy5mers <- function(arrJunctions, targeting_model, 
+# shazam:::getClosestBy5Mers(arrJunctions, HS5FModel, normalize="none")
+getClosestBy5Mers <- function(arrJunctions, targeting_model, 
                               normalize=c("none" ,"length", "mutations"),
                               symmetry=c("avg","min"),
                               crossGroups=NULL, mst=FALSE) {
@@ -336,9 +340,9 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
 }
 
 
-# Given an array of junction sequences, find the distance to the closest sequence
+# Given an array of sequences, find the distance to the closest sequence
 #
-# @param    arrJunctions  character vector of junction sequences.
+# @param    sequences     character vector of sequences.
 # @param    model         DNA (ham) or amino acid (aa) hamming distance model or
 #                         mouse (m1n) or human (hs1f) single nucleotide distance model
 # @param    normalize     method of normalization. Default is "none".
@@ -349,36 +353,44 @@ getClosestBy5mers <- function(arrJunctions, targeting_model,
 #                         (self vs others)
 # @param    mst           if true, return comma-separated branch lengths from minimum 
 #                         spanning tree
+#
 # @return   A vector of distances to the closest sequence.
+#
 # @examples
-# seq <- c("ACGTACGTACGT", "ACGAACGTACGT", "ACGAACGTATGT", "ACGAACGTATGC",
-#          "ACGAACGTATCC", "AAAAAAAAAAAA", "A-GAACGTATCC", "AAAAAA---AAA")
-# shazam:::getClosestMat(seq, model="ham", normalize="none")
-# shazam:::getClosestMat(seq, model="aa", normalize="none")
-getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
-                          normalize=c("none" ,"length", "mutations"),
-                          crossGroups=NULL, mst=FALSE) {
+# sequences <- c("ACGTACGTACGT", "ACGAACGTACGT", "ACGAACGTATGT", "ACGAACGTATGC",
+#                "ACGAACGTATCC", "AAAAAAAAAAAA", "A-GAACGTATCC", "AAAAAA---AAA")
+# shazam:::getClosestBy1Mers(sequences, model="ham", normalize="none")
+# shazam:::getClosestBy1Mers(sequences, model="aa", normalize="none")
+# shazam:::getClosestBy1Mers(sequences, model="ham", normalize="length")
+# shazam:::getClosestBy1Mers(sequences, model="aa", normalize="length")
+getClosestBy1Mers <- function(sequences, model=c("ham","aa","m1n","hs1f"),
+                              normalize=c("none" ,"length", "mutations"),
+                              crossGroups=NULL, mst=FALSE) {
+    ## DEBUG
+    # sequences <- c("ACGTACGTACGT", "ACGAACGTACGT", "AAAAAAAAAAAA", "A-AAAA---AAA")
+    # model="aa"; normalize="length"; crossGroups=NULL; mst=FALSE
+    
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
     
     ## If crossGroup requested, but only one group found, return NA
     if (!is.null(crossGroups) & length(unique(crossGroups)) < 2) {
-        arrJunctionsDist <- rep(NA, length(arrJunctions))
-        return (arrJunctionsDist)
+        seq_dist <- rep(NA, length(sequences))
+        return (seq_dist)
     }
     
     # Find unique sequences and return distance array with mapping
-    l <- findUniqueJunctions(arrJunctions)
-    arrJunctionsDist <- l$arrJunctionsDist
-    arrJunctionsUnique <- l$arrJunctionsUnique
-    # indexJunctionsCounts <- l$indexJunctionsCounts
+    x <- findUniqueJunctions(sequences)
+    ## TODO: x$arrJunctionsDist is always NAs. Seems pointless.
+    seq_dist <- x$arrJunctionsDist
+    seq_uniq <- x$arrJunctionsUnique
+    names(seq_dist) <- names(seq_uniq) <- seq_uniq
     
-    
-    # Compute distances between junctions
-    numbOfUniqueJunctions <- length(c(arrJunctionsUnique))
-    arrUniqueJunctionsDist <- rep(NA, numbOfUniqueJunctions)
-    if (numbOfUniqueJunctions > 1) {
+    # Compute distances between sequences
+    n_uniq <- length(seq_uniq)
+    seq_uniq_dist <- rep(NA, n_uniq)
+    if (n_uniq > 1) {
         if (model == "ham") {
             dist_mat <- getDNAMatrix(gap=0)
         } else if (model == "m1n") {
@@ -387,81 +399,104 @@ getClosestMat <- function(arrJunctions, model=c("ham","aa","m1n","hs1f"),
             dist_mat <- HS1FDistance
         } else if (model == "aa") {
             # Translate sequences
-            arrJunctionsUnique <- strsplit(gsub("[-.]", "X", arrJunctionsUnique), "")
-            arrJunctionsUnique <- sapply(arrJunctionsUnique, 
-                                         function(s) { paste(seqinr::translate(s, ambiguous=TRUE), 
-                                                             collapse="") })
-            print(arrJunctionsUnique)
+            seq_uniq <- setNames(alakazam::translateDNA(seq_uniq), seq_uniq)
             dist_mat <- getAAMatrix()
         }
-        matDistance <- pairwiseDist(arrJunctionsUnique, dist_mat)
         
-        junction_length <-  unique(stri_length(arrJunctionsUnique))
-        if (length(junction_length) > 1) {
-            stop("Unexpected. Different junction lengths found")
+        # Check for length mismatches
+        seq_length <-  unique(stri_length(seq_uniq))
+        if (length(seq_length) > 1) {
+            stop("Unexpected. Different sequence lengths found.")
         }
+        
+        uniq_mat <- pairwiseDist(seq_uniq, dist_mat=dist_mat)
+        
+        ## DEBUG
+        # cat("\n-> seq_uniq:\n")
+        # print(seq_uniq)
+        # cat("\n-> uniq_mat (raw):\n")
+        # print(uniq_mat)
+
         # Normalize distances
         if (normalize == "length") { 
-            matDistance <- matDistance / junction_length
+            uniq_mat <- uniq_mat / seq_length
         } else if (normalize == "mutations") {
             #dist <- dist/sum(strsplit(seq1,"")[[1]] != strsplit(seq2,"")[[1]])
-            stop("Sorry! nomalize=mutations not available")
+            stop("Sorry! nomalize=mutations is not available.")
         }
         
-        # Find minimum distance for each sequence
-        if (is.null(crossGroups)) {
-            if(!mst) {
-                arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJunctions, 
-                                                 function(i) { 
-                                                     ## Return smaller value greater than 0
-                                                     ## If all 0, return NA
-                                                     gt0 <- which(matDistance[,i]>0)
-                                                     if (length(gt0)==0) return (NA)
-                                                     min(matDistance[,i][gt0]) 
-                                                 })
-                names(arrUniqueJunctionsDist) <- arrJunctionsUnique
-                arrUniqueJunctionsDist <- round(arrUniqueJunctionsDist, 4)
-            } else {
-                # Get adjacency matrix of minimum spanning tree
-                adj <- ape::mst(matDistance)
-                arrUniqueJunctionsDist <- sapply(1:numbOfUniqueJunctions, 
-                                                 function(i) { 
-                                                     # Get value(s) from mst branches
-                                                     gt0 <- which(adj[,i]==1)
-                                                     # If none (broken mst!), return NA
-                                                     if (length(gt0)==0) return (NA)
-                                                     # If multiple values, comma-join
-                                                     paste0(round(matDistance[,i][gt0], 4), 
-                                                            collapse=",")
-                                                 })
-                names(arrUniqueJunctionsDist) <- arrJunctionsUnique
-            }
-        } else {
-            arrJunctionsDist <- sapply(1:length(arrJunctions),function(i) {
-                # Identify sequences to be considered when finding minimum
-                # cross distance
-                thisGroup <- crossGroups[i]
-                otherGroups <-  which(crossGroups!=thisGroup)
-                otherJunctions <- unique(arrJunctions[otherGroups])
-                otherJunctionsUniqueIdx <- match(otherJunctions,arrJunctionsUnique)
-                thisJunctionUniqueIdx <- match(arrJunctions[i],arrJunctionsUnique)
-                matDistanceRow <- matDistance[thisJunctionUniqueIdx,otherJunctionsUniqueIdx]
-                #min(range(matDistanceRow[matDistanceRow>0],finite=T))
-                gt0 <- which(matDistanceRow>0)
-                if (length(gt0)==0) return (NA)
-                min(matDistanceRow[gt0])
-            })  
-            names(arrJunctionsDist) <- arrJunctions
-            return (round(arrJunctionsDist,4))
-        }
+        ## DEBUG
+        # cat("\n-> seq_length:\n")
+        # print(seq_length)
+        # cat("\n-> uniq_mat (normalized):\n")
+        # print(uniq_mat)
+        
+    } else {
+        return(seq_dist)
     }
     
-    # Fill the distances for unique sequences
-    # arrJunctionsDist[is.na(arrJunctionsDist)] <- 
-    # arrUniqueJunctionsDist[indexJunctionsCounts==1]
-    arrJunctionsDist <- arrUniqueJunctionsDist[match(names(arrJunctionsDist), 
-                                                     names(arrUniqueJunctionsDist))]
-    return(arrJunctionsDist)
+    # Find minimum distance for each sequence
+    if (is.null(crossGroups)) {
+        if(!mst) {
+            # Return smaller value greater than 0
+            # If all 0, return NA
+            .dmin <- function(i) { 
+                x <- uniq_mat[, i]
+                gt0 <- which(x > 0)
+                if (length(gt0) != 0) { min(x[gt0]) } else { NA }
+            }
+            
+            ## TODO: Could be an apply over columns
+            seq_uniq_dist <- setNames(sapply(1:n_uniq, .dmin), names(seq_uniq))
+        } else {
+            # Get adjacency matrix of minimum spanning tree
+            adj <- ape::mst(uniq_mat)
+            
+            # TODO: This could be cleaner
+            # Get value(s) from mst branches
+            # If none (broken mst!), return NA
+            # If multiple values, comma-join
+            .dmst <- function(i) { 
+                gt0 <- which(adj[, i] == 1)
+                if (length(gt0) != 0) { 
+                    stri_join(round(uniq_mat[, i][gt0], 4), collapse=",") 
+                } else {
+                    NA
+                }
+            }
+            
+            ## TODO: Could be an apply over columns
+            seq_uniq_dist <- setNames(sapply(1:n_uniq, .dmst), names(seq_uniq))
+        }
+        
+        # Define return distance vector
+        seq_dist <- seq_uniq_dist[match(names(seq_dist), names(seq_uniq_dist))]
+        
+        ## DEBUG
+        # cat("\n-> seq_uniq_dist:\n")
+        # print(seq_uniq_dist)
+        # cat("\n-> seq_dist:\n")
+        # print(seq_dist)
+    } else {
+        # Identify sequences to be considered when finding minimum
+        # cross distance
+        .dcross <- function(i) {
+            this_group <- crossGroups[i]
+            other_groups <-  which(crossGroups != this_group)
+            other_seq <- unique(sequences[other_groups])
+            other_idx <- match(other_seq, seq_uniq)
+            this_idx <- match(sequences[i], seq_uniq)
+            r <- uniq_mat[this_idx, other_idx]
+            gt0 <- which(r > 0)
+            
+            if (length(gt0) != 0) { min(r[gt0]) } else { NA }
+        }
+        
+        # Define return distance vector
+        seq_dist <- setNames(sapply(1:length(sequences), .dcross), sequences)
+    }
+    
+    return(round(seq_dist, 4))
 }
 
 #' Distance to nearest neighbor
@@ -649,9 +684,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                              "model",
                              "normalize",
                              "symmetry",
-                             "getClosestMat", 
+                             "getClosestBy1Mers", 
                              "HS1FDistance",
-                             "distSeqMat",
                              "calcTargetingDistance",
                              "findUniqueJunctions",
                              "getPairwiseDistances")
@@ -660,9 +694,9 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     
     if (model %in% c("hs5f")) {
         # Export targeting model to processes
-        if (nproc>1) { parallel::clusterExport(cluster, list("targeting_model",
-                                                             "getClosestBy5mers"), 
-                                               envir=environment()) }    
+        if (nproc > 1) { parallel::clusterExport(cluster, list("targeting_model",
+                                                               "getClosestBy5Mers"), 
+                                                 envir=environment()) }    
         list_db <-
             foreach(idx=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
                 db_group <- db[groups[[idx]],]
@@ -672,7 +706,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                 }
                 arrSeqs <- as.vector(unlist(db[groups[[idx]], sequenceColumn]))
                 db_group$TMP_DIST_NEAREST <-
-                    getClosestBy5mers(arrSeqs,
+                    getClosestBy5Mers(arrSeqs,
                                       targeting_model=targeting_model,
                                       normalize=normalize,
                                       symmetry=symmetry,
@@ -683,28 +717,34 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     } else if (model %in% c("ham", "aa", "m1n", "hs1f")) {    
         list_db <-
             foreach(idx=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
-                db_group <- db[groups[[idx]],]
+                db_group <- db[groups[[idx]], ]
                 crossGroups <- NULL
                 if (!is.null(cross)) {
                     crossGroups <- db_group %>% dplyr::group_indices_(.dots=cross)
                 }
-                arrSeqs <-  as.vector(unlist(db[groups[[idx]],sequenceColumn]))
+                arrSeqs <-  as.vector(unlist(db[groups[[idx]], sequenceColumn]))
                 db_group$TMP_DIST_NEAREST <-
-                    getClosestMat(arrSeqs,
-                                  model=model,
-                                  normalize=normalize,
-                                  crossGroups=crossGroups,
-                                  mst=mst)
+                    getClosestBy1Mers(arrSeqs,
+                                      model=model,
+                                      normalize=normalize,
+                                      crossGroups=crossGroups,
+                                      mst=mst)
                 return(db_group)
             }        
     }
     
+    ## DEBUG
+    # print(list_db)
+    # for (i in 1:length(list_db)) {
+    #     cat(i, ": ", nrow(list_db[[i]]), "\n", sep="")
+    # }
+
     # Convert list from foreach into a db data.frame
     db <- dplyr::bind_rows(list_db)
-    db <- db[order(db$ROW_ID),]
+    db <- db[order(db$ROW_ID), ]
     
     # Stop the cluster
-    if( nproc>1) { parallel::stopCluster(cluster) }
+    if (nproc > 1) { parallel::stopCluster(cluster) }
     
     if (!is.null(cross)) {
         db$CROSS_DIST_NEAREST <- db$TMP_DIST_NEAREST
