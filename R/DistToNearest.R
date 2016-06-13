@@ -6,14 +6,16 @@ NULL
 
 # Returns a 5-mer sliding window of given sequence
 #
-# @param   strSequence   The sequence string
+# @param   sequence   sequence string
 # @return  An array of 5-mer sliding windows
 #
 # @examples
-# slidingArrayOf5mers("ACGTNACGTNACGTN")
-slidingArrayOf5mers <- function(strSequence){
-    seqLength <- stri_length(strSequence)
-    return(substr(rep(strSequence, seqLength - 4), 1:(seqLength - 4), 5:seqLength))
+# window5Mers("ACGTNACGTNACGTN")
+window5Mers <- function(sequence){
+    n <- stri_length(sequence)
+    w <- substr(rep(sequence, n - 4), 1:(n - 4), 5:n)
+    
+    return(w)
 }
 
 
@@ -129,7 +131,7 @@ pairwise5MerDist <- function(sequences, targetingModel,
     # 12345   ABCDE   JKLMN
     # 23456   BCDEF   KLMNO
     # 34567   CDEFG   LMNOP
-    .matSeqSlidingFiveMer <- sapply(sequences, function(x) { slidingArrayOf5mers(x) }, 
+    .matSeqSlidingFiveMer <- sapply(sequences, function(x) { window5Mers(x) }, 
                                     simplify="matrix")
     
     # Compute pairwise distance between all sequences' fivemers (by column)
