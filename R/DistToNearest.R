@@ -90,62 +90,6 @@ dist5Mers <- function(seq1, seq2, targeting_model,
 }
 
 
-# Get distance between two sequences of same length, broken by a sliding window of 5mers
-#
-# @param    seq1          first nucleotide sequence.
-# @param    seq2          second nucleotide sequence.
-# @param    model         DNA (ham) or amino acid (aa) hamming distance model or
-#                         mouse (m1n) or human (hs1f) single nucleotide distance model
-# @param    normalize     The method of normalization. Default is "none".
-#                         "length" = normalize distance by length of junction.
-#                         "mutations" = normalize distance by number of mutations in junction.
-# @return   distance between two sequences.
-#
-# @examples
-# seq <- c("ATG-C", "AT--C", "ATC-C", "ATQ-C")
-# shazam:::dist1Mers(seq[1], seq[2])
-# shazam:::dist1Mers(seq[1], seq[3])
-# shazam:::dist1Mers(seq[1], seq[4])
-dist1Mers <- function(seq1, seq2, model=c("ham","aa","m1n","hs1f"),
-                       normalize=c("none" ,"length", "mutations")) {
-    # TODO: No longer used.
-    # Evaluate choices
-    model <- match.arg(model)
-    normalize <- match.arg(normalize)
-    
-    # Get character distance matrix
-    if (model == "ham") {
-        dist_mat <- getDNAMatrix(gap=0)
-    } else if (model == "m1n") {
-        dist_mat <- M1NDistance
-    } else if (model == "hs1f") {
-        dist_mat <- HS1FDistance
-    } else if (model == "aa") {
-        
-        # Translate sequences
-        seq1 <- strsplit(tolower(gsub("[-.]", "N", seq1)), "")[[1]]
-        seq2 <- strsplit(tolower(gsub("[-.]", "N", seq2)), "")[[1]]
-        seq1 <- translate(seq1, ambiguous=T)
-        seq2 <- translate(seq2, ambiguous=T)
-        
-        dist_mat <- getAAMatrix()
-    }
-    
-    # Calculate distance
-    dist <- tryCatch(seqDist(seq1, seq2, dist_mat=dist_mat),
-                     error=function(e) { warning(e); return(NA) })
-    
-    # Normalize distances
-    if (normalize == "length") { 
-        dist <- dist / sum(stri_length(seq1))
-    } else if (normalize == "mutations") {
-        dist <- dist / sum(strsplit(seq1, "")[[1]] != strsplit(seq2, "")[[1]])
-    }
-    
-    return(dist)
-}
-
-
 # Given an array of nucleotide sequences, find the pairwise distances
 # 
 # @param   arrJunctions   character vector of nucleotide sequences.
