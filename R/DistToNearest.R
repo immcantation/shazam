@@ -385,7 +385,7 @@ getClosestBy1Mers <- function(sequences, model=c("ham","aa","m1n","hs1f"),
     ## TODO: x$arrJunctionsDist is always NAs. Seems pointless.
     seq_dist <- x$arrJunctionsDist
     seq_uniq <- x$arrJunctionsUnique
-    names(seq_dist) <- names(seq_uniq) <- seq_uniq
+    names(seq_uniq) <- seq_uniq
     
     # Compute distances between sequences
     n_uniq <- length(seq_uniq)
