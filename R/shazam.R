@@ -98,7 +98,9 @@
 #' @import   graphics
 #' @import   methods
 #' @import   utils
-#' @import   igraph
+#' @importFrom  igraph      V E get.data.frame graph.data.frame
+#'                          get.adjacency get.vertex.attribute
+#'                          set.vertex.attribute get.shortest.paths
 #' @importFrom  ape         mst
 #' @importFrom  data.table  data.table setkey setkeyv
 #' @importFrom  doParallel  registerDoParallel
