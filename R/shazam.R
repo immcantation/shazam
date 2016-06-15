@@ -98,6 +98,8 @@
 #' @import   graphics
 #' @import   methods
 #' @import   utils
+#' @import   igraph
+#' @import   plyr
 #' @importFrom  ape         mst
 #' @importFrom  data.table  data.table setkey setkeyv
 #' @importFrom  doParallel  registerDoParallel
