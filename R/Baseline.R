@@ -1156,6 +1156,7 @@ calcBaselineCI <- function (baseline_pdf,
     return(c(sigmaLow, sigmaUp))
 }
 
+
 # Given a BASELIne PDF calculate P value
 calcBaselinePvalue <- function (baseline_pdf, 
                                 length_sigma=4001, 
@@ -1164,13 +1165,12 @@ calcBaselinePvalue <- function (baseline_pdf,
         #norm <- (length_sigma - 1) / 2 / max_sigma
         norm <- sum(baseline_pdf, na.rm=TRUE)
         pVal <- sum(baseline_pdf[1:((length_sigma - 1)/2)] + baseline_pdf[((length_sigma + 1) / 2)] / 2) / norm
-        if (pVal > 0.5) {
-            pVal <- pVal - 1
-        }
-        return(pVal)
+        if (pVal > 0.5) { pVal <- pVal - 1 }
     } else {
-        return(NA)
+        pVal <- NA
     }
+    
+    return(pVal)
 }
 
 
