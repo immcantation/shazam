@@ -19,10 +19,10 @@ Authors@R: c(person("Mohamed", "Uduman", role=c("aut"),
 Title: Immunoglobulin Somatic Hypermutation Analysis
 Description: Provides a computational framework for Bayesian estimation of
     antigen-driven selection in immunoglobulin (Ig) sequences, providing an
-    intuitive means of analyzing selection by quantifying the degree of 
+    intuitive means of analyzing selection by quantifying the degree of
     selective pressure. Also provides tools to profile mutations in Ig
-    sequences, build models of somatic hypermutation (SHM) in Ig sequences, 
-    and make model-dependent distance comparisons of Ig repertoires. 
+    sequences, build models of somatic hypermutation (SHM) in Ig sequences,
+    and make model-dependent distance comparisons of Ig repertoires.
 License: CC BY-NC-SA 4.0
 URL: http://shazam.readthedocs.org
 BugReports: https://bitbucket.org/kleinstein/shazam/issues
@@ -64,5 +64,6 @@ Collate:
     'DistToNearest.R'
     'MutationDefinitions.R'
     'MutationProfiling.R'
+    'Shmulate.R'
     'TargetingModels.R'
 RoxygenNote: 5.0.1
