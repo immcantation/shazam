@@ -16,6 +16,7 @@ NULL
 #' that a given nucleotide at a given position will mutate to any of the other
 #' nucleotides. This is calculated for every position and every possible mutation.
 calcTargeting <- function(germlineSeq, targetingModel=shazam::HS5FModel) {
+  #* counts on constant variable NUCLEOTIDES (ACGTN-.)
   
   s_germlineSeq <- germlineSeq
   
@@ -74,6 +75,8 @@ calcTargeting <- function(germlineSeq, targetingModel=shazam::HS5FModel) {
 #' @details
 #' All codons one mutation away from the input codon are generated.
 allCodonMuts <- function(codon) {
+  #* counts on constant variable NUCLEOTIDES (ACGTN-.)
+  
   codon_char <- s2c(codon)
   matCodons <- t(array(codon_char, dim=c(3,12)))
   matCodons[1:4, 1] <- NUCLEOTIDES[1:4] # ATGC
@@ -90,6 +93,8 @@ allCodonMuts <- function(codon) {
 #'
 #' @return type of mutation, one of "S", "R", "Stop", or NA.
 mutationType <- function(codonFrom, codonTo) {
+  #* counts on constant variable AMINO_ACIDS
+  
   if (is.na(codonFrom) | is.na(codonTo) | is.na(AMINO_ACIDS[codonFrom]) | is.na(AMINO_ACIDS[codonTo])) {
     mutationType <- NA
   } else {
