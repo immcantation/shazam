@@ -10,9 +10,9 @@ NULL
 #' Simulate mutations in a single sequence
 #'
 #' @param input_seq    sequence in which mutations are to be introduced
-#' @param num_muts     number of mutations to be introduced into input sequence
+#' @param num_muts     number of mutations to be introduced into \code{input_seq}
 #'
-#' @return mutated sequence.
+#' @return A mutated sequence.
 #'
 #' @details
 #' Generates mutations in sequence one by one while updating targeting
@@ -82,21 +82,21 @@ shmulateSeq <- function(input_seq, num_muts) {
 
 #' Simulate sequences to populate a tree
 #'
-#' shmulateTree returns a set of simulated sequences generated from an input sequence and an
-#' igraph object. The input sequence is used to replace the founder node of the igraph lineage
+#' \code{shmulateTree} returns a set of simulated sequences generated from an input sequence and an
+#' igraph object. The input sequence is used to replace the founder node of the \code{igraph} lineage
 #' tree and sequences are simulated with mutations corresponding to edge weights in the tree.
 #' Sequences will not be generated for groups of nodes that are specified to be excluded.
 #'
 #' @param input_seq   sequence in which mutations are to be introduced.
-#' @param graph       igraph object with vertex annotations whose edges are to be recreated.
+#' @param graph       \code{igraph} object with vertex annotations whose edges are to be recreated.
 #' @param field       annotation field to use for both unweighted path length exclusion and
-#'                    consideration as a founder node. If NULL do not exclude any nodes.
+#'                    consideration as a founder node. If \code{NULL} do not exclude any nodes.
 #' @param exclude     vector of annotation values in the given field to exclude from potential
-#'                    founder set. If NULL do not exclude any nodes. Has no effect if field=NULL.
+#'                    founder set. If \code{NULL} do not exclude any nodes. Has no effect if \code{field=NULL}.
 #' @param jun_frac    fraction of characters in the junction region to add proportional number
 #'                    of trunk mutations to the sequence.
 #'
-#' @return a data.frame of simulated sequences.
+#' @return A \code{data.frame} of simulated sequences.
 #' @export
 shmulateTree <- function(input_seq, graph, field=NULL, exclude=NULL, jun_frac=NULL) {
   # Determine founder (mrca) of lineage tree
@@ -156,11 +156,11 @@ shmulateTree <- function(input_seq, graph, field=NULL, exclude=NULL, jun_frac=NU
 #'
 #' @param seq   sequence for which to compute mutation types
 #'
-#' @return matrix of mutation types for each position in the sequence.
+#' @return A \code{matrix} of mutation types for each position in the sequence.
 #'
 #' @details
-#' For each position in the input sequence, use the codon table to
-#' determine what types of mutations are possible. Returns matrix
+#' For each position in the input sequence, use \code{CODON_TABLE} to
+#' determine what types of mutations are possible. Returns \code{matrix}
 #' of all possible mutations and corresponding types.
 computeMutationTypes <- function(seq){
   #* counts on constant variable CODON_TABLE, NUCLEOTIDES (ACTGN-.)
@@ -182,7 +182,7 @@ computeMutationTypes <- function(seq){
 #' @param targeting     probabilities of each position in the sequence being mutated
 #' @param positions     vector of positions which have already been mutated
 #'
-#' @return list of position being mutated and updated vector of mutated positions.
+#' @return A \code{list} of position being mutated and updated vector of mutated positions.
 #'
 #' @details
 #' Sample positions in the sequence to mutate given targeting probability
