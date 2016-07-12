@@ -5,6 +5,84 @@
 NULL
 
 
+#### shmulation ####
+
+
+#' Simulate mutations in a single sequence
+#'
+#' @param input_seq    sequence in which mutations are to be introduced
+#' @param num_muts     number of mutations to be introduced into input sequence
+#'
+#' @return mutated sequence.
+#'
+#' @details
+#' Generates mutations in sequence one by one while updating targeting
+#' probability of each position after each mutation.
+#' @export
+shmulateSeq <- function(input_seq, num_muts) {
+  #* counts on constant variables CODON_TABLE, NUCLEOTIDES (ACTGN-.)
+  
+  # Trim sequence to last codon (getCodonPos from MutationProfiling.R)
+  if(getCodonPos(nchar(input_seq))[3] > nchar(input_seq)) {
+    sim_seq <- substr(input_seq, 1, getCodonPos(nchar(input_seq))[1]-1)
+  } else {
+    sim_seq <- input_seq
+  }
+  sim_seq <- gsub("\\.", "-", sim_seq)
+  sim_leng <- nchar(sim_seq)
+  stopifnot((sim_leng %% 3)==0)
+  
+  # Calculate possible mutations (given codon table)
+  mutation_types <- computeMutationTypes(sim_seq)
+  
+  # Calculate probabilities of mutations at each position given targeting
+  # from MutationProfiling.R; includes a N row
+  targeting <- calculateTargeting(germlineSeq = sim_seq) 
+  # keep only ACGT rows
+  targeting <- targeting[NUCLEOTIDES[1:4], ] 
+  # set NA to 0
+  targeting[is.na(targeting)] <- 0 
+  # Make probability of stop codon 0
+  targeting[mutation_types=="Stop"] <- 0
+  
+  # Initialize counters
+  total_muts <- 0
+  positions <- numeric(num_muts)
+  
+  while(total_muts < num_muts) {
+    # Get position to mutate and update counters
+    mutpos <- sampleMut(sim_leng, targeting, positions)
+    total_muts <- total_muts + 1
+    positions[total_muts] <- mutpos$pos
+    
+    # Implement mutation in simulation sequence
+    mut_nuc <- 4 - (4*mutpos$pos - mutpos$mut)
+    sim_char <- s2c(sim_seq)
+    sim_char[mutpos$pos] <- NUCLEOTIDES[mut_nuc]
+    sim_seq <- c2s(sim_char)
+    
+    # Update targeting
+    lower <- max(mutpos$pos-4, 1)
+    upper <- min(mutpos$pos+4, sim_leng)
+    targeting[, lower:upper] <- calculateTargeting(germlineSeq = 
+                                                     substr(sim_seq, lower, upper))[NUCLEOTIDES[1:4], ]
+    targeting[is.na(targeting)] <- 0
+    
+    # Update possible mutations
+    lower <- getCodonPos(lower)[1]
+    upper <- getCodonPos(upper)[3]
+    mutation_types[, lower:upper] <- computeMutationTypes(substr(sim_seq, lower, upper))
+    # Make probability of stop codon 0
+    if(any(mutation_types[, lower:upper]=="Stop", na.rm=T)) {
+      targeting[, lower:upper][mutation_types[, lower:upper]=="Stop"] <- 0
+    }
+  }
+  return(sim_seq)
+}
+
+
+#### helper functions ####
+
 #' Compute the mutations types
 #'
 #' @param seq   sequence for which to compute mutation types
@@ -51,4 +129,3 @@ sampleMut <- function(sim_leng, targeting, positions) {
   }
   return(list(mut=mut, pos=pos))
 }
-
