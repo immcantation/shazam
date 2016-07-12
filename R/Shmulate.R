@@ -7,7 +7,6 @@ NULL
 
 #### shmulation ####
 
-
 #' Simulate mutations in a single sequence
 #'
 #' @param input_seq    sequence in which mutations are to be introduced
@@ -78,6 +77,76 @@ shmulateSeq <- function(input_seq, num_muts) {
     }
   }
   return(sim_seq)
+}
+
+
+#' Simulate sequences to populate a tree
+#'
+#' shmulateTree returns a set of simulated sequences generated from an input sequence and an
+#' igraph object. The input sequence is used to replace the founder node of the igraph lineage
+#' tree and sequences are simulated with mutations corresponding to edge weights in the tree.
+#' Sequences will not be generated for groups of nodes that are specified to be excluded.
+#'
+#' @param input_seq   sequence in which mutations are to be introduced.
+#' @param graph       igraph object with vertex annotations whose edges are to be recreated.
+#' @param field       annotation field to use for both unweighted path length exclusion and
+#'                    consideration as a founder node. If NULL do not exclude any nodes.
+#' @param exclude     vector of annotation values in the given field to exclude from potential
+#'                    founder set. If NULL do not exclude any nodes. Has no effect if field=NULL.
+#' @param jun_frac    fraction of characters in the junction region to add proportional number
+#'                    of trunk mutations to the sequence.
+#'
+#' @return a data.frame of simulated sequences.
+#' @export
+shmulateTree <- function(input_seq, graph, field=NULL, exclude=NULL, jun_frac=NULL) {
+  # Determine founder (mrca) of lineage tree
+  # specify alakazam as opposed to ape::getMRCA
+  founder_df <- alakazam::getMRCA(graph, path="distance", root="Germline", 
+                                  field=field, exclude=exclude)
+  
+  # Get adjacency matrix
+  adj <- get.adjacency(graph, attr="weight", sparse=F)
+  # Get names of nodes for which sequences are not to be returned
+  skip_names <- c()
+  if (!is.null(field)) {
+    g <- get.vertex.attribute(graph, name = field)
+    g_names <- get.vertex.attribute(graph, name = 'name')
+    skip_names <- g_names[g %in% exclude]
+  }
+  
+  # Create data.frame to hold simulated sequences
+  sim_tree <- data.frame('name'=founder_df$NAME[1],
+                         'sequence'=input_seq, 'distance'=0,
+                         stringsAsFactors=F)
+  parent_nodes <- founder_df$NAME[1]
+  nchil <- sum(adj[parent_nodes,]>0)
+  
+  # Add trunk mutations proportional to fraction of sequence in junction
+  if(!is.null(jun_frac)) {
+    adj[parent_nodes,] <- round(adj[parent_nodes,]*(1+jun_frac))
+  }
+  while(nchil>0) {
+    new_parents <- c()
+    # Loop through parent-children combos
+    for(p in parent_nodes) {
+      children <- colnames(adj)[adj[p,]>0]
+      for(ch in children) {
+        # Add child to new parents
+        new_parents <- union(new_parents, ch)
+        # Simulate sequence for that edge
+        seq <- shmulateSeq(sim_tree$sequence[sim_tree$name==p], adj[p, ch])
+        new_node <- data.frame('name'=ch, 'sequence'=seq, 'distance'=adj[p, ch])
+        # Update output data.frame (bind_rows from dplyr)
+        sim_tree <- bind_rows(sim_tree, new_node)
+      }
+    }
+    # Re-calculate number of children
+    parent_nodes <- new_parents
+    nchil <- sum(adj[parent_nodes,]>0)
+  }
+  # Remove sequences that are to be excluded
+  sim_tree <- subset(sim_tree, !(name %in% skip_names))
+  return(sim_tree)
 }
 
 
