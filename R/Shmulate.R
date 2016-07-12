@@ -81,3 +81,26 @@ allCodonMuts <- function(codon) {
   matCodons[9:12,3] <- NUCLEOTIDES[1:4] # ATGC
   return(apply(matCodons,1,c2s))
 }
+
+
+#' Asses if a mutation is R or S based on codon information.
+#'
+#' @param codonFrom     starting codon
+#' @param codonTo       codon with mutation
+#'
+#' @return type of mutation, one of "S", "R", "Stop", or NA.
+mutationType <- function(codonFrom, codonTo) {
+  if (is.na(codonFrom) | is.na(codonTo) | is.na(AMINO_ACIDS[codonFrom]) | is.na(AMINO_ACIDS[codonTo])) {
+    mutationType <- NA
+  } else {
+    mutationType <- "S"
+    if(AMINO_ACIDS[codonFrom] != AMINO_ACIDS[codonTo]) {
+      mutationType <- "R"
+    }
+    if(AMINO_ACIDS[codonFrom]=="*" | AMINO_ACIDS[codonTo]=="*") {
+      mutationType <- "Stop"
+    }
+  }
+  return(mutationType)
+}
+
