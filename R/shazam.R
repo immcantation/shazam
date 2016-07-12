@@ -37,9 +37,12 @@
 #'              can compute evolutionary distances between sequences or groups of 
 #'              sequences. This information is particularly useful in understanding and 
 #'              defining clonal relationships.
+#'              
+#'      \item   SHMulate \cr
+#'              \code{shazam} also provides tools for simulating immunoglobulin (Ig) somatic hypermutation.
 #'  }
 #' 
-#' Below are the functions in \code{shazam} broken down by the three main tasks described
+#' Below are the functions in \code{shazam} broken down by the main tasks described
 #' above:
 #' 
 #' @section  Targeting models:
@@ -75,6 +78,12 @@
 #'   \item  \link{calcTargetingDistance}:    Construct a nucleotide distance matrix from a 
 #'                                           5-mer targeting model.
 #' }
+#'
+#'@section Simulation:
+#'\itemize{
+#'  \item \link{shmulateSeq}:                Simulate mutations in a single sequence.
+#'  \item \link{shmulateTree}:               Simulate sequences to populate a tree.
+#'}
 #'
 #' @name     shazam
 #' @docType  package
