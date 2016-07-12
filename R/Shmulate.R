@@ -28,22 +28,6 @@ computeMutationTypes <- function(seq){
   return(mut_types)
 }
 
-#' Find encompassing codon
-#'
-#' @param nuc_pos    position for which codon is to be found
-#' @param frame      reading frame in which to determine codon
-#'
-#' @return vector of positions of codon encompassing input position.
-#'
-#' @details
-#' Given a nuclotide position, find the positions of the three nucleotides
-#' that encompass the codon in the given reading frame of the sequence.
-# e.g. nuc 86 is part of nucs 85,86,87
-getCodonPos <- function(nuc_pos, frame=0) {
-  codon_num <- ( ceiling((nuc_pos + frame) / 3) ) * 3
-  codon <- (codon_num-2):codon_num
-  return(codon)
-}
 
 #' Pick a position to mutate
 #'
