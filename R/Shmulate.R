@@ -65,3 +65,27 @@ calcTargeting <- function(germlineSeq, targetingModel=shazam::HS5FModel) {
   
   return(gsTargeting[NUCLEOTIDES[1:4],]) # ATGC
 }
+
+
+#' Compute the mutations types
+#'
+#' @param seq   sequence for which to compute mutation types
+#'
+#' @return matrix of mutation types for each position in the sequence.
+#'
+#' @details
+#' For each position in the input sequence, use the codon table to
+#' determine what types of mutations are possible. Returns matrix
+#' of all possible mutations and corresponding types.
+computeMutationTypes <- function(seq){
+  #* counts on constant variable CODON_TABLE, NUCLEOTIDES (ACTGN-.)
+  #* caution: this breaks down if length of seq is not a multiple of 3
+  
+  leng_seq <- nchar(seq)
+  try(if( (leng_seq %%3 !=0) ) stop("length of input sequence must be a multiple of 3"))
+  
+  codons <- sapply(seq(1, leng_seq, by=3), function(x) {substr(seq,x,x+2)})
+  mut_types <- matrix(unlist(CODON_TABLE[, codons]), ncol=leng_seq, nrow=4, byrow=F)
+  dimnames(mut_types) <-  list(NUCLEOTIDES[1:4], 1:leng_seq)
+  return(mut_types)
+}
