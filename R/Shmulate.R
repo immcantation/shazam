@@ -33,7 +33,7 @@ getGraph <- function(edge_df, node_df) {
 #' Applies the targeting model to the input sequence to determine the probability
 #' that a given nucleotide at a given position will mutate to any of the other
 #' nucleotides. This is calculated for every position and every possible mutation.
-calculateTargeting <- function(germlineSeq, targetingModel=shazam::HS5FModel) {
+calcTargeting <- function(germlineSeq, targetingModel=shazam::HS5FModel) {
   
   s_germlineSeq <- germlineSeq
   
@@ -48,10 +48,9 @@ calculateTargeting <- function(germlineSeq, targetingModel=shazam::HS5FModel) {
   c_germlineSeq <- s2c(s_germlineSeq)
   
   # Matrix to hold targeting values for each position in c_germlineSeq
-  germlineSeqTargeting <- matrix(NA,
-                                 ncol=nchar(s_germlineSeq),
-                                 nrow=length(NUCLEOTIDES[1:5]), # ATGCN
-                                 dimnames=list(NUCLEOTIDES[1:5], c_germlineSeq))
+  gsTargeting <- matrix(NA, ncol=nchar(s_germlineSeq),
+                        nrow=length(NUCLEOTIDES[1:5]), # ATGCN
+                        dimnames=list(NUCLEOTIDES[1:5], c_germlineSeq))
   
   # Now remove the IMGT gaps so that the correct 5mers can be made to calculate
   # targeting. e.g.
@@ -66,21 +65,20 @@ calculateTargeting <- function(germlineSeq, targetingModel=shazam::HS5FModel) {
   pos<- 3:(gaplessSeqLen-2)
   subSeq =  substr(rep(gaplessSeq, gaplessSeqLen-4), (pos-2), (pos+2))
   
-  germlineSeqTargeting_gapless <- sapply(subSeq, function(x){
-    targetingModel@targeting[NUCLEOTIDES[1:5], x]
-  })
+  gsTargeting_gapless <- sapply(subSeq, 
+                                function(x){ targetingModel@targeting[NUCLEOTIDES[1:5], x] })
   
-  germlineSeqTargeting[, c_germlineSeq!="."] <- germlineSeqTargeting_gapless
+  gsTargeting[, c_germlineSeq!="."] <- gsTargeting_gapless
   
   # Set self-mutating targeting values to be NA
-  mutatingToSelf <- colnames(germlineSeqTargeting)
+  mutatingToSelf <- colnames(gsTargeting)
   # print(mutatingToSelf[!(mutatingToSelf %in% NUCLEOTIDES[1:4])])
-  mutatingToSelf[!(mutatingToSelf %in% NUCLEOTIDES[1:4])] <- "N"
+  mutatingToSelf[!(mutatingToSelf %in% NUCLEOTIDES[1:4])] <- "N" # ATGC
   
-  tmp <- sapply(1:ncol(germlineSeqTargeting), function(pos){
-    germlineSeqTargeting[mutatingToSelf[pos], pos] <<- NA }) # must use <<- (<- won't work)
+  tmp <- sapply(1:ncol(gsTargeting), function(pos){
+    gsTargeting[mutatingToSelf[pos], pos] <<- NA }) # must use <<- (<- won't work)
   
-  germlineSeqTargeting[!is.finite(germlineSeqTargeting)] <- NA
+  gsTargeting[!is.finite(gsTargeting)] <- NA
   
-  return(germlineSeqTargeting[NUCLEOTIDES[1:4],])
+  return(gsTargeting[NUCLEOTIDES[1:4],]) # ATGC
 }
