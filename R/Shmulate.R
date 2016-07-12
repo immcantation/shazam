@@ -64,3 +64,20 @@ calcTargeting <- function(germlineSeq, targetingModel=shazam::HS5FModel) {
   
   return(gsTargeting[NUCLEOTIDES[1:4],]) # ATGC
 }
+
+#' Create all codons one mutation away from input codon.
+#'
+#' @param codon   starting codon to which mutations are added.
+#'
+#' @return a vector of codons.
+#'
+#' @details
+#' All codons one mutation away from the input codon are generated.
+allCodonMuts <- function(codon) {
+  codon_char <- s2c(codon)
+  matCodons <- t(array(codon_char, dim=c(3,12)))
+  matCodons[1:4, 1] <- NUCLEOTIDES[1:4] # ATGC
+  matCodons[5:8, 2] <- NUCLEOTIDES[1:4] # ATGC
+  matCodons[9:12,3] <- NUCLEOTIDES[1:4] # ATGC
+  return(apply(matCodons,1,c2s))
+}
