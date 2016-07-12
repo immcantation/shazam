@@ -64,6 +64,6 @@ Collate:
     'DistToNearest.R'
     'MutationDefinitions.R'
     'MutationProfiling.R'
-    'Shmulate.R'
+    'SHMulate.R'
     'TargetingModels.R'
 RoxygenNote: 5.0.1
