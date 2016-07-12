@@ -106,3 +106,26 @@ getCodonPos <- function(nuc_pos, frame=0) {
   codon <- (codon_num-2):codon_num
   return(codon)
 }
+
+#' Pick a position to mutate
+#'
+#' @param sim_leng      length of sequence in which mutation is being simulated
+#' @param targeting     probabilities of each position in the sequence being mutated
+#' @param positions     vector of positions which have already been mutated
+#'
+#' @return list of position being mutated and updated vector of mutated positions.
+#'
+#' @details
+#' Sample positions in the sequence to mutate given targeting probability
+#' until a new position is selected. This new position is then added to the
+#' vector of mutated positions and returned.
+sampleMut <- function(sim_leng, targeting, positions) {
+  pos <- 0
+  # Sample mutations until new position is selected
+  while (pos %in% positions) {
+    # Randomly select a mutation
+    mut <- sample(1:(4*sim_leng), 1, replace=F, prob=as.vector(targeting))
+    pos <- ceiling(mut/4)
+  }
+  return(list(mut=mut, pos=pos))
+}
