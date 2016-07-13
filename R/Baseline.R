@@ -1162,7 +1162,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'                          targetingModel=HS5FModel,
 #'                          nproc=1)
 #' 
-#' # Grouping the PDFs by the sample barcode column
+#' # Group PDFs by the sample barcode column
 #' grouped <- groupBaseline(baseline, groupBy="BARCODE")
 #' 
 #' # Perform test on barcode PDFs
