@@ -11,7 +11,7 @@ NULL
 #
 # @examples
 # window5Mers("ACGTNACGTNACGTN")
-window5Mers <- function(sequence){
+window5Mers <- function(sequence) {
     n <- stri_length(sequence)
     w <- substr(rep(sequence, n - 4), 1:(n - 4), 5:n)
     

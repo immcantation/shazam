@@ -66,7 +66,7 @@ setClass("Baseline",
                  stats="data.frame"))
 
 
-#### Baseline object methods #####
+#### Methods #####
 
 #' Creates a Baseline object
 #' 
@@ -260,7 +260,7 @@ getBaselineStats <- function(baseline) {
 }
 
 
-#### Baseline selection calculating functions ####
+#### Calculation functions ####
 
 #' Calculate the BASELINe PDFs
 #' 
@@ -451,12 +451,12 @@ calcBaseline <- function(db,
                                       nproc=0)
         
         # Calculate the expected frequencies of mutations
-        db <- calcDBExpectedMutations( db,
-                                       sequenceColumn=sequenceColumn,
-                                       germlineColumn="GERMLINE_IMGT_D_MASK",
-                                       regionDefinition=regionDefinition,
-                                       targetingModel=targetingModel,
-                                       nproc=0 )
+        db <- calcDBExpectedMutations(db,
+                                      sequenceColumn=sequenceColumn,
+                                      germlineColumn="GERMLINE_IMGT_D_MASK",
+                                      regionDefinition=regionDefinition,
+                                      targetingModel=targetingModel,
+                                      nproc=0 )
     }
     
     # Calculate PDFs for each sequence
@@ -534,7 +534,7 @@ calcBaseline <- function(db,
     mat_template <- matrix( NA, 
                             ncol=length(regions), 
                             nrow=totalNumbOfSequences,
-                            dimnames=list( 1:totalNumbOfSequences, regions )
+                            dimnames=list(1:totalNumbOfSequences, regions)
     )
     
     # numbOfSeqs
@@ -756,13 +756,13 @@ calcBaselineBinomialPdf <- function ( x=3,
 #'                          nproc = 1)
 #' 
 #' # Grouping the PDFs by the sample barcode column
-#' baseline_grp1 <- groupBaseline(baseline, groupBy="BARCODE")
+#' grouped1 <- groupBaseline(baseline, groupBy="BARCODE")
 #'  
 #' # Grouping the PDFs by the sample barcode and C-region primer columns
-#' baseline_grp2 <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' grouped2 <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Re-grouping the PDFs by the sample barcode from sample barcode and C-region groups
-#' baseline_grp3 <- groupBaseline(baseline_grp2, groupBy=c("BARCODE"))
+#' grouped3 <- groupBaseline(grouped2, groupBy=c("BARCODE"))
 #'                   
 #' @export
 groupBaseline <- function(baseline, groupBy, nproc=1) {
@@ -1041,10 +1041,10 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                          nproc = 1)
 #' 
 #' # Grouping the PDFs by the sample barcode and C-region primer columns
-#' baseline_grp <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' grouped <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Get a data.frame of the summary statistics
-#' baseline_stats <- summarizeBaseline(baseline_grp, returnType="df")
+#' stats <- summarizeBaseline(grouped, returnType="df")
 #'                      
 #' @export
 summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1) {
@@ -1063,9 +1063,9 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
     if (nproc > 1){        
         cluster <- parallel::makeCluster(nproc, type="PSOCK")
         parallel::clusterExport(cluster, list('baseline',
-                                              'calcBaselineSigma',
-                                              'calcBaselineCI',
-                                              'calcBaselinePvalue'), 
+                                              'baselineSigma',
+                                              'baselineCI',
+                                              'baselinePValue'), 
                                 envir=environment())
         registerDoParallel(cluster, cores=nproc)
     } else if (nproc == 1) {
@@ -1089,14 +1089,14 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
             names(db_seq) <- names(db)
             for (region in regions) {
                 baseline_pdf <- baseline@pdfs[[region]][idx, ]
-                baseline_ci <- calcBaselineCI(baseline_pdf)
+                baseline_ci <- baselineCI(baseline_pdf)
                 df_baseline_seq_region <- 
                     data.frame(db_seq,
                                REGION=factor(region, levels=regions),
-                               BASELINE_SIGMA=calcBaselineSigma(baseline_pdf),
+                               BASELINE_SIGMA=baselineSigma(baseline_pdf),
                                BASELINE_CI_LOWER=baseline_ci[1],
                                BASELINE_CI_UPPER=baseline_ci[2],
-                               BASELINE_CI_PVALUE=calcBaselinePvalue(baseline_pdf))
+                               BASELINE_CI_PVALUE=baselinePValue(baseline_pdf))
                 df_baseline_seq <- dplyr::bind_rows(df_baseline_seq, df_baseline_seq_region)
             }
             df_baseline_seq[,1] <- as.vector(unlist(df_baseline_seq[,1]))
@@ -1121,30 +1121,114 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 }
 
 
-# Given a BASELIne PDF calculate mean sigma
-calcBaselineSigma <- function(baseline_pdf,
-                              max_sigma=20,
-                              length_sigma=4001) {
-    if (any(is.na(baseline_pdf))) { return(NA) }
+#' Two-sided test of BASELINe PDFs
+#' 
+#' \code{testBaseline} performs a two-sample signifance test of BASELINe 
+#' posterior probability density functions (PDFs).
+#'
+#' @param    baseline   \code{Baseline} object containing the \code{db} and grouped 
+#'                      BASELINe PDFs returned by \link{groupBaseline}.
+#' @param    groupBy    string defining the column in the \code{db} slot of the 
+#'                      \code{Baseline} containing sequence or group identifiers.
+#' 
+#' @return   A data.frame with test results containing the following columns:
+#'           \itemize{
+#'             \item  \code{REGION}:  sequence region, such as "CDR" and "FWR".
+#'             \item  \code{TEST}:    string defining the two group values compared.
+#'             \item  \code{PVALUE}:  two-sided p-value for the comparison.
+#'             \item  \code{FDR}:     FDR corrected \code{PVALUE}.
+#'           }
+#'           
+#' @seealso  To generate the \link{Baseline} input object see \link{groupBaseline}.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
+#'            sequencing data sets. 
+#'            Nucleic Acids Res. 2012 40(17):e134.
+#'  }
+#' 
+#' @examples
+#' # Subset example data
+#' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA") & 
+#'                           BARCODE %in% c("RL016","RL019","RL021"))
+#' 
+#' # Calculate BASELINe
+#' baseline <- calcBaseline(db, 
+#'                          sequenceColumn="SEQUENCE_IMGT",
+#'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                          testStatistic="focused",
+#'                          regionDefinition=IMGT_V_NO_CDR3,
+#'                          targetingModel=HS5FModel,
+#'                          nproc=1)
+#' 
+#' # Grouping the PDFs by the sample barcode column
+#' grouped <- groupBaseline(baseline, groupBy="BARCODE")
+#' 
+#' # Perform test on barcode PDFs
+#' testBaseline(grouped, groupBy="BARCODE")
+#' 
+#' @export
+testBaseline <- function(baseline, groupBy) {
+    ## DEBUG
+    # baseline=grouped; groupBy="BARCODE"
+    
+    # Get test groups
+    groups <- as.character(baseline@db[[groupBy]])
+    pair_indices <- combn(1:length(groups), 2, simplify=F)
+    pair_names <- combn(groups, 2, simplify=F)
+    test_names <- sapply(pair_names, paste, collapse=" != ")
+    
+    # Run tests
+    test_list <- list()
+    for (n in baseline@regions) {
+        d <- baseline@pdfs[[n]]
+        p <- sapply(pair_indices, function(x) { baseline2DistPValue(d[x[1], ], d[x[2], ])})
+        test_list[[n]] <- data.frame(TEST=test_names, PVALUE=p)
+    }
+    test_df <- bind_rows(test_list, .id="REGION")
+    test_df$FDR <- p.adjust(test_df$PVALUE, method="fdr")
+    
+    return(test_df)
+}
+    
+
+# Calculate mean sigma of a BASELINe PDF
+#
+# @param   base          BASLINe PDF vector.
+# @param   max_sigma     maximum sigma score.
+# @param   length_sigma  length of the PDF vector.
+# @return  Mean sigma.
+baselineSigma <- function(base, max_sigma=20, length_sigma=4001) {
+    # Return NA on bad input
+    if (any(is.na(base))) { 
+        return(NA) 
+    }
     
     sigma_s <- seq(-max_sigma, max_sigma, length.out=length_sigma)
-    #norm <- (length_sigma - 1) / 2 / max_sigma
-    norm <- sum(baseline_pdf, na.rm=TRUE)
-    return(baseline_pdf %*% sigma_s / norm)
+    norm <- sum(base, na.rm=TRUE)
+    sigma_mean <- base %*% sigma_s / norm
+    
+    return(sigma_mean)
 }
 
 
-# Given a BASELIne PDF calculate Confidence Interval
-calcBaselineCI <- function (baseline_pdf,
-                            low=0.025,
-                            up=0.975,
-                            max_sigma=20,
-                            length_sigma=4001){
-    
-    if (any(is.na(baseline_pdf))) { return(c(NA, NA)) }
+# Calculate confidence interval for BASELINe PDF
+#
+# @param   base          BASLINe PDF vector.
+# @param   low           lower CI percentile.
+# @param   up            upper CI percentile.
+# @param   max_sigma     maximum sigma score.
+# @param   length_sigma  length of the PDF vector.
+# @return  A vector of \code{c(lower, upper)} confidence bounds.
+baselineCI <- function (base, low=0.025, up=0.975, max_sigma=20, length_sigma=4001){
+    # Return NA on bad input
+    if (any(is.na(base))) { 
+        return(c(NA, NA)) 
+    }
     
     sigma_s <- seq(-max_sigma, max_sigma, length.out=length_sigma)
-    cdf <- cumsum(baseline_pdf)
+    cdf <- cumsum(base)
     cdf <- cdf / cdf[length(cdf)]
     intervalLow <- findInterval(low, cdf)
     fractionLow <- (low - cdf[intervalLow])/(cdf[intervalLow + 1] - cdf[intervalLow])
@@ -1157,21 +1241,61 @@ calcBaselineCI <- function (baseline_pdf,
 }
 
 
-# Given a BASELIne PDF calculate P value
-calcBaselinePvalue <- function (baseline_pdf, 
-                                length_sigma=4001, 
-                                max_sigma=20 ){
-    if (!any(is.na(baseline_pdf))) {
+# Calculate a p-value that the given BASELINe PDF differs from zero
+#
+# @param   base          BASLINe PDF vector.
+# @param   max_sigma     maximum sigma score.
+# @param   length_sigma  length of the PDF vector.
+# @return  A vector of \code{c(lower, upper)} confidence bounds.
+baselinePValue <- function (base, length_sigma=4001, max_sigma=20){
+    if (!any(is.na(base))) {
         #norm <- (length_sigma - 1) / 2 / max_sigma
-        norm <- sum(baseline_pdf, na.rm=TRUE)
-        pVal <- sum(baseline_pdf[1:((length_sigma - 1)/2)] + baseline_pdf[((length_sigma + 1) / 2)] / 2) / norm
-        if (pVal > 0.5) { pVal <- pVal - 1 }
+        norm <- sum(base, na.rm=TRUE)
+        pvalue <- sum(base[1:((length_sigma - 1)/2)] + base[((length_sigma + 1) / 2)] / 2) / norm
+        if (pvalue > 0.5) { pvalue <- 1 - pvalue }
     } else {
-        pVal <- NA
+        pvalue <- NA
     }
     
-    return(pVal)
+    return(pvalue)
 }
+
+
+# Compute p-value of two BASELINe PDFs
+#
+# @param   base1  first selection PDF
+# @param   base2  second selection PDF
+# @return  Two-sided p-value that base1 and base2 differ.
+baseline2DistPValue <-function(base1, base2) {
+    ## Debug
+    # base1=grouped@pdfs[["CDR"]][1, ]; base2=grouped@pdfs[["FWR"]][1, ]
+    # max_sigma=20; length_sigma=4001
+    # sigma_s <- seq(-max_sigma, max_sigma, length.out=length_sigma)
+    
+    # Get lengths
+    len1 <- length(base1)
+    len2 <- length(base2)
+    
+    # Check input
+    if (len1 != len2) {
+        stop("base1 and base2 must be the same length.")
+    }
+
+    # Determine p-value
+    if (len1 > 1 & len2 > 1) {
+        # Normalize
+        base1 <- base1 / sum(base1, na.rm=TRUE)
+        base2 <- base2 / sum(base2, na.rm=TRUE)
+        # Calculate p-value
+        cum2 <- cumsum(base2) - base2/2
+        pvalue <- sum(sapply(1:len1, function(i) { base1[i]*cum2[i] }))
+        if (pvalue > 0.5) { pvalue <- 1 - pvalue }
+    } else {
+        pvalue <- NA
+    }
+    
+    return(pvalue)
+}  
 
 
 #### Plotting functions ####
@@ -1432,34 +1556,29 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #'                           BARCODE %in% c("RL016","RL018","RL019","RL021"))
 #' 
 #' # Calculate BASELINe
-#' # By default, calcBaseline collapses the sequences in the db by the column "CLONE",
-#' # calculates the numbers of observed mutations and expected frequencies of mutations,
-#' # as defined in the IMGT_V_NO_CDR3 and using the HS5FModel targeting model.
-#' # Then, it calculates  the BASELINe posterior probability density functions (PDFs) for
-#' # sequences in the updated db files; using the focused test statistic
-#' db_baseline <- calcBaseline(db, 
-#'                             sequenceColumn="SEQUENCE_IMGT",
-#'                             germlineColumn="GERMLINE_IMGT_D_MASK", 
-#'                             testStatistic="focused",
-#'                             regionDefinition=IMGT_V_NO_CDR3,
-#'                             targetingModel = HS5FModel,
-#'                             nproc = 1)
+#' baseline <- calcBaseline(db, 
+#'                          sequenceColumn="SEQUENCE_IMGT",
+#'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                          testStatistic="focused",
+#'                          regionDefinition=IMGT_V_NO_CDR3,
+#'                          targetingModel=HS5FModel,
+#'                          nproc=1)
 #'  
 #' # Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 
 #' # respectively to sample barcodes and the constant region isotype primers.
-#' baseline <- groupBaseline(db_baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' grouped <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
 #' 
 #' # Plot mean and confidence interval
-#' plotBaselineSummary(baseline, "BARCODE", "CPRIMER", style="mean")
-#' plotBaselineSummary(baseline, "BARCODE", "CPRIMER", subsetRegions="CDR", style="mean")
-#' plotBaselineSummary(baseline, "BARCODE", "CPRIMER", facetBy="group", style="mean")
+#' plotBaselineSummary(grouped, "BARCODE", "CPRIMER", style="mean")
+#' plotBaselineSummary(grouped, "BARCODE", "CPRIMER", subsetRegions="CDR", style="mean")
+#' plotBaselineSummary(grouped, "BARCODE", "CPRIMER", facetBy="group", style="mean")
 #' 
 #' # Reorder and recolor groups
 #' group_colors <- c("IGHM"="darkorchid", "IGHA"="steelblue")
-#' plotBaselineSummary(baseline, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
+#' plotBaselineSummary(grouped, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
 #' 
 #' # Plot subset of data
-#' stats <- subset(getBaselineStats(baseline), BARCODE %in% c("RL018", "RL019"))
+#' stats <- subset(getBaselineStats(grouped), BARCODE %in% c("RL018", "RL019"))
 #' plotBaselineSummary(stats, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
 #' 
 #' @export
@@ -1606,7 +1725,7 @@ convolutionPowersOfTwoByTwos <- function( cons, length_sigma=4001,G=1 ){
     return( list( matG, groups ) )
 }
 
-weighted_conv<-function(x,y,w=1,m=100,length_sigma=4001){
+weighted_conv <- function(x, y, w=1, m=100, length_sigma=4001){
     lx<-length(x)
     ly<-length(y)
     if({lx<m}| {{lx*w}<m}| {{ly}<m}| {{ly*w}<m}){
