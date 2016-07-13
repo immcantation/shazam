@@ -129,7 +129,7 @@
 #' @importFrom  SDMTools    wt.sd
 #' @importFrom  seqinr      c2s s2c words translate
 #' @importFrom  stats       na.omit setNames ecdf sd cor cov median mad
-#'                          approx convolve weighted.mean
+#'                          approx convolve weighted.mean p.adjust
 #'                          dbeta pbeta qbeta rbeta
 #' @importFrom  stringi     stri_dup stri_flatten stri_join stri_length
 #'                          stri_count_boundaries stri_count_regex 

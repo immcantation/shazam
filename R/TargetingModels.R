@@ -1,6 +1,6 @@
 # Targeting models
 
-#' @include shazam.R
+#' @include Shazam.R
 NULL
 
 #### Data ####

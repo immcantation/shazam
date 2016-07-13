@@ -41,6 +41,7 @@ Imports:
     foreach,
     graphics,
     grid,
+    igraph,
     iterators,
     methods,
     lazyeval,
@@ -57,7 +58,7 @@ Suggests:
     rmarkdown,
     testthat
 Collate:
-    'shazam.R'
+    'Shazam.R'
     'RegionDefinitions.R'
     'Baseline.R'
     'Core.R'

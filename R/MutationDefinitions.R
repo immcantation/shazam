@@ -1,6 +1,6 @@
 # Class definitions for mutation classes
 
-#' @include shazam.R
+#' @include Shazam.R
 NULL
 
 #### Classes ####

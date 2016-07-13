@@ -1,6 +1,6 @@
 # Generates distance to nearest neighbor
 
-#' @include shazam.R
+#' @include Shazam.R
 NULL
 
 

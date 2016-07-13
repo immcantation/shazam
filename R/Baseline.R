@@ -1,7 +1,7 @@
 # Selection analysis using BASELINe
 
 #' @include RegionDefinitions.R
-#' @include shazam.R
+#' @include Shazam.R
 NULL
 
 #### Classes ####

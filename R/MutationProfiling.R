@@ -1,6 +1,6 @@
 # Mutation profiling
 
-#' @include shazam.R
+#' @include Shazam.R
 NULL
 
 #### Clonal Consensus building functions ####
