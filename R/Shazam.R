@@ -53,9 +53,11 @@
 #' 
 #' @section  Mutational profiling:
 #' \itemize{
-#'   \item  \link{collapseByClone}:    Build clonal consensus sequence.
+#'   \item  \link{collapseByClone}:          Build clonal consensus sequence.
 #'   \item  \link{calcDBObservedMutations}:  Compute observed mutation counts.
 #'   \item  \link{calcDBExpectedMutations}:  Compute expected mutation frequencies.
+#'   \item  \link{shmulateSeq}:              Simulate mutations in a single sequence.
+#'   \item  \link{shmulateTree}:             Simulate mutations over a lineage tree.
 #' }
 #'
 #' @section  Selection analysis:

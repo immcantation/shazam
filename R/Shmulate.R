@@ -5,7 +5,7 @@
 NULL
 
 
-#### shmulation ####
+#### SHMulation ####
 
 #' Simulate mutations in a single sequence
 #'
@@ -17,6 +17,7 @@ NULL
 #' @details
 #' Generates mutations in sequence one by one while updating targeting
 #' probability of each position after each mutation.
+#' 
 #' @export
 shmulateSeq <- function(input_seq, num_muts) {
   #* counts on constant variables CODON_TABLE, NUCLEOTIDES (ACTGN-.)
@@ -97,6 +98,7 @@ shmulateSeq <- function(input_seq, num_muts) {
 #'                    of trunk mutations to the sequence.
 #'
 #' @return A \code{data.frame} of simulated sequences.
+#' 
 #' @export
 shmulateTree <- function(input_seq, graph, field=NULL, exclude=NULL, jun_frac=NULL) {
   # Determine founder (mrca) of lineage tree
@@ -150,18 +152,18 @@ shmulateTree <- function(input_seq, graph, field=NULL, exclude=NULL, jun_frac=NU
 }
 
 
-#### helper functions ####
+#### Helper functions ####
 
-#' Compute the mutations types
-#'
-#' @param seq   sequence for which to compute mutation types
-#'
-#' @return A \code{matrix} of mutation types for each position in the sequence.
-#'
-#' @details
-#' For each position in the input sequence, use \code{CODON_TABLE} to
-#' determine what types of mutations are possible. Returns \code{matrix}
-#' of all possible mutations and corresponding types.
+# Compute the mutations types
+#
+# @param seq   sequence for which to compute mutation types
+#
+# @return A \code{matrix} of mutation types for each position in the sequence.
+#
+# @details
+# For each position in the input sequence, use \code{CODON_TABLE} to
+# determine what types of mutations are possible. Returns \code{matrix}
+# of all possible mutations and corresponding types.
 computeMutationTypes <- function(seq){
   #* counts on constant variable CODON_TABLE, NUCLEOTIDES (ACTGN-.)
   #* caution: this breaks down if length of seq is not a multiple of 3
@@ -176,18 +178,18 @@ computeMutationTypes <- function(seq){
 }
 
 
-#' Pick a position to mutate
-#'
-#' @param sim_leng      length of sequence in which mutation is being simulated
-#' @param targeting     probabilities of each position in the sequence being mutated
-#' @param positions     vector of positions which have already been mutated
-#'
-#' @return A \code{list} of position being mutated and updated vector of mutated positions.
-#'
-#' @details
-#' Sample positions in the sequence to mutate given targeting probability
-#' until a new position is selected. This new position is then added to the
-#' vector of mutated positions and returned.
+# Pick a position to mutate
+#
+# @param sim_leng      length of sequence in which mutation is being simulated
+# @param targeting     probabilities of each position in the sequence being mutated
+# @param positions     vector of positions which have already been mutated
+#
+# @return A \code{list} of position being mutated and updated vector of mutated positions.
+#
+# @details
+# Sample positions in the sequence to mutate given targeting probability
+# until a new position is selected. This new position is then added to the
+# vector of mutated positions and returned.
 sampleMut <- function(sim_leng, targeting, positions) {
   pos <- 0
   # Sample mutations until new position is selected

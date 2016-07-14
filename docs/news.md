@@ -1,4 +1,4 @@
-Version 0.1.2.999:  June 9, 2016
+Version 0.1.2.999:  July 14, 2016
 -------------------------------------------------------------------------------
 
 General:
@@ -22,6 +22,9 @@ Distance Profiling:
 Mutation Profiling:
 
 + Added the `MutationDefinition` `VOLUME_MUTATIONS`.
++ Added the functions `shmulateSeq()` and `shmulateTree()` to simulate
+  mutations on sequences and lineage trees, respectively, using a 5-mer
+  targeting model.
 
 Selection Analysis:
 
@@ -30,6 +33,9 @@ Selection Analysis:
 + Added `title` options to `plotBaselineSummary()` and `plotBaselineDensity()`.
 + Added more control over colors to `plotBaselineSummary()` and 
   `plotBaselineDensity()`.
++ Added the `testBaseline()` function to test the significance of 
+  differences between two selection distributions.
+  
 
 Version 0.1.2:  February 20, 2016
 -------------------------------------------------------------------------------

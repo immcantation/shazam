@@ -1,8 +1,9 @@
 SHazaM
 -------------------------------------------------------------------------------
 
-SHazaM provides tools for advanced analysis of somatic hypermutation (SHM) in 
-immunoglobulin (Ig) sequences. Shazam focuses on the following four 
+SHazaM is part of the [Immcantation](http://immcantation.readthedocs.io) tool 
+suite and provides tools for advanced analysis of somatic hypermutation (SHM) 
+in immunoglobulin (Ig) sequences. Shazam focuses on the following four 
 analysis topics:
 
 1. **Statistical analysis of SHM patterns**  
@@ -27,24 +28,11 @@ analysis topics:
    distances between sequences or groups of sequences. This information is 
    particularly useful in understanding and defining clonal relationships.
 
-Related Projects
--------------------------------------------------------------------------------
-
-* [pRESTO](http://presto.readthedocs.io) - 
-  Raw read assembly, quality control and UMI processing 
-* [Change-O](http://changeo.readthedocs.io) - 
-  V(D)J alignment standardization and clonal clustering
-* [Alakazam](http://alakazam.readthedocs.io) - 
-  Lineage reconstruction, V(D)J gene usage, repertoire diversity and 
-  physicochemical property analysis
-* [TIgGER](http://tigger.readthedocs.io) - 
-  Polymorphism detection and genotyping
-
 Dependencies
 ---------------
 
 **Depends:** alakazam, ggplot2  
-**Imports:** ape, data.table, doParallel, dplyr, foreach, graphics, grid, iterators, methods, lazyeval, parallel, SDMTools, scales, seqinr, stats, stringi, tidyr, utils  
+**Imports:** ape, data.table, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, methods, lazyeval, parallel, SDMTools, scales, seqinr, stats, stringi, tidyr, utils  
 **Suggests:** knitr, rmarkdown, testthat
 
 Authors
@@ -56,6 +44,7 @@ Authors
 [Jason Vander Heiden](mailto:jason.vanderheiden@yale.edu) (aut, cre)  
 [Ang Cui](mailto:angcui@mit.edu) (ctb)  
 [Susanna Marquez](mailto:susanna.marquez@yale.edu) (ctb)  
+[Julian Zhou](mailto:julian.zhou@yale.edu) (ctb)  
 [Steven Kleinstein](mailto:steven.kleinstein@yale.edu) (aut, cph)
 
 Citing

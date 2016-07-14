@@ -79,7 +79,7 @@ Calculating BASELINe probability density functions...
 ```R
 
 # Grouping the PDFs by the sample barcode and C-region primer columns
-baseline_grp <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+grouped <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
 
 ```
 
@@ -94,7 +94,7 @@ Calculating BASELINe statistics...
 ```R
 
 # Get a data.frame of the summary statistics
-baseline_stats <- summarizeBaseline(baseline_grp, returnType="df")
+stats <- summarizeBaseline(grouped, returnType="df")
 ```
 
 

@@ -72,9 +72,10 @@ Examples
 -------------------
 
 ```R
-# Subset example data
-db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
-BARCODE %in% c("RL016","RL018","RL019","RL021"))
+# Load and subset example data
+library(alakazam)
+file <- system.file("extdata", "ExampleDb.gz", package="alakazam")
+db <- subset(readChangeoDb(file), ISOTYPE %in% c("IgA", "IgG"))
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
@@ -82,8 +83,8 @@ sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK", 
 testStatistic="focused",
 regionDefinition=IMGT_V_NO_CDR3,
-targetingModel = HS5FModel,
-nproc = 1)
+targetingModel=HS5FModel,
+nproc=1)
 
 ```
 
@@ -99,8 +100,8 @@ Calculating BASELINe probability density functions...
 
 ```R
 
-# Grouping the PDFs by the sample barcode column
-baseline_grp1 <- groupBaseline(baseline, groupBy="BARCODE")
+# Group PDFs by sample
+grouped1 <- groupBaseline(baseline, groupBy="SAMPLE")
 
 ```
 
@@ -111,11 +112,19 @@ Calculating BASELINe statistics...
 
 ```
 
+
+```R
+plotBaselineDensity(grouped1, idColumn="SAMPLE", colorElement="group", 
+sigmaLimits=c(-1, 1))
+
+```
+
+![6](groupBaseline-6.png)
 
 ```R
  
-# Grouping the PDFs by the sample barcode and C-region primer columns
-baseline_grp2 <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+# Group PDFs by both sample (between variable) and isotype (within variable)
+grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 
 ```
 
@@ -128,9 +137,19 @@ Calculating BASELINe statistics...
 
 
 ```R
+plotBaselineDensity(grouped2, idColumn="SAMPLE", groupColumn="ISOTYPE",
+colorElement="group", colorValues=IG_COLORS,
+sigmaLimits=c(-1, 1))
 
-# Re-grouping the PDFs by the sample barcode from sample barcode and C-region groups
-baseline_grp3 <- groupBaseline(baseline_grp2, groupBy=c("BARCODE"))
+```
+
+![10](groupBaseline-10.png)
+
+```R
+
+# Collapse previous isotype (within variable) grouped PDFs into sample PDFs
+grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
+
 ```
 
 
@@ -140,6 +159,13 @@ Calculating BASELINe statistics...
 
 ```
 
+
+```R
+plotBaselineDensity(grouped3, idColumn="SAMPLE", colorElement="group",
+sigmaLimits=c(-1, 1))
+```
+
+![14](groupBaseline-14.png)
 
 
 See also

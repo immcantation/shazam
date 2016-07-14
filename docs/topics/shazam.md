@@ -49,9 +49,12 @@ Based on the underlying SHM targeting (calculated using `shazam`) one
 can compute evolutionary distances between sequences or groups of 
 sequences. This information is particularly useful in understanding and 
 defining clonal relationships.
+
++ SHMulate 
+`shazam` also provides tools for simulating immunoglobulin (Ig) somatic hypermutation.
  
 
-Below are the functions in `shazam` broken down by the three main tasks described
+Below are the functions in `shazam` broken down by the main tasks described
 above:
 
 Targeting models
@@ -98,6 +101,15 @@ Distance profiling
 distances to nearest-neighbors.
 + [calcTargetingDistance](calcTargetingDistance.md):    Construct a nucleotide distance matrix from a 
 5-mer targeting model.
+
+
+Simulation
+-------------------
+
+
+
++  [shmulateSeq](shmulateSeq.md):                Simulate mutations in a single sequence.
+ +  [shmulateTree](shmulateTree.md):               Simulate sequences to populate a tree.
 
 
 References

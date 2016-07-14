@@ -22,6 +22,9 @@ Distance Profiling:
 Mutation Profiling:
 
 + Added the `MutationDefinition` `VOLUME_MUTATIONS`.
++ Added the functions `shmulateSeq()` and `shmulateTree()` to simulate
+  mutations on sequences and lineage trees, respectively, using a 5-mer
+  targeting model.
 
 Selection Analysis:
 

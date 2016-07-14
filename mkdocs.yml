@@ -26,6 +26,8 @@ pages:
       - topics/calcDBObservedMutations.md
       - topics/calcExpectedMutations.md
       - topics/calcObservedMutations.md
+      - topics/shmulateSeq.md
+      - topics/shmulateTree.md
     - 'Targeting Models':
       - topics/createMutabilityMatrix.md
       - topics/createSubstitutionMatrix.md
@@ -41,6 +43,7 @@ pages:
       - topics/calcBaseline.md
       - topics/groupBaseline.md
       - topics/summarizeBaseline.md
+      - topics/testBaseline.md
       - topics/getBaselineStats.md
       - topics/plotBaselineDensity.md
       - topics/plotBaselineSummary.md

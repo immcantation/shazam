@@ -46,7 +46,7 @@ See Details for further information.
 normalize
 :   method of normalization. The default is `"length"`, which 
 divides the distance by the length of the sequence group. If 
-`"none"` then no normalization if performed
+`"none"` then no normalization if performed.
 
 symmetry
 :   if model is hs5f, distance between seq1 and seq2 is either the
@@ -62,15 +62,15 @@ nproc
 :   number of cores to distribute the function over.
 
 fields
-:   additional fields to use for grouping
+:   additional fields to use for grouping.
 
 cross
 :   columns for grouping to calculate distances across groups 
-(self vs others)
+(self vs others).
 
 mst
-:   if true, return comma-separated branch lengths from minimum 
-spanning tree
+:   if `TRUE`, return comma-separated branch lengths from minimum 
+spanning tree.
 
 
 
