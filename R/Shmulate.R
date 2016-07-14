@@ -145,7 +145,7 @@ shmulateTree <- function(input_seq, graph, field=NULL, exclude=NULL, jun_frac=NU
     nchil <- sum(adj[parent_nodes,]>0)
   }
   # Remove sequences that are to be excluded
-  sim_tree <- subset(sim_tree, !(name %in% skip_names))
+  sim_tree <- sim_tree[!(sim_tree$name %in% skip_names), ]
   return(sim_tree)
 }
 

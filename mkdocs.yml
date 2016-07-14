@@ -12,8 +12,9 @@ pages:
   - 'About':
     - 'Introduction': index.md
     - 'Download & Installation': install.md
-    - 'Release Notes': news.md
     - 'Package Overview': topics/shazam.md
+    - 'Release Notes': news.md
+    - 'Related Projects': projects.md
   - 'Vignettes':
     - 'Selection quantification': vignettes/Baseline-Vignette.md
     - 'Distance to nearest neighbor': vignettes/DistToNearest-Vignette.md

@@ -1,8 +1,9 @@
 SHazaM
 -------------------------------------------------------------------------------
 
-SHazaM provides tools for advanced analysis of somatic hypermutation (SHM) in 
-immunoglobulin (Ig) sequences. Shazam focuses on the following four 
+SHazaM is part of the [Immcantation](http://immcantation.readthedocs.io) tool 
+suite and provides tools for advanced analysis of somatic hypermutation (SHM) 
+in immunoglobulin (Ig) sequences. Shazam focuses on the following four 
 analysis topics:
 
 1. **Statistical analysis of SHM patterns**  
@@ -26,16 +27,3 @@ analysis topics:
    Based on the underlying SHM targeting model one can compute evolutionary 
    distances between sequences or groups of sequences. This information is 
    particularly useful in understanding and defining clonal relationships.
-
-Related Projects
--------------------------------------------------------------------------------
-
-* [pRESTO](http://presto.readthedocs.io) - 
-  Raw read assembly, quality control and UMI processing 
-* [Change-O](http://changeo.readthedocs.io) - 
-  V(D)J alignment standardization and clonal clustering
-* [Alakazam](http://alakazam.readthedocs.io) - 
-  Lineage reconstruction, V(D)J gene usage, repertoire diversity and 
-  physicochemical property analysis
-* [TIgGER](http://tigger.readthedocs.io) - 
-  Polymorphism detection and genotyping

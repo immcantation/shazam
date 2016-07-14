@@ -522,10 +522,10 @@ calcBaseline <- function(db,
                      )
             )
         
-        list_pdfs[[region]] <- mat_pdfs_binom[,1:4001]
-        list_k[[region]] <- mat_pdfs_binom[,4002]
-        list_n[[region]] <- mat_pdfs_binom[,4003]
-        list_p[[region]] <- mat_pdfs_binom[,4004]
+        list_pdfs[[region]] <- mat_pdfs_binom[, 1:4001]
+        list_k[[region]] <- mat_pdfs_binom[, 4002]
+        list_n[[region]] <- mat_pdfs_binom[, 4003]
+        list_p[[region]] <- mat_pdfs_binom[, 4004]
         list_numbOfSeqs[[region]][is.na(list_k[[region]])] <- 0
     }
     
@@ -679,24 +679,24 @@ calcBaselineHelper  <- function(observed,
 }
 
 # Calculate the BASELINe probability function in a binomial framework.
-calcBaselineBinomialPdf <- function ( x=3, 
-                                      n=10, 
-                                      p=0.33,
-                                      CONST_i=CONST_I,
-                                      max_sigma=20,
-                                      length_sigma=4001 ) {
+calcBaselineBinomialPdf <- function (x=3, 
+                                     n=10, 
+                                     p=0.33,
+                                     CONST_i=CONST_I,
+                                     max_sigma=20,
+                                     length_sigma=4001) {
     if(n!=0){
         sigma_s<-seq(-max_sigma,max_sigma,length.out=length_sigma)
         sigma_1<-log({CONST_i/{1-CONST_i}}/{p/{1-p}})
         index<-min(n,60)
-        y<- dbeta(CONST_i,x+BAYESIAN_FITTED[index],n+BAYESIAN_FITTED[index]-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
-        if(!sum(is.na(y))){
-            tmp<-approx(sigma_1,y,sigma_s)$y
-            tmp/sum(tmp)/{2*max_sigma/{length_sigma-1}}
-        }else{
+        y <- dbeta(CONST_i, x+BAYESIAN_FITTED[index], n+BAYESIAN_FITTED[index]-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
+        if (!sum(is.na(y))) {
+            tmp <- approx(sigma_1, y, sigma_s)$y
+            return(tmp / sum(tmp) / (2 * max_sigma / (length_sigma -1 )))
+        } else {
             return(NA)
         }
-    }else{
+    } else {
         return(NA)
     }
 }
@@ -867,7 +867,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                 }
                 
                 # If all the PDFs in the group different numbOfSeqs then call 
-                # combineWeigthedPosteriors, which groups PDFs weighted by the number of seqs/PDFs
+                # combineWeightedPosteriors, which groups PDFs weighted by the number of seqs/PDFs
                 # that went into creating those PDFs
                 if (sum(numbOfSeqs_region) > length(numbOfSeqs_region)) {
                     
@@ -932,7 +932,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                     if(length(list_GroupPdfs)>1){
                         repeat{
                             
-                            updatedPdf <- combineWeigthedPosteriors(list_GroupPdfs[[1]], 
+                            updatedPdf <- combineWeightedPosteriors(list_GroupPdfs[[1]], 
                                                                     sorted_numbOfSeqs_region[1], 
                                                                     list_GroupPdfs[[2]], 
                                                                     sorted_numbOfSeqs_region[2])
@@ -976,8 +976,10 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                                   }))
         
         # Normalize and save PDF matrix
+        # Hardcode normalization to max_sigma=20 and sigma_length=4001
+        pdf_norm <- 2*20*4000
         pdf_mat <- matrix_region_pdfs[, 1:4001, drop=FALSE]
-        list_pdfs[[region]] <- pdf_mat / rowSums(pdf_mat, na.rm=TRUE)
+        list_pdfs[[region]] <- pdf_mat / rowSums(pdf_mat, na.rm=TRUE) / pdf_norm
         # Save regions
         numbOfSeqs[, region] <- matrix_region_pdfs[, 4002]
     }
@@ -1761,7 +1763,7 @@ weighted_conv <- function(x, y, w=1, m=100, length_sigma=4001){
 }
 
 
-combineWeigthedPosteriors<-function(PDF1,NumberOfSeq1,PDF2,NumberOfSeq2,length_sigma=4001){
+combineWeightedPosteriors <- function(PDF1, NumberOfSeq1, PDF2, NumberOfSeq2, length_sigma=4001){
     #return(list(calculate_bayesGHelper(list(cbind(PDF1,PDF2),c(log(NumberOfSeq1,2),log(NumberOfSeq2,2))),
     #                                   length_sigma=length_sigma),NumberOfSeq1+NumberOfSeq2))
     return( calculate_bayesGHelper( list( cbind(PDF1,PDF2),

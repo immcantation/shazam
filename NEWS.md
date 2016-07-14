@@ -1,4 +1,4 @@
-Version 0.1.2.999:  June 9, 2016
+Version 0.1.2.999:  July 14, 2016
 -------------------------------------------------------------------------------
 
 General:
@@ -30,6 +30,9 @@ Selection Analysis:
 + Added `title` options to `plotBaselineSummary()` and `plotBaselineDensity()`.
 + Added more control over colors to `plotBaselineSummary()` and 
   `plotBaselineDensity()`.
++ Added the `testBaseline()` function to test the significance of 
+  differences between two selection distributions.
+  
 
 Version 0.1.2:  February 20, 2016
 -------------------------------------------------------------------------------

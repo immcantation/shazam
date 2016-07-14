@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 0.1.2.999
-Date: 2016-04-13
+Date: 2016-07-14
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
@@ -14,6 +14,8 @@ Authors@R: c(person("Mohamed", "Uduman", role=c("aut"),
                     email="angcui@mit.edu"),
              person("Susanna", "Marquez", role=c("ctb"), 
                     email="susanna.marquez@yale.edu"),
+             person("Julian", "Zhou", role=c("ctb"), 
+                    email="julian.zhou@yale.edu"),
              person("Steven", "Kleinstein", role=c("aut", "cph"), 
                     email="steven.kleinstein@yale.edu"))
 Title: Immunoglobulin Somatic Hypermutation Analysis
