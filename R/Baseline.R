@@ -1269,8 +1269,6 @@ baselinePValue <- function (base, length_sigma=4001, max_sigma=20){
 baseline2DistPValue <-function(base1, base2) {
     ## Debug
     # base1=grouped@pdfs[["CDR"]][1, ]; base2=grouped@pdfs[["FWR"]][1, ]
-    # max_sigma=20; length_sigma=4001
-    # sigma_s <- seq(-max_sigma, max_sigma, length.out=length_sigma)
     
     # Get lengths
     len1 <- length(base1)
@@ -1282,13 +1280,13 @@ baseline2DistPValue <-function(base1, base2) {
     }
 
     # Determine p-value
-    if (len1 > 1 & len2 > 1) {
+    if (len1 > 1) {
         # Normalize
         base1 <- base1 / sum(base1, na.rm=TRUE)
         base2 <- base2 / sum(base2, na.rm=TRUE)
         # Calculate p-value
         cum2 <- cumsum(base2) - base2/2
-        pvalue <- sum(sapply(1:len1, function(i) { base1[i]*cum2[i] }))
+        pvalue <- sum(base1*cum2)
         if (pvalue > 0.5) { pvalue <- 1 - pvalue }
     } else {
         pvalue <- NA
