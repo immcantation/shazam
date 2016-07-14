@@ -742,28 +742,36 @@ calcBaselineBinomialPdf <- function ( x=3,
 #'  }
 #' 
 #' @examples
-#' # Subset example data
-#' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
-#'                           BARCODE %in% c("RL016","RL018","RL019","RL021"))
-#' 
+#' # Load and subset example data
+#' library(alakazam)
+#' file <- system.file("extdata", "ExampleDb.gz", package="alakazam")
+#' db <- subset(readChangeoDb(file), ISOTYPE %in% c("IgA", "IgG"))
+#'                  
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
 #'                          sequenceColumn="SEQUENCE_IMGT",
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V_NO_CDR3,
-#'                          targetingModel = HS5FModel,
-#'                          nproc = 1)
-#' 
-#' # Grouping the PDFs by the sample barcode column
-#' grouped1 <- groupBaseline(baseline, groupBy="BARCODE")
+#'                          targetingModel=HS5FModel,
+#'                          nproc=1)
+#'                          
+#' # Group PDFs by sample
+#' grouped1 <- groupBaseline(baseline, groupBy="SAMPLE")
+#' plotBaselineDensity(grouped1, idColumn="SAMPLE", colorElement="group", 
+#'                     sigmaLimits=c(-1, 1))
 #'  
-#' # Grouping the PDFs by the sample barcode and C-region primer columns
-#' grouped2 <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+#' # Group PDFs by both sample (between variable) and isotype (within variable)
+#' grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
+#' plotBaselineDensity(grouped2, idColumn="SAMPLE", groupColumn="ISOTYPE",
+#'                     colorElement="group", colorValues=IG_COLORS,
+#'                     sigmaLimits=c(-1, 1))
 #' 
-#' # Re-grouping the PDFs by the sample barcode from sample barcode and C-region groups
-#' grouped3 <- groupBaseline(grouped2, groupBy=c("BARCODE"))
-#'                   
+#' # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
+#' grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
+#' plotBaselineDensity(grouped3, idColumn="SAMPLE", colorElement="group",
+#'                     sigmaLimits=c(-1, 1))
+#' 
 #' @export
 groupBaseline <- function(baseline, groupBy, nproc=1) {
     # Hack for visibility of data.table and foreach index variables
@@ -824,16 +832,15 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
         # Group (convolute) all the PDFS and get one single PDF
         list_region_pdfs  <-
             foreach(idx=iterators::icount(numbOfTotalGroups)) %dopar% {
-                
                 # Get a matrix (r=numb of sequences/groups * c=4001(i,e. the length of the PDFS))
-                matrix_GroupPdfs <- (baseline@pdfs[[region]])[groups[[idx]],]
+                matrix_GroupPdfs <- (baseline@pdfs[[region]])[groups[[idx]], , drop=FALSE]
                 
                 # A list version of 
                 list_GroupPdfs <- 
                     lapply( 1:nrow(matrix_GroupPdfs), 
                             function(rowIndex) {
-                                rowVals <- matrix_GroupPdfs[rowIndex,]
-                                if( !all(is.na(rowVals)) ) { matrix_GroupPdfs[rowIndex,] }
+                                rowVals <- matrix_GroupPdfs[rowIndex, ]
+                                if( !all(is.na(rowVals)) ) { matrix_GroupPdfs[rowIndex, ] }
                             })
                 # Determine the number of sequences that went into creating each of the PDFs
                 # If running groupBaseline for the first time after calcBaseline, then
@@ -968,7 +975,10 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                                       return(x)
                                   }))
         
-        list_pdfs[[region]] <- matrix_region_pdfs[, 1:4001]
+        # Normalize and save PDF matrix
+        pdf_mat <- matrix_region_pdfs[, 1:4001, drop=FALSE]
+        list_pdfs[[region]] <- pdf_mat / rowSums(pdf_mat, na.rm=TRUE)
+        # Save regions
         numbOfSeqs[, region] <- matrix_region_pdfs[, 4002]
     }
     
