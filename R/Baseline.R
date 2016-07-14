@@ -692,7 +692,7 @@ calcBaselineBinomialPdf <- function (x=3,
         y <- dbeta(CONST_i, x+BAYESIAN_FITTED[index], n+BAYESIAN_FITTED[index]-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
         if (!sum(is.na(y))) {
             tmp <- approx(sigma_1, y, sigma_s)$y
-            return(tmp / sum(tmp) / (2 * max_sigma / (length_sigma -1 )))
+            return(tmp / sum(tmp) / (2 * max_sigma / (length_sigma - 1)))
         } else {
             return(NA)
         }
@@ -977,7 +977,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
         
         # Normalize and save PDF matrix
         # Hardcode normalization to max_sigma=20 and sigma_length=4001
-        pdf_norm <- 2*20*4000
+        pdf_norm <- 2*20 / 4000
         pdf_mat <- matrix_region_pdfs[, 1:4001, drop=FALSE]
         list_pdfs[[region]] <- pdf_mat / rowSums(pdf_mat, na.rm=TRUE) / pdf_norm
         # Save regions
