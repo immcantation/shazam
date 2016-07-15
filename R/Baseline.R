@@ -1152,7 +1152,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE == "IgG")
 #' 
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
@@ -1172,10 +1172,13 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' @export
 testBaseline <- function(baseline, groupBy) {
     ## DEBUG
-    # baseline=grouped; groupBy="BARCODE"
+    # baseline=grouped; groupBy="SAMPLE"
     
     # Get test groups
     groups <- as.character(baseline@db[[groupBy]])
+    if (length(groups) < 2) {
+        stop('The ', groupBy, ' column does not contain at least two groups.')
+    }
     pair_indices <- combn(1:length(groups), 2, simplify=F)
     pair_names <- combn(groups, 2, simplify=F)
     test_names <- sapply(pair_names, paste, collapse=" != ")
@@ -1366,15 +1369,18 @@ baseline2DistPValue <-function(base1, base2) {
 #' grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 #' 
 #' # Plot mean and confidence interval
-#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE")
-#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", subsetRegions="CDR")
-#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group")
+#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", 
+#'                     sigmaLimits=c(-1, 1))
+#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", subsetRegions="CDR",
+#'                     sigmaLimits=c(-1, 1))
+#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group",
+#'                     sigmaLimits=c(-1, 1))
 #'
 #' # Reorder and recolor isotypes
 #' group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
 #'                   "IgG"="seagreen", "IgA"="steelblue")
 #' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", colorElement="group", 
-#'                     colorValues=group_colors)
+#'                     colorValues=group_colors, sigmaLimits=c(-1, 1))
 #' 
 #' @export
 plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorElement=c("id", "group"), 

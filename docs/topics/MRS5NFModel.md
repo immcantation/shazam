@@ -37,7 +37,9 @@ high-throughput immunoglobulin sequencing data. (In Preparation)
 See also
 -------------------
 
-See [HS5FModel](HS5FModel.md) for human 5-mer targeting model.
+See [HS5FModel](HS5FModel.md) for human 5-mer targeting model, [U5NModel](U5NModel.md)
+for the uniform 5-mer model, and [M1NDistance](M1NDistance.md) for the mouse 
+1-mer distance matrix.
 
 
 

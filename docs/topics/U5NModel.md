@@ -29,7 +29,8 @@ Format
 See also
 -------------------
 
-See [HS5FModel](HS5FModel.md) the human 5-mer model.
+See [HS5FModel](HS5FModel.md) for the human 5-mer model and [MRS5NFModel](MRS5NFModel.md) 
+for the mouse 5-mer model.
 
 
 

@@ -146,21 +146,24 @@ Calculating BASELINe statistics...
 ```R
 
 # Plot mean and confidence interval
-plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE")
+plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", 
+sigmaLimits=c(-1, 1))
 
 ```
 
 ![6](plotBaselineDensity-6.png)
 
 ```R
-plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", subsetRegions="CDR")
+plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", subsetRegions="CDR",
+sigmaLimits=c(-1, 1))
 
 ```
 
 ![8](plotBaselineDensity-8.png)
 
 ```R
-plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group")
+plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group",
+sigmaLimits=c(-1, 1))
 
 ```
 
@@ -172,7 +175,7 @@ plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group")
 group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
 "IgG"="seagreen", "IgA"="steelblue")
 plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", colorElement="group", 
-colorValues=group_colors)
+colorValues=group_colors, sigmaLimits=c(-1, 1))
 ```
 
 ![12](plotBaselineDensity-12.png)

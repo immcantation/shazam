@@ -39,7 +39,8 @@ See also
 -------------------
 
 See [HS1FDistance](HS1FDistance.md) for the 1-mer distance matrix from the same 
-publication.
+publication, [MRS5NFModel](MRS5NFModel.md) for the mouse 5-mer model, and 
+[U5NModel](U5NModel.md) for the uniform 5-mer model.
 
 
 

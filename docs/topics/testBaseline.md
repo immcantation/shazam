@@ -60,7 +60,7 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+db <- subset(ExampleDb, ISOTYPE == "IgG")
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
@@ -104,7 +104,15 @@ Calculating BASELINe statistics...
 testBaseline(grouped, groupBy="SAMPLE")
 ```
 
-**Error in combn(1:length(groups), 2, simplify = F)**: n < m
+
+```
+  REGION       TEST    PVALUE       FDR
+1    CDR -1h != +7d 0.1672909 0.2215204
+2    FWR -1h != +7d 0.2215204 0.2215204
+
+```
+
+
 
 See also
 -------------------
