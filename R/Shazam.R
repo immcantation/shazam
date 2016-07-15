@@ -67,6 +67,8 @@
 #'   \item  \link{groupBaseline}:            Combine PDFs from sequences grouped
 #'                                           by biological or experimental relevance.
 #'   \item  \link{summarizeBaseline}:        Compute summary statistics from BASELINe PDFs.
+#'   \item  \link{testBaseline}:             Perform significance testing for the difference
+#'                                           between BASELINe PDFs.
 #'   \item  \link{plotBaselineDensity}:      Plot the probability density functions
 #'                                           resulting from selection analysis.
 #'   \item  \link{plotBaselineSummary}:      Plot summary stastistics resulting from 
