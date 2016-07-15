@@ -1,0 +1,12 @@
+image: 
+  name: ssnn/immcantation
+  username: $USERNAME
+  password: $PASSWORD
+  email: $EMAIL
+
+pipelines:
+  default:
+    - step:
+        script:
+          - R CMD build .
+          - R CMD check *.tar.gz
