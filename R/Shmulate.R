@@ -9,14 +9,15 @@ NULL
 
 #' Simulate mutations in a single sequence
 #'
+#' Generates mutations in sequence one by one while updating targeting
+#' probability of each position after each mutation.
+#' 
 #' @param input_seq    sequence in which mutations are to be introduced
 #' @param num_muts     number of mutations to be introduced into \code{input_seq}
 #'
 #' @return A mutated sequence.
-#'
-#' @details
-#' Generates mutations in sequence one by one while updating targeting
-#' probability of each position after each mutation.
+#' 
+#' @seealso  \link{shmulateTree}
 #' 
 #' @export
 shmulateSeq <- function(input_seq, num_muts) {
@@ -98,6 +99,15 @@ shmulateSeq <- function(input_seq, num_muts) {
 #'                    of trunk mutations to the sequence.
 #'
 #' @return A \code{data.frame} of simulated sequences.
+#' 
+#' @seealso  \link{shmulateSeq}
+#' 
+#' @examples
+#' # Load example graph
+#' library(alakazam)
+#' graph <- ExampleTrees[[23]]
+#' 
+#' # Simulate
 #' 
 #' @export
 shmulateTree <- function(input_seq, graph, field=NULL, exclude=NULL, jun_frac=NULL) {
