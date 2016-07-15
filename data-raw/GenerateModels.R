@@ -125,7 +125,7 @@ devtools::use_data(HS5FModel, overwrite=TRUE)
 #### MRS5NF #####
 # Unpublished.  Shlomchik anti-NP mouse Kappa chain data.
 
-load("db_gc_igk_nf_rs_targeting.rdata")
+load("data-raw/db_gc_igk_nf_rs_targeting.rdata")
 
 # extend substitution matrix; get 5x3125 (expect 5th row [N] to be NAs)
 mrs5nf_sub <- extendSubstitutionMatrix(db_gc_igk_nf_sub_matrix_rs)
