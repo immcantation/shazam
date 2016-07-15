@@ -134,8 +134,8 @@ mrs5f_sub <- extendSubstitutionMatrix(db_gc_igk_nf_sub_matrix_rs)
 # extend mutability vector
 # db_gc_igk_nf_mut_matrix_rs is a df
 # extendMutabilityMatrix takes a numeric vector with names of 5mers
-mrs5f_mut_vec = db_gc_igk_nf_mut_matrix_rs$Mutability
-names(mrs5f_mut_vec) = rownames(db_gc_igk_nf_mut_matrix_rs)
+mrs5f_mut_vec <- db_gc_igk_nf_mut_matrix_rs$Mutability
+names(mrs5f_mut_vec) <- rownames(db_gc_igk_nf_mut_matrix_rs)
 #sum(mrs5f_mut_vec) # 1 (expected)
 mrs5f_mut <- extendMutabilityMatrix(mrs5f_mut_vec)
 #summary(mrs5f_mut) # 625 NAs (expected)
