@@ -30,22 +30,27 @@ data set to its nearest neighbor and finding the break point in the resulting
 bi-modal distribution that separates clonally related from unrelated sequences. 
 This is done via the following steps:
 
-1. Load a Change-O tab-delimited database file.
-2. Calculate the nearest neighbor distances for each sequence.
-3. Generate a histogram of the nearest neighbor distances and inspect for the 
+1. Calculate the nearest neighbor distances for each sequence.
+2. Generate a histogram of the nearest neighbor distances and inspect for the 
    threshold separating the two modes.
 
-## Load Change-O data
+## Example data
 
-A small example Change-O tab-delimited database file is included in the `shazam` 
-package. Calculating the nearest neighbor distances requires the following 
-fields (columns) to be present in the Change-O file: `V_CALL`, `J_CALL`, 
-`JUNCTION_LENGTH`, and `JUNCTION`.
+A small example Change-O database is included in the `alakazam` package. 
+Calculating the nearest neighbor distances requires the following 
+fields (columns) to be present in the Change-O database: 
+
+* `SEQUENCE_ID`
+* `V_CALL`
+* `J_CALL`
+* `JUNCTION`
+* `JUNCTION_LENGTH`
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 # Subset example data to one sample
 library(shazam)
-db <- subset(InfluenzaDb, BARCODE == "RL013")
+data(ExampleDb, package="alakazam")
+db <- subset(ExampleDb, SAMPLE == "-1h")
 ```
 
 ## Calculate nearest neighbor distances

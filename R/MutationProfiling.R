@@ -63,8 +63,8 @@ NULL
 #' 
 #' @examples
 #' # Subset example data
-#' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
-#'                           BARCODE %in% c("RL016","RL018","RL019","RL021"))
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 #' 
 #' # Run collapseByClone
 #' db_new <- collapseByClone(db, cloneColumn="CLONE", 
@@ -323,8 +323,8 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' 
 #' @examples
 #' # Subset example data
-#' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
-#'                           BARCODE %in% c("RL016","RL018","RL019","RL021"))
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 #'
 #' # Run calcDBObservedMutations()
 #' db_new <- calcDBObservedMutations(db, sequenceColumn="SEQUENCE_IMGT",
@@ -453,18 +453,19 @@ calcDBObservedMutations <- function(db,
 #' @seealso  See \link{calcDBObservedMutations} for counting the number of observed mutations.
 #' 
 #' @examples
-#' # Extracting the first entry in the example data to use for input and germline sequences.
-#' inputSeq <- InfluenzaDb[1, "SEQUENCE_IMGT"]
-#' germlineSeq <-  InfluenzaDb[1, "GERMLINE_IMGT_D_MASK"]
+#' # Use first entry in the exampled data for input and germline sequence
+#' data(ExampleDb, package="alakazam")
+#' in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
+#' germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]
 #' 
 #' # Identify all mutations in the sequence
-#' calcObservedMutations(inputSeq, germlineSeq)
+#' calcObservedMutations(in_seq, germ_seq)
 #' 
 #' # Identify only mutations the V segment minus CDR3
-#' calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
+#' calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3)
 #'  
 #' # Identify mutations by change in hydropathy class
-#' calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3,
+#' calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
 #'                       mutationDefinition=HYDROPATHY_MUTATIONS, frequency=TRUE)
 #' 
 #' @export
@@ -669,23 +670,23 @@ binMutationsByRegion <- function(mutationsArray,
 #' 
 #' @examples
 #' # Subset example data
-#' db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
-#'                           BARCODE %in% c("RL016","RL018","RL019","RL021"))
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 #'
 #' # Calculate expected mutations over V region
-#' db <- calcDBExpectedMutations(db,
-#'                               sequenceColumn="SEQUENCE_IMGT",
-#'                               germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                               regionDefinition=IMGT_V_NO_CDR3,
-#'                               nproc=1)
+#' db_exp <- calcDBExpectedMutations(db,
+#'                                   sequenceColumn="SEQUENCE_IMGT",
+#'                                   germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                                   regionDefinition=IMGT_V_NO_CDR3,
+#'                                   nproc=1)
 #' 
 #' # Calculate hydropathy expected mutations over V region
-#' db <- calcDBExpectedMutations(db,
-#'                               sequenceColumn="SEQUENCE_IMGT",
-#'                               germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                               regionDefinition=IMGT_V_NO_CDR3,
-#'                               mutationDefinition=HYDROPATHY_MUTATIONS,
-#'                               nproc=1)
+#' db_exp <- calcDBExpectedMutations(db,
+#'                                   sequenceColumn="SEQUENCE_IMGT",
+#'                                   germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                                   regionDefinition=IMGT_V_NO_CDR3,
+#'                                   mutationDefinition=HYDROPATHY_MUTATIONS,
+#'                                   nproc=1)
 #'
 #' @export
 calcDBExpectedMutations <- function(db, 
@@ -818,18 +819,18 @@ calcDBExpectedMutations <- function(db,
 #' See \link{calcObservedMutations} for getting observed mutation counts.
 #' 
 #' @examples
-#' # Extracting the first entry in the exampled data to use for input and germline sequences.
-#' inputSeq <- InfluenzaDb[1, "SEQUENCE_IMGT"]
-#' germlineSeq <-  InfluenzaDb[1, "GERMLINE_IMGT_D_MASK"]
+#' # Use first entry in the exampled data for input and germline sequence
+#' in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
+#' germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]
 #' 
 #' # Identify all mutations in the sequence
-#' calcExpectedMutations(inputSeq, germlineSeq)
+#' calcExpectedMutations(in_seq, germ_seq)
 #' 
 #' # Identify only mutations the V segment minus CDR3
-#' calcExpectedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
+#' calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3)
 #' 
 #' # Define mutations based on hydropathy
-#' calcExpectedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3,
+#' calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
 #'                       mutationDefinition=HYDROPATHY_MUTATIONS)
 #' 
 #' @export

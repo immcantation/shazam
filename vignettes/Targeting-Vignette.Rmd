@@ -29,25 +29,28 @@ inferred from observed mutations in the data. The model can then be transformed
 into a distance function to compare Ig sequences of a given dataset based on the 
 likelihood of the observed mutations. This is done via the following steps:
 
-1. Load a Change-O tab-delimited database file.
-2. Infer a substitution model, which is the likelihood of a base mutating to 
+1. Infer a substitution model, which is the likelihood of a base mutating to 
    each other base given the microsequence context. 
-3. Infer a mutability model, which is likelihood of a given base being mutated
+2. Infer a mutability model, which is likelihood of a given base being mutated
    given the microsequence context and substitution model.
-4. Visualize the mutability model to identify hot and cold spots.
-5. Calculate a nucleotide distance matrix based on the underlying SHM models.
+3. Visualize the mutability model to identify hot and cold spots.
+4. Calculate a nucleotide distance matrix based on the underlying SHM models.
 
-## Load Change-O data
+## Example data
 
-A small example Change-O tab-delimited database file is included in the `shazam` 
-package. Inferring a targeting model requires the following fields (columns) to 
-be present in the Change-O file: `SEQUENCE_IMGT`, `GERMLINE_IMGT_D_MASK` and 
-`V_CALL`.
+A small example Change-O database is included in the `shazam` package. 
+Inferring a targeting model requires the following fields (columns) to 
+be present in the Change-O database: 
+
+* `SEQUENCE_ID`
+* `SEQUENCE_IMGT`
+* `GERMLINE_IMGT_D_MASK`
+* `V_CALL`
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
-# Set example data
+# Load example data
 library(shazam)
-db <- InfluenzaDb
+data(ExampleDb, package="alakazam")
 ```
 
 ## Infer targeting model (substitution and mutability)
@@ -85,7 +88,7 @@ object directly from the dataset.
 
 # Create a consensus sequence for each clone to avoid over-counting mutations
 # Adds the CLONAL_CONSENSUS_SEQUENCE column
-db_cons <- collapseByClone(db)
+db_cons <- collapseByClone(ExampleDb)
 
 # Create substitution model using silent mutations
 sub_matrix <- createSubstitutionMatrix(db_cons, 
@@ -106,7 +109,7 @@ tar_matrix <- createTargetingMatrix(sub_matrix, mut_matrix)
 
 ```{r, eval=TRUE, warning=FALSE}
 # Create targeting model in one step using only silent mutations
-model <- createTargetingModel(db, model="S")
+model <- createTargetingModel(ExampleDb, model="S")
 ```
 
 ## Visualize targeting model
