@@ -72,6 +72,22 @@ NULL
 #'           publication.
 "HS5FModel"
 
+#' Mouse 5-mer targeting model.
+#'
+#' 5-mer model of somatic hypermutation targeting based on analysis of replacement and
+#' silent mutations in non-function IgK from NP-immunized Mus musculus.
+#'
+#' @format \link{TargetingModel} object.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Cui A, et al. A model of somatic hypermutation targeting in mice based on 
+#'          high-throughput immunoglobulin sequencing data. (In Preparation)
+#'  }
+#'  
+#' @seealso  See \link{HS5FModel} for human 5-mer targeting model.
+"MRS5NFModel"
+
 
 #### Classes ####
 
