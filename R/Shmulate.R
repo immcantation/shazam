@@ -12,15 +12,24 @@ NULL
 #' Generates mutations in sequence one by one while updating targeting
 #' probability of each position after each mutation.
 #' 
-#' @param input_seq    sequence in which mutations are to be introduced
-#' @param num_muts     number of mutations to be introduced into \code{input_seq}
-#'
+#' @param input_seq         sequence in which mutations are to be introduced
+#' @param num_muts          number of mutations to be introduced into \code{input_seq}
+#' @param targeting_model   targeting model of class \code{TargetingModel} to be used for 
+#'                          computing probabilities of mutations at each position. Default is
+#'                          \code{HS5FModel} from \code{SHazaM}.
 #' @return A mutated sequence.
 #' 
-#' @seealso  \link{shmulateTree}
+#' @seealso  \link{shmulateTree}, \link{HS5FModel}, \link{TargetingModel}
+#' 
+#' @examples
+#' # Example input sequence
+#' input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTAGAGAGTAGCCCGTTCCAGCACTGGGGCCAGGGCACCCTGGTCACCGTCTCCTCAG"
+#' 
+#' # Simulate using the default human S5F targeting model
+#' shmulateSeq(input_seq, num_muts = 6)
 #' 
 #' @export
-shmulateSeq <- function(input_seq, num_muts) {
+shmulateSeq <- function(input_seq, num_muts, targeting_model = HS5FModel) {
   #* counts on constant variables CODON_TABLE, NUCLEOTIDES (ACTGN-.)
   
   # Trim sequence to last codon (getCodonPos from MutationProfiling.R)
@@ -38,7 +47,7 @@ shmulateSeq <- function(input_seq, num_muts) {
   
   # Calculate probabilities of mutations at each position given targeting
   # from MutationProfiling.R; includes a N row
-  targeting <- calculateTargeting(germlineSeq = sim_seq) 
+  targeting <- calculateTargeting(germlineSeq = sim_seq, targetingModel = targeting_model) 
   # keep only ACGT rows
   targeting <- targeting[NUCLEOTIDES[1:4], ] 
   # set NA to 0
@@ -66,7 +75,8 @@ shmulateSeq <- function(input_seq, num_muts) {
     lower <- max(mutpos$pos-4, 1)
     upper <- min(mutpos$pos+4, sim_leng)
     targeting[, lower:upper] <- calculateTargeting(germlineSeq = 
-                                                     substr(sim_seq, lower, upper))[NUCLEOTIDES[1:4], ]
+                                                     substr(sim_seq, lower, upper),
+                                                   targetingModel = targeting_model)[NUCLEOTIDES[1:4], ]
     targeting[is.na(targeting)] <- 0
     
     # Update possible mutations
@@ -89,28 +99,36 @@ shmulateSeq <- function(input_seq, num_muts) {
 #' tree and sequences are simulated with mutations corresponding to edge weights in the tree.
 #' Sequences will not be generated for groups of nodes that are specified to be excluded.
 #'
-#' @param input_seq   sequence in which mutations are to be introduced.
-#' @param graph       \code{igraph} object with vertex annotations whose edges are to be recreated.
-#' @param field       annotation field to use for both unweighted path length exclusion and
-#'                    consideration as a founder node. If \code{NULL} do not exclude any nodes.
-#' @param exclude     vector of annotation values in the given field to exclude from potential
-#'                    founder set. If \code{NULL} do not exclude any nodes. Has no effect if \code{field=NULL}.
-#' @param jun_frac    fraction of characters in the junction region to add proportional number
-#'                    of trunk mutations to the sequence.
+#' @param input_seq         sequence in which mutations are to be introduced.
+#' @param graph             \code{igraph} object with vertex annotations whose edges are to be recreated.
+#' @param targeting_model   targeting model of class \code{TargetingModel} to be used for 
+#'                          computing probabilities of mutations at each position. Default is
+#'                          \code{HS5FModel} from \code{SHazaM}.
+#' @param field             annotation field to use for both unweighted path length exclusion and
+#'                          consideration as a founder node. If \code{NULL} do not exclude any nodes.
+#' @param exclude           vector of annotation values in the given field to exclude from potential
+#'                          founder set. If \code{NULL} do not exclude any nodes. Has no effect if \code{field=NULL}.
+#' @param jun_frac          fraction of characters in the junction region to add proportional number
+#'                          of trunk mutations to the sequence.
 #'
 #' @return A \code{data.frame} of simulated sequences.
 #' 
-#' @seealso  \link{shmulateSeq}
+#' @seealso  \link{shmulateSeq}, \link{HS5FModel}, \link{TargetingModel}, \link{ExampleTrees}
 #' 
 #' @examples
+#' # Example input
+#' input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTAGAGAGTAGCCCGTTCCAGCACTGGGGCCAGGGCACCCTGGTCACCGTCTCCTCAG"
+#' 
 #' # Load example graph
 #' library(alakazam)
-#' graph <- ExampleTrees[[23]]
+#' graph <- ExampleTrees[[17]]
 #' 
-#' # Simulate
+#' # Simulate using the mouse RS5NF targeting model
+#' shmulateTree(input_seq, graph, targeting_model = MRS5NFModel)
 #' 
 #' @export
-shmulateTree <- function(input_seq, graph, field=NULL, exclude=NULL, jun_frac=NULL) {
+shmulateTree <- function(input_seq, graph, targeting_model = HS5FModel,
+                         field=NULL, exclude=NULL, jun_frac=NULL) {
   # Determine founder (mrca) of lineage tree
   # specify alakazam as opposed to ape::getMRCA
   founder_df <- alakazam::getMRCA(graph, path="distance", root="Germline", 
@@ -146,7 +164,9 @@ shmulateTree <- function(input_seq, graph, field=NULL, exclude=NULL, jun_frac=NU
         # Add child to new parents
         new_parents <- union(new_parents, ch)
         # Simulate sequence for that edge
-        seq <- shmulateSeq(sim_tree$sequence[sim_tree$name==p], adj[p, ch])
+        seq <- shmulateSeq(input_seq = sim_tree$sequence[sim_tree$name==p], 
+                           num_muts = adj[p, ch],
+                           targeting_model = targeting_model)
         new_node <- data.frame('name'=ch, 'sequence'=seq, 'distance'=adj[p, ch])
         # Update output data.frame (bind_rows from dplyr)
         sim_tree <- bind_rows(sim_tree, new_node)
