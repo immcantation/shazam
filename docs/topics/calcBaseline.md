@@ -114,16 +114,11 @@ Examples
 
 ```R
 # Subset example data
-db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
-BARCODE %in% c("RL016","RL018","RL019","RL021"))
-
+data(ExampleDb, package="alakazam")
+db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+ 
 # Calculate BASELINe
-# By default, calcBaseline collapses the sequences in the db by the column "CLONE",
-# calculates the numbers of observed mutations and expected frequencies of mutations,
-# as defined in the IMGT_V_NO_CDR3 and using the HS5FModel targeting model.
-# Then, it calculates  the BASELINe posterior probability density functions (PDFs) for
-# sequences in the updated db files; using the focused test statistic
-db_baseline <- calcBaseline(db, 
+baseline <- calcBaseline(db, 
 sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK", 
 testStatistic="focused",

@@ -50,7 +50,8 @@ NULL
 #'
 #' @format \link{TargetingModel} object.
 #' 
-#' @seealso  See \link{HS5FModel} the human 5-mer model.
+#' @seealso  See \link{HS5FModel} for the human 5-mer model and \link{MRS5NFModel} 
+#'           for the mouse 5-mer model.
 "U5NModel"
 
 
@@ -69,8 +70,10 @@ NULL
 #'  }
 #'  
 #' @seealso  See \link{HS1FDistance} for the 1-mer distance matrix from the same 
-#'           publication.
+#'           publication, \link{MRS5NFModel} for the mouse 5-mer model, and 
+#'           \link{U5NModel} for the uniform 5-mer model.
 "HS5FModel"
+
 
 #' Mouse 5-mer targeting model.
 #'
@@ -85,7 +88,9 @@ NULL
 #'          high-throughput immunoglobulin sequencing data. (In Preparation)
 #'  }
 #'  
-#' @seealso  See \link{HS5FModel} for human 5-mer targeting model.
+#' @seealso  See \link{HS5FModel} for human 5-mer targeting model, \link{U5NModel}
+#'           for the uniform 5-mer model, and \link{M1NDistance} for the mouse 
+#'           1-mer distance matrix.
 "MRS5NFModel"
 
 

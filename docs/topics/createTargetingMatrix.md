@@ -64,7 +64,8 @@ Examples
 
 ```R
 # Subset example data to one isotype and sample as a demo
-db <- subset(InfluenzaDb, CPRIMER == "IGHA" & BARCODE == "RL014")
+data(ExampleDb, package="alakazam")
+db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 
 # Create 4x1024 model using only silent mutations and ignore multiple mutations
 sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")

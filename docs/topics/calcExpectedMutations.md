@@ -84,19 +84,19 @@ Examples
 -------------------
 
 ```R
-# Extracting the first entry in the exampled data to use for input and germline sequences.
-inputSeq <- InfluenzaDb[1, "SEQUENCE_IMGT"]
-germlineSeq <-  InfluenzaDb[1, "GERMLINE_IMGT_D_MASK"]
+# Use first entry in the exampled data for input and germline sequence
+in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
+germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]
 
 # Identify all mutations in the sequence
-calcExpectedMutations(inputSeq, germlineSeq)
+calcExpectedMutations(in_seq, germ_seq)
 
 ```
 
 
 ```
     SEQ_R     SEQ_S 
-0.7379522 0.2620478 
+0.7659404 0.2340596 
 
 ```
 
@@ -104,14 +104,14 @@ calcExpectedMutations(inputSeq, germlineSeq)
 ```R
 
 # Identify only mutations the V segment minus CDR3
-calcExpectedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
+calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3)
 
 ```
 
 
 ```
      CDR_R      CDR_S      FWR_R      FWR_S 
-0.16184071 0.04872069 0.57766105 0.21177756 
+0.20544721 0.04081758 0.56090228 0.19283293 
 
 ```
 
@@ -119,14 +119,14 @@ calcExpectedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
 ```R
 
 # Define mutations based on hydropathy
-calcExpectedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3,
+calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
 mutationDefinition=HYDROPATHY_MUTATIONS)
 ```
 
 
 ```
     CDR_R     CDR_S     FWR_R     FWR_S 
-0.1043777 0.1061837 0.3317107 0.4577279 
+0.1209459 0.1253189 0.3169116 0.4368236 
 
 ```
 

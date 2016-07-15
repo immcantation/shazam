@@ -67,19 +67,20 @@ Examples
 -------------------
 
 ```R
-# Extracting the first entry in the example data to use for input and germline sequences.
-inputSeq <- InfluenzaDb[1, "SEQUENCE_IMGT"]
-germlineSeq <-  InfluenzaDb[1, "GERMLINE_IMGT_D_MASK"]
+# Use first entry in the exampled data for input and germline sequence
+data(ExampleDb, package="alakazam")
+in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
+germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]
 
 # Identify all mutations in the sequence
-calcObservedMutations(inputSeq, germlineSeq)
+calcObservedMutations(in_seq, germ_seq)
 
 ```
 
 
 ```
 SEQ_R SEQ_S 
-   12     5 
+    0     2 
 
 ```
 
@@ -87,14 +88,13 @@ SEQ_R SEQ_S
 ```R
 
 # Identify only mutations the V segment minus CDR3
-calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3)
+calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3)
 
 ```
 
 
 ```
-CDR_R CDR_S FWR_R FWR_S 
-    2     2     8     1 
+[1] NA
 
 ```
 
@@ -102,14 +102,13 @@ CDR_R CDR_S FWR_R FWR_S
 ```R
  
 # Identify mutations by change in hydropathy class
-calcObservedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3,
+calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
 mutationDefinition=HYDROPATHY_MUTATIONS, frequency=TRUE)
 ```
 
 
 ```
-     CDR_R      CDR_S      FWR_R      FWR_S 
-0.02222222 0.06666667 0.01250000 0.02500000 
+[1] NA
 
 ```
 

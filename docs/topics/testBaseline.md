@@ -59,8 +59,8 @@ Examples
 
 ```R
 # Subset example data
-db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA") & 
-BARCODE %in% c("RL016","RL019","RL021"))
+data(ExampleDb, package="alakazam")
+db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
@@ -85,8 +85,8 @@ Calculating BASELINe probability density functions...
 
 ```R
 
-# Group PDFs by the sample barcode column
-grouped <- groupBaseline(baseline, groupBy="BARCODE")
+# Group PDFs by the sample identifier
+grouped <- groupBaseline(baseline, groupBy="SAMPLE")
 
 ```
 
@@ -100,23 +100,11 @@ Calculating BASELINe statistics...
 
 ```R
 
-# Perform test on barcode PDFs
-testBaseline(grouped, groupBy="BARCODE")
+# Perform test on sample PDFs
+testBaseline(grouped, groupBy="SAMPLE")
 ```
 
-
-```
-  REGION           TEST     PVALUE       FDR
-1    CDR RL019 != RL021 0.48366214 0.4836621
-2    CDR RL019 != RL016 0.22876315 0.3853040
-3    CDR RL021 != RL016 0.25686930 0.3853040
-4    FWR RL019 != RL021 0.06239216 0.1871765
-5    FWR RL019 != RL016 0.03626564 0.1871765
-6    FWR RL021 != RL016 0.37966816 0.4556018
-
-```
-
-
+**Error in combn(1:length(groups), 2, simplify = F)**: n < m
 
 See also
 -------------------

@@ -23,7 +23,7 @@ NULL
 #' 
 #' @examples
 #' # Example input sequence
-#' input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTAGAGAGTAGCCCGTTCCAGCACTGGGGCCAGGGCACCCTGGTCACCGTCTCCTCAG"
+#' input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
 #' 
 #' # Simulate using the default human S5F targeting model
 #' shmulateSeq(input_seq, num_muts = 6)
@@ -117,7 +117,7 @@ shmulateSeq <- function(input_seq, num_muts, targeting_model = HS5FModel) {
 #' 
 #' @examples
 #' # Example input
-#' input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTAGAGAGTAGCCCGTTCCAGCACTGGGGCCAGGGCACCCTGGTCACCGTCTCCTCAG"
+#' input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
 #' 
 #' # Load example graph
 #' library(alakazam)

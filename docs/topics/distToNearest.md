@@ -116,9 +116,9 @@ Examples
 -------------------
 
 ```R
-# Subset data for demo purposes
-db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
-BARCODE %in% c("RL016","RL018","RL019","RL021"))
+# Subset example data to one sample as a demo
+data(ExampleDb, package="alakazam")
+db <- subset(ExampleDb, SAMPLE == "-1h")
 
 # Use genotyped V assignments, HS1F model, and normalize by junction length
 dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 

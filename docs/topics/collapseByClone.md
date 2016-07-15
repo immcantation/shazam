@@ -101,8 +101,8 @@ Examples
 
 ```R
 # Subset example data
-db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
-BARCODE %in% c("RL016","RL018","RL019","RL021"))
+data(ExampleDb, package="alakazam")
+db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 
 # Run collapseByClone
 db_new <- collapseByClone(db, cloneColumn="CLONE", 

@@ -37,6 +37,7 @@ pages:
       - topics/createTargetingModel.md
       - topics/plotMutability.md
       - topics/HS5FModel.md
+      - topics/MRS5NFModel.md
       - topics/U5NModel.md
       - topics/TargetingModel-class.md
     - 'Selection Analysis':
@@ -66,5 +67,3 @@ pages:
       - topics/clearConsole.md
       - topics/getnproc.md
       - topics/getPlatform.md
-    - 'Data':
-      - topics/InfluenzaDb.md

@@ -72,10 +72,9 @@ Examples
 -------------------
 
 ```R
-# Load and subset example data
+# Subset example data from alakazam
 library(alakazam)
-file <- system.file("extdata", "ExampleDb.gz", package="alakazam")
-db <- subset(readChangeoDb(file), ISOTYPE %in% c("IgA", "IgG"))
+db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 

@@ -71,9 +71,11 @@ Mutational profiling
 
 
 
-+ [collapseByClone](collapseByClone.md):    Build clonal consensus sequence.
++ [collapseByClone](collapseByClone.md):          Build clonal consensus sequence.
 + [calcDBObservedMutations](calcDBObservedMutations.md):  Compute observed mutation counts.
 + [calcDBExpectedMutations](calcDBExpectedMutations.md):  Compute expected mutation frequencies.
++ [shmulateSeq](shmulateSeq.md):              Simulate mutations in a single sequence.
++ [shmulateTree](shmulateTree.md):             Simulate mutations over a lineage tree.
 
 
 Selection analysis

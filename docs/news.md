@@ -4,6 +4,8 @@ Version 0.1.2.999:  July 14, 2016
 General:
 
 + Added ape dependency
++ Removed the `InfluenzaDb` data object, in favor of the updated `ExampleDb`
+  provided in the alakazam package.
 
 Distance Profiling:
 

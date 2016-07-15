@@ -7,28 +7,31 @@ density function (PDF) based on observed mutations compared to expected
 mutation rates derived from an underlying SHM targeting model. Selection is 
 quantified via the following steps:
 
-1. Load a Change-O tab-delimited database file.
-2. Calculate the selection scores and group by relevant fields for comparison.
+1. Calculate the selection scores for individual sequences.
+2. Group by relevant fields for comparison and convolve individual selection PDFs.
 3. Plot and compare selection scores of different groups of sequences.
 
-## Load Change-O data
+## Example data
 
-A small example Change-O tab-delimited database file is included in the `shazam` 
-package. The example dataset consists of a subset of Ig sequencing data from an 
+A small example Change-O database is included in the `alakazam` package. 
+The example dataset consists of a subset of Ig sequencing data from an 
 influenza vaccination study (Laserson and Vigneault et al., PNAS, 2014). The 
 data include sequences from multiple time-points before and after the subject 
 received an influenza vaccination. Quantifying selection requires the following 
-fields (columns) to be present in the Change-O file: `SEQUENCE_IMGT` and 
-`GERMLINE_IMGT_D_MASK`.
+fields (columns) to be present in the Change-O database: 
+
+* `SEQUENCE_ID`
+* `SEQUENCE_IMGT`
+* `GERMLINE_IMGT_D_MASK`
 
 
 ```r
-# Set example data
+# Load example data
 library(shazam)
-db <- InfluenzaDb
+data(ExampleDb, package="alakazam")
 ```
 
-## Calculate selection scores and group by relevant fields for comparison
+## Calculate selection PDFs for individual sequences
 
 The first step to calculate selection is to call `calcDBClonalConsensus` to 
 collapse sequences by the `CLONE` column, if the data has been divided into 
@@ -37,7 +40,7 @@ clonal groups.
 
 ```r
 # Collapse clonal groups into single sequences
-db_clone <- collapseByClone(db, regionDefinition=IMGT_V_NO_CDR3, 
+db_clone <- collapseByClone(ExampleDb, regionDefinition=IMGT_V_NO_CDR3, 
                             expandedDb=TRUE, nproc=1)
 ```
 
@@ -93,18 +96,19 @@ baseline <- calcBaseline(db_exp, testStatistic="focused",
                          regionDefinition=IMGT_V_NO_CDR3,
                          nproc=1)
 
-# Subset the original data to two time-points and switched isotypes
-db_sub <- subset(db, CPRIMER %in% c("IGHA", "IGHG") & 
-                     BARCODE %in% c("RL013", "RL018"))
+# Subset the original data to switched isotypes
+db_sub <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
 # Calculate selection scores from scratch on subset
 baseline_sub <- calcBaseline(db_sub, testStatistic="focused", 
                              regionDefinition=IMGT_V_NO_CDR3, nproc=1)
 ```
 
+## Group and convolve individual sequence PDFs
+
 Selection scores can be used to compare selection pressures between different 
-samples. In the example influenza dataset, the `BARCODE` field corresponds to 
+samples. In the example influenza dataset, the `SAMPLE` field corresponds to 
 samples taken at different timepoints before and after an influenza vaccination. 
-Additionally, the `CPRIMER` field specifies the isotype of the sequence. The 
+Additionally, the `ISOTYPE` field specifies the isotype of the sequence. The 
 `groupBaseline` function convolves the Baseline PDFs of individual sequences 
 (or clones) to get a combined PDF. The field(s) by which to group the sequences are 
 specified with the `groupBy` parameter. The `groupBaseline` function automatically
@@ -116,14 +120,14 @@ confidence intervals, and p-values for each grouping.
 
 ```r
 # Combine selection scores by time-point
-baseline_one <- groupBaseline(baseline, groupBy=c("BARCODE"))
+baseline_one <- groupBaseline(baseline, groupBy=c("SAMPLE"))
 
 # Combine selection scores by time-point and isotype
-baseline_two <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
-baseline_sub <- groupBaseline(baseline_sub, groupBy=c("BARCODE", "CPRIMER"))
+baseline_two <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
+baseline_sub <- groupBaseline(baseline_sub, groupBy=c("SAMPLE", "ISOTYPE"))
 ```
 
-## Plot and compare selection scores of different groups of sequences
+## Plot and compare selection scores for groups
 
 `plotBaselineSummary` plots the mean and confidence interval of selection scores 
 for the given groups. The `idColumn` argument specifies the field that contains 
@@ -138,30 +142,30 @@ below.
 
 ```r
 # Plot mean and confidence interval by time-point
-plotBaselineSummary(baseline_one, "BARCODE")
+plotBaselineSummary(baseline_one, "SAMPLE")
 ```
 
 ![plot of chunk Baseline-Vignette-6](figure/Baseline-Vignette-6-1.png)
 
 ```r
 # Plot selection scores by time-point and isotype for only CDR
-plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", subsetRegions="CDR")
+plotBaselineSummary(baseline_two, "SAMPLE", "ISOTYPE", subsetRegions="CDR")
 ```
 
 ![plot of chunk Baseline-Vignette-6](figure/Baseline-Vignette-6-2.png)
 
 ```r
 # Plot only two time-points and recolor isotypes
-group_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
-                  "IGHG"="seagreen", "IGHA"="steelblue")
-plotBaselineSummary(baseline_sub, "BARCODE", "CPRIMER", groupColors=group_colors)
+group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
+                  "IgG"="seagreen", "IgA"="steelblue")
+plotBaselineSummary(baseline_sub, "SAMPLE", "ISOTYPE", groupColors=group_colors)
 ```
 
 ![plot of chunk Baseline-Vignette-6](figure/Baseline-Vignette-6-3.png)
 
 ```r
 # Group by CDR/FWR and facet by isotype
-plotBaselineSummary(baseline_two, "BARCODE", "CPRIMER", facetBy="group")
+plotBaselineSummary(baseline_two, "SAMPLE", "ISOTYPE", facetBy="group")
 ```
 
 ![plot of chunk Baseline-Vignette-6](figure/Baseline-Vignette-6-4.png)
@@ -174,9 +178,9 @@ function is shown.
 
 ```r
 # Plot selection PDFs for a subset of the data
-group_colors <- c("RL013"="steelblue", "RL018"="firebrick")
-plotBaselineDensity(baseline_sub, "CPRIMER", groupColumn="BARCODE", colorElement="group", 
-                    colorValues=group_colors, sigmaLimits=c(-3, 3))
+group_colors <- c("-1h"="steelblue", "+7d"="firebrick")
+plotBaselineDensity(baseline_sub, "ISOTYPE", groupColumn="SAMPLE", colorElement="group", 
+                    colorValues=group_colors, sigmaLimits=c(-1, 1))
 ```
 
 ![plot of chunk Baseline-Vignette-7](figure/Baseline-Vignette-7-1.png)

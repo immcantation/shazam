@@ -97,8 +97,8 @@ Examples
 
 ```R
 # Subset example data
-db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
-BARCODE %in% c("RL016","RL018","RL019","RL021"))
+data(ExampleDb, package="alakazam")
+db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
@@ -123,9 +123,8 @@ Calculating BASELINe probability density functions...
 
 ```R
  
-# Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 
-# respectively to sample barcodes and the constant region isotype primers.
-grouped <- groupBaseline(baseline, groupBy=c("BARCODE", "CPRIMER"))
+# Grouping the PDFs by sample and isotype annotations
+grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 
 ```
 
@@ -140,21 +139,23 @@ Calculating BASELINe statistics...
 ```R
 
 # Plot mean and confidence interval
-plotBaselineSummary(grouped, "BARCODE", "CPRIMER", style="mean")
+plotBaselineSummary(grouped, "ISOTYPE", "SAMPLE", style="mean")
 
 ```
 
 ![6](plotBaselineSummary-6.png)
 
 ```R
-plotBaselineSummary(grouped, "BARCODE", "CPRIMER", subsetRegions="CDR", style="mean")
+plotBaselineSummary(grouped, "ISOTYPE", "SAMPLE", subsetRegions="CDR", 
+style="mean")
 
 ```
 
 ![8](plotBaselineSummary-8.png)
 
 ```R
-plotBaselineSummary(grouped, "BARCODE", "CPRIMER", facetBy="group", style="mean")
+plotBaselineSummary(grouped, "ISOTYPE", "SAMPLE", facetBy="group", 
+style="mean")
 
 ```
 
@@ -163,8 +164,10 @@ plotBaselineSummary(grouped, "BARCODE", "CPRIMER", facetBy="group", style="mean"
 ```R
 
 # Reorder and recolor groups
-group_colors <- c("IGHM"="darkorchid", "IGHA"="steelblue")
-plotBaselineSummary(grouped, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
+group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
+"IgG"="seagreen", "IgA"="steelblue")
+plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", groupColors=group_colors, 
+style="mean")
 
 ```
 
@@ -173,8 +176,9 @@ plotBaselineSummary(grouped, "BARCODE", "CPRIMER", groupColors=group_colors, sty
 ```R
 
 # Plot subset of data
-stats <- subset(getBaselineStats(grouped), BARCODE %in% c("RL018", "RL019"))
-plotBaselineSummary(stats, "BARCODE", "CPRIMER", groupColors=group_colors, style="mean")
+stats <- subset(getBaselineStats(grouped), ISOTYPE == "IgG")
+plotBaselineSummary(stats, "SAMPLE", "ISOTYPE", groupColors=group_colors, 
+style="mean")
 ```
 
 ![14](plotBaselineSummary-14.png)

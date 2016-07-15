@@ -122,4 +122,4 @@ plot(p3)
 ```
 
 In this example, the unnormalized `hs5f` model distance threshold would be 
-set to a value near 4.
+set to a value near 6.
