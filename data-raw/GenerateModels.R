@@ -128,20 +128,20 @@ devtools::use_data(HS5FModel, overwrite=TRUE)
 load("db_gc_igk_nf_rs_targeting.rdata")
 
 # extend substitution matrix; get 5x3125 (expect 5th row [N] to be NAs)
-mrs5f_sub <- extendSubstitutionMatrix(db_gc_igk_nf_sub_matrix_rs)
-#table(colSums(mrs5f_sub, na.rm=1)) # 625 0/NAs (expected)
+mrs5nf_sub <- extendSubstitutionMatrix(db_gc_igk_nf_sub_matrix_rs)
+#table(colSums(mrs5nf_sub, na.rm=1)) # 625 0/NAs (expected)
 
 # extend mutability vector
 # db_gc_igk_nf_mut_matrix_rs is a df
 # extendMutabilityMatrix takes a numeric vector with names of 5mers
-mrs5f_mut_vec <- db_gc_igk_nf_mut_matrix_rs$Mutability
-names(mrs5f_mut_vec) <- rownames(db_gc_igk_nf_mut_matrix_rs)
-#sum(mrs5f_mut_vec) # 1 (expected)
-mrs5f_mut <- extendMutabilityMatrix(mrs5f_mut_vec)
-#summary(mrs5f_mut) # 625 NAs (expected)
+mrs5nf_mut_vec <- db_gc_igk_nf_mut_matrix_rs$Mutability
+names(mrs5nf_mut_vec) <- rownames(db_gc_igk_nf_mut_matrix_rs)
+#sum(mrs5nf_mut_vec) # 1 (expected)
+mrs5nf_mut <- extendMutabilityMatrix(mrs5nf_mut_vec)
+#summary(mrs5nf_mut) # 625 NAs (expected)
 
 # compute targeting; get 5x3125 (expect 5th row [N] to be NAs)
-mrs5f_tar <- createTargetingMatrix(mrs5f_sub, mrs5f_mut)
+mrs5nf_tar <- createTargetingMatrix(mrs5nf_sub, mrs5nf_mut)
 
 MRS5NFModel <- new("TargetingModel",
                    name = "rs5nf",
@@ -149,8 +149,8 @@ MRS5NFModel <- new("TargetingModel",
                    species = "Mus musculus",
                    date = "2015-01-06",
                    citation = "Cui A, et al. A model of somatic hypermutation targeting in mice based on high-throughput immunoglobulin sequencing data. (In prepration)",
-                   mutability = mrs5f_mut,
-                   substitution = mrs5f_sub,
-                   targeting = mrs5f_tar)
+                   mutability = mrs5nf_mut,
+                   substitution = mrs5nf_sub,
+                   targeting = mrs5nf_tar)
 
 devtools::use_data(MRS5NFModel, overwrite=TRUE)
