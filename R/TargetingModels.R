@@ -75,7 +75,7 @@ NULL
 #' Mouse 5-mer targeting model.
 #'
 #' 5-mer model of somatic hypermutation targeting based on analysis of replacement and
-#' silent mutations in non-function IgK from NP-immunized Mus musculus.
+#' silent mutations in non-functional IgK from NP-immunized Mus musculus.
 #'
 #' @format \link{TargetingModel} object.
 #' 
