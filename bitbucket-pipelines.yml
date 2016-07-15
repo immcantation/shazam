@@ -8,6 +8,7 @@ pipelines:
   default:
     - step:
         script:
+          - Rscript -e 'library(devtools); install_bitbucket("kleinstein/alakazam@default")'
           - R CMD build .
           - R CMD check *.tar.gz
 
