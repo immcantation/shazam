@@ -174,4 +174,4 @@ NULL
 
 # Add built-in variables to global variables environment
 utils::globalVariables(c("M1NDistance", "HS1FDistance", 
-                         "U5NModel", "HS5FModel"), package="shazam")
+                         "U5NModel", "HS5FModel", "MRS5NFModel"), package="shazam")

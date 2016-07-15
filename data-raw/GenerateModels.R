@@ -125,15 +125,32 @@ devtools::use_data(HS5FModel, overwrite=TRUE)
 #### MRS5NF #####
 # Unpublished.  Shlomchik anti-NP mouse Kappa chain data.
 
-# load("data-raw/MRS5NF_Targeting.RData")
+load("db_gc_igk_nf_rs_targeting.rdata")
 
-# MRS5NFModel <- new("TargetingModel",
-#                    name="hs5f",
-#                    description="5-mer targeting model based on all mutations in non-functional sequences.",
-#                    species="Mus musculus",
-#                    date="2015-01-06",
-#                    citation="Unpublished",
-#                    mutability=Targeting[["Mutability"]],
-#                    substitution=Targeting[['Substitution']],
-#                    targeting=Targeting[['Targeting']])
-# devtools::use_data(MRS5NFModel)
+# extend substitution matrix; get 5x3125 (expect 5th row [N] to be NAs)
+mrs5f_sub <- extendSubstitutionMatrix(db_gc_igk_nf_sub_matrix_rs)
+#table(colSums(mrs5f_sub, na.rm=1)) # 625 0/NAs (expected)
+
+# extend mutability vector
+# db_gc_igk_nf_mut_matrix_rs is a df
+# extendMutabilityMatrix takes a numeric vector with names of 5mers
+mrs5f_mut_vec = db_gc_igk_nf_mut_matrix_rs$Mutability
+names(mrs5f_mut_vec) = rownames(db_gc_igk_nf_mut_matrix_rs)
+#sum(mrs5f_mut_vec) # 1 (expected)
+mrs5f_mut <- extendMutabilityMatrix(mrs5f_mut_vec)
+#summary(mrs5f_mut) # 625 NAs (expected)
+
+# compute targeting; get 5x3125 (expect 5th row [N] to be NAs)
+mrs5f_tar <- createTargetingMatrix(mrs5f_sub, mrs5f_mut)
+
+MRS5NFModel <- new("TargetingModel",
+                   name = "rs5nf",
+                   description = "5-mer targeting model based on replacement (R) and silent (S) mutations in non-functional kappa light-chain sequences of NP-immunized mice",
+                   species = "Mus musculus",
+                   date = "2015-01-06",
+                   citation = "Cui A, et al. A model of somatic hypermutation targeting in mice based on high-throughput immunoglobulin sequencing data. (In prepration)",
+                   mutability = mrs5f_mut,
+                   substitution = mrs5f_sub,
+                   targeting = mrs5f_tar)
+
+devtools::use_data(MRS5NFModel, overwrite=TRUE)
