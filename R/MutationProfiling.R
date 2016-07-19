@@ -326,11 +326,18 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 #'
-#' # Run calcDBObservedMutations()
-#' db_new <- calcDBObservedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+#' # Calculate mutation frequency over the entire sequence
+#' db_mut <- calcDBObservedMutations(db, sequenceColumn="SEQUENCE_IMGT",
 #'                                   germlineColumn="GERMLINE_IMGT_D_MASK",
 #'                                   frequency=TRUE,
+#'                                   nproc=1)
+#'
+#' # Count of V-region mutations split by FWR and CDR
+#' # With mutations only considered replacement if charge changes
+#' db_mut <- calcDBObservedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+#'                                   germlineColumn="GERMLINE_IMGT_D_MASK",
 #'                                   regionDefinition=IMGT_V_NO_CDR3,
+#'                                   mutationDefinition=CHARGE_MUTATIONS,
 #'                                   nproc=1)
 #'                      
 #' @export
@@ -359,7 +366,7 @@ calcDBObservedMutations <- function(db,
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.  
-    if(nproc>1){        
+    if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
                                               'regionDefinition', 'frequency',
@@ -369,7 +376,7 @@ calcDBObservedMutations <- function(db,
                                               'collapseMatrixToVector'), 
                                 envir=environment())
         registerDoParallel(cluster)
-    } else if (nproc==1) {
+    } else if (nproc == 1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
