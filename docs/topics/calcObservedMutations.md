@@ -117,7 +117,7 @@ mutationDefinition=HYDROPATHY_MUTATIONS, frequency=TRUE)
 See also
 -------------------
 
-See [calcDBObservedMutations](calcDBObservedMutations.md) for counting the number of observed mutations.
+See [observedMutations](observedMutations.md) for counting the number of observed mutations.
 
 
 

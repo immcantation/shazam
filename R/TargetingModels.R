@@ -1385,7 +1385,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     
     # Plot
     if (!silent) { 
-        do.call(multiggplot, args=c(plot_list, ncol=length(plot_list))) 
+        do.call(gridPlot, args=c(plot_list, ncol=length(plot_list))) 
     }
     
     invisible(plot_list)

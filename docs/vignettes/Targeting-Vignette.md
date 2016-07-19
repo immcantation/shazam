@@ -68,7 +68,7 @@ object directly from the dataset.
 ```r
 # Create a consensus sequence for each clone to avoid over-counting mutations
 # Adds the CLONAL_CONSENSUS_SEQUENCE column
-db_cons <- collapseByClone(ExampleDb)
+db_cons <- collapseClones(ExampleDb)
 
 # Create substitution model using silent mutations
 sub_matrix <- createSubstitutionMatrix(db_cons, 

@@ -27,7 +27,10 @@ Mutation Profiling:
 + Added the functions `shmulateSeq()` and `shmulateTree()` to simulate
   mutations on sequences and lineage trees, respectively, using a 5-mer
   targeting model.
-
++ Renamed `collapseByClone`, `calcDbExpectedMutations` and 
+  `calcDbObservedMutations` to `collapseClones`, `expectedMutations`,
+  and `observedMutations`, respectively.
+  
 Selection Analysis:
 
 + Fixed a bug wherein passing a `Baseline` object through `groupBaseline()`
@@ -37,7 +40,7 @@ Selection Analysis:
   `plotBaselineDensity()`.
 + Added the `testBaseline()` function to test the significance of 
   differences between two selection distributions.
-  
++ Improved selection analysis vignette.  
 
 Version 0.1.2:  February 20, 2016
 -------------------------------------------------------------------------------

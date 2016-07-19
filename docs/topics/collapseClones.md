@@ -4,7 +4,7 @@
 
 
 
-**collapseByClone** - *Identifies clonal consensus sequences*
+**collapseClones** - *Identifies clonal consensus sequences*
 
 Description
 --------------------
@@ -15,7 +15,7 @@ Identifies effective/consensus sequences collapsed by clone
 Usage
 --------------------
 ```
-collapseByClone(db, cloneColumn = "CLONE", sequenceColumn = "SEQUENCE_IMGT",
+collapseClones(db, cloneColumn = "CLONE", sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", expandedDb = FALSE,
 regionDefinition = NULL, nonTerminalOnly = FALSE, nproc = 1)
 ```
@@ -67,7 +67,7 @@ CLONAL_SEQUENCE column.
 Details
 -------------------
 
-`collapseByClone` identifies the consensus sequence of each clonal 
+`collapseClones` identifies the consensus sequence of each clonal 
 group and appends a column to the input `data.frame` containing the clonal 
 consensus for each sequence.
 
@@ -104,11 +104,10 @@ Examples
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 
-# Run collapseByClone
-db_new <- collapseByClone(db, cloneColumn="CLONE", 
+# Build clonal consensus for V region
+db_new <- collapseClones(db, cloneColumn="CLONE", 
 sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK",
-expandedDb=FALSE,
 regionDefinition=IMGT_V_NO_CDR3,
 nproc=1)
 ```

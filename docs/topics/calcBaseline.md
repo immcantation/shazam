@@ -19,7 +19,8 @@ Usage
 calcBaseline(db, sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", testStatistic = c("local",
 "focused", "imbalance"), regionDefinition = NULL,
-targetingModel = HS5FModel, calcStats = FALSE, nproc = 1)
+targetingModel = HS5FModel, mutationDefinition = NULL,
+calcStats = FALSE, nproc = 1)
 ```
 
 Arguments
@@ -46,6 +47,15 @@ and boundaries of the Ig sequences.
 
 targetingModel
 :   [TargetingModel](TargetingModel-class.md) object. Default is  [HS5FModel](HS5FModel.md).
+
+mutationDefinition
+:   [MutationDefinition](MutationDefinition-class.md) object defining replacement
+and silent mutation criteria. If `NULL` then 
+replacement and silent are determined by exact 
+amino acid identity. Note, if the input data.frame 
+already contains observed and expected mutation frequency 
+columns then mutations will not be recalculated and this
+argument will be ignored.
 
 calcStats
 :   `logical` indicating whether or not to calculate the 

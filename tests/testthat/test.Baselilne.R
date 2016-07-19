@@ -80,10 +80,10 @@ test_that("calcExpectedMutations works with regionDefinition==NULL",{
     expect_equal(obs_mutations_null, exp_mutations_null, tolerance=0.001)
 })
 
-test_that("calcDBExpectedMutations works with regionDefinition==NULL",{
+test_that("expectedMutations works with regionDefinition==NULL",{
     db_subset <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
-                     BARCODE %in% c("RL016","RL018","RL019","RL021"))
-    db_mutations <- calcDBExpectedMutations( db_subset,
+                        BARCODE %in% c("RL016","RL018","RL019","RL021"))
+    db_mutations <- expectedMutations(db_subset,
                              sequenceColumn="SEQUENCE_IMGT",
                              germlineColumn="GERMLINE_IMGT_D_MASK",
                              regionDefinition=IMGT_V_NO_CDR3,
@@ -110,11 +110,11 @@ test_that("calcDBExpectedMutations works with regionDefinition==NULL",{
     exp_fwr_s<- c(0.1950189, 0.1950189, 0.1928329, 0.1928329, 0.1950189)
     expect_equal(obs_fwr_s, exp_fwr_s, tolerance=0.001)
     
-    db_mutations_null <- calcDBExpectedMutations( db_subset,
-                                             sequenceColumn="SEQUENCE_IMGT",
-                                             germlineColumn="GERMLINE_IMGT_D_MASK",
-                                             regionDefinition=NULL,
-                                             nproc=1)
+    db_mutations_null <- expectedMutations(db_subset,
+                                           sequenceColumn="SEQUENCE_IMGT",
+                                           germlineColumn="GERMLINE_IMGT_D_MASK",
+                                           regionDefinition=NULL,
+                                           nproc=1)
     ## SEQ_R, first 5
     obs_seq_r <- db_mutations_null$EXPECTED_SEQ_R[1:5]
     exp_seq_r <- c(0.7590282, 0.7635794, 0.7611897, 0.7585786, 0.7761334)
@@ -151,14 +151,14 @@ test_that("calcObservedMutations works with regionDefinition==NULL",{
     expect_equal(obs_mutations_null, exp_mutations_null, tolerance=0.001)
 })
 
-test_that("calcDBObservedMutations works with regionDefinition==NULL",{
+test_that("observedMutations works with regionDefinition==NULL",{
     db_subset <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
                             BARCODE %in% c("RL016","RL018","RL019","RL021"))
-    db_mutations <- calcDBObservedMutations( db_subset,
-                                             sequenceColumn="SEQUENCE_IMGT",
-                                             germlineColumn="GERMLINE_IMGT_D_MASK",
-                                             regionDefinition=IMGT_V_NO_CDR3,
-                                             nproc=1)
+    db_mutations <- observedMutations(db_subset,
+                                      sequenceColumn="SEQUENCE_IMGT",
+                                      germlineColumn="GERMLINE_IMGT_D_MASK",
+                                      regionDefinition=IMGT_V_NO_CDR3,
+                                      nproc=1)
     ## Check 5 examples for each
     ## CDR_R, first 5
     obs_cdr_r <- db_mutations$OBSERVED_CDR_R[1:5]
@@ -180,11 +180,11 @@ test_that("calcDBObservedMutations works with regionDefinition==NULL",{
     exp_fwr_s<- c(0, 0, 0, 1, 0)
     expect_equal(obs_fwr_s, exp_fwr_s)
      
-    db_mutations_null <- calcDBObservedMutations( db_subset,
-                                                  sequenceColumn="SEQUENCE_IMGT",
-                                                  germlineColumn="GERMLINE_IMGT_D_MASK",
-                                                  regionDefinition=NULL,
-                                                  nproc=1)
+    db_mutations_null <- observedMutations(db_subset,
+                                           sequenceColumn="SEQUENCE_IMGT",
+                                           germlineColumn="GERMLINE_IMGT_D_MASK",
+                                           regionDefinition=NULL,
+                                           nproc=1)
     ## SEQ_R, first 5
     obs_seq_r <- db_mutations_null$OBSERVED_SEQ_R[1:5]
     exp_seq_r <- c(12, 0, 0, 0, 0)

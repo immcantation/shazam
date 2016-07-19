@@ -1,5 +1,5 @@
 ---
-title: 'Shazam: Tuning clonal assignment thresholds by calculating distance to nearest
+title: 'Shazam: Tuning clonal assignment thresholds with nearest neighbor distances
   neighbor'
 author: "Namita Gupta"
 date: '`r Sys.Date()`'

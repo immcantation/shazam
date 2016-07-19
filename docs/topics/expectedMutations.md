@@ -4,19 +4,19 @@
 
 
 
-**calcDBExpectedMutations** - *Calculate expected mutation frequencies*
+**expectedMutations** - *Calculate expected mutation frequencies*
 
 Description
 --------------------
 
-`calcDBExpectedMutations` calculates the expected mutation frequencies for each 
+`expectedMutations` calculates the expected mutation frequencies for each 
 sequence in the input `data.frame`.
 
 
 Usage
 --------------------
 ```
-calcDBExpectedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
+expectedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", targetingModel = HS5FModel,
 regionDefinition = NULL, mutationDefinition = NULL, nproc = 1)
 ```
@@ -95,7 +95,7 @@ data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 
 # Calculate expected mutations over V region
-db_exp <- calcDBExpectedMutations(db,
+db_exp <- expectedMutations(db,
 sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK",
 regionDefinition=IMGT_V_NO_CDR3,
@@ -113,7 +113,7 @@ Calculating the expected frequencies of mutations...
 ```R
 
 # Calculate hydropathy expected mutations over V region
-db_exp <- calcDBExpectedMutations(db,
+db_exp <- expectedMutations(db,
 sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK",
 regionDefinition=IMGT_V_NO_CDR3,
@@ -133,7 +133,7 @@ See also
 -------------------
 
 [calcExpectedMutations](calcExpectedMutations.md) is called by this function to calculate the expected 
-mutation frequencies. See [calcDBObservedMutations](calcDBObservedMutations.md) for getting observed 
+mutation frequencies. See [observedMutations](observedMutations.md) for getting observed 
 mutation counts. See [IMGT_SCHEMES](IMGT_SCHEMES.md) for a set of predefined 
 [RegionDefinition](RegionDefinition-class.md) objects.
 

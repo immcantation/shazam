@@ -271,6 +271,13 @@ getBaselineStats <- function(baseline) {
 #' @param   regionDefinition    \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences.
 #' @param   targetingModel      \link{TargetingModel} object. Default is  \link{HS5FModel}.
+#' @param   mutationDefinition  \link{MutationDefinition} object defining replacement
+#'                              and silent mutation criteria. If \code{NULL} then 
+#'                              replacement and silent are determined by exact 
+#'                              amino acid identity. Note, if the input data.frame 
+#'                              already contains observed and expected mutation frequency 
+#'                              columns then mutations will not be recalculated and this
+#'                              argument will be ignored.
 #' @param   calcStats           \code{logical} indicating whether or not to calculate the 
 #'                              summary statistics \code{data.frame} stored in the 
 #'                              \code{stats} slot of a \link{Baseline} object.
@@ -344,6 +351,7 @@ calcBaseline <- function(db,
                          testStatistic=c("local", "focused","imbalance"),
                          regionDefinition=NULL,
                          targetingModel=HS5FModel,
+                         mutationDefinition=NULL,
                          calcStats=FALSE,
                          nproc=1) {
     # Hack for visibility of data.table and foreach index variables
@@ -415,38 +423,40 @@ calcBaseline <- function(db,
         expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
     }
     
-    if ( !all( c(observedColumns,expectedColumns) %in% colnames(db) ) ) {
-        
+    if (!all(c(observedColumns, expectedColumns) %in% colnames(db))) {
         # If the germlineColumn & sequenceColumn are not found in the db error and quit
-        if( !all( c(sequenceColumn, germlineColumn) %in% colnames(db) ) ) {
-            stop( paste0("Both ", sequenceColumn, " & ", germlineColumn, 
-                         " columns need to be present in the db") )
+        if (!all(c(sequenceColumn, germlineColumn) %in% colnames(db))) {
+            stop(paste0("Both ", sequenceColumn, " & ", germlineColumn, 
+                         " columns need to be present in the db"))
         }
         
         # Collapse the sequences by the CLONE column (if present)
-        if ( "CLONE" %in% colnames(db) ) {                       
-            db <- collapseByClone(db, 
+        if ("CLONE" %in% colnames(db)) {                       
+            db <- collapseClones(db, 
                                   cloneColumn="CLONE", 
                                   sequenceColumn=sequenceColumn,
                                   germlineColumn=germlineColumn,
-                                  expandedDb=FALSE, nproc=nproc_arg)            
+                                  expandedDb=FALSE, 
+                                  nproc=nproc_arg)
             sequenceColumn="CLONAL_SEQUENCE"
         }
         
         # Calculate the numbers of observed mutations
-        db <- calcDBObservedMutations(db,
-                                      sequenceColumn=sequenceColumn,
-                                      germlineColumn="GERMLINE_IMGT_D_MASK",
-                                      regionDefinition=regionDefinition,
-                                      nproc=0)
+        db <- observedMutations(db,
+                                sequenceColumn=sequenceColumn,
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                regionDefinition=regionDefinition,
+                                mutationDefinition=mutationDefinition,
+                                nproc=0)
         
         # Calculate the expected frequencies of mutations
-        db <- calcDBExpectedMutations(db,
-                                      sequenceColumn=sequenceColumn,
-                                      germlineColumn="GERMLINE_IMGT_D_MASK",
-                                      regionDefinition=regionDefinition,
-                                      targetingModel=targetingModel,
-                                      nproc=0 )
+        db <- expectedMutations(db,
+                                sequenceColumn=sequenceColumn,
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                regionDefinition=regionDefinition,
+                                targetingModel=targetingModel,
+                                mutationDefinition=mutationDefinition,
+                                nproc=0)
     }
     
     # Calculate PDFs for each sequence

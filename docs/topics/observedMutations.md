@@ -4,19 +4,19 @@
 
 
 
-**calcDBObservedMutations** - *Calculate observed numbers of mutations*
+**observedMutations** - *Calculate observed numbers of mutations*
 
 Description
 --------------------
 
-`calcDBObservedMutations` calculates the observed number of mutations for each 
+`observedMutations` calculates the observed number of mutations for each 
 sequence in the input `data.frame`.
 
 
 Usage
 --------------------
 ```
-calcDBObservedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
+observedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", frequency = FALSE,
 regionDefinition = NULL, mutationDefinition = NULL, nproc = 1)
 ```
@@ -100,11 +100,29 @@ Examples
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 
-# Run calcDBObservedMutations()
-db_new <- calcDBObservedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+# Calculate mutation frequency over the entire sequence
+db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK",
 frequency=TRUE,
+nproc=1)
+
+```
+
+
+```
+Calculating observed number of mutations...
+
+```
+
+
+```R
+
+# Count of V-region mutations split by FWR and CDR
+# With mutations only considered replacement if charge changes
+db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+germlineColumn="GERMLINE_IMGT_D_MASK",
 regionDefinition=IMGT_V_NO_CDR3,
+mutationDefinition=CHARGE_MUTATIONS,
 nproc=1)
 ```
 
@@ -122,7 +140,7 @@ See also
 [calcObservedMutations](calcObservedMutations.md) is called by this function to get the list of mutations 
 in each sequence grouped by the [RegionDefinition](RegionDefinition-class.md). 
 See [IMGT_SCHEMES](IMGT_SCHEMES.md) for a set of predefined [RegionDefinition](RegionDefinition-class.md) objects.
-See [calcDBExpectedMutations](calcDBExpectedMutations.md) for calculating expected mutation frequencies.
+See [expectedMutations](expectedMutations.md) for calculating expected mutation frequencies.
 
 
 

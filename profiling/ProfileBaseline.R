@@ -21,12 +21,12 @@ profvis({
 #### Calculate hydropathy expected mutations over V region ####
 
 profvis({
-    db <- calcDBExpectedMutations(db,
-                                  sequenceColumn="SEQUENCE_IMGT",
-                                  germlineColumn="GERMLINE_IMGT_D_MASK",
-                                  regionDefinition=IMGT_V_NO_CDR3,
-                                  mutationDefinition=HYDROPATHY_MUTATIONS,
-                                  nproc=1)
+    db <- expectedMutations(db,
+                            sequenceColumn="SEQUENCE_IMGT",
+                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                            regionDefinition=IMGT_V_NO_CDR3,
+                            mutationDefinition=HYDROPATHY_MUTATIONS,
+                            nproc=1)
 })
 
 #### Collapse one clone ####
@@ -39,12 +39,12 @@ profvis({
 #### Collapse clones ####
 
 profvis({
-    db_new <- collapseByClone(db, cloneColumn="CLONE", 
-                              sequenceColumn="SEQUENCE_IMGT",
-                              germlineColumn="GERMLINE_IMGT_D_MASK",
-                              expandedDb=FALSE,
-                              regionDefinition=IMGT_V_NO_CDR3,
-                              nproc=1)
+    db_new <- collapseClones(db, cloneColumn="CLONE", 
+                             sequenceColumn="SEQUENCE_IMGT",
+                             germlineColumn="GERMLINE_IMGT_D_MASK",
+                             expandedDb=FALSE,
+                             regionDefinition=IMGT_V_NO_CDR3,
+                             nproc=1)
 })
 
 #### Calculate Baseline ####

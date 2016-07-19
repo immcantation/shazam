@@ -16,14 +16,14 @@ pages:
     - 'Release Notes': news.md
     - 'Related Projects': projects.md
   - 'Vignettes':
-    - 'Selection quantification': vignettes/Baseline-Vignette.md
-    - 'Distance to nearest neighbor': vignettes/DistToNearest-Vignette.md
-    - 'SHM targeting models': vignettes/Targeting-Vignette.md
+    - 'Quantifing selection pressures': vignettes/Baseline-Vignette.md
+    - 'Tuning clonal assignment thresholds with nearest neighbor distances': vignettes/DistToNearest-Vignette.md
+    - 'Inferring SHM targeting models': vignettes/Targeting-Vignette.md
   - 'Help Topics':
     - 'Mutation Profiling':
-      - topics/collapseByClone.md
-      - topics/calcDBExpectedMutations.md
-      - topics/calcDBObservedMutations.md
+      - topics/collapseClones.md
+      - topics/expectedMutations.md
+      - topics/observedMutations.md
       - topics/calcExpectedMutations.md
       - topics/calcObservedMutations.md
       - topics/shmulateSeq.md

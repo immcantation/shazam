@@ -9,7 +9,7 @@ NULL
 #'
 #' Identifies effective/consensus sequences collapsed by clone
 #'
-#' \code{collapseByClone} identifies the consensus sequence of each clonal 
+#' \code{collapseClones} identifies the consensus sequence of each clonal 
 #' group and appends a column to the input \code{data.frame} containing the clonal 
 #' consensus for each sequence.
 #'
@@ -66,23 +66,22 @@ NULL
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 #' 
-#' # Run collapseByClone
-#' db_new <- collapseByClone(db, cloneColumn="CLONE", 
-#'                           sequenceColumn="SEQUENCE_IMGT",
-#'                           germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                           expandedDb=FALSE,
-#'                           regionDefinition=IMGT_V_NO_CDR3,
-#'                           nproc=1)
+#' # Build clonal consensus for V region
+#' db_new <- collapseClones(db, cloneColumn="CLONE", 
+#'                         sequenceColumn="SEQUENCE_IMGT",
+#'                         germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                         regionDefinition=IMGT_V_NO_CDR3,
+#'                         nproc=1)
 #' 
 #' @export
-collapseByClone <- function(db, 
-                            cloneColumn="CLONE", 
-                            sequenceColumn="SEQUENCE_IMGT",
-                            germlineColumn="GERMLINE_IMGT_D_MASK",
-                            expandedDb=FALSE,
-                            regionDefinition=NULL,
-                            nonTerminalOnly=FALSE,
-                            nproc=1) {
+collapseClones <- function(db, 
+                           cloneColumn="CLONE", 
+                           sequenceColumn="SEQUENCE_IMGT",
+                           germlineColumn="GERMLINE_IMGT_D_MASK",
+                           expandedDb=FALSE,
+                           regionDefinition=NULL,
+                           nonTerminalOnly=FALSE,
+                           nproc=1) {
     # Hack for visibility of data.table and foreach index variables
     idx <- yidx <- .I <- NULL
 
@@ -265,7 +264,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 
 #' Calculate observed numbers of mutations
 #'
-#' \code{calcDBObservedMutations} calculates the observed number of mutations for each 
+#' \code{observedMutations} calculates the observed number of mutations for each 
 #' sequence in the input \code{data.frame}.
 #'
 #' @param    db                  \code{data.frame} containing sequence data.
@@ -318,7 +317,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' \link{calcObservedMutations} is called by this function to get the list of mutations 
 #' in each sequence grouped by the \link{RegionDefinition}. 
 #' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
-#' See \link{calcDBExpectedMutations} for calculating expected mutation frequencies.
+#' See \link{expectedMutations} for calculating expected mutation frequencies.
 #'           
 #' 
 #' @examples
@@ -327,27 +326,27 @@ calcClonalConsensus <- function(inputSeq, germlineSeq,
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 #'
 #' # Calculate mutation frequency over the entire sequence
-#' db_mut <- calcDBObservedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-#'                                   germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                                   frequency=TRUE,
-#'                                   nproc=1)
+#' db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+#'                             germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                             frequency=TRUE,
+#'                             nproc=1)
 #'
 #' # Count of V-region mutations split by FWR and CDR
 #' # With mutations only considered replacement if charge changes
-#' db_mut <- calcDBObservedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-#'                                   germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                                   regionDefinition=IMGT_V_NO_CDR3,
-#'                                   mutationDefinition=CHARGE_MUTATIONS,
-#'                                   nproc=1)
+#' db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+#'                             germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                             regionDefinition=IMGT_V_NO_CDR3,
+#'                             mutationDefinition=CHARGE_MUTATIONS,
+#'                             nproc=1)
 #'                      
 #' @export
-calcDBObservedMutations <- function(db, 
-                                    sequenceColumn="SEQUENCE_IMGT",
-                                    germlineColumn="GERMLINE_IMGT_D_MASK",
-                                    frequency=FALSE,
-                                    regionDefinition=NULL,
-                                    mutationDefinition=NULL,
-                                    nproc=1) {
+observedMutations <- function(db, 
+                              sequenceColumn="SEQUENCE_IMGT",
+                              germlineColumn="GERMLINE_IMGT_D_MASK",
+                              frequency=FALSE,
+                              regionDefinition=NULL,
+                              mutationDefinition=NULL,
+                              nproc=1) {
     # Hack for visibility of data.table and foreach index variables
     idx <- NULL
     
@@ -457,7 +456,7 @@ calcDBObservedMutations <- function(db,
 #' the default \link{IMGT_V_NO_CDR3} definition, then mutations in positions beyond 
 #' 312 will be ignored.
 #' 
-#' @seealso  See \link{calcDBObservedMutations} for counting the number of observed mutations.
+#' @seealso  See \link{observedMutations} for counting the number of observed mutations.
 #' 
 #' @examples
 #' # Use first entry in the exampled data for input and germline sequence
@@ -585,7 +584,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 # in positions beyond 312 will be ignored.
 # 
 # @seealso  
-# See \link{calcDBObservedMutations} for identifying and counting the 
+# See \link{observedMutations} for identifying and counting the 
 # number of observed mutations.
 # This function is also used in \link{calcObservedMutations}.
 # 
@@ -626,7 +625,7 @@ binMutationsByRegion <- function(mutationsArray,
 
 #' Calculate expected mutation frequencies
 #'
-#' \code{calcDBExpectedMutations} calculates the expected mutation frequencies for each 
+#' \code{expectedMutations} calculates the expected mutation frequencies for each 
 #' sequence in the input \code{data.frame}.
 #'
 #' @param    db                  \code{data.frame} containing sequence data.
@@ -671,7 +670,7 @@ binMutationsByRegion <- function(mutationsArray,
 #' 
 #' @seealso  
 #' \link{calcExpectedMutations} is called by this function to calculate the expected 
-#' mutation frequencies. See \link{calcDBObservedMutations} for getting observed 
+#' mutation frequencies. See \link{observedMutations} for getting observed 
 #' mutation counts. See \link{IMGT_SCHEMES} for a set of predefined 
 #' \link{RegionDefinition} objects.
 #' 
@@ -681,28 +680,28 @@ binMutationsByRegion <- function(mutationsArray,
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 #'
 #' # Calculate expected mutations over V region
-#' db_exp <- calcDBExpectedMutations(db,
-#'                                   sequenceColumn="SEQUENCE_IMGT",
-#'                                   germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                                   regionDefinition=IMGT_V_NO_CDR3,
-#'                                   nproc=1)
+#' db_exp <- expectedMutations(db,
+#'                             sequenceColumn="SEQUENCE_IMGT",
+#'                             germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                             regionDefinition=IMGT_V_NO_CDR3,
+#'                             nproc=1)
 #' 
 #' # Calculate hydropathy expected mutations over V region
-#' db_exp <- calcDBExpectedMutations(db,
-#'                                   sequenceColumn="SEQUENCE_IMGT",
-#'                                   germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                                   regionDefinition=IMGT_V_NO_CDR3,
-#'                                   mutationDefinition=HYDROPATHY_MUTATIONS,
-#'                                   nproc=1)
+#' db_exp <- expectedMutations(db,
+#'                            sequenceColumn="SEQUENCE_IMGT",
+#'                            germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                            regionDefinition=IMGT_V_NO_CDR3,
+#'                            mutationDefinition=HYDROPATHY_MUTATIONS,
+#'                            nproc=1)
 #'
 #' @export
-calcDBExpectedMutations <- function(db, 
-                                    sequenceColumn="SEQUENCE_IMGT",
-                                    germlineColumn="GERMLINE_IMGT_D_MASK",
-                                    targetingModel=HS5FModel,
-                                    regionDefinition=NULL,
-                                    mutationDefinition=NULL,
-                                    nproc=1) {
+expectedMutations <- function(db, 
+                              sequenceColumn="SEQUENCE_IMGT",
+                              germlineColumn="GERMLINE_IMGT_D_MASK",
+                              targetingModel=HS5FModel,
+                              regionDefinition=NULL,
+                              mutationDefinition=NULL,
+                              nproc=1) {
     # Hack for visibility of data.table and foreach index variables
     idx <- NULL
     
@@ -782,7 +781,7 @@ calcDBExpectedMutations <- function(db,
 #'
 #' \code{calcExpectedMutations} calculates the expected mutation
 #' frequencies of a given sequence. This is primarily a helper function for
-#' \link{calcDBExpectedMutations}. 
+#' \link{expectedMutations}. 
 #'
 #' @param    germlineSeq         germline (reference) sequence.
 #' @param    inputSeq            input (observed) sequence. If this is not \code{NULL}, 
@@ -821,7 +820,7 @@ calcDBExpectedMutations <- function(db,
 #' For example, when using the default \link{IMGT_V_NO_CDR3} definition, mutations in
 #' positions beyond 312 will be ignored.
 #' 
-#' @seealso  \link{calcDBExpectedMutations} calls this function.
+#' @seealso  \link{expectedMutations} calls this function.
 #' To create a custom \code{targetingModel} see \link{createTargetingModel}.
 #' See \link{calcObservedMutations} for getting observed mutation counts.
 #' 

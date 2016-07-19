@@ -11,7 +11,7 @@ Description
 
 `calcExpectedMutations` calculates the expected mutation
 frequencies of a given sequence. This is primarily a helper function for
-[calcDBExpectedMutations](calcDBExpectedMutations.md).
+[expectedMutations](expectedMutations.md).
 
 
 Usage
@@ -135,7 +135,7 @@ mutationDefinition=HYDROPATHY_MUTATIONS)
 See also
 -------------------
 
-[calcDBExpectedMutations](calcDBExpectedMutations.md) calls this function.
+[expectedMutations](expectedMutations.md) calls this function.
 To create a custom `targetingModel` see [createTargetingModel](createTargetingModel.md).
 See [calcObservedMutations](calcObservedMutations.md) for getting observed mutation counts.
 

@@ -71,9 +71,9 @@ Mutational profiling
 
 
 
-+ [collapseByClone](collapseByClone.md):          Build clonal consensus sequence.
-+ [calcDBObservedMutations](calcDBObservedMutations.md):  Compute observed mutation counts.
-+ [calcDBExpectedMutations](calcDBExpectedMutations.md):  Compute expected mutation frequencies.
++ [collapseClones](collapseClones.md):           Build clonal consensus sequence.
++ [observedMutations](observedMutations.md):        Compute observed mutation counts and frequencies.
++ [expectedMutations](expectedMutations.md):        Compute expected mutation frequencies.
 + [shmulateSeq](shmulateSeq.md):              Simulate mutations in a single sequence.
 + [shmulateTree](shmulateTree.md):             Simulate mutations over a lineage tree.
 
@@ -88,6 +88,8 @@ density functions (PDFs).
 + [groupBaseline](groupBaseline.md):            Combine PDFs from sequences grouped
 by biological or experimental relevance.
 + [summarizeBaseline](summarizeBaseline.md):        Compute summary statistics from BASELINe PDFs.
++ [testBaseline](testBaseline.md):             Perform significance testing for the difference
+between BASELINe PDFs.
 + [plotBaselineDensity](plotBaselineDensity.md):      Plot the probability density functions
 resulting from selection analysis.
 + [plotBaselineSummary](plotBaselineSummary.md):      Plot summary stastistics resulting from 
