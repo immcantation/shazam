@@ -89,6 +89,9 @@ collapseClones <- function(db,
     check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
     
+    # Convert sequence columns to uppercase
+    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
+    
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
         cluster = nproc 
@@ -353,6 +356,9 @@ observedMutations <- function(db,
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
+    
+    # Convert sequence columns to uppercase
+    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
@@ -708,6 +714,9 @@ expectedMutations <- function(db,
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
+    
+    # Convert sequence columns to uppercase
+    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 

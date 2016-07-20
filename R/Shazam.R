@@ -117,13 +117,14 @@
 #' @importFrom  ape         mst
 #' @importFrom  data.table  data.table setkey setkeyv
 #' @importFrom  doParallel  registerDoParallel
-#' @importFrom  dplyr       do n desc %>%
+#' @importFrom  dplyr       do n desc funs %>%
 #'                          as_data_frame data_frame data_frame_
 #'                          bind_cols bind_rows combine
 #'                          filter filter_ select select_ arrange arrange_
 #'                          group_by group_by_ ungroup
-#'                          mutate mutate_ transmute transmute_
-#'                          rename rename_ summarize summarize_
+#'                          mutate mutate_ summarize summarize_
+#'                          mutate_each mutate_each_ summarize_each summarize_each_
+#'                          rename rename_ transmute transmute_
 #' @importFrom  foreach     foreach %dopar% registerDoSEQ
 #' @importFrom  lazyeval    interp
 #' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format

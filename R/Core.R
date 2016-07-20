@@ -98,6 +98,19 @@ checkColumns <- function(data, columns, logic=c("all", "any")) {
 }
 
 
+# Convert columns to uppercase
+#
+# @param   data     data.frame to modify.
+# @param   columns  vector of column names to transform to uppercase.
+# @return  The input data.frame with all entries in \code{columns} transformed 
+#          to uppercase.
+toupperColumns <- function(data, columns) {
+    data <- mutate_each_(data, funs(toupper), columns)
+    
+    return(data)
+}
+
+
 #### OS interaction functions ####
 
 #' Determines the OS platform being used

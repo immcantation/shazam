@@ -427,14 +427,16 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     if (!is.data.frame(db)) { stop('Must submit a data frame') }
     
     # Check for valid columns
-    columns <- c(sequenceColumn, vCallColumn, jCallColumn,fields,cross)
+    columns <- c(sequenceColumn, vCallColumn, jCallColumn, fields, cross)
     columns <- columns[!is.null(columns)]
     
     check <- checkColumns(db, columns)
     if (check != TRUE) { stop(check) }
     
-    # Convert case check for invalid characters
-    db[, sequenceColumn] <- toupper(db[[sequenceColumn]])
+    # Convert sequence columns to uppercase
+    db <- toupperColumns(db, c(sequenceColumn))
+    
+    # Check for invalid characters
     #check <- grepl("[^ACGTN]", db[[sequenceColumn]], perl=TRUE)
     #if (any(check)) {
     #  stop("Invalid sequence characters in the ", sequenceColumn, " column.")

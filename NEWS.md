@@ -6,6 +6,8 @@ General:
 + Added ape dependency
 + Removed the `InfluenzaDb` data object, in favor of the updated `ExampleDb`
   provided in the alakazam package.
++ Added conversion of sequence to uppercase for several functions to support
+  data that was not generated via Change-O.
 
 Distance Profiling:
 

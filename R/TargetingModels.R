@@ -204,7 +204,8 @@ setClass("TargetingModel",
 #' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
 #' 
 #' @export
-createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENCE_IMGT",
+createSubstitutionMatrix <- function(db, model=c("RS", "S"), 
+                                     sequenceColumn="SEQUENCE_IMGT",
                                      germlineColumn="GERMLINE_IMGT_D_MASK",
                                      vCallColumn="V_CALL",
                                      multipleMutation=c("independent", "ignore"),
@@ -218,8 +219,9 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"), sequenceColumn="SEQ
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
     if (check != TRUE) { stop(check) }
-    db[[sequenceColumn]] = toupper(db[[sequenceColumn]])
-    db[[germlineColumn]] = toupper(db[[germlineColumn]])
+    
+    # Convert sequence columns to uppercase
+    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
     # Setup
     nuc_chars <- NUCLEOTIDES[1:4]
@@ -455,8 +457,9 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
     if (check != TRUE) { stop(check) }
-    db[[sequenceColumn]] = toupper(db[[sequenceColumn]])
-    db[[germlineColumn]] = toupper(db[[germlineColumn]])
+    
+    # Convert sequence columns to uppercase
+    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
     # Check that the substitution model is valid
     if (any(dim(substitutionModel) != c(4, 1024))) {
@@ -952,6 +955,7 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
     sub_mat <- extendSubstitutionMatrix(sub_mat)
     mut_mat <- extendMutabilityMatrix(mut_mat)
     
+    # Make targeting matrix
     tar_mat <- createTargetingMatrix(sub_mat, mut_mat) 
     
     # Define TargetingModel object

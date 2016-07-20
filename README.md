@@ -1,9 +1,10 @@
 SHazaM
 -------------------------------------------------------------------------------
 
-SHazaM is part of the [Immcantation](http://immcantation.readthedocs.io) tool 
-suite and provides tools for advanced analysis of somatic hypermutation (SHM) 
-in immunoglobulin (Ig) sequences. Shazam focuses on the following four 
+SHazaM is part of the [Immcantation](http://immcantation.readthedocs.io) 
+analysis framework for Adaptive Immune Receptor Repertoire sequencing 
+(AIRR-seq) and provides tools for advanced analysis of somatic hypermutation 
+(SHM) in immunoglobulin (Ig) sequences. Shazam focuses on the following four 
 analysis topics:
 
 1. **Statistical analysis of SHM patterns**  
