@@ -1,11 +1,12 @@
 # Imports
+library(alakazam)
 library(shazam)
 library(profvis)
 
 #### Load example data ####
 
 # Subset data for demo purposes
-db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHG") & BARCODE != "RL013")
+db <- subset(ExampleDb, ISTOYPE %in% c("IGHA","IGHG") & SAMPLE == "+7d")
 
 #### createSubstitutionMatrix ####
 

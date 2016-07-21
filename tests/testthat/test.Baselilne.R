@@ -1,5 +1,9 @@
-InfluenzaDb <- file.path("..", "data-tests", "InfluenzaDb.gz")
-db <- readChangeoDb(InfluenzaDb)
+# Load test database
+e1 <- new.env()
+#load(file.path("tests", "data-tests", "TestDb.rda"), envir=e1)
+load(file.path("..", "data-tests", "TestDb.rda"), envir=e1)
+db <- get("TestDb", envir=e1)
+rm(e1)
 
 test_that("calculateTargeting and calculateMutationalPaths with regionDefinition==NULL", {
     

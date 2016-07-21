@@ -1,11 +1,12 @@
 # Imports
+library(alakazam)
 library(shazam)
 library(profvis)
 
 #### Load example data ####
 
 # Subset data for demo purposes
-db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & BARCODE != "RL013")
+db <- subset(ExampleDb, ISTOYPE %in% c("IGHA","IGHG") & SAMPLE == "+7d")
 
 # Extracting the first entry in the sample db to use for input and germline sequences.
 inputSeq <- db[1, "SEQUENCE_IMGT"]
