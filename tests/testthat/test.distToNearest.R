@@ -1,6 +1,9 @@
+InfluenzaDb <- file.path("..", "data-tests", "InfluenzaDb.gz")
+db <- readChangeoDb(InfluenzaDb)
+
 test_that("Test cross distToNearest with model hs1f", {
     ## Reproduce example
-    db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
+    db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
                      BARCODE %in% c("RL016","RL018","RL019","RL021"))
     db_nrow <- nrow(db)
     db2 <- dplyr::bind_rows(db,db)
@@ -68,7 +71,7 @@ test_that("Test cross distToNearest with model hs1f", {
 
 test_that("Test cross distToNearest with model hs5f", {
     ## Reproduce vignette
-    db <- subset(InfluenzaDb, CPRIMER %in% c("IGHA","IGHM") & 
+    db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
                      BARCODE %in% c("RL016","RL018","RL019","RL021"))
     
     db_nrow <- nrow(db)
