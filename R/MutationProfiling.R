@@ -834,6 +834,9 @@ expectedMutations <- function(db,
 #' See \link{calcObservedMutations} for getting observed mutation counts.
 #' 
 #' @examples
+#' # Load example data
+#' data(ExampleDb, package="alakazam")
+#' 
 #' # Use first entry in the exampled data for input and germline sequence
 #' in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
 #' germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]

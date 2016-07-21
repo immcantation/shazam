@@ -106,11 +106,14 @@
 #'            Front Immunol. 2013 4:358.
 #'  }
 #' 
-#' @import   alakazam
 #' @import   ggplot2
 #' @import   graphics
 #' @import   methods
 #' @import   utils
+#' @importFrom  alakazam    getAllele getGene getFamily getSegment
+#'                          getAAMatrix getDNAMatrix
+#'                          pairwiseDist pairwiseEqual seqDist seqEqual
+#'                          isValidAASeq translateStrings gridPlot
 #' @importFrom  igraph      V E get.data.frame graph.data.frame
 #'                          get.adjacency get.vertex.attribute
 #'                          set.vertex.attribute get.shortest.paths

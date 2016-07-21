@@ -33,9 +33,9 @@ BuildVignettes: true
 VignetteBuilder: knitr
 Depends:
     R (>= 3.1.2),
-    alakazam (>= 0.2.4),
     ggplot2 (>= 2.0.0)
 Imports:
+    alakazam (>= 0.2.4),
     ape,
     data.table (>= 1.9.4),
     doParallel,
