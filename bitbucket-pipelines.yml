@@ -11,6 +11,6 @@ pipelines:
           - sed -i '/test/ d' .Rbuildignore
           - Rscript -e 'library(devtools); install_bitbucket("kleinstein/alakazam@default")'
           - R CMD build .
-          - R CMD check *.tar.gz
+          - R CMD check *.tar.gz --as-cran --timings
 
 
