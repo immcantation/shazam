@@ -140,4 +140,17 @@ test_that("Test cross distToNearest with model hs5f", {
     db3_1_316_630_hs5f <- distToNearest(db3[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
                                    model="hs1f", first=FALSE, normalize="none",cross="SAMPLE")
     expect_equal(db3_1_316_630_hs5f$CROSS_DIST_NEAREST,c(1.75,1.75,1.75), tolerance=0.001)
+    
+    seq1 <- c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", 
+              "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
+    seq2 <- c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", 
+              "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
+    
+    dist <- shazam:::dist5Mers(seq1, seq2, HS5FModel)
+    expect_equal(dist, 1.0574, tolerance = 0.001)
+    
+    ## seq2[1] with a non valid character "S"
+    ## Expect error
+    seq2[1] <- "NNSCG"
+    expect_error(shazam:::dist5Mers(seq1, seq2, HS5FModel), "Character not found")
 })

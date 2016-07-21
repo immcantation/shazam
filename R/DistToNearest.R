@@ -48,6 +48,15 @@ dist5Mers <- function(seq1, seq2, targetingModel,
     # Get distance from targeting model
     targeting_dist <- calcTargetingDistance(targetingModel)
     
+    
+    # Check all characters in seq1 and seq2 are valid,
+    # found in the targetingModel distance matrix
+    validChars <- paste(rownames(targeting_dist),collapse="")
+    invalidChars <- grep("[^ACTGN]",paste(c(seq1,seq2),collapse=""))
+    if (length(invalidChars) > 0 ) {
+        stop("Character not found in targeting_dist")
+    }
+    
     # Compute length of sequence (for normalization, if specified)
     juncLength <- length(seq1)
     
