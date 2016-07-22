@@ -9,7 +9,7 @@ pipelines:
     - step:
         script:
           - sed -i '/test/ d' .Rbuildignore
-          - Rscript -e 'library(devtools); d <- read.dcf("DESCRIPTION", fields = "Imports"); d <- sub("^\\n","",d); d <- strsplit(d,",\n")[[1]]; alakazam <- d[grep("alakazam", d)]; v <- gsub(".*\\([^0-9.]*(.*)\\)$", "\\1", alakazam); devel <- length(grep("\\.999$",v)) > 0; if (devel) {install_bitbucket("kleinstein/alakazam@default")} else { install.packages("alakazam") }'
+          - Rscript install_alakazam.R
           - R CMD build .
           - R CMD check *.tar.gz --as-cran --timings
 
