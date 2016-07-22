@@ -1,5 +1,5 @@
 #load(file.path("tests", "data-tests", "ExampleDb.rda"))
-load(file.path("..", "data-tests", "ExampleDb.rda"), envir=e1)
+load(file.path("..", "data-tests", "ExampleDb.rda"))
 
 test_that("binMutationsByRegion", {
     set.seed(8)
