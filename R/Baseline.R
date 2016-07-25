@@ -1652,6 +1652,9 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     if (style == "mean") { 
         # Plot mean and confidence intervals
         stats_df <- stats_df[!is.na(stats_df$BASELINE_SIGMA), ]
+        if (!is.null(groupColumn) & !is.null(groupColors)) {
+            stats_df[,groupColumn] <- factor(stats_df[,groupColumn], levels=names(groupColors))
+        }
         p1 <- ggplot(stats_df, aes_string(x=idColumn, y="BASELINE_SIGMA", ymax=max("BASELINE_SIGMA"))) +
             base_theme + 
             xlab("") +
