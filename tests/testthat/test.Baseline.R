@@ -5,6 +5,8 @@ load(file.path("..", "data-tests", "TestDb.rda"), envir=e1)
 db <- get("TestDb", envir=e1)
 rm(e1)
 
+load(file.path("..", "data-tests", "ExampleDb.rda"))
+
 test_that("calculateTargeting and calculateMutationalPaths with regionDefinition==NULL", {
     
     ##--
@@ -248,4 +250,49 @@ test_that("calcBaseline works with regionDefinition==NULL", {
 #                                 regionDefinition=NULL,
 #                                 targetingModel = HS5FModel,
 #                                 nproc = 1)
+})
+
+
+test_that("Test groupBaseline", {
+    # Subset example data from alakazam
+    db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
+                      
+    # Calculate BASELINe
+    baseline <- calcBaseline(db, 
+                             sequenceColumn="SEQUENCE_IMGT",
+                             germlineColumn="GERMLINE_IMGT_D_MASK",
+                             testStatistic="focused",
+                             regionDefinition=IMGT_V_NO_CDR3,
+                             targetingModel=HS5FModel,
+                             nproc=1)
+    
+    # Group PDFs by sample
+    grouped1 <- groupBaseline(baseline, groupBy="SAMPLE")
+    pdf1 <- slot(grouped1, "pdfs")
+    sigma1 <- slot(grouped1,"stats")$BASELINE_SIGMA
+    
+    expect_equal(range(pdf1$CDR[1,]),c(0,8.412), tolerance=0.01)
+    expect_equal(range(pdf1$CDR[2,]),c(0,10.559), tolerance=0.01)
+    expect_equal(sigma1, c(-0.433, -0.715, -0.308, -0.750), tolerance=0.01)
+    
+    # Group PDFs by both sample (between variable) and isotype (within variable)
+    grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
+    pdf2 <- slot(grouped2, "pdfs")
+    sigma2 <- slot(grouped2,"stats")$BASELINE_SIGMA
+    
+    expect_equal(range(pdf2$CDR[1,]),c(0,5.71), tolerance=0.01)
+    expect_equal(range(pdf2$CDR[2,]),c(0,6.63), tolerance=0.01)    
+    expect_equal(sigma2, 
+                 c(-0.492, -0.720, -0.367, -0.710, -0.344, -0.707, -0.289, -0.774), tolerance=0.01)
+    
+    # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
+    grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
+    pdf3 <- slot(grouped3, "pdfs")
+    sigma3 <- slot(grouped3,"stats")$BASELINE_SIGMA
+    
+    expect_equal(range(pdf3$CDR[1,]),c(0,8.58), tolerance=0.01)
+    expect_equal(range(pdf3$CDR[2,]),c(0,10.49), tolerance=0.01)    
+    expect_equal(sigma3, 
+                 c( -0.426, -0.715, -0.308, -0.750), tolerance=0.01)
+    
 })
