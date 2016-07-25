@@ -51,10 +51,11 @@ dist5Mers <- function(seq1, seq2, targetingModel,
     
     # Check all characters in seq1 and seq2 are valid,
     # found in the targetingModel distance matrix
-    validChars <- paste(rownames(targeting_dist),collapse="")
-    invalidChars <- grep("[^ACTGN]",paste(c(seq1,seq2),collapse=""))
+    validChars <- rownames(targeting_dist)
+    allChars <- unique(strsplit(paste(c(seq1,seq2),collapse=""), "")[[1]])
+    invalidChars <- allChars[allChars %in% validChars == F]
     if (length(invalidChars) > 0 ) {
-        stop("Character not found in targeting_dist")
+        stop(paste0("Character not found in targeting_dist: ", paste(invalidChars, collapse=", ")))
     }
     
     # Compute length of sequence (for normalization, if specified)
