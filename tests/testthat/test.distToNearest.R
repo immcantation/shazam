@@ -146,11 +146,12 @@ test_that("Test cross distToNearest with model hs5f", {
     seq2 <- c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", 
               "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
     
-    dist <- shazam:::dist5Mers(seq1, seq2, HS5FModel)
+    targeting_distance <- calcTargetingDistance(HS5FModel)
+    dist <- shazam:::dist5Mers(seq1, seq2, targeting_distance)
     expect_equal(dist, 1.0574, tolerance = 0.001)
     
     ## seq2[1] with a non valid character "S"
     ## Expect error
     seq2[1] <- "NNSCG"
-    expect_error(shazam:::dist5Mers(seq1, seq2, HS5FModel), "Character not found")
+    expect_error(shazam:::dist5Mers(seq1, seq2, targeting_distance), "Character not found")
 })

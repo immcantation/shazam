@@ -23,7 +23,8 @@ window5Mers <- function(sequence) {
 #
 # @param    seq1            first nucleotide sequence, broken into 5mers.
 # @param    seq2            second nucleotide sequence, broken into 5mers.
-# @param    targetingModel  targeting model.
+# @param    targetingDistance  targeting distance obtained from a targeting model
+#                           with the function `calcTargetingDistance`
 # @param    normalize       method of normalization. Default is "none".
 #                           "length" = normalize distance by length of junction.
 # @param    symmetry        if model is hs5f, distance between seq1 and seq2 is either 
@@ -36,9 +37,9 @@ window5Mers <- function(sequence) {
 #          "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
 # seq2 <- c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", 
 #          "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
-#
-# shazam:::dist5Mers(seq1, seq2, HS5FModel)
-dist5Mers <- function(seq1, seq2, targetingModel, 
+# targeting_distance <- calcTargetingDistance(HS5FModel)
+# shazam:::dist5Mers(seq1, seq2, targeting_distance)
+dist5Mers <- function(seq1, seq2, targetingDistance, 
                       normalize=c("none", "length", "mutations"),
                       symmetry=c("avg", "min")) {
     # Evaluate choices
@@ -46,12 +47,12 @@ dist5Mers <- function(seq1, seq2, targetingModel,
     symmetry <- match.arg(symmetry)
     
     # Get distance from targeting model
-    targeting_dist <- calcTargetingDistance(targetingModel)
+    #targeting_dist <- calcTargetingDistance(targetingModel)
     
     
     # Check all characters in seq1 and seq2 are valid,
     # found in the targetingModel distance matrix
-    validChars <- rownames(targeting_dist)
+    validChars <- rownames(targetingDistance)
     allChars <- unique(strsplit(paste(c(seq1,seq2),collapse=""), "")[[1]])
     invalidChars <- allChars[allChars %in% validChars == F]
     if (length(invalidChars) > 0 ) {
@@ -75,11 +76,11 @@ dist5Mers <- function(seq1, seq2, targetingModel,
     dist <- NA
     tryCatch({
         if (length(seq1)==1){
-            seq1_to_seq2 <- targeting_dist[substr(seq2, 3, 3), seq1]
-            seq2_to_seq1 <- targeting_dist[substr(seq1, 3, 3), seq2]
+            seq1_to_seq2 <- targetingDistance[substr(seq2, 3, 3), seq1]
+            seq2_to_seq1 <- targetingDistance[substr(seq1, 3, 3), seq2]
         } else {
-            seq1_to_seq2 <- sum(diag(targeting_dist[substr(seq2, 3, 3), seq1]))
-            seq2_to_seq1 <- sum(diag(targeting_dist[substr(seq1, 3, 3), seq2]))
+            seq1_to_seq2 <- sum(diag(targetingDistance[substr(seq2, 3, 3), seq1]))
+            seq2_to_seq1 <- sum(diag(targetingDistance[substr(seq1, 3, 3), seq2]))
         }
         if (symmetry == "avg") {
             dist <- mean(c(seq1_to_seq2, seq2_to_seq1))
@@ -144,12 +145,14 @@ pairwise5MerDist <- function(sequences, targetingModel,
     .matSeqSlidingFiveMer <- sapply(sequences, function(x) { window5Mers(x) }, 
                                     simplify="matrix")
     
+    targeting_distance <- calcTargetingDistance(targetingModel)
+    
     # Compute pairwise distance between all sequences' fivemers (by column)
     .dist <- function(i) {
         c(rep.int(0, i - 1), 
           sapply(i:n_seq, function(j) { dist5Mers(.matSeqSlidingFiveMer[,i],
                                                   .matSeqSlidingFiveMer[,j],
-                                                  targetingModel,
+                                                  targeting_distance,
                                                   normalize=normalize,
                                                   symmetry=symmetry) }))
     }
