@@ -106,7 +106,8 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
 # Given an array of nucleotide sequences, find the pairwise distances
 # 
 # @param   sequences   character vector of nucleotide sequences.
-# @param   model       targeting model.
+# @param   targetingDistance targeting distance obtained from a targeting model
+#                      with the function `calcTargetingDistance`
 # @param   normalize   method of normalization. Default is "none".
 #                      "length" = normalize distance by length of junction.
 # @param   symmetry    if model is hs5f, distance between seq1 and seq2 is either the
@@ -120,7 +121,7 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
 # 
 # @examples
 # # working example
-pairwise5MerDist <- function(sequences, targetingModel, 
+pairwise5MerDist <- function(sequences, targetingDistance, 
                              normalize=c("none", "length", "mutations"),
                              symmetry=c("avg", "min")) {
     # Initial checks
@@ -145,14 +146,12 @@ pairwise5MerDist <- function(sequences, targetingModel,
     .matSeqSlidingFiveMer <- sapply(sequences, function(x) { window5Mers(x) }, 
                                     simplify="matrix")
     
-    targeting_distance <- calcTargetingDistance(targetingModel)
-    
     # Compute pairwise distance between all sequences' fivemers (by column)
     .dist <- function(i) {
         c(rep.int(0, i - 1), 
           sapply(i:n_seq, function(j) { dist5Mers(.matSeqSlidingFiveMer[,i],
                                                   .matSeqSlidingFiveMer[,j],
-                                                  targeting_distance,
+                                                  targetingDistance,
                                                   normalize=normalize,
                                                   symmetry=symmetry) }))
     }
@@ -188,7 +187,9 @@ findUniqSeq <- function(sequences) {
 #                          "length" = normalize distance by length of junction.
 #                          "mutations" = normalize distance by number of mutations in 
 #                          junction.
-# @param   targetingModel  targeting model for model="hs5f".
+# @param   targetingDistance  targeting distance for model="hs5f". The targeting distance 
+#                          for a model can be obtained with the function 
+#                          `calcTargetingDistance`
 # @param   symmetry        if model is hs5f, distance between seq1 and seq2 is either the
 #                          average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 # @param    crossGroups    column for grouping to calculate distances across groups 
@@ -207,7 +208,7 @@ findUniqSeq <- function(sequences) {
 # shazam:::nearestDist(sequences, model="aa", normalize="length")
 nearestDist<- function(sequences, model=c("ham", "aa", "m1n", "hs1f", "hs5f"),
                        normalize=c("none", "length", "mutations"),
-                       targetingModel=NULL, symmetry=c("avg", "min"),
+                       targetingDistance=NULL, symmetry=c("avg", "min"),
                        crossGroups=NULL, mst=FALSE) {
     ## DEBUG
     # sequences <- c("ACGTACGTACGT", "ACGAACGTACGT", "AAAAAAAAAAAA", "A-AAAA---AAA")
@@ -251,10 +252,10 @@ nearestDist<- function(sequences, model=c("ham", "aa", "m1n", "hs1f", "hs5f"),
             seq_uniq <- setNames(alakazam::translateDNA(seq_uniq), seq_uniq)
             dist_mat <- pairwiseDist(seq_uniq, dist_mat=getAAMatrix())
         } else if (model == "hs5f") {
-            if (is.null(targetingModel)) {
-                stop("Must provide targetingModel for model='hs5f'")
+            if (is.null(targetingDistance)) {
+                stop("Must provide targetingDistance for model='hs5f'")
             }
-            dist_mat <- pairwise5MerDist(seq_uniq, targetingModel, 
+            dist_mat <- pairwise5MerDist(seq_uniq, targetingDistance, 
                                              normalize, symmetry)
         }
 
@@ -455,8 +456,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     #  stop("Invalid sequence characters in the ", sequenceColumn, " column.")
     #}
     
-    # Get targeting model
-    targeting_model <- if (model == "hs5f") { HS5FModel } else { NULL }
+    # Get targeting distance
+    targeting_distance <- if (model == "hs5f") { calcTargetingDistance(HS5FModel) } else { NULL }
 
     # Parse V and J columns to get gene
     # cat("V+J Column parsing\n")
@@ -531,10 +532,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                                  "calcTargetingDistance",
                                  "findUniqSeq",
                                  "pairwise5MerDist",
-                                 "targeting_model")
+                                 "targeting_distance")
         parallel::clusterExport(cluster, export_functions, envir=environment())
     }
     
+   
 
     list_db <- foreach(idx=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
         db_group <- db[groups[[idx]], ]
@@ -546,7 +548,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
         db_group$TMP_DIST_NEAREST <- nearestDist(arrSeqs,
                                                  model=model,
                                                  normalize=normalize,
-                                                 targetingModel=targeting_model,
+                                                 targetingDistance=targeting_distance,
                                                  symmetry=symmetry,
                                                  crossGroups=crossGroups,
                                                  mst=mst)
