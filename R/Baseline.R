@@ -1472,6 +1472,15 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
             facetColumn <- "REGION" 
         }
         
+        # Apply color order
+        if (!is.null(colorValues)) {
+            if (colorElement == "id") {
+                dens_df[,idColumn] <- factor(dens_df[,idColumn], levels=names(colorValues))
+            } else {
+                dens_df[,groupColumn] <- factor(dens_df[,groupColumn], levels=names(colorValues))
+            }
+        }
+        
         # Plot probability density curve
         p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="DENSITY")) +
             base_theme + 
