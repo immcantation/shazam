@@ -123,3 +123,60 @@ plot(p3)
 
 In this example, the unnormalized `hs5f` model distance threshold would be 
 set to a value near 6.
+
+## Calculate nearest neighbor distances across groups rather that within group
+
+The arguments `fields` and `cross` are used for grouping data. 
+
+`fields` will split the input `data.frame` in groups and will treat them
+independently. It can be useful when the input data has multiple samples.
+
+In the previous examples we used a subset of the original example data. In the
+following example, we will use the two availabe samples, -1h and +7d, and will set `fields="SAMPLE"`. This will reproduce the same results as before for sample -1h.
+
+```{r fields, eval=TRUE, warning=FALSE}
+db <- ExampleDb
+table(db$SAMPLE)
+dist_hs1f_fields <- distToNearest(db, model="hs1f", first=FALSE, normalize="length", 
+                           nproc=1, fields="SAMPLE")
+library(testthat)
+expect_equal(subset(dist_hs1f_fields, SAMPLE == "-1h"), dist_hs1f)
+```
+
+We can plot the nearest neighbor distances for the two samples:
+
+```{r, eval=TRUE, warning=FALSE, fig.width=7}
+# Generate m1n histogram
+p4 <- ggplot() + theme_bw() + 
+    ggtitle("Distance to nearest: hs1f") + xlab("distance") +
+    geom_histogram(data=dist_hs1f_fields, aes(x=DIST_NEAREST), binwidth=0.025, 
+                   fill="steelblue", color="white") +
+    facet_grid( SAMPLE ~ ., scales = "free_y")
+plot(p4)
+```
+
+Setting the argument `cross` allows to calculate the nearest neighbor distances 
+across groups. In the following example we set `cross="SAMPLE"`. Data will be grouped
+in two categories, being -1h and +7d. For each sequence, the distances to all sequences
+belonging to other categories, +7d in this case, will be calculated and the 
+smallest value returned.
+
+```{r cross, eval=TRUE, warning=FALSE}
+dist_hs1f_cross <- distToNearest(db, model="hs1f", first=FALSE, normalize="length", 
+                           nproc=1, cross="SAMPLE")
+```
+
+The histogram for -1h will now be different, because we are looking at the distribution of
+the distance between the sequences in -1h and +7d. 
+
+```{r, eval=TRUE, warning=FALSE, fig.width=7}
+# Generate m1n histogram
+p5 <- ggplot() + theme_bw() + 
+    ggtitle("Distance to nearest: hs1f, across samples") + xlab("distance") +
+    geom_histogram(data=dist_hs1f_cross, aes(x=CROSS_DIST_NEAREST), binwidth=0.025, 
+                   fill="steelblue", color="white") +
+    facet_grid( SAMPLE ~ ., scales = "free_y")
+plot(p5)
+```
+
+
