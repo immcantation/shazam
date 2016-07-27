@@ -1,7 +1,6 @@
 ---
-title: 'Shazam: Tuning clonal assignment thresholds with nearest neighbor distances
-  neighbor'
-author: "Namita Gupta"
+title: 'Shazam: Tuning clonal assignment thresholds with nearest neighbor distances'
+author: "Namita Gupta and Susanna Marquez"
 date: '`r Sys.Date()`'
 output:
   pdf_document:
@@ -105,7 +104,7 @@ plot(p1)
 ```
 
 In this example, the length normalized `hs1f` model distance threshold would be 
-set to a value near 0.1.
+set to a value near 0.2.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Generate hs5f histogram
@@ -124,15 +123,19 @@ plot(p3)
 In this example, the unnormalized `hs5f` model distance threshold would be 
 set to a value near 6.
 
-## Calculate nearest neighbor distances across groups rather that within group
+## Calculate nearest neighbor distances across groups rather than within a group
 
 The arguments `fields` and `cross` are used for grouping data. 
 
-`fields` will split the input `data.frame` in groups and will treat them
-independently. It can be useful when the input data has multiple samples.
+`fields` will split the input `data.frame` in groups based on values in 
+the specified fields and will treat them independently. For example, 
+if the input data has multiple samples, `fields="SAMPLE"` would allow 
+each sample to be analyzed separately.
 
 In the previous examples we used a subset of the original example data. In the
-following example, we will use the two availabe samples, -1h and +7d, and will set `fields="SAMPLE"`. This will reproduce the same results as before for sample -1h.
+following example, we will use the two availabe samples, -1h and +7d, 
+and will set `fields="SAMPLE"`. This will reproduce previous results for sample 
+-1h and add results for sample +7d.
 
 ```{r fields, eval=TRUE, warning=FALSE}
 db <- ExampleDb
@@ -148,35 +151,40 @@ We can plot the nearest neighbor distances for the two samples:
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Generate m1n histogram
 p4 <- ggplot() + theme_bw() + 
-    ggtitle("Distance to nearest: hs1f") + xlab("distance") +
+    ggtitle("Grouped distance to nearest: hs1f") + xlab("distance") +
     geom_histogram(data=dist_hs1f_fields, aes(x=DIST_NEAREST), binwidth=0.025, 
                    fill="steelblue", color="white") +
     facet_grid( SAMPLE ~ ., scales = "free_y")
 plot(p4)
 ```
 
-Setting the argument `cross` allows to calculate the nearest neighbor distances 
-across groups. In the following example we set `cross="SAMPLE"`. Data will be grouped
-in two categories, being -1h and +7d. For each sequence, the distances to all sequences
-belonging to other categories, +7d in this case, will be calculated and the 
-smallest value returned.
+In this case, the threshold selected for +7d is not noticeably 
+different from that selected for -1h.
+
+Setting the argument `cross` calculates the distances across groups 
+to the nearest neighbor in a different group. In the following example 
+we set `cross="SAMPLE"`, meaning data will be grouped in either -1h or 
++7d. For each sequence in -1h, the distances to all sequences belonging 
+to other groups, +7d in this case, will be calculated and the smallest 
+value returned.
 
 ```{r cross, eval=TRUE, warning=FALSE}
 dist_hs1f_cross <- distToNearest(db, model="hs1f", first=FALSE, normalize="length", 
                            nproc=1, cross="SAMPLE")
 ```
 
-The histogram for -1h will now be different, because we are looking at the distribution of
-the distance between the sequences in -1h and +7d. 
+The histogram for -1h will now be different, because we are looking at 
+the distribution of the distance between the sequences in -1h and +7d. 
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Generate m1n histogram
 p5 <- ggplot() + theme_bw() + 
-    ggtitle("Distance to nearest: hs1f, across samples") + xlab("distance") +
+    ggtitle("Cross-sample distance to nearest: hs1f") + xlab("distance") +
     geom_histogram(data=dist_hs1f_cross, aes(x=CROSS_DIST_NEAREST), binwidth=0.025, 
                    fill="steelblue", color="white") +
     facet_grid( SAMPLE ~ ., scales = "free_y")
 plot(p5)
 ```
 
-
+This can give us a sense of overlap between samples or a way to 
+compare within-sample variation to cross-sample variation.
