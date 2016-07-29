@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
-Version: 0.1.2.999
-Date: 2016-07-20
+Version: 0.1.2.99
+Date: 2016-07-29
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
@@ -26,7 +26,7 @@ Description: Provides a computational framework for Bayesian estimation of
     sequences, build models of somatic hypermutation (SHM) in Ig sequences,
     and make model-dependent distance comparisons of Ig repertoires.
 License: CC BY-NC-SA 4.0
-URL: http://shazam.readthedocs.org
+URL: http://shazam.readthedocs.io
 BugReports: https://bitbucket.org/kleinstein/shazam/issues
 LazyData: true
 BuildVignettes: true

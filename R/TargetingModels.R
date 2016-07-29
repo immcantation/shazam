@@ -85,7 +85,7 @@ NULL
 #' @references
 #' \enumerate{
 #'   \item  Cui A, et al. A model of somatic hypermutation targeting in mice based on 
-#'          high-throughput immunoglobulin sequencing data. (In Preparation)
+#'          high-throughput immunoglobulin sequencing data. Under review.
 #'  }
 #'  
 #' @seealso  See \link{HS5FModel} for human 5-mer targeting model, \link{U5NModel}
