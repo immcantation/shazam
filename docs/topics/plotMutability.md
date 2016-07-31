@@ -80,7 +80,7 @@ plotMutability(HS5FModel, "C")
 ```R
 
 # Plot two nucleotides in barchart style
-plotMutability(HS5FModel, c("G","T"), style="bar")
+plotMutability(HS5FModel, c("G", "T"), style="bar")
 ```
 
 ![4](plotMutability-4.png)

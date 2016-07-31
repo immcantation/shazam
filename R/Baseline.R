@@ -743,7 +743,8 @@ calcBaselineBinomialPdf <- function (x=3,
 #'            Nucleic Acids Res. 2012 40(17):e134.
 #'  }
 #' 
-#' @examples
+#' @examples  
+#' \donttest{
 #' # Subset example data from alakazam
 #' library(alakazam)
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
@@ -772,7 +773,7 @@ calcBaselineBinomialPdf <- function (x=3,
 #' grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
 #' plotBaselineDensity(grouped3, idColumn="SAMPLE", colorElement="group",
 #'                     sigmaLimits=c(-1, 1))
-#' 
+#' }
 #' @export
 groupBaseline <- function(baseline, groupBy, nproc=1) {
     # Hack for visibility of data.table and foreach index variables
@@ -1366,7 +1367,7 @@ baseline2DistPValue <-function(base1, base2) {
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "-1h")
 #' 
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
@@ -1380,19 +1381,15 @@ baseline2DistPValue <-function(base1, base2) {
 #' # Grouping the PDFs by the sample and isotype annotations
 #' grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 #' 
-#' # Plot mean and confidence interval
-#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", 
-#'                     sigmaLimits=c(-1, 1))
-#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", subsetRegions="CDR",
-#'                     sigmaLimits=c(-1, 1))
+#' # Plot density faceted by region with custom isotype colors
+#' isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
+#'                   "IgG"="seagreen", "IgA"="steelblue")
+#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", colorValues=isotype_colors, 
+#'                     colorElement="group", sigmaLimits=c(-1, 1))
+#'
+#' # Facet by isotype instead of region
 #' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group",
 #'                     sigmaLimits=c(-1, 1))
-#'
-#' # Reorder and recolor isotypes
-#' group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
-#'                   "IgG"="seagreen", "IgA"="steelblue")
-#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", colorElement="group", 
-#'                     colorValues=group_colors, sigmaLimits=c(-1, 1))
 #' 
 #' @export
 plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorElement=c("id", "group"), 
@@ -1590,10 +1587,10 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #' grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 #' 
 #' # Plot mean and confidence interval by region with custom group colors
-#' group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
-#'                   "IgG"="seagreen", "IgA"="steelblue")
+#' isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
+#'                     "IgG"="seagreen", "IgA"="steelblue")
 #' plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", 
-#'                     groupColors=group_colors)
+#'                     groupColors=isotype_colors)
 #' 
 #' # Facet by group instead of region
 #' plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", facetBy="group")

@@ -93,10 +93,10 @@ Examples
 ```R
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
+db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 
-# Create model using only silent mutations and ignore multiple mutations
-sub <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
+# Create model using only silent mutations
+sub <- createSubstitutionMatrix(db, model="S")
 ```
 
 

@@ -139,10 +139,10 @@ Calculating BASELINe statistics...
 ```R
 
 # Plot mean and confidence interval by region with custom group colors
-group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
+isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
 "IgG"="seagreen", "IgA"="steelblue")
 plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", 
-groupColors=group_colors)
+groupColors=isotype_colors)
 
 ```
 

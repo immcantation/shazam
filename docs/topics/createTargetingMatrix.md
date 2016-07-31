@@ -65,22 +65,22 @@ Examples
 ```R
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
+db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 
-# Create 4x1024 model using only silent mutations and ignore multiple mutations
-sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
-mut_model <- createMutabilityMatrix(db, sub_model, model="S", multipleMutation="ignore",
-minNumSeqMutations=10)
+# Create 4x1024 models using only silent mutations
+sub_model <- createSubstitutionMatrix(db, model="S")
+mut_model <- createMutabilityMatrix(db, sub_model, model="S")
 
 ```
 
 *Warning*:Insufficient number of mutations to infer some 5-mers. Filled with 0. 
 ```R
-tar_model <- createTargetingMatrix(sub_model, mut_model)
 
-# Create 5x3125 model including Ns
+# Extend substitution and mutability to including Ns (5x3125 model)
 sub_model <- extendSubstitutionMatrix(sub_model)
 mut_model <- extendMutabilityMatrix(mut_model)
+
+# Create targeting model from substitution and mutability
 tar_model <- createTargetingMatrix(sub_model, mut_model)
 ```
 

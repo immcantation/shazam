@@ -105,7 +105,7 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "-1h")
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
@@ -145,40 +145,24 @@ Calculating BASELINe statistics...
 
 ```R
 
-# Plot mean and confidence interval
-plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", 
-sigmaLimits=c(-1, 1))
+# Plot density faceted by region with custom isotype colors
+isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
+"IgG"="seagreen", "IgA"="steelblue")
+plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", colorValues=isotype_colors, 
+colorElement="group", sigmaLimits=c(-1, 1))
 
 ```
 
 ![6](plotBaselineDensity-6.png)
 
 ```R
-plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", subsetRegions="CDR",
-sigmaLimits=c(-1, 1))
 
+# Facet by isotype instead of region
+plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group",
+sigmaLimits=c(-1, 1))
 ```
 
 ![8](plotBaselineDensity-8.png)
-
-```R
-plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group",
-sigmaLimits=c(-1, 1))
-
-```
-
-![10](plotBaselineDensity-10.png)
-
-```R
-
-# Reorder and recolor isotypes
-group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
-"IgG"="seagreen", "IgA"="steelblue")
-plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", colorElement="group", 
-colorValues=group_colors, sigmaLimits=c(-1, 1))
-```
-
-![12](plotBaselineDensity-12.png)
 
 
 See also
