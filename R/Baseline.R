@@ -1589,23 +1589,14 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #' # Grouping the PDFs by sample and isotype annotations
 #' grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 #' 
-#' # Plot mean and confidence interval
-#' plotBaselineSummary(grouped, "ISOTYPE", "SAMPLE", style="mean")
-#' plotBaselineSummary(grouped, "ISOTYPE", "SAMPLE", subsetRegions="CDR", 
-#'                     style="mean")
-#' plotBaselineSummary(grouped, "ISOTYPE", "SAMPLE", facetBy="group", 
-#'                     style="mean")
-#' 
-#' # Reorder and recolor groups
+#' # Plot mean and confidence interval by region with custom group colors
 #' group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
 #'                   "IgG"="seagreen", "IgA"="steelblue")
-#' plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", groupColors=group_colors, 
-#'                     style="mean")
+#' plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", 
+#'                     groupColors=group_colors)
 #' 
-#' # Plot subset of data
-#' stats <- subset(getBaselineStats(grouped), ISOTYPE == "IgG")
-#' plotBaselineSummary(stats, "SAMPLE", "ISOTYPE", groupColors=group_colors, 
-#'                     style="mean")
+#' # Facet by group instead of region
+#' plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", facetBy="group")
 #' 
 #' @export
 plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 

@@ -184,7 +184,7 @@ grouped_1 <- groupBaseline(baseline, groupBy=c("SAMPLE"))
 grouped_2 <- groupBaseline(baseline_sub, groupBy=c("SAMPLE", "ISOTYPE"))
 ```
 
-### Convolving multi-level variables
+### Convolving variables at multiple level
 
 To make selection comparisons using two levels of variables, you
 would need two iterations of groupings, where the first iteration of 
@@ -220,8 +220,8 @@ testBaseline(grouped_1, groupBy="SAMPLE")
 
 ```
 ##   REGION       TEST       PVALUE          FDR
-## 1    CDR -1h != +7d 0.0000911719 0.0001823438
-## 2    FWR -1h != +7d 0.1876222312 0.1876222312
+## 1    CDR -1h != +7d 4.169835e-07 8.339670e-07
+## 2    FWR -1h != +7d 3.655955e-01 3.655955e-01
 ```
 
 ## Plot and compare selection scores for groups

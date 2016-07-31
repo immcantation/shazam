@@ -16,7 +16,7 @@ pages:
     - 'Release Notes': news.md
     - 'Related Projects': projects.md
   - 'Vignettes':
-    - 'Quantifing selection pressures': vignettes/Baseline-Vignette.md
+    - 'Quantification of selection pressure': vignettes/Baseline-Vignette.md
     - 'Tuning clonal assignment thresholds with nearest neighbor distances': vignettes/DistToNearest-Vignette.md
     - 'Inferring SHM targeting models': vignettes/Targeting-Vignette.md
   - 'Help Topics':

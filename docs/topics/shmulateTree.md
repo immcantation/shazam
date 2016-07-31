@@ -4,56 +4,70 @@
 
 
 
-**shmulateTree** - *Simulate sequences to populate a tree*
+**shmulateTree** - *Simulate mutations in a lineage tree*
 
 Description
 --------------------
 
 `shmulateTree` returns a set of simulated sequences generated from an input sequence and an
-igraph object. The input sequence is used to replace the founder node of the `igraph` lineage
-tree and sequences are simulated with mutations corresponding to edge weights in the tree.
-Sequences will not be generated for groups of nodes that are specified to be excluded.
+lineage tree. The input sequence is used to replace the MRCA node of the `igraph` object
+defining the lineage tree. Sequences are then simulated with mutations corresponding to edge 
+weights in the tree. Sequences will not be generated for groups of nodes that are specified 
+to be excluded.
 
 
 Usage
 --------------------
 ```
-shmulateTree(input_seq, graph, targeting_model = HS5FModel, field = NULL,
-exclude = NULL, jun_frac = NULL)
+shmulateTree(sequence, graph, targetingModel = HS5FModel, field = NULL,
+exclude = NULL, junctionWeight = NULL)
 ```
 
 Arguments
 -------------------
 
-input_seq
-:   sequence in which mutations are to be introduced.
+sequence
+:   string defining the MRCA sequence to seed mutations from.
 
 graph
-:   `igraph` object with vertex annotations whose edges are to be recreated.
+:   `igraph` object defining the seed lineage tree, with 
+vertex annotations, whose edges are to be recreated.
 
-targeting_model
-:   targeting model of class `TargetingModel` to be used for 
-computing probabilities of mutations at each position. Default is
-`HS5FModel` from `SHazaM`.
+targetingModel
+:   5-mer [TargetingModel](TargetingModel-class.md) object to be used for computing 
+probabilities of mutations at each position. Defaults to
+[HS5FModel](HS5FModel.md).
 
 field
-:   annotation field to use for both unweighted path length exclusion and
-consideration as a founder node. If `NULL` do not exclude any nodes.
+:   annotation to use for both unweighted path length exclusion and
+consideration as the MRCA node. If `NULL` do not exclude 
+any nodes.
 
 exclude
-:   vector of annotation values in the given field to exclude from potential
-founder set. If `NULL` do not exclude any nodes. Has no effect if `field=NULL`.
+:   vector of annotation values in `field` to exclude from potential
+MRCA set. If `NULL` do not exclude any nodes. 
+Has no effect if `field=NULL`.
 
-jun_frac
-:   fraction of characters in the junction region to add proportional number
-of trunk mutations to the sequence.
+junctionWeight
+:   fraction of the nucleotide sequence that is within the junction 
+region. When specified this adds a proportional number of  
+mutations to the trunk of the tree. Requires a value between 
+0 and 1. If `NULL` then edge weights are unmodified
+from the input `graph`.
 
 
 
 Value
 -------------------
 
-A `data.frame` of simulated sequences.
+A `data.frame` of simulated sequences with columns:
+
++  `NAME`:      name of the corresponding node in the input 
+`graph`.  
++  `SEQUENCE`:  mutated sequence.
++  `DISTANCE`:  Hamming distance of the mutated sequence from 
+the seed `sequence`.
+
 
 
 
@@ -61,28 +75,49 @@ Examples
 -------------------
 
 ```R
-# Example input
-input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
-
-# Load example graph
-library(alakazam)
+# Load example lineage and define example MRCA
+data(ExampleTrees, package="alakazam")
 graph <- ExampleTrees[[17]]
+sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
 
-# Simulate using the mouse RS5NF targeting model
-shmulateTree(input_seq, graph, targeting_model = MRS5NFModel)
+# Simulate using the default human 5-mer targeting model
+shmulateTree(sequence, graph)
+
 ```
 
 
 ```
-            name                                      sequence distance
+            NAME                                      SEQUENCE DISTANCE
 1      Inferred1 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-2 GN5SHBT07JDYW5 NGATCTCACGACACGGCCGTGTATTATTGTGCGAGAGATAGTTTA        2
-3 GN5SHBT01AKANC NGATCTGACGACACGGCCTTTTATTGTTGTGCGAGAGATAGTTTA        4
-4 GN5SHBT03EP4KC NGATATCACGACACGGCCGTTTATTATTGTGCGAGAGATAATTTA        3
-5 GN5SHBT01A3SFZ NGATTTTACGACGCGGCCTTATATTATTGTGGGAGAGATAGTTTA        6
-6 GN5SHBT04CEA6I NGATCTCGCGACACGGCCGTGTATTATTGTGCGAGAGATAGTTTA        1
-7 GN5SHBT06IXJIH NGATCTCACGACACGGCCGTGTATTATTGTGCGAGAGATAGCTTA        1
-8 GN5SHBT08HUU7M NGATATCACGACATGGTCGTTTATTATTGTGCGAGAGATGATTTA        3
+2 GN5SHBT07JDYW5 NGATCTGACGACCCGGCCGTGTATTACTGTGCGAGAGATAATTTA        2
+3 GN5SHBT01AKANC NCATTTGACGACACGGCCGTATATGACTGTGCGAGAGATAGTTTA        4
+4 GN5SHBT03EP4KC NGATTTGACGACCCGGCCCTATATTACTGTGCGAGAGATAATTTA        3
+5 GN5SHBT01A3SFZ NTATCTGACGACCCGGCCGTTTATGACTGTGCGAGCGGTAGTTTA        6
+6 GN5SHBT04CEA6I NGATGTGACGACCCGGCCGTGTATTACTGTGCGAGAGATAATTTA        1
+7 GN5SHBT06IXJIH NGATCTGACGACCCGGCCGTGTATTACTGTGCGAGAGATACTTTA        1
+8 GN5SHBT08HUU7M NCATTTGACGACCCGGCCCTATATTACTGTGCGAGAGATGGTTTA        3
+
+```
+
+
+```R
+
+# Simulate using the mouse 5-mer targeting model
+# Exclude nodes without a sample identifier
+# Add 20% mutation rate to the trunk
+shmulateTree(sequence, graph, targetingModel=MRS5NFModel,
+field="SAMPLE", exclude=NA, junctionWeight=0.2)
+```
+
+
+```
+            NAME                                      SEQUENCE DISTANCE
+1 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
+2 GN5SHBT03EP4KC NGATCTGACGACACGGCCATGTATTACTGTGCGAAAGACAGTTTG        4
+3 GN5SHBT01A3SFZ NGATCTGACGGCACGACCATGTTTTACTGTACAAGAGATACTTTA        7
+4 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTGTATTACTGTGAGAGAGATAGTTTA        1
+5 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGAGAGTTTA        1
+6 GN5SHBT08HUU7M NGATCTGACGACACGACCATGTTTTATTGTGCGAAAGACAGTTTG        3
 
 ```
 
@@ -91,7 +126,9 @@ shmulateTree(input_seq, graph, targeting_model = MRS5NFModel)
 See also
 -------------------
 
-[shmulateSeq](shmulateSeq.md), [HS5FModel](HS5FModel.md), [TargetingModel](TargetingModel-class.md), [ExampleTrees](http://www.inside-r.org/packages/cran/alakazam/docs/ExampleTrees)
+See [shmulateSeq](shmulateSeq.md) for imposing mutations on a single sequence. 
+See [HS5FModel](HS5FModel.md) and [MRS5NFModel](MRS5NFModel.md) for predefined 
+[TargetingModel](TargetingModel-class.md) objects.
 
 
 

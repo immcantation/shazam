@@ -138,50 +138,23 @@ Calculating BASELINe statistics...
 
 ```R
 
-# Plot mean and confidence interval
-plotBaselineSummary(grouped, "ISOTYPE", "SAMPLE", style="mean")
+# Plot mean and confidence interval by region with custom group colors
+group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
+"IgG"="seagreen", "IgA"="steelblue")
+plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", 
+groupColors=group_colors)
 
 ```
 
 ![6](plotBaselineSummary-6.png)
 
 ```R
-plotBaselineSummary(grouped, "ISOTYPE", "SAMPLE", subsetRegions="CDR", 
-style="mean")
 
+# Facet by group instead of region
+plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", facetBy="group")
 ```
 
 ![8](plotBaselineSummary-8.png)
-
-```R
-plotBaselineSummary(grouped, "ISOTYPE", "SAMPLE", facetBy="group", 
-style="mean")
-
-```
-
-![10](plotBaselineSummary-10.png)
-
-```R
-
-# Reorder and recolor groups
-group_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
-"IgG"="seagreen", "IgA"="steelblue")
-plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", groupColors=group_colors, 
-style="mean")
-
-```
-
-![12](plotBaselineSummary-12.png)
-
-```R
-
-# Plot subset of data
-stats <- subset(getBaselineStats(grouped), ISOTYPE == "IgG")
-plotBaselineSummary(stats, "SAMPLE", "ISOTYPE", groupColors=group_colors, 
-style="mean")
-```
-
-![14](plotBaselineSummary-14.png)
 
 
 See also

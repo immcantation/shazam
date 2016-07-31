@@ -4,12 +4,14 @@
 
 
 
-**collapseClones** - *Identifies clonal consensus sequences*
+**collapseClones** - *Constructs clonal consensus sequences*
 
 Description
 --------------------
 
-Identifies effective/consensus sequences collapsed by clone
+`collapseClones` identifies the consensus sequence of each clonal 
+group and appends columns to the input `data.frame` containing the clonal 
+consensus and germline for each sequence.
 
 
 Usage
@@ -61,38 +63,35 @@ nproc
 Value
 -------------------
 
-A modified `db` data.frame with clonal consensus sequences in the
-CLONAL_SEQUENCE column.
+A modified `db` with clonal consensus sequences added 
+in the following columns:
+
++  `CLONAL_SEQUENCE`:  consensus input sequence for the clone.
++  `CLONAL_GERMLINE`:  consensus germline sequence for the clone.
+Generally, this will be unchanged from
+the data in `germlineColumn`, but
+may be truncated when the input sequence
+is truncaated due to inconsistencies 
+in the lengths of the input sequences or
+`regionDefinition` limits.
+
 
 Details
 -------------------
-
-`collapseClones` identifies the consensus sequence of each clonal 
-group and appends a column to the input `data.frame` containing the clonal 
-consensus for each sequence.
-
 
 For sequences identified to be part of the same clone, this function defines an 
 effective sequence that will be representative for all mutations in the clone. Each 
 position in this consensus (or effective) sequence is created by a weighted sampling 
 of each mutated base (and non "N", "." or "-" characters) from all the sequences in 
-the clone. 
-
-For example, in a clone with 5 sequences that have a C at position 1, and 5 sequences
-with a T at this same position, the consensus sequence will have a C 50%  and T 50% 
-of the time it is called.
-
-The function returns an updated `db` that collpases all the sequences by clones 
-defined in the `cloneColumn` column argument.
+the clone. For example, in a clone with 5 sequences that have a C at position 1, and 
+5 sequences with a T at this same position, the consensus sequence will have a C 50%  
+and T 50% of the time it is called.
 
 Non-terminal branch mutations are defined as the set of mutations that occur on 
 branches of the lineage tree that are not connected to a leaf. For computational 
 efficiency, the set of non-terminal branch mutations is approximated as those that are
 shared between more than one sequence in a clone. In this case the terminal branch 
 mutations are filtered out.
-
-This function can be parallelized if `db` contains thousands of sequences. 
-Specify the number of cores available using the `nproc` parameter.
 
 
 
@@ -104,12 +103,24 @@ Examples
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 
-# Build clonal consensus for V region
-db_new <- collapseClones(db, cloneColumn="CLONE", 
-sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK",
-regionDefinition=IMGT_V_NO_CDR3,
-nproc=1)
+# Build clonal consensus for the full sequence
+clones <- collapseClones(db, nproc=1)
+
+```
+
+
+```
+Collapsing clonal sequences...
+
+```
+
+
+```R
+
+# Build clonal consensus for V-region only 
+# Return the same number of rows as the input
+clones <- collapseClones(db, regionDefinition=IMGT_V_NO_CDR3, 
+expandedDb=TRUE, nproc=1)
 ```
 
 

@@ -114,8 +114,11 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HS5FModel) {
 #' @param   exclude          vector of annotation values in \code{field} to exclude from potential
 #'                           MRCA set. If \code{NULL} do not exclude any nodes. 
 #'                           Has no effect if \code{field=NULL}.
-#' @param   junctionWeight   fraction (0 to 1) of characters in the junction region to add 
-#'                           proportional number of trunk mutations to the sequence.
+#' @param   junctionWeight   fraction of the nucleotide sequence that is within the junction 
+#'                           region. When specified this adds a proportional number of  
+#'                           mutations to the trunk of the tree. Requires a value between 
+#'                           0 and 1. If \code{NULL} then edge weights are unmodified
+#'                           from the input \code{graph}.
 #'
 #' @return   A \code{data.frame} of simulated sequences with columns:
 #'           \itemize{
@@ -136,12 +139,21 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HS5FModel) {
 #' graph <- ExampleTrees[[17]]
 #' sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
 #' 
-#' # Simulate using the mouse 5-mer targeting model
-#' shmulateTree(sequence, graph, targetingModel=MRS5NFModel)
+#' # Simulate using the default human 5-mer targeting model
+#' shmulateTree(sequence, graph)
 #' 
+#' # Simulate using the mouse 5-mer targeting model
+#' # Exclude nodes without a sample identifier
+#' # Add 20% mutation rate to the trunk
+#' shmulateTree(sequence, graph, targetingModel=MRS5NFModel,
+#'              field="SAMPLE", exclude=NA, junctionWeight=0.2)
+#'  
 #' @export
 shmulateTree <- function(sequence, graph, targetingModel=HS5FModel,
                          field=NULL, exclude=NULL, junctionWeight=NULL) {
+    ## DEBUG
+    # targetingModel=HS5FModel; field=NULL; exclude=NULL; junctionWeight=NULL
+    
     # Determine MRCA of lineage tree
     mrca_df <- alakazam::getMRCA(graph, path="distance", root="Germline", 
                                  field=field, exclude=exclude)
@@ -177,7 +189,7 @@ shmulateTree <- function(sequence, graph, targetingModel=HS5FModel,
                 # Add child to new parents
                 new_parents <- union(new_parents, ch)
                 # Simulate sequence for that edge
-                seq <- shmulateSeq(sequence=sim_tree$sequence[sim_tree$name == p], 
+                seq <- shmulateSeq(sequence=sim_tree$SEQUENCE[sim_tree$NAME == p], 
                                    mutations=adj[p, ch],
                                    targetingModel=targetingModel)
                 new_node <- data.frame("NAME"=ch, "SEQUENCE"=seq, "DISTANCE"=adj[p, ch])
@@ -187,10 +199,10 @@ shmulateTree <- function(sequence, graph, targetingModel=HS5FModel,
         }
         # Re-calculate number of children
         parent_nodes <- new_parents
-        nchild <- sum(adj[parent_nodes,]>0)
+        nchild <- sum(adj[parent_nodes, ] > 0)
     }
     # Remove sequences that are to be excluded
-    sim_tree <- sim_tree[!(sim_tree$name %in% skip_names), ]
+    sim_tree <- sim_tree[!(sim_tree$NAME %in% skip_names), ]
     return(sim_tree)
 }
 

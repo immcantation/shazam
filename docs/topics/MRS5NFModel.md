@@ -28,7 +28,7 @@ References
 
 
 1. Cui A, et al. A model of somatic hypermutation targeting in mice based on 
-high-throughput immunoglobulin sequencing data. (In Preparation)
+high-throughput immunoglobulin sequencing data. Under review.
  
 
 

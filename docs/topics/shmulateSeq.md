@@ -9,36 +9,36 @@
 Description
 --------------------
 
-Generates mutations in sequence one by one while updating targeting
-probability of each position after each mutation.
+Generates random mutations in a sequence iteratively using a targeting model.
+Targeting probabilities at each position are updated after each iteration.
 
 
 Usage
 --------------------
 ```
-shmulateSeq(input_seq, num_muts, targeting_model = HS5FModel)
+shmulateSeq(sequence, mutations, targetingModel = HS5FModel)
 ```
 
 Arguments
 -------------------
 
-input_seq
-:   sequence in which mutations are to be introduced
+sequence
+:   sequence string in which mutations are to be introduced.
 
-num_muts
-:   number of mutations to be introduced into `input_seq`
+mutations
+:   number of mutations to be introduced into `sequence`.
 
-targeting_model
-:   targeting model of class `TargetingModel` to be used for 
-computing probabilities of mutations at each position. Default is
-`HS5FModel` from `SHazaM`.
+targetingModel
+:   5-mer [TargetingModel](TargetingModel-class.md) object to be used for computing 
+probabilities of mutations at each position. Defaults to
+[HS5FModel](HS5FModel.md).
 
 
 
 Value
 -------------------
 
-A mutated sequence.
+A string defining the mutated sequence.
 
 
 
@@ -46,16 +46,16 @@ Examples
 -------------------
 
 ```R
-# Example input sequence
-input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
+# Define example input sequence
+sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
 
-# Simulate using the default human S5F targeting model
-shmulateSeq(input_seq, num_muts = 6)
+# Simulate using the default human 5-mer targeting model
+shmulateSeq(sequence, mutations=6)
 ```
 
 
 ```
-[1] "NGGTCTGACTCCACGGCCGTGTATCATTGTGCGAGAGATAGTATA"
+[1] "NGACCTGACGAAGCGGCAGTGTCTTACTGTGCGAGAGATAGTTTG"
 
 ```
 
@@ -64,7 +64,9 @@ shmulateSeq(input_seq, num_muts = 6)
 See also
 -------------------
 
-[shmulateTree](shmulateTree.md), [HS5FModel](HS5FModel.md), [TargetingModel](TargetingModel-class.md)
+See [shmulateTree](shmulateTree.md) for imposing mutations on a lineage tree. 
+See [HS5FModel](HS5FModel.md) and [MRS5NFModel](MRS5NFModel.md) for predefined 
+[TargetingModel](TargetingModel-class.md) objects.
 
 
 

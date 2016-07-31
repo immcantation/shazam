@@ -80,24 +80,13 @@ averaging over all corresponding unambiguous 5-mers.
 
 These extended substitution and mutability matrices can be used to create an 
 overall SHM targeting matrix (`createTargetingMatrix`), which is the combined 
-probability of mutability and substitution. All of the above steps can be combined 
-by using the single function `createTargetingModel` to infer a `TargetingModel` 
-object directly from the dataset.
+probability of mutability and substitution. 
 
 ```{r, eval=FALSE}
-
-# Create a consensus sequence for each clone to avoid over-counting mutations
-# Adds the CLONAL_CONSENSUS_SEQUENCE column
-db_cons <- collapseClones(ExampleDb)
-
 # Create substitution model using silent mutations
-sub_matrix <- createSubstitutionMatrix(db_cons, 
-                                       sequenceColumn="CLONAL_SEQUENCE", 
-                                       model="S")
+sub_matrix <- createSubstitutionMatrix(ExampleDb, model="S")
 # Create mutability model using silent mutations
-mut_matrix <- createMutabilityMatrix(db_cons, sub_matrix, 
-                                     sequenceColumn="CLONAL_SEQUENCE", 
-                                     model="S")
+mut_matrix <- createMutabilityMatrix(ExampleDb, sub_matrix, model="S")
 
 # Extend models to include ambiguous 5-mers
 sub_matrix <- extendSubstitutionMatrix(sub_matrix)
@@ -107,9 +96,19 @@ mut_matrix <- extendMutabilityMatrix(mut_matrix)
 tar_matrix <- createTargetingMatrix(sub_matrix, mut_matrix)
 ```
 
+All of the above steps can be combined by using the single function 
+`createTargetingModel` to infer a `TargetingModel` object directly from 
+the dataset. Additionally, it is generally appropriate to consider the mutations
+within a clone only once. Consensus sequences for each clone can be generated
+using the `collapseClones` function.
+
 ```{r, eval=TRUE, warning=FALSE}
+# Collapse sequences into clonal consensus
+clone_db <- collapseClones(ExampleDb, nproc=1)
 # Create targeting model in one step using only silent mutations
-model <- createTargetingModel(ExampleDb, model="S")
+# Use consensus sequence input and germline columns
+model <- createTargetingModel(clone_db, model="S", sequenceColumn="CLONAL_SEQUENCE", 
+                              germlineColumn="CLONAL_GERMLINE")
 ```
 
 ## Visualize targeting model

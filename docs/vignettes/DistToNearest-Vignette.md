@@ -32,7 +32,7 @@ data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, SAMPLE == "-1h")
 ```
 
-## Calculate nearest neighbor distances
+## Calculating nearest neighbor distances
 
 The function for calculating distance between every sequence and its nearest
 neighbor takes a few parameters to adjust how the distance is measured. If a 
@@ -57,16 +57,16 @@ overall distance.
 
 
 ```r
-# Use hs1f model and normalize by junction length
-dist_hs1f <- distToNearest(db, model="hs1f", first=FALSE, normalize="length", 
-                           nproc=1)
+# Use nucleotide Hamming distance and normalize by junction length
+dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="length", 
+                          nproc=1)
 
 # Use genotyped V assignments and 5-mer model
 dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", 
                            first=FALSE, normalize="none", nproc=1)
 ```
 
-## Generate histogram
+### Generating histograms of nearest neighbor distances
 
 The primary use of the distance to nearest calculation in the Change-O pipeline 
 is to determine the optimal threshold for separating clonally related sequences 
@@ -75,41 +75,106 @@ without "near"" neighbor), which show up as two modes in a histogram.
 
 
 ```r
-# Generate m1n histogram
+# Generate Hamming distance histogram
 library(ggplot2)
-p1 <- ggplot() + theme_bw() + 
-    ggtitle("Distance to nearest: hs1f") + xlab("distance") +
-    geom_histogram(data=dist_hs1f, aes(x=DIST_NEAREST), binwidth=0.025, 
-                   fill="steelblue", color="white") +
-    geom_rug(aes(x=seq(0.0, 0.5, 0.1)), color="firebrick")
+p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
+             aes(x=DIST_NEAREST)) + 
+    theme_bw() + xlab("Hamming distance") + ylab("Count") +
+    scale_x_continuous(breaks=seq(0, 1, 0.1)) +
+    geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
+    geom_vline(xintercept=0.15, color="firebrick", linetype=3)
 plot(p1)
 ```
 
 ![plot of chunk DistToNearest-Vignette-3](figure/DistToNearest-Vignette-3-1.png)
 
-In this example, the length normalized `hs1f` model distance threshold would be 
-set to a value near 0.1.
+In this example, the length normalized `ham` model distance threshold would be 
+set to a value near 0.15.
 
 
 ```r
-# Generate hs5f histogram
-p2 <- ggplot() + theme_bw() + 
-    ggtitle("Distance to nearest: hs5f") + xlab("distance") +
-    geom_histogram(data=dist_hs5f, aes(x=DIST_NEAREST), binwidth=1, 
-                   fill="steelblue", color="white") +
-    geom_rug(aes(x=seq(0, 15, 1)), color="firebrick")
+# Generate hs5f distance histogram
+p2 <- ggplot(subset(dist_hs5f, !is.na(DIST_NEAREST)),
+             aes(x=DIST_NEAREST)) + 
+    theme_bw() + xlab("HS5F distance") + ylab("Count") +
+    scale_x_continuous(breaks=seq(0, 50, 5)) +
+    geom_histogram(fill="steelblue", color="white", binwidth=1) +
+    geom_vline(xintercept=7, color="firebrick", linetype=3)
 plot(p2)
 ```
 
 ![plot of chunk DistToNearest-Vignette-4](figure/DistToNearest-Vignette-4-1.png)
 
+In this example, the unnormalized `hs5f` model distance threshold would be 
+set to a value near 7.
+
+### Calculating nearest neighbor distances independently for subsets of data
+
+The `fields` argument to `distToNearest` will split the input `data.frame`
+in groups based on values in the specified fields (columns) and will 
+treat them independently. For example, if the input data has multiple 
+samples, then `fields="SAMPLE"` would allow each sample to be analyzed 
+separately.
+
+In the previous examples we used a subset of the original example data. In the
+following example, we will use the two available samples, `-1h` and `+7d`, 
+and will set `fields="SAMPLE"`. This will reproduce previous results for sample 
+`-1h` and add results for sample `+7d`.
+
+
 ```r
-# Zoom in to find threshold
-p3 <- p2 + xlim(c(0, 15)) + scale_y_sqrt()
+dist_fields <- distToNearest(ExampleDb, model="ham", first=FALSE, 
+                             normalize="length", fields="SAMPLE", 
+                             nproc=1)
+```
+
+We can plot the nearest neighbor distances for the two samples:
+
+
+```r
+# Generate grouped histograms
+p3 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)), 
+             aes(x=DIST_NEAREST)) + 
+    theme_bw() + xlab("Grouped Hamming distance") + ylab("Count") +
+    geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
+    geom_vline(xintercept=0.15, color="firebrick", linetype=3) +
+    facet_grid(SAMPLE ~ ., scales="free_y")
 plot(p3)
 ```
 
-![plot of chunk DistToNearest-Vignette-4](figure/DistToNearest-Vignette-4-2.png)
+![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
 
-In this example, the unnormalized `hs5f` model distance threshold would be 
-set to a value near 6.
+In this case, the threshold selected for `+7d` is not noticeably 
+different from that selected for `-1h`.
+
+### Calculating nearest neighbor distances across groups rather than within a groups
+
+Specifying the `cross` argument to `distToNearest` forces distance calculations 
+to be performed across groups, such that the nearest neighbor of each sequence 
+will always be a sequence in a different group. In the following example 
+we set `cross="SAMPLE"`, which will grouped the data into `-1h` and 
+`+7d` sample subsets. Thus, nearest neighbor distances for sequences in sample 
+`-1h` will be restricted to the closest sequence in sample `+7d` and vice versa.
+
+
+```r
+dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE, 
+                            normalize="length", cross="SAMPLE", nproc=1)
+```
+
+
+```r
+# Generate cross sample histograms
+p4 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)), 
+             aes(x=CROSS_DIST_NEAREST)) + 
+    theme_bw() + xlab("Cross-sample Hamming distance") + ylab("Count") +
+    geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
+    geom_vline(xintercept=0.15, color="firebrick", linetype=3) +
+    facet_grid(SAMPLE ~ ., scales="free_y")
+plot(p4)
+```
+
+![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
+
+This can give us a sense of overlap between samples or a way to 
+compare within-sample variation to cross-sample variation.

@@ -1,5 +1,5 @@
 ---
-title: 'Shazam: Quantifing selection pressures'
+title: 'Shazam: Quantification of selection pressure'
 author: "Namita Gupta & Jason Anthony Vander Heiden"
 date: '`r Sys.Date()`'
 output:

@@ -198,7 +198,7 @@ setClass("TargetingModel",
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
 #' 
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -432,12 +432,12 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
-#' mut_model <- createMutabilityMatrix(db, sub_model, model="S", multipleMutation="ignore",
-#'                                     minNumSeqMutations=10)
+#' mut_model <- createMutabilityMatrix(db, sub_model, model="S", 
+#'                                     multipleMutation="ignore", minNumSeqMutations=10)
 #' 
 #' @export
 createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
@@ -692,7 +692,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -753,7 +753,7 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -835,7 +835,7 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
 #'
 #' # Create 4x1024 model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
@@ -911,7 +911,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' model <- createTargetingModel(db, model="S", multipleMutation="ignore")
@@ -1470,7 +1470,7 @@ listMutations <- function(seqInput, seqGL, multipleMutation, model) {
     matIGL = matrix(c(seqI, seqG), ncol=length(seqI), nrow=2, byrow=T)
     mutations <- analyzeMutations2NucUri(matIGL)
     mutations <- mutations[!is.na(mutations)]
-    positions <- as.numeric(names(mutations))
+    #positions <- as.numeric(names(mutations))
     # mutations <- mutations[positions <= VLENGTH]
     
     #remove the nucleotide mutations in the codons with multiple mutations
