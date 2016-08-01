@@ -158,7 +158,7 @@ collapseClones <- function(db,
                             regionDefinition=regionDefinition, 
                             nonTerminalOnly=nonTerminalOnly)
     }
-    
+
     # Stop cluster
     if(nproc > 1) { parallel::stopCluster(cluster) }
     
@@ -199,8 +199,9 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
     # inputSeq=db$SEQUENCE_IMGT[4:6]; germlineSeq=db$GERMLINE_IMGT_D_MASK[4:6]; regionDefinition=NULL; nonTerminalOnly=FALSE
     
     # If only one sequence in clone, return it
-    if(length(inputSeq) == 1) {
-        return(inputSeq)
+    if (length(inputSeq) == 1) {
+        returnSeq <- c("input"=inputSeq, "germline"=germlineSeq)
+        return(returnSeq)
     }
     
     # Find length of shortest input sequence
@@ -233,7 +234,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
         # If the current position is a gap in both germline and the sequence,
         # return a gap
         if(posGL %in% c("-", ".") & sum(!(posNucs%in%c("-", ".", "N", "n")))==0 ){
-            return(c(".",error))
+            return(c(".", error))
         }
         
         # If all the sequences in the clone have the same nucleotide at the current
