@@ -8,13 +8,13 @@ test_that("Test shmulateSeq", {
     # Simulate using the default human S5F targeting model
 
     set.seed(56)
-    output <- shmulateSeq(input_seq, num_muts = 6)
+    output <- shmulateSeq(input_seq, mutations = 6)
 
     expected <- "NAATTTGACGACACGGCCGTGGATGACTGTGCGAGAGATGCTTTA"   
     expect_equal(output, expected)
     
     set.seed(56)
-    output <- shmulateSeq(input_seq, num_muts = 6, targeting_model = HS5FModel)
+    output <- shmulateSeq(input_seq, mutations = 6, targetingModel = HS5FModel)
     expect_equal(output, expected)
     
     i <- strsplit(input_seq,"")[[1]]
@@ -27,9 +27,9 @@ test_that("Test shmulateTree", {
     input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
     graph <- ExampleTrees[[17]]
     set.seed(7)
-    tree <- shmulateTree(input_seq, graph, targeting_model = MRS5NFModel)
-    expect_equal(tree$distance, c(0, 2, 4, 3, 6, 1, 1, 3))
-    expect_equal(tree$sequence, 
+    tree <- shmulateTree(input_seq, graph, targetingModel = MRS5NFModel)
+    expect_equal(tree$DISTANCE, c(0, 2, 4, 3, 6, 1, 1, 3))
+    expect_equal(tree$SEQUENCE, 
                  c("NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA", 
                    "NGATCTGACGACACGGCCGTGTATTACTGTGCGAAAGATAGTGTA", 
                    "NGATCTGACGACACGGCCGCATATTACTGTGCGAAAGATAATTTA", 
