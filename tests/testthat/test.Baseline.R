@@ -208,8 +208,7 @@ test_that("observedMutations works with regionDefinition==NULL",{
 ## Baseline
 ##--
 
-test_that("calcBaseline works with regionDefinition==NULL", {
-    set.seed(82)
+test_that("calcBaseline", {
     db_baseline <- calcBaseline(db, 
                                 sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
@@ -242,14 +241,102 @@ test_that("calcBaseline works with regionDefinition==NULL", {
     obs_fwr_s <- slot(db_baseline,"db")$OBSERVED_FWR_S[993:997]
     exp_fwr_s<- c(10, 0, 0, 0, 0)
     expect_equal(obs_fwr_s, exp_fwr_s)
+
     
-#     db_baseline_null <- calcBaseline(db, 
-#                                 sequenceColumn="SEQUENCE_IMGT",
-#                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
-#                                 testStatistic="focused",
-#                                 regionDefinition=NULL,
-#                                 targetingModel = HS5FModel,
-#                                 nproc = 1)
+    ## Trim sequence to 1:312 and expect same results 
+    ## with regionDefinition=NULL
+    ## aux function
+    trimToLength <- function(inputSeq, germlineSeq, rdLength) {
+        # Removing IMGT gaps (they should come in threes)
+        # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
+        germlineSeq <- gsub("\\.\\.\\.", "XXX", germlineSeq)
+        #If there is a single gap left convert it to an N
+        germlineSeq <- gsub("\\.", "N", germlineSeq)
+        # Re-assigning s_germlineSeq (now has all "." that are not IMGT gaps converted to Ns)
+        germlineSeq <- gsub("XXX", "...", germlineSeq)
+        
+        # Removing IMGT gaps (they should come in threes)
+        # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
+        inputSeq <- gsub("\\.\\.\\.", "XXX", inputSeq)
+        #If there is a single gap left convert it to an N
+        inputSeq <- gsub("\\.", "N", inputSeq)
+        # Re-assigning s_germlineSeq (now has all "." that are not IMGT gaps converted to Ns)
+        inputSeq <- gsub("XXX", "...", inputSeq)    
+        
+        # Trim the input and germline sequence to the shortest
+        len_inputSeq <- nchar(inputSeq)
+        len_germlineSeq <- nchar(germlineSeq)
+        rdLength <- 312
+        
+        len_shortest <- min(c(len_inputSeq, len_germlineSeq, rdLength), na.rm=TRUE)
+        
+        c_inputSeq <- seqinr::s2c(inputSeq)[1:len_shortest]
+        c_germlineSeq <- seqinr::s2c(germlineSeq)[1:len_shortest]
+        
+        # If the sequence and germline (which now should be the same length) is shorter
+        # than the rdLength, pad it with Ns
+        if(len_shortest<rdLength){
+            fillWithNs <- array("N",rdLength-len_shortest)
+            c_inputSeq <- c( c_inputSeq, fillWithNs)
+            c_germlineSeq <- c( c_germlineSeq, fillWithNs)
+        }        
+        
+        return(list("inputSeq"=paste(c_inputSeq,collapse=""),
+                    "germlineSeq"=paste(c_germlineSeq,collapse="")))
+    }
+    
+    db_trim <- db[1:5, ]
+    db_trim$CLONE <- NULL
+    
+    for (i in 1:nrow(db_trim)) {
+        trim_seqs <- trimToLength(db_trim$SEQUENCE_IMGT[i], db_trim$GERMLINE_IMGT_D_MASK[i], 312)
+        db_trim$SEQUENCE_IMGT[i] <- trim_seqs$inputSeq
+        db_trim$GERMLINE_IMGT_D_MASK[i] <- trim_seqs$germlineSeq
+    }
+    
+    db_1_to_5 <- db[1:5,]
+    db_1_to_5$CLONE <- NULL
+    
+    db_baseline <- calcBaseline(db_1_to_5, 
+                                sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK", 
+                                testStatistic="focused",
+                                regionDefinition=IMGT_V_NO_CDR3,
+                                targetingModel = HS5FModel,
+                                nproc = 1,
+                                calcStats = T)
+    
+    db_baseline_trim_null <- calcBaseline(db_trim, sequenceColumn="SEQUENCE_IMGT",
+                                          germlineColumn="GERMLINE_IMGT_D_MASK",
+                                          testStatistic="focused",
+                                          regionDefinition=NULL,
+                                          targetingModel = HS5FModel,
+                                          nproc = 1)
+ 
+    total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$OBSERVED_SEQ_S,
+        slot(db_baseline_trim_null,"db")$OBSERVED_SEQ_R))
+    
+    total_baseline <- rowSums(slot(db_baseline,"db")[1:5,grep("OBSERVED.*", colnames(slot(db_baseline,"db")))])
+    expect_equivalent(total_trim_null, total_baseline)
+    
+    # db_baseline_null <- calcBaseline(db,
+    #                             sequenceColumn="SEQUENCE_IMGT",
+    #                             germlineColumn="GERMLINE_IMGT_D_MASK",
+    #                             testStatistic="focused",
+    #                             regionDefinition=NULL,
+    #                             targetingModel = HS5FModel,
+    #                             nproc = 1)
+    # ## Check 5 examples for each, at different positions
+    # ## CDR_R, first 5
+    # obs_seq_r <- slot(db_baseline_null,"db")$OBSERVED_SEQ_R[1:5]
+    # exp_seq_r<- c(12, 18, 74, 73)
+    # expect_equal(obs_seq_r, exp_seq_r)
+    # 
+    # obs_seq_s <- slot(db_baseline_null,"db")$OBSERVED_SEQ_S[1:5]
+    # exp_seq_s<- c(5, 6, 34, 46, 1)
+    # expect_equal(obs_seq_r, exp_seq_r)
+
+    
 })
 
 
