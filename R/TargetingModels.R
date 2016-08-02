@@ -1137,7 +1137,7 @@ writeTargetingDistance <- function(model, file) {
 #' 
 #' \code{plotMutability} plots the mutability rates of a \code{TargetingModel}.
 #' 
-#' @param    model        \link{TargetingModel} object or matrix containing normalized 
+#' @param    model        \link{TargetingModel} object or vector containing normalized 
 #'                        mutability rates.
 #' @param    nucleotides  vector of center nucleotide characters to plot.
 #' @param    style        type of plot to draw. One of:
