@@ -221,26 +221,32 @@ test_that("calcBaseline", {
     ## Check if the stats slot has been filled
     expect_gt(nrow(slot(db_baseline,"stats")),0)
     
-    ## Check 5 examples for each, at different positions
-    ## CDR_R, first 5
-    obs_cdr_r <- slot(db_baseline,"db")$OBSERVED_CDR_R[1:5]
-    exp_cdr_r<- c(2, 6, 17, 18, 0)
-    expect_equal(obs_cdr_r, exp_cdr_r)
+    db_baseline_rowSums <- rowSums(slot(db_baseline,"db")[1:5,grep("OBSERVED",colnames(slot(db_baseline,"db")))])
     
-    ## CDR_S, 673:677
-    obs_cdr_s <- slot(db_baseline,"db")$OBSERVED_CDR_S[673:677]
-    exp_cdr_s <- c(3, 5, 5, 5, 0)
-    expect_equal(obs_cdr_s, exp_cdr_s)
+    expect_equivalent(
+        db_baseline_rowSums,
+        c(13, 19, 55, 0, 0))
     
-    ## FWR_R, 937:941
-    obs_fwr_r <- slot(db_baseline,"db")$OBSERVED_FWR_R[937:941]
-    exp_fwr_r<- c(0, 7, 14, 7, 0)
-    expect_equal(obs_fwr_r, exp_fwr_r)
-    
-    ## FWR_S, 993:997
-    obs_fwr_s <- slot(db_baseline,"db")$OBSERVED_FWR_S[993:997]
-    exp_fwr_s<- c(10, 0, 0, 0, 0)
-    expect_equal(obs_fwr_s, exp_fwr_s)
+#     ## Check 5 examples for each, at different positions
+#     ## CDR_R, first 5
+#     obs_cdr_r <- slot(db_baseline,"db")$OBSERVED_CDR_R[1:5]
+#     exp_cdr_r<- c(2, 6, 17, 18, 0)
+#     expect_equal(obs_cdr_r, exp_cdr_r)
+#     
+#     ## CDR_S, 673:677
+#     obs_cdr_s <- slot(db_baseline,"db")$OBSERVED_CDR_S[673:677]
+#     exp_cdr_s <- c(3, 5, 5, 5, 0)
+#     expect_equal(obs_cdr_s, exp_cdr_s)
+#     
+#     ## FWR_R, 937:941
+#     obs_fwr_r <- slot(db_baseline,"db")$OBSERVED_FWR_R[937:941]
+#     exp_fwr_r<- c(0, 7, 14, 7, 0)
+#     expect_equal(obs_fwr_r, exp_fwr_r)
+#     
+#     ## FWR_S, 993:997
+#     obs_fwr_s <- slot(db_baseline,"db")$OBSERVED_FWR_S[993:997]
+#     exp_fwr_s<- c(10, 0, 0, 0, 0)
+#     expect_equal(obs_fwr_s, exp_fwr_s)
 
     
     ## Trim sequence to 1:312 and expect same results 
@@ -318,6 +324,17 @@ test_that("calcBaseline", {
     
     total_baseline <- rowSums(slot(db_baseline,"db")[1:5,grep("OBSERVED.*", colnames(slot(db_baseline,"db")))])
     expect_equivalent(total_trim_null, total_baseline)
+    
+    ## Shold match observedMutations
+    obs_mu <- observedMutations(db_1_to_5,
+                                sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                regionDefinition=IMGT_V_NO_CDR3,
+                                nproc=1)
+    expect_equivalent(
+        rowSums(obs_mu[1:5,grep("OBSERVED", colnames(obs_mu))]), 
+        total_baseline
+        )
     
     # db_baseline_null <- calcBaseline(db,
     #                             sequenceColumn="SEQUENCE_IMGT",
