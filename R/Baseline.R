@@ -267,7 +267,8 @@ getBaselineStats <- function(baseline) {
 #' @param   germlineColumn      \code{character} name of the column in \code{db} 
 #'                              containing germline sequences.
 #' @param   testStatistic       \code{character} indicating the statistical framework 
-#'                              used to test for selection. One of \code{c("local", "focused", "imbalance")}.
+#'                              used to test for selection. One of 
+#'                              \code{c("local", "focused", "imbalanced")}.
 #' @param   regionDefinition    \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences.
 #' @param   targetingModel      \link{TargetingModel} object. Default is  \link{HS5FModel}.
@@ -348,7 +349,7 @@ getBaselineStats <- function(baseline) {
 calcBaseline <- function(db,
                          sequenceColumn="SEQUENCE_IMGT",
                          germlineColumn="GERMLINE_IMGT_D_MASK",
-                         testStatistic=c("local", "focused","imbalance"),
+                         testStatistic=c("local", "focused", "imbalanced"),
                          regionDefinition=NULL,
                          targetingModel=HS5FModel,
                          mutationDefinition=NULL,
@@ -358,7 +359,7 @@ calcBaseline <- function(db,
     idx <- NULL
     
     # Evaluate argument choices
-    testStatistic <- match.arg(testStatistic, c("local", "focused","imbalance"))
+    testStatistic <- match.arg(testStatistic)
     
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
@@ -441,12 +442,13 @@ calcBaseline <- function(db,
                                   expandedDb=FALSE, 
                                   nproc=nproc_arg)
             sequenceColumn="CLONAL_SEQUENCE"
+            germlineColumn="CLONAL_GERMLINE"
         }
         
         # Calculate the numbers of observed mutations
         db <- observedMutations(db,
                                 sequenceColumn=sequenceColumn,
-                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                germlineColumn=germlineColumn,
                                 regionDefinition=regionDefinition,
                                 mutationDefinition=mutationDefinition,
                                 nproc=0)
@@ -454,7 +456,7 @@ calcBaseline <- function(db,
         # Calculate the expected frequencies of mutations
         db <- expectedMutations(db,
                                 sequenceColumn=sequenceColumn,
-                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                germlineColumn=germlineColumn,
                                 regionDefinition=regionDefinition,
                                 targetingModel=targetingModel,
                                 mutationDefinition=mutationDefinition,

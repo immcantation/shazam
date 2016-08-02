@@ -3,13 +3,13 @@
 #' @include Shazam.R
 NULL
 
-#### Clonal Consensus building functions ####
+#### Clonal consensus building functions ####
 
-#' Constructs clonal consensus sequences
+#' Constructs effective clonal sequences
 #'
-#' \code{collapseClones} identifies the consensus sequence of each clonal 
-#' group and appends columns to the input \code{data.frame} containing the clonal 
-#' consensus and germline for each sequence.
+#' \code{collapseClones} creates an effective sequence for each clonal 
+#' group and appends columns to the input \code{data.frame} containing the effective 
+#' sequence and germline for each clone.
 #'
 #' @param   db                  \code{data.frame} containing sequence data.
 #' @param   cloneColumn         \code{character} name of the column containing clonal 
@@ -33,24 +33,25 @@ NULL
 #' @return   A modified \code{db} with clonal consensus sequences added 
 #'           in the following columns:
 #'           \itemize{
-#'             \item \code{CLONAL_SEQUENCE}:  consensus input sequence for the clone.
-#'             \item \code{CLONAL_GERMLINE}:  consensus germline sequence for the clone.
+#'             \item \code{CLONAL_SEQUENCE}:  effective sequence for the clone.
+#'             \item \code{CLONAL_GERMLINE}:  germline sequence for the clone.
 #'                                            Generally, this will be unchanged from
 #'                                            the data in \code{germlineColumn}, but
 #'                                            may be truncated when the input sequence
-#'                                            is truncaated due to inconsistencies 
+#'                                            is truncated due to inconsistencies 
 #'                                            in the lengths of the input sequences or
 #'                                            \code{regionDefinition} limits.
 #'           }
 #'
 #' @details
-#' For sequences identified to be part of the same clone, this function defines an 
-#' effective sequence that will be representative for all mutations in the clone. Each 
-#' position in this consensus (or effective) sequence is created by a weighted sampling 
-#' of each mutated base (and non "N", "." or "-" characters) from all the sequences in 
-#' the clone. For example, in a clone with 5 sequences that have a C at position 1, and 
-#' 5 sequences with a T at this same position, the consensus sequence will have a C 50\%  
-#' and T 50\% of the time it is called.
+#' 
+#' For sequences identified to be part of the same clone, an effective clonal sequence, 
+#' representative of all mutations in a clone, is constructed using a stochastic approach. 
+#' Each position in th effective sequence is determined by a weighted sampling 
+#' of each mutated non-ambiguous base (excluding "N", "." or "-" characters) from all 
+#' the sequences in the clone. For example, in a clone with 5 sequences that have "C" 
+#' at position 1, and 5 sequences with "T" at this same position, the effective sequence 
+#' will have a "C" 50\% and "T" 50\% of the time it is called.
 #' 
 #' Non-terminal branch mutations are defined as the set of mutations that occur on 
 #' branches of the lineage tree that are not connected to a leaf. For computational 
@@ -253,17 +254,17 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
                 # If we look at all nodes (including terminal nodes), sample a nucleotide from the possible
                 # nucleotides in the clonal sequences at this position
                 if(!nonTerminalOnly){
-                    return( c(sample(charInputSeqs[i,!charInputSeqs[i,]%in% c("N", "n") & charInputSeqs[i,]!=posGL],1),error) )
+                    return( c(sample(charInputSeqs[i, !charInputSeqs[i, ] %in% c("N", "n") & charInputSeqs[i, ] != posGL], 1), error))
                 }else{
                     
                     # If we look at only non-terminal nodes, we only sample the nucleotides that appear more 
                     # than once (this is a quick approximation)
                     posNucs = charInputSeqs[i,!charInputSeqs[i,]%in% c("N", "n") & charInputSeqs[i,]!=posGL]
                     posNucsTable = table(posNucs)
-                    if(sum(posNucsTable>1)==0){
-                        return( c(posGL,error) )
-                    }else{
-                        return( c(sample( posNucs[posNucs%in%names(posNucsTable)[posNucsTable>1]],1),error) )
+                    if(sum(posNucsTable > 1) == 0) {
+                        return(c(posGL,error))
+                    } else {
+                        return(c(sample(posNucs[posNucs %in% names(posNucsTable)[posNucsTable > 1]], 1), error))
                     }
                 }
                 
