@@ -1,3 +1,12 @@
+Version 0.1.3.999:  August 3, 2016
+-------------------------------------------------------------------------------
+
+Selection Analysis:
+
++ Fixed a bug in calcBaseline wherein the germline column was hardcoded, 
+  leading to incorrect mutation counts for some clonal consensus sequences.
+
+
 Version 0.1.3:  July 31, 2016
 -------------------------------------------------------------------------------
 
