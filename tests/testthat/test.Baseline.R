@@ -227,10 +227,10 @@ test_that("calcBaseline", {
     db_baseline_rowSums <- rowSums(
         slot(db_baseline,"db")[1:5,grep("OBSERVED",colnames(slot(db_baseline,"db")))])
 
-## Commented because working on the code, when clones collapsed.    
-#     expect_equivalent(
-#         db_baseline_rowSums,
-#         c(13, 19, 103, 105, 0))
+# Commented because working on the code, when clones collapsed.
+    expect_equivalent(
+        db_baseline_rowSums,
+        c(13, 19, 19, 55, 0))
     
 #     ## Check 5 examples for each, at different positions
 #     ## CDR_R, first 5
