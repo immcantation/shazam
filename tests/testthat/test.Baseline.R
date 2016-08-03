@@ -382,6 +382,7 @@ test_that("Test groupBaseline", {
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
                       
     # Calculate BASELINe
+    set.seed(4)
     baseline <- calcBaseline(db, 
                              sequenceColumn="SEQUENCE_IMGT",
                              germlineColumn="GERMLINE_IMGT_D_MASK",
@@ -395,28 +396,28 @@ test_that("Test groupBaseline", {
     pdf1 <- slot(grouped1, "pdfs")
     sigma1 <- slot(grouped1,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf1$CDR[1,]),c(0,9.975), tolerance=0.01)
-    expect_equal(range(pdf1$CDR[2,]),c(0,9.412), tolerance=0.01)
-    expect_equal(sigma1, c(-0.576, -0.656, -0.320, -0.803), tolerance=0.01)
+    expect_equal(range(pdf1$CDR[1,]),c(0,6.061), tolerance=0.01)
+    expect_equal(range(pdf1$CDR[2,]),c(0,8.440), tolerance=0.01)
+    expect_equal(sigma1, c(-0.351, -0.7, -0.230, -0.911), tolerance=0.01)
     
     # Group PDFs by both sample (between variable) and isotype (within variable)
     grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
     pdf2 <- slot(grouped2, "pdfs")
     sigma2 <- slot(grouped2,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf2$CDR[1,]),c(0,6.038), tolerance=0.01)
-    expect_equal(range(pdf2$CDR[2,]),c(0,9.631), tolerance=0.01)    
+    expect_equal(range(pdf2$CDR[1,]),c(0,4.192), tolerance=0.01)
+    expect_equal(range(pdf2$CDR[2,]),c(0,4.561), tolerance=0.01)    
     expect_equal(sigma2, 
-                 c(-0.558, -0.659, -0.593, -0.652, -0.305, -0.747, -0.328, -0.834), tolerance=0.01)
+                 c(-0.43, -0.68, -0.27, -0.72, -0.17, -0.99, -0.26, -0.87), tolerance=0.01)
     
     # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
     grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
     pdf3 <- slot(grouped3, "pdfs")
     sigma3 <- slot(grouped3,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf3$CDR[1,]),c(0,10.20), tolerance=0.01)
-    expect_equal(range(pdf3$CDR[2,]),c(0,9.384), tolerance=0.01)    
+    expect_equal(range(pdf3$CDR[1,]),c(0,6.089), tolerance=0.01)
+    expect_equal(range(pdf3$CDR[2,]),c(0,8.432), tolerance=0.01)    
     expect_equal(sigma3, 
-                 c( -0.576, -0.656, -0.320, -0.803), tolerance=0.01)
+                 c( -0.35, -0.7, -0.23, -0.91), tolerance=0.01)
     
 })
