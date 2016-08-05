@@ -19,7 +19,8 @@ Usage
 createMutabilityMatrix(db, substitutionModel, model = c("RS", "S"),
 sequenceColumn = "SEQUENCE_IMGT", germlineColumn = "GERMLINE_IMGT_D_MASK",
 vCallColumn = "V_CALL", multipleMutation = c("independent", "ignore"),
-minNumSeqMutations = 500, returnSource = FALSE)
+minNumSeqMutations = 500, numSeqMutationsOnly = FALSE,
+returnSource = FALSE)
 ```
 
 Arguments
@@ -60,9 +61,15 @@ to compute the mutability rates. If the number is smaller
 than this threshold, the mutability for the 5-mer will be 
 inferred. Default is 500.
 
+numSeqMutationsOnly
+:   return only a vector counting the observed number of mutations 
+in sequences containing each 5-mer. This option can be used for
+parameter tuning for `minNumSeqMutations` during 
+preliminary analysis. Default is `FALSE`.
+
 returnSource
 :   return the sources of 5-mer mutabilities (measured vs.
-inferred). Default is false.
+inferred). Default is `FALSE`.
 
 
 

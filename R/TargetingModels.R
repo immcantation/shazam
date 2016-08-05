@@ -413,12 +413,12 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
 #'                               to compute the mutability rates. If the number is smaller 
 #'                               than this threshold, the mutability for the 5-mer will be 
 #'                               inferred. Default is 500.    
-#' @param    numSeqMUtationsOnly return only a vector counting the observed number of mutations 
+#' @param    numSeqMutationsOnly return only a vector counting the observed number of mutations 
 #'                               in sequences containing each 5-mer. This option can be used for
 #'                               parameter tuning for \code{minNumSeqMutations} during 
-#'                               preliminary analysis. Default is \code{False}.                              
+#'                               preliminary analysis. Default is \code{FALSE}.                              
 #' @param    returnSource        return the sources of 5-mer mutabilities (measured vs.
-#'                               inferred). Default is \code{False}.                          
+#'                               inferred). Default is \code{FALSE}.                          
 #'
 #' @return   A named numeric vector of 1024 normalized mutability rates for each 5-mer 
 #'           motif with names defining the 5-mer nucleotide sequence.
@@ -449,7 +449,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                                    vCallColumn="V_CALL",
                                    multipleMutation=c("independent", "ignore"),
                                    minNumSeqMutations=500, 
-                                   numSeqMutationsOnly = FALSE,
+                                   numSeqMutationsOnly=FALSE,
                                    returnSource=FALSE) {
     # substitutionModel=sub_model; model="S"; sequenceColumn="SEQUENCE_IMGT"; germlineColumn="GERMLINE_IMGT_D_MASK"
     # vCallColumn="V_CALL"; multipleMutation="ignore"; minNumSeqMutations=10; returnSource=FALSE

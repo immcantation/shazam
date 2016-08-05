@@ -18,7 +18,7 @@ Usage
 ```
 calcBaseline(db, sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", testStatistic = c("local",
-"focused", "imbalance"), regionDefinition = NULL,
+"focused", "imbalanced"), regionDefinition = NULL,
 targetingModel = HS5FModel, mutationDefinition = NULL,
 calcStats = FALSE, nproc = 1)
 ```
@@ -39,7 +39,8 @@ containing germline sequences.
 
 testStatistic
 :   `character` indicating the statistical framework 
-used to test for selection. One of `c("local", "focused", "imbalance")`.
+used to test for selection. One of 
+`c("local", "focused", "imbalanced")`.
 
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions

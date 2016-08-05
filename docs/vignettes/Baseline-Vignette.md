@@ -219,9 +219,9 @@ testBaseline(grouped_1, groupBy="SAMPLE")
 ```
 
 ```
-##   REGION       TEST       PVALUE          FDR
-## 1    CDR -1h != +7d 3.789268e-07 7.578536e-07
-## 2    FWR -1h != +7d 3.575911e-01 3.575911e-01
+##   REGION       TEST     PVALUE        FDR
+## 1    CDR -1h != +7d 0.01259308 0.01259308
+## 2    FWR -1h != +7d 0.00568277 0.01136554
 ```
 
 ## Plot and compare selection scores for groups

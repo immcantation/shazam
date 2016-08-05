@@ -1,15 +1,17 @@
-Version 0.1.3.999:  August 4, 2016
+Version 0.1.4:  August 5, 2016
 -------------------------------------------------------------------------------
 
 Selection Analysis:
 
-+ Fixed a bug in calcBaseline wherein the germline column was hardcoded, 
-  leading to incorrect mutation counts for some clonal consensus sequences.
++ Fixed a bug in calcBaseline wherein the germline column was incorrected 
+  hardcoded, leading to erroneous mutation counts for some clonal consensus 
+  sequences.
 
 Targeting Models:
 
 + Added `numSeqMutationsOnly` argument to `createMutabilityMatrix()`, enabling
   parameter tuning for `minNumSeqMutations`.
+  
 
 Version 0.1.3:  July 31, 2016
 -------------------------------------------------------------------------------

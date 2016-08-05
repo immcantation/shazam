@@ -23,7 +23,7 @@ Arguments
 -------------------
 
 model
-:   [TargetingModel](TargetingModel-class.md) object or matrix containing normalized 
+:   [TargetingModel](TargetingModel-class.md) object or vector containing normalized 
 mutability rates.
 
 nucleotides
