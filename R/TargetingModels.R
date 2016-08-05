@@ -594,6 +594,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     
     # Filter out 5-mers with low number of observed mutations in the sequences
     NumSeqMutations <- sapply(1:1024,function(i)sum(MutabilityWeights[!is.na(MutabilityMatrix[i,])])) 
+    names(NumSeqMutations) = names(Mutability_Mean)
     Mutability_Mean[NumSeqMutations < minNumSeqMutations] <- NA
     
     if (numSeqMutationsOnly) {
