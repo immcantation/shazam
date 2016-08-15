@@ -335,7 +335,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
 #' additional columns.
 #' 
 #' @seealso  
-#' \link{calcObservedMutations} is called by this function to get the list of mutations 
+#' \link{calcObservedMutations} is called by this function to get the number of mutations 
 #' in each sequence grouped by the \link{RegionDefinition}. 
 #' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
 #' See \link{expectedMutations} for calculating expected mutation frequencies.
@@ -471,8 +471,7 @@ observedMutations <- function(db,
 #'                               replacement and silent are determined by exact 
 #'                               amino acid identity.
 #'                               
-#' @return   An \code{array} of the mutations, replacement (R) or silent(S), with the 
-#'           names indicating the nucleotide postion of the mutations in the sequence.
+#' @return   An \code{array} with the number of replacement (R) and silent(S) mutations.
 #'           
 #' @details
 #' Each mutation is considered independently in its codon context. Note, only the part of 
@@ -480,7 +479,8 @@ observedMutations <- function(db,
 #' the default \link{IMGT_V_NO_CDR3} definition, then mutations in positions beyond 
 #' 312 will be ignored.
 #' 
-#' @seealso  See \link{observedMutations} for counting the number of observed mutations.
+#' @seealso  See \link{observedMutations} for counting the number of observed mutations 
+#' in a \code{data.frame}.
 #' 
 #' @examples
 #' # Use first entry in the exampled data for input and germline sequence
