@@ -176,7 +176,43 @@ findUniqSeq <- function(sequences) {
     return(seq_uniq)
 }
 
+# Get chars in the distance model
+# 
+# @param    model  
+#
+# @return    vector of unique chars in the distance model
+# @examples 
+# getCharsInModel("hs1f")
+getCharsInModel <- function(model) {
+    if (model == "ham") {
+        chars <- colnames(getDNAMatrix(gap=0))
+    } else if (model == "m1n") {
+        chars <- colnames(M1NDistance)
+    } else if (model == "hs1f") {
+        chars <- colnames(HS1FDistance)
+    } else if (model == "aa") {
+        chars <- colnames(getAAMatrix())
+    } else if (model == "hs5f") {
+        chars <-rownames(HS5FModel@targeting)
+    }    
+    chars
+}
 
+# Validate the sequence
+# 
+# @param    seq
+# @param    validChars
+#
+# @return    TRUE is all the character in the sequence are found in validChars; 
+#            FALSE otherwise
+# @examples 
+# allValidChars("ATCG",getCharsInModel("hs1f"))
+# allValidChars("ATCG.",getCharsInModel("hs1f"))
+# allValidChars("ATCGJ",getCharsInModel("hs1f"))
+allValidChars <- function(seq, validChars) {
+    all(unique(strsplit(seq, "")[[1]]) %in% validChars)
+}
+    
 # Given an array of sequences, find the distance to the closest sequence
 #
 # @param    sequences      character vector of sequences.
@@ -451,13 +487,18 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     db <- toupperColumns(db, c(sequenceColumn))
     
     # Check for invalid characters
-    #check <- grepl("[^ACGTN]", db[[sequenceColumn]], perl=TRUE)
-    #if (any(check)) {
-    #  stop("Invalid sequence characters in the ", sequenceColumn, " column.")
-    #}
+    valid_seq <- sapply(db[[sequenceColumn]], allValidChars, getCharsInModel(model))
+    not_valid_seq <- which(!valid_seq)
+    if (length(not_valid_seq)>0) {
+        warning("Invalid sequence characters in the ", sequenceColumn, " column.",
+                length(not_valid_seq)," sequence(s) removed")
+        db <- db[valid_seq,]
+    }    
     
     # Get targeting distance
-    targeting_distance <- if (model == "hs5f") { calcTargetingDistance(HS5FModel) } else { NULL }
+    targeting_distance <- if (model == "hs5f") { 
+        calcTargetingDistance(HS5FModel) 
+        } else { NULL }
 
     # Parse V and J columns to get gene
     # cat("V+J Column parsing\n")

@@ -155,3 +155,25 @@ test_that("Test cross distToNearest with model hs5f", {
     seq2[1] <- "NNSCG"
     expect_error(shazam:::dist5Mers(seq1, seq2, targeting_distance), "Character not found")
 })
+
+test_that("Test distToNearest with unrecognized characters", {
+    db2 <- subset(db, CPRIMER %in% c("IGHA","IGHM") &
+                     BARCODE %in% c("RL016","RL018","RL019","RL021"))
+
+    ## Create a junction with unrecognized char
+    ## This seq belongs to clone of size 1
+    db2$JUNCTION[3] <- gsub("T","Z",db2$JUNCTION[5] )
+    expect_warning(
+        dist_hs1f <- distToNearest(db2,model="hs1f", first=FALSE, normalize="length"),
+        "Invalid sequence characters"
+    )
+    
+    ## Create a junction with unrecognized char
+    ## This seq belongs to clone of size > 1
+    db2$JUNCTION[5] <- gsub("T","Z",db$JUNCTION[5] )
+    expect_warning(
+        dist_hs1f <- distToNearest(db2,model="hs1f", first=FALSE, normalize="length"),
+        "Invalid sequence characters"
+    )
+
+})
