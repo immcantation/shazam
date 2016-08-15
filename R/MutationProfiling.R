@@ -409,9 +409,6 @@ observedMutations <- function(db,
     cat("Calculating observed number of mutations...\n")
     
     # Identify all the mutations in the sequences
-    # observedMutations helper function returns a list (1 element per sequence)
-    # containing an array of mutations (s or R) and the array labels indicate
-    # the nucleotide position of the mutations.
     numbOfSeqs <- nrow(db)
     observedMutations_list <-
         foreach(idx=iterators::icount(numbOfSeqs)) %dopar% {
