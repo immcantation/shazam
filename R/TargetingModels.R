@@ -114,7 +114,10 @@ NULL
 #'                         complete 5-mer of the unmutated nucleotide sequence.
 #' @slot     mutability    Normalized rates of a given 5-mer being mutated. The 
 #'                         mutability model is stored as a numeric vector of length 3125 
-#'                         with mutability rates for each 5-mer.
+#'                         with mutability rates for each 5-mer. Note that "normalized" 
+#'                         means that the mutability rates for the 1024 5-mers that 
+#'                         contain no "N" at any position sums up to 1 (as opposed to 
+#'                         the entire vector summing up to 1).
 #' @slot     targeting     Rate matrix of a given mutation ocurring, defined as 
 #'                         \eqn{mutability * substitution}. The targeting model 
 #'                         is stored as a 5x3125 matrix. Rows define
@@ -754,7 +757,9 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #'                            \link{createMutabilityMatrix}.
 #' 
 #' @return   A 3125 vector of normalized mutability rates for each 5-mer motif with 
-#'           names defining the 5-mer nucleotide sequence.
+#'           names defining the 5-mer nucleotide sequence. Note that "normalized" means
+#'           that the mutability rates for the 1024 5-mers that contain no "N" at any
+#'           position sums up to 1 (as opposed to the entire vector summing up to 1).
 #' 
 #' @seealso  \link{createMutabilityMatrix}, \link{extendSubstitutionMatrix}
 #' 
