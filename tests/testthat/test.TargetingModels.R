@@ -119,9 +119,29 @@ test_that("rescaleMutability", {
 })
 
 test_that("removeCodonGaps", {
-    ## TODO
+    test_db <- data.frame("A"=c("ATC","...","ATC", "ATC...", "ATC..."), "B"=c("ATC","...","...", "ATC...","...ATC"))
+    obs <- removeCodonGaps(test_db)
+    exp <- matrix(c("ATC","ATC","","","","","ATC","ATC","", ""), ncol=2, byrow = T)
+    expect_equal(obs, exp)
 })
 
-test_that("listObservedMutations", {
-    ## TODO
+test_that("calcOBservedMutations and listObservedMutations reproduce same results", {
+    
+    db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
+    
+    lom <- mapply(shazam:::listMutations, db[["SEQUENCE_IMGT"]], db[["GERMLINE_IMGT_D_MASK"]], 
+           "independent", "RS", USE.NAMES=FALSE)
+    
+#     cob <- mapply(calcObservedMutations,db[["SEQUENCE_IMGT"]], db[["GERMLINE_IMGT_D_MASK"]])
+#     om <- observedMutations(db, "SEQUENCE_IMGT", "GERMLINE_IMGT_D_MASK")
+#     
+#     expect_equal(length(lom[[1]]), sum(cob[,1]))
+#     expect_equal(length(lom[[1]]), sum(om[1, c("OBSERVED_SEQ_R", "OBSERVED_SEQ_S")]))
+#     
+    ## Use only V
+    om_v <- observedMutations(db, "SEQUENCE_IMGT", "GERMLINE_IMGT_D_MASK", 
+                              regionDefinition=IMGT_V_NO_CDR3)
+    ## TODO check more seqs
+    expect_equal(length(lom[[1]]), sum(om_v[1, grep("OBSERVED_", colnames(om_v))]))
+    
 })
