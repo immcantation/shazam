@@ -183,9 +183,11 @@ setClass("TargetingModel",
 #'                             substitution rates. If the number of mutations for a 5-mer
 #'                             is below this threshold, its substitution rates will be 
 #'                             estimated from neighboring 5-mers. Default is 50. 
-#' @param    numMutationsOnly  When \code{TRUE}, provide counting information on the number
+#' @param    numMutationsOnly  when \code{TRUE}, return counting information on the number
 #'                             of mutations for each 5-mer, instead of building a substitution
-#'                             matrix. Default is \code{FALSE}.                                                          
+#'                             matrix. This option can be used for parameter tuning for 
+#'                             \code{minNumMutations} during preliminary analysis. 
+#'                             Default is \code{FALSE}.                                                          
 #' 
 #' @return   When \code{numMutationsOnly} is \code{FALSE}, a 4x1024 matrix of column 
 #'           normalized substitution rates for each 5-mer motif with row names defining 
@@ -489,10 +491,10 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
 #'                               to compute the mutability rates. If the number is smaller 
 #'                               than this threshold, the mutability for the 5-mer will be 
 #'                               inferred. Default is 500.    
-#' @param    numSeqMutationsOnly return only a vector counting the number of observed mutations 
-#'                               in sequences containing each 5-mer. This option can be used for
-#'                               parameter tuning for \code{minNumSeqMutations} during 
-#'                               preliminary analysis. Default is \code{FALSE}.                              
+#' @param    numSeqMutationsOnly when \code{TRUE}, return only a vector counting the number of 
+#'                               observed mutations in sequences containing each 5-mer. This 
+#'                               option can be used for parameter tuning for \code{minNumSeqMutations} 
+#'                               during preliminary analysis. Default is \code{FALSE}.                              
 #' @param    returnSource        return the sources of 5-mer mutabilities (measured vs.
 #'                               inferred). Default is \code{FALSE}.                          
 #'
