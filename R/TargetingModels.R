@@ -182,11 +182,25 @@ setClass("TargetingModel",
 #' @param    minNumMutations   minimum number of mutations required to compute the 5-mer 
 #'                             substitution rates. If the number of mutations for a 5-mer
 #'                             is below this threshold, its substitution rates will be 
-#'                             estimated from neighboring 5-mers. Default is 50.                            
+#'                             estimated from neighboring 5-mers. Default is 50. 
+#' @param    numMutationsOnly  When \code{TRUE}, provide counting information on the number
+#'                             of mutations for each 5-mer, instead of building a substitution
+#'                             matrix. Default is \code{FALSE}.                                                          
 #' 
-#' @return   A 4x1024 matrix of column normalized substitution rates for each 5-mer motif with 
-#'           row names defining the center nucleotide, one of \code{c("A", "C", "G", "T")}, 
-#'           and column names defining the 5-mer nucleotide sequence.
+#' @return   When \code{numMutationsOnly} is \code{FALSE}, a 4x1024 matrix of column 
+#'           normalized substitution rates for each 5-mer motif with row names defining 
+#'           the center nucleotide, one of \code{c("A", "C", "G", "T")}, and column names 
+#'           defining the 5-mer nucleotide sequence. When \code{numMutationsOnly} is 
+#'           \code{TRUE}, a 1024x5 data frame with each row providing information on 
+#'           counting the number of mutations for a 5-mer. Columns are named 
+#'           \code{fivemer.total}, \code{fivemer.every}, \code{inner3.total}, 
+#'           \code{inner3.every}, and \code{method}, corresponding to, respectively,
+#'           the total number of mutations when counted as a 5-mer, 
+#'           whether there is mutation to every other base when counted as a 5-mer,
+#'           the total number of mutations when counted as an inner 3-mer, 
+#'           whether there is mutation to every other base when counted as an inner 3-mer,
+#'           and the method that would be used for computing substitution rate (\code{5mer}, 
+#'           \code{3mer}, or \code{1mer}).
 #' 
 #' @references
 #' \enumerate{
@@ -213,7 +227,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
                                      vCallColumn="V_CALL",
                                      multipleMutation=c("independent", "ignore"),
                                      returnModel=c("5mer", "1mer", "1mer_raw"),
-                                     minNumMutations=50)  {
+                                     minNumMutations=50,
+                                     numMutationsOnly=FALSE)  {
     # Evaluate argument choices
     model <- match.arg(model)
     multipleMutation <- match.arg(multipleMutation)
@@ -342,51 +357,109 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
         return (subMat1mer)
     } 
     
-    # Aggregate mutations from neighboring bases for low frequency fivemers
+    ##### for a given 5mer, count number of mutations
     # fivemer=M; FIVEMER="CCATT"
-    .simplifivemer <- function(fivemer, FIVEMER, Thresh=50) {
-        Nuc=substr(FIVEMER,3,3)
-        Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
-        
-        # If the total number of mutation is greater than Thresh, and there are mutations to every other base
-        if(sum(fivemer[[Nei]][Nuc,])>Thresh && sum(fivemer[[Nei]][Nuc,]==0)==1){
-            return(fivemer[[Nei]][Nuc,]);
+    .simplifivemer <- function(fivemer, FIVEMER, Thresh=50, count=F) {
+      # center
+      Nuc=substr(FIVEMER,3,3)
+      # neighbors
+      Nei=paste(substr(FIVEMER,1,2),substr(FIVEMER,4,5),collapse="",sep="")
+      
+      ### using 5mer
+      # aggregate mutations
+      FIVE.5 = fivemer[[Nei]][Nuc,]
+      # count total number of mutations for a given 5mer
+      fivemer.total = sum(FIVE.5)
+      # are there mutations to every other base?
+      fivemer.every = ( sum(FIVE.5==0)==1 )
+      
+      ### using inner 3mer
+      # aggregate mutations from 5-mers with the same inner 3-mer
+      FIVE.3 = FIVE.5
+      for(i in 1:4){
+        for(j in 1:4){
+          MutatedNeighbor=paste(nuc_chars[i],substring(Nei,2,3),nuc_chars[j],collapse="",sep="")
+          FIVE.3=FIVE.3+fivemer[[MutatedNeighbor]][Nuc,]
         }
-        else{ # Otherwise aggregate mutations from 5-mers with the same inner 3-mer
-            FIVE=fivemer[[Nei]][Nuc,]
-            for(i in 1:4){
-                for(j in 1:4){
-                    MutatedNeighbor=paste(nuc_chars[i],substring(Nei,2,3),nuc_chars[j],collapse="",sep="")
-                    FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
-                }
-            }
-            
-            # If the total number of mutations is still not enough, aggregate mutations from all 5-mers 
-            # i.e., use 1-mer model
-            if(sum(FIVE) <= Thresh || sum(FIVE==0)!=1 ){
-                FIVE=fivemer[[Nei]][Nuc,]
-                MutatedNeighbors = seqinr::words(4, nuc_chars)
-                for (MutatedNeighbor in MutatedNeighbors) {
-                    FIVE=FIVE+fivemer[[MutatedNeighbor]][Nuc,]
-                }
-            } 
-            
-            return(FIVE)
+      }
+      # count total number of mutations for inner 3mer
+      inner3.total = sum(FIVE.3)
+      # are there mutations to every other base?
+      inner3.every = ( sum(FIVE.3==0)==1 )
+      
+      ### using 1mer
+      FIVE.1 = FIVE.5
+      MutatedNeighbors = seqinr::words(4, nuc_chars)
+      for (MutatedNeighbor in MutatedNeighbors) {
+        FIVE.1=FIVE.1+fivemer[[MutatedNeighbor]][Nuc,]
+      }
+      
+      # For a 5mer, if the total number of mutations is greater than Thresh, 
+      # and if there are mutations to every other base, compute for the 5mer 
+      if ( fivemer.total > Thresh & fivemer.every ){
+        method = "5mer"
+        if (!count) {return(FIVE.5)}
+      } else { 
+        # Otherwise aggregate mutations from 5-mers with the same inner 3-mer
+        if ( inner3.total > Thresh & inner3.every ) {
+          method = "3mer"
+          if (!count) {return(FIVE.3)}
+        } else {
+          # If the total number of mutations is still not enough, 
+          # aggregate mutations from all 5-mers (i.e., use 1-mer model)
+          method = "1mer"
+          if (!count) {return(FIVE.1)}
         }
+      }
+      
+      return(data.frame(fivemer.total, fivemer.every,
+                        inner3.total, inner3.every, method, 
+                        stringsAsFactors=F))
     }
     
-    
-    substitutionModel <- sapply(seqinr::words(5, nuc_chars), function(x) { .simplifivemer(M, x, Thresh=minNumMutations) })
-    
-    # Assign A->A, C->C, G->G, T->T to NA
-    center_nuc <- gsub("..([ACGT])..", "\\1", colnames(substitutionModel))
-    for (i in 1:length(center_nuc)) {
+    # either construct 5mer substition matrix, and normalize (numMutationsOnly = F)
+    if (!numMutationsOnly) {
+      substitutionModel <- sapply(seqinr::words(5, nuc_chars), 
+                                  function(x) { .simplifivemer(M, x, 
+                                                               Thresh = minNumMutations,
+                                                               count = numMutationsOnly) }, simplify=T)
+      # Assign A->A, C->C, G->G, T->T to NA
+      center_nuc <- gsub("..([ACGT])..", "\\1", colnames(substitutionModel))
+      for (i in 1:length(center_nuc)) {
         substitutionModel[center_nuc[i], i] <- NA
+      }
+      
+      # Normalize by column
+      substitutionModel <- apply(substitutionModel, 2, function(x) { x / sum(x, na.rm=TRUE) })
+      substitutionModel[!is.finite(substitutionModel)] <- NA    
+    } else {
+      # or count number of mutations (numMutationsOnly = T), return data frame
+      # need to set simplify to F in sapply() and then use bind_rows; otherwise 
+      # every entry in df would be a list
+      substitutionModel <- sapply(seqinr::words(5, nuc_chars), 
+                                  function(x) { .simplifivemer(M, x, 
+                                                               Thresh = minNumMutations,
+                                                               count = numMutationsOnly) }, simplify=F)
+      substitutionModel = dplyr::bind_rows(substitutionModel)
+      rownames(substitutionModel) = seqinr::words(5, nuc_chars)
+      # sanity check
+      # number of 5mers for which substitution was computed as a 5mer should match 
+      # with number of 5mers fulfilling conditions for being computed as a 5mer
+      stopifnot( sum(substitutionModel$fivemer.total>minNumMutations & 
+                       substitutionModel$fivemer.every) 
+                 == 
+                   sum(substitutionModel$method =="5mer") )
+      # number of 5mers for which substitution was computed as its inner 3mer should match
+      # with number of 5mers which fail to fulfill conditions for being computed as 5mer and 
+      # which fulfill conditions for being computed as an inner 3mer
+      stopifnot( sum( (!(substitutionModel$fivemer.total>minNumMutations & 
+                           substitutionModel$fivemer.every)) 
+                      & 
+                        (substitutionModel$inner3.total>minNumMutations & 
+                           substitutionModel$inner3.every) ) 
+                 == 
+                   sum(substitutionModel$method =="3mer") )
     }
-    
-    # Normalize by column
-    substitutionModel <- apply(substitutionModel, 2, function(x) { x / sum(x, na.rm=TRUE) })
-    substitutionModel[!is.finite(substitutionModel)] <- NA
     
     return(substitutionModel)
 }
@@ -416,15 +489,18 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
 #'                               to compute the mutability rates. If the number is smaller 
 #'                               than this threshold, the mutability for the 5-mer will be 
 #'                               inferred. Default is 500.    
-#' @param    numSeqMutationsOnly return only a vector counting the observed number of mutations 
+#' @param    numSeqMutationsOnly return only a vector counting the number of observed mutations 
 #'                               in sequences containing each 5-mer. This option can be used for
 #'                               parameter tuning for \code{minNumSeqMutations} during 
 #'                               preliminary analysis. Default is \code{FALSE}.                              
 #' @param    returnSource        return the sources of 5-mer mutabilities (measured vs.
 #'                               inferred). Default is \code{FALSE}.                          
 #'
-#' @return   A named numeric vector of 1024 normalized mutability rates for each 5-mer 
-#'           motif with names defining the 5-mer nucleotide sequence.
+#' @return   When \code{numSeqMutationsOnly} is \code{FALSE}, a named numeric vector of 1024 
+#'           normalized mutability rates for each 5-mer motif with names defining the 5-mer 
+#'           nucleotide sequence. When \code{numSeqMutationsOnly} is \code{TRUE}, a named numeric
+#'           vector of length 1024 counting the number of observed mutations in sequences containing 
+#'           each 5-mer.
 #' 
 #' @references
 #' \enumerate{

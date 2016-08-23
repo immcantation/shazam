@@ -1,3 +1,11 @@
+Version 0.1.5: August 23, 2016
+-------------------------------------------------------------------------------
+Targeting Models:
+
++ Added `numMutationsOnly` argument to `createSubstitutionMatrix()`, enabling
+  parameter tuning for `minNumMutations`.
+  
+
 Version 0.1.4:  August 5, 2016
 -------------------------------------------------------------------------------
 
