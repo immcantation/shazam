@@ -187,9 +187,10 @@ setClass("TargetingModel",
 #'                             of mutations for each 5-mer, instead of building a substitution
 #'                             matrix. This option can be used for parameter tuning for 
 #'                             \code{minNumMutations} during preliminary analysis. 
-#'                             Default is \code{FALSE}.                                                          
+#'                             Default is \code{FALSE}. Only applies when \code{returnModel} 
+#'                             is set to \code{"5mer"}.                                                          
 #' 
-#' @return   When \code{numMutationsOnly} is \code{FALSE}, a 4x1024 matrix of column 
+#' @return   For \code{returnModel = "5mer"}: when \code{numMutationsOnly} is \code{FALSE}, a 4x1024 matrix of column 
 #'           normalized substitution rates for each 5-mer motif with row names defining 
 #'           the center nucleotide, one of \code{c("A", "C", "G", "T")}, and column names 
 #'           defining the 5-mer nucleotide sequence. When \code{numMutationsOnly} is 
@@ -202,7 +203,8 @@ setClass("TargetingModel",
 #'           the total number of mutations when counted as an inner 3-mer, 
 #'           whether there is mutation to every other base when counted as an inner 3-mer,
 #'           and the method that would be used for computing substitution rate (\code{5mer}, 
-#'           \code{3mer}, or \code{1mer}).
+#'           \code{3mer}, or \code{1mer}). For \code{returnModel = "1mer"} or \code{"1mer_raw"}:
+#'           a 4x4 normalized or un-normalized 1-mer substitution matrix respectively.
 #' 
 #' @references
 #' \enumerate{
