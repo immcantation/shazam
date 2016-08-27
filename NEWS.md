@@ -6,6 +6,13 @@ Targeting Models:
   parameter tuning for `minNumMutations`.
   
 
+Mutation Profiling:
+
++ Added `returnRaw` argument to `calcObservedMutations()`, which if true returns 
+  the positions of point mutations and their corresponding mutation types, as 
+  opposed to counts of mutations (hence "raw"). 
+
+
 Version 0.1.4:  August 5, 2016
 -------------------------------------------------------------------------------
 
