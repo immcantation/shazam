@@ -467,8 +467,15 @@ observedMutations <- function(db,
 #'                               and silent mutation criteria. If \code{NULL} then 
 #'                               replacement and silent are determined by exact 
 #'                               amino acid identity.
+#' @param    returnRaw           return the positions of point mutations and their corresponding
+#'                               mutation types (as opposed to counts of mutations; hence "raw").
+#'                               Default if \code{FALSE}.                               
 #'                               
-#' @return   An \code{array} with the number of replacement (R) and silent(S) mutations.
+#' @return   For \code{returnRaw=FALSE}, an \code{array} with the number of replacement (R) 
+#'           and silent(S) mutations. For \code{returnRaw=TRUE}, a list consisting of 
+#'           \code{raw_mutations}, a logical vector in which \code{TRUE} indicates point mutation(s); 
+#'           and \code{raw_types}, a character vector indicating the mutation type of each point 
+#'           mutation.
 #'           
 #' @details
 #' Each mutation is considered independently in its codon context. Note, only the part of 
@@ -497,7 +504,8 @@ observedMutations <- function(db,
 #' 
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
-                                  regionDefinition=NULL, mutationDefinition=NULL) {
+                                  regionDefinition=NULL, mutationDefinition=NULL,
+                                  returnRaw=FALSE) {
     # Assign mutation definition
     aminoAcidClasses <- if (is.null(mutationDefinition)) { NULL } else { mutationDefinition@classes }
         
@@ -565,10 +573,14 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
         mutations_array <- apply(rbind(c_germlineSeq_codons, c_inputSeq_codons), 2, 
                                  function(x) { mutationType(c2s(x[1]), c2s(x[2]), aminoAcidClasses=aminoAcidClasses) })
         names(mutations_array) = mutations_pos
+        # make a copy of mutations_array before removing NAs (for when returnRaw = T)
+        mutations_array_raw = mutations_array
+        # remove NAs (arisen from cases such as NNN [germline] and NNC [input])
         mutations_array<- mutations_array[!is.na(mutations_array)]
         if(length(mutations_array)==sum(is.na(mutations_array))){
             mutations_array<-NA    
         } else {
+            # mutation types other than "R" and "S" (e.g. "Stop") will be removed by binMutationsByRegion
             mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
             if (frequency==TRUE) {
                 tempNames <- sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) })
@@ -580,8 +592,22 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
                 mutations_array <- mutations_array/denoms
             }
         }        
-    }    
-    return(mutations_array)
+    }
+    
+    # return positions of point mutations ans their mutation types ("raw")
+    if (returnRaw){
+      if (sum(mutations)>0) {
+        # sanity check: expect mutations to be TRUE at exactly the positions of point mutations 
+        # recorded in mutations_array_raw
+        stopifnot( which(mutations) == names(mutations_array_raw) )
+      } else {
+        mutations_array_raw = NA 
+      }
+      return(list(raw_mutations = mutations, raw_types = mutations_array_raw))
+    } else {
+    # return counts of each mutation type  
+      return(mutations_array)
+    }
 }
 
 
