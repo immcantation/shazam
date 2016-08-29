@@ -3,15 +3,16 @@ Version 0.1.5: August 23, 2016
 Targeting Models:
 
 + Added `numMutationsOnly` argument to `createSubstitutionMatrix()`, enabling
-  parameter tuning for `minNumMutations`.
-  
+  parameter tuning for `minNumMutations`.  
 
 Mutation Profiling:
 
 + Added `returnRaw` argument to `calcObservedMutations()`, which if true returns 
   the positions of point mutations and their corresponding mutation types, as 
   opposed to counts of mutations (hence "raw"). 
-
++ Added new function `slideWindow()` which implements a sliding window approach
+  towards filtering sequences with equal to or more than a given number of 
+  mutations in a given number of consecutive nucleotides.
 
 Version 0.1.4:  August 5, 2016
 -------------------------------------------------------------------------------
