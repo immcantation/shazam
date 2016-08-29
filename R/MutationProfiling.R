@@ -458,7 +458,9 @@ observedMutations <- function(db,
 #' @param    inputSeq            input sequence.
 #' @param    germlineSeq         germline sequence.
 #' @param    frequency           \code{logical} indicating whether or not to calculate
-#'                               mutation frequencies. Default is \code{FALSE}.
+#'                               mutation frequencies. The denominator used is the number of bases
+#'                               that are non-N in both the input and the germline sequences.
+#'                               Default is \code{FALSE}.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences. Note, only the part of
 #'                               sequences defined in \code{regionDefinition} are analyzed.
@@ -472,16 +474,20 @@ observedMutations <- function(db,
 #'                               Default if \code{FALSE}.                               
 #'                               
 #' @return   For \code{returnRaw=FALSE}, an \code{array} with the number of replacement (R) 
-#'           and silent(S) mutations. For \code{returnRaw=TRUE}, a list consisting of 
-#'           \code{raw_mutations}, a logical vector in which \code{TRUE} indicates point mutation(s); 
-#'           and \code{raw_types}, a character vector indicating the mutation type of each point 
-#'           mutation.
+#'           and silent(S) mutations. For \code{returnRaw=TRUE}, a data frame whose columns
+#'           indicate the position, mutation type (R or S), and region of each mutation.
 #'           
 #' @details
 #' Each mutation is considered independently in its codon context. Note, only the part of 
 #' \code{inputSeq} defined in \code{regionDefinition} is analyzed. For example, when using 
 #' the default \link{IMGT_V_NO_CDR3} definition, then mutations in positions beyond 
-#' 312 will be ignored.
+#' 312 will be ignored. 
+#' 
+#' Note that only replacement (R) and silent (S) mutations are included in the 
+#' results. Stop mutations and mutations such as the case in which NNN in the germline
+#' sequence is observed as NNC in the input sequence are excluded. In other words,
+#' a result that is \code{NA} or zero indicates absence of R and S mutations, not 
+#' necessarily all types of mutations, such as the excluded ones mentioned above.
 #' 
 #' @seealso  See \link{observedMutations} for counting the number of observed mutations 
 #' in a \code{data.frame}.
@@ -489,19 +495,34 @@ observedMutations <- function(db,
 #' @examples
 #' # Use first entry in the exampled data for input and germline sequence
 #' data(ExampleDb, package="alakazam")
-#' in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
-#' germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]
+#' in_seq <- ExampleDb[100, "SEQUENCE_IMGT"]
+#' germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
 #' 
 #' # Identify all mutations in the sequence
-#' calcObservedMutations(in_seq, germ_seq)
+#' ex1_raw = calcObservedMutations(in_seq, germ_seq, returnRaw=T)
+#' table(ex1_raw$region, ex1_raw$type)
+#' # Count all mutations in the sequence
+#' ex1_count = calcObservedMutations(in_seq, germ_seq, returnRaw=F)
 #' 
 #' # Identify only mutations the V segment minus CDR3
-#' calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3)
+#' ex2_raw = calcObservedMutations(in_seq, germ_seq, 
+#'                                 regionDefinition=IMGT_V_NO_CDR3, returnRaw=T)
+#' table(ex2_raw$region, ex2_raw$type)                                 
+#' # Count only mutations the V segment minus CDR3
+#' ex2_count = calcObservedMutations(in_seq, germ_seq, 
+#'                                   regionDefinition=IMGT_V_NO_CDR3, returnRaw=F)
 #'  
 #' # Identify mutations by change in hydropathy class
-#' calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
-#'                       mutationDefinition=HYDROPATHY_MUTATIONS, frequency=TRUE)
-#' 
+#' ex3_raw = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
+#'                                 mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=T)
+#' table(ex3_raw$region, ex3_raw$type)                                 
+#' # Count mutations by change in hydropathy class
+#' ex3_count = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
+#'                                   mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=F)
+#' ex3_freq = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
+#'                                  mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=F, 
+#'                                  frequency=T)
+#'                                 
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
                                   regionDefinition=NULL, mutationDefinition=NULL,
@@ -551,6 +572,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
         c_germlineSeq <- c( c_germlineSeq, fillWithNs)
     }
     
+    mutations_array_raw <- NA
     mutations_array <- NA
     mutations = (c_germlineSeq != c_inputSeq) & (c_germlineSeq%in%NUCLEOTIDES[1:5]) & (c_inputSeq%in%NUCLEOTIDES[1:5])
     if (sum(mutations) > 0) {
@@ -570,40 +592,51 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
         c_inputSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
         
         # Determine whether the mutations are R or S
-        mutations_array <- apply(rbind(c_germlineSeq_codons, c_inputSeq_codons), 2, 
-                                 function(x) { mutationType(c2s(x[1]), c2s(x[2]), aminoAcidClasses=aminoAcidClasses) })
-        names(mutations_array) = mutations_pos
-        # make a copy of mutations_array before removing NAs (for when returnRaw = T)
-        mutations_array_raw = mutations_array
+        mutations_array_raw <- apply(rbind(c_germlineSeq_codons, c_inputSeq_codons), 2, 
+                                     function(x) { mutationType(c2s(x[1]), c2s(x[2]), aminoAcidClasses=aminoAcidClasses) })
+        names(mutations_array_raw) = mutations_pos
         # remove NAs (arisen from cases such as NNN [germline] and NNC [input])
-        mutations_array<- mutations_array[!is.na(mutations_array)]
-        if(length(mutations_array)==sum(is.na(mutations_array))){
-            mutations_array<-NA    
+        mutations_array_raw <- mutations_array_raw[!is.na(mutations_array_raw)]
+        
+        if(length(mutations_array_raw)==0){
+            # NA if mutations_array_raw contains all NAs and they have all been removed
+            mutations_array_raw <- NA
+            mutations_array <- NA    
         } else {
-            # mutation types other than "R" and "S" (e.g. "Stop") will be removed by binMutationsByRegion
-            mutations_array <- binMutationsByRegion(mutations_array,regionDefinition)
+            # mutation types other than "R" and "S" (e.g. "Stop") will be removed by binMutationsByRegion,
+            # and stored in mutations_array
+            mutations_array <- binMutationsByRegion(mutations_array_raw, regionDefinition)
             if (frequency==TRUE) {
                 tempNames <- sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) })
                 # Subset boundaries to only non N bases (in both seq and gl)
                 boundaries <- regionDefinition@boundaries[c_inputSeq%in%NUCLEOTIDES[1:4] &  
-                                                              c_germlineSeq%in%NUCLEOTIDES[1:4]]
+                                                          c_germlineSeq%in%NUCLEOTIDES[1:4]]
                 # Freq = numb of mutations / numb of non N bases (in both seq and gl)
                 denoms <- sapply(tempNames, function(x) { sum(boundaries==x) })
                 mutations_array <- mutations_array/denoms
             }
+            # for consistency, manually remove non-"R"/"S" from mutations_array_raw
+            # i.e. not counting mutations such as "Stop"
+            mutations_array_raw = mutations_array_raw[mutations_array_raw %in% c("R", "S")]
         }        
     }
     
-    # return positions of point mutations ans their mutation types ("raw")
+    # return positions of point mutations and their mutation types ("raw")
     if (returnRaw){
-      if (sum(mutations)>0) {
-        # sanity check: expect mutations to be TRUE at exactly the positions of point mutations 
-        # recorded in mutations_array_raw
-        stopifnot( which(mutations) == names(mutations_array_raw) )
+      if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
+        # if mutations_array_raw is NA, or 
+        # if mutations_array_raw is empty due to all mutations being "Stop" and hence removed
+        # avoid is.na(mutations_array_raw) to avoid warning in case mutations_array_raw is a vector
+        return(mutations_array_raw)
       } else {
-        mutations_array_raw = NA 
+      rawDf = data.frame(as.numeric(names(mutations_array_raw)))
+      rawDf = cbind(rawDf,
+                    as.character(mutations_array_raw), # as.character to remove names of the vector
+                    as.character(regionDefinition@boundaries[as.numeric(names(mutations_array_raw))]),
+                    stringsAsFactors=F)
+      colnames(rawDf) = c("position", "type", "region")
+      return(rawDf)
       }
-      return(list(raw_mutations = mutations, raw_types = mutations_array_raw))
     } else {
     # return counts of each mutation type  
       return(mutations_array)
