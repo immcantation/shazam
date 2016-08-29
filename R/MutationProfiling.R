@@ -762,7 +762,8 @@ slideWindowHelper = function(mutPos, mutThresh, windowSize){
   # check preconditions
   stopifnot(mutThresh>=1 & mutThresh<=windowSize & windowSize>=2)
   
-  if (length(mutPos)==0 && is.na(mutPos)) {
+  if (length(mutPos)==1 && is.na(mutPos)) {
+    # use && instead of & to short-circuit in case length(mutPos)!=1 (otherwise warning)
     return(F)
   } else {
     # general idea:
