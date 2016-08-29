@@ -736,8 +736,16 @@ binMutationsByRegion <- function(mutationsArray,
 slideWindow = function(inputSeq, germlineSeq, mutThresh, windowSize){
   # identify all R and S mutations in input sequence
   inputMut = calcObservedMutations(inputSeq=inputSeq, germlineSeq=germlineSeq, returnRaw=T)
+  
   # extract positions of mutations
-  inputMutPos = inputMut$position
+  # inputMut must either be NA (no observed mutation) or a df
+  # avoid is.na (in case inputMut is a data frame then will get multiple T/F values and hence warning)
+  if (!is.data.frame(inputMut)) {
+    inputMutPos = NA
+  } else {
+    inputMutPos = inputMut$position
+  }
+
   # call helper
   return(slideWindowHelper(mutPos=inputMutPos, mutThresh=mutThresh, windowSize=windowSize))
 }
