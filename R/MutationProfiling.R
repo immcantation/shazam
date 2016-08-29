@@ -475,7 +475,8 @@ observedMutations <- function(db,
 #'                               
 #' @return   For \code{returnRaw=FALSE}, an \code{array} with the number of replacement (R) 
 #'           and silent(S) mutations. For \code{returnRaw=TRUE}, a data frame whose columns
-#'           indicate the position, mutation type (R or S), and region of each mutation.
+#'           (\code{position}, \code{type}, and \code{region}) indicate the position, 
+#'           mutation type (R or S), and region of each mutation.
 #'           
 #' @details
 #' Each mutation is considered independently in its codon context. Note, only the part of 
@@ -493,7 +494,7 @@ observedMutations <- function(db,
 #' in a \code{data.frame}.
 #' 
 #' @examples
-#' # Use first entry in the exampled data for input and germline sequence
+#' # Use an entry in the example data for input and germline sequence
 #' data(ExampleDb, package="alakazam")
 #' in_seq <- ExampleDb[100, "SEQUENCE_IMGT"]
 #' germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
@@ -698,6 +699,85 @@ binMutationsByRegion <- function(mutationsArray,
     sortingOrder <- match(regionDefinition@labels, names(mutations_region_counts))
     mutations_region_counts <- mutations_region_counts[sortingOrder]
     return(mutations_region_counts)
+}
+
+
+#### Sliding window approach ####
+#' Sliding window approach towards filtering sequences
+#'
+#' \code{slideWindow} determines whether an input sequence contains equal to or more than 
+#' a given number of mutations in a given length of consecutive nucleotides when compared 
+#' to a germline sequence.
+#' 
+#' @param    inputSeq            input sequence.
+#' @param    germlineSeq         germline sequence.
+#' @param    mutThresh           threshold on the number of mutations in \code{windowSize} 
+#'                               consecutive nucleotides. Must be between 1 and \code{windowSize} 
+#'                               inclusive. 
+#' @param    windowSize          length of consecutive nucleotides. Must be at least 2 and small
+#'                               than the length of \code{inputSeq}.
+#'                               
+#' @return  \code{TRUE} if there are equal to or more than \code{mutThresh} number of mutations
+#'          in any window of \code{windowSize} consecutive nucleotides; \code{FALSE} if otherwise.
+#' 
+#' @seealso  \link{calcObservedMutations} is called by \code{slideWindow} to identify observed 
+#'           mutations. 
+#' 
+#' @examples
+#' # Use an entry in the example data for input and germline sequence
+#' data(ExampleDb, package="alakazam")
+#' in_seq <- ExampleDb[100, "SEQUENCE_IMGT"]
+#' germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
+#' 
+#' # detect if in_seq has 6 or more mutations in 10 consecutive nucleotides
+#' slideWindow(inputSeq=in_seq, germlineSeq=germ_seq, mutThresh=6, windowSize=10)
+#'                                 
+#' @export
+slideWindow = function(inputSeq, germlineSeq, mutThresh, windowSize){
+  # identify all R and S mutations in input sequence
+  inputMut = calcObservedMutations(inputSeq=inputSeq, germlineSeq=germlineSeq, returnRaw=T)
+  # extract positions of mutations
+  inputMutPos = inputMut$position
+  # call helper
+  return(slideWindowHelper(mutPos=inputMutPos, mutThresh=mutThresh, windowSize=windowSize))
+}
+
+
+# Helper for sliding window approach towards filtering sequences
+#
+# @param    mutPos              a numeric vector containing positions of point mutations as 
+#                               returned in the \code{position} column by 
+#                               \code{calcObserverdMutations()} with \code{returnRaw=TRUE}. 
+#                               Can be \code{NA}, in which case the returned value will be 
+#                               \code{FALSE}.
+# @param    mutThresh           threshold on the number of mutations in \code{windowSize} 
+#                               consecutive nucleotides. Must be between 1 and \code{windowSize} 
+#                               inclusive.
+# @param    windowSize          length of consecutive nucleotides. Must be at least 2.
+#
+# @return   \code{TRUE} if there are equal to or more than \code{mutThresh} number of mutations
+#           in any window of \code{windowSize} consecutive nucleotides; \code{FALSE} if otherwise.
+#
+slideWindowHelper = function(mutPos, mutThresh, windowSize){
+  # check preconditions
+  stopifnot(mutThresh>=1 & mutThresh<=windowSize & windowSize>=2)
+  
+  if (length(mutPos)==0 && is.na(mutPos)) {
+    return(F)
+  } else {
+    # general idea:
+    # only need to check windows containing mutations (as opposed to every possible window)
+    for (i in 1:length(mutPos)){
+      # get window limits
+      lower = mutPos[i]
+      upper = lower + windowSize - 1
+      # how many mutations fall within current window
+      windowCount = sum(mutPos>=lower & mutPos <= upper)
+      # return as soon as a window has >= mutThresh mutations
+      if (windowCount >= mutThresh) {return(T)}
+    }
+    return(F)
+  }
 }
 
 
