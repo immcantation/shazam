@@ -807,6 +807,11 @@ slideWindowHelper = function(mutPos, mutThresh, windowSize){
 #'           \code{windowSizeRange}. Each column in a matrix corresponds to a \code{mutThresh} in
 #'           \code{mutThreshRange}.
 #' 
+#' @details  If, in a given combination of \code{mutThresh} and \code{windowSize}, \code{mutThresh} 
+#'           is greater than \code{windowSize}, \code{NA}s will be returned for that particular
+#'           combination. A message indicating that the combination has been "skipped" will be 
+#'           printed if \code{verbose=TRUE}.
+#' 
 #' @seealso  \link{slideWindow} is called repetitively on \code{db} for tuning.
 #' 
 #' @examples
@@ -815,8 +820,12 @@ slideWindowHelper = function(mutPos, mutThresh, windowSize){
 #' 
 #' # Try out thresholds of 2-4 mutations in window sizes of 7-9 nucleotides 
 #' # on a subset of ExampleDb
+#' # In this case, all combinations are legal and thus computed
 #' slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, windowSizeRange = 7:9)
-#'                                 
+#' 
+#' # In the following case, illegal combinations are skipped, returning NAs                                  
+#' slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, windowSizeRange = 2:4)
+#'                                                                                                
 #' @export
 slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT", 
                            germlineColumn = "GERMLINE_IMGT_D_MASK",
@@ -831,12 +840,18 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
     if (verbose) {cat(paste0("now computing for windowSize = ", size, "\n"))}
     
     for (thresh in mutThreshRange) {
-      if (verbose) {cat(paste0(">>> mutThresh = ", thresh, "\n"))}
-      # apply slideWindow on db
-      cur.logical = sapply(1:nrow(db), function(i){slideWindow(inputSeq = db[i, sequenceColumn],
-                                                               germlineSeq = db[i, germlineColumn],
-                                                               mutThresh = thresh,
-                                                               windowSize = size)})
+      if (thresh <= size){
+        if (verbose) {cat(paste0(">>> mutThresh = ", thresh, "\n"))}
+        # apply slideWindow on db
+        cur.logical = sapply(1:nrow(db), function(i){slideWindow(inputSeq = db[i, sequenceColumn],
+                                                                 germlineSeq = db[i, germlineColumn],
+                                                                 mutThresh = thresh,
+                                                                 windowSize = size)})
+      } else {
+        cat(paste0(">>> mutThresh = ", thresh, " > ", size, " (skipped)\n"))
+        # NA if skipped
+        cur.logical = rep(NA, nrow(db))
+      }
       # store results for each thresh as a column in a logical matrix
       if (thresh == mutThreshRange[1]) {
         cur.mtx = matrix(data=cur.logical, nrow=length(cur.logical))
@@ -858,6 +873,97 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
   return(cur.list)
 }
 
+#' Visualize parameter tuning for sliding window approach
+#'
+#' Visualize results from \code{slideWindowTune}
+#' 
+#' @param    tuneList            a list of logical matrices returned by \code{slideWindowTune}.
+#' @param    plotFiltered        whether to plot the number of filtered sequences (as opposed to
+#'                               the number of remaining sequences). Default is \code{TRUE}.
+#' @param    pchs                point types to pass on to \code{plot}.
+#' @param    ltys                line types to pass on to \code{plot}.
+#' @param    cols                colors to pass on to \code{plot}.                             
+#' @param    plotLegend          whether to plot legend. Default is \code{TRUE}.
+#' @param    legendPos           position of legend. Default is \code{topright}.
+#' @param    legendHoriz         whether to make legend horizontal. Default is \code{FALSE}.
+#' @param    legendCex           numeric values by which legend should be magnified relative to 1.
+#' 
+#' @details  For each \code{windowSize}, the numbers of sequences filtered or remaining after applying
+#'           the sliding window approach are plotted on the y-axis against thresholds on the number of
+#'           mutations in a window on the x-axis.
+#'           
+#'           When plotting, a 0.1 \code{amount} of jittering will be applied in order to allow for
+#'           distinguishing lines for different window sizes from each other. 
+#'           
+#'           \code{NA} for a combination of \code{mutThresh} and \code{windowSize} where 
+#'           \code{mutThresh} is greater than \code{windowSize} will not be plotted. 
+#' 
+#' @seealso  See \link{slideWindowTune} for getting \code{tuneList}.
+#' 
+#' @examples
+#' # Use an entry in the example data for input and germline sequence
+#' data(ExampleDb, package="alakazam")
+#' 
+#' # Try out thresholds of 2-4 mutations in window sizes of 7-9 nucleotides 
+#' # on a subset of ExampleDb
+#' tuneList = slideWindowTune(db = ExampleDb[1:10, ], mutThreshRange = 2:4, windowSizeRange = 3:5)
+#'
+#' # Visualize
+#' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3)
+#'                                                             
+#' @export
+slideWindowTunePlot = function(tuneList, plotFiltered = TRUE,
+                               pchs = 1, ltys = 2, cols = 1,
+                               plotLegend = TRUE, legendPos = "topright", 
+                               legendHoriz = FALSE, legendCex = 1){
+  
+  # invert (!) tuneList if plotting retained sequences
+  ylab.part = "filtered"
+  if (!plotFiltered) {
+    tuneList = lapply(tuneList, function(x){!x})
+    ylab.part = "remaining"}
+  
+  # if single-valued, expand into vector with repeating values (otherwise legend would break)
+  if (length(pchs)==1) {pchs = rep(pchs, length(tuneList))}
+  if (length(ltys)==1) {ltys = rep(ltys, length(tuneList))}
+  if (length(cols)==1) {cols = rep(cols, length(tuneList))}
+  
+  # tabulate tuneList
+  plotList = lapply(tuneList, colSums)
+  
+  # get x-axis values (i.e. mutThreshRange; colnames of matrix in tuneList with most columns)
+  #threshes = as.numeric(colnames(tuneList[[which.max(lapply(lapply(tuneList, colnames), length))]]))
+  threshes = as.numeric(colnames(tuneList[[1]]))
+  
+  # plot for first window size
+  plot(x = jitter(threshes, amount=0.1), # mutThreshRange on x-axis
+       y = jitter(plotList[[1]], amount=0.1), # tabulated sums in plotList on y-axis
+       # ylim: non-negative lower limit; upper limit slight above max tabulated sum
+       ylim = c( max(0, min(range(plotList, na.rm=T))-1), max(range(plotList, na.rm=T))+1),
+       # xlim: +/- 0.2 to accommodate for amount of jittering (0.1)
+       xlim = c(min(threshes)-0.2, max(threshes+0.2)),
+       xaxt="n", xlab="Threshold on number of mutations",
+       ylab=paste("Number of sequences", ylab.part),
+       cex.lab=1.5, cex.axis=1.5, type="b", lwd=1.5,
+       pch=pchs[1], lty=ltys[1], col=cols[1])
+  axis(side=1, at=threshes, cex.axis=1.5)
+  
+  # plot for the rest of the window sizes
+  for (i in 1:length(plotList)){
+    if (i>=2) {
+      points(x = jitter(threshes, amount=0.1), 
+             y = jitter(plotList[[i]], amount=0.1), type='b', lwd=1.5,
+             pch=pchs[i], lty=ltys[i], col=cols[i])
+    }
+  }
+  
+  # add legend
+  if (plotLegend) {
+    legend(legendPos, legend = c("Window Size", names(tuneList)),
+           horiz = legendHoriz, cex = legendCex,
+           pch=c(NA, pchs), lty=c(NA, ltys), col=c(NA, cols))
+  }
+}
 
 
 #### Expected frequencies calculating functions ####
