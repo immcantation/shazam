@@ -13,6 +13,10 @@ Mutation Profiling:
 + Added new function `slideWindow()` which implements a sliding window approach
   towards filtering sequences with equal to or more than a given number of 
   mutations in a given number of consecutive nucleotides.
++ Added new function `slideWindowTune()` which allows for parameter tuning for
+  using `slideWindow()`.
++ Added new function `slideWindowTunePlot()` which visualizes parameter tuning 
+  by `slideWindowTune()`.
 
 Version 0.1.4:  August 5, 2016
 -------------------------------------------------------------------------------
