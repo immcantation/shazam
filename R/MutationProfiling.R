@@ -714,8 +714,7 @@ binMutationsByRegion <- function(mutationsArray,
 #' @param    mutThresh           threshold on the number of mutations in \code{windowSize} 
 #'                               consecutive nucleotides. Must be between 1 and \code{windowSize} 
 #'                               inclusive. 
-#' @param    windowSize          length of consecutive nucleotides. Must be at least 2 and small
-#'                               than the length of \code{inputSeq}.
+#' @param    windowSize          length of consecutive nucleotides. Must be at least 2.
 #'                               
 #' @return  \code{TRUE} if there are equal to or more than \code{mutThresh} number of mutations
 #'          in any window of \code{windowSize} consecutive nucleotides; \code{FALSE} if otherwise.
@@ -788,6 +787,76 @@ slideWindowHelper = function(mutPos, mutThresh, windowSize){
     return(F)
   }
 }
+
+#' Parameter tuning for sliding window approach
+#'
+#' Helps with parameter tuning for \code{slideWindow}
+#' 
+#' @param    db                  \code{data.frame} containing sequence data.
+#' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
+#' @param    germlineColumn      name of the column containing IMGT-gapped germline sequences.
+#' @param    mutThreshRange      range of threshold on the number of mutations in \code{windowSize} 
+#'                               consecutive nucleotides to try. Must be between 1 and 
+#'                               maximum \code{windowSizeRange} inclusive. 
+#' @param    windowSizeRange     range of length of consecutive nucleotides to try. The lower end
+#'                               must be at least 2.
+#' @param    verbose             whether to print out messages indicating current progress. Default
+#'                               is \code{TRUE}.              
+#'                               
+#' @return   a list of logical matrices. Each matrix corresponds to a \code{windowSize} in 
+#'           \code{windowSizeRange}. Each column in a matrix corresponds to a \code{mutThresh} in
+#'           \code{mutThreshRange}.
+#' 
+#' @seealso  \link{slideWindow} is called repetitively on \code{db} for tuning.
+#' 
+#' @examples
+#' # Use an entry in the example data for input and germline sequence
+#' data(ExampleDb, package="alakazam")
+#' in_seq <- ExampleDb[100, "SEQUENCE_IMGT"]
+#' germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
+#' ???
+#'                                  
+#' @export
+slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT", 
+                           germlineColumn = "GERMLINE_IMGT_D_MASK",
+                           mutThreshRange, windowSizeRange, verbose=TRUE){
+  # check preconditions
+  stopifnot( min(mutThreshRange)>=1 & 
+             max(mutThreshRange)<=max(windowSizeRange) &
+             min(windowSizeRange)>=2 )
+  
+  # apply slideWindow on combinations of windowSize and mutThresh
+  for (size in windowSizeRange) {
+    if (verbose) {cat(paste0("now computing for windowSize = ", size, "\n"))}
+    
+    for (thresh in mutThreshRange) {
+      if (verbose) {cat(paste0(">>> mutThresh = ", thresh, "\n"))}
+      # apply slideWindow on db
+      cur.logical = sapply(1:nrow(db), function(i){slideWindow(inputSeq = db[i, sequenceColumn],
+                                                               germlineSeq = db[i, germlineColumn],
+                                                               mutThresh = thresh,
+                                                               windowSize = size)})
+      # store results for each thresh as a column in a logical matrix
+      if (thresh == mutThreshRange[1]) {
+        cur.mtx = matrix(data=cur.logical, nrow=length(cur.logical))
+      } else {
+        cur.mtx = cbind(cur.mtx, cur.logical)
+      }
+    }
+    colnames(cur.mtx) = as.character(mutThreshRange)
+    
+    # store results for each size (and threshes under that size) as a logical matrix in a list
+    if (size == windowSizeRange[1]) {
+      cur.list = list(cur.mtx)
+    } else {
+      cur.list = c(cur.list, list(cur.mtx))
+    }
+  }
+  names(cur.list) = as.character(windowSizeRange)
+
+  return(cur.list)
+}
+
 
 
 #### Expected frequencies calculating functions ####
