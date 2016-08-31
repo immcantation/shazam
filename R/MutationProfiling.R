@@ -812,10 +812,11 @@ slideWindowHelper = function(mutPos, mutThresh, windowSize){
 #' @examples
 #' # Use an entry in the example data for input and germline sequence
 #' data(ExampleDb, package="alakazam")
-#' in_seq <- ExampleDb[100, "SEQUENCE_IMGT"]
-#' germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
-#' ???
-#'                                  
+#' 
+#' # Try out thresholds of 2-4 mutations in window sizes of 7-9 nucleotides 
+#' # on a subset of ExampleDb
+#' slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, windowSizeRange = 7:9)
+#'                                 
 #' @export
 slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT", 
                            germlineColumn = "GERMLINE_IMGT_D_MASK",
