@@ -887,11 +887,12 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' @param    jitter.y            whether to jitter y-axis values. Default is \code{TRUE}.
 #' @param    jitter.y.amt        amount of jittering to be applied on y-axis values if 
 #'                               \code{jitter.y=TRUE}. Default is 0.1.                               
-#' @param    pchs                point types to pass on to \code{plot}.
-#' @param    ltys                line types to pass on to \code{plot}.
-#' @param    cols                colors to pass on to \code{plot}.                             
+#' @param    pchs                point types to pass on to \link{plot}.
+#' @param    ltys                line types to pass on to \link{plot}.
+#' @param    cols                colors to pass on to \link{plot}.                             
 #' @param    plotLegend          whether to plot legend. Default is \code{TRUE}.
-#' @param    legendPos           position of legend. Default is \code{"topright"}.
+#' @param    legendPos           position of legend to pass on to \link{legend}. Default is
+#'                               \code{"topright"}.
 #' @param    legendHoriz         whether to make legend horizontal. Default is \code{FALSE}.
 #' @param    legendCex           numeric values by which legend should be magnified relative to 1.
 #' 
