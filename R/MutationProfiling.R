@@ -812,7 +812,8 @@ slideWindowHelper = function(mutPos, mutThresh, windowSize){
 #'           combination. A message indicating that the combination has been "skipped" will be 
 #'           printed if \code{verbose=TRUE}.
 #' 
-#' @seealso  \link{slideWindow} is called repetitively on \code{db} for tuning.
+#' @seealso  \link{slideWindow} is called repetitively on \code{db} for tuning. See 
+#'           \link{slideWindowTunePlot} for visualization.
 #' 
 #' @examples
 #' # Use an entry in the example data for input and germline sequence
@@ -877,14 +878,14 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #'
 #' Visualize results from \code{slideWindowTune}
 #' 
-#' @param    tuneList            a list of logical matrices returned by \code{slideWindowTune}.
+#' @param    tuneList            a list of logical matrices returned by \link{slideWindowTune}.
 #' @param    plotFiltered        whether to plot the number of filtered sequences (as opposed to
 #'                               the number of remaining sequences). Default is \code{TRUE}.
 #' @param    pchs                point types to pass on to \code{plot}.
 #' @param    ltys                line types to pass on to \code{plot}.
 #' @param    cols                colors to pass on to \code{plot}.                             
 #' @param    plotLegend          whether to plot legend. Default is \code{TRUE}.
-#' @param    legendPos           position of legend. Default is \code{topright}.
+#' @param    legendPos           position of legend. Default is \code{"topright"}.
 #' @param    legendHoriz         whether to make legend horizontal. Default is \code{FALSE}.
 #' @param    legendCex           numeric values by which legend should be magnified relative to 1.
 #' 
@@ -909,7 +910,12 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' tuneList = slideWindowTune(db = ExampleDb[1:10, ], mutThreshRange = 2:4, windowSizeRange = 3:5)
 #'
 #' # Visualize
-#' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3)
+#' # Plot numbers of sequences filtered
+#' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, plotFiltered=T)
+#' # Plot numbers of sequences remaining
+#' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, plotFiltered=F,
+#'                     legendPos="bottomright")
+#' 
 #'                                                             
 #' @export
 slideWindowTunePlot = function(tuneList, plotFiltered = TRUE,
