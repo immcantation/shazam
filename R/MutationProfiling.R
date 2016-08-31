@@ -881,8 +881,12 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' @param    tuneList            a list of logical matrices returned by \link{slideWindowTune}.
 #' @param    plotFiltered        whether to plot the number of filtered sequences (as opposed to
 #'                               the number of remaining sequences). Default is \code{TRUE}.
-#' @param    jitter.amt.x        amount of jittering to be applied on x-axis values. Default is 0.
-#' @param    jitter.amt.y        amount of jittering to be applied on y-axis values. Default is 0.1.                               
+#' @param    jitter.x            whether to jitter x-axis values. Default is \code{FALSE}.                               
+#' @param    jitter.x.amt        amount of jittering to be applied on x-axis values if 
+#'                               \code{jitter.x=TRUE}. Default is 0.1.
+#' @param    jitter.y            whether to jitter y-axis values. Default is \code{TRUE}.
+#' @param    jitter.y.amt        amount of jittering to be applied on y-axis values if 
+#'                               \code{jitter.y=TRUE}. Default is 0.1.                               
 #' @param    pchs                point types to pass on to \code{plot}.
 #' @param    ltys                line types to pass on to \code{plot}.
 #' @param    cols                colors to pass on to \code{plot}.                             
@@ -897,8 +901,9 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #'           
 #'           When plotting, a 0.1 \code{amount} of jittering will be applied by default on the y-axis 
 #'           in order to allow for distinguishing lines for different window sizes from each other.
-#'           If desireable, different \code{amount} of jittering can be applied on either axis via 
-#'           adjusting \code{jitter.amt.x} and \code{jitter.amt.y}.
+#'           If desireable, different \code{amount} of jittering can be applied on either axis or 
+#'           both axes via adjusting \code{jitter.x}, \code{jitter.y}, \code{jitter.x.amt} and 
+#'           \code{jitter.y.amt}.
 #'           
 #'           \code{NA} for a combination of \code{mutThresh} and \code{windowSize} where 
 #'           \code{mutThresh} is greater than \code{windowSize} will not be plotted. 
@@ -925,7 +930,8 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #'                                                             
 #' @export
 slideWindowTunePlot = function(tuneList, plotFiltered = TRUE,
-                               jitter.amt.x = 0, jitter.amt.y = 0.1, 
+                               jitter.x = FALSE, jitter.x.amt = 0.1,
+                               jitter.y = TRUE, jitter.y.amt = 0.1,
                                pchs = 1, ltys = 2, cols = 1,
                                plotLegend = TRUE, legendPos = "topright", 
                                legendHoriz = FALSE, legendCex = 1){
@@ -949,12 +955,18 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE,
   threshes = as.numeric(colnames(tuneList[[1]]))
   
   # plot for first window size
-  plot(x = jitter(threshes, amount=jitter.amt.x), # mutThreshRange on x-axis
-       y = jitter(plotList[[1]], amount=jitter.amt.y), # tabulated sums in plotList on y-axis
+  x1 = threshes
+  if (jitter.x) {x1 = jitter(x1, amount=jitter.x.amt)}
+  y1 = plotList[[1]]
+  if (jitter.y) {y1 = jitter(y1, amount=jitter.y.amt)}
+  
+  plot(x1, # mutThreshRange on x-axis
+       y1, # tabulated sums in plotList on y-axis
        # ylim: non-negative lower limit; upper limit slight above max tabulated sum
-       ylim = c( max(0, min(range(plotList, na.rm=T))-1), max(range(plotList, na.rm=T))+1),
-       # xlim: +/- 0.2 to accommodate for amount of jittering (0.1)
-       xlim = c(min(threshes)-0.2, max(threshes+0.2)),
+       ylim = c( max(0, min(range(plotList, na.rm=T)) - max(1, jitter.y.amt) ), 
+                 max(range(plotList, na.rm=T)) + max(1, jitter.y.amt)),
+       # xlim: +/- jitter.x.amt*2 to accommodate for amount of jittering on x-axis
+       xlim = c(min(threshes)-jitter.x.amt*2, max(threshes+jitter.x.amt*2)),
        xaxt="n", xlab="Threshold on number of mutations",
        ylab=paste("Number of sequences", ylab.part),
        cex.lab=1.5, cex.axis=1.5, type="b", lwd=1.5,
@@ -964,8 +976,13 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE,
   # plot for the rest of the window sizes
   for (i in 1:length(plotList)){
     if (i>=2) {
-      points(x = jitter(threshes, amount=jitter.amt.x), 
-             y = jitter(plotList[[i]], amount=jitter.amt.y), type='b', lwd=1.5,
+      
+      xi = threshes
+      if (jitter.x) {xi = jitter(xi, amount=jitter.x.amt)}
+      yi = plotList[[i]]
+      if (jitter.y) {yi = jitter(yi, amount=jitter.y.amt)}
+      
+      points(xi, yi, type='b', lwd=1.5,
              pch=pchs[i], lty=ltys[i], col=cols[i])
     }
   }
