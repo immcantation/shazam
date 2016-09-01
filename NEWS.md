@@ -10,11 +10,12 @@ Mutation Profiling:
 + Added `returnRaw` argument to `calcObservedMutations()`, which if true returns 
   the positions of point mutations and their corresponding mutation types, as 
   opposed to counts of mutations (hence "raw"). 
-+ Added new function `slideWindow()` which implements a sliding window approach
-  towards filtering sequences with equal to or more than a given number of 
-  mutations in a given number of consecutive nucleotides.
++ Added new functions `slideWindowSeq()` and `slideWindowDb()` which implement 
+  a sliding window approach towards filtering a single sequence or sequences in
+  a data.frame which contain(s) equal to or more than a given number of mutations 
+  in a given number of consecutive nucleotides.
 + Added new function `slideWindowTune()` which allows for parameter tuning for
-  using `slideWindow()`.
+  using `slideWindowSeq()` and `slideWindowDb()`.
 + Added new function `slideWindowTunePlot()` which visualizes parameter tuning 
   by `slideWindowTune()`.
 
