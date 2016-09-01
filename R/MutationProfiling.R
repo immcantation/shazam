@@ -968,7 +968,7 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' # Use an entry in the example data for input and germline sequence
 #' data(ExampleDb, package="alakazam")
 #' 
-#' # Try out thresholds of 2-4 mutations in window sizes of 7-9 nucleotides 
+#' # Try out thresholds of 2-4 mutations in window sizes of 3-5 nucleotides 
 #' # on a subset of ExampleDb
 #' tuneList = slideWindowTune(db = ExampleDb[1:10, ], 
 #'                            mutThreshRange = 2:4, windowSizeRange = 3:5,
