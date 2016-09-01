@@ -929,10 +929,12 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' @param    tuneList            a list of logical matrices returned by \link{slideWindowTune}.
 #' @param    plotFiltered        whether to plot the number of filtered sequences (as opposed to
 #'                               the number of remaining sequences). Default is \code{TRUE}.
+#' @param    percentage          whether to plot on the y-axis the percentage of filtered sequences
+#'                               (as opposed to the absolute number). Default is \code{FALSE}.                             
 #' @param    jitter.x            whether to jitter x-axis values. Default is \code{FALSE}.                               
 #' @param    jitter.x.amt        amount of jittering to be applied on x-axis values if 
 #'                               \code{jitter.x=TRUE}. Default is 0.1.
-#' @param    jitter.y            whether to jitter y-axis values. Default is \code{TRUE}.
+#' @param    jitter.y            whether to jitter y-axis values. Default is \code{FALSE}.
 #' @param    jitter.y.amt        amount of jittering to be applied on y-axis values if 
 #'                               \code{jitter.y=TRUE}. Default is 0.1.                               
 #' @param    pchs                point types to pass on to \link{plot}.
@@ -948,11 +950,13 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #'           the sliding window approach are plotted on the y-axis against thresholds on the number of
 #'           mutations in a window on the x-axis.
 #'           
-#'           When plotting, a 0.1 \code{amount} of jittering will be applied by default on the y-axis 
-#'           values in order to allow for visually distinguishing lines for different window sizes 
-#'           from each other in case they are very close or identical to each other. No or different 
-#'           \code{amount} of jittering can be applied on either axis or both axes via adjusting 
-#'           \code{jitter.x}, \code{jitter.y}, \code{jitter.x.amt} and \code{jitter.y.amt}.
+#'           When plotting, a user-defined \code{amount} of jittering can be applied on values plotted
+#'           on either axis or both axes via adjusting \code{jitter.x}, \code{jitter.y}, 
+#'           \code{jitter.x.amt} and \code{jitter.y.amt}. This may be help with visually distinguishing
+#'           lines for different window sizes in case they are very close or identical to each other. 
+#'           If plotting percentages (\code{percentage=TRUE}) and using jittering on the y-axis values 
+#'           (\code{jitter.y=TRUE}), it is strongly recommended that \code{jitter.y.amt} be set very
+#'           small (e.g. 0.01). 
 #'           
 #'           \code{NA} for a combination of \code{mutThresh} and \code{windowSize} where 
 #'           \code{mutThresh} is greater than \code{windowSize} will not be plotted. 
@@ -971,34 +975,46 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #'                            verbose = FALSE)
 #'
 #' # Visualize
-#' # Plot numbers of sequences filtered
-#' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, plotFiltered=T)
-#' # Plot numbers of sequences remaining
-#' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, plotFiltered=F,
-#'                     legendPos="bottomright")
-#' 
+#' # Plot numbers of sequences filtered without jittering y-axis values
+#' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, 
+#'                     plotFiltered=T, jitter.y=F)
+#'                     
+#' # Notice that some of the lines overlap
+#' # Jittering could help
+#' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
+#'                     plotFiltered=T, jitter.y=T)
+#'                     
+#' # Plot numbers of sequences remaining instead of filtered
+#' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, 
+#'                     plotFiltered=F, jitter.y=T, legendPos="bottomright")
+#'                     
+#' # Plot percentages of sequences filtered with a tiny amount of jittering
+#' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
+#'                     plotFiltered=T, percentage=T, 
+#'                     jitter.y=T, jitter.y.amt=0.01)
 #'                                                             
 #' @export
-slideWindowTunePlot = function(tuneList, plotFiltered = TRUE,
+slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE,
                                jitter.x = FALSE, jitter.x.amt = 0.1,
-                               jitter.y = TRUE, jitter.y.amt = 0.1,
+                               jitter.y = FALSE, jitter.y.amt = 0.1,
                                pchs = 1, ltys = 2, cols = 1,
                                plotLegend = TRUE, legendPos = "topright", 
                                legendHoriz = FALSE, legendCex = 1){
   
   # invert (!) tuneList if plotting retained sequences
-  ylab.part = "filtered"
+  ylab.part.2 = "filtered"
   if (!plotFiltered) {
     tuneList = lapply(tuneList, function(x){!x})
-    ylab.part = "remaining"}
+    ylab.part.2 = "remaining"}
   
   # if single-valued, expand into vector with repeating values (otherwise legend would break)
   if (length(pchs)==1) {pchs = rep(pchs, length(tuneList))}
   if (length(ltys)==1) {ltys = rep(ltys, length(tuneList))}
   if (length(cols)==1) {cols = rep(cols, length(tuneList))}
   
-  # tabulate tuneList
+  # tabulate tuneList (and if applicable convert to percentage)
   plotList = lapply(tuneList, colSums)
+  if (percentage) {plotList = lapply(plotList, function(x){x/nrow(tuneList[[1]])})}
   
   # get x-axis values (i.e. mutThreshRange; colnames of matrix in tuneList with most columns)
   #threshes = as.numeric(colnames(tuneList[[which.max(lapply(lapply(tuneList, colnames), length))]]))
@@ -1010,15 +1026,24 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE,
   y1 = plotList[[1]]
   if (jitter.y) {y1 = jitter(y1, amount=jitter.y.amt)}
   
+  if (percentage) {
+    ylab.part.1 = "Percentage of sequences"
+    # ylim: [0, 1]
+    ylims = c(0, 1)
+  } else {
+    ylab.part.1 = "Number of sequences"
+    # ylim: non-negative lower limit; upper limit slight above max tabulated sum
+    ylims = c( max(0, min(range(plotList, na.rm=T)) - max(1, jitter.y.amt) ), 
+               max(range(plotList, na.rm=T)) + max(1, jitter.y.amt) )
+  }
+  
   plot(x1, # mutThreshRange on x-axis
        y1, # tabulated sums in plotList on y-axis
-       # ylim: non-negative lower limit; upper limit slight above max tabulated sum
-       ylim = c( max(0, min(range(plotList, na.rm=T)) - max(1, jitter.y.amt) ), 
-                 max(range(plotList, na.rm=T)) + max(1, jitter.y.amt)),
+       ylim = ylims,
        # xlim: +/- jitter.x.amt*2 to accommodate for amount of jittering on x-axis
        xlim = c(min(threshes)-jitter.x.amt*2, max(threshes+jitter.x.amt*2)),
        xaxt="n", xlab="Threshold on number of mutations",
-       ylab=paste("Number of sequences", ylab.part),
+       ylab=paste(ylab.part.1, ylab.part.2),
        cex.lab=1.5, cex.axis=1.5, type="b", lwd=1.5,
        pch=pchs[1], lty=ltys[1], col=cols[1])
   axis(side=1, at=threshes, cex.axis=1.5)
