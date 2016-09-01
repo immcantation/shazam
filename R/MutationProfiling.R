@@ -895,7 +895,8 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
         cur.logical = slideWindowDb(db, sequenceColumn, germlineColumn, 
                                     mutThresh = thresh, windowSize = size)
       } else {
-        if (verbose) {cat(paste0(">>> mutThresh = ", thresh, " > ", size, " (skipped)\n"))}
+        if (verbose) {cat(paste0(">>> mutThresh = ", thresh, " > windowSize = ", 
+                                 size, " (skipped)\n"))}
         # NA if skipped
         cur.logical = rep(NA, nrow(db))
       }
