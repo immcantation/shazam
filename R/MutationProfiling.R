@@ -703,11 +703,11 @@ binMutationsByRegion <- function(mutationsArray,
 
 
 #### Sliding window approach ####
-#' Sliding window approach towards filtering sequences
+#' Sliding window approach towards filtering a single sequence
 #'
-#' \code{slideWindow} determines whether an input sequence contains equal to or more than 
-#' a given number of mutations in a given length of consecutive nucleotides when compared 
-#' to a germline sequence.
+#' \code{slideWindowSeq} determines whether an input sequence contains equal to or more than 
+#' a given number of mutations in a given length of consecutive nucleotides (a "window") 
+#' when compared to a germline sequence.
 #' 
 #' @param    inputSeq            input sequence.
 #' @param    germlineSeq         germline sequence.
@@ -717,10 +717,13 @@ binMutationsByRegion <- function(mutationsArray,
 #' @param    windowSize          length of consecutive nucleotides. Must be at least 2.
 #'                               
 #' @return  \code{TRUE} if there are equal to or more than \code{mutThresh} number of mutations
-#'          in any window of \code{windowSize} consecutive nucleotides; \code{FALSE} if otherwise.
+#'          in any window of \code{windowSize} consecutive nucleotides (i.e. the sequence should
+#'          be filtered); \code{FALSE} if otherwise.
 #' 
-#' @seealso  \link{calcObservedMutations} is called by \code{slideWindow} to identify observed 
-#'           mutations. 
+#' @seealso  \link{calcObservedMutations} is called by \code{slideWindowSeq} to identify observed 
+#'           mutations. See \link{slideWindowDb} for applying the sliding window approach on a 
+#'           \code{data.frame}. See \link{slideWindowTune} for parameter tuning for \code{mutThresh}
+#'           and \code{windowSize}.
 #' 
 #' @examples
 #' # Use an entry in the example data for input and germline sequence
@@ -728,11 +731,11 @@ binMutationsByRegion <- function(mutationsArray,
 #' in_seq <- ExampleDb[100, "SEQUENCE_IMGT"]
 #' germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
 #' 
-#' # detect if in_seq has 6 or more mutations in 10 consecutive nucleotides
-#' slideWindow(inputSeq=in_seq, germlineSeq=germ_seq, mutThresh=6, windowSize=10)
+#' # Determine if in_seq has 6 or more mutations in 10 consecutive nucleotides
+#' slideWindowSeq(inputSeq=in_seq, germlineSeq=germ_seq, mutThresh=6, windowSize=10)
 #'                                 
 #' @export
-slideWindow = function(inputSeq, germlineSeq, mutThresh, windowSize){
+slideWindowSeq = function(inputSeq, germlineSeq, mutThresh, windowSize){
   # identify all R and S mutations in input sequence
   inputMut = calcObservedMutations(inputSeq=inputSeq, germlineSeq=germlineSeq, returnRaw=T)
   
@@ -746,7 +749,7 @@ slideWindow = function(inputSeq, germlineSeq, mutThresh, windowSize){
   }
 
   # call helper
-  return(slideWindowHelper(mutPos=inputMutPos, mutThresh=mutThresh, windowSize=windowSize))
+  return(slideWindowSeqHelper(mutPos=inputMutPos, mutThresh=mutThresh, windowSize=windowSize))
 }
 
 
@@ -765,7 +768,7 @@ slideWindow = function(inputSeq, germlineSeq, mutThresh, windowSize){
 # @return   \code{TRUE} if there are equal to or more than \code{mutThresh} number of mutations
 #           in any window of \code{windowSize} consecutive nucleotides; \code{FALSE} if otherwise.
 #
-slideWindowHelper = function(mutPos, mutThresh, windowSize){
+slideWindowSeqHelper = function(mutPos, mutThresh, windowSize){
   # check preconditions
   stopifnot(mutThresh>=1 & mutThresh<=windowSize & windowSize>=2)
   
@@ -788,9 +791,54 @@ slideWindowHelper = function(mutPos, mutThresh, windowSize){
   }
 }
 
+
+#' Sliding window approach towards filtering sequences in a \code{data.frame}
+#'
+#' \code{slideWindowDb} determines whether each input sequence in a \code{data.frame} 
+#' contains equal to or more than a given number of mutations in a given length of 
+#' consecutive nucleotides (a "window") when compared to their respective germline 
+#' sequence.
+#' 
+#' @param    db                  \code{data.frame} containing sequence data.
+#' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
+#' @param    germlineColumn      name of the column containing IMGT-gapped germline sequences.
+#' @param    mutThresh           threshold on the number of mutations in \code{windowSize} 
+#'                               consecutive nucleotides. Must be between 1 and \code{windowSize} 
+#'                               inclusive. 
+#' @param    windowSize          length of consecutive nucleotides. Must be at least 2.
+#'                               
+#' @return   a logical vector. The length of the vector matches the number of input sequences in 
+#'           \code{db}. Each entry in the vector indicates whether the corresponding input sequence
+#'           should be filtered based on the given parameters.
+#' 
+#' @seealso  See \link{slideWindowSeq} for applying the sliding window approach on a single sequence. 
+#'           See \link{slideWindowTune} for parameter tuning for \code{mutThresh} and \code{windowSize}.
+#' 
+#' @examples
+#' # Use an entry in the example data for input and germline sequence
+#' data(ExampleDb, package="alakazam")
+#' 
+#' # Apply the sliding window approach on a subset of ExampleDb
+#' slideWindowDb(db = ExampleDb[1:10, ], mutThresh=6, windowSize=10)
+#' 
+#' @export
+slideWindowDb = function(db, sequenceColumn = "SEQUENCE_IMGT", 
+                         germlineColumn = "GERMLINE_IMGT_D_MASK",
+                         mutThresh, windowSize){
+  db.filter = sapply(1:nrow(db), function(i){slideWindowSeq(inputSeq = db[i, sequenceColumn],
+                                                            germlineSeq = db[i, germlineColumn],
+                                                            mutThresh = mutThresh,
+                                                            windowSize = windowSize)})
+  return(db.filter)
+}
+
+
 #' Parameter tuning for sliding window approach
 #'
-#' Helps with parameter tuning for \code{slideWindow}
+#' Apply \link{slideWindowDb} over a search grid made of combinations of \code{mutThresh} and 
+#' \code{windowSize} to help with picking a pair of values for these parameters. Parameter 
+#' tuning can be performed by choosing a combination that gives a reasonable number of 
+#' filtered/remaining sequences. 
 #' 
 #' @param    db                  \code{data.frame} containing sequence data.
 #' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
@@ -812,8 +860,8 @@ slideWindowHelper = function(mutPos, mutThresh, windowSize){
 #'           combination. A message indicating that the combination has been "skipped" will be 
 #'           printed if \code{verbose=TRUE}.
 #' 
-#' @seealso  \link{slideWindow} is called repetitively on \code{db} for tuning. See 
-#'           \link{slideWindowTunePlot} for visualization.
+#' @seealso  \link{slideWindowDb} is called on \code{db} for tuning. See \link{slideWindowTunePlot} 
+#'           for visualization.
 #' 
 #' @examples
 #' # Use an entry in the example data for input and germline sequence
@@ -844,12 +892,10 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
       if (thresh <= size){
         if (verbose) {cat(paste0(">>> mutThresh = ", thresh, "\n"))}
         # apply slideWindow on db
-        cur.logical = sapply(1:nrow(db), function(i){slideWindow(inputSeq = db[i, sequenceColumn],
-                                                                 germlineSeq = db[i, germlineColumn],
-                                                                 mutThresh = thresh,
-                                                                 windowSize = size)})
+        cur.logical = slideWindowDb(db, sequenceColumn, germlineColumn, 
+                                    mutThresh = thresh, windowSize = size)
       } else {
-        cat(paste0(">>> mutThresh = ", thresh, " > ", size, " (skipped)\n"))
+        if (verbose) {cat(paste0(">>> mutThresh = ", thresh, " > ", size, " (skipped)\n"))}
         # NA if skipped
         cur.logical = rep(NA, nrow(db))
       }
@@ -870,13 +916,14 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
     }
   }
   names(cur.list) = as.character(windowSizeRange)
-
+  
   return(cur.list)
 }
 
+
 #' Visualize parameter tuning for sliding window approach
 #'
-#' Visualize results from \code{slideWindowTune}
+#' Visualize results from \link{slideWindowTune}
 #' 
 #' @param    tuneList            a list of logical matrices returned by \link{slideWindowTune}.
 #' @param    plotFiltered        whether to plot the number of filtered sequences (as opposed to
@@ -901,16 +948,16 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #'           mutations in a window on the x-axis.
 #'           
 #'           When plotting, a 0.1 \code{amount} of jittering will be applied by default on the y-axis 
-#'           in order to allow for distinguishing lines for different window sizes from each other.
-#'           If desireable, different \code{amount} of jittering can be applied on either axis or 
-#'           both axes via adjusting \code{jitter.x}, \code{jitter.y}, \code{jitter.x.amt} and 
-#'           \code{jitter.y.amt}.
+#'           values in order to allow for visually distinguishing lines for different window sizes 
+#'           from each other in case they are very close or identical to each other. No or different 
+#'           \code{amount} of jittering can be applied on either axis or both axes via adjusting 
+#'           \code{jitter.x}, \code{jitter.y}, \code{jitter.x.amt} and \code{jitter.y.amt}.
 #'           
 #'           \code{NA} for a combination of \code{mutThresh} and \code{windowSize} where 
 #'           \code{mutThresh} is greater than \code{windowSize} will not be plotted. 
 #' 
-#' @seealso  See \link{slideWindowTune} for getting \code{tuneList}. See \link{jitter} for use of 
-#'           jittering \code{amount}.
+#' @seealso  See \link{slideWindowTune} for how to get \code{tuneList}. See \link{jitter} for 
+#'           use of \code{amount} of jittering.
 #' 
 #' @examples
 #' # Use an entry in the example data for input and germline sequence
@@ -919,7 +966,8 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' # Try out thresholds of 2-4 mutations in window sizes of 7-9 nucleotides 
 #' # on a subset of ExampleDb
 #' tuneList = slideWindowTune(db = ExampleDb[1:10, ], 
-#'                            mutThreshRange = 2:4, windowSizeRange = 3:5)
+#'                            mutThreshRange = 2:4, windowSizeRange = 3:5,
+#'                            verbose = FALSE)
 #'
 #' # Visualize
 #' # Plot numbers of sequences filtered
