@@ -884,6 +884,23 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
              max(mutThreshRange)<=max(windowSizeRange) &
              min(windowSizeRange)>=2 )
   
+  # get positions of R/S mutations for sequences in db
+  # do this here and then call slideWindowSeqHelper (so it's done only once)
+  # instead of calling slideWindowDb which does this every time it is called
+  inputMutList = sapply(1:nrow(db), 
+                        function(i){
+                            calcObservedMutations(inputSeq=db[i, sequenceColumn],
+                                                  germlineSeq=db[i, germlineColumn],
+                                                  returnRaw=T)})    
+  inputMutPosList = lapply(inputMutList, 
+                           function(x){
+                               if (!is.data.frame(x)) {
+                                   return(NA) 
+                               } else {
+                                   return(x$position)
+                               }
+                           })
+    
   # apply slideWindow on combinations of windowSize and mutThresh
   for (size in windowSizeRange) {
     if (verbose) {cat(paste0("now computing for windowSize = ", size, "\n"))}
@@ -891,9 +908,10 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
     for (thresh in mutThreshRange) {
       if (thresh <= size){
         if (verbose) {cat(paste0(">>> mutThresh = ", thresh, "\n"))}
-        # apply slideWindow on db
-        cur.logical = slideWindowDb(db, sequenceColumn, germlineColumn, 
-                                    mutThresh = thresh, windowSize = size)
+        # apply slideWindow using current pair of parameters
+        cur.logical = unlist(lapply(inputMutPosList,
+                                    slideWindowSeqHelper,
+                                    mutThresh = thresh, windowSize = size))
       } else {
         if (verbose) {cat(paste0(">>> mutThresh = ", thresh, " > windowSize = ", 
                                  size, " (skipped)\n"))}
