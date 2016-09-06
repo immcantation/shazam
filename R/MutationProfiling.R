@@ -470,13 +470,16 @@ observedMutations <- function(db,
 #'                               replacement and silent are determined by exact 
 #'                               amino acid identity.
 #' @param    returnRaw           return the positions of point mutations and their corresponding
-#'                               mutation types (as opposed to counts of mutations; hence "raw").
-#'                               Default if \code{FALSE}.                               
+#'                               mutation types (as opposed to counts of mutations; hence "raw"); 
+#'                               as well as the number of non-N bases used as the denominator when
+#'                               calculating frequency. Default if \code{FALSE}.                               
 #'                               
 #' @return   For \code{returnRaw=FALSE}, an \code{array} with the number of replacement (R) 
-#'           and silent(S) mutations. For \code{returnRaw=TRUE}, a data frame whose columns
-#'           (\code{position}, \code{type}, and \code{region}) indicate the position, 
-#'           mutation type (R or S), and region of each mutation.
+#'           and silent(S) mutations. For \code{returnRaw=TRUE}, a list containing a data 
+#'           frame (\code{$pos}) whose columns (\code{position}, \code{type}, and \code{region}) 
+#'           indicate the position, mutation type (R or S), and region of each mutation; and a 
+#'           vector (\code{$nonN}) indicating the number of non-N bases in regions defined by
+#'           \code{regionDefinition}.
 #'           
 #' @details
 #' Each mutation is considered independently in its codon context. Note, only the part of 
@@ -501,28 +504,41 @@ observedMutations <- function(db,
 #' 
 #' # Identify all mutations in the sequence
 #' ex1_raw = calcObservedMutations(in_seq, germ_seq, returnRaw=T)
-#' table(ex1_raw$region, ex1_raw$type)
 #' # Count all mutations in the sequence
 #' ex1_count = calcObservedMutations(in_seq, germ_seq, returnRaw=F)
+#' ex1_freq = calcObservedMutations(in_seq, germ_seq, returnRaw=F, frequency=T)
+#' # Compare this with ex1_count
+#' table(ex1_raw$pos$region, ex1_raw$pos$type)
+#' # Compare this with ex1_freq
+#' table(ex1_raw$pos$region, ex1_raw$pos$type) / ex1_raw$nonN
 #' 
 #' # Identify only mutations the V segment minus CDR3
 #' ex2_raw = calcObservedMutations(in_seq, germ_seq, 
 #'                                 regionDefinition=IMGT_V_NO_CDR3, returnRaw=T)
-#' table(ex2_raw$region, ex2_raw$type)                                 
 #' # Count only mutations the V segment minus CDR3
 #' ex2_count = calcObservedMutations(in_seq, germ_seq, 
 #'                                   regionDefinition=IMGT_V_NO_CDR3, returnRaw=F)
-#'  
+#' ex2_freq = calcObservedMutations(in_seq, germ_seq, 
+#'                                  regionDefinition=IMGT_V_NO_CDR3, returnRaw=F,
+#'                                  frequency=T)
+#' # Compare this with ex2_count
+#' table(ex2_raw$pos$region, ex2_raw$pos$type)                                 
+#' # Compare this with ex2_freq
+#' table(ex2_raw$pos$region, ex2_raw$pos$type) / ex2_raw$nonN                                        
+#' 
 #' # Identify mutations by change in hydropathy class
 #' ex3_raw = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
 #'                                 mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=T)
-#' table(ex3_raw$region, ex3_raw$type)                                 
 #' # Count mutations by change in hydropathy class
 #' ex3_count = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
 #'                                   mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=F)
 #' ex3_freq = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
 #'                                  mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=F, 
 #'                                  frequency=T)
+#' # Compre this with ex3_count
+#' table(ex3_raw$pos$region, ex3_raw$pos$type)                                        
+#' # Compare this with ex3_freq
+#' table(ex3_raw$pos$region, ex3_raw$pos$type) / ex3_raw$nonN                                        
 #'                                 
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
@@ -624,19 +640,26 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
     
     # return positions of point mutations and their mutation types ("raw")
     if (returnRaw){
+      # number of non-N bases (in both seq and gl)
+      nonN.regions <- unique(sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) }))
+      nonN.boundaries <- regionDefinition@boundaries[c_inputSeq%in%NUCLEOTIDES[1:4] &  
+                                                       c_germlineSeq%in%NUCLEOTIDES[1:4]]
+      nonN.denoms <- sapply(nonN.regions, function(x) { sum(nonN.boundaries==x) })
+      
       if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
         # if mutations_array_raw is NA, or 
         # if mutations_array_raw is empty due to all mutations being "Stop" and hence removed
         # avoid is.na(mutations_array_raw) to avoid warning in case mutations_array_raw is a vector
-        return(mutations_array_raw)
+        return(list(pos=mutations_array_raw, nonN=nonN.denoms))
       } else {
-      rawDf = data.frame(as.numeric(names(mutations_array_raw)))
-      rawDf = cbind(rawDf,
-                    as.character(mutations_array_raw), # as.character to remove names of the vector
-                    as.character(regionDefinition@boundaries[as.numeric(names(mutations_array_raw))]),
-                    stringsAsFactors=F)
-      colnames(rawDf) = c("position", "type", "region")
-      return(rawDf)
+        # df indicating position, mutation type (R or S), and region of each mutation
+        rawDf = data.frame(as.numeric(names(mutations_array_raw)))
+        rawDf = cbind(rawDf,
+                      as.character(mutations_array_raw), # as.character to remove names of the vector
+                      as.character(regionDefinition@boundaries[as.numeric(names(mutations_array_raw))]),
+                      stringsAsFactors=F)
+        colnames(rawDf) = c("position", "type", "region")
+      return(list(pos=rawDf, nonN=nonN.denoms))
       }
     } else {
     # return counts of each mutation type  
@@ -737,7 +760,7 @@ binMutationsByRegion <- function(mutationsArray,
 #' @export
 slideWindowSeq = function(inputSeq, germlineSeq, mutThresh, windowSize){
   # identify all R and S mutations in input sequence
-  inputMut = calcObservedMutations(inputSeq=inputSeq, germlineSeq=germlineSeq, returnRaw=T)
+  inputMut = calcObservedMutations(inputSeq=inputSeq, germlineSeq=germlineSeq, returnRaw=T)$pos
   
   # extract positions of mutations
   # inputMut must either be NA (no observed mutation) or a df
@@ -843,6 +866,11 @@ slideWindowDb = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' @param    db                  \code{data.frame} containing sequence data.
 #' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
 #' @param    germlineColumn      name of the column containing IMGT-gapped germline sequences.
+#' @param    dbMutList           if supplied, this should be a list of \code{data.frame}s returned 
+#'                               as \code{$pos} of the nested list produced by 
+#'                               \link{calcObservedMutations} with \code{returnRaw=TRUE}; otherwise, 
+#'                               \link{calcObservedMutations} is called on columns \code{sequenceColumn}
+#'                               and \code{germlineColumn} of \code{db}. Default is \code{NULL}. 
 #' @param    mutThreshRange      range of threshold on the number of mutations in \code{windowSize} 
 #'                               consecutive nucleotides to try. Must be between 1 and 
 #'                               maximum \code{windowSizeRange} inclusive. 
@@ -859,9 +887,14 @@ slideWindowDb = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #'           is greater than \code{windowSize}, \code{NA}s will be returned for that particular
 #'           combination. A message indicating that the combination has been "skipped" will be 
 #'           printed if \code{verbose=TRUE}.
+#'           
+#'           If \link{calcObservedMutations} was previously run on \code{db} and saved, supplying
+#'           \code{$pos} from the saved result as \code{dbMutList} could save time by skipping a
+#'           second call of \link{calcObservedMutations}. This could be helpful especially when 
+#'           \code{db} is large.
 #' 
 #' @seealso  \link{slideWindowDb} is called on \code{db} for tuning. See \link{slideWindowTunePlot} 
-#'           for visualization.
+#'           for visualization. See \link{calcObservedMutations} for generating \code{dbMutList}.
 #' 
 #' @examples
 #' # Use an entry in the example data for input and germline sequence
@@ -874,31 +907,50 @@ slideWindowDb = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' 
 #' # In the following case, illegal combinations are skipped, returning NAs                                  
 #' slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, windowSizeRange = 2:4)
-#'                                                                                                
+#'                                                             
+#' # Run calcObservedMutations separately and skip calling it again in slideWindowTune
+#' exDbMutList = sapply(1:5, 
+#'                    function(i){
+#'                      calcObservedMutations(inputSeq = ExampleDb[i, "SEQUENCE_IMGT"],
+#'                                            germlineSeq = ExampleDb[i, "GERMLINE_IMGT_D_MASK"],
+#'                                            returnRaw = TRUE)$pos})
+#' slideWindowTune(db = ExampleDb[1:5, ], dbMutList = exDbMutList, 
+#'                 mutThreshRange = 2:4, windowSizeRange = 2:4)                                                 
+#'                                                            
+#'                                                                                                                                                                                                                                                                      
 #' @export
 slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT", 
                            germlineColumn = "GERMLINE_IMGT_D_MASK",
+                           dbMutList = NULL,
                            mutThreshRange, windowSizeRange, verbose=TRUE){
   # check preconditions
+  stopifnot(!is.null(db))
   stopifnot( min(mutThreshRange)>=1 & 
              max(mutThreshRange)<=max(windowSizeRange) &
              min(windowSizeRange)>=2 )
   
+  
   # get positions of R/S mutations for sequences in db
   # do this here and then call slideWindowSeqHelper (so it's done only once)
   # instead of calling slideWindowDb which does this every time it is called
-  inputMutList = sapply(1:nrow(db), 
-                        function(i){
+  if (is.null(dbMutList)) {
+    inputMutList = sapply(1:nrow(db), 
+                          function(i){
                             calcObservedMutations(inputSeq=db[i, sequenceColumn],
                                                   germlineSeq=db[i, germlineColumn],
-                                                  returnRaw=T)})    
+                                                  returnRaw=T)$pos})    
+  } else {
+    if (verbose) {cat("dbMutList supplied; skipped calling calcObservedMutations()\n")}
+    inputMutList = dbMutList
+  }
+  
   inputMutPosList = lapply(inputMutList, 
                            function(x){
-                               if (!is.data.frame(x)) {
-                                   return(NA) 
-                               } else {
-                                   return(x$position)
-                               }
+                             if (!is.data.frame(x)) {
+                               return(NA) 
+                             } else {
+                               return(x$position)
+                             }
                            })
     
   # apply slideWindow on combinations of windowSize and mutThresh
