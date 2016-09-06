@@ -1099,8 +1099,11 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
   
   if (percentage) {
     ylab.part.1 = "Percentage of sequences"
-    # ylim: [0, 1]
-    ylims = c(0, 1)
+    # ylim
+    ylim.padding = abs(diff(range(plotList, na.rm=T)))*0.01
+    ylims = c(max(0, min(range(plotList, na.rm=T)) - ylim.padding), 
+              min(1, max(range(plotList, na.rm=T)) + ylim.padding) )
+
   } else {
     ylab.part.1 = "Number of sequences"
     # ylim: non-negative lower limit; upper limit slight above max tabulated sum
