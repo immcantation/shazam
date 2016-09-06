@@ -1077,10 +1077,11 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
     tuneList = lapply(tuneList, function(x){!x})
     ylab.part.2 = "remaining"}
   
-  # if single-valued, expand into vector with repeating values (otherwise legend would break)
-  if (length(pchs)==1) {pchs = rep(pchs, length(tuneList))}
-  if (length(ltys)==1) {ltys = rep(ltys, length(tuneList))}
-  if (length(cols)==1) {cols = rep(cols, length(tuneList))}
+  # if number of pchs/ltys/cols provided does not match number of lines expected
+  # expand into vector with repeating values (otherwise legend would break)
+  if (length(pchs)!=length(tuneList)) {pchs = rep(pchs, length(tuneList))}
+  if (length(ltys)!=length(tuneList)) {ltys = rep(ltys, length(tuneList))}
+  if (length(cols)!=length(tuneList)) {cols = rep(cols, length(tuneList))}
   
   # tabulate tuneList (and if applicable convert to percentage)
   plotList = lapply(tuneList, colSums)
