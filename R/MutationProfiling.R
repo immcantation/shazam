@@ -482,7 +482,7 @@ observedMutations <- function(db,
 #'           \code{regionDefinition}.
 #'           
 #' @details
-#' Each mutation is considered independently in its codon context. Note, only the part of 
+#' Each mutation is considered independently in the germline context. Note, only the part of 
 #' \code{inputSeq} defined in \code{regionDefinition} is analyzed. For example, when using 
 #' the default \link{IMGT_V_NO_CDR3} definition, then mutations in positions beyond 
 #' 312 will be ignored. 
