@@ -1,11 +1,4 @@
-Version 0.1.999: September 7, 2016
--------------------------------------------------------------------------------
-Distance Calculation:
-
-+ Added `findThreshold` function to infer clonal distance threshold from 
-  nearest neighbor distances returned by `distToNearest`.
-
-Version 0.1.5: August 23, 2016
+Version 0.1.4.999: September 7, 2016
 -------------------------------------------------------------------------------
 Targeting Models:
 
@@ -25,6 +18,12 @@ Mutation Profiling:
   using `slideWindowSeq()` and `slideWindowDb()`.
 + Added new function `slideWindowTunePlot()` which visualizes parameter tuning 
   by `slideWindowTune()`.
+  
+Distance Calculation:
+
++ Added `findThreshold` function to infer clonal distance threshold from 
+  nearest neighbor distances returned by `distToNearest`.
+
 
 Version 0.1.4:  August 5, 2016
 -------------------------------------------------------------------------------
