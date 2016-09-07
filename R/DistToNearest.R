@@ -286,6 +286,8 @@ nearestDist<- function(sequences, model=c("ham", "aa", "m1n", "hs1f", "hs5f"),
         } else if (model == "aa") {
             # Translate sequences
             seq_uniq <- setNames(alakazam::translateDNA(seq_uniq), seq_uniq)
+            # cat("\n-> seq_uniq:\n")
+            # print(seq_uniq)
             dist_mat <- pairwiseDist(seq_uniq, dist_mat=getAAMatrix())
         } else if (model == "hs5f") {
             if (is.null(targetingDistance)) {
@@ -381,6 +383,62 @@ nearestDist<- function(sequences, model=c("ham", "aa", "m1n", "hs1f", "hs5f"),
     }
     
     return(round(seq_dist, 4))
+}
+
+#' Find distance threshold
+#'
+#' Infer value of the minimum between the two modes in a bimodal distribution.
+#'
+#' @param    distances  numeric vector of distances.
+#' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
+#' 
+#' @return   Returns distance threshold that separates two modes of the input distribution.
+#'
+#' @details
+#' The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
+#' sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
+#' with the ideal threshold being a value that separates the two modes. This function takes 
+#' as input a vector of such distances and infers the ideal threshold.
+#' 
+#' @seealso  See \link{distToNearest} for details on generating the input distance vector.
+#' 
+#' @examples
+#' # Subset example data to one sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#' 
+#' # Use genotyped V assignments, HS1F model, and normalize by junction length
+#' dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
+#'                            model="hs1f", first=FALSE, normalize="length")
+#' threshold <- findThreshold(dist_hs1f$DIST_NEAREST)
+#'                            
+#' # Plot histogram of non-NA distances
+#' p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
+#'     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
+#'     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
+#'                    fill="steelblue", color="white") + 
+#'     geom_vline(xintercept=threshold, linetype="dashed")
+#' plot(p1)
+#'
+#' @export
+findThreshold <- function(distances, subsample=NULL) {
+    # Remove NA, NaN, and infinite distances
+    distances <- distances[!is.na(distances) & !is.nan(distances) & !is.infinite(distances)]
+    # Subsample input distances
+    if(!is.null(subsample)) {
+        distances <- sample(distances, subsample)
+    }
+    # Ideal bandwidth
+    h_ucv <- h.ucv(distances, 4)$h
+    # Density estimate
+    dens <- bkde(distances, bandwidth=h_ucv)
+    # Find threshold
+    tryCatch(threshold <- dens$x[which(diff(sign(diff(dens$y)))==2)[1]+1], 
+             error = function(e) {
+                 warning('No minimum was found between two modes.')
+                 return(NA)
+             })
+    return(threshold)
 }
 
 #' Distance to nearest neighbor

@@ -70,8 +70,10 @@
 #' defining clonal relationships.
 #'              
 #' \itemize{
+#'   \item  \link{findThreshold}:            Identify clonal assignment threshold based on 
+#'                                           distances to nearest neighbors.
 #'   \item  \link{distToNearest}:            Tune clonal assignment thresholds by calculating 
-#'                                           distances to nearest-neighbors.
+#'                                           distances to nearest neighbors.
 #'   \item  \link{calcTargetingDistance}:    Construct a nucleotide distance matrix from a 
 #'                                           5-mer targeting model.
 #' }
@@ -118,6 +120,8 @@
 #' @importFrom  foreach     foreach %dopar% registerDoSEQ
 #' @importFrom  igraph      V E as_adjacency_matrix graph_from_data_frame
 #'                          vertex_attr set_vertex_attr
+#' @importFrom  kedd        h.ucv
+#' @importFrom  KernSmooth  bkde
 #' @importFrom  lazyeval    interp
 #' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format
 #'                          math_format percent scientific

@@ -90,9 +90,17 @@ dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f",
 The primary use of the distance to nearest calculation in the Change-O pipeline 
 is to determine the optimal threshold for separating clonally related sequences 
 (represented by sequences with "near"" neighbors) from singletons (sequences 
-without "near"" neighbor), which show up as two modes in a histogram.
+without "near"" neighbor), which show up as two modes in a histogram. This can 
+be done using the `findThreshold` function, which will look for the minimum 
+between two modes of a distribution based on an input vector (`distances`). 
+Determining the optimal bandwidth parameter for smoothing the distribution can
+be computationally intensive. The bandwidth is typically robust when subsampling 
+down to 15,000 distances (possibly even fewer). The input vector can be 
+subsampled to the size specified using the `subsample` parameter.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
+# Find threshold for Hamming nearest neighbor distances
+threshold_ham <- findThreshold(dist_ham$DIST_NEAREST)
 # Generate Hamming distance histogram
 library(ggplot2)
 p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
@@ -100,21 +108,23 @@ p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
     theme_bw() + xlab("Hamming distance") + ylab("Count") +
     scale_x_continuous(breaks=seq(0, 1, 0.1)) +
     geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
-    geom_vline(xintercept=0.15, color="firebrick", linetype=3)
+    geom_vline(xintercept=threshold_ham, color="firebrick", linetype=3)
 plot(p1)
 ```
 
 In this example, the length normalized `ham` model distance threshold would be 
-set to a value near 0.15.
+set to a value near 0.12.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
+# Find threshold for HS5F nearest neighbor distances
+threshold_hs5f <- findThreshold(dist_hs5f$DIST_NEAREST)
 # Generate hs5f distance histogram
 p2 <- ggplot(subset(dist_hs5f, !is.na(DIST_NEAREST)),
              aes(x=DIST_NEAREST)) + 
     theme_bw() + xlab("HS5F distance") + ylab("Count") +
     scale_x_continuous(breaks=seq(0, 50, 5)) +
     geom_histogram(fill="steelblue", color="white", binwidth=1) +
-    geom_vline(xintercept=7, color="firebrick", linetype=3)
+    geom_vline(xintercept=threshold_hs5f, color="firebrick", linetype=3)
 plot(p2)
 ```
 
@@ -148,13 +158,13 @@ p3 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)),
              aes(x=DIST_NEAREST)) + 
     theme_bw() + xlab("Grouped Hamming distance") + ylab("Count") +
     geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
-    geom_vline(xintercept=0.15, color="firebrick", linetype=3) +
+    geom_vline(xintercept=threshold_ham, color="firebrick", linetype=3) +
     facet_grid(SAMPLE ~ ., scales="free_y")
 plot(p3)
 ```
 
-In this case, the threshold selected for `+7d` is not noticeably 
-different from that selected for `-1h`.
+In this case, the threshold selected for `-1h` seems to work well 
+for `+7d` as well.
 
 ### Calculating nearest neighbor distances across groups rather than within a groups
 
@@ -176,7 +186,7 @@ p4 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)),
              aes(x=CROSS_DIST_NEAREST)) + 
     theme_bw() + xlab("Cross-sample Hamming distance") + ylab("Count") +
     geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
-    geom_vline(xintercept=0.15, color="firebrick", linetype=3) +
+    geom_vline(xintercept=threshold_ham, color="firebrick", linetype=3) +
     facet_grid(SAMPLE ~ ., scales="free_y")
 plot(p4)
 ```

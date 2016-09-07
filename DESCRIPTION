@@ -45,6 +45,8 @@ Imports:
     grid,
     igraph,
     iterators,
+    kedd,
+    KernSmooth,
     methods,
     lazyeval,
     parallel,
