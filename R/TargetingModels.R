@@ -470,8 +470,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
 #' 
 #' @param subCount                 \code{data.frame} returned by \link{createSubstitutionMatrix}
 #'                                 with \code{numMutationsOnly=TRUE}.
-#' @param minNumMutationsRange     a number or a vector indicating the range of \code{minNumMutations}
-#'                                 to try.
+#' @param minNumMutationsRange     a number or a vector indicating the value or range of values
+#'                                 of \code{minNumMutations} to try.
 #' 
 #' @return      A 3xn matrix, where n is the number of trial values of \code{minNumMutations}
 #'              supplied in \code{minNumMutationsRange}. Each column corresponds to a value
@@ -566,17 +566,21 @@ minNumMutationsTune = function(subCount, minNumMutationsRange) {
 #' @param    minNumSeqMutations  minimum number of mutations in sequences containing each 5-mer
 #'                               to compute the mutability rates. If the number is smaller 
 #'                               than this threshold, the mutability for the 5-mer will be 
-#'                               inferred. Default is 500.    
+#'                               inferred. Default is 500. Not required if 
+#'                               \code{numSeqMutationsOnly=TRUE}.   
 #' @param    numSeqMutationsOnly when \code{TRUE}, return only a vector counting the number of 
 #'                               observed mutations in sequences containing each 5-mer. This 
 #'                               option can be used for parameter tuning for \code{minNumSeqMutations} 
-#'                               during preliminary analysis. Default is \code{FALSE}.                              
+#'                               during preliminary analysis using \link{minNumSeqMutationsTune}. 
+#'                               Default is \code{FALSE}.                              
 #' @param    returnSource        return the sources of 5-mer mutabilities (measured vs.
 #'                               inferred). Default is \code{FALSE}.                          
 #'
 #' @return   When \code{numSeqMutationsOnly} is \code{FALSE}, a named numeric vector of 1024 
 #'           normalized mutability rates for each 5-mer motif with names defining the 5-mer 
-#'           nucleotide sequence. When \code{numSeqMutationsOnly} is \code{TRUE}, a named numeric
+#'           nucleotide sequence. 
+#'           
+#'           When \code{numSeqMutationsOnly} is \code{TRUE}, a named numeric
 #'           vector of length 1024 counting the number of observed mutations in sequences containing 
 #'           each 5-mer.
 #' 
@@ -588,7 +592,8 @@ minNumMutationsTune = function(subCount, minNumMutationsRange) {
 #'  }
 #' 
 #' @seealso  \link{extendMutabilityMatrix}, \link{createSubstitutionMatrix}, 
-#'           \link{createTargetingMatrix}, \link{createTargetingModel}
+#'           \link{createTargetingMatrix}, \link{createTargetingModel},
+#'           \link{minNumSeqMutationsTune}
 #' 
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
@@ -597,7 +602,13 @@ minNumMutationsTune = function(subCount, minNumMutationsRange) {
 #'
 #' # Create model using only silent mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S")
-#' mut_model <- createMutabilityMatrix(db, sub_model, model="S")
+#' mut_model <- createMutabilityMatrix(db, sub_model, model="S", 
+#'                                     minNumSeqMutations=200,
+#'                                     numSeqMutationsOnly=FALSE)
+#' 
+#' # Count the number of mutations in sequences containing each 5-mer
+#' mut_count <- createMutabilityMatrix(db, sub_model, model="S", 
+#'                                    numSeqMutationsOnly=TRUE)
 #' 
 #' @export
 createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
@@ -752,11 +763,9 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     # Filter out 5-mers with low number of observed mutations in the sequences
     NumSeqMutations <- sapply(1:1024,function(i)sum(MutabilityWeights[!is.na(MutabilityMatrix[i,])])) 
     names(NumSeqMutations) = names(Mutability_Mean)
-    Mutability_Mean[NumSeqMutations < minNumSeqMutations] <- NA
+    if (numSeqMutationsOnly) {return(NumSeqMutations)}
     
-    if (numSeqMutationsOnly) {
-        return(NumSeqMutations)
-    }
+    Mutability_Mean[NumSeqMutations <= minNumSeqMutations] <- NA
     
     # Infer mutability for missing 5-mers
     .fillHot <-function(FIVEMER,mutability){
@@ -837,6 +846,74 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
     }
     
     return(Mutability_Mean_Complete)
+}
+
+
+#' Parameter tuning for minNumSeqMutations
+#' 
+#' \code{minNumSeqMutationsTune} helps with picking a threshold value for \code{minNumSeqMutations}
+#' in \link{createMutabilityMatrix} by tabulating the number of 5-mers for which 
+#' mutability would be computed directly or inferred at various threshold values.
+#' 
+#' @param mutCount                  a \code{vector} of length 1024 returned by 
+#'                                  \link{createMutabilityMatrix} with \code{numSeqMutationsOnly=TRUE}.
+#' @param minNumSeqMutationsRange   a number or a vector indicating the value or the range of values 
+#'                                  of \code{minNumSeqMutations} to try.
+#' 
+#' @return      A 2xn matrix, where n is the number of trial values of \code{minNumSeqMutations}
+#'              supplied in \code{minNumSeqMutationsRange}. Each column corresponds to a value
+#'              in \code{minNumSeqMutationsRange}. The rows correspond to the number of 5-mers
+#'              for which mutability would be computed directly (\code{"measured"}) and inferred
+#'              (\code{"inferred"}), respectively.
+#'              
+#' @details     At a given threshold value of \code{minNumSeqMutations}, for a given 5-mer,
+#'              if the total number of mutations is greater than the threshold, mutability 
+#'              is computed directly. Otherwise, mutability is inferred.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
+#'            Front Immunol. 2013 4(November):358.
+#'  }
+#' 
+#' @seealso     See argument \code{numSeqMutationsOnly} in \link{createMutabilityMatrix} 
+#'              for generating the required input \code{vector} \code{mutCount}. 
+#'              See argument \code{minNumSeqMutations} in \link{createMutabilityMatrix}
+#'              for what it does.  
+#' 
+#' @examples
+#' # Subset example data to one isotype and sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
+#'
+#' # Create model using only silent mutations
+#' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
+#'                                 returnModel="5mer", numMutationsOnly=FALSE,
+#'                                 minNumMutations=20)
+#'
+#' # Count the number of mutations in sequences containing each 5-mer
+#' mutCount <- createMutabilityMatrix(db, substitutionModel = sub,
+#'                                    model="S", multipleMutation="independent",
+#'                                    numSeqMutationsOnly=TRUE)
+#' 
+#' # Tune minNumSeqMutations
+#' minNumSeqMutationsTune(mutCount, seq(from=100, to=300, by=50))
+#'                                       
+#' @export
+minNumSeqMutationsTune = function(mutCount, minNumSeqMutationsRange) {
+  stopifnot( length(mutCount) == 1024 )
+  
+  tuneTable = sapply(minNumSeqMutationsRange, 
+                     function(thresh) {
+                       method.count = c( sum(mutCount > thresh),
+                                         sum(mutCount <= thresh) )
+                       names(method.count) = c("measured", "inferred")
+                       stopifnot( sum(method.count)==1024 )
+                       return(method.count)
+                     })
+  colnames(tuneTable) = minNumSeqMutationsRange
+  return(tuneTable)
 }
 
 
