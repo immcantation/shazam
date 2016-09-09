@@ -183,6 +183,7 @@ setClass("TargetingModel",
 #'                             substitution rates. If the number of mutations for a 5-mer
 #'                             is below this threshold, its substitution rates will be 
 #'                             estimated from neighboring 5-mers. Default is 50. 
+#'                             Not required if \code{numMutationsOnly=TRUE}. 
 #' @param    numMutationsOnly  when \code{TRUE}, return counting information on the number
 #'                             of mutations for each 5-mer, instead of building a substitution
 #'                             matrix. This option can be used for parameter tuning for 
@@ -192,10 +193,14 @@ setClass("TargetingModel",
 #'                             this argument is \code{TRUE} can serve as the input for
 #'                             \link{minNumMutationsTune}.                                                       
 #' 
-#' @return   For \code{returnModel = "5mer"}: when \code{numMutationsOnly} is \code{FALSE}, a 4x1024 matrix of column 
+#' @return   For \code{returnModel = "5mer"}: 
+#' 
+#'           When \code{numMutationsOnly} is \code{FALSE}, a 4x1024 matrix of column 
 #'           normalized substitution rates for each 5-mer motif with row names defining 
 #'           the center nucleotide, one of \code{c("A", "C", "G", "T")}, and column names 
-#'           defining the 5-mer nucleotide sequence. When \code{numMutationsOnly} is 
+#'           defining the 5-mer nucleotide sequence. 
+#'           
+#'           When \code{numMutationsOnly} is 
 #'           \code{TRUE}, a 1024x4 data frame with each row providing information on 
 #'           counting the number of mutations for a 5-mer. Columns are named 
 #'           \code{fivemer.total}, \code{fivemer.every}, \code{inner3.total}, and
@@ -204,6 +209,7 @@ setClass("TargetingModel",
 #'           whether there is mutation to every other base when counted as a 5-mer,
 #'           the total number of mutations when counted as an inner 3-mer, and
 #'           whether there is mutation to every other base when counted as an inner 3-mer.
+#'           
 #'           For \code{returnModel = "1mer"} or \code{"1mer_raw"}:
 #'           a 4x4 normalized or un-normalized 1-mer substitution matrix respectively.
 #' 
@@ -224,7 +230,13 @@ setClass("TargetingModel",
 #' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 #' 
 #' # Create model using only silent mutations
-#' sub <- createSubstitutionMatrix(db, model="S")
+#' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
+#'                                 returnModel="5mer", numMutationsOnly=FALSE)
+#' 
+#' # Count the number of mutations per 5-mer
+#' subCount <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
+#'                                      returnModel="5mer", numMutationsOnly=TRUE)
+
 #' 
 #' @export
 createSubstitutionMatrix <- function(db, model=c("RS", "S"), 
@@ -467,6 +479,24 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
 #'              for which substitution rates would be computed directly using the 5-mer itself 
 #'              (\code{"5mer"}), using its inner 3-mer (\code{"3mer"}), and using the central 
 #'              1-mer (\code{"1mer"}), respectively.
+#' 
+#' @details     At a given threshold value of \code{minNumMutations}, for a given 5-mer,
+#'              if the total number of mutations is greater than the threshold and there
+#'              are mutations to every other base, substitution rates are computed directly
+#'              for the 5-mer using its mutations. Otherwise, mutations from 5-mers with 
+#'              the same inner 3-mer as the 5-mer of interest are aggregated. If the number 
+#'              of such mutations is greater than the threshold and there are mutations to 
+#'              every other base, these mutations are used for inferring the substitution 
+#'              rates for the 5-mer of interest; if not, mutations from all 5-mers with the 
+#'              same center nucleotide are aggregated and used for inferring the substitution
+#'              rates for the 5-mer of interest (i.e. the 1-mer model).
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
+#'            Front Immunol. 2013 4(November):358.
+#'  }
 #' 
 #' @seealso     See argument \code{numMutationsOnly} in \link{createSubstitutionMatrix} 
 #'              for generating the required input \code{data.frame} \code{subCount}. 
