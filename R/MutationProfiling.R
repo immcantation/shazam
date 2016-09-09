@@ -1011,8 +1011,9 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' @param    ltys                line types to pass on to \link{plot}.
 #' @param    cols                colors to pass on to \link{plot}.                             
 #' @param    plotLegend          whether to plot legend. Default is \code{TRUE}.
-#' @param    legendPos           position of legend to pass on to \link{legend}. Default is
-#'                               \code{"topright"}.
+#' @param    legendPos           position of legend to pass on to \link{legend}. Can be either a
+#'                               numeric vector specifying x-y coordinates, or one of 
+#'                               \code{"topright"}, \code{"center"}, etc. Default is \code{"topright"}.
 #' @param    legendHoriz         whether to make legend horizontal. Default is \code{FALSE}.
 #' @param    legendCex           numeric values by which legend should be magnified relative to 1.
 #' 
@@ -1079,9 +1080,9 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
   
   # if number of pchs/ltys/cols provided does not match number of lines expected
   # expand into vector with repeating values (otherwise legend would break)
-  if (length(pchs)!=length(tuneList)) {pchs = rep(pchs, length(tuneList))}
-  if (length(ltys)!=length(tuneList)) {ltys = rep(ltys, length(tuneList))}
-  if (length(cols)!=length(tuneList)) {cols = rep(cols, length(tuneList))}
+  if (length(pchs)!=length(tuneList)) {pchs = rep(pchs, length.out=length(tuneList))}
+  if (length(ltys)!=length(tuneList)) {ltys = rep(ltys, length.out=length(tuneList))}
+  if (length(cols)!=length(tuneList)) {cols = rep(cols, length.out=length(tuneList))}
   
   # tabulate tuneList (and if applicable convert to percentage)
   plotList = lapply(tuneList, colSums)
@@ -1138,10 +1139,21 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
   
   # add legend
   if (plotLegend) {
-    legend(legendPos, legend = c("Window Size", names(tuneList)),
-           horiz = legendHoriz, cex = legendCex,
-           pch=c(NA, pchs), lty=c(NA, ltys), col=c(NA, cols))
+    # if legendPos specified as xy coordinates
+    if (is.numeric(legendPos) & length(legendPos)==2) {
+      legend(x=legendPos[1], y=legendPos[2], 
+             legend = c("Window Size", names(tuneList)),
+             horiz = legendHoriz, cex = legendCex,
+             pch=c(NA, pchs), lty=c(NA, ltys), col=c(NA, cols))
+    } else {
+    # if legendPos specified as "center", "topright", etc.  
+      legend(legendPos, 
+             legend = c("Window Size", names(tuneList)),
+             horiz = legendHoriz, cex = legendCex,
+             pch=c(NA, pchs), lty=c(NA, ltys), col=c(NA, cols))
+    }
   }
+  
 }
 
 
