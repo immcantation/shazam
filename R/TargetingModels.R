@@ -473,7 +473,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
 #' @param minNumMutationsRange     a number or a vector indicating the value or range of values
 #'                                 of \code{minNumMutations} to try.
 #' 
-#' @return      A 3xn matrix, where n is the number of trial values of \code{minNumMutations}
+#' @return      A 3xn \code{matrix}, where n is the number of trial values of \code{minNumMutations}
 #'              supplied in \code{minNumMutationsRange}. Each column corresponds to a value
 #'              in \code{minNumMutationsRange}. The rows correspond to the number of 5-mers
 #'              for which substitution rates would be computed directly using the 5-mer itself 
@@ -519,7 +519,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
 minNumMutationsTune = function(subCount, minNumMutationsRange) {
   stopifnot( nrow(subCount)==1024 & ncol(subCount)==4 )
 
-  tuneTable = sapply(minNumMutationsRange, 
+  tuneMtx = sapply(minNumMutationsRange, 
                      function(thresh) {
                        method.count = c(# as 5mer
                                         sum( subCount$fivemer.total > thresh & 
@@ -539,8 +539,8 @@ minNumMutationsTune = function(subCount, minNumMutationsRange) {
                        stopifnot( sum(method.count)==1024 )
                        return(method.count)
                      })
-  colnames(tuneTable) = minNumMutationsRange
-  return(tuneTable)
+  colnames(tuneMtx) = minNumMutationsRange
+  return(tuneMtx)
 }
 
 #' Builds a mutability model
@@ -860,7 +860,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #' @param minNumSeqMutationsRange   a number or a vector indicating the value or the range of values 
 #'                                  of \code{minNumSeqMutations} to try.
 #' 
-#' @return      A 2xn matrix, where n is the number of trial values of \code{minNumSeqMutations}
+#' @return      A 2xn \code{matrix}, where n is the number of trial values of \code{minNumSeqMutations}
 #'              supplied in \code{minNumSeqMutationsRange}. Each column corresponds to a value
 #'              in \code{minNumSeqMutationsRange}. The rows correspond to the number of 5-mers
 #'              for which mutability would be computed directly (\code{"measured"}) and inferred
@@ -904,7 +904,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 minNumSeqMutationsTune = function(mutCount, minNumSeqMutationsRange) {
   stopifnot( length(mutCount) == 1024 )
   
-  tuneTable = sapply(minNumSeqMutationsRange, 
+  tuneMtx = sapply(minNumSeqMutationsRange, 
                      function(thresh) {
                        method.count = c( sum(mutCount > thresh),
                                          sum(mutCount <= thresh) )
@@ -912,8 +912,8 @@ minNumSeqMutationsTune = function(mutCount, minNumSeqMutationsRange) {
                        stopifnot( sum(method.count)==1024 )
                        return(method.count)
                      })
-  colnames(tuneTable) = minNumSeqMutationsRange
-  return(tuneTable)
+  colnames(tuneMtx) = minNumSeqMutationsRange
+  return(tuneMtx)
 }
 
 
@@ -1638,6 +1638,171 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     invisible(plot_list)
 }
 
+
+#' Visualize parameter tuning for minNumMutations and minNumSeqMutations
+#'
+#' Visualize results from \link{minNumMutationsTune} and \link{minNumSeqMutationsTune}
+#' 
+#' @param    tuneMtx             a \code{matrix} or a \code{list} of matrices produced by either 
+#'                               \link{minNumMutationsTune} or \link{minNumSeqMutationsTune}.
+#'                               In the case of a list, it is assumed that each matrix corresponds
+#'                               to a sample and that all matrices in the list were produced using
+#'                               the same set of trial values of \code{minNumMutations} or 
+#'                               \code{minNumSeqMutations}.
+#' @param    thresh              a number or a vector of indicating the value or the range of values
+#'                               of \code{minNumMutations} or \code{minNumSeqMutations} to plot. 
+#'                               Should correspond to the columns of \code{tuneMtx}.
+#' @param    criterion           one of \code{"5mer"}, \code{"3mer"}, or \code{"1mer"} (for \code{tuneMtx}
+#'                               produced by \link{minNumMutationsTune}), or either \code{"measured"} or
+#'                               \code{"inferred"} (for \code{tuneMtx} produced by 
+#'                               \link{minNumSeqMutationsTune}).                
+#' @param    pchs                point types to pass on to \link{plot}.
+#' @param    ltys                line types to pass on to \link{plot}.
+#' @param    cols                colors to pass on to \link{plot}.                             
+#' @param    plotLegend          whether to plot legend. Default is \code{TRUE}. Only applicable 
+#'                               if \code{tuneMtx} is a named list with names of the matrices 
+#'                               corresponding to the names of the samples.
+#' @param    legendPos           position of legend to pass on to \link{legend}. Can be either a
+#'                               numeric vector specifying x-y coordinates, or one of 
+#'                               \code{"topright"}, \code{"center"}, etc. Default is \code{"topright"}.
+#' @param    legendHoriz         whether to make legend horizontal. Default is \code{FALSE}.
+#' @param    legendCex           numeric values by which legend should be magnified relative to 1.
+#' 
+#' @details  For \code{tuneMtx} produced by \link{minNumMutationsTune}, for each sample, depending on
+#'           \code{criterion}, the numbers of 5-mers for which substitution rates are directly computed
+#'           (\code{"5mer"}), inferred based on inner 3-mers (\code{"3mer"}), or inferred based on 
+#'           central 1-mers (\code{"1mer"}) are plotted on the y-axis against values of 
+#'           \code{minNumMutations} on the x-axis.
+#' 
+#'           For \code{tuneMtx} produced by \link{minNumSeqMutationsTune}, for each sample, depending on
+#'           \code{criterion}, the numbers of 5-mers for which mutability rates are directly measured
+#'           (\code{"measured"}) or inferred (\code{"inferred"}) are plotted on the y-axis against values
+#'           of \code{minNumSeqMutations} on the x-axis.
+#'           
+#'           Note that legends will be plotted only if \code{tuneMtx} is a supplied as a named \code{list}
+#'           of matrices, ideally with names of each \code{matrix} corresponding to those of the samples 
+#'           based on which the matrices were produced, even if \code{plotLegend=TRUE}.
+#' 
+#' @seealso  See \link{minNumMutationsTune} and \link{minNumSeqMutationsTune} for generating 
+#'           \code{tuneMtx}. 
+#' 
+#' @examples
+#' # Subset example data to one isotype and sample as demos
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE == "IgA")
+#' 
+#' tuneMtx = list()
+#' for (i in 1:length(unique(db$SAMPLE))) {
+#'     # Get data corresponding to current sample
+#'     curDb = db[db$SAMPLE==unique(db$SAMPLE)[i], ]
+#'     
+#'     # Count the number of mutations per 5-mer
+#'     subCount = createSubstitutionMatrix(db=curDb, model="S", multipleMutation="independent",
+#'                                         returnModel="5mer", numMutationsOnly=TRUE)
+#'     
+#'     # Tune over minNumMutations = 5..50
+#'     subTune = minNumMutationsTune(subCount, seq(from=5, to=50, by=5))
+#'     
+#'     tuneMtx = c(tuneMtx, list(subTune))
+#' }
+#'
+#' # Name tuneMtx after sample names 
+#' names(tuneMtx) = unique(db$SAMPLE)
+#' 
+#' # plot with legend for both samples for a subset of minNumMutations values
+#' plotTune(tuneMtx, thresh=c(5,15,25,40), criterion="3mer",
+#'          pchs=16:17, ltys=1:2, cols=2:3, 
+#'          plotLegend=TRUE, legendPos=c(5, 100))
+#' 
+#' # plot for only 1 sample for all the minNumMutations values (no legend)
+#' plotTune(tuneMtx[[1]], thresh=seq(from=5, to=50, by=5), criterion="3mer")
+#' 
+#' @export
+plotTune = function(tuneMtx, thresh, 
+                    criterion=c("5mer", "3mer", "1mer", "measured", "inferred"), 
+                    pchs = 1, ltys = 2, cols = 1,
+                    plotLegend = TRUE, legendPos = "topright", 
+                    legendHoriz = FALSE, legendCex = 1) {
+  
+  stopifnot(length(criterion)==1)
+  stopifnot(is.matrix(tuneMtx) | is.list(tuneMtx))
+  
+  ### extract plot data into plotMtx
+  # if tuneMtx is just a matrix
+  if (!is.list(tuneMtx)) {
+    plotMtx = matrix(tuneMtx[criterion, as.character(thresh)], nrow=1)
+  } else {
+  # if tuneMtx is a named list of matrices (e.g. corresponding to multiple samples)  
+    plotMtx = do.call(base::rbind, 
+                      lapply(tuneMtx, 
+                             function(mtx){mtx[criterion, as.character(thresh)]}))
+    rownames(plotMtx) = names(tuneMtx)
+  }
+  # sanity check: there should not be any NA
+  stopifnot(!any(is.na(plotMtx)))
+  
+  ### if number of pchs/ltys/cols provided does not match number of samples expected
+  # expand into vector with repeating values (otherwise legend would break)
+  if (length(pchs)!=nrow(plotMtx)) {pchs = rep(pchs, length.out=nrow(plotMtx))}
+  if (length(ltys)!=nrow(plotMtx)) {ltys = rep(ltys, length.out=nrow(plotMtx))}
+  if (length(cols)!=nrow(plotMtx)) {cols = rep(cols, length.out=nrow(plotMtx))}
+  
+  
+  ### axis labels
+  if (criterion %in% c("5mer", "3mer", "1mer")) {
+    xlab.name = "Minimum # mutations per 5-mer to\ndirectly compute 5-mer substitution rates"
+    # cannot use switch because variable names cannot start with number
+    ylab.name = "# 5-mers for which substitution rates are\n"
+    if (criterion=="5mer") {
+      ylab.name = paste(ylab.name, "directly computed")
+    } else if (criterion=="3mer") {
+      ylab.name = paste(ylab.name, "inferred based on inner 3-mers")
+    } else if (criterion=="1mer") {
+      ylab.name = paste(ylab.name, "inferred based on central 1-mers")
+    }
+  } else if (criterion %in% c("measured", "inferred")) {
+    xlab.name = "Minimum # mutations in sequences containing each 5-mer\nto directly compute mutability"
+    ylab.name = paste("# 5-mers for which mutability is", criterion)
+  }
+  
+  ### plot
+  # bottom, left, top, right
+  par(mar=c(6, 6, 4, 2) + 0.1)
+  for (i in 1:nrow(plotMtx)) {
+    if (i==1) {
+      plot(x=thresh, y=plotMtx[i, ], 
+           ylim=range(plotMtx),
+           xaxt="n", xlab="", ylab="",
+           cex.axis=1.5, type="b", lwd=1.5,
+           pch=pchs[i], lty=ltys[i], col=cols[i])
+      axis(side=1, at=thresh, cex.axis=1.5)
+      mtext(side=1, text=xlab.name, line=4, cex=1.2)
+      mtext(side=2, text=ylab.name, line=3, cex=1.2)
+    } else {
+      points(x=thresh, y=plotMtx[i, ],
+             type="b", lwd=1.5,
+             pch=pchs[i], lty=ltys[i], col=cols[i])
+    }
+  }
+  
+  ### legend (even if plotLegend=T, only plotted if tuneMtx is a named list)
+  if ( !is.null(rownames(plotMtx)) & plotLegend ) {
+    # if legendPos specified as xy coordinates
+    if (is.numeric(legendPos) & length(legendPos)==2) {
+      legend(x=legendPos[1], y=legendPos[2], 
+             legend = c("Sample", rownames(plotMtx)),
+             horiz = legendHoriz, cex = legendCex,
+             pch=c(NA, pchs), lty=c(NA, ltys), col=c(NA, cols))
+    } else {
+    # if legendPos specified as "center", "topright", etc.  
+      legend(legendPos, 
+             legend = c("Sample", rownames(plotMtx)),
+             horiz = legendHoriz, cex = legendCex,
+             pch=c(NA, pchs), lty=c(NA, ltys), col=c(NA, cols))
+    }
+  }
+  
+}
 
 #### Original BASELINe functions ####
 
