@@ -228,16 +228,16 @@ setClass("TargetingModel",
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
-#' 
-#' # Create model using only silent mutations
-#' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
-#'                                 returnModel="5mer", numMutationsOnly=FALSE)
-#' 
+#'
 #' # Count the number of mutations per 5-mer
 #' subCount <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
 #'                                      returnModel="5mer", numMutationsOnly=TRUE)
-
-#' 
+#'
+#' # Create model using only silent mutations
+#' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
+#'                                 returnModel="5mer", numMutationsOnly=FALSE,
+#'                                 minNumMutations=20)
+#'
 #' @export
 createSubstitutionMatrix <- function(db, model=c("RS", "S"), 
                                      sequenceColumn="SEQUENCE_IMGT",
