@@ -188,22 +188,23 @@ setClass("TargetingModel",
 #'                             matrix. This option can be used for parameter tuning for 
 #'                             \code{minNumMutations} during preliminary analysis. 
 #'                             Default is \code{FALSE}. Only applies when \code{returnModel} 
-#'                             is set to \code{"5mer"}.                                                          
+#'                             is set to \code{"5mer"}. The \code{data.frame} returned when
+#'                             this argument is \code{TRUE} can serve as the input for
+#'                             \link{minNumMutationsTune}.                                                       
 #' 
 #' @return   For \code{returnModel = "5mer"}: when \code{numMutationsOnly} is \code{FALSE}, a 4x1024 matrix of column 
 #'           normalized substitution rates for each 5-mer motif with row names defining 
 #'           the center nucleotide, one of \code{c("A", "C", "G", "T")}, and column names 
 #'           defining the 5-mer nucleotide sequence. When \code{numMutationsOnly} is 
-#'           \code{TRUE}, a 1024x5 data frame with each row providing information on 
+#'           \code{TRUE}, a 1024x4 data frame with each row providing information on 
 #'           counting the number of mutations for a 5-mer. Columns are named 
-#'           \code{fivemer.total}, \code{fivemer.every}, \code{inner3.total}, 
-#'           \code{inner3.every}, and \code{method}, corresponding to, respectively,
+#'           \code{fivemer.total}, \code{fivemer.every}, \code{inner3.total}, and
+#'           \code{inner3.every}, corresponding to, respectively,
 #'           the total number of mutations when counted as a 5-mer, 
 #'           whether there is mutation to every other base when counted as a 5-mer,
-#'           the total number of mutations when counted as an inner 3-mer, 
-#'           whether there is mutation to every other base when counted as an inner 3-mer,
-#'           and the method that would be used for computing substitution rate (\code{5mer}, 
-#'           \code{3mer}, or \code{1mer}). For \code{returnModel = "1mer"} or \code{"1mer_raw"}:
+#'           the total number of mutations when counted as an inner 3-mer, and
+#'           whether there is mutation to every other base when counted as an inner 3-mer.
+#'           For \code{returnModel = "1mer"} or \code{"1mer_raw"}:
 #'           a 4x4 normalized or un-normalized 1-mer substitution matrix respectively.
 #' 
 #' @references
@@ -214,7 +215,8 @@ setClass("TargetingModel",
 #'  }
 #'
 #' @seealso  \link{extendSubstitutionMatrix}, \link{createMutabilityMatrix}, 
-#'           \link{createTargetingMatrix}, \link{createTargetingModel}
+#'           \link{createTargetingMatrix}, \link{createTargetingModel},
+#'           \link{minNumMutationsTune}.
 #' 
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
@@ -398,26 +400,23 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
         FIVE.1=FIVE.1+fivemer[[MutatedNeighbor]][Nuc,]
       }
       
-      # For a 5mer, if the total number of mutations is greater than Thresh, 
-      # and if there are mutations to every other base, compute for the 5mer 
-      if ( fivemer.total > Thresh & fivemer.every ){
-        method = "5mer"
-        if (!count) {return(FIVE.5)}
-      } else { 
+      if (!count) {
+        # For a 5mer, if the total number of mutations is greater than Thresh, 
+        # and if there are mutations to every other base, compute for the 5mer 
+        if ( fivemer.total > Thresh & fivemer.every ){
+            return(FIVE.5)
+        } else if ( inner3.total > Thresh & inner3.every ) { 
         # Otherwise aggregate mutations from 5-mers with the same inner 3-mer
-        if ( inner3.total > Thresh & inner3.every ) {
-          method = "3mer"
-          if (!count) {return(FIVE.3)}
+            return(FIVE.3)
         } else {
-          # If the total number of mutations is still not enough, 
-          # aggregate mutations from all 5-mers (i.e., use 1-mer model)
-          method = "1mer"
-          if (!count) {return(FIVE.1)}
-        }
+        # If the total number of mutations is still not enough, 
+        # aggregate mutations from all 5-mers (i.e., use 1-mer model)
+            return(FIVE.1)
+        } 
       }
       
       return(data.frame(fivemer.total, fivemer.every,
-                        inner3.total, inner3.every, method, 
+                        inner3.total, inner3.every, 
                         stringsAsFactors=F))
     }
     
@@ -446,28 +445,73 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
                                                                count = numMutationsOnly) }, simplify=F)
       substitutionModel = dplyr::bind_rows(substitutionModel)
       rownames(substitutionModel) = seqinr::words(5, nuc_chars)
-      # sanity check
-      # number of 5mers for which substitution was computed as a 5mer should match 
-      # with number of 5mers fulfilling conditions for being computed as a 5mer
-      stopifnot( sum(substitutionModel$fivemer.total>minNumMutations & 
-                       substitutionModel$fivemer.every) 
-                 == 
-                   sum(substitutionModel$method =="5mer") )
-      # number of 5mers for which substitution was computed as its inner 3mer should match
-      # with number of 5mers which fail to fulfill conditions for being computed as 5mer and 
-      # which fulfill conditions for being computed as an inner 3mer
-      stopifnot( sum( (!(substitutionModel$fivemer.total>minNumMutations & 
-                           substitutionModel$fivemer.every)) 
-                      & 
-                        (substitutionModel$inner3.total>minNumMutations & 
-                           substitutionModel$inner3.every) ) 
-                 == 
-                   sum(substitutionModel$method =="3mer") )
     }
     
     return(substitutionModel)
 }
 
+#' Parameter tuning for minNumMutations
+#' 
+#' \code{minNumMutationsTune} helps with picking a threshold value for \code{minNumMutations}
+#' in \link{createSubstitutionMatrix} by tabulating the number of 5-mers for which 
+#' substitution rates would be computed directly or inferred at various threshold values.
+#' 
+#' @param subCount                 \code{data.frame} returned by \link{createSubstitutionMatrix}
+#'                                 with \code{numMutationsOnly=TRUE}.
+#' @param minNumMutationsRange     a number or a vector indicating the range of \code{minNumMutations}
+#'                                 to try.
+#' 
+#' @return      A 3xn matrix, where n is the number of trial values of \code{minNumMutations}
+#'              supplied in \code{minNumMutationsRange}. Each column corresponds to a value
+#'              in \code{minNumMutationsRange}. The rows correspond to the number of 5-mers
+#'              for which substitution rates would be computed directly using the 5-mer itself 
+#'              (\code{"5mer"}), using its inner 3-mer (\code{"3mer"}), and using the central 
+#'              1-mer (\code{"1mer"}), respectively.
+#' 
+#' @seealso     See argument \code{numMutationsOnly} in \link{createSubstitutionMatrix} 
+#'              for generating the required input \code{data.frame} \code{subCount}. 
+#'              See argument \code{minNumMutations} in \link{createSubstitutionMatrix}
+#'              for what it does.  
+#' 
+#' @examples
+#' # Subset example data to one isotype and sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
+#'
+#' # Count the number of mutations per 5-mer
+#' subCount <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
+#'                                      returnModel="5mer", numMutationsOnly=TRUE)
+#' 
+#' # Tune minNumMutations
+#' minNumMutationsTune(subCount, seq(from=10, to=100, by=10))
+#'                                       
+#' @export
+minNumMutationsTune = function(subCount, minNumMutationsRange) {
+  stopifnot( nrow(subCount)==1024 & ncol(subCount)==4 )
+
+  tuneTable = sapply(minNumMutationsRange, 
+                     function(thresh) {
+                       method.count = c(# as 5mer
+                                        sum( subCount$fivemer.total > thresh & 
+                                             subCount$fivemer.every ),
+                                        # as inner 3mer
+                                        sum( !(subCount$fivemer.total > thresh & 
+                                               subCount$fivemer.every) &
+                                             (subCount$inner3.total > thresh & 
+                                              subCount$inner3.every) ),
+                                        # as 1mer
+                                        sum( !(subCount$fivemer.total > thresh & 
+                                               subCount$fivemer.every) & 
+                                             !(subCount$inner3.total > thresh & 
+                                               subCount$inner3.every) )
+                                       )
+                       names(method.count) = c("5mer", "3mer", "1mer")
+                       stopifnot( sum(method.count)==1024 )
+                       return(method.count)
+                     })
+  colnames(tuneTable) = minNumMutationsRange
+  return(tuneTable)
+}
 
 #' Builds a mutability model
 #'
