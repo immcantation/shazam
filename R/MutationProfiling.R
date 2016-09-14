@@ -503,10 +503,10 @@ observedMutations <- function(db,
 #' germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
 #' 
 #' # Identify all mutations in the sequence
-#' ex1_raw = calcObservedMutations(in_seq, germ_seq, returnRaw=T)
+#' ex1_raw = calcObservedMutations(in_seq, germ_seq, returnRaw=TRUE)
 #' # Count all mutations in the sequence
-#' ex1_count = calcObservedMutations(in_seq, germ_seq, returnRaw=F)
-#' ex1_freq = calcObservedMutations(in_seq, germ_seq, returnRaw=F, frequency=T)
+#' ex1_count = calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE)
+#' ex1_freq = calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE, frequency=TRUE)
 #' # Compare this with ex1_count
 #' table(ex1_raw$pos$region, ex1_raw$pos$type)
 #' # Compare this with ex1_freq
@@ -514,13 +514,13 @@ observedMutations <- function(db,
 #' 
 #' # Identify only mutations the V segment minus CDR3
 #' ex2_raw = calcObservedMutations(in_seq, germ_seq, 
-#'                                 regionDefinition=IMGT_V_NO_CDR3, returnRaw=T)
+#'                                 regionDefinition=IMGT_V_NO_CDR3, returnRaw=TRUE)
 #' # Count only mutations the V segment minus CDR3
 #' ex2_count = calcObservedMutations(in_seq, germ_seq, 
-#'                                   regionDefinition=IMGT_V_NO_CDR3, returnRaw=F)
+#'                                   regionDefinition=IMGT_V_NO_CDR3, returnRaw=FALSE)
 #' ex2_freq = calcObservedMutations(in_seq, germ_seq, 
-#'                                  regionDefinition=IMGT_V_NO_CDR3, returnRaw=F,
-#'                                  frequency=T)
+#'                                  regionDefinition=IMGT_V_NO_CDR3, returnRaw=FALSE,
+#'                                  frequency=TRUE)
 #' # Compare this with ex2_count
 #' table(ex2_raw$pos$region, ex2_raw$pos$type)                                 
 #' # Compare this with ex2_freq
@@ -528,13 +528,13 @@ observedMutations <- function(db,
 #' 
 #' # Identify mutations by change in hydropathy class
 #' ex3_raw = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
-#'                                 mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=T)
+#'                                 mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=TRUE)
 #' # Count mutations by change in hydropathy class
 #' ex3_count = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
-#'                                   mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=F)
+#'                                   mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=FALSE)
 #' ex3_freq = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
-#'                                  mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=F, 
-#'                                  frequency=T)
+#'                                  mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=FALSE, 
+#'                                  frequency=TRUE)
 #' # Compre this with ex3_count
 #' table(ex3_raw$pos$region, ex3_raw$pos$type)                                        
 #' # Compare this with ex3_freq
@@ -903,10 +903,12 @@ slideWindowDb = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' # Try out thresholds of 2-4 mutations in window sizes of 7-9 nucleotides 
 #' # on a subset of ExampleDb
 #' # In this case, all combinations are legal and thus computed
-#' slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, windowSizeRange = 7:9)
+#' slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, 
+#'                 windowSizeRange = 7:9)
 #' 
 #' # In the following case, illegal combinations are skipped, returning NAs                                  
-#' slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, windowSizeRange = 2:4)
+#' slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, 
+#'                 windowSizeRange = 2:4, verbose = FALSE)
 #'                                                             
 #' # Run calcObservedMutations separately and skip calling it again in slideWindowTune
 #' exDbMutList = sapply(1:5, 
@@ -917,7 +919,6 @@ slideWindowDb = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' slideWindowTune(db = ExampleDb[1:5, ], dbMutList = exDbMutList, 
 #'                 mutThreshRange = 2:4, windowSizeRange = 2:4)                                                 
 #'                                                            
-#'                                                                                                                                                                                                                                                                      
 #' @export
 slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT", 
                            germlineColumn = "GERMLINE_IMGT_D_MASK",
@@ -1048,21 +1049,22 @@ slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #' # Visualize
 #' # Plot numbers of sequences filtered without jittering y-axis values
 #' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, 
-#'                     plotFiltered=T, jitter.y=F)
+#'                     plotFiltered=TRUE, jitter.y=FALSE)
 #'                     
 #' # Notice that some of the lines overlap
 #' # Jittering could help
 #' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
-#'                     plotFiltered=T, jitter.y=T)
+#'                     plotFiltered=TRUE, jitter.y=TRUE)
 #'                     
 #' # Plot numbers of sequences remaining instead of filtered
 #' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, 
-#'                     plotFiltered=F, jitter.y=T, legendPos="bottomright")
+#'                     plotFiltered=FALSE, jitter.y=TRUE, 
+#'                     legendPos="bottomright")
 #'                     
 #' # Plot percentages of sequences filtered with a tiny amount of jittering
 #' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
-#'                     plotFiltered=T, percentage=T, 
-#'                     jitter.y=T, jitter.y.amt=0.01)
+#'                     plotFiltered=TRUE, percentage=TRUE, 
+#'                     jitter.y=TRUE, jitter.y.amt=0.01)
 #'                                                             
 #' @export
 slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE,
