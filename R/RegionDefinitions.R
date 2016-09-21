@@ -10,7 +10,6 @@ REGION_PALETTE <-  c("CDR"="#377eb8",
                      "FWR"="#e41a1c",
                      "CDR1"="#ff7f00",
                      "CDR2"="#a65628",
-                     "CDR3"="#377eb8",
                      "FWR1"="#4daf4a",
                      "FWR2"="#984ea3",
                      "FWR3"="#e41a1c")
@@ -49,7 +48,7 @@ setClass("RegionDefinition",
                  regions="character",
                  labels="character",
                  citation="character"),
-         prototype=c(name="IMGT_V_NO_CDR3",
+         prototype=c(name="IMGT_V",
                      description="IMGT_Numbering scheme defining the V gene up to, but not including, CDR3.",
                      boundaries=factor(c(rep("FWR", 78), 
                                          rep("CDR", 36),  
@@ -141,10 +140,8 @@ makeNullRegionDefinition <- function(regionLength) {
 #'
 #' @format A \link{RegionDefinition} object containing:
 #' \itemize{
-#'   \item  \code{IMGT_V}:                     Grouped CDR and FWR V-segment regions including CDR3.
-#'   \item  \code{IMGT_V_BY_REGIONS}:          Individual CDR and FWR V-segment regions including CDR3.
-#'   \item  \code{IMGT_V_NO_CDR3}:             Grouped CDR and FWR V-segment regions excluding CDR3.
-#'   \item  \code{IMGT_V_BY_REGIONS_NO_CDR3}:  Individual CDR and FWR V-segment regions excluding CDR3.
+#'   \item  \code{IMGT_V}:                     Grouped CDR and FWR V-segment regions excluding CDR3.
+#'   \item  \code{IMGT_V_BY_REGIONS}:          Individual CDR and FWR V-segment regions excluding CDR3.
 #' }
 #' 
 #' @references
@@ -165,10 +162,3 @@ NULL
 #' @rdname  IMGT_SCHEMES
 NULL
 
-#' @name    IMGT_V_NO_CDR3
-#' @rdname  IMGT_SCHEMES
-NULL
-
-#' @name    IMGT_V_BY_REGIONS_NO_CDR3
-#' @rdname  IMGT_SCHEMES
-NULL
