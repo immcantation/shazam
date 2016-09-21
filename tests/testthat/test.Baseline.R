@@ -10,7 +10,7 @@ load(file.path("..", "data-tests", "ExampleDb.rda"))
 test_that("calculateTargeting and calculateMutationalPaths with regionDefinition==NULL", {
     
     ##--
-    ## With regionDefinition = IMGT_V_NO_CDR3
+    ## With regionDefinition = IMGT_V
     ##--
     ## calculateTargeting and calculateMutationalPaths 
     ## as used by calcExpectedMutations
@@ -21,8 +21,8 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     targeting <- shazam:::calculateTargeting(germlineSeq = germlineSeq, 
                                     inputSeq = inputSeq,
                                     targetingModel = HS5FModel,
-                                    regionDefinition = IMGT_V_NO_CDR3)
-    expect_equal(dim(targeting),c(5,IMGT_V_NO_CDR3@seqLength))
+                                    regionDefinition = IMGT_V)
+    expect_equal(dim(targeting),c(5,IMGT_V@seqLength))
     
     obs_targeting <- targeting[3,c(1,10,50,78,312)]
     exp_targeting <- c(NA, 0.0011048048, NA, 0.0001235885, 0.0002081728)
@@ -31,7 +31,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
         
     mutationalPaths <- shazam:::calculateMutationalPaths(
                             germlineSeq = seqinr::c2s(colnames(targeting)), 
-                            regionDefinition = IMGT_V_NO_CDR3)
+                            regionDefinition = IMGT_V)
     
     obs_mpath <- mutationalPaths[3,c(1,10,50,78,312)]
     exp_mpath <- c("S", "R", "S", "S", "R" )
@@ -75,7 +75,7 @@ test_that("calcExpectedMutations works with regionDefinition==NULL",{
     germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
     
     obs_mutations <- calcExpectedMutations(inputSeq, germlineSeq, targetingModel = HS5FModel, 
-                          regionDefinition = IMGT_V_NO_CDR3)
+                          regionDefinition = IMGT_V)
     exp_mutations <- c(0.16184071, 0.04872069, 0.57766105, 0.21177756)
     names(exp_mutations) <- c("CDR_R", "CDR_S", "FWR_R", "FWR_S")
     expect_equal(obs_mutations, exp_mutations, tolerance=0.001)
@@ -93,7 +93,7 @@ test_that("expectedMutations works with regionDefinition==NULL",{
     db_mutations <- expectedMutations(db_subset,
                              sequenceColumn="SEQUENCE_IMGT",
                              germlineColumn="GERMLINE_IMGT_D_MASK",
-                             regionDefinition=IMGT_V_NO_CDR3,
+                             regionDefinition=IMGT_V,
                              nproc=1)
     
     ## Check 5 examples for each, at different positions
@@ -143,7 +143,7 @@ test_that("calcObservedMutations works with regionDefinition==NULL",{
     germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
     
     obs_mutations <- calcObservedMutations(inputSeq, germlineSeq, 
-                                           regionDefinition=IMGT_V_NO_CDR3,
+                                           regionDefinition=IMGT_V,
                                            frequency=F)
     
     ## TODO: should sum(exp_mutations) and sum(exp_mutations_null) match?
@@ -164,7 +164,7 @@ test_that("observedMutations works with regionDefinition==NULL",{
     db_mutations <- observedMutations(db_subset,
                                       sequenceColumn="SEQUENCE_IMGT",
                                       germlineColumn="GERMLINE_IMGT_D_MASK",
-                                      regionDefinition=IMGT_V_NO_CDR3,
+                                      regionDefinition=IMGT_V,
                                       nproc=1)
     ## Check 5 examples for each
     ## CDR_R, first 5
@@ -216,7 +216,7 @@ test_that("calcBaseline", {
                                 sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
                                 testStatistic="focused",
-                                regionDefinition=IMGT_V_NO_CDR3,
+                                regionDefinition=IMGT_V,
                                 targetingModel = HS5FModel,
                                 nproc = 1,
                                 calcStats = T)
@@ -254,7 +254,7 @@ test_that("calcBaseline", {
 #     expect_equal(obs_fwr_s, exp_fwr_s)
 
     
-    ## If we trim the sequences to 1:312 (this is the region IMGT_V_NO_CDR3)
+    ## If we trim the sequences to 1:312 (this is the region IMGT_V)
     ## we expect to get the same results setting regionDefinition=NULL
     ## Setting CLONE to NULL
     ## TODO: test with CLONE
@@ -315,7 +315,7 @@ test_that("calcBaseline", {
                                 sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
                                 testStatistic="focused",
-                                regionDefinition=IMGT_V_NO_CDR3,
+                                regionDefinition=IMGT_V,
                                 targetingModel = HS5FModel,
                                 nproc = 1,
                                 calcStats = T)
@@ -335,11 +335,11 @@ test_that("calcBaseline", {
     expect_equivalent(total_trim_null, total_baseline)
     
     ## Should match observedMutations, with the full seqs and region 
-    ## IMGT_V_NO_CDR3 and the trimmed seqs and region NULL
+    ## IMGT_V and the trimmed seqs and region NULL
     obs_mu <- observedMutations(db_1_to_5,
                                 sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
-                                regionDefinition=IMGT_V_NO_CDR3,
+                                regionDefinition=IMGT_V,
                                 nproc=1)
     expect_equivalent(
         rowSums(obs_mu[,grep("OBSERVED", colnames(obs_mu))]), 
@@ -387,7 +387,7 @@ test_that("Test groupBaseline", {
                              sequenceColumn="SEQUENCE_IMGT",
                              germlineColumn="GERMLINE_IMGT_D_MASK",
                              testStatistic="focused",
-                             regionDefinition=IMGT_V_NO_CDR3,
+                             regionDefinition=IMGT_V,
                              targetingModel=HS5FModel,
                              nproc=1)
     

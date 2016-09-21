@@ -238,7 +238,7 @@ editBaseline <- function(baseline, field_name, value) {
 #'                          sequenceColumn="SEQUENCE_IMGT",
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
-#'                          regionDefinition=IMGT_V_NO_CDR3,
+#'                          regionDefinition=IMGT_V,
 #'                          targetingModel = HS5FModel,
 #'                          nproc = 1)
 #' 
@@ -341,7 +341,7 @@ getBaselineStats <- function(baseline) {
 #'                          sequenceColumn="SEQUENCE_IMGT",
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
-#'                          regionDefinition=IMGT_V_NO_CDR3,
+#'                          regionDefinition=IMGT_V,
 #'                          targetingModel = HS5FModel,
 #'                          nproc=1)
 #'                          
@@ -756,7 +756,7 @@ calcBaselineBinomialPdf <- function (x=3,
 #'                          sequenceColumn="SEQUENCE_IMGT",
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
-#'                          regionDefinition=IMGT_V_NO_CDR3,
+#'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HS5FModel,
 #'                          nproc=1)
 #'                          
@@ -1052,7 +1052,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                          sequenceColumn="SEQUENCE_IMGT",
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
-#'                          regionDefinition=IMGT_V_NO_CDR3,
+#'                          regionDefinition=IMGT_V,
 #'                          targetingModel = HS5FModel,
 #'                          nproc = 1)
 #' 
@@ -1174,7 +1174,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'                          sequenceColumn="SEQUENCE_IMGT",
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
-#'                          regionDefinition=IMGT_V_NO_CDR3,
+#'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HS5FModel,
 #'                          nproc=1)
 #' 
@@ -1376,7 +1376,7 @@ baseline2DistPValue <-function(base1, base2) {
 #'                          sequenceColumn="SEQUENCE_IMGT",
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
-#'                          regionDefinition=IMGT_V_NO_CDR3,
+#'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HS5FModel,
 #'                          nproc=1)
 #'  
@@ -1581,7 +1581,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #'                          sequenceColumn="SEQUENCE_IMGT",
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
-#'                          regionDefinition=IMGT_V_NO_CDR3,
+#'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HS5FModel,
 #'                          nproc=1)
 #'  

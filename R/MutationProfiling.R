@@ -72,7 +72,7 @@ NULL
 #'                          
 #' # Build clonal consensus for V-region only 
 #' # Return the same number of rows as the input
-#' clones <- collapseClones(db, regionDefinition=IMGT_V_NO_CDR3, 
+#' clones <- collapseClones(db, regionDefinition=IMGT_V, 
 #'                          expandedDb=TRUE, nproc=1)
 #' 
 #' @export
@@ -310,7 +310,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
 #' @return   A modified \code{db} \code{data.frame} with observed mutation counts for each 
 #'           sequence listed. The columns names are dynamically created based on the
 #'           regions in the \code{regionDefinition}. For example, when using the
-#'           \link{IMGT_V_NO_CDR3} definition, which defines positions for CDR and
+#'           \link{IMGT_V} definition, which defines positions for CDR and
 #'           FWR, the following columns are added:
 #'           \itemize{
 #'             \item  \code{OBSERVED_CDR_R}:  number of replacement mutations in CDR1 and 
@@ -356,7 +356,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
 #' # With mutations only considered replacement if charge changes
 #' db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
 #'                             germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                             regionDefinition=IMGT_V_NO_CDR3,
+#'                             regionDefinition=IMGT_V,
 #'                             mutationDefinition=CHARGE_MUTATIONS,
 #'                             nproc=1)
 #'                      
@@ -484,7 +484,7 @@ observedMutations <- function(db,
 #' @details
 #' Each mutation is considered independently in the germline context. Note, only the part of 
 #' \code{inputSeq} defined in \code{regionDefinition} is analyzed. For example, when using 
-#' the default \link{IMGT_V_NO_CDR3} definition, then mutations in positions beyond 
+#' the default \link{IMGT_V} definition, then mutations in positions beyond 
 #' 312 will be ignored. 
 #' 
 #' Note that only replacement (R) and silent (S) mutations are included in the 
@@ -514,12 +514,12 @@ observedMutations <- function(db,
 #' 
 #' # Identify only mutations the V segment minus CDR3
 #' ex2_raw = calcObservedMutations(in_seq, germ_seq, 
-#'                                 regionDefinition=IMGT_V_NO_CDR3, returnRaw=TRUE)
+#'                                 regionDefinition=IMGT_V, returnRaw=TRUE)
 #' # Count only mutations the V segment minus CDR3
 #' ex2_count = calcObservedMutations(in_seq, germ_seq, 
-#'                                   regionDefinition=IMGT_V_NO_CDR3, returnRaw=FALSE)
+#'                                   regionDefinition=IMGT_V, returnRaw=FALSE)
 #' ex2_freq = calcObservedMutations(in_seq, germ_seq, 
-#'                                  regionDefinition=IMGT_V_NO_CDR3, returnRaw=FALSE,
+#'                                  regionDefinition=IMGT_V, returnRaw=FALSE,
 #'                                  frequency=TRUE)
 #' # Compare this with ex2_count
 #' table(ex2_raw$pos$region, ex2_raw$pos$type)                                 
@@ -527,12 +527,12 @@ observedMutations <- function(db,
 #' table(ex2_raw$pos$region, ex2_raw$pos$type) / ex2_raw$nonN                                        
 #' 
 #' # Identify mutations by change in hydropathy class
-#' ex3_raw = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
+#' ex3_raw = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 #'                                 mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=TRUE)
 #' # Count mutations by change in hydropathy class
-#' ex3_count = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
+#' ex3_count = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 #'                                   mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=FALSE)
-#' ex3_freq = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
+#' ex3_freq = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 #'                                  mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=FALSE, 
 #'                                  frequency=TRUE)
 #' # Compre this with ex3_count
@@ -684,7 +684,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 # 
 # @details
 # Note, only the part of sequences defined in \code{regionDefinition} are analyzed.
-# For example, if the default \link{IMGT_V_NO_CDR3} definition is used, then mutations
+# For example, if the default \link{IMGT_V} definition is used, then mutations
 # in positions beyond 312 will be ignored.
 # 
 # @seealso  
@@ -701,7 +701,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 # 
 # # Random mutations
 # binMutationsByRegion(mutations_array, regionDefinition=NULL)
-# binMutationsByRegion(mutations_array, regionDefinition=IMGT_V_NO_CDR3)
+# binMutationsByRegion(mutations_array, regionDefinition=IMGT_V)
 binMutationsByRegion <- function(mutationsArray, 
                                  regionDefinition=NULL) {
     # Create full sequence RegionDefinition object 
@@ -1187,7 +1187,7 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
 #'           for each region defined in \code{regionDefinition}.
 #'          
 #'           The columns names are dynamically created based on the regions in  
-#'           \code{regionDefinition}. For example, when using the \link{IMGT_V_NO_CDR3}
+#'           \code{regionDefinition}. For example, when using the \link{IMGT_V}
 #'           definition, which defines positions for CDR and FWR, the following columns are
 #'           added:  
 #'           \itemize{
@@ -1203,7 +1203,7 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
 #'           
 #' @details
 #' Only the part of the sequences defined in \code{regionDefinition} are analyzed. 
-#' For example, when using the \link{IMGT_V_NO_CDR3} definition, mutations in
+#' For example, when using the \link{IMGT_V} definition, mutations in
 #' positions beyond 312 will be ignored.
 #' 
 #' @seealso  
@@ -1221,14 +1221,14 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
 #' db_exp <- expectedMutations(db,
 #'                             sequenceColumn="SEQUENCE_IMGT",
 #'                             germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                             regionDefinition=IMGT_V_NO_CDR3,
+#'                             regionDefinition=IMGT_V,
 #'                             nproc=1)
 #' 
 #' # Calculate hydropathy expected mutations over V region
 #' db_exp <- expectedMutations(db,
 #'                            sequenceColumn="SEQUENCE_IMGT",
 #'                            germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                            regionDefinition=IMGT_V_NO_CDR3,
+#'                            regionDefinition=IMGT_V,
 #'                            mutationDefinition=HYDROPATHY_MUTATIONS,
 #'                            nproc=1)
 #'
@@ -1340,7 +1340,7 @@ expectedMutations <- function(db,
 #'                               
 #' @return   A \code{numeric} vector of the expected frequencies of mutations in the 
 #'           regions in the \code{regionDefinition}. For example, when using the default 
-#'           \link{IMGT_V_NO_CDR3} definition, which defines positions for CDR and 
+#'           \link{IMGT_V} definition, which defines positions for CDR and 
 #'           FWR, the following columns are calculated:
 #'           \itemize{
 #'              \item  \code{EXPECTED_CDR_R}:  number of replacement mutations in CDR1 and 
@@ -1358,7 +1358,7 @@ expectedMutations <- function(db,
 #' given sequence and its germline. 
 #' 
 #' Note, only the part of the sequences defined in \code{regionDefinition} are analyzed. 
-#' For example, when using the default \link{IMGT_V_NO_CDR3} definition, mutations in
+#' For example, when using the default \link{IMGT_V} definition, mutations in
 #' positions beyond 312 will be ignored.
 #' 
 #' @seealso  \link{expectedMutations} calls this function.
@@ -1377,10 +1377,10 @@ expectedMutations <- function(db,
 #' calcExpectedMutations(in_seq, germ_seq)
 #' 
 #' # Identify only mutations the V segment minus CDR3
-#' calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3)
+#' calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V)
 #' 
 #' # Define mutations based on hydropathy
-#' calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
+#' calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 #'                       mutationDefinition=HYDROPATHY_MUTATIONS)
 #' 
 #' @export

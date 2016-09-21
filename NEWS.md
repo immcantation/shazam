@@ -24,6 +24,10 @@ Distance Calculation:
 + Added `findThreshold` function to infer clonal distance threshold from 
   nearest neighbor distances returned by `distToNearest`.
 
+Region Definition:
+
++ Deleted `IMGT_V_NO_CDR3` and `IMGT_V_BY_REGIONS_NO_CDR3`. Updated `IMGT_V` 
+  and `IMGT_V_BY_REGIONS` so that neither includes CDR3 now.
 
 Version 0.1.4:  August 5, 2016
 -------------------------------------------------------------------------------

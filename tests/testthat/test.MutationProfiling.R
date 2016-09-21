@@ -10,7 +10,7 @@ test_that("binMutationsByRegion", {
     mutation_types <- sample(c("R", "S"), length(posOfMutations), replace=TRUE)
     mutations_array <- array(mutation_types, dimnames=list(posOfMutations))
     
-    observed_bin <- binMutationsByRegion(mutations_array, regionDefinition=IMGT_V_NO_CDR3)
+    observed_bin <- binMutationsByRegion(mutations_array, regionDefinition=IMGT_V)
     expected_bin <- c(1, 0, 3, 2)
     names(expected_bin) <- c("CDR_R", "CDR_S", "FWR_R", "FWR_S")
     expect_equal(observed_bin, expected_bin)
@@ -28,7 +28,7 @@ test_that("observedMutations, charge mutations", {
 
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                              germlineColumn="GERMLINE_IMGT_D_MASK",
-                             regionDefinition=IMGT_V_NO_CDR3,
+                             regionDefinition=IMGT_V,
                              mutationDefinition=CHARGE_MUTATIONS,
                              nproc=1)
     
@@ -48,12 +48,12 @@ test_that("calcObservedMutations, hydropathy", {
      
     # Identify only mutations in the V segment minus CDR3
     expect_equivalent(
-        calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3),
+        calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V),
         NA)
       
     # Identify mutations by change in hydropathy class
     expect_equivalent(
-        calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
+        calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
                            mutationDefinition=HYDROPATHY_MUTATIONS, frequency=TRUE),
         NA)
     
@@ -67,7 +67,7 @@ test_that("calcExpecteddMutations, hydropathy", {
     db_exp <- expectedMutations(db,
                                sequenceColumn="SEQUENCE_IMGT",
                                germlineColumn="GERMLINE_IMGT_D_MASK",
-                               regionDefinition=IMGT_V_NO_CDR3,
+                               regionDefinition=IMGT_V,
                                mutationDefinition=HYDROPATHY_MUTATIONS,
                                nproc=1)    
     expect_equal(db_exp$EXPECTED_CDR_R[1:10],

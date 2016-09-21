@@ -15,7 +15,7 @@ germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
 #### Calculate expected mutations ####
 
 profvis({
-    calcExpectedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V_NO_CDR3,
+    calcExpectedMutations(inputSeq, germlineSeq, regionDefinition=IMGT_V,
                           mutationDefinition=HYDROPATHY_MUTATIONS)
 })
 
@@ -25,7 +25,7 @@ profvis({
     db <- expectedMutations(db,
                             sequenceColumn="SEQUENCE_IMGT",
                             germlineColumn="GERMLINE_IMGT_D_MASK",
-                            regionDefinition=IMGT_V_NO_CDR3,
+                            regionDefinition=IMGT_V,
                             mutationDefinition=HYDROPATHY_MUTATIONS,
                             nproc=1)
 })
@@ -34,7 +34,7 @@ profvis({
 
 profvis({
     calcClonalConsensus(inputSeq, germlineSeq, 
-                        regionDefinition=IMGT_V_NO_CDR3, nonTerminalOnly=FALSE)
+                        regionDefinition=IMGT_V, nonTerminalOnly=FALSE)
 })
 
 #### Collapse clones ####
@@ -44,7 +44,7 @@ profvis({
                              sequenceColumn="SEQUENCE_IMGT",
                              germlineColumn="GERMLINE_IMGT_D_MASK",
                              expandedDb=FALSE,
-                             regionDefinition=IMGT_V_NO_CDR3,
+                             regionDefinition=IMGT_V,
                              nproc=1)
 })
 
@@ -55,7 +55,7 @@ profvis({
                                 sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
                                 testStatistic="focused",
-                                regionDefinition=IMGT_V_NO_CDR3,
+                                regionDefinition=IMGT_V,
                                 targetingModel = HS5FModel,
                                 nproc = 1)
 })
@@ -73,7 +73,7 @@ profvis({
                                 sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
                                 testStatistic="focused",
-                                regionDefinition=IMGT_V_NO_CDR3,
+                                regionDefinition=IMGT_V,
                                 targetingModel = HS5FModel,
                                 nproc = 1)
      

@@ -140,7 +140,7 @@ test_that("calcOBservedMutations and listObservedMutations reproduce same result
 #     
     ## Use only V
     om_v <- observedMutations(db, "SEQUENCE_IMGT", "GERMLINE_IMGT_D_MASK", 
-                              regionDefinition=IMGT_V_NO_CDR3)
+                              regionDefinition=IMGT_V)
     ## TODO check more seqs
     expect_equal(length(lom[[1]]), sum(om_v[1, grep("OBSERVED_", colnames(om_v))]))
     
