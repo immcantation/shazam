@@ -1652,9 +1652,9 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
 #' @param    thresh              a number or a vector of indicating the value or the range of values
 #'                               of \code{minNumMutations} or \code{minNumSeqMutations} to plot. 
 #'                               Should correspond to the columns of \code{tuneMtx}.
-#' @param    criterion           one of \code{"5mer"}, \code{"3mer"}, or \code{"1mer"} (for \code{tuneMtx}
-#'                               produced by \link{minNumMutationsTune}), or either \code{"measured"} or
-#'                               \code{"inferred"} (for \code{tuneMtx} produced by 
+#' @param    criterion           one of \code{"5mer"}, \code{"3mer"}, \code{"1mer"}, or \code{"3mer+1mer"} 
+#'                               (for \code{tuneMtx} produced by \link{minNumMutationsTune}), or either 
+#'                               \code{"measured"} or \code{"inferred"} (for \code{tuneMtx} produced by 
 #'                               \link{minNumSeqMutationsTune}).                
 #' @param    pchs                point types to pass on to \link{plot}.
 #' @param    ltys                line types to pass on to \link{plot}.
@@ -1670,9 +1670,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
 #' 
 #' @details  For \code{tuneMtx} produced by \link{minNumMutationsTune}, for each sample, depending on
 #'           \code{criterion}, the numbers of 5-mers for which substitution rates are directly computed
-#'           (\code{"5mer"}), inferred based on inner 3-mers (\code{"3mer"}), or inferred based on 
-#'           central 1-mers (\code{"1mer"}) are plotted on the y-axis against values of 
-#'           \code{minNumMutations} on the x-axis.
+#'           (\code{"5mer"}), inferred based on inner 3-mers (\code{"3mer"}), inferred based on 
+#'           central 1-mers (\code{"1mer"}), or inferred based on inner 3-mers and central 1-mers
+#'           (\code{"3mer+1mer"}) are plotted on the y-axis against values of \code{minNumMutations} 
+#'           on the x-axis.
 #' 
 #'           For \code{tuneMtx} produced by \link{minNumSeqMutationsTune}, for each sample, depending on
 #'           \code{criterion}, the numbers of 5-mers for which mutability rates are directly measured
@@ -1719,7 +1720,8 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
 #' 
 #' @export
 plotTune = function(tuneMtx, thresh, 
-                    criterion=c("5mer", "3mer", "1mer", "measured", "inferred"), 
+                    criterion=c("5mer", "3mer", "1mer", "3mer+1mer", 
+                                "measured", "inferred"), 
                     pchs = 1, ltys = 2, cols = 1,
                     plotLegend = TRUE, legendPos = "topright", 
                     legendHoriz = FALSE, legendCex = 1) {
@@ -1729,13 +1731,30 @@ plotTune = function(tuneMtx, thresh,
   
   ### extract plot data into plotMtx
   # if tuneMtx is just a matrix
+  if (criterion=="3mer+1mer") {
+    criterion.for.data = c("")
+  } else {
+    criterion.for.data = criterion
+  }
+  
   if (!is.list(tuneMtx)) {
-    plotMtx = matrix(tuneMtx[criterion, as.character(thresh)], nrow=1)
+    if (criterion!="3mer+1mer") {
+      plotMtx = matrix(tuneMtx[criterion, as.character(thresh)], nrow=1)
+    } else {
+      plotMtx = matrix(colSums(tuneMtx[c("3mer", "1mer"), as.character(thresh)]), nrow=1)
+    }
   } else {
   # if tuneMtx is a named list of matrices (e.g. corresponding to multiple samples)  
-    plotMtx = do.call(base::rbind, 
-                      lapply(tuneMtx, 
-                             function(mtx){mtx[criterion, as.character(thresh)]}))
+    if (criterion!="3mer+1mer") {
+      plotMtx = do.call(base::rbind, 
+                        lapply(tuneMtx, 
+                               function(mtx){mtx[criterion, as.character(thresh)]}))
+    } else {
+      plotMtx = do.call(base::rbind, 
+                        lapply(tuneMtx, 
+                               function(mtx){colSums(mtx[c("3mer", "1mer"), 
+                                                         as.character(thresh)])}))
+    }
     rownames(plotMtx) = names(tuneMtx)
   }
   # sanity check: there should not be any NA
@@ -1749,7 +1768,7 @@ plotTune = function(tuneMtx, thresh,
   
   
   ### axis labels
-  if (criterion %in% c("5mer", "3mer", "1mer")) {
+  if (criterion %in% c("5mer", "3mer", "1mer", "3mer+1mer")) {
     xlab.name = "Minimum # mutations per 5-mer to\ndirectly compute 5-mer substitution rates"
     # cannot use switch because variable names cannot start with number
     ylab.name = "# 5-mers for which substitution rates are\n"
@@ -1759,6 +1778,8 @@ plotTune = function(tuneMtx, thresh,
       ylab.name = paste(ylab.name, "inferred based on inner 3-mers")
     } else if (criterion=="1mer") {
       ylab.name = paste(ylab.name, "inferred based on central 1-mers")
+    } else if (criterion=="3mer+1mer") {
+      ylab.name = paste(ylab.name, "inferred based on 3- and 1-mers")
     }
   } else if (criterion %in% c("measured", "inferred")) {
     xlab.name = "Minimum # mutations in sequences containing each 5-mer\nto directly compute mutability"
