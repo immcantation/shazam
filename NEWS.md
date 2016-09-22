@@ -4,6 +4,11 @@ Targeting Models:
 
 + Added `numMutationsOnly` argument to `createSubstitutionMatrix()`, enabling
   parameter tuning for `minNumMutations`.  
++ Added functions `minNumMutationsTune()` and `minNumSeqMutationsTune()` to 
+  tune for parameters `minNumMutations` and `minNumSeqMutations` in functions 
+  `createSubstitutionMatrix()` and `createMutabilityMatrix()` respectively. 
+  Also added function `plotTune()` which helps visualize parameter tuning using
+  the abovementioned two new functions. 
 
 Mutation Profiling:
 
