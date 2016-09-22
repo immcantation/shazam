@@ -24,10 +24,14 @@ pages:
       - topics/collapseClones.md
       - topics/expectedMutations.md
       - topics/observedMutations.md
+      - topics/slideWindowDb.md
       - topics/calcExpectedMutations.md
       - topics/calcObservedMutations.md
+      - topics/slideWindowSeq.md
+      - topics/slideWindowTune.md
       - topics/shmulateSeq.md
       - topics/shmulateTree.md
+      - topics/slideWindowTunePlot.md
     - 'Targeting Models':
       - topics/createMutabilityMatrix.md
       - topics/createSubstitutionMatrix.md
@@ -35,6 +39,8 @@ pages:
       - topics/extendSubstitutionMatrix.md
       - topics/createTargetingMatrix.md
       - topics/createTargetingModel.md
+      - topics/minNumMutationsTune.md
+      - topics/minNumSeqMutationsTune.md
       - topics/plotMutability.md
       - topics/HS5FModel.md
       - topics/MRS5NFModel.md
@@ -52,6 +58,7 @@ pages:
       - topics/Baseline-class.md
     - 'Distance Profiling':
       - topics/distToNearest.md
+      - topics/findThreshold.md
       - topics/calcTargetingDistance.md
       - topics/writeTargetingDistance.md
       - topics/HS1FDistance.md

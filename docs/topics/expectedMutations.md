@@ -63,7 +63,7 @@ A modified `db` `data.frame` with expected mutation frequencies
 for each region defined in `regionDefinition`.
 
 The columns names are dynamically created based on the regions in  
-`regionDefinition`. For example, when using the [IMGT_V_NO_CDR3](IMGT_SCHEMES.md)
+`regionDefinition`. For example, when using the [IMGT_V](IMGT_SCHEMES.md)
 definition, which defines positions for CDR and FWR, the following columns are
 added:  
 
@@ -81,7 +81,7 @@ Details
 -------------------
 
 Only the part of the sequences defined in `regionDefinition` are analyzed. 
-For example, when using the [IMGT_V_NO_CDR3](IMGT_SCHEMES.md) definition, mutations in
+For example, when using the [IMGT_V](IMGT_SCHEMES.md) definition, mutations in
 positions beyond 312 will be ignored.
 
 
@@ -98,7 +98,7 @@ db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 db_exp <- expectedMutations(db,
 sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK",
-regionDefinition=IMGT_V_NO_CDR3,
+regionDefinition=IMGT_V,
 nproc=1)
 
 ```
@@ -116,7 +116,7 @@ Calculating the expected frequencies of mutations...
 db_exp <- expectedMutations(db,
 sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK",
-regionDefinition=IMGT_V_NO_CDR3,
+regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS,
 nproc=1)
 ```

@@ -55,7 +55,7 @@ Value
 
 A `numeric` vector of the expected frequencies of mutations in the 
 regions in the `regionDefinition`. For example, when using the default 
-[IMGT_V_NO_CDR3](IMGT_SCHEMES.md) definition, which defines positions for CDR and 
+[IMGT_V](IMGT_SCHEMES.md) definition, which defines positions for CDR and 
 FWR, the following columns are calculated:
 
 + `EXPECTED_CDR_R`:  number of replacement mutations in CDR1 and 
@@ -75,7 +75,7 @@ Details
 given sequence and its germline. 
 
 Note, only the part of the sequences defined in `regionDefinition` are analyzed. 
-For example, when using the default [IMGT_V_NO_CDR3](IMGT_SCHEMES.md) definition, mutations in
+For example, when using the default [IMGT_V](IMGT_SCHEMES.md) definition, mutations in
 positions beyond 312 will be ignored.
 
 
@@ -107,7 +107,7 @@ calcExpectedMutations(in_seq, germ_seq)
 ```R
 
 # Identify only mutations the V segment minus CDR3
-calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3)
+calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V)
 
 ```
 
@@ -122,7 +122,7 @@ calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3)
 ```R
 
 # Define mutations based on hydropathy
-calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V_NO_CDR3,
+calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS)
 ```
 

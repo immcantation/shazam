@@ -17,10 +17,8 @@ Format
 -------------------
 A [RegionDefinition](RegionDefinition-class.md) object containing:
 
-+ `IMGT_V`:                     Grouped CDR and FWR V-segment regions including CDR3.
-+ `IMGT_V_BY_REGIONS`:          Individual CDR and FWR V-segment regions including CDR3.
-+ `IMGT_V_NO_CDR3`:             Grouped CDR and FWR V-segment regions excluding CDR3.
-+ `IMGT_V_BY_REGIONS_NO_CDR3`:  Individual CDR and FWR V-segment regions excluding CDR3.
++ `IMGT_V`:                     Grouped CDR and FWR V-segment regions excluding CDR3.
++ `IMGT_V_BY_REGIONS`:          Individual CDR and FWR V-segment regions excluding CDR3.
 
 References
 -------------------

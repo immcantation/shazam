@@ -88,11 +88,22 @@ Users may define other region sets and boundaries by creating a custom
 observed <- observedMutations(clones, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+```
+
+```
+## Error in {: task 1 failed - "object 'IMGT_V_NO_CDR3' not found"
+```
+
+```r
 # Count observed mutations and append EXPECTED columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               targetingModel=HS5FModel,
                               regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+```
+
+```
+## Error in checkColumns(db, c(sequenceColumn, germlineColumn)): object 'observed' not found
 ```
 
 The counts of observed and expected mutations can be combined to test for selection 
@@ -107,6 +118,10 @@ baseline <- calcBaseline(expected, testStatistic="focused",
                          regionDefinition=IMGT_V_NO_CDR3, nproc=1)
 ```
 
+```
+## Error in checkColumns(db, c(sequenceColumn, germlineColumn)): object 'expected' not found
+```
+
 ### Calculating selection in one step
 
 It is not required for `collapseClones`, `observedMutation` and `expectedMutations`
@@ -119,12 +134,22 @@ functions prior to calculating selection scores.
 # Calculate selection scores from scratch on subset
 baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
                          regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+```
 
+```
+## Error in calcBaseline(ExampleDb, testStatistic = "focused", regionDefinition = IMGT_V_NO_CDR3, : object 'IMGT_V_NO_CDR3' not found
+```
+
+```r
 # Subset the original data to switched isotypes
 db_sub <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
 # Calculate selection scores from scratch on subset
 baseline_sub <- calcBaseline(db_sub, testStatistic="focused", 
                              regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+```
+
+```
+## Error in calcBaseline(db_sub, testStatistic = "focused", regionDefinition = IMGT_V_NO_CDR3, : object 'IMGT_V_NO_CDR3' not found
 ```
 
 ### Using alternative mutation definitions and models
@@ -179,9 +204,19 @@ intervals, and p-values that each group differs from zero.
 ```r
 # Combine selection scores by time-point
 grouped_1 <- groupBaseline(baseline, groupBy=c("SAMPLE"))
+```
 
+```
+## Error in data.table(baseline@db): object 'baseline' not found
+```
+
+```r
 # Combine selection scores by time-point and isotype
 grouped_2 <- groupBaseline(baseline_sub, groupBy=c("SAMPLE", "ISOTYPE"))
+```
+
+```
+## Error in data.table(baseline@db): object 'baseline_sub' not found
 ```
 
 ### Convolving variables at multiple level
@@ -219,9 +254,7 @@ testBaseline(grouped_1, groupBy="SAMPLE")
 ```
 
 ```
-##   REGION       TEST     PVALUE        FDR
-## 1    CDR -1h != +7d 0.01259308 0.01259308
-## 2    FWR -1h != +7d 0.00568277 0.01136554
+## Error in testBaseline(grouped_1, groupBy = "SAMPLE"): object 'grouped_1' not found
 ```
 
 ## Plot and compare selection scores for groups
@@ -247,7 +280,9 @@ isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick",
 plotBaselineSummary(grouped_1, "SAMPLE")
 ```
 
-![plot of chunk Baseline-Vignette-10](figure/Baseline-Vignette-10-1.png)
+```
+## Error in is(baseline, "Baseline"): object 'grouped_1' not found
+```
 
 ```r
 # Plot selection scores by time-point and isotype for only CDR
@@ -255,14 +290,18 @@ plotBaselineSummary(grouped_2, "SAMPLE", "ISOTYPE", groupColors=isotype_colors,
                     subsetRegions="CDR")
 ```
 
-![plot of chunk Baseline-Vignette-10](figure/Baseline-Vignette-10-2.png)
+```
+## Error in is(baseline, "Baseline"): object 'grouped_2' not found
+```
 
 ```r
 # Group by CDR/FWR and facet by isotype
 plotBaselineSummary(grouped_2, "SAMPLE", "ISOTYPE", facetBy="group")
 ```
 
-![plot of chunk Baseline-Vignette-10](figure/Baseline-Vignette-10-3.png)
+```
+## Error in is(baseline, "Baseline"): object 'grouped_2' not found
+```
 
 `plotBaselineDensity` plots the full `Baseline` PDF of selection scores for the 
 given groups. The parameters are the same as those for `plotBaselineSummary`.
@@ -276,4 +315,6 @@ plotBaselineDensity(grouped_2, "ISOTYPE", groupColumn="SAMPLE", colorElement="gr
                     colorValues=sample_colors, sigmaLimits=c(-1, 1))
 ```
 
-![plot of chunk Baseline-Vignette-11](figure/Baseline-Vignette-11-1.png)
+```
+## Error in duplicated(baseline@db[, c(idColumn, groupColumn)]): object 'grouped_2' not found
+```

@@ -50,7 +50,7 @@ baseline <- calcBaseline(db,
 sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK", 
 testStatistic="focused",
-regionDefinition=IMGT_V_NO_CDR3,
+regionDefinition=IMGT_V,
 targetingModel = HS5FModel,
 nproc = 1)
 
@@ -89,11 +89,16 @@ getBaselineStats(grouped)
 
 
 ```
-  SAMPLE ISOTYPE REGION BASELINE_SIGMA BASELINE_CI_LOWER BASELINE_CI_UPPER BASELINE_CI_PVALUE
-1    +7d     IgA    CDR     -0.3107486        -0.5021914        -0.1494948      -4.542175e-02
-2    +7d     IgA    FWR     -0.7014394        -0.8286399        -0.5839526      -3.885781e-14
-3    +7d     IgG    CDR     -0.2442523        -0.3743292        -0.1337740      -1.293014e-02
-4    +7d     IgG    FWR     -0.7121034        -0.8094326        -0.6257404      -5.595524e-14
+  SAMPLE ISOTYPE REGION BASELINE_SIGMA BASELINE_CI_LOWER BASELINE_CI_UPPER
+1    +7d     IgA    CDR     -0.3089862        -0.5003393        -0.1479380
+2    +7d     IgA    FWR     -0.6954960        -0.8228015        -0.5769405
+3    +7d     IgG    CDR     -0.2457173        -0.3758853        -0.1347132
+4    +7d     IgG    FWR     -0.7141405        -0.8116666        -0.6270893
+  BASELINE_CI_PVALUE
+1      -4.944102e-02
+2      -3.352874e-14
+3      -1.181225e-02
+4      -5.284662e-14
 
 ```
 

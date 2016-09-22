@@ -20,7 +20,8 @@ Usage
 createSubstitutionMatrix(db, model = c("RS", "S"),
 sequenceColumn = "SEQUENCE_IMGT", germlineColumn = "GERMLINE_IMGT_D_MASK",
 vCallColumn = "V_CALL", multipleMutation = c("independent", "ignore"),
-returnModel = c("5mer", "1mer", "1mer_raw"), minNumMutations = 50)
+returnModel = c("5mer", "1mer", "1mer_raw"), minNumMutations = 50,
+numMutationsOnly = FALSE)
 ```
 
 Arguments
@@ -65,16 +66,43 @@ minNumMutations
 :   minimum number of mutations required to compute the 5-mer 
 substitution rates. If the number of mutations for a 5-mer
 is below this threshold, its substitution rates will be 
-estimated from neighboring 5-mers. Default is 50.
+estimated from neighboring 5-mers. Default is 50. 
+Not required if `numMutationsOnly=TRUE`.
+
+numMutationsOnly
+:   when `TRUE`, return counting information on the number
+of mutations for each 5-mer, instead of building a substitution
+matrix. This option can be used for parameter tuning for 
+`minNumMutations` during preliminary analysis. 
+Default is `FALSE`. Only applies when `returnModel` 
+is set to `"5mer"`. The `data.frame` returned when
+this argument is `TRUE` can serve as the input for
+[minNumMutationsTune](minNumMutationsTune.md).
 
 
 
 Value
 -------------------
 
-A 4x1024 matrix of column normalized substitution rates for each 5-mer motif with 
-row names defining the center nucleotide, one of `c("A", "C", "G", "T")`, 
-and column names defining the 5-mer nucleotide sequence.
+For `returnModel = "5mer"`: 
+
+When `numMutationsOnly` is `FALSE`, a 4x1024 matrix of column 
+normalized substitution rates for each 5-mer motif with row names defining 
+the center nucleotide, one of `c("A", "C", "G", "T")`, and column names 
+defining the 5-mer nucleotide sequence. 
+
+When `numMutationsOnly` is 
+`TRUE`, a 1024x4 data frame with each row providing information on 
+counting the number of mutations for a 5-mer. Columns are named 
+`fivemer.total`, `fivemer.every`, `inner3.total`, and
+`inner3.every`, corresponding to, respectively,
+the total number of mutations when counted as a 5-mer, 
+whether there is mutation to every other base when counted as a 5-mer,
+the total number of mutations when counted as an inner 3-mer, and
+whether there is mutation to every other base when counted as an inner 3-mer.
+
+For `returnModel = "1mer"` or `"1mer_raw"`:
+a 4x4 normalized or un-normalized 1-mer substitution matrix respectively.
 
 References
 -------------------
@@ -95,8 +123,14 @@ Examples
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 
+# Count the number of mutations per 5-mer
+subCount <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
+returnModel="5mer", numMutationsOnly=TRUE)
+
 # Create model using only silent mutations
-sub <- createSubstitutionMatrix(db, model="S")
+sub <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
+returnModel="5mer", numMutationsOnly=FALSE,
+minNumMutations=20)
 ```
 
 
@@ -105,7 +139,8 @@ See also
 -------------------
 
 [extendSubstitutionMatrix](extendSubstitutionMatrix.md), [createMutabilityMatrix](createMutabilityMatrix.md), 
-[createTargetingMatrix](createTargetingMatrix.md), [createTargetingModel](createTargetingModel.md)
+[createTargetingMatrix](createTargetingMatrix.md), [createTargetingModel](createTargetingModel.md),
+[minNumMutationsTune](minNumMutationsTune.md).
 
 
 

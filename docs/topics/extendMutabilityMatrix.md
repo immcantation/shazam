@@ -32,7 +32,9 @@ Value
 -------------------
 
 A 3125 vector of normalized mutability rates for each 5-mer motif with 
-names defining the 5-mer nucleotide sequence.
+names defining the 5-mer nucleotide sequence. Note that "normalized" means
+that the mutability rates for the 1024 5-mers that contain no "N" at any
+position sums up to 1 (as opposed to the entire vector summing up to 1).
 
 
 

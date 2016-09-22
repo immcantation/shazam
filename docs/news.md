@@ -1,3 +1,34 @@
+Version 0.1.4.999: September 7, 2016
+-------------------------------------------------------------------------------
+Targeting Models:
+
++ Added `numMutationsOnly` argument to `createSubstitutionMatrix()`, enabling
+  parameter tuning for `minNumMutations`.  
+
+Mutation Profiling:
+
++ Added `returnRaw` argument to `calcObservedMutations()`, which if true returns 
+  the positions of point mutations and their corresponding mutation types, as 
+  opposed to counts of mutations (hence "raw"). 
++ Added new functions `slideWindowSeq()` and `slideWindowDb()` which implement 
+  a sliding window approach towards filtering a single sequence or sequences in
+  a data.frame which contain(s) equal to or more than a given number of mutations 
+  in a given number of consecutive nucleotides.
++ Added new function `slideWindowTune()` which allows for parameter tuning for
+  using `slideWindowSeq()` and `slideWindowDb()`.
++ Added new function `slideWindowTunePlot()` which visualizes parameter tuning 
+  by `slideWindowTune()`.
+  
+Distance Calculation:
+
++ Added `findThreshold` function to infer clonal distance threshold from 
+  nearest neighbor distances returned by `distToNearest`.
+
+Region Definition:
+
++ Deleted `IMGT_V_NO_CDR3` and `IMGT_V_BY_REGIONS_NO_CDR3`. Updated `IMGT_V` 
+  and `IMGT_V_BY_REGIONS` so that neither includes CDR3 now.
+
 Version 0.1.4:  August 5, 2016
 -------------------------------------------------------------------------------
 

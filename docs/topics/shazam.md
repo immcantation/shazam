@@ -91,8 +91,10 @@ models. This information is particularly useful in understanding and
 defining clonal relationships.
 
 
++ [findThreshold](findThreshold.md):            Identify clonal assignment threshold based on 
+distances to nearest neighbors.
 + [distToNearest](distToNearest.md):            Tune clonal assignment thresholds by calculating 
-distances to nearest-neighbors.
+distances to nearest neighbors.
 + [calcTargetingDistance](calcTargetingDistance.md):    Construct a nucleotide distance matrix from a 
 5-mer targeting model.
 

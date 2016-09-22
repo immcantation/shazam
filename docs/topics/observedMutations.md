@@ -64,7 +64,7 @@ Value
 A modified `db` `data.frame` with observed mutation counts for each 
 sequence listed. The columns names are dynamically created based on the
 regions in the `regionDefinition`. For example, when using the
-[IMGT_V_NO_CDR3](IMGT_SCHEMES.md) definition, which defines positions for CDR and
+[IMGT_V](IMGT_SCHEMES.md) definition, which defines positions for CDR and
 FWR, the following columns are added:
 
 + `OBSERVED_CDR_R`:  number of replacement mutations in CDR1 and 
@@ -121,7 +121,7 @@ Calculating observed number of mutations...
 # With mutations only considered replacement if charge changes
 db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK",
-regionDefinition=IMGT_V_NO_CDR3,
+regionDefinition=IMGT_V,
 mutationDefinition=CHARGE_MUTATIONS,
 nproc=1)
 ```
@@ -137,7 +137,7 @@ Calculating observed number of mutations...
 See also
 -------------------
 
-[calcObservedMutations](calcObservedMutations.md) is called by this function to get the list of mutations 
+[calcObservedMutations](calcObservedMutations.md) is called by this function to get the number of mutations 
 in each sequence grouped by the [RegionDefinition](RegionDefinition-class.md). 
 See [IMGT_SCHEMES](IMGT_SCHEMES.md) for a set of predefined [RegionDefinition](RegionDefinition-class.md) objects.
 See [expectedMutations](expectedMutations.md) for calculating expected mutation frequencies.

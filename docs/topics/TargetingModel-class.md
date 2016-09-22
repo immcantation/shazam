@@ -45,7 +45,10 @@ complete 5-mer of the unmutated nucleotide sequence.
 `mutability`
 :   Normalized rates of a given 5-mer being mutated. The 
 mutability model is stored as a numeric vector of length 3125 
-with mutability rates for each 5-mer.
+with mutability rates for each 5-mer. Note that "normalized" 
+means that the mutability rates for the 1024 5-mers that 
+contain no "N" at any position sums up to 1 (as opposed to 
+the entire vector summing up to 1).
 
 `targeting`
 :   Rate matrix of a given mutation ocurring, defined as 

@@ -59,13 +59,15 @@ minNumSeqMutations
 :   minimum number of mutations in sequences containing each 5-mer
 to compute the mutability rates. If the number is smaller 
 than this threshold, the mutability for the 5-mer will be 
-inferred. Default is 500.
+inferred. Default is 500. Not required if 
+`numSeqMutationsOnly=TRUE`.
 
 numSeqMutationsOnly
-:   return only a vector counting the observed number of mutations 
-in sequences containing each 5-mer. This option can be used for
-parameter tuning for `minNumSeqMutations` during 
-preliminary analysis. Default is `FALSE`.
+:   when `TRUE`, return only a vector counting the number of 
+observed mutations in sequences containing each 5-mer. This 
+option can be used for parameter tuning for `minNumSeqMutations` 
+during preliminary analysis using [minNumSeqMutationsTune](minNumSeqMutationsTune.md). 
+Default is `FALSE`.
 
 returnSource
 :   return the sources of 5-mer mutabilities (measured vs.
@@ -76,8 +78,13 @@ inferred). Default is `FALSE`.
 Value
 -------------------
 
-A named numeric vector of 1024 normalized mutability rates for each 5-mer 
-motif with names defining the 5-mer nucleotide sequence.
+When `numSeqMutationsOnly` is `FALSE`, a named numeric vector of 1024 
+normalized mutability rates for each 5-mer motif with names defining the 5-mer 
+nucleotide sequence. 
+
+When `numSeqMutationsOnly` is `TRUE`, a named numeric
+vector of length 1024 counting the number of observed mutations in sequences containing 
+each 5-mer.
 
 References
 -------------------
@@ -100,16 +107,28 @@ db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 
 # Create model using only silent mutations
 sub_model <- createSubstitutionMatrix(db, model="S")
-mut_model <- createMutabilityMatrix(db, sub_model, model="S")
+mut_model <- createMutabilityMatrix(db, sub_model, model="S", 
+minNumSeqMutations=200,
+numSeqMutationsOnly=FALSE)
+
 ```
 
 *Warning*:Insufficient number of mutations to infer some 5-mers. Filled with 0. 
+```R
+
+# Count the number of mutations in sequences containing each 5-mer
+mut_count <- createMutabilityMatrix(db, sub_model, model="S", 
+numSeqMutationsOnly=TRUE)
+```
+
+
 
 See also
 -------------------
 
 [extendMutabilityMatrix](extendMutabilityMatrix.md), [createSubstitutionMatrix](createSubstitutionMatrix.md), 
-[createTargetingMatrix](createTargetingMatrix.md), [createTargetingModel](createTargetingModel.md)
+[createTargetingMatrix](createTargetingMatrix.md), [createTargetingModel](createTargetingModel.md),
+[minNumSeqMutationsTune](minNumSeqMutationsTune.md)
 
 
 
