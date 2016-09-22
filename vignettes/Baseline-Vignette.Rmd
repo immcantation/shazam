@@ -70,7 +70,7 @@ for each clone.
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Collapse clonal groups into single sequences
-clones <- collapseClones(ExampleDb, regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+clones <- collapseClones(ExampleDb, regionDefinition=IMGT_V, nproc=1)
 ```
 
 Following construction of an effective sequence for each clone, the observed
@@ -90,13 +90,10 @@ the boundaries lie. There are four built-in region definitions
 in the `shazam` package, which are all dependent upon the V segment
 being IMGT-gapped:
 
-*  `IMGT_V`: All regions in the V segment grouped as either CDR or FWR.
+*  `IMGT_V`: All regions in the V segment, excluding CDR3, grouped as 
+    either CDR or FWR.
 *  `IMGT_V_BY_REGIONS`: The CDR1, CDR2, CDR3, FWR1, FWR and FWR3 regions 
-    in the V segment treated as individual regions.
-*  `IMGT_V_NO_CDR3`: All regions in the V segment, excluding CDR3, grouped as 
-   either CDR or FWR (default).
-*  `IMGT_V_BY_REGIONS_NO_CDR3`: The CDR1, CDR2, FWR1, FWR and FWR3 regions 
-    in the V segment treated as individual regions.
+    in the V segment (no CDR3) treated as individual regions.
 
 Users may define other region sets and boundaries by creating a custom
 `RegionDefinition` object.
@@ -105,12 +102,12 @@ Users may define other region sets and boundaries by creating a custom
 # Count observed mutations and append OBSERVED columns to the output
 observed <- observedMutations(clones, 
                               sequenceColumn="CLONAL_SEQUENCE",
-                              regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+                              regionDefinition=IMGT_V, nproc=1)
 # Count observed mutations and append EXPECTED columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               targetingModel=HS5FModel,
-                              regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+                              regionDefinition=IMGT_V, nproc=1)
 ```
 
 The counts of observed and expected mutations can be combined to test for selection 
@@ -121,7 +118,7 @@ on mutation counts can be specified using the `testStatistic` parameter.
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Calculate selection scores using the output from expectedMutations
 baseline <- calcBaseline(expected, testStatistic="focused", 
-                         regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+                         regionDefinition=IMGT_V, nproc=1)
 ```
 
 ### Calculating selection in one step
@@ -134,13 +131,13 @@ functions prior to calculating selection scores.
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Calculate selection scores from scratch on subset
 baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
-                         regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+                         regionDefinition=IMGT_V, nproc=1)
 
 # Subset the original data to switched isotypes
 db_sub <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
 # Calculate selection scores from scratch on subset
 baseline_sub <- calcBaseline(db_sub, testStatistic="focused", 
-                             regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+                             regionDefinition=IMGT_V, nproc=1)
 ```
 
 ### Using alternative mutation definitions and models
@@ -169,7 +166,7 @@ The default behavior of `expectedMutations` is to use the human 5-mer mutation m
 ```{r, eval=FALSE, warning=FALSE, results="hide"}
 # Calculate selection on charge class with the mouse 5-mer model
 baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
-                         regionDefinition=IMGT_V_NO_CDR3, 
+                         regionDefinition=IMGT_V, 
                          targetingModel=MRS5NFModel,
                          targetingModel=CHARGE_MUTATIONS,
                          nproc=1)
