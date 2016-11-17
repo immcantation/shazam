@@ -20,7 +20,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     
     targeting <- shazam:::calculateTargeting(germlineSeq = germlineSeq, 
                                     inputSeq = inputSeq,
-                                    targetingModel = HS5FModel,
+                                    targetingModel = HH_S5F,
                                     regionDefinition = IMGT_V)
     expect_equal(dim(targeting),c(5,IMGT_V@seqLength))
     
@@ -46,7 +46,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     
     targeting_null <- shazam:::calculateTargeting(germlineSeq = germlineSeq, 
                                           inputSeq = inputSeq,
-                                          targetingModel = HS5FModel,
+                                          targetingModel = HH_S5F,
                                           regionDefinition = NULL)
     expect_equal(dim(targeting_null),c(5,406))
     
@@ -74,13 +74,13 @@ test_that("calcExpectedMutations works with regionDefinition==NULL",{
     inputSeq <- db[1, "SEQUENCE_IMGT"]
     germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
     
-    obs_mutations <- calcExpectedMutations(inputSeq, germlineSeq, targetingModel = HS5FModel, 
+    obs_mutations <- calcExpectedMutations(inputSeq, germlineSeq, targetingModel = HH_S5F, 
                           regionDefinition = IMGT_V)
     exp_mutations <- c(0.16184071, 0.04872069, 0.57766105, 0.21177756)
     names(exp_mutations) <- c("CDR_R", "CDR_S", "FWR_R", "FWR_S")
     expect_equal(obs_mutations, exp_mutations, tolerance=0.001)
     
-    obs_mutations_null <- calcExpectedMutations(inputSeq, germlineSeq, targetingModel = HS5FModel, 
+    obs_mutations_null <- calcExpectedMutations(inputSeq, germlineSeq, targetingModel = HH_S5F, 
                                            regionDefinition = NULL)
     exp_mutations_null <- c(0.7379522, 0.2620478)
     names(exp_mutations_null) <- c("SEQ_R", "SEQ_S")
@@ -217,7 +217,7 @@ test_that("calcBaseline", {
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
-                                targetingModel = HS5FModel,
+                                targetingModel = HH_S5F,
                                 nproc = 1,
                                 calcStats = T)
     
@@ -316,7 +316,7 @@ test_that("calcBaseline", {
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
-                                targetingModel = HS5FModel,
+                                targetingModel = HH_S5F,
                                 nproc = 1,
                                 calcStats = T)
     
@@ -324,7 +324,7 @@ test_that("calcBaseline", {
                                           germlineColumn="GERMLINE_IMGT_D_MASK",
                                           testStatistic="focused",
                                           regionDefinition=NULL,
-                                          targetingModel = HS5FModel,
+                                          targetingModel = HH_S5F,
                                           nproc = 1)
  
     total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$OBSERVED_SEQ_S,
@@ -361,7 +361,7 @@ test_that("calcBaseline", {
     #                             germlineColumn="GERMLINE_IMGT_D_MASK",
     #                             testStatistic="focused",
     #                             regionDefinition=NULL,
-    #                             targetingModel = HS5FModel,
+    #                             targetingModel = HH_S5F,
     #                             nproc = 1)
     # ## Check 5 examples for each, at different positions
     # ## CDR_R, first 5
@@ -388,7 +388,7 @@ test_that("Test groupBaseline", {
                              germlineColumn="GERMLINE_IMGT_D_MASK",
                              testStatistic="focused",
                              regionDefinition=IMGT_V,
-                             targetingModel=HS5FModel,
+                             targetingModel=HH_S5F,
                              nproc=1)
     
     # Group PDFs by sample

@@ -39,26 +39,89 @@ NULL
 #'            Front Immunol. 2013 4(November):358.
 #' }
 #'
-#' @seealso  See \link{HS5FModel} for the 5-mer model from same publication.
+#' @seealso  See \link{HH_S5F} for the 5-mer targeting model from same publication.
 "HS1FDistance"
 
 
-#' Uniform 5-mer targeting model.
+#' Uniform 5-mer null targeting model.
 #'
 #' A null 5-mer model of somatic hypermutation targeting where all substitution, mutability
 #' and targeting rates are uniformly distributed.
 #'
 #' @format \link{TargetingModel} object.
 #' 
-#' @seealso  See \link{HS5FModel} for the human 5-mer model and \link{MRS5NFModel} 
-#'           for the mouse 5-mer model.
-"U5NModel"
+#' @seealso  See \link{HH_S5F} and \link{HKL_S5F} for the human 5-mer targeting models and 
+#'           \link{MK_RS5NF} for the mouse 5-mer targeting model.
+"U5N"
 
 
-#' Human 5-mer targeting model.
+#' Human heavy chain, silent, 1-mer, functional substitution model.
+#'
+#' 1-mer substitution model of somatic hypermutation based on analysis of silent mutations
+#' in functional heavy chain Ig sequences from Homo sapiens.
+#'
+#' @format   A symmetric matrix of nucleotide substitution rates. The rates are normalized,
+#'           therefore each row and each column sum up to 1.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
+#'            Front Immunol. 2013 4(November):358.
+#' }
+#' 
+#' @seealso  See \link{HKL_S1F} for the human light chain 1-mer substitution model and 
+#'           \link{MK_RS1NF} for the mouse light chain 1-mer substitution model.
+"HH_S1F"
+
+
+#' Human kappa and lambda chain, silent, 1-mer, functional substitution model.
+#'
+#' 1-mer substitution model of somatic hypermutation based on analysis of silent mutations
+#' in functional kappa and lambda light chain Ig sequences from Homo sapiens.
+#'
+#' @format   A symmetric matrix of nucleotide substitution rates. The rates are normalized,
+#'           therefore each row and each column sum up to 1.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
+#'   Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
+#'   Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
+#'   Immunology,197(9), 3566–3574.
+#'  }
+#' 
+#' @seealso  See \link{HH_S1F} for the human heavy chain 1-mer substitution model and 
+#'           \link{MK_RS1NF} for the mouse light chain 1-mer substitution model.
+"HKL_S1F"
+
+
+#' Mouse kappa chain, replacement and silent, 1-mer, non-functional substitution model.
+#'
+#' 1-mer substitution model of somatic hypermutation based on analysis of replacement and
+#' silent mutations in non-functional kappa light chain Ig sequences from NP-immunized Mus
+#' musculus.
+#'
+#' @format   A symmetric matrix of nucleotide substitution rates. The rates are normalized,
+#'           therefore each row and each column sum up to 1.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
+#'   Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
+#'   Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
+#'   Immunology,197(9), 3566–3574.
+#'  }
+#' 
+#' @seealso  See \link{HH_S1F} for the human heavy chain 1-mer substitution model and 
+#'           \link{HKL_S1F} for the human light chain 1-mer substitution model.
+"MK_RS1NF"
+
+
+#' Human heavy chain, silent, 5-mer, functional targeting model.
 #'
 #' 5-mer model of somatic hypermutation targeting based on analysis of silent mutations
-#' in functional Ig sequences from Homo sapiens.
+#' in functional heavy chain Ig sequences from Homo sapiens.
 #'
 #' @format \link{TargetingModel} object.
 #' 
@@ -70,28 +133,53 @@ NULL
 #'  }
 #'  
 #' @seealso  See \link{HS1FDistance} for the 1-mer distance matrix from the same 
-#'           publication, \link{MRS5NFModel} for the mouse 5-mer model, and 
-#'           \link{U5NModel} for the uniform 5-mer model.
-"HS5FModel"
+#'           publication, \link{HKL_S5F} for the human light chain 5-mer targeting model, 
+#'           \link{MK_RS5NF} for the mouse 5-mer targeting model, and \link{U5N} for the 
+#'           uniform 5-mer null targeting model.
+"HH_S5F"
 
 
-#' Mouse 5-mer targeting model.
+#' Human kappa and lambda light chain, silent, 5-mer, functional targeting model.
 #'
-#' 5-mer model of somatic hypermutation targeting based on analysis of replacement and
-#' silent mutations in non-functional IgK from NP-immunized Mus musculus.
+#' 5-mer model of somatic hypermutation targeting based on analysis of silent mutations
+#' in functional kappa and lambda light chain Ig sequences from Homo sapiens.
 #'
 #' @format \link{TargetingModel} object.
 #' 
 #' @references
 #' \enumerate{
-#'   \item  Cui A, et al. A model of somatic hypermutation targeting in mice based on 
-#'          high-throughput immunoglobulin sequencing data. Under review.
+#'   \item  Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
+#'   Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
+#'   Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
+#'   Immunology,197(9), 3566–3574.
 #'  }
 #'  
-#' @seealso  See \link{HS5FModel} for human 5-mer targeting model, \link{U5NModel}
-#'           for the uniform 5-mer model, and \link{M1NDistance} for the mouse 
-#'           1-mer distance matrix.
-"MRS5NFModel"
+#' @seealso  See \link{HH_S5F} for the human heavy chain 5-mer targeting model, 
+#'           \link{MK_RS5NF} for the mouse kappa light chain 5-mer targeting model, 
+#'           and \link{U5N} for the uniform 5-mer null targeting model.
+"HKL_S5F"
+
+
+#' Mouse kappa light chain, replacement and silent, 5-mer, non-functional targeting model.
+#'
+#' 5-mer model of somatic hypermutation targeting based on analysis of replacement and
+#' silent mutations in non-functional kappa light chain Ig sequences from NP-immunized 
+#' Mus musculus.
+#'
+#' @format \link{TargetingModel} object.
+#' 
+#' @references
+#' \enumerate{
+#'   \item  Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
+#'   Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
+#'   Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
+#'   Immunology,197(9), 3566–3574.
+#'  }
+#'  
+#' @seealso  See \link{HH_S5F} for the human heavy chain silent 5-mer functional targeting
+#'           model, \link{HKL_S5F} for the human light chain silent 5-mer functional 
+#'           targeting model, and \link{U5N} for the uniform 5-mer null targeting model.
+"MK_RS5NF"
 
 
 #### Classes ####
@@ -1241,8 +1329,8 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #'           for building a model.
 #' 
 #' @examples
-#' # Calculate targeting distance of HS5FModel
-#' dist <- calcTargetingDistance(HS5FModel)
+#' # Calculate targeting distance of HH_S5F
+#' dist <- calcTargetingDistance(HH_S5F)
 #' 
 #' @export
 calcTargetingDistance <- function(model) {
@@ -1365,7 +1453,7 @@ removeCodonGaps <- function(matInput) {
 #' @examples
 #' \dontrun{
 #' # Write HS5F targeting model to working directory as hs5f.tab
-#' writeTargetingModel(HS5FModel, "hs5f.tab") 
+#' writeTargetingModel(HH_S5F, "hs5f.tab") 
 #' }
 #' 
 #' @export
@@ -1414,16 +1502,16 @@ writeTargetingDistance <- function(model, file) {
 #' 
 #' @examples
 #' # Plot one nucleotide in circular style
-#' plotMutability(HS5FModel, "C")
+#' plotMutability(HH_S5F, "C")
 #' 
 #' # Plot two nucleotides in barchart style
-#' plotMutability(HS5FModel, c("G", "T"), style="bar")
+#' plotMutability(HH_S5F, c("G", "T"), style="bar")
 #' 
 #' @export
 plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
                            style=c("hedgehog", "bar"), size=1, silent=FALSE, 
                            ...) {
-    # model=HS5FModel
+    # model=HH_S5F
     # nucleotides=c("C")
     # nucleotides=c("A", "C", "G", "T")
     # style="hedgehog"

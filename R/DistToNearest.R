@@ -37,7 +37,7 @@ window5Mers <- function(sequence) {
 #          "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
 # seq2 <- c("NNACG", "NACGA", "ACGAA", "CGAAC", "GAACG", "AACGT", "ACGTA", 
 #          "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
-# targeting_distance <- calcTargetingDistance(HS5FModel)
+# targeting_distance <- calcTargetingDistance(HH_S5F)
 # shazam:::dist5Mers(seq1, seq2, targeting_distance)
 dist5Mers <- function(seq1, seq2, targetingDistance, 
                       normalize=c("none", "length", "mutations"),
@@ -193,7 +193,7 @@ getCharsInModel <- function(model) {
     } else if (model == "aa") {
         chars <- colnames(getAAMatrix())
     } else if (model == "hs5f") {
-        chars <-rownames(HS5FModel@targeting)
+        chars <-rownames(HH_S5F@targeting)
     }    
     chars
 }
@@ -479,7 +479,7 @@ findThreshold <- function(distances, subsample=NULL) {
 #' sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
 #' with the ideal threshold being a value that separates the two modes.
 #' 
-#' "hs5f" use distance derived from the \link{HS5FModel}
+#' "hs5f" use distance derived from the \link{HH_S5F}
 #' using \link{calcTargetingDistance}. "hs1f" and "m1n" use \link{HS1FDistance} and 
 #' \link{M1NDistance} to calculate distances respectively. "ham" uses a nucleotide 
 #' hamming distance matrix from \link[alakazam]{getDNAMatrix}, with gaps being zero. 
@@ -501,7 +501,7 @@ findThreshold <- function(distances, subsample=NULL) {
 #'  
 #' @seealso  See \link{calcTargetingDistance} for generating nucleotide distance matrices 
 #'           from a \link{TargetingModel} object. See \link{M1NDistance}, 
-#'           \link{HS5FModel}, \link[alakazam]{getDNAMatrix}, and \link[alakazam]{getAAMatrix}
+#'           \link{HH_S5F}, \link[alakazam]{getDNAMatrix}, and \link[alakazam]{getAAMatrix}
 #'           for individual model details.
 #' 
 #' @examples
@@ -555,7 +555,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
     
     # Get targeting distance
     targeting_distance <- if (model == "hs5f") { 
-        calcTargetingDistance(HS5FModel) 
+        calcTargetingDistance(HH_S5F) 
         } else { NULL }
 
     # Parse V and J columns to get gene

@@ -14,7 +14,7 @@ test_that("Test shmulateSeq", {
     expect_equal(output, expected)
     
     set.seed(56)
-    output <- shmulateSeq(input_seq, mutations = 6, targetingModel = HS5FModel)
+    output <- shmulateSeq(input_seq, mutations = 6, targetingModel = HH_S5F)
     expect_equal(output, expected)
     
     i <- strsplit(input_seq,"")[[1]]
@@ -27,7 +27,7 @@ test_that("Test shmulateTree", {
     input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
     graph <- ExampleTrees[[17]]
     set.seed(7)
-    tree <- shmulateTree(input_seq, graph, targetingModel = MRS5NFModel)
+    tree <- shmulateTree(input_seq, graph, targetingModel = MK_RS5NF)
     expect_equal(tree$DISTANCE, c(0, 2, 4, 3, 6, 1, 1, 3))
     expect_equal(tree$SEQUENCE, 
                  c("NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA", 

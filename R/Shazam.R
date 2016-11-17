@@ -37,8 +37,8 @@
 #' \itemize{
 #'   \item  \link{createTargetingModel}:     Build a 5-mer targeting model.
 #'   \item  \link{plotMutability}:           Plot 5-mer mutability rates.
-#'   \item  \link{HS5FModel}:                Human 5-mer SHM targeting model.
-#'   \item  \link{MRS5NFModel}:              Mouse 5-mer SHM targeting model.
+#'   \item  \link{HH_S5F}:                Human 5-mer SHM targeting model.
+#'   \item  \link{MK_RS5NF}:              Mouse 5-mer SHM targeting model.
 #' }
 #'
 #' @section  Quantification of selection pressure:
@@ -173,4 +173,5 @@ NULL
 
 # Add built-in variables to global variables environment
 utils::globalVariables(c("M1NDistance", "HS1FDistance", 
-                         "U5NModel", "HS5FModel", "MRS5NFModel"), package="shazam")
+                         "HH_S1F", "HKL_S1F", "MK_RS1NF",
+                         "HH_S5F", "HKL_S5F", "MK_RS5NF", "U5N"), package="shazam")

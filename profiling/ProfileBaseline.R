@@ -56,7 +56,7 @@ profvis({
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
-                                targetingModel = HS5FModel,
+                                targetingModel = HH_S5F,
                                 nproc = 1)
 })
 
@@ -74,7 +74,7 @@ profvis({
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
-                                targetingModel = HS5FModel,
+                                targetingModel = HH_S5F,
                                 nproc = 1)
      
     # Grouping the PDFs by the BARCODE and CPRIMER columns in the db, corresponding 

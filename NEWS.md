@@ -9,6 +9,14 @@ Targeting Models:
   `createSubstitutionMatrix()` and `createMutabilityMatrix()` respectively. 
   Also added function `plotTune()` which helps visualize parameter tuning using
   the abovementioned two new functions. 
++ Added human kappa and lambda light chain, silent, 5-mer, functional targeting
+  model (`HKL_S5F`).
++ Renamed `HS5FModel` as `HH_S5F`, `MRS5NFModel` as `MK_RS5NF`, and `U5NModel` 
+  as `U5N`.
++ Added human heavy chain, silent, 1-mer, functional substitution model (`HH_S1F`),
+  human kappa and lambda light chain, silent, 1-mer, functional substitution model 
+  (`HKL_S1F`), and mouse kappa light chain, replacement and silent, 1-mer, 
+  non-functional substitution model (`MK_RS1NF`).
 
 Mutation Profiling:
 

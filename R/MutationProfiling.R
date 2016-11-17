@@ -1171,7 +1171,7 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
 #'                               sequences.
 #' @param    germlineColumn      \code{character} name of the column containing 
 #'                               the germline or reference sequence.
-#' @param    targetingModel      \link{TargetingModel} object. Default is \link{HS5FModel}.
+#' @param    targetingModel      \link{TargetingModel} object. Default is \link{HH_S5F}.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences.
 #' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
@@ -1236,7 +1236,7 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
 expectedMutations <- function(db, 
                               sequenceColumn="SEQUENCE_IMGT",
                               germlineColumn="GERMLINE_IMGT_D_MASK",
-                              targetingModel=HS5FModel,
+                              targetingModel=HH_S5F,
                               regionDefinition=NULL,
                               mutationDefinition=NULL,
                               nproc=1) {
@@ -1267,7 +1267,7 @@ expectedMutations <- function(db,
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
                                               'regionDefinition','targetingModel',
                                               'calcExpectedMutations','calculateTargeting',
-                                              's2c','c2s','NUCLEOTIDES','HS5FModel',
+                                              's2c','c2s','NUCLEOTIDES','HH_S5F',
                                               'calculateMutationalPaths','CODON_TABLE'),
                                 envir=environment() )
         registerDoParallel(cluster)
@@ -1330,7 +1330,7 @@ expectedMutations <- function(db,
 #'                               same length as \code{inputSeq} and positions in 
 #'                               \code{germlineSeq} corresponding to positions with Ns in 
 #'                               \code{inputSeq} will also be assigned an N. 
-#' @param    targetingModel      \link{TargetingModel} object. Default is \link{HS5FModel}.
+#' @param    targetingModel      \link{TargetingModel} object. Default is \link{HH_S5F}.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences.
 #' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
@@ -1386,7 +1386,7 @@ expectedMutations <- function(db,
 #' @export
 calcExpectedMutations <- function(germlineSeq,
                                   inputSeq=NULL,
-                                  targetingModel=HS5FModel,
+                                  targetingModel=HH_S5F,
                                   regionDefinition=NULL,
                                   mutationDefinition=NULL) {
     # Assign codon table
@@ -1433,7 +1433,7 @@ calcExpectedMutations <- function(germlineSeq,
 
 calculateTargeting <- function(germlineSeq,
                                inputSeq=NULL,
-                               targetingModel=HS5FModel,
+                               targetingModel=HH_S5F,
                                regionDefinition=NULL) {
     
     # If an inputSequence is passed then process the germlineSequence

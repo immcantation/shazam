@@ -96,7 +96,7 @@ test_that("createTargetingModel", {
 
 test_that("calcTargetingDistance", {
     
-    dist <- calcTargetingDistance(HS5FModel)
+    dist <- calcTargetingDistance(HH_S5F)
     
     set.seed(15)
     idx <- sample(length(dist), 20)

@@ -239,7 +239,7 @@ editBaseline <- function(baseline, field_name, value) {
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel = HS5FModel,
+#'                          targetingModel = HH_S5F,
 #'                          nproc = 1)
 #' 
 #' # Grouping the PDFs by the isotype and sample annotations.
@@ -271,7 +271,7 @@ getBaselineStats <- function(baseline) {
 #'                              \code{c("local", "focused", "imbalanced")}.
 #' @param   regionDefinition    \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences.
-#' @param   targetingModel      \link{TargetingModel} object. Default is  \link{HS5FModel}.
+#' @param   targetingModel      \link{TargetingModel} object. Default is  \link{HH_S5F}.
 #' @param   mutationDefinition  \link{MutationDefinition} object defining replacement
 #'                              and silent mutation criteria. If \code{NULL} then 
 #'                              replacement and silent are determined by exact 
@@ -342,7 +342,7 @@ getBaselineStats <- function(baseline) {
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel = HS5FModel,
+#'                          targetingModel = HH_S5F,
 #'                          nproc=1)
 #'                          
 #' @export
@@ -351,7 +351,7 @@ calcBaseline <- function(db,
                          germlineColumn="GERMLINE_IMGT_D_MASK",
                          testStatistic=c("local", "focused", "imbalanced"),
                          regionDefinition=NULL,
-                         targetingModel=HS5FModel,
+                         targetingModel=HH_S5F,
                          mutationDefinition=NULL,
                          calcStats=FALSE,
                          nproc=1) {
@@ -399,7 +399,7 @@ calcBaseline <- function(db,
                                               'mutationType','translateCodonToAminoAcid',
                                               'AMINO_ACIDS','binMutationsByRegion',
                                               'collapseMatrixToVector','calcExpectedMutations',
-                                              'calculateTargeting','HS5FModel','calculateMutationalPaths',
+                                              'calculateTargeting','HH_S5F','calculateMutationalPaths',
                                               'CODON_TABLE'
         ), 
         envir=environment() )    
@@ -757,7 +757,7 @@ calcBaselineBinomialPdf <- function (x=3,
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel=HS5FModel,
+#'                          targetingModel=HH_S5F,
 #'                          nproc=1)
 #'                          
 #' # Group PDFs by sample
@@ -1053,7 +1053,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel = HS5FModel,
+#'                          targetingModel = HH_S5F,
 #'                          nproc = 1)
 #' 
 #' # Grouping the PDFs by the sample and isotype annotations
@@ -1175,7 +1175,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel=HS5FModel,
+#'                          targetingModel=HH_S5F,
 #'                          nproc=1)
 #' 
 #' # Group PDFs by the sample identifier
@@ -1377,7 +1377,7 @@ baseline2DistPValue <-function(base1, base2) {
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel=HS5FModel,
+#'                          targetingModel=HH_S5F,
 #'                          nproc=1)
 #'  
 #' # Grouping the PDFs by the sample and isotype annotations
@@ -1582,7 +1582,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel=HS5FModel,
+#'                          targetingModel=HH_S5F,
 #'                          nproc=1)
 #'  
 #' # Grouping the PDFs by sample and isotype annotations

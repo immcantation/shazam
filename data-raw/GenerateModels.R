@@ -3,7 +3,7 @@
 # Imports
 library(seqinr)
 
-#### M1N #####
+#### M1NDistance #####
 
 # Smith DS, et al. Di- and trinucleotide target preferences of somatic mutagenesis 
 #    in normal and autoreactive B cells. 
@@ -21,7 +21,7 @@ M1NDistance <- matrix(c(0, 2.86, 1, 2.14, 0, 0, 0,
 devtools::use_data(M1NDistance, overwrite=TRUE)
 
 
-#### HS1F #####
+#### HS1FDistance #####
 
 # Yaari G, et al. Models of somatic hypermutation targeting and substitution 
 #   based on synonymous mutations from high-throughput immunoglobulin sequencing data. 
@@ -66,19 +66,67 @@ u5n_mut <- extendMutabilityMatrix(u5n_mut)
 u5n_tar <- createTargetingMatrix(u5n_sub, u5n_mut)
 
 # Build and save TargetingModel object
-U5NModel <- new("TargetingModel",
-                 name="u5n",
-                 description="uniform 5-mer model",
+U5N <- new("TargetingModel",
+                 name="U5N",
+                 description="uniform 5-mer null model",
                  species="",
                  date="2015-05-06",
                  citation="",
                  substitution=u5n_sub,
                  mutability=u5n_mut,
                  targeting=u5n_tar)
-devtools::use_data(U5NModel, overwrite=TRUE)
+devtools::use_data(U5N, overwrite=TRUE)
 
+#### HH_S1F ####
 
-#### HS5F ####
+# Yaari G, et al. Models of somatic hypermutation targeting and substitution 
+
+# HS1FDistance[1:4, 1:4] normalized by row
+# HH_S1F = round(apply(HS1FDistance[1:4, 1:4], 1, function(x){x/sum(x)}), 3)
+
+# Hard-coded in case HS1FDistance gets renamed in the future
+HH_S1F = matrix(data=c(0.000, 0.431, 0.207, 0.362,
+                       0.431, 0.000, 0.362, 0.207,
+                       0.207, 0.362, 0.000, 0.431,
+                       0.362, 0.207, 0.431, 0.000),
+                nrow=4, byrow=TRUE, 
+                dimnames = list(c("A","C","G","T"), 
+                                c("A","C","G","T")))
+
+devtools::use_data(HH_S1F, overwrite=TRUE)
+
+#### HKL_S1F ####
+
+# Table 3 from 
+# Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  
+# Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
+# Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
+# Immunology,197(9), 3566–3574. http://doi.org/10.4049/jimmunol.1502263
+
+HKL_S1F = matrix(data=c(0.00, 0.26, 0.50, 0.24,
+                        0.25, 0.00, 0.30, 0.45,
+                        0.53, 0.31, 0.00, 0.16,
+                        0.20, 0.57, 0.23, 0.00),
+                  nrow=4, byrow=TRUE, 
+                  dimnames = list(c("A","C","G","T"), 
+                                  c("A","C","G","T")))
+
+devtools::use_data(HKL_S1F, overwrite=TRUE)
+
+#### MK_RS1NF ####
+
+# Directly from Ang Cui
+MK_RS1NF = matrix(data=c(0.00, 0.17, 0.53, 0.30,
+                         0.10, 0.00, 0.13, 0.77,
+                         0.77, 0.14, 0.00, 0.08,
+                         0.28, 0.53, 0.19, 0.00),
+                nrow=4, byrow=TRUE, 
+                dimnames = list(c("A","C","G","T"), 
+                                c("A","C","G","T")))
+
+devtools::use_data(MK_RS1NF, overwrite=TRUE)
+
+#### HH_S5F ####
 
 # Yaari G, et al. Models of somatic hypermutation targeting and substitution 
 #   based on synonymous mutations from high-throughput immunoglobulin sequencing data. 
@@ -111,46 +159,59 @@ hs5f_mut <- extendMutabilityMatrix(hs5f_mut)
 hs5f_tar <- createTargetingMatrix(hs5f_sub, hs5f_mut)
 
 # Build and save TargetingModel object
-HS5FModel <- new("TargetingModel",
-                 name="hs5f",
-                 description="5-mer targeting model based on silent mutations in functional sequences.",
+HH_S5F <- new("TargetingModel",
+                 name="HH_S5F",
+                 description="5-mer targeting model based on silent (S) mutations in human heavy-chain functional sequences.",
                  species="Homo sapiens",
                  date="2015-01-06",
                  citation="Yaari G, et al. Front Immunol. 2013 4(November):358",
                  substitution=hs5f_sub,
                  mutability=hs5f_mut,
                  targeting=hs5f_tar)
-devtools::use_data(HS5FModel, overwrite=TRUE)
+devtools::use_data(HH_S5F, overwrite=TRUE)
 
-#### MRS5NF #####
-# Unpublished.  Shlomchik anti-NP mouse Kappa chain data.
+#### HKL_S5F ####
 
-load("data-raw/db_gc_igk_nf_rs_targeting.rdata")
+# Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  
+# Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
+# Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
+# Immunology,197(9), 3566–3574. http://doi.org/10.4049/jimmunol.1502263
 
-# extend substitution matrix; get 5x3125 (expect 5th row [N] to be NAs)
-mrs5nf_sub <- extendSubstitutionMatrix(db_gc_igk_nf_sub_matrix_rs)
-#table(colSums(mrs5nf_sub, na.rm=1)) # 625 0/NAs (expected)
+load("data-raw/HKL_S5F_raw.rdata")
 
-# extend mutability vector
-# db_gc_igk_nf_mut_matrix_rs is a df
-# extendMutabilityMatrix takes a numeric vector with names of 5mers
-mrs5nf_mut_vec <- db_gc_igk_nf_mut_matrix_rs$Mutability
-names(mrs5nf_mut_vec) <- rownames(db_gc_igk_nf_mut_matrix_rs)
-#sum(mrs5nf_mut_vec) # 1 (expected)
-mrs5nf_mut <- extendMutabilityMatrix(mrs5nf_mut_vec)
-#summary(mrs5nf_mut) # 625 NAs (expected)
+HKL_S5F <- new("TargetingModel",
+                name = "HKL_S5F",
+                description = "5-mer targeting model based on silent (S) mutations in human kappa & lambda light-chain functional sequences",
+                species = "Homo sapiens",
+                date = "2015-12-06",
+                citation = "Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of Immunology, 197(9), 3566–3574. http://doi.org/10.4049/jimmunol.1502263",
+                mutability = hL.mut,
+                substitution = hL.sub,
+                targeting = hL.tar)
 
-# compute targeting; get 5x3125 (expect 5th row [N] to be NAs)
-mrs5nf_tar <- createTargetingMatrix(mrs5nf_sub, mrs5nf_mut)
+devtools::use_data(HKL_S5F, overwrite=TRUE)
 
-MRS5NFModel <- new("TargetingModel",
-                   name = "rs5nf",
-                   description = "5-mer targeting model based on replacement (R) and silent (S) mutations in non-functional kappa light-chain sequences of NP-immunized mice",
-                   species = "Mus musculus",
-                   date = "2015-01-06",
-                   citation = "Cui A, et al. A model of somatic hypermutation targeting in mice based on high-throughput immunoglobulin sequencing data. (In prepration)",
-                   mutability = mrs5nf_mut,
-                   substitution = mrs5nf_sub,
-                   targeting = mrs5nf_tar)
+rm(hL.sub, hL.tar, hL.char, hL.mut)
 
-devtools::use_data(MRS5NFModel, overwrite=TRUE)
+#### MK_RS5NF #####
+
+# Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  
+# Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
+# Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
+# Immunology,197(9), 3566–3574. http://doi.org/10.4049/jimmunol.1502263
+
+load("data-raw/MK_RS5NF_raw.rdata")
+
+MK_RS5NF <- new("TargetingModel",
+               name = "MK_RS5NF",
+               description = "5-mer targeting model based on replacement (R) and silent (S) mutations in kappa light-chain non-functional sequences from NP-immunized mice",
+               species = "Mus musculus",
+               date = "2015-01-06",
+               citation = "Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of Immunology, 197(9), 3566–3574. http://doi.org/10.4049/jimmunol.1502263",
+               mutability = mL.mut,
+               substitution = mL.sub,
+               targeting = mL.tar)
+
+devtools::use_data(MK_RS5NF, overwrite=TRUE)
+
+rm(mL.sub, mL.tar, mL.char, mL.mut)

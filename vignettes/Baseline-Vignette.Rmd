@@ -80,7 +80,7 @@ is used to calculate the number of observed mutations and
 `expectedMutations` calculates the expected frequency of mutations. 
 The underlying targeting model for calculating expectations can be specified 
 using the `targetingModel` parameter. In the example below, the default 
-`HS5FModel` is used. Column names for sequence and germline sequence may
+`HH_S5F` is used. Column names for sequence and germline sequence may
 also be passed in as parameters if they differ from the Change-O defaults. 
 
 Mutations are counted by these functions separately for complementarity 
@@ -106,7 +106,7 @@ observed <- observedMutations(clones,
 # Count observed mutations and append EXPECTED columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="CLONAL_SEQUENCE",
-                              targetingModel=HS5FModel,
+                              targetingModel=HH_S5F,
                               regionDefinition=IMGT_V, nproc=1)
 ```
 
@@ -160,14 +160,14 @@ provides the following built-in MutationDefinitions:
    volume class.
 
 The default behavior of `expectedMutations` is to use the human 5-mer mutation model,
-`HS5FModel`. Alternative SHM targeting models can be provided using the 
+`HH_S5F`. Alternative SHM targeting models can be provided using the 
 `targetingModel` argument.
 
 ```{r, eval=FALSE, warning=FALSE, results="hide"}
 # Calculate selection on charge class with the mouse 5-mer model
 baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
                          regionDefinition=IMGT_V, 
-                         targetingModel=MRS5NFModel,
+                         targetingModel=MK_RS5NFModel,
                          targetingModel=CHARGE_MUTATIONS,
                          nproc=1)
 ```

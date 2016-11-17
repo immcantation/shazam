@@ -16,12 +16,12 @@ NULL
 #' @param    mutations       number of mutations to be introduced into \code{sequence}.
 #' @param    targetingModel  5-mer \link{TargetingModel} object to be used for computing 
 #'                           probabilities of mutations at each position. Defaults to
-#'                           \link{HS5FModel}.
+#'                           \link{HH_S5F}.
 #'                           
 #' @return   A string defining the mutated sequence.
 #' 
 #' @seealso  See \link{shmulateTree} for imposing mutations on a lineage tree. 
-#'           See \link{HS5FModel} and \link{MRS5NFModel} for predefined 
+#'           See \link{HH_S5F} and \link{MK_RS5NF} for predefined 
 #'           \link{TargetingModel} objects.
 #' 
 #' @examples
@@ -32,7 +32,7 @@ NULL
 #' shmulateSeq(sequence, mutations=6)
 #' 
 #' @export
-shmulateSeq <- function(sequence, mutations, targetingModel=HS5FModel) {
+shmulateSeq <- function(sequence, mutations, targetingModel=HH_S5F) {
     #* counts on constant variables CODON_TABLE, NUCLEOTIDES (ACTGN-.)
     
     # Trim sequence to last codon (getCodonPos from MutationProfiling.R)
@@ -107,7 +107,7 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HS5FModel) {
 #'                           vertex annotations, whose edges are to be recreated.
 #' @param    targetingModel  5-mer \link{TargetingModel} object to be used for computing 
 #'                           probabilities of mutations at each position. Defaults to
-#'                           \link{HS5FModel}.
+#'                           \link{HH_S5F}.
 #' @param   field            annotation to use for both unweighted path length exclusion and
 #'                           consideration as the MRCA node. If \code{NULL} do not exclude 
 #'                           any nodes.
@@ -130,7 +130,7 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HS5FModel) {
 #'           }
 #' 
 #' @seealso  See \link{shmulateSeq} for imposing mutations on a single sequence. 
-#'           See \link{HS5FModel} and \link{MRS5NFModel} for predefined 
+#'           See \link{HH_S5F} and \link{MK_RS5NF} for predefined 
 #'           \link{TargetingModel} objects.
 #' 
 #' @examples
@@ -145,14 +145,14 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HS5FModel) {
 #' # Simulate using the mouse 5-mer targeting model
 #' # Exclude nodes without a sample identifier
 #' # Add 20% mutation rate to the trunk
-#' shmulateTree(sequence, graph, targetingModel=MRS5NFModel,
+#' shmulateTree(sequence, graph, targetingModel=MK_RS5NF,
 #'              field="SAMPLE", exclude=NA, junctionWeight=0.2)
 #'  
 #' @export
-shmulateTree <- function(sequence, graph, targetingModel=HS5FModel,
+shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
                          field=NULL, exclude=NULL, junctionWeight=NULL) {
     ## DEBUG
-    # targetingModel=HS5FModel; field=NULL; exclude=NULL; junctionWeight=NULL
+    # targetingModel=HH_S5F; field=NULL; exclude=NULL; junctionWeight=NULL
     
     # Determine MRCA of lineage tree
     mrca_df <- alakazam::getMRCA(graph, path="distance", root="Germline", 
