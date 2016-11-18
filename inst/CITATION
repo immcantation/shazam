@@ -58,7 +58,7 @@ bibentry(bibtype = "Article",
          title   = "A Model of Somatic Hypermutation Targeting in Mice Based on High-Throughput 
                     Ig Sequencing Data.",
          author  = c(person("Ang", "Cui"),
-                     person("Roberto", "Di Niro")
+                     person("Roberto", "Di Niro"),
                      person("Jason A.", "Vander Heiden"),
                      person("Adrian W.", "Briggs"),
                      person("Kris", "Adams"),
