@@ -31,7 +31,7 @@ bibentry(bibtype = "Article",
 
 bibentry(bibtype = "Article",
          style   = "citation",
-         header  = "To cite the HS5F model and the targeting model generation methods, please use:",
+         header  = "To cite the HH_S5F model and the targeting model generation methods, please use:",
          title   = "Models of somatic hypermutation targeting and substitution based on synonymous 
                     mutations from high-throughput immunoglobulin sequencing data.",
          author  = c(person("Gur", "Yaari"),
@@ -51,3 +51,25 @@ bibentry(bibtype = "Article",
          number  = 358,
          pages   = "1-11",
          doi     = "10.3389/fimmu.2013.00358")
+
+bibentry(bibtype = "Article",
+         style   = "citation",
+         header  = "To cite the HKL_S1F, HKL_S5F, MK_RS1NF, and MK_RS5NF models, please use:",
+         title   = "A Model of Somatic Hypermutation Targeting in Mice Based on High-Throughput 
+                    Ig Sequencing Data.",
+         author  = c(person("Ang", "Cui"),
+                     person("Roberto", "Di Niro")
+                     person("Jason A.", "Vander Heiden"),
+                     person("Adrian W.", "Briggs"),
+                     person("Kris", "Adams"),
+                     person("Tamara", "Gilbert"),
+                     person("Kevin C.", "O'Connor"),
+                     person("Francois", "Vigneault"),
+                     person("Mark J.", "Shlomchik"),
+                     person("Steven H.", "Kleinstein")),
+         year    = 2016,
+         journal = "The Journal of Immunology",
+         volume  = 197,
+         number  = 9,
+         pages   = "3566-3574",
+         doi     = "10.4049/jimmunol.1502263")
