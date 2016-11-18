@@ -51,7 +51,7 @@ sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
-targetingModel = HS5FModel,
+targetingModel = HH_S5F,
 nproc = 1)
 
 ```
@@ -89,16 +89,11 @@ getBaselineStats(grouped)
 
 
 ```
-  SAMPLE ISOTYPE REGION BASELINE_SIGMA BASELINE_CI_LOWER BASELINE_CI_UPPER
-1    +7d     IgA    CDR     -0.3089862        -0.5003393        -0.1479380
-2    +7d     IgA    FWR     -0.6954960        -0.8228015        -0.5769405
-3    +7d     IgG    CDR     -0.2457173        -0.3758853        -0.1347132
-4    +7d     IgG    FWR     -0.7141405        -0.8116666        -0.6270893
-  BASELINE_CI_PVALUE
-1      -4.944102e-02
-2      -3.352874e-14
-3      -1.181225e-02
-4      -5.284662e-14
+  SAMPLE ISOTYPE REGION BASELINE_SIGMA BASELINE_CI_LOWER BASELINE_CI_UPPER BASELINE_CI_PVALUE
+1    +7d     IgA    CDR     -0.3094426        -0.5008311        -0.1483314      -4.838203e-02
+2    +7d     IgA    FWR     -0.6977938        -0.8251886        -0.5787796      -3.796963e-14
+3    +7d     IgG    CDR     -0.2426503        -0.3726854        -0.1326803      -1.459370e-02
+4    +7d     IgG    FWR     -0.7131437        -0.8105023        -0.6263927      -5.107026e-14
 
 ```
 

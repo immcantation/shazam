@@ -1,4 +1,4 @@
-Version 0.1.4.999: September 7, 2016
+Version 0.1.4.999: November 18, 2016
 -------------------------------------------------------------------------------
 Targeting Models:
 
@@ -41,6 +41,7 @@ Region Definition:
 
 + Deleted `IMGT_V_NO_CDR3` and `IMGT_V_BY_REGIONS_NO_CDR3`. Updated `IMGT_V` 
   and `IMGT_V_BY_REGIONS` so that neither includes CDR3 now.
+
 
 Version 0.1.4:  August 5, 2016
 -------------------------------------------------------------------------------

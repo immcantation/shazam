@@ -68,7 +68,7 @@ sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
-targetingModel=HS5FModel,
+targetingModel=HH_S5F,
 nproc=1)
 
 ```
@@ -106,9 +106,9 @@ testBaseline(grouped, groupBy="SAMPLE")
 
 
 ```
-  REGION       TEST      PVALUE         FDR
-1    CDR -1h != +7d 0.303761976 0.303761976
-2    FWR -1h != +7d 0.004946861 0.009893722
+  REGION       TEST      PVALUE        FDR
+1    CDR -1h != +7d 0.322796870 0.32279687
+2    FWR -1h != +7d 0.005371717 0.01074343
 
 ```
 

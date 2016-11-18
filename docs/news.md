@@ -1,9 +1,22 @@
-Version 0.1.4.999: September 7, 2016
+Version 0.1.4.999: November 18, 2016
 -------------------------------------------------------------------------------
 Targeting Models:
 
 + Added `numMutationsOnly` argument to `createSubstitutionMatrix()`, enabling
   parameter tuning for `minNumMutations`.  
++ Added functions `minNumMutationsTune()` and `minNumSeqMutationsTune()` to 
+  tune for parameters `minNumMutations` and `minNumSeqMutations` in functions 
+  `createSubstitutionMatrix()` and `createMutabilityMatrix()` respectively. 
+  Also added function `plotTune()` which helps visualize parameter tuning using
+  the abovementioned two new functions. 
++ Added human kappa and lambda light chain, silent, 5-mer, functional targeting
+  model (`HKL_S5F`).
++ Renamed `HS5FModel` as `HH_S5F`, `MRS5NFModel` as `MK_RS5NF`, and `U5NModel` 
+  as `U5N`.
++ Added human heavy chain, silent, 1-mer, functional substitution model (`HH_S1F`),
+  human kappa and lambda light chain, silent, 1-mer, functional substitution model 
+  (`HKL_S1F`), and mouse kappa light chain, replacement and silent, 1-mer, 
+  non-functional substitution model (`MK_RS1NF`).
 
 Mutation Profiling:
 
@@ -28,6 +41,7 @@ Region Definition:
 
 + Deleted `IMGT_V_NO_CDR3` and `IMGT_V_BY_REGIONS_NO_CDR3`. Updated `IMGT_V` 
   and `IMGT_V_BY_REGIONS` so that neither includes CDR3 now.
+
 
 Version 0.1.4:  August 5, 2016
 -------------------------------------------------------------------------------

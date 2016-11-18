@@ -17,9 +17,8 @@ frequencies of a given sequence. This is primarily a helper function for
 Usage
 --------------------
 ```
-calcExpectedMutations(germlineSeq, inputSeq = NULL,
-targetingModel = HS5FModel, regionDefinition = NULL,
-mutationDefinition = NULL)
+calcExpectedMutations(germlineSeq, inputSeq = NULL, targetingModel = HH_S5F,
+regionDefinition = NULL, mutationDefinition = NULL)
 ```
 
 Arguments
@@ -36,7 +35,7 @@ same length as `inputSeq` and positions in
 `inputSeq` will also be assigned an N.
 
 targetingModel
-:   [TargetingModel](TargetingModel-class.md) object. Default is [HS5FModel](HS5FModel.md).
+:   [TargetingModel](TargetingModel-class.md) object. Default is [HH_S5F](HH_S5F.md).
 
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions

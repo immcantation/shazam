@@ -51,7 +51,7 @@ for each clone.
 
 ```r
 # Collapse clonal groups into single sequences
-clones <- collapseClones(ExampleDb, regionDefinition=IMGT_V_NO_CDR3, nproc=1)
+clones <- collapseClones(ExampleDb, regionDefinition=IMGT_V, nproc=1)
 ```
 
 Following construction of an effective sequence for each clone, the observed
@@ -61,7 +61,7 @@ is used to calculate the number of observed mutations and
 `expectedMutations` calculates the expected frequency of mutations. 
 The underlying targeting model for calculating expectations can be specified 
 using the `targetingModel` parameter. In the example below, the default 
-`HS5FModel` is used. Column names for sequence and germline sequence may
+`HH_S5F` is used. Column names for sequence and germline sequence may
 also be passed in as parameters if they differ from the Change-O defaults. 
 
 Mutations are counted by these functions separately for complementarity 
@@ -71,13 +71,10 @@ the boundaries lie. There are four built-in region definitions
 in the `shazam` package, which are all dependent upon the V segment
 being IMGT-gapped:
 
-*  `IMGT_V`: All regions in the V segment grouped as either CDR or FWR.
+*  `IMGT_V`: All regions in the V segment, excluding CDR3, grouped as 
+    either CDR or FWR.
 *  `IMGT_V_BY_REGIONS`: The CDR1, CDR2, CDR3, FWR1, FWR and FWR3 regions 
-    in the V segment treated as individual regions.
-*  `IMGT_V_NO_CDR3`: All regions in the V segment, excluding CDR3, grouped as 
-   either CDR or FWR (default).
-*  `IMGT_V_BY_REGIONS_NO_CDR3`: The CDR1, CDR2, FWR1, FWR and FWR3 regions 
-    in the V segment treated as individual regions.
+    in the V segment (no CDR3) treated as individual regions.
 
 Users may define other region sets and boundaries by creating a custom
 `RegionDefinition` object.
@@ -87,23 +84,12 @@ Users may define other region sets and boundaries by creating a custom
 # Count observed mutations and append OBSERVED columns to the output
 observed <- observedMutations(clones, 
                               sequenceColumn="CLONAL_SEQUENCE",
-                              regionDefinition=IMGT_V_NO_CDR3, nproc=1)
-```
-
-```
-## Error in {: task 1 failed - "object 'IMGT_V_NO_CDR3' not found"
-```
-
-```r
+                              regionDefinition=IMGT_V, nproc=1)
 # Count observed mutations and append EXPECTED columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="CLONAL_SEQUENCE",
-                              targetingModel=HS5FModel,
-                              regionDefinition=IMGT_V_NO_CDR3, nproc=1)
-```
-
-```
-## Error in checkColumns(db, c(sequenceColumn, germlineColumn)): object 'observed' not found
+                              targetingModel=HH_S5F,
+                              regionDefinition=IMGT_V, nproc=1)
 ```
 
 The counts of observed and expected mutations can be combined to test for selection 
@@ -115,11 +101,7 @@ on mutation counts can be specified using the `testStatistic` parameter.
 ```r
 # Calculate selection scores using the output from expectedMutations
 baseline <- calcBaseline(expected, testStatistic="focused", 
-                         regionDefinition=IMGT_V_NO_CDR3, nproc=1)
-```
-
-```
-## Error in checkColumns(db, c(sequenceColumn, germlineColumn)): object 'expected' not found
+                         regionDefinition=IMGT_V, nproc=1)
 ```
 
 ### Calculating selection in one step
@@ -133,23 +115,13 @@ functions prior to calculating selection scores.
 ```r
 # Calculate selection scores from scratch on subset
 baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
-                         regionDefinition=IMGT_V_NO_CDR3, nproc=1)
-```
+                         regionDefinition=IMGT_V, nproc=1)
 
-```
-## Error in calcBaseline(ExampleDb, testStatistic = "focused", regionDefinition = IMGT_V_NO_CDR3, : object 'IMGT_V_NO_CDR3' not found
-```
-
-```r
 # Subset the original data to switched isotypes
 db_sub <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
 # Calculate selection scores from scratch on subset
 baseline_sub <- calcBaseline(db_sub, testStatistic="focused", 
-                             regionDefinition=IMGT_V_NO_CDR3, nproc=1)
-```
-
-```
-## Error in calcBaseline(db_sub, testStatistic = "focused", regionDefinition = IMGT_V_NO_CDR3, : object 'IMGT_V_NO_CDR3' not found
+                             regionDefinition=IMGT_V, nproc=1)
 ```
 
 ### Using alternative mutation definitions and models
@@ -172,15 +144,15 @@ provides the following built-in MutationDefinitions:
    volume class.
 
 The default behavior of `expectedMutations` is to use the human 5-mer mutation model,
-`HS5FModel`. Alternative SHM targeting models can be provided using the 
+`HH_S5F`. Alternative SHM targeting models can be provided using the 
 `targetingModel` argument.
 
 
 ```r
 # Calculate selection on charge class with the mouse 5-mer model
 baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
-                         regionDefinition=IMGT_V_NO_CDR3, 
-                         targetingModel=MRS5NFModel,
+                         regionDefinition=IMGT_V, 
+                         targetingModel=MK_RS5NFModel,
                          targetingModel=CHARGE_MUTATIONS,
                          nproc=1)
 ```
@@ -204,19 +176,9 @@ intervals, and p-values that each group differs from zero.
 ```r
 # Combine selection scores by time-point
 grouped_1 <- groupBaseline(baseline, groupBy=c("SAMPLE"))
-```
 
-```
-## Error in data.table(baseline@db): object 'baseline' not found
-```
-
-```r
 # Combine selection scores by time-point and isotype
 grouped_2 <- groupBaseline(baseline_sub, groupBy=c("SAMPLE", "ISOTYPE"))
-```
-
-```
-## Error in data.table(baseline@db): object 'baseline_sub' not found
 ```
 
 ### Convolving variables at multiple level
@@ -254,7 +216,9 @@ testBaseline(grouped_1, groupBy="SAMPLE")
 ```
 
 ```
-## Error in testBaseline(grouped_1, groupBy = "SAMPLE"): object 'grouped_1' not found
+##   REGION       TEST      PVALUE        FDR
+## 1    CDR -1h != +7d 0.013073445 0.01307345
+## 2    FWR -1h != +7d 0.005485099 0.01097020
 ```
 
 ## Plot and compare selection scores for groups
@@ -280,9 +244,7 @@ isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick",
 plotBaselineSummary(grouped_1, "SAMPLE")
 ```
 
-```
-## Error in is(baseline, "Baseline"): object 'grouped_1' not found
-```
+![plot of chunk Baseline-Vignette-10](figure/Baseline-Vignette-10-1.png)
 
 ```r
 # Plot selection scores by time-point and isotype for only CDR
@@ -290,18 +252,14 @@ plotBaselineSummary(grouped_2, "SAMPLE", "ISOTYPE", groupColors=isotype_colors,
                     subsetRegions="CDR")
 ```
 
-```
-## Error in is(baseline, "Baseline"): object 'grouped_2' not found
-```
+![plot of chunk Baseline-Vignette-10](figure/Baseline-Vignette-10-2.png)
 
 ```r
 # Group by CDR/FWR and facet by isotype
 plotBaselineSummary(grouped_2, "SAMPLE", "ISOTYPE", facetBy="group")
 ```
 
-```
-## Error in is(baseline, "Baseline"): object 'grouped_2' not found
-```
+![plot of chunk Baseline-Vignette-10](figure/Baseline-Vignette-10-3.png)
 
 `plotBaselineDensity` plots the full `Baseline` PDF of selection scores for the 
 given groups. The parameters are the same as those for `plotBaselineSummary`.
@@ -315,6 +273,4 @@ plotBaselineDensity(grouped_2, "ISOTYPE", groupColumn="SAMPLE", colorElement="gr
                     colorValues=sample_colors, sigmaLimits=c(-1, 1))
 ```
 
-```
-## Error in duplicated(baseline@db[, c(idColumn, groupColumn)]): object 'grouped_2' not found
-```
+![plot of chunk Baseline-Vignette-11](figure/Baseline-Vignette-11-1.png)

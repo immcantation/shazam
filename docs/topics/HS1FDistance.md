@@ -39,7 +39,7 @@ Front Immunol. 2013 4(November):358.
 See also
 -------------------
 
-See [HS5FModel](HS5FModel.md) for the 5-mer model from same publication.
+See [HH_S5F](HH_S5F.md) for the 5-mer targeting model from same publication.
 
 
 

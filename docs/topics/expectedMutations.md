@@ -17,7 +17,7 @@ Usage
 --------------------
 ```
 expectedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", targetingModel = HS5FModel,
+germlineColumn = "GERMLINE_IMGT_D_MASK", targetingModel = HH_S5F,
 regionDefinition = NULL, mutationDefinition = NULL, nproc = 1)
 ```
 
@@ -36,7 +36,7 @@ germlineColumn
 the germline or reference sequence.
 
 targetingModel
-:   [TargetingModel](TargetingModel-class.md) object. Default is [HS5FModel](HS5FModel.md).
+:   [TargetingModel](TargetingModel-class.md) object. Default is [HH_S5F](HH_S5F.md).
 
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions

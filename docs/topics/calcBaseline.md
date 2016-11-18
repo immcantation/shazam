@@ -19,8 +19,8 @@ Usage
 calcBaseline(db, sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", testStatistic = c("local",
 "focused", "imbalanced"), regionDefinition = NULL,
-targetingModel = HS5FModel, mutationDefinition = NULL,
-calcStats = FALSE, nproc = 1)
+targetingModel = HH_S5F, mutationDefinition = NULL, calcStats = FALSE,
+nproc = 1)
 ```
 
 Arguments
@@ -47,7 +47,7 @@ regionDefinition
 and boundaries of the Ig sequences.
 
 targetingModel
-:   [TargetingModel](TargetingModel-class.md) object. Default is  [HS5FModel](HS5FModel.md).
+:   [TargetingModel](TargetingModel-class.md) object. Default is  [HH_S5F](HH_S5F.md).
 
 mutationDefinition
 :   [MutationDefinition](MutationDefinition-class.md) object defining replacement
@@ -134,7 +134,7 @@ sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
-targetingModel = HS5FModel,
+targetingModel = HH_S5F,
 nproc=1)
 ```
 

@@ -4,19 +4,19 @@
 
 
 
-**HS5FModel** - *Human 5-mer targeting model.*
+**HH_S5F** - *Human heavy chain, silent, 5-mer, functional targeting model.*
 
 Description
 --------------------
 
 5-mer model of somatic hypermutation targeting based on analysis of silent mutations
-in functional Ig sequences from Homo sapiens.
+in functional heavy chain Ig sequences from Homo sapiens.
 
 
 Usage
 --------------------
 ```
-HS5FModel
+HH_S5F
 ```
 
 
@@ -39,8 +39,9 @@ See also
 -------------------
 
 See [HS1FDistance](HS1FDistance.md) for the 1-mer distance matrix from the same 
-publication, [MRS5NFModel](MRS5NFModel.md) for the mouse 5-mer model, and 
-[U5NModel](U5NModel.md) for the uniform 5-mer model.
+publication, [HKL_S5F](HKL_S5F.md) for the human light chain 5-mer targeting model, 
+[MK_RS5NF](MK_RS5NF.md) for the mouse 5-mer targeting model, and [U5N](U5N.md) for the 
+uniform 5-mer null targeting model.
 
 
 

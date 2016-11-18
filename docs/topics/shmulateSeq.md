@@ -16,7 +16,7 @@ Targeting probabilities at each position are updated after each iteration.
 Usage
 --------------------
 ```
-shmulateSeq(sequence, mutations, targetingModel = HS5FModel)
+shmulateSeq(sequence, mutations, targetingModel = HH_S5F)
 ```
 
 Arguments
@@ -31,7 +31,7 @@ mutations
 targetingModel
 :   5-mer [TargetingModel](TargetingModel-class.md) object to be used for computing 
 probabilities of mutations at each position. Defaults to
-[HS5FModel](HS5FModel.md).
+[HH_S5F](HH_S5F.md).
 
 
 
@@ -55,7 +55,7 @@ shmulateSeq(sequence, mutations=6)
 
 
 ```
-[1] "NGATTTGACGACACGGCCGTGAATTACTGTGCGCGACAGGGTTTA"
+[1] "NGATCAGACGACGCGGCCGTCTTTTACTGTGCGAGAGATACTTTT"
 
 ```
 
@@ -65,7 +65,7 @@ See also
 -------------------
 
 See [shmulateTree](shmulateTree.md) for imposing mutations on a lineage tree. 
-See [HS5FModel](HS5FModel.md) and [MRS5NFModel](MRS5NFModel.md) for predefined 
+See [HH_S5F](HH_S5F.md) and [MK_RS5NF](MK_RS5NF.md) for predefined 
 [TargetingModel](TargetingModel-class.md) objects.
 
 

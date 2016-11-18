@@ -88,7 +88,7 @@ The distance to nearest neighbor can be used to estimate a threshold for assigni
 sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
 with the ideal threshold being a value that separates the two modes.
 
-"hs5f" use distance derived from the [HS5FModel](HS5FModel.md)
+"hs5f" use distance derived from the [HH_S5F](HH_S5F.md)
 using [calcTargetingDistance](calcTargetingDistance.md). "hs1f" and "m1n" use [HS1FDistance](HS1FDistance.md) and 
 [M1NDistance](M1NDistance.md) to calculate distances respectively. "ham" uses a nucleotide 
 hamming distance matrix from [getDNAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getDNAMatrix), with gaps being zero. 
@@ -140,7 +140,7 @@ See also
 
 See [calcTargetingDistance](calcTargetingDistance.md) for generating nucleotide distance matrices 
 from a [TargetingModel](TargetingModel-class.md) object. See [M1NDistance](M1NDistance.md), 
-[HS5FModel](HS5FModel.md), [getDNAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getDNAMatrix), and [getAAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getAAMatrix)
+[HH_S5F](HH_S5F.md), [getDNAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getDNAMatrix), and [getAAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getAAMatrix)
 for individual model details.
 
 

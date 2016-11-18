@@ -52,8 +52,8 @@ Examples
 -------------------
 
 ```R
-# Calculate targeting distance of HS5FModel
-dist <- calcTargetingDistance(HS5FModel)
+# Calculate targeting distance of HH_S5F
+dist <- calcTargetingDistance(HH_S5F)
 ```
 
 

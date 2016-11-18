@@ -52,8 +52,8 @@ along with tools to build these mutability and substitution models from data.
 
 + [createTargetingModel](createTargetingModel.md):     Build a 5-mer targeting model.
 + [plotMutability](plotMutability.md):           Plot 5-mer mutability rates.
-+ [HS5FModel](HS5FModel.md):                Human 5-mer SHM targeting model.
-+ [MRS5NFModel](MRS5NFModel.md):              Mouse 5-mer SHM targeting model.
++ [HH_S5F](HH_S5F.md):                Human 5-mer SHM targeting model.
++ [MK_RS5NF](MK_RS5NF.md):              Mouse 5-mer SHM targeting model.
 
 
 Quantification of selection pressure

@@ -4,7 +4,7 @@
 
 
 
-**U5NModel** - *Uniform 5-mer targeting model.*
+**U5N** - *Uniform 5-mer null targeting model.*
 
 Description
 --------------------
@@ -16,7 +16,7 @@ and targeting rates are uniformly distributed.
 Usage
 --------------------
 ```
-U5NModel
+U5N
 ```
 
 
@@ -29,8 +29,8 @@ Format
 See also
 -------------------
 
-See [HS5FModel](HS5FModel.md) for the human 5-mer model and [MRS5NFModel](MRS5NFModel.md) 
-for the mouse 5-mer model.
+See [HH_S5F](HH_S5F.md) and [HKL_S5F](HKL_S5F.md) for the human 5-mer targeting models and 
+[MK_RS5NF](MK_RS5NF.md) for the mouse 5-mer targeting model.
 
 
 
