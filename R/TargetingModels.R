@@ -60,7 +60,7 @@ NULL
 #' 1-mer substitution model of somatic hypermutation based on analysis of silent mutations
 #' in functional heavy chain Ig sequences from Homo sapiens.
 #'
-#' @format   A symmetric matrix of nucleotide substitution rates. The rates are normalized,
+#' @format   A 4x4 symmetric matrix of nucleotide substitution rates. The rates are normalized,
 #'           therefore each row and each column sum up to 1.
 #' 
 #' @references
@@ -80,8 +80,9 @@ NULL
 #' 1-mer substitution model of somatic hypermutation based on analysis of silent mutations
 #' in functional kappa and lambda light chain Ig sequences from Homo sapiens.
 #'
-#' @format   A symmetric matrix of nucleotide substitution rates. The rates are normalized,
-#'           therefore each row and each column sum up to 1.
+#' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
+#'           therefore each row and each column sum up to 1. Reported in Table III in
+#'           Cui et al., 2016 (see References below).
 #' 
 #' @references
 #' \enumerate{
@@ -102,7 +103,7 @@ NULL
 #' silent mutations in non-functional kappa light chain Ig sequences from NP-immunized Mus
 #' musculus.
 #'
-#' @format   A symmetric matrix of nucleotide substitution rates. The rates are normalized,
+#' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
 #'           therefore each row and each column sum up to 1.
 #' 
 #' @references
