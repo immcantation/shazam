@@ -88,7 +88,7 @@ NULL
 #'   \item  Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
 #'   Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
 #'   Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
-#'   Immunology,197(9), 3566–3574.
+#'   Immunology, 197(9), 3566-3574.
 #'  }
 #' 
 #' @seealso  See \link{HH_S1F} for the human heavy chain 1-mer substitution model and 
@@ -110,7 +110,7 @@ NULL
 #'   \item  Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
 #'   Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
 #'   Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
-#'   Immunology,197(9), 3566–3574.
+#'   Immunology, 197(9), 3566-3574.
 #'  }
 #' 
 #' @seealso  See \link{HH_S1F} for the human heavy chain 1-mer substitution model and 
@@ -151,7 +151,7 @@ NULL
 #'   \item  Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
 #'   Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
 #'   Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
-#'   Immunology,197(9), 3566–3574.
+#'   Immunology, 197(9), 3566-3574.
 #'  }
 #'  
 #' @seealso  See \link{HH_S5F} for the human heavy chain 5-mer targeting model, 
@@ -173,7 +173,7 @@ NULL
 #'   \item  Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
 #'   Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
 #'   Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
-#'   Immunology,197(9), 3566–3574.
+#'   Immunology, 197(9), 3566-3574.
 #'  }
 #'  
 #' @seealso  See \link{HH_S5F} for the human heavy chain silent 5-mer functional targeting
