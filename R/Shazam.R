@@ -93,8 +93,10 @@
 #'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
 #'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
 #'            Front Immunol. 2013 4:358.
-#'   \item  Cui A, et al. A model of somatic hypermutation targeting in mice based on 
-#'            high-throughput immunoglobulin sequencing data. Under review.
+#'   \item  Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
+#'          Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
+#'          Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
+#'          Immunology, 197(9), 3566-3574.
 #'  }
 #' 
 #' @import   ggplot2
