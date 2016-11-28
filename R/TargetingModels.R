@@ -1661,7 +1661,8 @@ makeAverage1merSub = function(sub5mer) {
 #'                               \code{createMutabilityMatrix} and that returned by
 #'                               \code{makeDegenerate5merMut} with \code{extended=FALSE}.
 #'                               Names should correspond to 5-mers made up of "A", "T", 
-#'                               "G", and "C" (case-insensitive).
+#'                               "G", and "C" (case-insensitive). \code{NA} values are 
+#'                               allowed.
 #'
 #' @return   A named vector of length 4 containing normalized mutability rates.
 #'
@@ -1708,7 +1709,7 @@ makeAverage1merMut = function(mut5mer) {
     stopifnot(length(mut1mer) == 4)
     
     # normalize
-    mut1mer = mut1mer / sum(mut1mer)
+    mut1mer = mut1mer / sum(mut1mer, na.rm=T)
     
     return(mut1mer)
 }
