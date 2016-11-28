@@ -1429,6 +1429,291 @@ removeCodonGaps <- function(matInput) {
 }
 
 
+#' Make a degenerate 5-mer substitution model based on a 1-mer substitution model
+#'
+#' \code{makeDegenerate5merSub} populates substitution rates from a 1-mer substitution model
+#' into 5-mers with corresponding central 1-mers.
+#'
+#' @param    sub1mer             a 4x4 matrix containing (normalized) substitution rates.
+#'                               Row names should correspond to nucleotides to mutate from.
+#'                               Column names should correspond to nucleotides to mutate into.
+#'                               Nucleotides should include "A", "T", "G", and "C" 
+#'                               (case-insensitive).
+#' @param    extended            whether to return the unextended (\code{extended=FALSE}) or 
+#'                               extended (\code{extended=TRUE}) 5-mer substitution model. 
+#'                               Default is \code{FALSE}.
+#'
+#' @return   For \code{extended=FALSE}, a 4x1024 matrix. For \code{extended=TRUE}, a 5x3125 
+#'           matrix.
+#'
+#' @details  As a concrete example, consider a 1-mer substitution model in which substitution
+#'           rates from "A" to "T", "G", and "C" are, respectively, 0.1, 0.6, and 0.3. In the 
+#'           resultant degenerate 5-mer substitution model, all the 5-mers (columns) that have 
+#'           an "A" as their central 1-mer would have substitution rates (rows) of 0.1, 0.6, and 
+#'           0.3 to "T", "G", and "C" respectively. 
+#'           
+#'           When \code{extended=TRUE}, \code{extendSubstitutionMatrix} is called to extend
+#'           the 4x1024 substitution matrix.
+#'  
+#' @seealso  See \code{\link{makeAverage1merSub}} for making a 1-mer substitution model by taking
+#'           the average of a 5-mer substitution model. See \code{\link{extendSubstitutionMatrix}}
+#'           for extending the substitution matrix.
+#' 
+#' @examples
+#' # Make a degenerate 5-mer model (4x1024) based on HKL_S1F (4x4)
+#' # Note: not to be confused with HKL_S5F@substitution, which is non-degenerate
+#' degenerate5merSub <- makeDegenerate5merSub(sub1mer = HKL_S1F)
+#' 
+#' # Look at a few 5-mers
+#' degenerate5merSub[, c("AAAAT", "AACAT", "AAGAT", "AATAT")]
+#' 
+#' @export
+
+makeDegenerate5merSub = function(sub1mer, extended=FALSE) {
+    # make sure that rownames and colnames of sub1mer are uppercase
+    rownames(sub1mer) = toupper(rownames(sub1mer))
+    colnames(sub1mer) = toupper(colnames(sub1mer))
+    
+    # create 5-mer labels using ATGC
+    nuc_chars <- NUCLEOTIDES[1:4]
+    nuc_words <- seqinr::words(5, nuc_chars)
+    
+    # get center positions of 5mers
+    nuc_centers = sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
+    
+    # initiate 5-mer substitution matrix (4x1024)
+    sub5mer = matrix(NA, nrow=4, ncol=length(nuc_words),
+                     dimnames=list(nuc_chars, nuc_words))
+    
+    # assign values from 1-mer model to 5-mer model
+    for (from in rownames(sub1mer)) {
+        for (to in colnames(sub1mer)) {
+            if (from != to) { # if statement keeps diagonals as NA
+                colIndex = which(nuc_centers == from)
+                sub5mer[to, colIndex] = sub1mer[from, to]
+            }
+        }
+    }
+    stopifnot(dim(sub5mer) == c(4, 1024))
+    
+    # if extended=TRUE, extend
+    if (extended) {
+        sub5mer = extendSubstitutionMatrix(sub5mer)
+        stopifnot(dim(sub5mer) == c(5, 3125))
+    }
+    
+    return(sub5mer)
+}
+
+#' Make a degenerate 5-mer mutability model based on a 1-mer mutability model
+#'
+#' \code{makeDegenerate5merMut} populates mutability rates from a 1-mer mutability model
+#' into 5-mers with corresponding central 1-mers.
+#'
+#' @param    mut1mer             a named vector of length 4 containing (normalized) 
+#'                               mutability rates. Names should correspond to nucleotides, 
+#'                               which should include "A", "T", "G", and "C" 
+#'                               (case-insensitive).
+#' @param    extended            whether to return the unextended (\code{extended=FALSE}) or 
+#'                               extended (\code{extended=TRUE}) 5-mer mutability model. 
+#'                               Default is \code{FALSE}.
+#'
+#' @return   For \code{extended=FALSE}, a vector of length 1024. The vector returned is 
+#'           normalized. For \code{extended=TRUE}, a vector of length 3125. 
+#'
+#' @details  As a concrete example, consider a 1-mer mutability model in which mutability
+#'           rates of "A", "T", "G", and "C" are, respectively, 0.14, 0.23, 0.31, and 0.32. 
+#'           In the resultant degenerate 5-mer mutability model, all the 5-mers that have 
+#'           an "A" as their central 1-mer would have mutability rate of 0.14/256, where 256 is
+#'           the number of such 5-mers. 
+#'           
+#'           When \code{extended=TRUE}, \code{extendMutabilityMatrix} is called to extend the
+#'           mutability vector of length 1024 into a vector of length 3125.
+#'  
+#' @seealso  See \code{\link{makeAverage1merMut}} for making a 1-mer mutability model by 
+#'           taking the average of a 5-mer mutability model. See 
+#'           \code{\link{extendMutabilityMatrix}} for extending the mutability vector.
+#' 
+#' @examples
+#' # Make a degenerate 5-mer model (length of 1024) based on a 1-mer model
+#' example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)
+#' degenerate5merMut <- makeDegenerate5merMut(mut1mer = example1merMut)
+#' 
+#' # Look at a few 5-mers
+#' degenerate5merMut[c("AAAAT", "AACAT", "AAGAT", "AATAT")]
+#' 
+#' # Normalized
+#' sum(degenerate5merMut)
+#' 
+#' @export
+
+makeDegenerate5merMut = function(mut1mer, extended=FALSE) {
+    # make sure that names of mut1mer are uppercase
+    names(mut1mer) = toupper(names(mut1mer))
+    
+    # create 5-mer labels using ATGCN
+    nuc_chars <- NUCLEOTIDES[1:4]
+    nuc_words <- seqinr::words(5, nuc_chars)
+    
+    # get center positions of 5mers
+    nuc_centers = sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
+    
+    # initiate 5-mer mutability vector (length of 3125)
+    mut5mer = rep(NA, length=length(nuc_words))
+    names(mut5mer) = nuc_words
+    
+    # assign values from 1-mer model to 5-mer model
+    for (center in names(mut1mer)) {
+        index = which(nuc_centers == center)
+        mut5mer[index] = mut1mer[center]
+    } 
+    stopifnot(length(mut5mer) == 1024)
+    
+    # normalize
+    mut5mer = mut5mer / sum(mut5mer, na.rm=T)
+    
+    # if extended=TRUE, extend
+    if (extended) {
+        mut5mer = extendMutabilityMatrix(mut5mer)
+        stopifnot(length(mut5mer) == 3125)
+    }
+    
+    return(mut5mer)
+}
+
+
+#' Make a 1-mer substitution model by averaging over a 5-mer substitution model
+#'
+#' \code{makeAverage1merSub} averages substitution rates in a 5-mer substitution model
+#' to derive a 1-mer substitution model.
+#'
+#' @param    sub5mer             a 4x1024 matrix such as that returned by 
+#'                               \code{createSubstitutionMatrix} and that returned by
+#'                               \code{makeDegenerate5merSub} with \code{extended=FALSE}.
+#'                               Column names should correspond to 5-mers containing the 
+#'                               central 1-mer to mutate from. Row names should correspond to 
+#'                               nucleotides to mutate into. Nucleotides should include 
+#'                               "A", "T", "G", and "C" (case-insensitive).
+#'
+#' @return   A 4x4 matrix with row names representing nucleotides to mutate from and column
+#'           names representing nucleotides to mutate into. Rates are normalized by row. 
+#'
+#' @details  For example, the substitution rate from "A" to "T" in the resultant 1-mer model
+#'           is derived by averaging the substitution rates into a "T" of all the 5-mers that 
+#'           have an "A" as their central 1-mer. 
+#'  
+#' @seealso  See \code{\link{makeDegenerate5merSub}} for making a degenerate 5-mer substitution 
+#'           model based on a 1-mer substitution model. 
+#' 
+#' @examples
+#' # Make a degenerate 5-mer model (4x1024) based on HKL_S1F (4x4)
+#' degenerate5merSub <- makeDegenerate5merSub(sub1mer = HKL_S1F)
+#' 
+#' # Now make a 1-mer model by averaging over the degenerate 5-mer model
+#' # Expected to get back HKL_S1F
+#' makeAverage1merSub(sub5mer = degenerate5merSub)
+#' 
+#' @export
+
+makeAverage1merSub = function(sub5mer) {
+    stopifnot(dim(sub5mer) == c(4, 1024))
+    
+    # make sure that rownames and colnames of sub5mer are uppercase
+    rownames(sub5mer) = toupper(rownames(sub5mer))
+    colnames(sub5mer) = toupper(colnames(sub5mer))
+    
+    # get 5-mers and center positions of 5-mers
+    nuc_words = colnames(sub5mer)
+    nuc_centers = sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
+    
+    # create 1-mer labels using ATGC
+    nuc_chars <- NUCLEOTIDES[1:4]
+    
+    # initiate 1-mer substitution matrix (4x4)
+    sub1mer = matrix(NA, nrow=length(nuc_chars), ncol=length(nuc_chars),
+                     dimnames=list(nuc_chars, nuc_chars))
+    
+    # assign values from 5-mer model to 1-mer model
+    for (from in rownames(sub1mer)) {
+        for (to in colnames(sub1mer)) {
+            if (from != to) { # if statement keeps diagonals as NA
+                colIndex = which(nuc_centers == from)
+                sub1mer[from, to] = mean(sub5mer[to, colIndex], na.rm=T)
+            }
+        }
+    }
+    stopifnot(dim(sub1mer) == c(4, 4))
+    
+    # normalize
+    # tricky: apply transposes result; use t() to transpose back 
+    sub1mer = t(apply(sub1mer, 1, function(x){x/sum(x, na.rm=T)}))
+    
+    return(sub1mer)
+}
+
+
+#' Make a 1-mer mutability model by averaging over a 5-mer mutability model
+#'
+#' \code{makeAverage1merMut} averages mutability rates in a 5-mer mutability model
+#' to derive a 1-mer mutability model.
+#'
+#' @param    mut5mer             a named vector of length 1024 such as that returned by 
+#'                               \code{createMutabilityMatrix} and that returned by
+#'                               \code{makeDegenerate5merMut} with \code{extended=FALSE}.
+#'                               Names should correspond to 5-mers made up of "A", "T", 
+#'                               "G", and "C" (case-insensitive).
+#'
+#' @return   A named vector of length 4 containing normalized mutability rates.
+#'
+#' @details  For example, the mutability rate of "A" in the resultant 1-mer model
+#'           is derived by averaging the mutability rates of all the 5-mers that 
+#'           have an "A" as their central 1-mer, followed by normalization.
+#'  
+#' @seealso  See \code{\link{makeDegenerate5merMut}} for making a degenerate 5-mer mutability
+#'           model based on a 1-mer mutability model. 
+#' 
+#' @examples
+#' # Make a degenerate 5-mer model (length of 1024) based on a 1-mer model
+#' example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)
+#' degenerate5merMut <- makeDegenerate5merMut(mut1mer = example1merMut)
+#'  
+#' # Now make a 1-mer model by averaging over the degenerate 5-mer model
+#' # Expected to get back example1merMut
+#' makeAverage1merMut(mut5mer = degenerate5merMut)
+#' 
+#' @export
+
+makeAverage1merMut = function(mut5mer) {
+    stopifnot(length(mut5mer) == 1024)
+    
+    # make sure that names mut5mer are uppercase
+    names(mut5mer) = toupper(names(mut5mer))
+    
+    # get 5-mers and center positions of 5-mers
+    nuc_words = names(mut5mer)
+    nuc_centers = sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
+    
+    # create 1-mer labels using ATGC
+    nuc_chars <- NUCLEOTIDES[1:4]
+    
+    # initiate 1-mer mutability vector (length 4)
+    mut1mer = rep(NA, length=length(nuc_chars))
+    names(mut1mer) = nuc_chars
+    
+    # assign values from 5-mer model to 1-mer model
+    for (center in names(mut1mer)) {
+        index = which(nuc_centers == center)
+        mut1mer[center] = mean(mut5mer[index], na.rm=T)
+    }
+    stopifnot(length(mut1mer) == 4)
+    
+    # normalize
+    mut1mer = mut1mer / sum(mut1mer)
+    
+    return(mut1mer)
+}
+
+
 #### I/O Functions ####
 
 #' Write targeting model distances to a file

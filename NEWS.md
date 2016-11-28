@@ -17,6 +17,10 @@ Targeting Models:
   human kappa and lambda light chain, silent, 1-mer, functional substitution model 
   (`HKL_S1F`), and mouse kappa light chain, replacement and silent, 1-mer, 
   non-functional substitution model (`MK_RS1NF`).
++ Added `makeDegenerate5merSub` and `makeDegenerate5merMut` which make degenerate
+  5-mer substitution and mutability models respectively based on the 1-mer models. 
+  Also added `makeAverage1merSub` and `makeAverage1merMut` which make 1-mer 
+  substitution and mutability models respectively by averaging over the 5-mer models. 
 
 Mutation Profiling:
 
