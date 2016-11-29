@@ -145,3 +145,97 @@ test_that("calcOBservedMutations and listObservedMutations reproduce same result
     expect_equal(length(lom[[1]]), sum(om_v[1, grep("OBSERVED_", colnames(om_v))]))
     
 })
+
+test_that("makeDegenerate5merSub with extended=FALSE using HH_S1F", {
+    degenerate5mer = makeDegenerate5merSub(HH_S1F, extended=FALSE)
+    centers = sapply(colnames(degenerate5mer), substr, start=3, stop=3)
+    
+    test_HH_S1F = HH_S1F
+    diag(test_HH_S1F) = NA
+    
+    for (nuc in c("A", "T", "G", "C")) {
+        colIdx = which(centers==nuc)
+        for (i in colIdx) {
+            expect_equal(test_HH_S1F[nuc, ],
+                         degenerate5mer[, i])
+        }
+    }
+})
+
+test_that("makeDegenerate5merSub with extended=TRUE using HH_S1F", {
+    degenerate5mer = makeDegenerate5merSub(HH_S1F, extended=TRUE)
+    centers = sapply(colnames(degenerate5mer), substr, start=3, stop=3)
+    
+    test_HH_S1F = HH_S1F
+    diag(test_HH_S1F) = NA
+    
+    # 5mers with non-N central 1mer (incl. eg. ATTTN) should have same rates as 
+    # corresponding central 1mer
+    for (nuc in c("A", "T", "G", "C")) {
+        colIdx = which(centers==nuc)
+        for (i in colIdx) {
+            expect_equal(test_HH_S1F[nuc, ],
+                         degenerate5mer[-5, i])
+        }
+    }
+    
+    # 5mers with N central 1mer should have all NA rates
+    colIdx = which(centers=="N")
+    for (i in colIdx) {
+        expect_equal(sum(is.na(degenerate5mer[, i])), 5)
+    }
+})
+
+test_that("makeAverage1merSub using HH_S1F", {
+    degenerate5mer = makeDegenerate5merSub(HH_S1F, extended=FALSE)
+    average1mer = makeAverage1merSub(degenerate5mer)
+    
+    test_HH_S1F = HH_S1F
+    diag(test_HH_S1F) = NA
+    
+    expect_equal(test_HH_S1F, average1mer)
+})
+
+test_that("makeDegenerate5merMut with extended=FALSE using an example", {
+    example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)
+    degenerate5mer = makeDegenerate5merMut(example1merMut, extended=FALSE)
+    centers = sapply(colnames(degenerate5mer), substr, start=3, stop=3)
+    
+    for (nuc in c("A", "T", "G", "C")) {
+        idx = which(centers==nuc)
+        for (i in idx) {
+            expect_equal(example1merMut[nuc], degenerate5mer[idx])
+        }
+    }
+})
+
+test_that("makeDegenerate5merMut with extended=TRUE using an example", {
+    example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)
+    degenerate5mer = makeDegenerate5merMut(example1merMut, extended=TRUE)
+    centers = sapply(colnames(degenerate5mer), substr, start=3, stop=3)
+    
+    # 5mers with non-N central 1mer (incl. eg. ATTTN) should have same rates as 
+    # corresponding central 1mer
+    for (nuc in c("A", "T", "G", "C")) {
+        idx = which(centers==nuc)
+        for (i in idx) {
+            expect_equal(example1merMut[nuc], degenerate5mer[idx])
+        }
+    }
+    
+    # 5mers with N central 1mer should have all NA rates
+    idx = which(centers=="N")
+    for (i in idx) {
+        expect_equal(NA, degenerate5mer[idx])
+    }
+})
+
+test_that("makeAverage1merMut using an example", {
+    example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)
+    degenerate5mer = makeDegenerate5merMut(example1merMut, extended=FALSE)
+    average1mer = makeAverage1merMut(degenerate5mer)
+    
+    expect_equal(example1merMut[match(names(average1mer), 
+                                      names(example1merMut))], 
+                 average1mer)
+})
