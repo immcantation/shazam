@@ -192,6 +192,8 @@ test_that("makeAverage1merSub using HH_S1F", {
     
     test_HH_S1F = HH_S1F
     diag(test_HH_S1F) = NA
+    test_HH_S1F = test_HH_S1F[match(rownames(average1mer), rownames(test_HH_S1F)),
+                              match(colnames(average1mer), colnames(test_HH_S1F))]
     
     expect_equal(test_HH_S1F, average1mer)
 })
