@@ -86,8 +86,8 @@ also be passed in as parameters if they differ from the Change-O defaults.
 Mutations are counted by these functions separately for complementarity 
 determining (CDR) and framework (FWR) regions. The `regionDefinition` 
 argument defines whether these regions are handled separately, and where
-the boundaries lie. There are four built-in region definitions 
-in the `shazam` package, which are all dependent upon the V segment
+the boundaries lie. There are two built-in region definitions 
+in the `shazam` package, both dependent upon the V segment
 being IMGT-gapped:
 
 *  `IMGT_V`: All regions in the V segment, excluding CDR3, grouped as 
