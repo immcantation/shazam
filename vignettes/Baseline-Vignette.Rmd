@@ -60,7 +60,7 @@ greater control over the analysis parameters.
 
 ### Calculating selection in multiple steps
 
-Individual sequences within clonal groups are not, strickly speaking, 
+Individual sequences within clonal groups are not, strictly speaking, 
 independent events and it is generally appropriate to only analyze selection
 pressures on an effective sequence for each clonal group. The `collapseClones`
 function provides one strategy for generating an effective sequences for 
