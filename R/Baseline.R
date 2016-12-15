@@ -354,7 +354,7 @@ calcBaseline <- function(db,
                          targetingModel=HH_S5F,
                          mutationDefinition=NULL,
                          calcStats=FALSE,
-                         nproc=1, weakPrior=FALSE) {
+                         nproc=1) {
     # Hack for visibility of data.table and foreach index variables
     idx <- NULL
     
@@ -505,8 +505,7 @@ calcBaseline <- function(db,
                     expected = db[idx, cols_expected],
                     region = region,
                     testStatistic = testStatistic,
-                    regionDefinition = regionDefinition,
-                    weakPrior = weakPrior
+                    regionDefinition = regionDefinition
                 )
             }
         
@@ -611,8 +610,7 @@ calcBaselineHelper  <- function(observed,
                                 expected,
                                 region,
                                 testStatistic="local",
-                                regionDefinition=NULL,
-                                weakPrior=FALSE) {
+                                regionDefinition=NULL) {
     
     if (is.null(regionDefinition)) {
         regions <- makeNullRegionDefinition()@regions
@@ -681,7 +679,7 @@ calcBaselineHelper  <- function(observed,
         )
     
     
-    return( c( calcBaselineBinomialPdf( x=obsX, n=obsN, p=expP, weakPrior=weakPrior ), obsX, obsN, expP ) )
+    return( c( calcBaselineBinomialPdf( x=obsX, n=obsN, p=expP ), obsX, obsN, expP ) )
 }
 
 # Calculate the BASELINe probability function in a binomial framework.
@@ -690,18 +688,14 @@ calcBaselineBinomialPdf <- function (x=3,
                                      p=0.33,
                                      CONST_i=CONST_I,
                                      max_sigma=20,
-                                     length_sigma=4001, weakPrior=FALSE) {
+                                     length_sigma=4001) {
     if(n!=0){
         sigma_s<-seq(-max_sigma,max_sigma,length.out=length_sigma)
         sigma_1<-log({CONST_i/{1-CONST_i}}/{p/{1-p}})
         index<-min(n,60)
-        if (!weakPrior) {
-            y <- dbeta(CONST_i, x+BAYESIAN_FITTED[index], n+BAYESIAN_FITTED[index]-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
-        } else {
-            print("using weak prior Beta(1, 1)")
-            y <- dbeta(CONST_i, x+1, n+1-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
-        }
-        
+
+        y <- dbeta(CONST_i, x+BAYESIAN_FITTED[index], n+BAYESIAN_FITTED[index]-x)*(1-p)*p*exp(sigma_1)/({1-p}^2+2*p*{1-p}*exp(sigma_1)+{p^2}*exp(2*sigma_1))
+
         if (!sum(is.na(y))) {
             tmp <- approx(sigma_1, y, sigma_s)$y
             return(tmp / sum(tmp) / (2 * max_sigma / (length_sigma - 1)))
@@ -1304,6 +1298,10 @@ baseline2DistPValue <-function(base1, base2) {
     # Check input
     if (len1 != len2) {
         stop("base1 and base2 must be the same length.")
+    }
+    # NA if all values in pdfs are NA
+    if (sum(is.na(base1))==len1 | sum(is.na(base2))==len2) {
+        return(NA)
     }
 
     # Determine p-value
