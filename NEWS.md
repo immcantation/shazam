@@ -1,4 +1,4 @@
-Version 0.1.4.999: November 18, 2016
+Version 0.1.4.999: December 20, 2016
 -------------------------------------------------------------------------------
 Targeting Models:
 
@@ -17,6 +17,10 @@ Targeting Models:
   human kappa and lambda light chain, silent, 1-mer, functional substitution model 
   (`HKL_S1F`), and mouse kappa light chain, replacement and silent, 1-mer, 
   non-functional substitution model (`MK_RS1NF`).
++ Removed `HS1FDistance` (replaced by `HH_S1F`) and `M1NDistance` (replaced by 
+  `MK_RS1NF`).
++ Updated `calcTargetingDistance()` to enable calculation of a symmetric distance
+  matrix given a 1-mer substitution matrix normalized by row, such as `HH_S1F`.
 + Added `makeDegenerate5merSub` and `makeDegenerate5merMut` which make degenerate
   5-mer substitution and mutability models respectively based on the 1-mer models. 
   Also added `makeAverage1merSub` and `makeAverage1merMut` which make 1-mer 

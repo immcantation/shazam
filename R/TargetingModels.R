@@ -1283,8 +1283,8 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #'  rates in a 1-mer substitution model to a symmetric distance matrix.
 #' 
 #' @param    model     \link{TargetingModel} object with mutation likelihood information, or
-#'                     a 4x4 1-mer substitution matrix with rownames and colnames consisting of 
-#'                     "A", "T", "G", and "C".
+#'                     a 4x4 1-mer substitution matrix normalized by row with rownames and 
+#'                     colnames consisting of "A", "T", "G", and "C".
 #'                                                
 #' @return   For input of \link{TargetingModel}, a matrix of distances for each 5-mer motif with 
 #'           rows names defining the center nucleotide and column names defining the 5-mer 
@@ -1364,9 +1364,9 @@ calcTargetingDistance <- function(model) {
 # \code{symmetrize} makes a 1-mer substitution matrix symmetric by minimizing the 
 # rss between it and a symmetric matrix.
 # 
-# @param    sub1mer     a 4x4 matrix. Each row sums into 1 and reflects substitution 
-#                       probabilities for each nucleotide. Rownames and colnames are 
-#                       "A","C","G", and "T".
+# @param    sub1mer     a 4x4 matrix normalized by row. Each row sums up to 1 and 
+#                       reflects substitution probabilities for each nucleotide. 
+#                       Rownames and colnames are "A","C","G", and "T".
 #
 # @return   a 4x4 symmetrix matrix with \code{NA}s on the diagonal.
 # 
@@ -1380,6 +1380,10 @@ calcTargetingDistance <- function(model) {
 symmetrize = function(sub1mer) {
     rownames(sub1mer) <- toupper(rownames(sub1mer))
     colnames(sub1mer) <- toupper(colnames(sub1mer))
+    
+    # check that rows sum up to 1
+    stopifnot(all.equal(rowSums(sub1mer), rep(1, 4), 
+                        check.names=FALSE, tolerance=0.055))
     
     minDist <- function(Pars, subMtx) {
         return((Pars[1]-subMtx["A","C"])^2 + (Pars[1]-subMtx["C","A"])^2 + 
