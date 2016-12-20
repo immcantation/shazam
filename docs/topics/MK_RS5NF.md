@@ -40,9 +40,11 @@ Immunology, 197(9), 3566-3574.
 See also
 -------------------
 
-See [HH_S5F](HH_S5F.md) for the human heavy chain silent 5-mer functional targeting
-model, [HKL_S5F](HKL_S5F.md) for the human light chain silent 5-mer functional 
-targeting model, and [U5N](U5N.md) for the uniform 5-mer null targeting model.
+See [MK_RS1NF](MK_RS1NF.md) for the 1-mer substitution matrix from the same
+publication; [HH_S5F](HH_S5F.md) for the human heavy chain silent 5-mer 
+functional targeting model; [HKL_S5F](HKL_S5F.md) for the human light chain 
+silent 5-mer functional targeting model; and [U5N](U5N.md) for the 
+uniform 5-mer null targeting model.
 
 
 

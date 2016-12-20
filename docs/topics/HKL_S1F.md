@@ -23,8 +23,12 @@ HKL_S1F
 Format
 -------------------
 A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
-therefore each row and each column sum up to 1. Reported in Table III in
-Cui et al., 2016 (see References below).
+therefore each row sums up to 1.
+Details
+-------------------
+
+Reported in Table III in Cui et al., 2016 (see References below).
+
 References
 -------------------
 

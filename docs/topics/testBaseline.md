@@ -49,7 +49,8 @@ References
 
 1. Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
 sequencing data sets. 
-Nucleic Acids Res. 2012 40(17):e134.
+Nucleic Acids Res. 2012 40(17):e134. 
+(Corretions at http://selection.med.yale.edu/baseline/correction/)
  
 
 
@@ -107,8 +108,8 @@ testBaseline(grouped, groupBy="SAMPLE")
 
 ```
   REGION       TEST      PVALUE        FDR
-1    CDR -1h != +7d 0.322796870 0.32279687
-2    FWR -1h != +7d 0.005371717 0.01074343
+1    CDR -1h != +7d 0.304097293 0.30409729
+2    FWR -1h != +7d 0.005720863 0.01144173
 
 ```
 

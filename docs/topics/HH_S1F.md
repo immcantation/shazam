@@ -22,8 +22,14 @@ HH_S1F
 
 Format
 -------------------
-A 4x4 symmetric matrix of nucleotide substitution rates. The rates are normalized,
-therefore each row and each column sum up to 1.
+A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
+therefore each row sums up to 1.
+Details
+-------------------
+
+`HH_S1F` replaces `HS1FDistance` from SHazaM of versions prior to
+0.1.5.
+
 References
 -------------------
 

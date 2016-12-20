@@ -38,9 +38,9 @@ Front Immunol. 2013 4(November):358.
 See also
 -------------------
 
-See [HS1FDistance](HS1FDistance.md) for the 1-mer distance matrix from the same 
-publication, [HKL_S5F](HKL_S5F.md) for the human light chain 5-mer targeting model, 
-[MK_RS5NF](MK_RS5NF.md) for the mouse 5-mer targeting model, and [U5N](U5N.md) for the 
+See [HH_S1F](HH_S1F.md) for the 1-mer substitution matrix from the same 
+publication; [HKL_S5F](HKL_S5F.md) for the human light chain 5-mer targeting model; 
+[MK_RS5NF](MK_RS5NF.md) for the mouse 5-mer targeting model; and [U5N](U5N.md) for the 
 uniform 5-mer null targeting model.
 
 

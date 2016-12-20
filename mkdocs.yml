@@ -65,8 +65,6 @@ pages:
       - topics/findThreshold.md
       - topics/calcTargetingDistance.md
       - topics/writeTargetingDistance.md
-      - topics/HS1FDistance.md
-      - topics/M1NDistance.md
     - 'Mutation & Region Definitions':
       - topics/MUTATION_SCHEMES.md
       - topics/IMGT_SCHEMES.md

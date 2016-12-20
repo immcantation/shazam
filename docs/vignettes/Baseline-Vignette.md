@@ -40,7 +40,7 @@ greater control over the analysis parameters.
 
 ### Calculating selection in multiple steps
 
-Individual sequences within clonal groups are not, strickly speaking, 
+Individual sequences within clonal groups are not, strictly speaking, 
 independent events and it is generally appropriate to only analyze selection
 pressures on an effective sequence for each clonal group. The `collapseClones`
 function provides one strategy for generating an effective sequences for 
@@ -67,8 +67,8 @@ also be passed in as parameters if they differ from the Change-O defaults.
 Mutations are counted by these functions separately for complementarity 
 determining (CDR) and framework (FWR) regions. The `regionDefinition` 
 argument defines whether these regions are handled separately, and where
-the boundaries lie. There are four built-in region definitions 
-in the `shazam` package, which are all dependent upon the V segment
+the boundaries lie. There are two built-in region definitions 
+in the `shazam` package, both dependent upon the V segment
 being IMGT-gapped:
 
 *  `IMGT_V`: All regions in the V segment, excluding CDR3, grouped as 
@@ -217,8 +217,8 @@ testBaseline(grouped_1, groupBy="SAMPLE")
 
 ```
 ##   REGION       TEST      PVALUE        FDR
-## 1    CDR -1h != +7d 0.013073445 0.01307345
-## 2    FWR -1h != +7d 0.005485099 0.01097020
+## 1    CDR -1h != +7d 0.012574503 0.01257450
+## 2    FWR -1h != +7d 0.005115781 0.01023156
 ```
 
 ## Plot and compare selection scores for groups

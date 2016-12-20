@@ -107,15 +107,18 @@ References
 analysis of Ig V region sequences. 
 Int Immunol. 2008 20(5):683-94.
 1. Uduman M, et al. Detecting selection in immunoglobulin sequences. 
-Nucleic Acids Res. 2011 39(Web Server issue):W499-504.
+Nucleic Acids Res. 2011 39(Web Server issue):W499-504. (Corrections at 
+http://selection.med.yale.edu/baseline/correction/) 
 1. Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
 sequencing data sets. 
 Nucleic Acids Res. 2012 40(17):e134.
 1. Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
 on synonymous mutations from high-throughput immunoglobulin sequencing data. 
 Front Immunol. 2013 4:358.
-1. Cui A, et al. A model of somatic hypermutation targeting in mice based on 
-high-throughput immunoglobulin sequencing data. Under review.
+1. Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
+Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
+Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
+Immunology, 197(9), 3566-3574.
  
 
 

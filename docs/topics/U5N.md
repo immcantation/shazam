@@ -29,7 +29,7 @@ Format
 See also
 -------------------
 
-See [HH_S5F](HH_S5F.md) and [HKL_S5F](HKL_S5F.md) for the human 5-mer targeting models and 
+See [HH_S5F](HH_S5F.md) and [HKL_S5F](HKL_S5F.md) for the human 5-mer targeting models; and 
 [MK_RS5NF](MK_RS5NF.md) for the mouse 5-mer targeting model.
 
 
