@@ -175,6 +175,5 @@ NULL
 # BAYESIAN_FITTED
 
 # Add built-in variables to global variables environment
-utils::globalVariables(c("M1NDistance", "HS1FDistance", 
-                         "HH_S1F", "HKL_S1F", "MK_RS1NF",
+utils::globalVariables(c("HH_S1F", "HKL_S1F", "MK_RS1NF",
                          "HH_S5F", "HKL_S5F", "MK_RS5NF", "U5N"), package="shazam")
