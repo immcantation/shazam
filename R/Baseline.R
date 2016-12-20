@@ -744,7 +744,8 @@ calcBaselineBinomialPdf <- function (x=3,
 #' \enumerate{
 #'   \item  Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
 #'            sequencing data sets. 
-#'            Nucleic Acids Res. 2012 40(17):e134.
+#'            Nucleic Acids Res. 2012 40(17):e134. 
+#'            (Corrections at http://selection.med.yale.edu/baseline/correction/)
 #'  }
 #' 
 #' @examples  
@@ -1163,7 +1164,8 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' \enumerate{
 #'   \item  Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
 #'            sequencing data sets. 
-#'            Nucleic Acids Res. 2012 40(17):e134.
+#'            Nucleic Acids Res. 2012 40(17):e134. 
+#'            (Corretions at http://selection.med.yale.edu/baseline/correction/)
 #'  }
 #' 
 #' @examples
