@@ -23,8 +23,8 @@ test_that("Test cross distToNearest with model hs1f", {
                                     model="hs1f", first=FALSE, normalize="length")
     ## Test if the updated function reproduces results
     expect_equal(dist_hs1f$DIST_NEAREST[test_idx],
-                 c(NA,NA,NA,NA,0.6396,0.7027,0.6479,0.5563,0.4879,
-                   0.4879,0.6998,0.0700,0.1955,0.6071,0.6145,0.1955,0.5974),
+                 c(NA,NA,NA,NA,0.4040, 0.4447, 0.3963, 0.3469, 0.3050, 0.3050,
+                   0.4284, 0.0435, 0.1212, 0.3771, 0.3862, 0.1212, 0.3687),
                  tolerance=0.001)
     
     ## There's only one donor, hence cross-donor will return all NA
@@ -45,8 +45,8 @@ test_that("Test cross distToNearest with model hs1f", {
     
     expect_equal(cross_dist_hs1f, cross_dist_hs1f_donor)
     expect_equal(cross_dist_hs1f$CROSS_DIST_NEAREST[test_idx],
-                 c(NA,NA,NA,NA,0.6396,0.7027,0.6479,0.5563,0.4879,
-                   0.4879,0.6998,0.0700,0.1955,0.6071,0.6145,0.1955,0.5974),
+                 c(NA,NA,NA,NA,0.4040, 0.4447, 0.3963, 0.3469, 0.3050, 0.3050,
+                   0.4284, 0.0435, 0.1212, 0.3771, 0.3862, 0.1212, 0.3687),
                  tolerance=0.001)
     ## Check cross
     ## Crossing shoud reproduce the same results as not crossed
@@ -70,7 +70,7 @@ test_that("Test cross distToNearest with model hs1f", {
     ## One seq has been edited, will return distance values
     db3_1_316_630 <- distToNearest(db3[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
                              model="hs1f", first=FALSE, normalize="length",cross="SAMPLE")
-    expect_equal(db3_1_316_630$CROSS_DIST_NEAREST,c(0.0265,0.0265,0.0265), tolerance=0.001)
+    expect_equal(db3_1_316_630$CROSS_DIST_NEAREST,c(0.0175,0.0175,0.0175), tolerance=0.001)
 })
 
 test_that("Test cross distToNearest with model hs5f", {
@@ -138,8 +138,8 @@ test_that("Test cross distToNearest with model hs5f", {
     
     ## One seq has been edited, will return distance values
     db3_1_316_630_hs5f <- distToNearest(db3[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
-                                   model="hs1f", first=FALSE, normalize="none",cross="SAMPLE")
-    expect_equal(db3_1_316_630_hs5f$CROSS_DIST_NEAREST,c(1.75,1.75,1.75), tolerance=0.001)
+                                   model="hs5f", first=FALSE, normalize="none",cross="SAMPLE")
+    expect_equal(db3_1_316_630_hs5f$CROSS_DIST_NEAREST,c(1.001,1.001,1.001), tolerance=0.001)
     
     seq1 <- c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", 
               "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
