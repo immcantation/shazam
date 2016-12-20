@@ -30,6 +30,12 @@ AMINO_ACIDS <- c("TTT"="F", "TTC"="F",
                  "GGT"="G", "GGC"="G", "GGA"="G", "GGG"="G",
                  "TAA"="*", "TAG"="*", "TGA"="*")
 
+#### Distance matrices
+library(shazam)
+HH_S1F_Distance <- calcTargetingDistance(model=HH_S1F)
+HKL_S1F_Distance <- calcTargetingDistance(model=HKL_S1F)
+MK_RS1NF_Distance <- calcTargetingDistance(model=MK_RS1NF)
+
 #### Load other saved data ####
 
 load("data-raw/CDR_Nuc_Mat.RData")
@@ -47,4 +53,7 @@ devtools::use_data(NUCLEOTIDES,
                    CONST_I,
                    CODON_TABLE,
                    AMINO_ACIDS,
+                   HH_S1F_Distance,
+                   HKL_S1F_Distance,
+                   MK_RS1NF_Distance,
                    internal=TRUE, overwrite=TRUE)
