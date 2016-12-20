@@ -5,44 +5,6 @@ NULL
 
 #### Data ####
 
-#' Mouse single nucleotide distance matrix.
-#'
-#' Single nucleotide distance matrix of somatic hypermutation targeting based on 
-#' Mus musculus Ig sequence data.
-#'
-#' @format   A symmetric matrix of nucleotide substitution distance scores with 
-#'           row names and column names definition the specific subsitution.
-#' 
-#' @references
-#' \enumerate{
-#'   \item  Smith DS, et al. Di- and trinucleotide target preferences of somatic 
-#'            mutagenesis in normal and autoreactive B cells. 
-#'            J Immunol. 1996 156:2642-52. 
-#' }
-#'
-#' @seealso  See \link{HS1FDistance} for the human 1-mer distance matrix.
-"M1NDistance"
-
-
-#' Human single nucleotide distance matrix.
-#'
-#' Single nucleotide distance matrix of somatic hypermutation targeting based on 
-#' human Ig sequence data.
-#'
-#' @format   A symmetric matrix of nucleotide substitution distance scores with 
-#'           row names and column names definition the specific subsitution.
-#' 
-#' @references
-#' \enumerate{
-#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
-#'            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
-#'            Front Immunol. 2013 4(November):358.
-#' }
-#'
-#' @seealso  See \link{HH_S5F} for the 5-mer targeting model from same publication.
-"HS1FDistance"
-
-
 #' Uniform 5-mer null targeting model.
 #'
 #' A null 5-mer model of somatic hypermutation targeting where all substitution, mutability
@@ -50,7 +12,7 @@ NULL
 #'
 #' @format \link{TargetingModel} object.
 #' 
-#' @seealso  See \link{HH_S5F} and \link{HKL_S5F} for the human 5-mer targeting models and 
+#' @seealso  See \link{HH_S5F} and \link{HKL_S5F} for the human 5-mer targeting models; and 
 #'           \link{MK_RS5NF} for the mouse 5-mer targeting model.
 "U5N"
 
@@ -60,8 +22,11 @@ NULL
 #' 1-mer substitution model of somatic hypermutation based on analysis of silent mutations
 #' in functional heavy chain Ig sequences from Homo sapiens.
 #'
-#' @format   A 4x4 symmetric matrix of nucleotide substitution rates. The rates are normalized,
-#'           therefore each row and each column sum up to 1.
+#' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
+#'           therefore each row sums up to 1.
+#' 
+#' @details  \code{HH_S1F} replaces \code{HS1FDistance} from SHazaM of versions prior to
+#'           0.1.5.
 #' 
 #' @references
 #' \enumerate{
@@ -81,8 +46,9 @@ NULL
 #' in functional kappa and lambda light chain Ig sequences from Homo sapiens.
 #'
 #' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
-#'           therefore each row and each column sum up to 1. Reported in Table III in
-#'           Cui et al., 2016 (see References below).
+#'           therefore each row sums up to 1. 
+#'           
+#' @details  Reported in Table III in Cui et al., 2016 (see References below).
 #' 
 #' @references
 #' \enumerate{
@@ -104,8 +70,11 @@ NULL
 #' musculus.
 #'
 #' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
-#'           therefore each row and each column sum up to 1.
+#'           therefore each row sums up to 1.
 #' 
+#' @details  \code{MK_RS1NF} replaces \code{M1NDistance} from SHazaM of versions prior to
+#'           0.1.5.
+#'           
 #' @references
 #' \enumerate{
 #'   \item  Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,
@@ -133,9 +102,9 @@ NULL
 #'            Front Immunol. 2013 4(November):358.
 #'  }
 #'  
-#' @seealso  See \link{HS1FDistance} for the 1-mer distance matrix from the same 
-#'           publication, \link{HKL_S5F} for the human light chain 5-mer targeting model, 
-#'           \link{MK_RS5NF} for the mouse 5-mer targeting model, and \link{U5N} for the 
+#' @seealso  See \link{HH_S1F} for the 1-mer substitution matrix from the same 
+#'           publication; \link{HKL_S5F} for the human light chain 5-mer targeting model; 
+#'           \link{MK_RS5NF} for the mouse 5-mer targeting model; and \link{U5N} for the 
 #'           uniform 5-mer null targeting model.
 "HH_S5F"
 
@@ -155,8 +124,8 @@ NULL
 #'   Immunology, 197(9), 3566-3574.
 #'  }
 #'  
-#' @seealso  See \link{HH_S5F} for the human heavy chain 5-mer targeting model, 
-#'           \link{MK_RS5NF} for the mouse kappa light chain 5-mer targeting model, 
+#' @seealso  See \link{HH_S5F} for the human heavy chain 5-mer targeting model; 
+#'           \link{MK_RS5NF} for the mouse kappa light chain 5-mer targeting model; 
 #'           and \link{U5N} for the uniform 5-mer null targeting model.
 "HKL_S5F"
 
@@ -177,9 +146,11 @@ NULL
 #'   Immunology, 197(9), 3566-3574.
 #'  }
 #'  
-#' @seealso  See \link{HH_S5F} for the human heavy chain silent 5-mer functional targeting
-#'           model, \link{HKL_S5F} for the human light chain silent 5-mer functional 
-#'           targeting model, and \link{U5N} for the uniform 5-mer null targeting model.
+#' @seealso  See \link{MK_RS1NF} for the 1-mer substitution matrix from the same
+#'           publication; \link{HH_S5F} for the human heavy chain silent 5-mer 
+#'           functional targeting model; \link{HKL_S5F} for the human light chain 
+#'           silent 5-mer functional targeting model; and \link{U5N} for the 
+#'           uniform 5-mer null targeting model.
 "MK_RS5NF"
 
 

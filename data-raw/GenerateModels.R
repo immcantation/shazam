@@ -3,42 +3,6 @@
 # Imports
 library(seqinr)
 
-#### M1NDistance #####
-
-# Smith DS, et al. Di- and trinucleotide target preferences of somatic mutagenesis 
-#    in normal and autoreactive B cells. 
-#    J Immunol. 1996 156:2642-52. 
-
-nuc_chars <- c('A','C','G','T','N','.','-')
-M1NDistance <- matrix(c(0, 2.86, 1, 2.14, 0, 0, 0, 
-                        2.86, 0, 2.14, 1, 0, 0, 0, 
-                        1, 2.14, 0, 2.86, 0, 0, 0, 
-                        2.14, 1, 2.86, 0, 0, 0, 0, 
-                        0, 0, 0, 0, 0, 0, 0, 
-                        0, 0, 0, 0, 0, 0, 0, 
-                        0, 0, 0, 0, 0, 0, 0),
-                      7, 7, dimnames=list(nuc_chars, nuc_chars))
-devtools::use_data(M1NDistance, overwrite=TRUE)
-
-
-#### HS1FDistance #####
-
-# Yaari G, et al. Models of somatic hypermutation targeting and substitution 
-#   based on synonymous mutations from high-throughput immunoglobulin sequencing data. 
-#   Front Immunol. 2013 4(November):358.
-
-nuc_chars <- c('A','C','G','T','N','.','-')
-HS1FDistance <- matrix(c(0, 2.08, 1, 1.75, 0, 0, 0, 
-                        2.08, 0, 1.75, 1, 0, 0, 0, 
-                        1, 1.75, 0, 2.08, 0, 0, 0, 
-                        1.75, 1, 2.08, 0, 0, 0, 0, 
-                        0, 0, 0, 0, 0, 0, 0, 
-                        0, 0, 0, 0, 0, 0, 0, 
-                        0, 0, 0, 0, 0, 0, 0),
-                      7, 7, dimnames=list(nuc_chars, nuc_chars))
-devtools::use_data(HS1FDistance, overwrite=TRUE)
-
-
 #### U5N ####
 
 # 5-mer null model
@@ -81,14 +45,12 @@ devtools::use_data(U5N, overwrite=TRUE)
 
 # Yaari G, et al. Models of somatic hypermutation targeting and substitution 
 
-# HS1FDistance[1:4, 1:4] normalized by row
-# HH_S1F = round(apply(HS1FDistance[1:4, 1:4], 1, function(x){x/sum(x)}), 3)
-
-# Hard-coded in case HS1FDistance gets renamed in the future
-HH_S1F = matrix(data=c(0.000, 0.431, 0.207, 0.362,
-                       0.431, 0.000, 0.362, 0.207,
-                       0.207, 0.362, 0.000, 0.431,
-                       0.362, 0.207, 0.431, 0.000),
+# from G Yaari (transposed his origianl "Normalized" matrix, 
+# which had columns summing up to 1)
+HH_S1F = matrix(data=c(0.0000, 0.3057, 0.4786, 0.2157,
+                       0.2443, 0.0000, 0.3031, 0.4526,
+                       0.5075, 0.3249, 0.0000, 0.1676,
+                       0.2219, 0.4945, 0.2836, 0.0000),
                 nrow=4, byrow=TRUE, 
                 dimnames = list(c("A","C","G","T"), 
                                 c("A","C","G","T")))
