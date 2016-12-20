@@ -187,9 +187,9 @@ getCharsInModel <- function(model) {
     if (model == "ham") {
         chars <- colnames(getDNAMatrix(gap=0))
     } else if (model == "m1n") {
-        chars <- colnames(M1NDistance)
+        chars <- colnames(MK_RS1NF_Distance)
     } else if (model == "hs1f") {
-        chars <- colnames(HS1FDistance)
+        chars <- colnames(HH_S1F_Distance)
     } else if (model == "aa") {
         chars <- colnames(getAAMatrix())
     } else if (model == "hs5f") {
@@ -280,9 +280,9 @@ nearestDist<- function(sequences, model=c("ham", "aa", "m1n", "hs1f", "hs5f"),
         if (model == "ham") {
             dist_mat <- pairwiseDist(seq_uniq, dist_mat=getDNAMatrix(gap=0))
         } else if (model == "m1n") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=M1NDistance)
+            dist_mat <- pairwiseDist(seq_uniq, dist_mat=MK_RS1NF_Distance)
         } else if (model == "hs1f") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=HS1FDistance)
+            dist_mat <- pairwiseDist(seq_uniq, dist_mat=HH_S1F_Distance)
         } else if (model == "aa") {
             # Translate sequences
             seq_uniq <- setNames(alakazam::translateDNA(seq_uniq), seq_uniq)
@@ -479,9 +479,9 @@ findThreshold <- function(distances, subsample=NULL) {
 #' sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
 #' with the ideal threshold being a value that separates the two modes.
 #' 
-#' "hs5f" use distance derived from the \link{HH_S5F}
-#' using \link{calcTargetingDistance}. "hs1f" and "m1n" use \link{HS1FDistance} and 
-#' \link{M1NDistance} to calculate distances respectively. "ham" uses a nucleotide 
+#' "hs5f" uses distance derived from \link{HH_S5F} using \link{calcTargetingDistance}.
+#' "hs1f" and "m1n" use distance derived from \link{HH_S1F} and \link{MK_RS1NF} 
+#' respectively, also using \link{calcTargetingDistance}. "ham" uses a nucleotide 
 #' hamming distance matrix from \link[alakazam]{getDNAMatrix}, with gaps being zero. 
 #' "aa" uses an amino acid hamming distance matrix from \link[alakazam]{getAAMatrix}.
 #' 
@@ -500,8 +500,8 @@ findThreshold <- function(distances, subsample=NULL) {
 #'  }
 #'  
 #' @seealso  See \link{calcTargetingDistance} for generating nucleotide distance matrices 
-#'           from a \link{TargetingModel} object. See \link{M1NDistance}, 
-#'           \link{HH_S5F}, \link[alakazam]{getDNAMatrix}, and \link[alakazam]{getAAMatrix}
+#'           from a \link{TargetingModel} object. See \link{HH_S5F}, \link{HH_S1F}, 
+#'           \link{MK_RS1NF}, \link[alakazam]{getDNAMatrix}, and \link[alakazam]{getAAMatrix}
 #'           for individual model details.
 #' 
 #' @examples
@@ -627,7 +627,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                                  "normalize",
                                  "symmetry",
                                  "nearestDist", 
-                                 "HS1FDistance",
+                                 "HH_S1F_Distance",
+                                 "MK_RS1NF_Distance",
                                  "calcTargetingDistance",
                                  "findUniqSeq",
                                  "pairwise5MerDist",
