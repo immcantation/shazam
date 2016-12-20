@@ -134,7 +134,7 @@
 #' @importFrom  seqinr      c2s s2c words translate
 #' @importFrom  stats       na.omit setNames ecdf sd cor cov median mad
 #'                          approx convolve weighted.mean p.adjust
-#'                          dbeta pbeta qbeta rbeta
+#'                          dbeta pbeta qbeta rbeta optim
 #' @importFrom  stringi     stri_dup stri_flatten stri_join stri_length
 #'                          stri_count_boundaries stri_count_regex 
 #'                          stri_extract_all_regex stri_extract_first_regex  
