@@ -350,8 +350,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
     
     if (model == "S") { # Silent model
         for(index in 1:length(mutations)) {
-            cSeq <-  s2c(db[index,sequenceColumn])
-            cGL  <-  s2c(db[index,germlineColumn])
+            cSeq <-  s2c(db[[sequenceColumn]][index])
+            cGL  <-  s2c(db[[germlineColumn]][index])
             indexMutation <- mutations[[index]]
             v_fam <- v_families[index]
             
@@ -382,8 +382,8 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
         }
     } else if (model == "RS") { # RS model (All mutations)
         for (index in 1:length(mutations)) {
-            cSeq <-  s2c(db[index,sequenceColumn])
-            cGL  <-  s2c(db[index,germlineColumn])
+            cSeq <-  s2c(db[[sequenceColumn]][index])
+            cGL  <-  s2c(db[[germlineColumn]][index])
             indexMutation <- mutations[[index]]
             v_fam <- v_families[index]
             
@@ -722,13 +722,13 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
         COUNT[[index]] <- template
         indexMutation <- mutations[[index]]
         if(!sum(is.na(indexMutation))){
-            cSeq <-  s2c(db[index, sequenceColumn])
-            cGL  <-  s2c(db[index, germlineColumn])
+            cSeq <-  s2c(db[[sequenceColumn]][index])
+            cGL  <-  s2c(db[[germlineColumn]][index])
             positions <- as.numeric(names(indexMutation))
             positions <- positions[positions <= VLENGTH]
             positions <- positions[!is.na(positions)]
             for (position in  positions){
-                wrd5 <- substr(db[index, germlineColumn], position - 2, position + 2)
+                wrd5 <- substr(db[[germlineColumn]][index], position - 2, position + 2)
                 if(!grepl("[^ACGT]", wrd5) & nchar(wrd5) == 5){
                     codonNucs = getCodonPos(position)
                     codonGL = cGL[codonNucs]
@@ -1275,139 +1275,6 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
     return(model_obj)
 }
 
-
-#' Calculates a 5-mer distance matrix from a TargetingModel object
-#' 
-#' \code{calcTargetingDistance} converts either the targeting rates in a \code{TargetingModel}
-#'  model to a matrix of 5-mer to single-nucleotide mutation distances, or the substitution 
-#'  rates in a 1-mer substitution model to a symmetric distance matrix.
-#' 
-#' @param    model     \link{TargetingModel} object with mutation likelihood information, or
-#'                     a 4x4 1-mer substitution matrix normalized by row with rownames and 
-#'                     colnames consisting of "A", "T", "G", and "C".
-#'                                                
-#' @return   For input of \link{TargetingModel}, a matrix of distances for each 5-mer motif with 
-#'           rows names defining the center nucleotide and column names defining the 5-mer 
-#'           nucleotide sequence. For input of 1-mer substitution matrix, a 4x4 symmetric distance
-#'           matrix. 
-#'           
-#' @details
-#' The targeting model is transformed into a distance matrix by:
-#' \enumerate{
-#'   \item  Converting the likelihood of being mutated \eqn{p=mutability*substitution} to 
-#'          distance \eqn{d=-log10(p)}.
-#'   \item  Dividing this distance by the mean of the distances.
-#'   \item  Converting all infinite, no change (e.g., A->A), and NA distances to 
-#'          zero.
-#' }
-#' 
-#' The 1-mer substitution matrix is transformed into a distance matrix by:
-#' \enumerate{
-#'   \item  Symmetrize the 1-mer substitution matrix.
-#'   \item  Converting the rates to distance \eqn{d=-log10(p)}.
-#'   \item  Dividing this distance by the mean of the distances.
-#'   \item  Converting all infinite, no change (e.g., A->A), and NA distances to 
-#'          zero.
-#' }
-#' 
-#' @seealso  See \link{TargetingModel} for this class of objects and
-#'           \link{createTargetingModel} for building one.
-#' 
-#' @examples
-#' # Calculate targeting distance of HH_S5F
-#' dist <- calcTargetingDistance(HH_S5F)
-#' 
-#' # Calculate targeting distance of HH_S1F
-#' dist <- calcTargetingDistance(HH_S1F)
-#' 
-#' @export
-calcTargetingDistance <- function(model) {
-    # if model is TargetingModel object, assume 5-mer targeting model
-    # extract targeting matrix
-    if (is(model, "TargetingModel")) {
-        input = "5mer"
-        model <- model@targeting
-    } else if (is(model, "matrix")) {
-        # if model is a matrix, assume 1-mer substitution matrix
-        # symmetrize
-        input = "1mer"
-        model <- symmetrize(model)
-    } else {
-        # anything else: error
-        stop("Input must be either a targeting matrix or TargetingModel object.")
-    }
-    
-    # Take negative log10 of all probabilities
-    model_dist <- -log10(model)
-    # Center distances on 1 (divide by mean)
-    model_dist <- model_dist/mean(model_dist, na.rm=T)
-    # Set infinite values to NA
-    model_dist[!is.finite(model_dist)] <- NA
-    
-    # TODO: the indexing of A-->A etc positions can probably be done smarter/faster
-    # Assign no-change entries to distance 0
-    if (input=="5mer") {
-        center_nuc <- gsub("..([ACGTN])..", "\\1", colnames(model_dist))
-        for (i in 1:length(center_nuc)) {
-            model_dist[center_nuc[i], i] <- 0
-        }
-    } else {
-        diag(model_dist) <- 0
-    }
-    
-    return(model_dist)
-}
-
-# (From G Yaari)
-# Symmetrize a non-symmetric, 1-mer substitution matrix
-# 
-# \code{symmetrize} makes a 1-mer substitution matrix symmetric by minimizing the 
-# rss between it and a symmetric matrix.
-# 
-# @param    sub1mer     a 4x4 matrix normalized by row. Each row sums up to 1 and 
-#                       reflects substitution probabilities for each nucleotide. 
-#                       Rownames and colnames are "A","C","G", and "T".
-#
-# @return   a 4x4 symmetrix matrix with \code{NA}s on the diagonal.
-# 
-# @details  The input 1-mer substitution matrix is approximated by a symmetric matrix 
-#           both with respect to time (e.g. C->T = T->C), and with respect to strand 
-#           (e.g. C->T = G->A). The symmetric matrix has three free parameters that 
-#           are estimated by minimizing the sum of squares between this matrix and 
-#           the input matrix. The fitted matrix was normalized to ensure that each 
-#           row sums up to 1.
-#
-symmetrize = function(sub1mer) {
-    rownames(sub1mer) <- toupper(rownames(sub1mer))
-    colnames(sub1mer) <- toupper(colnames(sub1mer))
-    
-    # check that rows sum up to 1
-    stopifnot(all.equal(rowSums(sub1mer), rep(1, 4), 
-                        check.names=FALSE, tolerance=0.055))
-    
-    minDist <- function(Pars, subMtx) {
-        return((Pars[1]-subMtx["A","C"])^2 + (Pars[1]-subMtx["C","A"])^2 + 
-                   (Pars[1]-subMtx["G","T"])^2 + (Pars[1]-subMtx["T","G"])^2 +
-                   (Pars[2]-subMtx["A","G"])^2 + (Pars[2]-subMtx["G","A"])^2 + 
-                   (Pars[2]-subMtx["C","T"])^2 + (Pars[2]-subMtx["T","C"])^2 +
-                   (Pars[3]-subMtx["A","T"])^2 + (Pars[3]-subMtx["T","A"])^2 + 
-                   (Pars[3]-subMtx["C","G"])^2 + (Pars[3]-subMtx["G","C"])^2)
-    }
-    
-    pars <- optim(par=rep(0, 3), fn=minDist, subMtx = sub1mer)$par
-    pars <- pars/sum(pars)
-    symmetric_substitution <- sub1mer
-    symmetric_substitution["A",2:4] <- pars
-    symmetric_substitution["C",c(1,4,3)] <- pars
-    symmetric_substitution["G",c(4,1,2)] <- pars
-    symmetric_substitution["T",c(3,2,1)] <- pars
-    
-    # NAs on diagonal instead of 0 so that calcTargetingDistance works with 1-mer model
-    diag(symmetric_substitution) <- NA
-    return(symmetric_substitution)
-}
-
-
 # Rescales mutability probabilities from a TargetingModel
 # 
 # \code{rescaleMutability} renormalizes the mutability probabilities
@@ -1763,8 +1630,139 @@ makeAverage1merMut = function(mut5mer) {
     return(mut1mer)
 }
 
+#### Distance Functions ####
 
-#### I/O Functions ####
+#' Calculates a 5-mer distance matrix from a TargetingModel object
+#' 
+#' \code{calcTargetingDistance} converts either the targeting rates in a \code{TargetingModel}
+#'  model to a matrix of 5-mer to single-nucleotide mutation distances, or the substitution 
+#'  rates in a 1-mer substitution model to a symmetric distance matrix.
+#' 
+#' @param    model     \link{TargetingModel} object with mutation likelihood information, or
+#'                     a 4x4 1-mer substitution matrix normalized by row with rownames and 
+#'                     colnames consisting of "A", "T", "G", and "C".
+#'                                                
+#' @return   For input of \link{TargetingModel}, a matrix of distances for each 5-mer motif with 
+#'           rows names defining the center nucleotide and column names defining the 5-mer 
+#'           nucleotide sequence. For input of 1-mer substitution matrix, a 4x4 symmetric distance
+#'           matrix. 
+#'           
+#' @details
+#' The targeting model is transformed into a distance matrix by:
+#' \enumerate{
+#'   \item  Converting the likelihood of being mutated \eqn{p=mutability*substitution} to 
+#'          distance \eqn{d=-log10(p)}.
+#'   \item  Dividing this distance by the mean of the distances.
+#'   \item  Converting all infinite, no change (e.g., A->A), and NA distances to 
+#'          zero.
+#' }
+#' 
+#' The 1-mer substitution matrix is transformed into a distance matrix by:
+#' \enumerate{
+#'   \item  Symmetrize the 1-mer substitution matrix.
+#'   \item  Converting the rates to distance \eqn{d=-log10(p)}.
+#'   \item  Dividing this distance by the mean of the distances.
+#'   \item  Converting all infinite, no change (e.g., A->A), and NA distances to 
+#'          zero.
+#' }
+#' 
+#' @seealso  See \link{TargetingModel} for this class of objects and
+#'           \link{createTargetingModel} for building one.
+#' 
+#' @examples
+#' # Calculate targeting distance of HH_S5F
+#' dist <- calcTargetingDistance(HH_S5F)
+#' 
+#' # Calculate targeting distance of HH_S1F
+#' dist <- calcTargetingDistance(HH_S1F)
+#' 
+#' @export
+calcTargetingDistance <- function(model) {
+  # if model is TargetingModel object, assume 5-mer targeting model
+  # extract targeting matrix
+  if (is(model, "TargetingModel")) {
+    input = "5mer"
+    model <- model@targeting
+  } else if (is(model, "matrix")) {
+    # if model is a matrix, assume 1-mer substitution matrix
+    # symmetrize
+    input = "1mer"
+    model <- symmetrize(model)
+  } else {
+    # anything else: error
+    stop("Input must be either a targeting matrix or TargetingModel object.")
+  }
+  
+  # Take negative log10 of all probabilities
+  model_dist <- -log10(model)
+  # Center distances on 1 (divide by mean)
+  model_dist <- model_dist/mean(model_dist, na.rm=T)
+  # Set infinite values to NA
+  model_dist[!is.finite(model_dist)] <- NA
+  
+  # TODO: the indexing of A-->A etc positions can probably be done smarter/faster
+  # Assign no-change entries to distance 0
+  if (input=="5mer") {
+    center_nuc <- gsub("..([ACGTN])..", "\\1", colnames(model_dist))
+    for (i in 1:length(center_nuc)) {
+      model_dist[center_nuc[i], i] <- 0
+    }
+  } else {
+    diag(model_dist) <- 0
+  }
+  
+  return(model_dist)
+}
+
+# (From G Yaari)
+# Symmetrize a non-symmetric, 1-mer substitution matrix
+# 
+# \code{symmetrize} makes a 1-mer substitution matrix symmetric by minimizing the 
+# rss between it and a symmetric matrix.
+# 
+# @param    sub1mer     a 4x4 matrix normalized by row. Each row sums up to 1 and 
+#                       reflects substitution probabilities for each nucleotide. 
+#                       Rownames and colnames are "A","C","G", and "T".
+#
+# @return   a 4x4 symmetrix matrix with \code{NA}s on the diagonal.
+# 
+# @details  The input 1-mer substitution matrix is approximated by a symmetric matrix 
+#           both with respect to time (e.g. C->T = T->C), and with respect to strand 
+#           (e.g. C->T = G->A). The symmetric matrix has three free parameters that 
+#           are estimated by minimizing the sum of squares between this matrix and 
+#           the input matrix. The fitted matrix was normalized to ensure that each 
+#           row sums up to 1.
+#
+symmetrize <- function(sub1mer) {
+  rownames(sub1mer) <- toupper(rownames(sub1mer))
+  colnames(sub1mer) <- toupper(colnames(sub1mer))
+  
+  # check that rows sum up to 1
+  stopifnot(all.equal(rowSums(sub1mer), rep(1, 4), 
+                      check.names=FALSE, tolerance=0.055))
+  
+  .minDist <- function(Pars, subMtx) {
+    (Pars[1] - subMtx["A", "C"])^2 + (Pars[1] - subMtx["C", "A"])^2 + 
+    (Pars[1] - subMtx["G", "T"])^2 + (Pars[1] - subMtx["T", "G"])^2 +
+    (Pars[2] - subMtx["A", "G"])^2 + (Pars[2] - subMtx["G", "A"])^2 + 
+    (Pars[2] - subMtx["C", "T"])^2 + (Pars[2] - subMtx["T", "C"])^2 +
+    (Pars[3] - subMtx["A", "T"])^2 + (Pars[3] - subMtx["T", "A"])^2 + 
+    (Pars[3] - subMtx["C", "G"])^2 + (Pars[3] - subMtx["G", "C"])^2
+  }
+  
+  pars <- optim(par=rep(0, 3), fn=.minDist, subMtx=sub1mer)$par
+  pars <- pars/sum(pars)
+  symmetric_substitution <- sub1mer
+  symmetric_substitution["A", 2:4] <- pars
+  symmetric_substitution["C", c(1, 4, 3)] <- pars
+  symmetric_substitution["G", c(4, 1, 2)] <- pars
+  symmetric_substitution["T", c(3, 2, 1)] <- pars
+  
+  # NAs on diagonal instead of 0 so that calcTargetingDistance works with 1-mer model
+  diag(symmetric_substitution) <- NA
+  return(symmetric_substitution)
+}
+
 
 #' Write targeting model distances to a file
 #' 
