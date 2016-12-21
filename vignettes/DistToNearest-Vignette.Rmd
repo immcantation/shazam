@@ -65,11 +65,17 @@ V(D)J segment calls, the parameter `first` can be set to `FALSE`. Setting
 `first=FALSE` will use the union of all possible genes to group sequences, rather 
 than the first gene in the field. The `model` parameter determines which 
 underlying SHM model is used to calculate the distance. The default model is 
-`hs1f`, a human Ig-specific single nucleotide model similar to a 
-transition/transversion model (Yaari et al, 2013). Other options 
-include nucleotide Hamming distance (`ham`), amino acid Hamming distance (`aa`), 
-single nucleotide (`m1n`) and 3-mer (`m3n`) mouse models (Smith et al, 1996), 
-and a 5-mer model inferred from human data (`hs5f`) (Yaari et al, 2013).
+single nucleotide Hamming distance with gaps considered as a match to any 
+nucleotide (`ham`). Other options include a human Ig-specific single nucleotide 
+model similar to a transition/transversion model (`hh_s1f`) and the corresponding 
+5-mer context model from Yaari et al, 2013 (`hh_s5f`), and analogous pair of 
+mouse specific models from Cui et al, 2015 (`mk_rs1nf` and `mk_rs5nf`), and 
+amino acid Hamming distance (`aa`). 
+
+**Note:** Human mouse distance measure that are backward compatible with 
+SHazaM v0.1.4 and Change-O v0.3.3 are also provide as `hs1f_compat` and
+`m1n_compat`, respectively.
+
 For models that are not symmetric (e.g., distance from A to B is not equal to the
 distance from B to A), there is a `symmetry` parameter that allows the user to 
 specify taking the average or the minimum of the two distances to determine the
@@ -81,8 +87,8 @@ dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="length",
                           nproc=1)
 
 # Use genotyped V assignments and 5-mer model
-dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hs5f", 
-                           first=FALSE, normalize="none", nproc=1)
+dist_s5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f", 
+                          first=FALSE, normalize="none", nproc=1)
 ```
 
 ### Generating histograms of nearest neighbor distances
@@ -105,7 +111,9 @@ threshold_ham <- findThreshold(dist_ham$DIST_NEAREST)
 library(ggplot2)
 p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
              aes(x=DIST_NEAREST)) + 
-    theme_bw() + xlab("Hamming distance") + ylab("Count") +
+    theme_bw() + 
+    xlab("Hamming distance") + 
+    ylab("Count") +
     scale_x_continuous(breaks=seq(0, 1, 0.1)) +
     geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
     geom_vline(xintercept=threshold_ham, color="firebrick", linetype=3)
@@ -116,19 +124,21 @@ In this example, the length normalized `ham` model distance threshold would be
 set to a value near 0.12.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
-# Find threshold for HS5F nearest neighbor distances
-threshold_hs5f <- findThreshold(dist_hs5f$DIST_NEAREST)
-# Generate hs5f distance histogram
-p2 <- ggplot(subset(dist_hs5f, !is.na(DIST_NEAREST)),
+# Find threshold for HH_S5F nearest neighbor distances
+threshold_s5f <- findThreshold(dist_s5f$DIST_NEAREST)
+# Generate HH_S5F distance histogram
+p2 <- ggplot(subset(dist_s5f, !is.na(DIST_NEAREST)),
              aes(x=DIST_NEAREST)) + 
-    theme_bw() + xlab("HS5F distance") + ylab("Count") +
+    theme_bw() + 
+    xlab("HH_S5F distance") + 
+    ylab("Count") +
     scale_x_continuous(breaks=seq(0, 50, 5)) +
     geom_histogram(fill="steelblue", color="white", binwidth=1) +
-    geom_vline(xintercept=threshold_hs5f, color="firebrick", linetype=3)
+    geom_vline(xintercept=threshold_s5f, color="firebrick", linetype=3)
 plot(p2)
 ```
 
-In this example, the unnormalized `hs5f` model distance threshold would be 
+In this example, the unnormalized `hh_s5f` model distance threshold would be 
 set to a value near 7.
 
 ### Calculating nearest neighbor distances independently for subsets of data
@@ -156,7 +166,9 @@ We can plot the nearest neighbor distances for the two samples:
 # Generate grouped histograms
 p3 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)), 
              aes(x=DIST_NEAREST)) + 
-    theme_bw() + xlab("Grouped Hamming distance") + ylab("Count") +
+    theme_bw() + 
+    xlab("Grouped Hamming distance") + 
+    ylab("Count") +
     geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
     geom_vline(xintercept=threshold_ham, color="firebrick", linetype=3) +
     facet_grid(SAMPLE ~ ., scales="free_y")
@@ -184,7 +196,9 @@ dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE,
 # Generate cross sample histograms
 p4 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)), 
              aes(x=CROSS_DIST_NEAREST)) + 
-    theme_bw() + xlab("Cross-sample Hamming distance") + ylab("Count") +
+    theme_bw() + 
+    xlab("Cross-sample Hamming distance") + 
+    ylab("Count") +
     geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
     geom_vline(xintercept=threshold_ham, color="firebrick", linetype=3) +
     facet_grid(SAMPLE ~ ., scales="free_y")

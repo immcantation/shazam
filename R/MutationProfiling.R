@@ -758,9 +758,9 @@ binMutationsByRegion <- function(mutationsArray,
 #' slideWindowSeq(inputSeq=in_seq, germlineSeq=germ_seq, mutThresh=6, windowSize=10)
 #'                                 
 #' @export
-slideWindowSeq = function(inputSeq, germlineSeq, mutThresh, windowSize){
+slideWindowSeq <- function(inputSeq, germlineSeq, mutThresh, windowSize){
   # identify all R and S mutations in input sequence
-  inputMut = calcObservedMutations(inputSeq=inputSeq, germlineSeq=germlineSeq, returnRaw=T)$pos
+  inputMut <- calcObservedMutations(inputSeq=inputSeq, germlineSeq=germlineSeq, returnRaw=T)$pos
   
   # extract positions of mutations
   # inputMut must either be NA (no observed mutation) or a df
@@ -791,13 +791,13 @@ slideWindowSeq = function(inputSeq, germlineSeq, mutThresh, windowSize){
 # @return   \code{TRUE} if there are equal to or more than \code{mutThresh} number of mutations
 #           in any window of \code{windowSize} consecutive nucleotides; \code{FALSE} if otherwise.
 #
-slideWindowSeqHelper = function(mutPos, mutThresh, windowSize){
+slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
   # check preconditions
-  stopifnot(mutThresh>=1 & mutThresh<=windowSize & windowSize>=2)
+  stopifnot(mutThresh >= 1 & mutThresh <= windowSize & windowSize>=2)
   
-  if (length(mutPos)==1 && is.na(mutPos)) {
+  if (length(mutPos) == 1 && is.na(mutPos)) {
     # use && instead of & to short-circuit in case length(mutPos)!=1 (otherwise warning)
-    return(F)
+    return(FALSE)
   } else {
     # general idea:
     # only need to check windows containing mutations (as opposed to every possible window)
@@ -808,9 +808,10 @@ slideWindowSeqHelper = function(mutPos, mutThresh, windowSize){
       # how many mutations fall within current window
       windowCount = sum(mutPos>=lower & mutPos <= upper)
       # return as soon as a window has >= mutThresh mutations
-      if (windowCount >= mutThresh) {return(T)}
+      if (windowCount >= mutThresh) { return(TRUE) }
     }
-    return(F)
+    
+    return(FALSE)
   }
 }
 
@@ -845,14 +846,14 @@ slideWindowSeqHelper = function(mutPos, mutThresh, windowSize){
 #' slideWindowDb(db = ExampleDb[1:10, ], mutThresh=6, windowSize=10)
 #' 
 #' @export
-slideWindowDb = function(db, sequenceColumn = "SEQUENCE_IMGT", 
-                         germlineColumn = "GERMLINE_IMGT_D_MASK",
+slideWindowDb <- function(db, sequenceColumn="SEQUENCE_IMGT", 
+                         germlineColumn="GERMLINE_IMGT_D_MASK",
                          mutThresh, windowSize){
-  db.filter = sapply(1:nrow(db), function(i){slideWindowSeq(inputSeq = db[i, sequenceColumn],
-                                                            germlineSeq = db[i, germlineColumn],
-                                                            mutThresh = mutThresh,
-                                                            windowSize = windowSize)})
-  return(db.filter)
+  db_filter <- sapply(1:nrow(db), function(i) { slideWindowSeq(inputSeq = db[i, sequenceColumn],
+                                                               germlineSeq = db[i, germlineColumn],
+                                                               mutThresh = mutThresh,
+                                                               windowSize = windowSize)})
+  return(db_filter)
 }
 
 
@@ -897,38 +898,36 @@ slideWindowDb = function(db, sequenceColumn = "SEQUENCE_IMGT",
 #'           for visualization. See \link{calcObservedMutations} for generating \code{dbMutList}.
 #' 
 #' @examples
-#' # Use an entry in the example data for input and germline sequence
+#' # Load and subset example data
 #' data(ExampleDb, package="alakazam")
+#' db <- ExampleDb[1:5, ]
 #' 
-#' # Try out thresholds of 2-4 mutations in window sizes of 7-9 nucleotides 
-#' # on a subset of ExampleDb
-#' # In this case, all combinations are legal and thus computed
-#' slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, 
-#'                 windowSizeRange = 7:9)
+#' # Try out thresholds of 2-4 mutations in window sizes of 7-9 nucleotides. 
+#' # In this case, all combinations are legal.
+#' slideWindowTune(db, mutThreshRange=2:4, windowSizeRange=7:9)
 #' 
-#' # In the following case, illegal combinations are skipped, returning NAs                                  
-#' slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, 
-#'                 windowSizeRange = 2:4, verbose = FALSE)
+#' # Illegal combinations are skipped, returning NAs.
+#' slideWindowTune(db, mutThreshRange=2:4, windowSizeRange=2:4, 
+#'                 verbose=FALSE)
 #'                                                             
-#' # Run calcObservedMutations separately and skip calling it again in slideWindowTune
-#' exDbMutList = sapply(1:5, 
-#'                    function(i){
-#'                      calcObservedMutations(inputSeq = ExampleDb[i, "SEQUENCE_IMGT"],
-#'                                            germlineSeq = ExampleDb[i, "GERMLINE_IMGT_D_MASK"],
-#'                                            returnRaw = TRUE)$pos})
-#' slideWindowTune(db = ExampleDb[1:5, ], dbMutList = exDbMutList, 
-#'                 mutThreshRange = 2:4, windowSizeRange = 2:4)                                                 
+#' # Run calcObservedMutations separately
+#' exDbMutList <- sapply(1:5, function(i) {
+#'     calcObservedMutations(inputSeq=db[i, "SEQUENCE_IMGT"],
+#'                           germlineSeq=db[i, "GERMLINE_IMGT_D_MASK"],
+#'                           returnRaw=TRUE)$pos })
+#' slideWindowTune(db, dbMutList=exDbMutList, 
+#'                 mutThreshRange=2:4, windowSizeRange=2:4)
 #'                                                            
 #' @export
-slideWindowTune = function(db, sequenceColumn = "SEQUENCE_IMGT", 
+slideWindowTune <- function(db, sequenceColumn = "SEQUENCE_IMGT", 
                            germlineColumn = "GERMLINE_IMGT_D_MASK",
                            dbMutList = NULL,
                            mutThreshRange, windowSizeRange, verbose=TRUE){
   # check preconditions
   stopifnot(!is.null(db))
-  stopifnot( min(mutThreshRange)>=1 & 
-             max(mutThreshRange)<=max(windowSizeRange) &
-             min(windowSizeRange)>=2 )
+  stopifnot(min(mutThreshRange) >= 1 & 
+             max(mutThreshRange) <= max(windowSizeRange) &
+             min(windowSizeRange) >= 2)
   
   
   # get positions of R/S mutations for sequences in db

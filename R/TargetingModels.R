@@ -21,12 +21,11 @@ NULL
 #'
 #' 1-mer substitution model of somatic hypermutation based on analysis of silent mutations
 #' in functional heavy chain Ig sequences from Homo sapiens.
+#' 
+#' \code{HH_S1F} replaces \code{HS1FDistance} in versions of SHazaM prior to 0.1.5.
 #'
 #' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
 #'           therefore each row sums up to 1.
-#' 
-#' @details  \code{HH_S1F} replaces \code{HS1FDistance} from SHazaM of versions prior to
-#'           0.1.5.
 #' 
 #' @references
 #' \enumerate{
@@ -44,11 +43,11 @@ NULL
 #'
 #' 1-mer substitution model of somatic hypermutation based on analysis of silent mutations
 #' in functional kappa and lambda light chain Ig sequences from Homo sapiens.
+#' 
+#' Reported in Table III in Cui et al, 2016.
 #'
 #' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
 #'           therefore each row sums up to 1. 
-#'           
-#' @details  Reported in Table III in Cui et al., 2016 (see References below).
 #' 
 #' @references
 #' \enumerate{
@@ -68,12 +67,11 @@ NULL
 #' 1-mer substitution model of somatic hypermutation based on analysis of replacement and
 #' silent mutations in non-functional kappa light chain Ig sequences from NP-immunized Mus
 #' musculus.
+#' 
+#' \code{MK_RS1NF} replaces \code{M1NDistance} from versions of SHazaM prior to 0.1.5.
 #'
 #' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
 #'           therefore each row sums up to 1.
-#' 
-#' @details  \code{MK_RS1NF} replaces \code{M1NDistance} from SHazaM of versions prior to
-#'           0.1.5.
 #'           
 #' @references
 #' \enumerate{

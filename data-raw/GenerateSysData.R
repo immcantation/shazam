@@ -1,3 +1,5 @@
+library(shazam)
+
 #### Region boundaries ####
 
 VLENGTH <- 312
@@ -32,10 +34,19 @@ AMINO_ACIDS <- c("TTT"="F", "TTC"="F",
 
 #### Distance matrices ####
 
-library(shazam)
 HH_S1F_Distance <- calcTargetingDistance(model=HH_S1F)
 HKL_S1F_Distance <- calcTargetingDistance(model=HKL_S1F)
 MK_RS1NF_Distance <- calcTargetingDistance(model=MK_RS1NF)
+HH_S5F_Distance <- calcTargetingDistance(model=HH_S5F)
+HKL_S5F_Distance <- calcTargetingDistance(model=HKL_S5F)
+MK_RS5NF_Distance <- calcTargetingDistance(model=MK_RS5NF)
+
+e <- new.env()
+load("data-raw/HS1F_v0.1.4.rda", envir=e)
+load("data-raw/M1N_v0.1.4.rda", envir=e)
+HS1F_Distance_v0.1.4 <- get("HS1FDistance", envir=e)
+M1N_Distance_v0.1.4 <- get("M1NDistance", envir=e)
+rm(e)
 
 #### Load other saved data ####
 
@@ -55,6 +66,11 @@ devtools::use_data(NUCLEOTIDES,
                    CODON_TABLE,
                    AMINO_ACIDS,
                    HH_S1F_Distance,
+                   HH_S5F_Distance,
                    HKL_S1F_Distance,
+                   HKL_S5F_Distance,
                    MK_RS1NF_Distance,
+                   MK_RS5NF_Distance,
+                   HS1F_v0.1.4,
+                   M1N_v0.1.4,
                    internal=TRUE, overwrite=TRUE)

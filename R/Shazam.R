@@ -144,6 +144,43 @@ NULL
 
 #### Sysdata ####
 
+# Deprecated (v0.1.4) mouse single nucleotide distance matrix
+#
+# Single nucleotide distance matrix of somatic hypermutation targeting based on 
+# Mus musculus Ig sequence data.
+#
+# @format   A symmetric matrix of nucleotide substitution distance scores with 
+#           row names and column names definition the specific subsitution.
+# 
+# @references
+# \enumerate{
+#   \item  Smith DS, et al. Di- and trinucleotide target preferences of somatic 
+#            mutagenesis in normal and autoreactive B cells. 
+#            J Immunol. 1996 156:2642-52. 
+# }
+#
+# @seealso  See \link{HS1FDistance} for the human 1-mer distance matrix.
+# M1N_Distance_v0.1.4
+
+
+# Deprecated (v0.1.4) Human single nucleotide distance matrix.
+#
+# Single nucleotide distance matrix of somatic hypermutation targeting based on 
+# human Ig sequence data.
+#
+# @format   A symmetric matrix of nucleotide substitution distance scores with 
+#           row names and column names definition the specific subsitution.
+# 
+# @references
+# \enumerate{
+#   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
+#            on synonymous mutations from high-throughput immunoglobulin sequencing data. 
+#            Front Immunol. 2013 4(November):358.
+# }
+#
+# @seealso  See \link{HS5FModel} for the 5-mer model from same publication.
+# HS1F_Distance_v0.1.4
+
 # Ordered nucleotide character set
 # NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
 

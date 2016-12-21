@@ -21,15 +21,15 @@ window5Mers <- function(sequence) {
 
 # Get distance between two sequences of same length, broken by a sliding window of 5mers
 #
-# @param    seq1            first nucleotide sequence, broken into 5mers.
-# @param    seq2            second nucleotide sequence, broken into 5mers.
+# @param    seq1               first nucleotide sequence, broken into 5mers.
+# @param    seq2               second nucleotide sequence, broken into 5mers.
 # @param    targetingDistance  targeting distance obtained from a targeting model
-#                           with the function `calcTargetingDistance`
-# @param    normalize       method of normalization. Default is "none".
-#                           "length" = normalize distance by length of junction.
-# @param    symmetry        if model is hs5f, distance between seq1 and seq2 is either 
-#                           the average (avg) of seq1->seq2 and seq2->seq1 or the 
-#                           minimum (min).
+#                              with the function \code{calcTargetingDistance}.
+# @param    normalize          method of normalization. Default is "none".
+#                              "length" = normalize distance by length of junction.
+# @param    symmetry           if model is hs5f, distance between seq1 and seq2 is either 
+#                              the average (avg) of seq1->seq2 and seq2->seq1 or the 
+#                              minimum (min).
 # @return   distance between two sequences.
 #
 # @examples
@@ -105,19 +105,15 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
 
 # Given an array of nucleotide sequences, find the pairwise distances
 # 
-# @param   sequences   character vector of nucleotide sequences.
-# @param   targetingDistance targeting distance obtained from a targeting model
-#                      with the function `calcTargetingDistance`
-# @param   normalize   method of normalization. Default is "none".
-#                      "length" = normalize distance by length of junction.
-# @param   symmetry    if model is hs5f, distance between seq1 and seq2 is either the
-#                      average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
+# @param   sequences          character vector of nucleotide sequences.
+# @param   targetingDistance  targeting distance obtained from a targeting model
+#                             with the function \code{calcTargetingDistance}.
+# @param   normalize          method of normalization. Default is "none".
+#                             "length" = normalize distance by length of junction.
+# @param   symmetry           if model is hs5f, distance between seq1 and seq2 is either the
+#                             average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
+#
 # @return  A matrix of pairwise distances between junction sequences.
-# 
-# @details
-# needs method details
-# 
-# @seealso needs links
 # 
 # @examples
 # # working example
@@ -182,20 +178,27 @@ findUniqSeq <- function(sequences) {
 #
 # @return    vector of unique chars in the distance model
 # @examples 
-# getCharsInModel("hs1f")
+# getCharsInModel("hh_s1f")
 getCharsInModel <- function(model) {
     if (model == "ham") {
         chars <- colnames(getDNAMatrix(gap=0))
-    } else if (model == "m1n") {
-        chars <- colnames(MK_RS1NF_Distance)
-    } else if (model == "hs1f") {
-        chars <- colnames(HH_S1F_Distance)
     } else if (model == "aa") {
         chars <- colnames(getAAMatrix())
-    } else if (model == "hs5f") {
+    } else if (model == "hh_s1f") {
+        chars <- colnames(HH_S1F_Distance)
+    } else if (model == "hh_s5f") {
         chars <-rownames(HH_S5F@targeting)
-    }    
-    chars
+    } else if (model == "mk_rs1nf") {
+        chars <- colnames(MK_RS1NF_Distance)
+    } else if (model == "mk_rs5nf") {
+        chars <-rownames(MK_RS1NF@targeting)
+    } else if (model == "hs1f_compat") {
+        chars <- colnames(HS1F_v0.1.4)
+    } else if (model == "m1n_compat") {
+        chars <- colnames(M1N_v0.1.4)
+    }
+  
+    return(chars)
 }
 
 # Validate the sequence
@@ -206,9 +209,9 @@ getCharsInModel <- function(model) {
 # @return    TRUE is all the character in the sequence are found in validChars; 
 #            FALSE otherwise
 # @examples 
-# allValidChars("ATCG",getCharsInModel("hs1f"))
-# allValidChars("ATCG.",getCharsInModel("hs1f"))
-# allValidChars("ATCGJ",getCharsInModel("hs1f"))
+# allValidChars("ATCG", getCharsInModel("hh_s1f"))
+# allValidChars("ATCG.", getCharsInModel("hh_s1f"))
+# allValidChars("ATCGJ", getCharsInModel("hh_s1f"))
 allValidChars <- function(seq, validChars) {
     all(unique(strsplit(seq, "")[[1]]) %in% validChars)
 }
@@ -216,17 +219,12 @@ allValidChars <- function(seq, validChars) {
 # Given an array of sequences, find the distance to the closest sequence
 #
 # @param    sequences      character vector of sequences.
-# @param    model          DNA (ham) or amino acid (aa) hamming distance model or
-#                          mouse (m1n) or human (hs1f) single nucleotide distance model;
-#                          or human 5-mer (hs5f) nucleotide model.
+# @param    model          5-mer or 1-mer distance model
 # @param    normalize      method of normalization. Default is "none".
 #                          "length" = normalize distance by length of junction.
 #                          "mutations" = normalize distance by number of mutations in 
 #                          junction.
-# @param   targetingDistance  targeting distance for model="hs5f". The targeting distance 
-#                          for a model can be obtained with the function 
-#                          `calcTargetingDistance`
-# @param   symmetry        if model is hs5f, distance between seq1 and seq2 is either the
+# @param    symmetr        if model is hs5f or mrs5nf, distance between seq1 and seq2 is either the
 #                          average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 # @param    crossGroups    column for grouping to calculate distances across groups 
 #                          (self vs others).
@@ -242,9 +240,9 @@ allValidChars <- function(seq, validChars) {
 # shazam:::nearestDist(sequences, model="aa", normalize="none")
 # shazam:::nearestDist(sequences, model="ham", normalize="length")
 # shazam:::nearestDist(sequences, model="aa", normalize="length")
-nearestDist<- function(sequences, model=c("ham", "aa", "m1n", "hs1f", "hs5f"),
+nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "hs1f_compat", "m1n_compat"),
                        normalize=c("none", "length", "mutations"),
-                       targetingDistance=NULL, symmetry=c("avg", "min"),
+                       symmetry=c("avg", "min"),
                        crossGroups=NULL, mst=FALSE) {
     ## DEBUG
     # sequences <- c("ACGTACGTACGT", "ACGAACGTACGT", "AAAAAAAAAAAA", "A-AAAA---AAA")
@@ -279,24 +277,22 @@ nearestDist<- function(sequences, model=c("ham", "aa", "m1n", "hs1f", "hs5f"),
         # Get distance matrix
         if (model == "ham") {
             dist_mat <- pairwiseDist(seq_uniq, dist_mat=getDNAMatrix(gap=0))
-        } else if (model == "m1n") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=MK_RS1NF_Distance)
-        } else if (model == "hs1f") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=HH_S1F_Distance)
         } else if (model == "aa") {
-            # Translate sequences
             seq_uniq <- setNames(alakazam::translateDNA(seq_uniq), seq_uniq)
-            # cat("\n-> seq_uniq:\n")
-            # print(seq_uniq)
             dist_mat <- pairwiseDist(seq_uniq, dist_mat=getAAMatrix())
-        } else if (model == "hs5f") {
-            if (is.null(targetingDistance)) {
-                stop("Must provide targetingDistance for model='hs5f'")
-            }
-            dist_mat <- pairwise5MerDist(seq_uniq, targetingDistance, 
-                                             normalize, symmetry)
-        }
-
+        } else if (model == "hh_s1f") {
+            dist_mat <- pairwiseDist(seq_uniq, dist_mat=HH_S1F_Distance)
+        } else if (model == "mk_rs1nf") {
+            dist_mat <- pairwiseDist(seq_uniq, dist_mat=MK_RS1NF_Distance)
+        } else if (model == "hh_s5f") {
+            dist_mat <- pairwise5MerDist(seq_uniq, HH_S5F_Distance, normalize, symmetry)
+        } else if (model == "mk_rs5nf") {
+            dist_mat <- pairwise5MerDist(seq_uniq, MK_RS5NF_Distance, normalize, symmetry)
+        } else if (model == "hs1f_compat") {
+            dist_mat <- pairwiseDist(seq_uniq, dist_mat=HS1F_Distance_v0.1.4)
+        } else if (model == "m1n_compat") {
+            dist_mat <- pairwiseDist(seq_uniq, dist_mat=M1N_Distance_v0.1.4)
+        }                
         ## DEBUG
         # cat("\n-> seq_uniq:\n")
         # print(seq_uniq)
@@ -407,14 +403,16 @@ nearestDist<- function(sequences, model=c("ham", "aa", "m1n", "hs1f", "hs5f"),
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
 #' 
-#' # Use genotyped V assignments, HS1F model, and normalize by junction length
-#' dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
-#'                            model="hs1f", first=FALSE, normalize="length")
-#' threshold <- findThreshold(dist_hs1f$DIST_NEAREST)
+#' # Use genotyped V assignments, Hamming distance, and normalize by junction length
+#' dist<- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
+#'                      first=FALSE, normalize="length")
+#' threshold <- findThreshold(dist$DIST_NEAREST)
 #'                            
 #' # Plot histogram of non-NA distances
-#' p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
-#'     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
+#' p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
+#'     theme_bw() + 
+#'     ggtitle("Distance to nearest: Hamming") + 
+#'     xlab("distance") +
 #'     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
 #'                    fill="steelblue", color="white") + 
 #'     geom_vline(xintercept=threshold, linetype="dashed")
@@ -452,7 +450,7 @@ findThreshold <- function(distances, subsample=NULL) {
 #' @param    vCallColumn     name of the column containing the V-segment allele calls.
 #' @param    jCallColumn     name of the column containing the J-segment allele calls.
 #' @param    model           underlying SHM model, which must be one of 
-#'                           \code{c("m1n", "ham", "aa", "hs5f")}.
+#'                           \code{c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "hs1f_compat", "m1n_compat")}.
 #'                           See Details for further information.
 #' @param    normalize       method of normalization. The default is \code{"length"}, which 
 #'                           divides the distance by the length of the sequence group. If 
@@ -479,11 +477,25 @@ findThreshold <- function(distances, subsample=NULL) {
 #' sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
 #' with the ideal threshold being a value that separates the two modes.
 #' 
-#' "hs5f" uses distance derived from \link{HH_S5F} using \link{calcTargetingDistance}.
-#' "hs1f" and "m1n" use distance derived from \link{HH_S1F} and \link{MK_RS1NF} 
-#' respectively, also using \link{calcTargetingDistance}. "ham" uses a nucleotide 
-#' hamming distance matrix from \link[alakazam]{getDNAMatrix}, with gaps being zero. 
-#' "aa" uses an amino acid hamming distance matrix from \link[alakazam]{getAAMatrix}.
+#' The following distance measures are accepted by the \code{model} parameter.
+#' 
+#' \itemize{
+#'   \item \code{"ham"}:          Single nucleotide Hamming distance matrix from \link[alakazam]{getDNAMatrix} 
+#'                                with gaps assigned zero distance.
+#'   \item \code{"aa"}:           Single amino acid Hamming distance matrix from \link[alakazam]{getAAMatrix}.
+#'   \item \code{"hh_s1f"}:       Human single nucleotide distance matrix derived from \link{HH_S1F} with 
+#'                                \link{calcTargetingDistance}.
+#'   \item \code{"hh_s5f"}:       Human 5-mer nucleotide context distance matix derived from \link{HH_S5F} with 
+#'                                \link{calcTargetingDistance}.
+#'   \item \code{"mk_rs1nf"}:     Mouse single nucleotide distance matrix derived from \link{MK_RS1NF} with 
+#'                                \link{calcTargetingDistance}.
+#'   \item \code{"mk_rs5nf"}:     Mouse 5-mer nucleotide context distance matrix derived from \link{MK_RS1NF} with 
+#'                                \link{calcTargetingDistance}.
+#'   \item \code{"hs1f_compat"}:  Backwards compatible human single nucleotide distance matrix used in 
+#'                                SHazaM v0.1.4 and Change-O v0.3.3.
+#'   \item \code{"m1n_compat"}:   Backwards compatibley mouse single nucleotide distance matrix used in 
+#'                                SHazaM v0.1.4 and Change-O v0.3.3.
+#' }
 #' 
 #' @references
 #' \enumerate{
@@ -509,21 +521,26 @@ findThreshold <- function(distances, subsample=NULL) {
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
 #' 
-#' # Use genotyped V assignments, HS1F model, and normalize by junction length
-#' dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
-#'                            model="hs1f", first=FALSE, normalize="length")
+#' # Use genotyped V assignments, Hamming distance, and normalize by junction length
+#' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
+#'                       first=FALSE, normalize="length")
 #'                            
 #' # Plot histogram of non-NA distances
-#' p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
-#'     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
-#'     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
-#'                    fill="steelblue", color="white")
+#' p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
+#'       theme_bw() + 
+#'       ggtitle("Distance to nearest: Hamming") + 
+#'       xlab("distance") +
+#'       geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
+#'                      fill="steelblue", color="white")
 #' plot(p1)
 #'
+#' # Use human 5-mer model
+#' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f")
+#' 
 #' @export
-distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
-                          jCallColumn="J_CALL", model=c("hs1f", "m1n", "ham", "aa", "hs5f"), 
-                          normalize=c("length", "none"), symmetry=c("avg","min"),
+distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+                          model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
+                          normalize=c("length", "none"), symmetry=c("avg", "min"),
                           first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE) {
     # Hack for visibility of data.table and foreach index variables
     idx <- yidx <- .I <- NULL
@@ -629,6 +646,10 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
                                  "nearestDist", 
                                  "HH_S1F_Distance",
                                  "MK_RS1NF_Distance",
+                                 "HH_S5F_Distance",
+                                 "MK_RS5NF_Distance",
+                                 "HS1F_Distance_v0.1.4",
+                                 "M1N_Distance_v0.1.4",
                                  "calcTargetingDistance",
                                  "findUniqSeq",
                                  "pairwise5MerDist",
@@ -648,7 +669,6 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
         db_group$TMP_DIST_NEAREST <- nearestDist(arrSeqs,
                                                  model=model,
                                                  normalize=normalize,
-                                                 targetingDistance=targeting_distance,
                                                  symmetry=symmetry,
                                                  crossGroups=crossGroups,
                                                  mst=mst)
