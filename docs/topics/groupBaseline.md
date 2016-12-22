@@ -39,11 +39,13 @@ set and will not be reset.
 
 
 
+
 Value
 -------------------
 
 A `Baseline` object, containing the modified `db` and the BASELINe 
 posterior probability density functions (PDF) for each of the groups.
+
 
 Details
 -------------------
@@ -56,6 +58,7 @@ To overcome this, PDFs from sequences grouped by biological or experimental rele
 are convolved to from a single PDF for the selection strength. For example, sequences
 from each sample may be combined together, allowing you to compare selection  across 
 samples. This is accomplished through a fast numerical convolution technique.
+
 
 References
 -------------------

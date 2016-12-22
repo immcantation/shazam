@@ -32,6 +32,7 @@ groupBy
 
 
 
+
 Value
 -------------------
 
@@ -41,6 +42,7 @@ A data.frame with test results containing the following columns:
 + `TEST`:    string defining the two group values compared.
 + `PVALUE`:  two-sided p-value for the comparison.
 + `FDR`:     FDR corrected `PVALUE`.
+
 
 
 References
@@ -108,8 +110,8 @@ testBaseline(grouped, groupBy="SAMPLE")
 
 ```
   REGION       TEST      PVALUE        FDR
-1    CDR -1h != +7d 0.304097293 0.30409729
-2    FWR -1h != +7d 0.005720863 0.01144173
+1    CDR -1h != +7d 0.301751035 0.30175104
+2    FWR -1h != +7d 0.005009738 0.01001948
 
 ```
 

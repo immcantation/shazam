@@ -34,6 +34,7 @@ mutabilityModel
 
 
 
+
 Value
 -------------------
 
@@ -42,11 +43,13 @@ containing normalized targeting probabilities for each 5-mer motif with
 row names defining the center nucleotide and column names defining the 
 5-mer nucleotide sequence.
 
+
 Details
 -------------------
 
 Targeting rates are calculated by multiplying the normalized mutability rate by the 
 normalized substitution rates for each individual 5-mer.
+
 
 References
 -------------------

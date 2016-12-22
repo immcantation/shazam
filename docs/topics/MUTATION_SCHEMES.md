@@ -14,6 +14,7 @@ physicochemical classes.
 
 
 
+
 Format
 -------------------
 A [MutationDefinition](MutationDefinition-class.md) object defining:
@@ -26,6 +27,7 @@ in side chain hydrophobicitity class.
 in side chain polarity class.
 + `VOLUME_MUTATIONS`:      Amino acid mutations are defined by changes
 in side chain volume class.
+
 
 References
 -------------------

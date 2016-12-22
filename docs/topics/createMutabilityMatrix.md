@@ -75,6 +75,7 @@ inferred). Default is `FALSE`.
 
 
 
+
 Value
 -------------------
 
@@ -85,6 +86,7 @@ nucleotide sequence.
 When `numSeqMutationsOnly` is `TRUE`, a named numeric
 vector of length 1024 counting the number of observed mutations in sequences containing 
 each 5-mer.
+
 
 References
 -------------------

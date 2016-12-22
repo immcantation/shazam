@@ -81,10 +81,12 @@ will be used.
 
 
 
+
 Value
 -------------------
 
 A [TargetingModel](TargetingModel-class.md) object.
+
 
 References
 -------------------

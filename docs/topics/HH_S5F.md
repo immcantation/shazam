@@ -20,9 +20,11 @@ HH_S5F
 ```
 
 
+
 Format
 -------------------
-[TargetingModel](TargetingModel-class.md) object.
+A [TargetingModel](TargetingModel-class.md) object.
+
 References
 -------------------
 

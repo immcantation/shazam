@@ -30,6 +30,7 @@ colnames consisting of "A", "T", "G", and "C".
 
 
 
+
 Value
 -------------------
 
@@ -37,6 +38,7 @@ For input of [TargetingModel](TargetingModel-class.md), a matrix of distances fo
 rows names defining the center nucleotide and column names defining the 5-mer 
 nucleotide sequence. For input of 1-mer substitution matrix, a 4x4 symmetric distance
 matrix.
+
 
 Details
 -------------------

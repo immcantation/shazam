@@ -29,6 +29,7 @@ either [groupBaseline](groupBaseline.md) or [summarizeBaseline](summarizeBaselin
 
 
 
+
 Value
 -------------------
 
@@ -90,10 +91,10 @@ getBaselineStats(grouped)
 
 ```
   SAMPLE ISOTYPE REGION BASELINE_SIGMA BASELINE_CI_LOWER BASELINE_CI_UPPER BASELINE_CI_PVALUE
-1    +7d     IgA    CDR     -0.3105874        -0.5021412        -0.1492305      -4.628867e-02
-2    +7d     IgA    FWR     -0.6958622        -0.8232664        -0.5771754      -3.286260e-14
-3    +7d     IgG    CDR     -0.2448268        -0.3748944        -0.1341802      -1.237200e-02
-4    +7d     IgG    FWR     -0.7141085        -0.8115537        -0.6271177      -5.995204e-14
+1    +7d     IgA    CDR     -0.3066403        -0.4981192        -0.1460119      -5.499097e-02
+2    +7d     IgA    FWR     -0.6990904        -0.8265410        -0.5797970      -2.842171e-14
+3    +7d     IgG    CDR     -0.2353832        -0.3654914        -0.1244890      -2.420408e-02
+4    +7d     IgG    FWR     -0.7065625        -0.8043858        -0.6189482      -5.595524e-14
 
 ```
 

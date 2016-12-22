@@ -29,10 +29,12 @@ subsample
 
 
 
+
 Value
 -------------------
 
 Returns distance threshold that separates two modes of the input distribution.
+
 
 Details
 -------------------
@@ -52,14 +54,16 @@ Examples
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, SAMPLE == "-1h")
 
-# Use genotyped V assignments, HS1F model, and normalize by junction length
-dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
-model="hs1f", first=FALSE, normalize="length")
-threshold <- findThreshold(dist_hs1f$DIST_NEAREST)
+# Use genotyped V assignments, Hamming distance, and normalize by junction length
+dist<- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
+first=FALSE, normalize="length")
+threshold <- findThreshold(dist$DIST_NEAREST)
 
 # Plot histogram of non-NA distances
-p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
-ggtitle("Distance to nearest: hs1f") + xlab("distance") +
+p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
+theme_bw() + 
+ggtitle("Distance to nearest: Hamming") + 
+xlab("distance") +
 geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
 fill="steelblue", color="white") + 
 geom_vline(xintercept=threshold, linetype="dashed")

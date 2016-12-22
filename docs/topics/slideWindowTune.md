@@ -57,12 +57,14 @@ is `TRUE`.
 
 
 
+
 Value
 -------------------
 
 a list of logical matrices. Each matrix corresponds to a `windowSize` in 
 `windowSizeRange`. Each column in a matrix corresponds to a `mutThresh` in
 `mutThreshRange`.
+
 
 Details
 -------------------
@@ -83,14 +85,13 @@ Examples
 -------------------
 
 ```R
-# Use an entry in the example data for input and germline sequence
+# Load and subset example data
 data(ExampleDb, package="alakazam")
+db <- ExampleDb[1:5, ]
 
-# Try out thresholds of 2-4 mutations in window sizes of 7-9 nucleotides 
-# on a subset of ExampleDb
-# In this case, all combinations are legal and thus computed
-slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, 
-windowSizeRange = 7:9)
+# Try out thresholds of 2-4 mutations in window sizes of 7-9 nucleotides. 
+# In this case, all combinations are legal.
+slideWindowTune(db, mutThreshRange=2:4, windowSizeRange=7:9)
 
 ```
 
@@ -143,9 +144,9 @@ $`9`
 
 ```R
 
-# In the following case, illegal combinations are skipped, returning NAs                                  
-slideWindowTune(db = ExampleDb[1:5, ], mutThreshRange = 2:4, 
-windowSizeRange = 2:4, verbose = FALSE)
+# Illegal combinations are skipped, returning NAs.
+slideWindowTune(db, mutThreshRange=2:4, windowSizeRange=2:4, 
+verbose=FALSE)
 
 ```
 
@@ -181,14 +182,13 @@ $`4`
 
 ```R
 
-# Run calcObservedMutations separately and skip calling it again in slideWindowTune
-exDbMutList = sapply(1:5, 
-function(i){
-calcObservedMutations(inputSeq = ExampleDb[i, "SEQUENCE_IMGT"],
-germlineSeq = ExampleDb[i, "GERMLINE_IMGT_D_MASK"],
-returnRaw = TRUE)$pos})
-slideWindowTune(db = ExampleDb[1:5, ], dbMutList = exDbMutList, 
-mutThreshRange = 2:4, windowSizeRange = 2:4)
+# Run calcObservedMutations separately
+exDbMutList <- sapply(1:5, function(i) {
+calcObservedMutations(inputSeq=db[i, "SEQUENCE_IMGT"],
+germlineSeq=db[i, "GERMLINE_IMGT_D_MASK"],
+returnRaw=TRUE)$pos })
+slideWindowTune(db, dbMutList=exDbMutList, 
+mutThreshRange=2:4, windowSizeRange=2:4)
 ```
 
 

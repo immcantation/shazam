@@ -18,6 +18,7 @@ described below.
 
 
 
+
 Mutational profiling
 -------------------
 
@@ -33,6 +34,7 @@ models, can also be performed along with model driven simulations of SHM.
 + [expectedMutations](expectedMutations.md):        Compute expected mutation frequencies.
 + [shmulateSeq](shmulateSeq.md):              Simulate mutations in a single sequence.
 + [shmulateTree](shmulateTree.md):             Simulate mutations over a lineage tree.
+
 
 
 SHM targeting models
@@ -54,6 +56,7 @@ along with tools to build these mutability and substitution models from data.
 + [plotMutability](plotMutability.md):           Plot 5-mer mutability rates.
 + [HH_S5F](HH_S5F.md):                Human 5-mer SHM targeting model.
 + [MK_RS5NF](MK_RS5NF.md):              Mouse 5-mer SHM targeting model.
+
 
 
 Quantification of selection pressure
@@ -81,6 +84,7 @@ resulting from selection analysis.
 selection analysis.
 
 
+
 Mutational distance calculation
 -------------------
 
@@ -97,6 +101,7 @@ distances to nearest neighbors.
 distances to nearest neighbors.
 + [calcTargetingDistance](calcTargetingDistance.md):    Construct a nucleotide distance matrix from a 
 5-mer targeting model.
+
 
 
 References

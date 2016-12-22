@@ -70,11 +70,13 @@ set and will not be reset.
 
 
 
+
 Value
 -------------------
 
 A `Baseline` object containing the modified `db` and BASELINe 
 posterior probability density functions (PDF) for each of the sequences.
+
 
 Details
 -------------------
@@ -103,6 +105,7 @@ E.g.
 For `focused` the `regionDefinition` must only contain two regions. If more 
 than two regions are defined the `local` test statistic will be used.
 For further information on the frame of these tests see Uduman et al. (2011).
+
 
 References
 -------------------

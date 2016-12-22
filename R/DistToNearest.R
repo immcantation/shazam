@@ -193,9 +193,9 @@ getCharsInModel <- function(model) {
     } else if (model == "mk_rs5nf") {
         chars <-rownames(MK_RS1NF@targeting)
     } else if (model == "hs1f_compat") {
-        chars <- colnames(HS1F_v0.1.4)
+        chars <- colnames(HS1F_Compat)
     } else if (model == "m1n_compat") {
-        chars <- colnames(M1N_v0.1.4)
+        chars <- colnames(M1N_Compat)
     }
   
     return(chars)
@@ -289,9 +289,9 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
         } else if (model == "mk_rs5nf") {
             dist_mat <- pairwise5MerDist(seq_uniq, MK_RS5NF_Distance, normalize, symmetry)
         } else if (model == "hs1f_compat") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=HS1F_Distance_v0.1.4)
+            dist_mat <- pairwiseDist(seq_uniq, dist_mat=HS1F_Compat)
         } else if (model == "m1n_compat") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=M1N_Distance_v0.1.4)
+            dist_mat <- pairwiseDist(seq_uniq, dist_mat=M1N_Compat)
         }                
         ## DEBUG
         # cat("\n-> seq_uniq:\n")
@@ -648,8 +648,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
                                  "MK_RS1NF_Distance",
                                  "HH_S5F_Distance",
                                  "MK_RS5NF_Distance",
-                                 "HS1F_Distance_v0.1.4",
-                                 "M1N_Distance_v0.1.4",
+                                 "HS1F_Compat",
+                                 "M1N_Compat",
                                  "calcTargetingDistance",
                                  "findUniqSeq",
                                  "pairwise5MerDist",

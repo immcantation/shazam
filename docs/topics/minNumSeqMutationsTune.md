@@ -33,6 +33,7 @@ of `minNumSeqMutations` to try.
 
 
 
+
 Value
 -------------------
 
@@ -42,12 +43,14 @@ in `minNumSeqMutationsRange`. The rows correspond to the number of 5-mers
 for which mutability would be computed directly (`"measured"`) and inferred
 (`"inferred"`), respectively.
 
+
 Details
 -------------------
 
 At a given threshold value of `minNumSeqMutations`, for a given 5-mer,
 if the total number of mutations is greater than the threshold, mutability 
 is computed directly. Otherwise, mutability is inferred.
+
 
 References
 -------------------

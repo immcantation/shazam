@@ -81,6 +81,7 @@ this argument is `TRUE` can serve as the input for
 
 
 
+
 Value
 -------------------
 
@@ -103,6 +104,7 @@ whether there is mutation to every other base when counted as an inner 3-mer.
 
 For `returnModel = "1mer"` or `"1mer_raw"`:
 a 4x4 normalized or un-normalized 1-mer substitution matrix respectively.
+
 
 References
 -------------------

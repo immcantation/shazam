@@ -13,12 +13,14 @@ Definitions of the CDR and FWR, according to the IMGT unique numbering scheme.
 
 
 
+
 Format
 -------------------
 A [RegionDefinition](RegionDefinition-class.md) object containing:
 
 + `IMGT_V`:                     Grouped CDR and FWR V-segment regions excluding CDR3.
 + `IMGT_V_BY_REGIONS`:          Individual CDR and FWR V-segment regions excluding CDR3.
+
 
 References
 -------------------

@@ -20,9 +20,10 @@ U5N
 ```
 
 
+
 Format
 -------------------
-[TargetingModel](TargetingModel-class.md) object.
+A [TargetingModel](TargetingModel-class.md) object.
 
 
 

@@ -21,15 +21,17 @@ MK_RS1NF
 ```
 
 
+
 Format
 -------------------
 A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
 therefore each row sums up to 1.
-Details
+
+Note
 -------------------
 
-`MK_RS1NF` replaces `M1NDistance` from SHazaM of versions prior to
-0.1.5.
+`MK_RS1NF` replaces `M1NDistance` from versions of SHazaM prior to 0.1.5.
+
 
 References
 -------------------

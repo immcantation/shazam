@@ -86,10 +86,12 @@ intervals, and P values.
 
 
 
+
 Value
 -------------------
 
 A `Baseline` object.
+
 
 Details
 -------------------
@@ -106,6 +108,7 @@ For example,
 For `focused` the `regionDefinition` must only contain two regions. If more 
 than two regions are defined, then the `local` test statistic will be used.
 For further information on the frame of these tests see Uduman et al. (2011).
+
 
 References
 -------------------
@@ -191,8 +194,7 @@ Slot "pdfs":
 list()
 
 Slot "stats":
-[1] GROUP              REGION             BASELINE_SIGMA     BASELINE_CI_LOWER  BASELINE_CI_UPPER 
-[6] BASELINE_CI_PVALUE
+[1] GROUP              REGION             BASELINE_SIGMA     BASELINE_CI_LOWER  BASELINE_CI_UPPER  BASELINE_CI_PVALUE
 <0 rows> (or 0-length row.names)
 
 

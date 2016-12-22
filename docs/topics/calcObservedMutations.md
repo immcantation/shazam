@@ -55,6 +55,7 @@ calculating frequency. Default if `FALSE`.
 
 
 
+
 Value
 -------------------
 
@@ -64,6 +65,7 @@ frame (`$pos`) whose columns (`position`, `type`, and `region`)
 indicate the position, mutation type (R or S), and region of each mutation; and a 
 vector (`$nonN`) indicating the number of non-N bases in regions defined by
 `regionDefinition`.
+
 
 Details
 -------------------

@@ -10,7 +10,7 @@ NULL
 #' A null 5-mer model of somatic hypermutation targeting where all substitution, mutability
 #' and targeting rates are uniformly distributed.
 #'
-#' @format \link{TargetingModel} object.
+#' @format   A \link{TargetingModel} object.
 #' 
 #' @seealso  See \link{HH_S5F} and \link{HKL_S5F} for the human 5-mer targeting models; and 
 #'           \link{MK_RS5NF} for the mouse 5-mer targeting model.
@@ -21,8 +21,6 @@ NULL
 #'
 #' 1-mer substitution model of somatic hypermutation based on analysis of silent mutations
 #' in functional heavy chain Ig sequences from Homo sapiens.
-#' 
-#' \code{HH_S1F} replaces \code{HS1FDistance} in versions of SHazaM prior to 0.1.5.
 #'
 #' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
 #'           therefore each row sums up to 1.
@@ -36,6 +34,8 @@ NULL
 #' 
 #' @seealso  See \link{HKL_S1F} for the human light chain 1-mer substitution model and 
 #'           \link{MK_RS1NF} for the mouse light chain 1-mer substitution model.
+#'  
+#' @note     \code{HH_S1F} replaces \code{HS1FDistance} in versions of SHazaM prior to 0.1.5.
 "HH_S1F"
 
 
@@ -44,8 +44,6 @@ NULL
 #' 1-mer substitution model of somatic hypermutation based on analysis of silent mutations
 #' in functional kappa and lambda light chain Ig sequences from Homo sapiens.
 #' 
-#' Reported in Table III in Cui et al, 2016.
-#'
 #' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
 #'           therefore each row sums up to 1. 
 #' 
@@ -59,6 +57,8 @@ NULL
 #' 
 #' @seealso  See \link{HH_S1F} for the human heavy chain 1-mer substitution model and 
 #'           \link{MK_RS1NF} for the mouse light chain 1-mer substitution model.
+#'           
+#' @note     Reported in Table III in Cui et al, 2016.
 "HKL_S1F"
 
 
@@ -67,11 +67,9 @@ NULL
 #' 1-mer substitution model of somatic hypermutation based on analysis of replacement and
 #' silent mutations in non-functional kappa light chain Ig sequences from NP-immunized Mus
 #' musculus.
-#' 
-#' \code{MK_RS1NF} replaces \code{M1NDistance} from versions of SHazaM prior to 0.1.5.
-#'
+#'           
 #' @format   A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
-#'           therefore each row sums up to 1.
+#'           therefore each row sums up to 1. 
 #'           
 #' @references
 #' \enumerate{
@@ -83,6 +81,8 @@ NULL
 #' 
 #' @seealso  See \link{HH_S1F} for the human heavy chain 1-mer substitution model and 
 #'           \link{HKL_S1F} for the human light chain 1-mer substitution model.
+#'
+#' @note     \code{MK_RS1NF} replaces \code{M1NDistance} from versions of SHazaM prior to 0.1.5.
 "MK_RS1NF"
 
 
@@ -91,7 +91,7 @@ NULL
 #' 5-mer model of somatic hypermutation targeting based on analysis of silent mutations
 #' in functional heavy chain Ig sequences from Homo sapiens.
 #'
-#' @format \link{TargetingModel} object.
+#' @format   A \link{TargetingModel} object.
 #' 
 #' @references
 #' \enumerate{
@@ -112,7 +112,7 @@ NULL
 #' 5-mer model of somatic hypermutation targeting based on analysis of silent mutations
 #' in functional kappa and lambda light chain Ig sequences from Homo sapiens.
 #'
-#' @format \link{TargetingModel} object.
+#' @format A \link{TargetingModel} object.
 #' 
 #' @references
 #' \enumerate{

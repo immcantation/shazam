@@ -33,6 +33,7 @@ of `minNumMutations` to try.
 
 
 
+
 Value
 -------------------
 
@@ -42,6 +43,7 @@ in `minNumMutationsRange`. The rows correspond to the number of 5-mers
 for which substitution rates would be computed directly using the 5-mer itself 
 (`"5mer"`), using its inner 3-mer (`"3mer"`), and using the central 
 1-mer (`"1mer"`), respectively.
+
 
 Details
 -------------------
@@ -56,6 +58,7 @@ every other base, these mutations are used for inferring the substitution
 rates for the 5-mer of interest; if not, mutations from all 5-mers with the 
 same center nucleotide are aggregated and used for inferring the substitution
 rates for the 5-mer of interest (i.e. the 1-mer model).
+
 
 References
 -------------------

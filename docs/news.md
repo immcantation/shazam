@@ -1,5 +1,6 @@
 Version 0.1.4.999: December 20, 2016
 -------------------------------------------------------------------------------
+
 Targeting Models:
 
 + Added `numMutationsOnly` argument to `createSubstitutionMatrix()`, enabling
@@ -40,8 +41,13 @@ Distance Calculation:
 
 + Added `findThreshold` function to infer clonal distance threshold from 
   nearest neighbor distances returned by `distToNearest`.
-+ Removed `HS1FDistance` (replaced by `HH_S1F`) and `M1NDistance` (replaced by 
-  `MK_RS1NF`).
++ Deprecated the `HS1FDistance` and `M1NDistance` distance models, which have 
+  been renamed to `hs1f_compat` and `m1n_compat` in the `model` argument of
+  `distToNearest`. These deprecated models should be used for compatibility 
+  with DefineClones in Change-O v0.3.3. These models have been replaced by 
+  replaced by `hh_s1f` and `mk_rs1nf`, which are supported by Change-O v0.3.4. 
++ Renamed the `hs5f` model in `distToNearest` to `hh_s5f`.
++ Added support for `MK_RS5NF` models to `distToNearest`.
 + Updated `calcTargetingDistance()` to enable calculation of a symmetric distance
   matrix given a 1-mer substitution matrix normalized by row, such as `HH_S1F`.
 

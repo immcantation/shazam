@@ -35,6 +35,7 @@ probabilities of mutations at each position. Defaults to
 
 
 
+
 Value
 -------------------
 
@@ -55,7 +56,7 @@ shmulateSeq(sequence, mutations=6)
 
 
 ```
-[1] "NGATCCGACGACACGGCCGTGTCTTACTGTGCGAGAGAGAATATG"
+[1] "NGATCTGCCGGAACGGCCGTGGATAACTGTGCGAGAGACAGTTTA"
 
 ```
 

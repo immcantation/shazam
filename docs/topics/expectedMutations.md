@@ -56,6 +56,7 @@ over. If the cluster has already been set the call function with
 
 
 
+
 Value
 -------------------
 
@@ -75,6 +76,7 @@ of the V-segment.
 FWR2 and FWR3 of the V-segment.
 + `EXPECTED_FWR_S`:  number of silent mutations in FWR1, FWR2 and
 FWR3 of the V-segment.
+
 
 
 Details

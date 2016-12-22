@@ -159,8 +159,7 @@ NULL
 #            J Immunol. 1996 156:2642-52. 
 # }
 #
-# @seealso  See \link{HS1FDistance} for the human 1-mer distance matrix.
-# M1N_Distance_v0.1.4
+# M1N_Compat
 
 
 # Deprecated (v0.1.4) Human single nucleotide distance matrix.
@@ -178,8 +177,7 @@ NULL
 #            Front Immunol. 2013 4(November):358.
 # }
 #
-# @seealso  See \link{HS5FModel} for the 5-mer model from same publication.
-# HS1F_Distance_v0.1.4
+# HS1F_Compat
 
 # Ordered nucleotide character set
 # NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
