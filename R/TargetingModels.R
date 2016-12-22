@@ -1639,6 +1639,7 @@ makeAverage1merMut = function(mut5mer) {
 #' @param    model     \link{TargetingModel} object with mutation likelihood information, or
 #'                     a 4x4 1-mer substitution matrix normalized by row with rownames and 
 #'                     colnames consisting of "A", "T", "G", and "C".
+#' @param    places    decimal places to round distances to.
 #'                                                
 #' @return   For input of \link{TargetingModel}, a matrix of distances for each 5-mer motif with 
 #'           rows names defining the center nucleotide and column names defining the 5-mer 
@@ -1660,7 +1661,7 @@ makeAverage1merMut = function(mut5mer) {
 #'   \item  Symmetrize the 1-mer substitution matrix.
 #'   \item  Converting the rates to distance \eqn{d=-log10(p)}.
 #'   \item  Dividing this distance by the mean of the distances.
-#'   \item  Converting all infinite, no change (e.g., A->A), and NA distances to 
+#'   \item  Converting all infinite, no change (e.g., A -> A), and NA distances to 
 #'          zero.
 #' }
 #' 
@@ -1675,20 +1676,19 @@ makeAverage1merMut = function(mut5mer) {
 #' dist <- calcTargetingDistance(HH_S1F)
 #' 
 #' @export
-calcTargetingDistance <- function(model) {
+calcTargetingDistance <- function(model, places=2) {
   # if model is TargetingModel object, assume 5-mer targeting model
   # extract targeting matrix
   if (is(model, "TargetingModel")) {
-    input = "5mer"
+    input <- "5mer"
     model <- model@targeting
-  } else if (is(model, "matrix")) {
-    # if model is a matrix, assume 1-mer substitution matrix
-    # symmetrize
-    input = "1mer"
+  } else if (is(model, "matrix") & all(dim(model) == c(4, 4))) {
+    # if model is a matrix, assume 1-mer substitution matrix and symmetrize
+    input <- "1mer"
     model <- symmetrize(model)
   } else {
     # anything else: error
-    stop("Input must be either a targeting matrix or TargetingModel object.")
+    stop("Input must be either a 4x4 targeting matrix or TargetingModel object.")
   }
   
   # Take negative log10 of all probabilities
@@ -1700,14 +1700,20 @@ calcTargetingDistance <- function(model) {
   
   # TODO: the indexing of A-->A etc positions can probably be done smarter/faster
   # Assign no-change entries to distance 0
-  if (input=="5mer") {
-    center_nuc <- gsub("..([ACGTN])..", "\\1", colnames(model_dist))
-    for (i in 1:length(center_nuc)) {
-      model_dist[center_nuc[i], i] <- 0
-    }
-  } else {
-    diag(model_dist) <- 0
+  if (input == "5mer") {
+      center_nuc <- gsub("..([ACGTN])..", "\\1", colnames(model_dist))
+      for (i in 1:length(center_nuc)) {
+          model_dist[center_nuc[i], i] <- 0
+      }
+  } else if (input == "1mer") {
+      diag(model_dist) <- 0
+      model_dist <- rbind(model_dist, matrix(0, 3, 4))
+      model_dist <- cbind(model_dist, matrix(0, 7, 3))
+      colnames(model_dist)[5:7] <- rownames(model_dist)[5:7] <- c("N", "-", ".")
   }
+  
+  # Round
+  model_dist <- round(model_dist, places)
   
   return(model_dist)
 }
@@ -1785,14 +1791,14 @@ symmetrize <- function(sub1mer) {
 #' @examples
 #' \dontrun{
 #' # Write HS5F targeting model to working directory as hs5f.tab
-#' writeTargetingModel(HH_S5F, "hs5f.tab") 
+#' writeTargetingModel(HH_S5F, "hh_s5f.tsv") 
 #' }
 #' 
 #' @export
 writeTargetingDistance <- function(model, file) {
     to_write <- as.data.frame(calcTargetingDistance(model))
     to_write[is.na(to_write)] <- 0
-    write.table(to_write, file, quote=FALSE, sep="\t")
+    write.table(to_write, file, quote=FALSE, sep="\t", col.names=NA, row.names=TRUE)
 }
 
 

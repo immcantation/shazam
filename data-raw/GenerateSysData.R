@@ -74,3 +74,10 @@ devtools::use_data(NUCLEOTIDES,
                    HS1F_Compat,
                    M1N_Compat,
                    internal=TRUE, overwrite=TRUE)
+
+
+# Write targeted distances for Change-O
+writeTargetingDistance(HH_S1F, "hh_s1f_dist.tsv")
+writeTargetingDistance(HH_S5F, "hh_s5f_dist.tsv")
+writeTargetingDistance(MK_RS1NF, "mk_rs1nf_dist.tsv")
+writeTargetingDistance(MK_RS5NF, "mk_rs5nf_dist.tsv")
