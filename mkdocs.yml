@@ -39,6 +39,10 @@ pages:
       - topics/extendSubstitutionMatrix.md
       - topics/createTargetingMatrix.md
       - topics/createTargetingModel.md
+      - topics/makeAverage1merMut.md
+      - topics/makeAverage1merSub.md
+      - topics/makeDegenerate5merMut.md
+      - topics/makeDegenerate5merSub.md
       - topics/minNumMutationsTune.md
       - topics/minNumSeqMutationsTune.md
       - topics/plotMutability.md
