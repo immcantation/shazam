@@ -100,8 +100,8 @@ test_that("calcTargetingDistance", {
     
     set.seed(15)
     idx <- sample(length(dist), 20)
-    expected_dist <- c(0.937, NA, 0.931, 1.03, NA, 1.032, 0.963, 0, 0.938, 0, NA, NA, 0, 0.959, 0.942, 0, NA, 0.995, 0.855, 0)
-    expect_equal(dist[idx], expected_dist, tolerance=0.001)    
+    expected_dist <- c(0.94, NA, 0.93, 1.03, NA, 1.03, 0.96, 0, 0.94, 0, NA, NA, 0, 0.96, 0.94, 0, NA, 1.00, 0.85, 0)
+    expect_equal(dist[idx], expected_dist, tolerance=0.001)
 })
 
 test_that("rescaleMutability", {
