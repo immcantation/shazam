@@ -24,9 +24,9 @@ pages:
       - topics/collapseClones.md
       - topics/expectedMutations.md
       - topics/observedMutations.md
-      - topics/slideWindowDb.md
       - topics/calcExpectedMutations.md
       - topics/calcObservedMutations.md
+      - topics/slideWindowDb.md
       - topics/slideWindowSeq.md
       - topics/slideWindowTune.md
       - topics/shmulateSeq.md
@@ -63,6 +63,7 @@ pages:
       - topics/plotBaselineDensity.md
       - topics/plotBaselineSummary.md
       - topics/createBaseline.md
+      - topics/editBaseline.md
       - topics/Baseline-class.md
     - 'Distance Profiling':
       - topics/distToNearest.md

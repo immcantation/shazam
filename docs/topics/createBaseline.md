@@ -81,8 +81,10 @@ defined region (e.g. "CDR" and "FWR"). Matrices have dimensions
 
 stats
 :   `data.frame` of BASELINe statistics, 
-including: selection strength (Sigma), 95% confidence 
-intervals, and P values.
+including: mean selection strength (mean Sigma), 95% confidence 
+intervals, and p-values with positive signs for the presence of 
+positive selection and/or p-values with negative signs for the
+presence of negative selection.
 
 
 

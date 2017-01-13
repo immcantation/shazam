@@ -9,8 +9,9 @@
 Description
 --------------------
 
-`summarizeBaseline` calculates BASELINe statistics such as the selection strength
-(Sigma), the 95% confidence intervals and P-values.
+`summarizeBaseline` calculates BASELINe statistics such as the mean selection 
+strength (mean Sigma), the 95% confidence intervals and p-values for the presence of
+selection.
 
 
 Usage
@@ -44,7 +45,26 @@ Value
 -------------------
 
 Either a modified `Baseline` object or data.frame containing the 
-BASELINe selection strength, 95% confidence intervals and P-value.
+mean BASELINe selection strength, its 95% confidence intervals, and 
+a p-value for the presence of selection.
+
+
+Details
+-------------------
+
+The returned p-value can be either positive or negative. Its magnitude 
+(without the sign) should be interpreted as per normal. Its sign indicates 
+the direction of the selection detected. A positive p-value indicates positive
+selection, whereas a negative p-value indicates negative selection.
+
+
+References
+-------------------
+
+
+1. Uduman M, et al. Detecting selection in immunoglobulin sequences. 
+Nucleic Acids Res. 2011 39(Web Server issue):W499-504.
+
 
 
 

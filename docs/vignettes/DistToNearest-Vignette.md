@@ -49,7 +49,7 @@ single nucleotide Hamming distance with gaps considered as a match to any
 nucleotide (`ham`). Other options include a human Ig-specific single nucleotide 
 model similar to a transition/transversion model (`hh_s1f`) and the corresponding 
 5-mer context model from Yaari et al, 2013 (`hh_s5f`), and analogous pair of 
-mouse specific models from Cui et al, 2015 (`mk_rs1nf` and `mk_rs5nf`), and 
+mouse specific models from Cui et al, 2016 (`mk_rs1nf` and `mk_rs5nf`), and 
 amino acid Hamming distance (`aa`). 
 
 **Note:** Human mouse distance measure that are backward compatible with 

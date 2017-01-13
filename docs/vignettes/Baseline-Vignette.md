@@ -166,11 +166,15 @@ before and after an influenza vaccination and the `ISOTYPE` field specifies
 the isotype of the sequence. The `groupBaseline` function convolves the BASELINe 
 PDFs of individual sequences/clones to get a combined PDF. The field(s) by 
 which to group the sequences are specified with the `groupBy` parameter. 
+
 The `groupBaseline` function automatically calls `summarizeBaseline` to 
 generate summary statistics based on the requested groupings, and populates 
 the `stats` slot of the input `Baseline` object with the number of sequences 
-with observed mutations for each region, selection scores, 95% confidence 
-intervals, and p-values that each group differs from zero. 
+with observed mutations for each region, mean selection scores, 95% confidence 
+intervals, and p-values with positive signs indicating the presence of positive 
+selection and/or p-values with negative signs indicating the presence of negative 
+selection. The magnitudes of the p-values (without the signs) should be 
+interpreted as per normal.
 
 
 ```r
@@ -180,6 +184,7 @@ grouped_1 <- groupBaseline(baseline, groupBy=c("SAMPLE"))
 # Combine selection scores by time-point and isotype
 grouped_2 <- groupBaseline(baseline_sub, groupBy=c("SAMPLE", "ISOTYPE"))
 ```
+
 
 ### Convolving variables at multiple level
 
@@ -216,9 +221,9 @@ testBaseline(grouped_1, groupBy="SAMPLE")
 ```
 
 ```
-##   REGION       TEST      PVALUE        FDR
-## 1    CDR -1h != +7d 0.012584832 0.01258483
-## 2    FWR -1h != +7d 0.005377654 0.01075531
+##   REGION       TEST     PVALUE        FDR
+## 1    CDR -1h != +7d 0.01298192 0.01298192
+## 2    FWR -1h != +7d 0.00529541 0.01059082
 ```
 
 ## Plot and compare selection scores for groups
@@ -274,3 +279,37 @@ plotBaselineDensity(grouped_2, "ISOTYPE", groupColumn="SAMPLE", colorElement="gr
 ```
 
 ![plot of chunk Baseline-Vignette-11](figure/Baseline-Vignette-11-1.png)
+
+
+## Editing a field in a Baseline object
+
+If, for any reason, one needs to edit the existing values in a field in a 
+`Baseline` object, one can do so via `editBaseline`. In the following example,
+we remove results related to IgA in the relevant fields from `grouped_2`. 
+When the input data is large and it takes a long time for `calcBaseline` to run,
+`editBaseline` could become useful when, for instance, one would like to exclude
+a certain sample or isotype, but would rather not re-run `calcBaseline` after 
+removing that sample or isotype from the original input data.
+
+
+```r
+# Get indices of rows corresponding to IgA in the field "db"
+# These are the same indices also in the matrices in the fileds "numbOfSeqs", 
+# "binomK", "binomN", "binomP", and "pdfs"
+# In this example, there is one row of IgA for each sample
+dbIgMIndex <- which(grouped_2@db$ISOTYPE == "IgA")
+
+grouped_2 <- editBaseline(grouped_2, "db", grouped_2@db[-dbIgMIndex, ])
+grouped_2 <- editBaseline(grouped_2, "numbOfSeqs", grouped_2@numbOfSeqs[-dbIgMIndex, ])
+grouped_2 <- editBaseline(grouped_2, "binomK", grouped_2@binomK[-dbIgMIndex, ])
+grouped_2 <- editBaseline(grouped_2, "binomN", grouped_2@binomN[-dbIgMIndex, ])
+grouped_2 <- editBaseline(grouped_2, "binomP", grouped_2@binomP[-dbIgMIndex, ])
+grouped_2 <- editBaseline(grouped_2, "pdfs", 
+                         lapply(grouped_2@pdfs, function(pdfs) {pdfs[-dbIgMIndex, ]} ))
+
+# The indices corresponding to IgA are slightly different in the field "stats"
+# In this example, there is one row of IgA for each sample and for each region
+grouped_2 <- editBaseline(grouped_2, "stats", 
+                          grouped_2@stats[grouped_2@stats$ISOTYPE!="IgA", ])
+```
+

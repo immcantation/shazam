@@ -17,7 +17,7 @@ Description
 Usage
 --------------------
 ```
-calcTargetingDistance(model)
+calcTargetingDistance(model, places = 2)
 ```
 
 Arguments
@@ -27,6 +27,9 @@ model
 :   [TargetingModel](TargetingModel-class.md) object with mutation likelihood information, or
 a 4x4 1-mer substitution matrix normalized by row with rownames and 
 colnames consisting of "A", "T", "G", and "C".
+
+places
+:   decimal places to round distances to.
 
 
 
@@ -57,7 +60,7 @@ The 1-mer substitution matrix is transformed into a distance matrix by:
 1. Symmetrize the 1-mer substitution matrix.
 1. Converting the rates to distance <code class = 'eq'>d=-log10(p)</code>.
 1. Dividing this distance by the mean of the distances.
-1. Converting all infinite, no change (e.g., A->A), and NA distances to 
+1. Converting all infinite, no change (e.g., A -> A), and NA distances to 
 zero.
 
 

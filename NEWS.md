@@ -1,5 +1,15 @@
-Version 0.1.4.999: December 22, 2016
+Version 0.1.4.999: January 12, 2017
 -------------------------------------------------------------------------------
+
+Selection Analysis:
+
++ Fixed a bug in p-value calculation in `summarizeBaseline()`. The returned 
+  p-value can now be either positive or negative. Its magnitude (without the 
+  sign) should be interpreted as per normal. Its sign indicates the direction 
+  of the selection detected. A positive p-value indicates positive selection, 
+  whereas a negative p-value indicates negative selection.
++ Added `editBaseline()` to exported functions, and a corresponding section 
+  in the vignette. 
 
 Targeting Models:
 

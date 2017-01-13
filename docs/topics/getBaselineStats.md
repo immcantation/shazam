@@ -33,8 +33,10 @@ either [groupBaseline](groupBaseline.md) or [summarizeBaseline](summarizeBaselin
 Value
 -------------------
 
-A `data.frame` with the BASELINe selection strength scores (Sigma),
-95% confidence intervals and P-values.
+A `data.frame` with the mean selection strength (mean Sigma), 95% 
+confidence intervals, and p-values with positive signs for the presence 
+of positive selection and/or p-values with negative signs for the presence 
+of negative selection.
 
 
 
@@ -91,10 +93,10 @@ getBaselineStats(grouped)
 
 ```
   SAMPLE ISOTYPE REGION BASELINE_SIGMA BASELINE_CI_LOWER BASELINE_CI_UPPER BASELINE_CI_PVALUE
-1    +7d     IgA    CDR     -0.3066403        -0.4981192        -0.1460119      -5.499097e-02
-2    +7d     IgA    FWR     -0.6990904        -0.8265410        -0.5797970      -2.842171e-14
-3    +7d     IgG    CDR     -0.2353832        -0.3654914        -0.1244890      -2.420408e-02
-4    +7d     IgG    FWR     -0.7065625        -0.8043858        -0.6189482      -5.595524e-14
+1    +7d     IgA    CDR     -0.3122192        -0.5037549        -0.1526285      -8.906103e-05
+2    +7d     IgA    FWR     -0.7001688        -0.8274556        -0.5830940      -1.276756e-14
+3    +7d     IgG    CDR     -0.2456188        -0.3756938        -0.1347218      -1.611595e-05
+4    +7d     IgG    FWR     -0.7147021        -0.8122153        -0.6275499      -7.216450e-15
 
 ```
 
