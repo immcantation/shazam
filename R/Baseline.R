@@ -45,13 +45,16 @@ NULL
 #'                              \code{r} = number of rows = number of sequences or groups. \cr
 #'                              \code{c} = number of columns = length of the PDF (default 4001).
 #' @slot    stats               \code{data.frame} of BASELINe statistics, 
-#'                              including: selection strength (Sigma), 95\% confidence 
-#'                              intervals, and P values.
+#'                              including: mean selection strength (mean Sigma), 95\% confidence 
+#'                              intervals, and p-values with positive signs for the presence of 
+#'                              positive selection and/or p-values with negative signs for the
+#'                              presence of negative selection.
 #'                          
 #' @name         Baseline-class
 #' @rdname       Baseline-class
 #' @aliases      Baseline
 #' @exportClass  Baseline
+#' @seealso      See \code{\link{summarizeBaseline}} for more information on \code{@stats}.
 setClass("Baseline", 
          slots=c(description="character",
                  db="data.frame",
@@ -107,8 +110,10 @@ setClass("Baseline",
 #'                              \code{r} = number of rows = number of sequences or groups. \cr
 #'                              \code{c} = number of columns = length of the PDF (default 4001).
 #' @param   stats               \code{data.frame} of BASELINe statistics, 
-#'                              including: selection strength (Sigma), 95\% confidence 
-#'                              intervals, and P values.
+#'                              including: mean selection strength (mean Sigma), 95\% confidence 
+#'                              intervals, and p-values with positive signs for the presence of 
+#'                              positive selection and/or p-values with negative signs for the
+#'                              presence of negative selection.
 #'                              
 #' @return   A \code{Baseline} object.
 #' 
@@ -193,17 +198,36 @@ createBaseline <- function(description="",
 }
 
 
-# Edit the Baseline object
-# 
-# \code{editBaseline} edits a \code{Baseline}.
-#
-# @param   baseline     The \code{Baseline} S4 object to be edited.
-# @param   field_name   Name of the field in the \code{Baseline} S4 object to be edited.
-# @param   value        The value to set the \code{field_name}.
-# 
-# @return   A \code{Baseline} object.
-# 
-# @seealso  See \link{Baseline} for the return object.
+#' Edit the Baseline object
+#' 
+#' \code{editBaseline} edits a field in a \code{Baseline} object.
+#'
+#' @param   baseline     The \code{Baseline} S4 object to be edited.
+#' @param   field_name   Name of the field in the \code{Baseline} S4 object to be edited.
+#' @param   value        The value to set the \code{field_name}.
+#' 
+#' @return   A \code{Baseline} object with the field of choice updated.
+#' 
+#' @seealso  See \link{Baseline} for the return object.
+#'
+#' @examples
+#' # Subset example data
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' 
+#' # Calculate BASELINe
+#' baseline <- calcBaseline(db, 
+#'                          sequenceColumn="SEQUENCE_IMGT",
+#'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                          testStatistic="focused",
+#'                          regionDefinition=IMGT_V,
+#'                          targetingModel = HH_S5F,
+#'                          nproc = 1)
+#' # Edit the field "description"
+#' baseline <- editBaseline(baseline, field_name = "description", 
+#'                          value = "+7d IgA & IgG")
+#'                                                   
+#' @export
 editBaseline <- function(baseline, field_name, value) {
     if (!match(field_name, slotNames(baseline))) { 
         stop("field_name not part of BASELINe object!")
@@ -223,8 +247,10 @@ editBaseline <- function(baseline, field_name, value) {
 #' @param    baseline  \code{Baseline} object that has been run through
 #'                     either \link{groupBaseline} or \link{summarizeBaseline}.
 #' 
-#' @return   A \code{data.frame} with the BASELINe selection strength scores (Sigma),
-#'           95\% confidence intervals and P-values. 
+#' @return   A \code{data.frame} with the mean selection strength (mean Sigma), 95\% 
+#'           confidence intervals, and p-values with positive signs for the presence 
+#'           of positive selection and/or p-values with negative signs for the presence 
+#'           of negative selection. 
 #' 
 #' @seealso  For calculating the BASELINe summary statistics see \link{summarizeBaseline}.
 #' 
@@ -1025,8 +1051,9 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 
 #' Calculate BASELINe summary statistics
 #'
-#' \code{summarizeBaseline} calculates BASELINe statistics such as the selection strength
-#' (Sigma), the 95\% confidence intervals and P-values.
+#' \code{summarizeBaseline} calculates BASELINe statistics such as the mean selection 
+#' strength (mean Sigma), the 95\% confidence intervals and p-values for the presence of
+#' selection.
 #'
 #' @param    baseline    \code{Baseline} object returned by \link{calcBaseline} containing 
 #'                       annotations and BASELINe posterior probability density functions 
@@ -1039,11 +1066,22 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                       set and will not be reset.
 #' 
 #' @return   Either a modified \code{Baseline} object or data.frame containing the 
-#'           BASELINe selection strength, 95\% confidence intervals and P-value.  
-#'           
+#'           mean BASELINe selection strength, its 95\% confidence intervals, and 
+#'           a p-value for the presence of selection.
+#' 
+#' @details  The returned p-value can be either positive or negative. Its magnitude 
+#'           (without the sign) should be interpreted as per normal. Its sign indicates 
+#'           the direction of the selection detected. A positive p-value indicates positive
+#'           selection, whereas a negative p-value indicates negative selection.
+#'                     
 #' @seealso  See \link{calcBaseline} for generating \code{Baseline} objects and
 #'           \link{groupBaseline} for convolving groups of BASELINe PDFs.
 #'           
+#' @references
+#' \enumerate{
+#'   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
+#'            Nucleic Acids Res. 2011 39(Web Server issue):W499-504.
+#' }
 #' 
 #' @examples
 #' # Subset example data
@@ -1269,13 +1307,36 @@ baselineCI <- function (base, low=0.025, up=0.975, max_sigma=20, length_sigma=40
 # @param   base          BASLINe PDF vector.
 # @param   max_sigma     maximum sigma score.
 # @param   length_sigma  length of the PDF vector.
-# @return  A vector of \code{c(lower, upper)} confidence bounds.
+# @return  A p-value. The returned p-value can be either positive or negative. 
+#          Its magnitude (without the sign) should be interpreted as per normal. 
+#          Its sign indicate the direction of the selection detected. A positive 
+#          p-value indicates positive selection, whereas a negative p-value 
+#          indicates negative selection.
 baselinePValue <- function (base, length_sigma=4001, max_sigma=20){
+    # note: since there isn't a null distribution, this "p-value" isn't a p-value in the 
+    # conventional sense
     if (!any(is.na(base))) {
+        # normalization factor
         #norm <- (length_sigma - 1) / 2 / max_sigma
-        norm <- sum(base, na.rm=TRUE)
-        pvalue <- sum(base[1:((length_sigma - 1)/2)] + base[((length_sigma + 1) / 2)] / 2) / norm
-        if (pvalue > 0.5) { pvalue <- 1 - pvalue }
+        # sums up to 100 for default setting (sigma_s from -20 to 20 with length 4001)
+        norm <- sum(base, na.rm=TRUE) 
+        
+        # compute Pr(selection strength < 0):
+        # sum up density for sigma from min_sigma up to and right before 0 (area under curve), plus
+        # + binomial correction (density at sigma=0 divided by 2); 
+        # normalized
+        pvalue <- ( sum(base[1:((length_sigma - 1) / 2)]) + 
+                    base[((length_sigma + 1) / 2)] / 2 ) / norm
+        
+        # from Fig 4 caption of Detecting selection in immunoglobulin sequences by Uduman et al. 2011
+        # "Note that P values less than zero are indicative of negative selection."
+        
+        # 1) if Pr(selection strength < 0) <= 0.5, return Pr(selection strength < 0)
+        #    this will be positive, and serves as the "p-value" for positive selection
+        # 2) if Pr(selection strength < 0) > 0.5, return -Pr(selection strength>0)
+        #    this will be negative, and serves as the "p-value" for negative selection
+        #    (negative sign highlights the fact that selection is negative)
+        if (pvalue > 0.5) { pvalue <- -(1 - pvalue) } 
     } else {
         pvalue <- NA
     }
