@@ -54,7 +54,7 @@ NULL
 #' @rdname       Baseline-class
 #' @aliases      Baseline
 #' @exportClass  Baseline
-#' @seealso      See \code{\link{summarizeBaseline}} for more information on \code{@stats}.
+#' @seealso      See \link{summarizeBaseline} for more information on \code{@stats}.
 setClass("Baseline", 
          slots=c(description="character",
                  db="data.frame",

@@ -1369,8 +1369,8 @@ removeCodonGaps <- function(matInput) {
 #'           When \code{extended=TRUE}, \code{extendSubstitutionMatrix} is called to extend
 #'           the 4x1024 substitution matrix.
 #'  
-#' @seealso  See \code{\link{makeAverage1merSub}} for making a 1-mer substitution model by taking
-#'           the average of a 5-mer substitution model. See \code{\link{extendSubstitutionMatrix}}
+#' @seealso  See \link{makeAverage1merSub} for making a 1-mer substitution model by taking
+#'           the average of a 5-mer substitution model. See \link{extendSubstitutionMatrix}
 #'           for extending the substitution matrix.
 #' 
 #' @examples
@@ -1444,9 +1444,9 @@ makeDegenerate5merSub = function(sub1mer, extended=FALSE) {
 #'           When \code{extended=TRUE}, \code{extendMutabilityMatrix} is called to extend the
 #'           mutability vector of length 1024 into a vector of length 3125.
 #'  
-#' @seealso  See \code{\link{makeAverage1merMut}} for making a 1-mer mutability model by 
+#' @seealso  See \link{makeAverage1merMut} for making a 1-mer mutability model by 
 #'           taking the average of a 5-mer mutability model. See 
-#'           \code{\link{extendMutabilityMatrix}} for extending the mutability vector.
+#'           \link{extendMutabilityMatrix} for extending the mutability vector.
 #' 
 #' @examples
 #' # Make a degenerate 5-mer model (length of 1024) based on a 1-mer model
@@ -1516,7 +1516,7 @@ makeDegenerate5merMut = function(mut1mer, extended=FALSE) {
 #'           is derived by averaging the substitution rates into a "T" of all the 5-mers that 
 #'           have an "A" as their central 1-mer. 
 #'  
-#' @seealso  See \code{\link{makeDegenerate5merSub}} for making a degenerate 5-mer substitution 
+#' @seealso  See \link{makeDegenerate5merSub} for making a degenerate 5-mer substitution 
 #'           model based on a 1-mer substitution model. 
 #' 
 #' @examples
@@ -1584,7 +1584,7 @@ makeAverage1merSub = function(sub5mer) {
 #'           is derived by averaging the mutability rates of all the 5-mers that 
 #'           have an "A" as their central 1-mer, followed by normalization.
 #'  
-#' @seealso  See \code{\link{makeDegenerate5merMut}} for making a degenerate 5-mer mutability
+#' @seealso  See \link{makeDegenerate5merMut} for making a degenerate 5-mer mutability
 #'           model based on a 1-mer mutability model. 
 #' 
 #' @examples
