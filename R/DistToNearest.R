@@ -3,6 +3,7 @@
 #' @include Shazam.R
 NULL
 
+#### Distance to Nearest ####
 
 # Returns a 5-mer sliding window of given sequence
 #
@@ -105,22 +106,15 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
 
 # Given an array of nucleotide sequences, find the pairwise distances
 # 
-# @param   sequences   character vector of nucleotide sequences.
-# @param   targetingDistance targeting distance obtained from a targeting model
-#                      with the function `calcTargetingDistance`
-# @param   normalize   method of normalization. Default is "none".
-#                      "length" = normalize distance by length of junction.
-# @param   symmetry    if model is hs5f, distance between seq1 and seq2 is either the
-#                      average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
+# @param   sequences          character vector of nucleotide sequences.
+# @param   targetingDistance  targeting distance obtained from a targeting model
+#                             with the function `calcTargetingDistance`
+# @param   normalize          method of normalization. Default is "none".
+#                             "length" = normalize distance by length of junction.
+# @param   symmetry           if model is hs5f, distance between seq1 and seq2 is either the
+#                             average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
+#
 # @return  A matrix of pairwise distances between junction sequences.
-# 
-# @details
-# needs method details
-# 
-# @seealso needs links
-# 
-# @examples
-# # working example
 pairwise5MerDist <- function(sequences, targetingDistance, 
                              normalize=c("none", "length", "mutations"),
                              symmetry=c("avg", "min")) {
@@ -385,61 +379,6 @@ nearestDist<- function(sequences, model=c("ham", "aa", "m1n", "hs1f", "hs5f"),
     return(round(seq_dist, 4))
 }
 
-#' Find distance threshold
-#'
-#' Infer value of the minimum between the two modes in a bimodal distribution.
-#'
-#' @param    distances  numeric vector of distances.
-#' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
-#' 
-#' @return   Returns distance threshold that separates two modes of the input distribution.
-#'
-#' @details
-#' The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
-#' sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
-#' with the ideal threshold being a value that separates the two modes. This function takes 
-#' as input a vector of such distances and infers the ideal threshold.
-#' 
-#' @seealso  See \link{distToNearest} for details on generating the input distance vector.
-#' 
-#' @examples
-#' # Subset example data to one sample as a demo
-#' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, SAMPLE == "-1h")
-#' 
-#' # Use genotyped V assignments, HS1F model, and normalize by junction length
-#' dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
-#'                            model="hs1f", first=FALSE, normalize="length")
-#' threshold <- findThreshold(dist_hs1f$DIST_NEAREST)
-#'                            
-#' # Plot histogram of non-NA distances
-#' p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
-#'     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
-#'     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
-#'                    fill="steelblue", color="white") + 
-#'     geom_vline(xintercept=threshold, linetype="dashed")
-#' plot(p1)
-#'
-#' @export
-findThreshold <- function(distances, subsample=NULL) {
-    # Remove NA, NaN, and infinite distances
-    distances <- distances[!is.na(distances) & !is.nan(distances) & !is.infinite(distances)]
-    # Subsample input distances
-    if(!is.null(subsample)) {
-        distances <- sample(distances, subsample)
-    }
-    # Ideal bandwidth
-    h_ucv <- h.ucv(distances, 4)$h
-    # Density estimate
-    dens <- bkde(distances, bandwidth=h_ucv)
-    # Find threshold
-    tryCatch(threshold <- dens$x[which(diff(sign(diff(dens$y)))==2)[1]+1], 
-             error = function(e) {
-                 warning('No minimum was found between two modes.')
-                 return(NA)
-             })
-    return(threshold)
-}
 
 #' Distance to nearest neighbor
 #'
@@ -673,4 +612,310 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL",
         db$DIST_NEAREST <- db$TMP_DIST_NEAREST
     }
     return(db[, !(names(db) %in% c("V", "J", "L", "ROW_ID", "V1", "J1","TMP_DIST_NEAREST"))])
+}
+
+
+#### Distance Threshold Detection ####
+
+#' Find distance threshold
+#'
+#' Infer value of the minimum between the two modes in a bimodal distribution.
+#'
+#' @param    method     method.
+#' @param    cutEdge    cut.
+#' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
+#' 
+#' @return   Returns distance threshold that separates two modes of the input distribution.
+#' 
+#' @export
+findThreshold <- function (data, method=c("gmm, dens"), cutEdge=0.7, subsample=NULL){
+  # Check arguments
+  method <- match.arg(method)
+  
+  if (method == "gmm") {
+    output <- gmmFit(data, cutEdge)
+  } else if (method == "dens") {
+    output <- smoothValley(data, subsample)
+  } else {
+    print("Error: assigned method has not been found")
+    output <- NA
+  }
+  
+  return(output)
+}
+
+
+#' Find distance threshold
+#'
+#' Infer value of the minimum between the two modes in a bimodal distribution.
+#'
+#' @param    distances  numeric vector of distances.
+#' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
+#' 
+#' @return   Returns distance threshold that separates two modes of the input distribution.
+#'
+#' @details
+#' The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
+#' sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
+#' with the ideal threshold being a value that separates the two modes. This function takes 
+#' as input a vector of such distances and infers the ideal threshold.
+#' 
+#' @seealso  See \link{distToNearest} for details on generating the input distance vector.
+#' 
+#' @examples
+#' # Subset example data to one sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#' 
+#' # Use genotyped V assignments, HS1F model, and normalize by junction length
+#' dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
+#'                            model="hs1f", first=FALSE, normalize="length")
+#' threshold <- findThreshold(dist_hs1f$DIST_NEAREST)
+#'                            
+#' # Plot histogram of non-NA distances
+#' p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
+#'     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
+#'     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
+#'                    fill="steelblue", color="white") + 
+#'     geom_vline(xintercept=threshold, linetype="dashed")
+#' plot(p1)
+#'
+#' @export
+smoothValley <- function(distances, subsample=NULL) {
+  # Remove NA, NaN, and infinite distances
+  distances <- distances[!is.na(distances) & !is.nan(distances) & !is.infinite(distances)]
+  # Subsample input distances
+  if(!is.null(subsample)) {
+    distances <- sample(distances, subsample)
+  }
+  # Ideal bandwidth
+  h_ucv <- h.ucv(distances, 4)$h
+  # Density estimate
+  dens <- bkde(distances, bandwidth=h_ucv)
+  # Find threshold
+  tryCatch(threshold <- dens$x[which(diff(sign(diff(dens$y)))==2)[1]+1], 
+           error = function(e) {
+             warning('No minimum was found between two modes.')
+             return(NA)
+           })
+  return(threshold)
+}
+
+#' GMM Fit
+#' @export
+gmmFit <- function(ent, cutEdge=0.7) {
+  
+  #************* Filter Unknown Data *************#
+  ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
+  
+  #************* Defult cutEdge *************#
+  cutEdge <- cutEdge*ent[which.max(ent)]
+  
+  #************* Define Scan Step For Initializing *************#
+  if (ent[which.min(ent)] >= 0 & ent[which.max(ent)] <= 1) {
+    scan_step <- 0.01
+  } else {
+    scan_step <- 1
+  }
+  
+  #*************  set rand seed *************#
+  set.seed(3000)
+  
+  #*************  define Number of Gaussians *************#
+  num_G <- 2
+  
+  vec.omega1 <- 0; vec.omega2 <- 0
+  vec.mu1 <- 0;    vec.mu2 <- 0
+  vec.sigma1 <- 0; vec.sigma2 <- 0
+  vec.lkhood <- 0
+  valley.itr <- 0
+  valley_loc <- 0
+  nEve <- length(ent)
+  while (1) {
+    #*************  guess the valley loc *************#
+    valley_loc <- valley_loc + scan_step
+    if ( valley_loc > cutEdge ) break
+    
+    #*************  Choosing Random Omega *************#
+    omega <- runif(1)
+    omega <- c(omega, 1.-omega)
+    
+    #*************  Choosing Random Mean *************#
+    mu_int <- mean(ent[ent<=valley_loc])
+    mu_int <- c(mu_int, mean(ent[ent>valley_loc]))
+    
+    #*************  Choosing Random Sigma *************#
+    sigma_int <- sd(ent[ent<valley_loc])
+    sigma_int <- c(sigma_int, sd(ent[ent>valley_loc]))
+    
+    #*************  EM Algorithm *************#
+    temp_lk <- 0
+    itr <- 0
+    while (1){
+      mu <- 0
+      sigma <- 0
+      for (j in 1:num_G){
+        mu[j] <- mu_int[j]
+        sigma[j] <- sigma_int[j]
+      }
+      
+      #*************  E-step Expectation *************#
+      resp <- array(0, dim=c(nEve,num_G))
+      for(i in 1:nEve){
+        for (j in 1:num_G)
+          resp[i,j] <- omega[j]*dnorm(ent[i], mu[j], sigma[j])
+        resp[i,] <- resp[i,]/sum(resp[i,])
+      }
+      
+      #*************  M-step Maximization *************#
+      for (j in 1:num_G){
+        m_c <- sum(resp[,j])
+        
+        omega[j] <- m_c / nEve
+        
+        mu[j] <- sum(resp[,j]*ent) 
+        mu[j] <- mu[j] / m_c
+        
+        sigma[j] <- sum(resp[,j]*(ent-mu[j])*(ent-mu[j]))
+        sigma[j] <- sigma[j] / m_c
+        sigma[j] <- sqrt(sigma[j])
+      }
+      
+      #*************  Log-likelihood calculation *************#
+      log_lk <- 0.
+      for (i in 1:nEve){
+        s <- 0
+        for (j in 1:num_G)
+          s <- s + omega[j]*dnorm(ent[i], mu[j], sigma[j])
+        log_lk <- log_lk + log(s, base = exp(1))
+      }
+      log_lk_err <- abs(log_lk - temp_lk)
+      itr = itr + 1
+      #print(paste0("scaned: ", valley_loc, " itr # ", itr, " -> ", log_lk_err))
+      if (is.na(log_lk_err) | is.nan(log_lk_err) | is.infinite(log_lk_err)) break
+      if (log_lk_err < 1.e-7) break
+      temp_lk <- log_lk;
+    }
+    print(paste0("scaned: ", valley_loc, " --------> Log-Likelihood: ", log_lk))
+    
+    #************************************************************# 
+    #*************  JUST FOR VISUALIZATION PURPOSES *************#
+    if (ent[which.min(ent)] >= 0 & ent[which.max(ent)] <= 1) {
+      h_min <- 0.0
+      h_max <- 1
+      dh = 0.02
+    } else {
+      h_min <- 0.0
+      h_max <- ent[which.max(ent)]
+      dh = 1
+    }
+    h <- hist(ent, plot = FALSE, breaks=seq(h_min, h_max, by=dh))
+    plot(h, freq=FALSE, col="steelblue", border="white", xlim=c(h_min, h_max))
+    curve(omega[1]*dnorm(x, mu[1], sigma[1]), add=TRUE, col="darkblue", lwd=2, xlim = c(h_min, h_max))
+    curve(omega[2]*dnorm(x, mu[2], sigma[2]), add=TRUE, col="darkred", lwd=2, xlim = c(h_min, h_max))
+    #************************************************************#
+    #************************************************************#
+    
+    valley.itr <- valley.itr + 1
+    vec.omega1[valley.itr] <- omega[1]
+    vec.omega2[valley.itr] <- omega[2]
+    vec.mu1[valley.itr] <- mu[1]
+    vec.mu2[valley.itr] <- mu[2]
+    vec.sigma1[valley.itr] <- sigma[1]
+    vec.sigma2[valley.itr] <- sigma[2]
+    vec.lkhood[valley.itr] <- log_lk
+  }
+  MaxLoc <- which.max(vec.lkhood)
+  print(vec.lkhood[MaxLoc])
+  
+  omega[1] <- vec.omega1[MaxLoc]; omega[2] <- vec.omega2[MaxLoc]
+  mu[1] <- vec.mu1[MaxLoc];       mu[2] <- vec.mu2[MaxLoc]
+  sigma[1] <- vec.sigma1[MaxLoc]; sigma[2] <- vec.sigma2[MaxLoc]  
+  
+  threshold <- function_threshold (omega, mu, sigma)
+  
+  #************* Print OutPuts *************#
+  print(paste0("Omega_1= ",    round(omega[1],digits = 6),    ",  Omega_2= ", round(omega[2],digits = 6)))
+  print(paste0("Mu_1= ",       round(mu[1],digits = 6),       ",  Mu_2= ",    round(mu[2],digits = 6)))
+  print(paste0("Sigma_1= ",    round(sigma[1],digits = 6),    ",  Sigma_2= ", round(sigma[2],digits = 6)))
+  print(paste0("Threshold= ", round(threshold,digits = 3)))
+  
+  #************* Return OutPuts *************#
+  results<-list(omega_1=omega[1], omega_2=omega[2],
+                mu_1=mu[1],       mu_2=mu[2],
+                sigma_1=sigma[1], sigma_2=sigma[2],
+                threshold = threshold)
+  return(results)
+}
+
+# Description
+NGaussianArea <- function (a, b, omega, mu, sigma){
+  erf1 <- (a-mu)/(sqrt(2)*sigma)
+  erf1 <- 2*pnorm(erf1*sqrt(2)) - 1
+  
+  erf2 <- (b-mu)/(sqrt(2)*sigma)
+  erf2 <- 2*pnorm(erf2*sqrt(2)) - 1
+  
+  area <- sigma * omega * (-erf1 + erf2) / (2*sigma)
+  return(area)
+}
+
+
+# Description
+function_threshold <- function (omega, mu, sigma){
+  
+  f <- 1.e-6
+  TopRange <- mu[2] + sqrt(2.*sigma[2]*sigma[2]*log(1/f, base = exp(1)))
+  
+  erf1 <- (TopRange - mu[1])/(sqrt(2)*sigma[1])
+  erf1 <- 2*pnorm(erf1*sqrt(2)) - 1
+  erf2 <- (mu[1])/(sqrt(2)*sigma[1])
+  erf2 <- 2*pnorm(erf2*sqrt(2)) - 1
+  A <- 1./(erf1 + erf2)
+  A <- A/sigma[1]
+  
+  
+  erf1 <- (TopRange - mu[2])/(sqrt(2)*sigma[2])
+  erf1 <- 2*pnorm(erf1*sqrt(2)) - 1
+  erf2 <- (mu[2])/(sqrt(2)*sigma[2])
+  erf2 <- 2*pnorm(erf2*sqrt(2)) - 1
+  B <- 1./(erf1 + erf2)
+  B <- B/sigma[2]
+  
+  
+  a <- sigma[2]*sigma[2] - sigma[1]*sigma[1]
+  b <- 2.*(mu[2]*sigma[1]*sigma[1] - mu[1]*sigma[2]*sigma[2])
+  c <- mu[1]*mu[1]*sigma[2]*sigma[2] 
+  c <- c - mu[2]*mu[2]*sigma[1]*sigma[1]
+  c <- c - 2.*sigma[1]*sigma[1]*sigma[2]*sigma[2]*log(A/B, base = exp(1))
+  
+  x1 <- -b + sqrt(b*b - 4.*a*c)
+  x1 <- x1/(2.*a)
+  
+  x2 <- -b - sqrt(b*b - 4.*a*c)
+  x2 <- x2/(2.*a)
+  
+  TP <- NGaussianArea(0, x1, omega[1], mu[1], sigma[1])
+  FN <- NGaussianArea(x1, TopRange, omega[1], mu[1], sigma[1])
+  FP <- NGaussianArea(0, x1, omega[2], mu[2], sigma[2])
+  TN <- NGaussianArea(x1, TopRange, omega[2], mu[2], sigma[2])
+  SEN <- TP/(TP+FN)
+  SPC <- TN/(TN+FP)
+  ave1 <- (SEN+SPC)/2.
+  
+  TP <- NGaussianArea(0, x2, omega[1], mu[1], sigma[1])
+  FN <- NGaussianArea(x2, TopRange, omega[1], mu[1], sigma[1])
+  FP <- NGaussianArea(0, x2, omega[2], mu[2], sigma[2])
+  TN <- NGaussianArea(x2, TopRange, omega[2], mu[2], sigma[2])
+  SEN <- TP/(TP+FN)
+  SPC <- TN/(TN+FP)
+  ave2 <- (SEN+SPC)/2.
+  
+  if (ave1 > ave2) {
+    threshold <- x1
+  } else {
+    threshold <- x2
+  }
+  
+  return(threshold)
 }
