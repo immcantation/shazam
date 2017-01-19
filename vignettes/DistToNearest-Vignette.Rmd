@@ -106,7 +106,7 @@ subsampled to the size specified using the `subsample` parameter.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Find threshold for Hamming nearest neighbor distances
-threshold_ham <- findThreshold(dist_ham$DIST_NEAREST)
+threshold_ham <- findThreshold(dist_ham$DIST_NEAREST, method="dens")
 # Generate Hamming distance histogram
 library(ggplot2)
 p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
@@ -125,7 +125,7 @@ set to a value near 0.12.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Find threshold for HH_S5F nearest neighbor distances
-threshold_s5f <- findThreshold(dist_s5f$DIST_NEAREST)
+threshold_s5f <- findThreshold(dist_s5f$DIST_NEAREST, method="dens")
 # Generate HH_S5F distance histogram
 p2 <- ggplot(subset(dist_s5f, !is.na(DIST_NEAREST)),
              aes(x=DIST_NEAREST)) + 
