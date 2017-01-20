@@ -745,7 +745,7 @@ smoothValley <- function(distances, subsample=NULL) {
 
 #' Find distance threshold with Gaussian Mixture Method
 #'
-#' Fits a bimodal distribution via two Gaussian functions and calculates maximum of the average of the 
+#' Fits a bimodal distribution with two Gaussian functions and calculates maximum of the average of the 
 #' Sensitivity plus Specificity corresponding to the Gaussian distributions.
 #' 
 #' @param    ent         a numeric vector of entries (containing distance distribution).
