@@ -782,7 +782,7 @@ smoothValley <- function(distances, subsample=NULL) {
 #' # To find the Threshold cut use either findThreshold-switch
 #' output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
 #' # or 
-#' output <- gmmfit(db$DIST_NEAREST, cutEdge=0.9) 
+#' output <- gmmFit(db$DIST_NEAREST, cutEdge=0.9) 
 #' 
 #' # Retrieve outputs:
 #' omega <- c(output[[1]], output[[2]])
@@ -794,7 +794,11 @@ smoothValley <- function(distances, subsample=NULL) {
 #' # Threshold location using plot below. 
 #' # Plot histogram of non-NA distances and fitted Gaussian curves and Threshold:
 #' 
-#' # Set the x-axis parameters: x_min, x_max, dx, and x_seq.
+#' # Set the x-axis parameters: 
+#' x_min <- 0 
+#' x_max <- 1.0 
+#' dx <- 0.02  
+#' x_seq <- 0.1
 #'  
 #' # Generate the Gaussian distributions:
 #' x <- seq(x_min, x_max, by=0.002)
