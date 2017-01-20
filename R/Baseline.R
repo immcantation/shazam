@@ -1753,13 +1753,12 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     # Add additional theme elements
     p1 <- p1 + do.call(theme, list(...))
     
-    #   # Plot
-    #   if (!silent) { 
-    p1
-    #   } else {
-    #       invisible(p1)
-    #   }
-    
+    # Plot
+    if (!silent) { 
+        p1
+    } else {
+        invisible(p1)
+    }
 }
 
 

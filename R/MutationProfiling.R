@@ -470,8 +470,8 @@ observedMutations <- function(db,
 #'                               replacement and silent are determined by exact 
 #'                               amino acid identity.
 #' @param    returnRaw           return the positions of point mutations and their corresponding
-#'                               mutation types (as opposed to counts of mutations; hence "raw"); 
-#'                               as well as the number of non-N bases used as the denominator when
+#'                               mutation types, as opposed to counts of mutations.
+#'                               Also returns the number of non-N bases used as the denominator when
 #'                               calculating frequency. Default if \code{FALSE}.                               
 #'                               
 #' @return   For \code{returnRaw=FALSE}, an \code{array} with the number of replacement (R) 
