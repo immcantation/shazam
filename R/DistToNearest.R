@@ -642,16 +642,23 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 
 #' Find distance threshold
 #'
-#' Infer value of the minimum between the two modes in a bimodal distribution.
+#' Switch between \code{"gmm"} or \code{"dens"} method to infer value of the threshold between the two modes in a bimodal distribution.
 #'
-#' @param    method     method (either gmm or dens).
-#' @param    cutEdge    upper range for initializing the Gaussian fit parameters.
+#' @param    data       input data (a numeric vector) containing distance distribution. 
+#' @param    method     either one of the \code{"gmm"} or \code{"dens"} techniques.
+#' @param    cutEdge    upper range (a fraction of the data density) to rule initialization of Gaussian fit parameters.
 #' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
 #' 
-#' @return   Returns distance threshold that separates two modes of the input distribution.
+#' @return   Calling \link{gmmFit} function, \code{"gmm"} method returns optimum threshold cut and the Gaussian 
+#'           fit parameters, mixing proportion (\eqn{\omega}), mean (\eqn{\mu}), and standard deviation (\eqn{\sigma}), 
+#'           of a two modes distribution.
+#'           
+#'           Calling \link{smoothValley} function, \code{"dens"} method returns distance threshold 
+#'           that separates two modes of the input distribution.            
+#'
 #' 
 #' @export
-findThreshold <- function (data, method=c("gmm", "dens"), cutEdge=0.7, subsample=NULL){
+findThreshold <- function (data, method=c("gmm", "dens"), cutEdge=0.9, subsample=NULL){
   # Check arguments
   method <- match.arg(method)
   
@@ -668,7 +675,7 @@ findThreshold <- function (data, method=c("gmm", "dens"), cutEdge=0.7, subsample
 }
 
 
-#' Find distance threshold with dens Method
+#' Find distance threshold with \code{"dens"} Method
 #'
 #' Infer value of the minimum between the two modes in a bimodal distribution.
 #'
@@ -683,7 +690,13 @@ findThreshold <- function (data, method=c("gmm", "dens"), cutEdge=0.7, subsample
 #' with the ideal threshold being a value that separates the two modes. This function takes 
 #' as input a vector of such distances and infers the ideal threshold.
 #' 
-#' @seealso  See \link{distToNearest} for details on generating the input distance vector.
+#' @seealso  
+#' \itemize{
+#' \item     See \link{distToNearest} for details on generating the input distance vector.
+#' \item         See \link{gmmFit} for a different threshold inference methodology.
+#' \item           See \link{findThreshold} to switch between available methods.
+#'}
+#' 
 #' 
 #' @examples
 #' # Subset example data to one sample as a demo
@@ -693,7 +706,11 @@ findThreshold <- function (data, method=c("gmm", "dens"), cutEdge=0.7, subsample
 #' # Use genotyped V assignments, HS1F model, and normalize by junction length
 #' dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
 #'                            model="hs1f", first=FALSE, normalize="length")
-#' threshold <- findThreshold(dist_hs1f$DIST_NEAREST)
+#'                  
+#' # using findThreshold switch
+#' threshold <- findThreshold(dist_hs1f$DIST_NEAREST, method="dens")
+#' # or
+#' threshold <- smoothValley(dist_hs1f$DIST_NEAREST)
 #'                            
 #' # Plot histogram of non-NA distances
 #' p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
@@ -726,28 +743,103 @@ smoothValley <- function(distances, subsample=NULL) {
 
 
 
-#' GMM Fit
+#' Find distance threshold with Gaussian Mixture Method
 #'
-#' NIMA HERE
+#' Fits a bimodal distribution via two Gaussian functions and calculates maximum of the average of the 
+#' Sensitivity plus Specificity corresponding to the Gaussian distributions.
+#' 
+#' @param    ent         a numeric vector of entries (containing distance distribution).
+#' @param    cutEdge     upper range (a fraction of the data density) to rule initialization of Gaussian fit parameters. 
+#'                       Default value is equal to \eqn{90}\% of the entries.
+#'
+#' @return   returns optimum threshold cut and the Gaussian fit parameters, such as
+#'           mixing proportion (\eqn{\omega}), mean (\eqn{\mu}), and standard deviation (\eqn{\sigma}).
+#'           
+#'
+#' @seealso  
+#' \itemize{
+#' \item     See \link{distToNearest} for details on generating the input distance vector.
+#' \item     See \link{smoothValley} for a different threshold inference methodology.
+#' \item     See \link{findThreshold} to switch between available methods.
+#'}
 #'
 #'
+#' @details This function follows a Gaussian Mixture Model (GMM) procedure, 
+#'          including the Expectation Maximization (EM) algorithm, for learning the parameters  
+#'          of two univariate Gaussians which fit the bimodal distribution entries. 
+#'          Retrieving the fit parameters, it then calculates, analytically, the optimum threshold, 
+#'          where the average of the Sensitivity plus Specificity reaches its maximum. This threshold 
+#'          can be then invoked for assigning Ig sequences to clonal groups.
 #'
+#' @examples
+#' # Subset example data to one sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#' 
+#' # Use nucleotide Hamming distance and normalize by junction length
+#' db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+#'                             
+#' # To find the Threshold cut use either findThreshold-switch
+#' output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
+#' # or 
+#' output <- gmmfit(db$DIST_NEAREST, cutEdge=0.9) 
+#' 
+#' # Retrieve outputs:
+#' omega <- c(output[[1]], output[[2]])
+#' mu <-    c(output[[3]], output[[4]]) 
+#' sigma <- c(output[[5]], output[[6]]) 
+#' threshold <- output[[7]]
+#' 
+#' # You can check the quality of the fit performance and corresponding 
+#' # Threshold location using plot below. 
+#' # Plot histogram of non-NA distances and fitted Gaussian curves and Threshold:
+#' 
+#' # Set the x-axis parameters: x_min, x_max, dx, and x_seq.
+#'  
+#' # Generate the Gaussian distributions:
+#' x <- seq(x_min, x_max, by=0.002)
+#' G1 <- omega[1]*dnorm(x, mu[1], sigma[1])
+#' GAUSS1 <- data.frame(x=x, G1=G1)
+#' G2 <- omega[2]*dnorm(x, mu[2], sigma[2])   
+#' GAUSS2 <- data.frame(x=x, G2=G2)
+#' 
+#' # Plot all above:
+#'p <- ggplot(data=subset(db, !is.na(DIST_NEAREST)),
+#'             aes(x=DIST_NEAREST, ..density..)) + 
+#'   theme_bw() + xlab("Hamming distance") + ylab("Density") +
+#'   scale_x_continuous(breaks=seq(x_min, x_max, x_seq), limits=c(x_min, x_max)) +
+#'   geom_histogram(breaks=seq(x_min, x_max, by=dx), fill="steelblue", color="white") +
+#'   geom_vline(xintercept=threshold, color="firebrick", linetype="longdash", size = 1) + 
+#'   geom_line(data=GAUSS1, aes(x=x, y=G1), colour = "darkblue", size = 1) +
+#'   geom_line(data=GAUSS2, aes(x=x, y=G2), colour = "darkred", size = 1)
+#' plot(p)
+#' 
+#' 
 #' @export
-gmmFit <- function(ent, cutEdge=0.7) {
+gmmFit <- function(ent, cutEdge=0.9) {
   
   #************* Filter Unknown Data *************#
   ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
   
   #************* Defult cutEdge *************#
-  cutEdge <- cutEdge*ent[which.max(ent)]
+  cut <- cutEdge*length(ent)
   
   #************* Define Scan Step For Initializing *************#
-  if (ent[which.min(ent)] >= 0 & ent[which.max(ent)] <= 1) {
+  if (ent[which.max(ent)] <= 5) {
     scan_step <- 0.01
   } else {
     scan_step <- 1
   }
-  
+
+  #************* Print some info *************#
+  valley_loc <- 0
+  while (1) {
+    valley_loc <- valley_loc + scan_step
+    if ( length(ent[ent<=valley_loc]) > cut ) break
+  }
+  print(paste0("The number of non-NA entries= ", length(ent)))
+  print(paste0("The 'gmm' would be done in ", ceiling(valley_loc/scan_step), " iterations"))
+    
   #*************  set rand seed *************#
   set.seed(3000)
   
@@ -762,9 +854,11 @@ gmmFit <- function(ent, cutEdge=0.7) {
   valley_loc <- 0
   nEve <- length(ent)
   while (1) {
+    cat("#")
+    
     #*************  guess the valley loc *************#
     valley_loc <- valley_loc + scan_step
-    if ( valley_loc > cutEdge ) break
+    if ( length(ent[ent<=valley_loc]) > cut ) break
     
     #*************  Choosing Random Omega *************#
     omega <- runif(1)
@@ -826,23 +920,23 @@ gmmFit <- function(ent, cutEdge=0.7) {
       if (log_lk_err < 1.e-7) break
       temp_lk <- log_lk;
     }
-    print(paste0("scaned: ", valley_loc, " --------> Log-Likelihood: ", log_lk))
-    
+
     #************************************************************# 
     #*************  JUST FOR VISUALIZATION PURPOSES *************#
-    if (ent[which.min(ent)] >= 0 & ent[which.max(ent)] <= 1) {
-      h_min <- 0.0
-      h_max <- 1
-      dh = 0.02
-    } else {
-      h_min <- 0.0
-      h_max <- ent[which.max(ent)]
-      dh = 1
-    }
-    h <- hist(ent, plot = FALSE, breaks=seq(h_min, h_max, by=dh))
-    plot(h, freq=FALSE, col="steelblue", border="white", xlim=c(h_min, h_max))
-    curve(omega[1]*dnorm(x, mu[1], sigma[1]), add=TRUE, col="darkblue", lwd=2, xlim = c(h_min, h_max))
-    curve(omega[2]*dnorm(x, mu[2], sigma[2]), add=TRUE, col="darkred", lwd=2, xlim = c(h_min, h_max))
+    #print(paste0("scaned: ", valley_loc, " --------> Log-Likelihood: ", log_lk))
+    # if (ent[which.min(ent)] >= 0 & ent[which.max(ent)] <= 1) {
+    #   h_min <- 0.0
+    #   h_max <- 1
+    #   dh = 0.02
+    # } else {
+    #   h_min <- 0.0
+    #   h_max <- ent[which.max(ent)]
+    #   dh = 1
+    # }
+    # h <- hist(ent, plot = FALSE, breaks=seq(h_min, h_max, by=dh))
+    # plot(h, freq=FALSE, col="steelblue", border="white", xlim=c(h_min, h_max))
+    # curve(omega[1]*dnorm(x, mu[1], sigma[1]), add=TRUE, col="darkblue", lwd=2, xlim = c(h_min, h_max))
+    # curve(omega[2]*dnorm(x, mu[2], sigma[2]), add=TRUE, col="darkred", lwd=2, xlim = c(h_min, h_max))
     #************************************************************#
     #************************************************************#
     
@@ -856,7 +950,8 @@ gmmFit <- function(ent, cutEdge=0.7) {
     vec.lkhood[valley.itr] <- log_lk
   }
   MaxLoc <- which.max(vec.lkhood)
-  print(vec.lkhood[MaxLoc])
+  cat("\n")
+  #print(vec.lkhood[MaxLoc])
   
   omega[1] <- vec.omega1[MaxLoc]; omega[2] <- vec.omega2[MaxLoc]
   mu[1] <- vec.mu1[MaxLoc];       mu[2] <- vec.mu2[MaxLoc]
@@ -865,10 +960,10 @@ gmmFit <- function(ent, cutEdge=0.7) {
   threshold <- function_threshold (omega, mu, sigma)
   
   #************* Print OutPuts *************#
-  print(paste0("Omega_1= ",    round(omega[1],digits = 6),    ",  Omega_2= ", round(omega[2],digits = 6)))
-  print(paste0("Mu_1= ",       round(mu[1],digits = 6),       ",  Mu_2= ",    round(mu[2],digits = 6)))
-  print(paste0("Sigma_1= ",    round(sigma[1],digits = 6),    ",  Sigma_2= ", round(sigma[2],digits = 6)))
-  print(paste0("Threshold= ", round(threshold,digits = 3)))
+  # print(paste0("Omega_1= ",    round(omega[1],digits = 6),    ",  Omega_2= ", round(omega[2],digits = 6)))
+  # print(paste0("Mu_1= ",       round(mu[1],digits = 6),       ",  Mu_2= ",    round(mu[2],digits = 6)))
+  # print(paste0("Sigma_1= ",    round(sigma[1],digits = 6),    ",  Sigma_2= ", round(sigma[2],digits = 6)))
+  # print(paste0("Threshold= ", round(threshold,digits = 3)))
   
   #************* Return OutPuts *************#
   results<-list(omega_1=omega[1], omega_2=omega[2],
@@ -878,7 +973,8 @@ gmmFit <- function(ent, cutEdge=0.7) {
   return(results)
 }
 
-# Description
+# Calculates the area (integral) bounded in domain[a,b] under an univariate Gaussian 
+# with parameters of mixing proportion (omega), mean (mu), and standard deviation (sigma).   
 NGaussianArea <- function (a, b, omega, mu, sigma){
   erf1 <- (a-mu)/(sqrt(2)*sigma)
   erf1 <- 2*pnorm(erf1*sqrt(2)) - 1
@@ -891,7 +987,8 @@ NGaussianArea <- function (a, b, omega, mu, sigma){
 }
 
 
-# Description
+# Calculates, analytically, the optimum threshold, where the average of 
+# the Sensitivity and Specificity reaches its maximum. 
 function_threshold <- function (omega, mu, sigma){
   
   f <- 1.e-6
