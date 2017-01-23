@@ -748,7 +748,7 @@ smoothValley <- function(distances, subsample=NULL) {
 #' Fits a bimodal distribution with two Gaussian functions and calculates maximum of the average of the 
 #' Sensitivity plus Specificity corresponding to the Gaussian distributions.
 #' 
-#' @param    ent         a numeric vector of entries (containing distance distribution).
+#' @param    ent         numeric vector of distances returned from \link{distToNearest} function.
 #' @param    cutEdge     upper range (a fraction of the data density) to rule initialization of Gaussian fit parameters. 
 #'                       Default value is equal to \eqn{90}\% of the entries.
 #'
@@ -1049,4 +1049,90 @@ function_threshold <- function (omega, mu, sigma){
   }
   
   return(threshold)
+}
+
+
+#' Plot gmmFit results 
+#' 
+#' \code{plotgmmFit}         invokes the results of \link{distToNearest} (histogram of distance 
+#'                           of every sequence to its nearest sequence) and \link{gmmFit} (Gaussian fit parameters 
+#'                           plus the distance threshold cut) functions and combines them in single plot.
+#' @param    ent             numeric vector of distances returned from \link{distToNearest} function.
+#' @param    GaussData       output object from \code{gmmFit} function containing optimum threshold cut, 
+#'                           mixing proportion (\eqn{\omega}), mean (\eqn{\mu}), and standard deviation (\eqn{\sigma}).
+#' @param    x_min           x-axis minimum range.
+#' @param    x_max           x-axis maximum range.
+#' @param    x_seq           x-axis breaking sequence.
+#' @param    hist_binwidth   histogram bin size.
+#' @param    title           string defining the plot title.
+#' @param    size            numeric value for lines in the plot.
+#' @param    silent          if \code{TRUE} do not draw the plot and just return the ggplot2 
+#'                           object; if \code{FALSE} draw the plot.
+#' @param    ...             additional arguments to pass to ggplot2::theme.
+#' 
+#' @return   A ggplot object defining the plot.
+#'
+#' 
+#' @examples
+#' # Subset example data to one sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#'
+#' # Use nucleotide Hamming distance and normalize by junction length
+#' db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+#' 
+#' # To find the Threshold cut, call findThreshold-switch for \code{gmm} method.
+#' output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
+#' print(output)
+#' 
+#' # define x-axis limits
+#' x_min <- 0.0  
+#' x_max <- db$DIST_NEAREST[which.max(db$DIST_NEAREST)]
+#' dx = 0.02     
+#' x_seq <- 0.1
+#' 
+#' plotgmmFit(db$DIST_NEAREST, output, x_min, x_max, x_seq, dx, title="plotgmmFit")
+#' 
+#' @export
+plotgmmFit <- function (ent, GaussData, x_min, x_max, x_seq, hist_binwidth, title=NULL, size=1, silent=FALSE, ...){
+    
+    # Invoke the distToNearest distribution
+    ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
+    db <-  data.frame(DIST_NEAREST=ent)
+    
+    # Invoke Gaussians parameters
+    omega <- c(GaussData[[1]], GaussData[[2]])
+    mu <-    c(GaussData[[3]], GaussData[[4]])
+    sigma <- c(GaussData[[5]], GaussData[[6]])
+    threshold <- GaussData[[7]]
+    
+    # Generate Gaussian curves
+    x <- seq(x_min, x_max, by=0.002)
+    G1 <- omega[1]*dnorm(x, mu[1], sigma[1])
+    GAUSS1 <- data.frame(x=x, G1=G1)
+    G2 <- omega[2]*dnorm(x, mu[2], sigma[2])
+    GAUSS2 <- data.frame(x=x, G2=G2)
+    
+    # Plot distToNearest distribution plus Gaussian fits
+    p <- ggplot(db,
+                aes(x=DIST_NEAREST, ..density..)) +
+        theme_bw() + xlab("Hamming distance") + ylab("Density") +
+        scale_x_continuous(breaks=seq(x_min, x_max, x_seq), limits=c(x_min, x_max)) +
+        geom_histogram(breaks=seq(x_min, x_max, by=hist_binwidth), fill="steelblue", color="white") +
+        geom_vline(xintercept=threshold, color="firebrick", linetype="longdash", size = size) +
+        geom_line(data=GAUSS1, aes(x=x, y=G1), colour = "darkblue", size = size) +
+        geom_line(data=GAUSS2, aes(x=x, y=G2), colour = "darkred", size = size)
+    # Add Title
+    if (!is.null(title)) {
+        p <- p + ggtitle(title)
+    } 
+    # Add additional theme elements
+    p <- p + do.call(theme, list(...))
+    
+    # Plot
+    if (!silent) { 
+        plot(p)
+    } else {
+        return(p)
+    }
 }
