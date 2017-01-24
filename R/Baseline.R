@@ -221,7 +221,7 @@ createBaseline <- function(description="",
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel = HH_S5F,
+#'                          targetingModel=HH_S5F,
 #'                          nproc = 1)
 #' # Edit the field "description"
 #' baseline <- editBaseline(baseline, field_name = "description", 
@@ -265,7 +265,7 @@ editBaseline <- function(baseline, field_name, value) {
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel = HH_S5F,
+#'                          targetingModel=HH_S5F,
 #'                          nproc = 1)
 #' 
 #' # Grouping the PDFs by the isotype and sample annotations.
@@ -368,7 +368,7 @@ getBaselineStats <- function(baseline) {
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel = HH_S5F,
+#'                          targetingModel=HH_S5F,
 #'                          nproc=1)
 #'                          
 #' @export
@@ -390,6 +390,21 @@ calcBaseline <- function(db,
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
+    
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
+    
+    # Check mutation definition
+    if (!is.null(mutationDefinition) & !is(mutationDefinition, "MutationDefinition")) {
+        stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
+    }
+    
+    # Check targeting model
+    if (!is(targetingModel, "TargetingModel")) {
+        stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
+    }
     
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
@@ -431,7 +446,7 @@ calcBaseline <- function(db,
         envir=environment() )    
         registerDoParallel(cluster, cores=nproc)
         nproc_arg <- cluster
-    } else if ( nproc==1 ) {
+    } else if (nproc == 1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
@@ -637,6 +652,10 @@ calcBaselineHelper  <- function(observed,
                                 region,
                                 testStatistic="local",
                                 regionDefinition=NULL) {
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
     
     if (is.null(regionDefinition)) {
         regions <- makeNullRegionDefinition()@regions
@@ -1094,7 +1113,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
-#'                          targetingModel = HH_S5F,
+#'                          targetingModel=HH_S5F,
 #'                          nproc = 1)
 #' 
 #' # Grouping the PDFs by the sample and isotype annotations

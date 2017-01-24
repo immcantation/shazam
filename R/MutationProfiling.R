@@ -95,6 +95,11 @@ collapseClones <- function(db,
     check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
     
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
+
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
@@ -198,6 +203,11 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
                                 nonTerminalOnly=FALSE) {
     ## DEBUG
     # inputSeq=db$SEQUENCE_IMGT[4:6]; germlineSeq=db$GERMLINE_IMGT_D_MASK[4:6]; regionDefinition=NULL; nonTerminalOnly=FALSE
+    
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
     
     # If only one sequence in clone, return it
     if (length(inputSeq) == 1) {
@@ -375,6 +385,16 @@ observedMutations <- function(db,
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
     
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
+    
+    # Check mutation definition
+    if (!is.null(mutationDefinition) & !is(mutationDefinition, "MutationDefinition")) {
+        stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
+    }
+    
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
@@ -544,6 +564,16 @@ observedMutations <- function(db,
 calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
                                   regionDefinition=NULL, mutationDefinition=NULL,
                                   returnRaw=FALSE) {
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
+    
+    # Check mutation definition
+    if (!is.null(mutationDefinition) & !is(mutationDefinition, "MutationDefinition")) {
+        stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
+    }
+    
     # Assign mutation definition
     aminoAcidClasses <- if (is.null(mutationDefinition)) { NULL } else { mutationDefinition@classes }
         
@@ -704,6 +734,11 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
 # binMutationsByRegion(mutations_array, regionDefinition=IMGT_V)
 binMutationsByRegion <- function(mutationsArray, 
                                  regionDefinition=NULL) {
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
+
     # Create full sequence RegionDefinition object 
     # The seqLength will be the largest index of a mutation
     if (is.null(regionDefinition)) {
@@ -847,8 +882,8 @@ slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
 #' 
 #' @export
 slideWindowDb <- function(db, sequenceColumn="SEQUENCE_IMGT", 
-                         germlineColumn="GERMLINE_IMGT_D_MASK",
-                         mutThresh, windowSize){
+                          germlineColumn="GERMLINE_IMGT_D_MASK",
+                          mutThresh, windowSize){
   db_filter <- sapply(1:nrow(db), function(i) { slideWindowSeq(inputSeq = db[i, sequenceColumn],
                                                                germlineSeq = db[i, germlineColumn],
                                                                mutThresh = mutThresh,
@@ -920,9 +955,9 @@ slideWindowDb <- function(db, sequenceColumn="SEQUENCE_IMGT",
 #'                                                            
 #' @export
 slideWindowTune <- function(db, sequenceColumn = "SEQUENCE_IMGT", 
-                           germlineColumn = "GERMLINE_IMGT_D_MASK",
-                           dbMutList = NULL,
-                           mutThreshRange, windowSizeRange, verbose=TRUE){
+                            germlineColumn = "GERMLINE_IMGT_D_MASK",
+                            dbMutList = NULL,
+                            mutThreshRange, windowSizeRange, verbose=TRUE){
   # check preconditions
   stopifnot(!is.null(db))
   stopifnot(min(mutThreshRange) >= 1 & 
@@ -1246,6 +1281,21 @@ expectedMutations <- function(db,
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
     
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
+    
+    # Check mutation definition
+    if (!is.null(mutationDefinition) & !is(mutationDefinition, "MutationDefinition")) {
+        stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
+    }
+    
+    # Check targeting model
+    if (!is(targetingModel, "TargetingModel")) {
+        stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
+    }
+    
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
@@ -1388,6 +1438,21 @@ calcExpectedMutations <- function(germlineSeq,
                                   targetingModel=HH_S5F,
                                   regionDefinition=NULL,
                                   mutationDefinition=NULL) {
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
+    
+    # Check mutation definition
+    if (!is.null(mutationDefinition) & !is(mutationDefinition, "MutationDefinition")) {
+        stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
+    }
+    
+    # Check targeting model
+    if (!is(targetingModel, "TargetingModel")) {
+        stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
+    }
+    
     # Assign codon table
     codonTable <- if (is.null(mutationDefinition)) { CODON_TABLE } else { mutationDefinition@codonTable }
     
@@ -1434,7 +1499,16 @@ calculateTargeting <- function(germlineSeq,
                                inputSeq=NULL,
                                targetingModel=HH_S5F,
                                regionDefinition=NULL) {
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
     
+    # Check targeting model
+    if (!is(targetingModel, "TargetingModel")) {
+        stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
+    }
+
     # If an inputSequence is passed then process the germlineSequence
     # to be the same legth, mask germlineSequence with Ns where inputSequence is also N
     # If not needed then  you may skip this step by passing in inputSequence=NULL 
@@ -1519,6 +1593,11 @@ calculateMutationalPaths <- function(germlineSeq,
                                      inputSeq=NULL,
                                      regionDefinition=NULL,
                                      codonTable=NULL) {    
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
+
     # Set codon table if required
     if (is.null(codonTable)) { codonTable <- CODON_TABLE }
     

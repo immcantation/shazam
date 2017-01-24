@@ -35,6 +35,11 @@ NULL
 shmulateSeq <- function(sequence, mutations, targetingModel=HH_S5F) {
     #* counts on constant variables CODON_TABLE, NUCLEOTIDES (ACTGN-.)
     
+    # Check targeting model
+    if (!is(targetingModel, "TargetingModel")) {
+        stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
+    }
+
     # Trim sequence to last codon (getCodonPos from MutationProfiling.R)
     if(getCodonPos(stri_length(sequence))[3] > stri_length(sequence)) {
         sim_seq <- substr(sequence, 1, getCodonPos(stri_length(sequence))[1]-1)
@@ -153,6 +158,11 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
                          field=NULL, exclude=NULL, junctionWeight=NULL) {
     ## DEBUG
     # targetingModel=HH_S5F; field=NULL; exclude=NULL; junctionWeight=NULL
+    
+    # Check targeting model
+    if (!is(targetingModel, "TargetingModel")) {
+        stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
+    }
     
     # Determine MRCA of lineage tree
     mrca_df <- alakazam::getMRCA(graph, path="distance", root="Germline", 
