@@ -3,6 +3,18 @@
 #' @include Shazam.R
 NULL
 
+#### Classes ####
+
+setClass("gmmFitResults",
+         slots=c(omega1="numeric", 
+                 omega2="numeric",
+                 mu1="numeric",      
+                 mu2="numeric",
+                 sigma1="numeric", 
+                 sigma2="numeric",
+                 threshold = "numeric"))
+
+
 #### Distance to Nearest ####
 
 # Returns a 5-mer sliding window of given sequence
@@ -751,14 +763,14 @@ smoothValley <- function(distances, subsample=NULL) {
 #' Sensitivity plus Specificity corresponding to the Gaussian distributions.
 #' 
 #' @param    ent         numeric vector of distances returned from \link{distToNearest} function.
-#' @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} function, to support 
-#'                       initialization of the Gaussian fit parameters. 
-#' @param    cutEdge     upper range (a fraction of the data density) to rule initialization of Gaussian fit parameters. 
-#'                       Default value is equal to \eqn{90}\% of the entries.
+#' @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} 
+#'                       function, to support initialization of the Gaussian fit parameters. 
+#' @param    cutEdge     upper range (a fraction of the data density) to rule initialization of 
+#'                       Gaussian fit parameters. Default value is equal to \eqn{90}\% of the entries.
 #'
-#' @return   returns optimum threshold cut and the Gaussian fit parameters, such as
-#'           mixing proportion (\eqn{\omega}), mean (\eqn{\mu}), and standard deviation (\eqn{\sigma}).
-#'           
+#' @return   returns an objrct including optimum "\code{threshold}" cut and the Gaussian fit parameters, 
+#'           such as mixing proportion ("\code{omega1}" and "\code{omega2}"), mean ("\code{mu1}" and "\code{mu2}"), 
+#'           and standard deviation ("\code{sigma1}" and "\code{sigma2}"). Returns "\code{NULL}" if no fit has found.         
 #'
 #' @seealso  
 #' \itemize{
@@ -789,10 +801,10 @@ smoothValley <- function(distances, subsample=NULL) {
 #' output <- gmmFit(db$DIST_NEAREST, cutEdge=0.9) 
 #' 
 #' # Retrieve outputs:
-#' omega <- c(output[[1]], output[[2]])
-#' mu <-    c(output[[3]], output[[4]]) 
-#' sigma <- c(output[[5]], output[[6]]) 
-#' threshold <- output[[7]]
+#' omega <- c(output@omega1, output@omega2)
+#' mu <-    c(output@mu1,    output@mu2) 
+#' sigma <- c(output@sigma1, output@sigma2) 
+#' threshold <- output@threshold
 #' 
 #' # To check the quality of the fit performance and corresponding 
 #' # threshold location use "plotgmmFit" function in shazam. 
@@ -965,13 +977,17 @@ gmmFit <- function(ent, cross=NULL, cutEdge=0.9) {
         # print(paste0("Threshold= ", round(threshold,digits = 3)))
         
         #************* Return OutPuts *************#
-        results<-list(omega_1=omega[1], omega_2=omega[2],
-                      mu_1=mu[1],       mu_2=mu[2],
-                      sigma_1=sigma[1], sigma_2=sigma[2],
-                      threshold = threshold)        
+        results<-new("gmmFitResults",
+                     omega1=omega[1], 
+                     omega2=omega[2],
+                     mu1=mu[1],
+                     mu2=mu[2],
+                     sigma1=sigma[1], 
+                     sigma2=sigma[2],
+                     threshold = threshold)        
     } else {    
         print("Error: No Gaussian fit found")
-        results<-FALSE
+        results<-NULL
     }
     
     return(results)
@@ -1060,15 +1076,19 @@ function_threshold <- function (omega, mu, sigma){
 #' @param    ent             numeric vector of distances returned from \link{distToNearest} function.
 #' @param    cross           if not \code{NULL} plot histogram of numeric vector \code{cross} invoked from 
 #'                           \link{distToNearest} function in \eqn{-y} direction.
-#' @param    GaussData       output object from \code{gmmFit} function containing optimum threshold cut, 
+#' @param    GaussData       output object from \link{gmmFit} function including optimum "\code{threshold}" 
+#'                           cut and the Gaussian fit parameters, such as mixing proportion ("\code{omega1}" 
+#'                           and "\code{omega2}"), mean ("\code{mu1}" and "\code{mu2}"), and standard deviation 
+#'                           ("\code{sigma1}" and "\code{sigma2}").
+#' 
 #'                           mixing proportion (\eqn{\omega}), mean (\eqn{\mu}), and standard deviation (\eqn{\sigma}).
 #' @param    x_min           x-axis minimum range.
 #' @param    x_max           x-axis maximum range.
 #' @param    x_seq           x-axis breaking sequence.
-#' @param    hist_binwidth   histogram bin size.
+#' @param    histBinwidth   histogram bin size.
 #' @param    title           string defining the plot title.
 #' @param    size            numeric value for lines in the plot.
-#' @param    threCut         if \code{TRUE} plot a vertical line passing through threshold; if \code{FALSE} do not draw.
+#' @param    threshCut         if \code{TRUE} plot a vertical line passing through threshold; if \code{FALSE} do not draw.
 #' @param    gauss           if \code{TRUE} plot Gaussian fit curves; if \code{FALSE} do not draw. 
 #' @param    silent          if \code{TRUE} do not draw the plot and just return the ggplot2 
 #'                           object; if \code{FALSE} draw the plot.
@@ -1090,24 +1110,24 @@ function_threshold <- function (omega, mu, sigma){
 #' print(output)
 #' 
 #' plotgmmFit(ent=db$DIST_NEAREST, GaussData=output, x_min=0.0, x_max=1, x_seq=0.1,
-#'                 hist_binwidth=0.02, title="plotgmmFit")
+#'                 histBinwidth=0.02, title="plotgmmFit")
 #' @export
-plotgmmFit <- function (ent, cross=NULL, GaussData, x_min, x_max, x_seq, 
-                        hist_binwidth, title=NULL, size=1, threCut=TRUE, gauss=TRUE, silent=FALSE, ...){
+plotgmmFit <- function (ent, cross=NULL, GaussData = NULL, x_min, x_max, x_seq, 
+                        histBinwidth, title=NULL, size=1, threshCut=TRUE, gauss=TRUE, silent=FALSE, ...){
     
     # Invoke the distToNearest distribution
     ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
     db <-  data.frame(DIST_NEAREST=ent)
     
-    if (is.null(GaussData[[1]]) | GaussData[[1]] == FALSE)
-        print("GaussData is either 'NULL' or 'FALSE'. Histogram is plotted")
+    if (is.null(GaussData))
+        print("GaussData is 'NULL'. Histogram is only plotted")
     
-    if (!is.null(GaussData[[1]]) & GaussData[[1]] != FALSE & gauss==TRUE){
+    if (!is.null(GaussData) & gauss==TRUE){
         # Invoke Gaussians parameters
-        omega <- c(GaussData[[1]], GaussData[[2]])
-        mu <-    c(GaussData[[3]], GaussData[[4]])
-        sigma <- c(GaussData[[5]], GaussData[[6]])
-        
+        omega <- c(GaussData@omega1, GaussData@omega2)
+        mu <-    c(GaussData@mu1, GaussData@mu2) 
+        sigma <- c(GaussData@sigma1, GaussData@sigma2) 
+
         # Generate Gaussian curves
         x <- seq(x_min, x_max, by=0.002)
         G1 <- omega[1]*dnorm(x, mu[1], sigma[1])
@@ -1115,29 +1135,29 @@ plotgmmFit <- function (ent, cross=NULL, GaussData, x_min, x_max, x_seq,
         G2 <- omega[2]*dnorm(x, mu[2], sigma[2])
         GAUSS2 <- data.frame(x=x, G2=G2)
     }
-    if (!is.null(GaussData[[1]]) & GaussData[[1]] != FALSE & threCut == TRUE) 
-        threshold <- GaussData[[7]]
+    if (!is.null(GaussData) & threshCut == TRUE) 
+        threshold <- GaussData@threshold
     
     # Plot distToNearest distribution plus Gaussian fits
     p <- ggplot(db,
                 aes(x=DIST_NEAREST, ..density..)) +
         theme_bw() + xlab("Hamming distance") + ylab("Density") +
         scale_x_continuous(breaks=seq(x_min, x_max, x_seq), limits=c(x_min, x_max)) +
-        geom_histogram(breaks=seq(x_min, x_max, by=hist_binwidth), fill="gray40", color="white")
+        geom_histogram(breaks=seq(x_min, x_max, by=histBinwidth), fill="gray40", color="white")
     # Add cross histogram
     if (!is.null(cross)){
         cross <- cross[!is.na(cross) & !is.nan(cross) & !is.infinite(cross)]
         db_cross <-  data.frame(DIST_NEAREST=cross)
         p <- p + geom_histogram(data=db_cross,
                                 aes(x=DIST_NEAREST, y=-(..density..)),
-                                breaks=seq(x_min, x_max, by=hist_binwidth),
+                                breaks=seq(x_min, x_max, by=histBinwidth),
                                 fill="gray69", color="white")
     }
     # Add threshold vertical line
-    if (!is.null(GaussData[[1]]) & GaussData[[1]] != FALSE & threCut == TRUE) 
+    if (!is.null(GaussData) & threshCut == TRUE) 
         p <- p + geom_vline(xintercept=threshold, color="firebrick", linetype="longdash", size = size)
     # Add Gaussian curves
-    if (!is.null(GaussData[[1]]) & GaussData[[1]] != FALSE & gauss==TRUE){
+    if (!is.null(GaussData) & gauss==TRUE){
         p <- p + geom_line(data=GAUSS1, aes(x=x, y=G1), colour = "darkblue", size = size) +
             geom_line(data=GAUSS2, aes(x=x, y=G2), colour = "darkred", size = size)
     }
