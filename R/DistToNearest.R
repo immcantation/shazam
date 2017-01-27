@@ -646,6 +646,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #'
 #' @param    data       input data (a numeric vector) containing distance distribution. 
 #' @param    method     either one of the \code{"gmm"} or \code{"dens"} techniques.
+#' @param    cross      a supplementary info (numeric vector) invoked from \link{distToNearest} function, to support 
+#'                      initialization of the Gaussian fit parameters. 
 #' @param    cutEdge    upper range (a fraction of the data density) to rule initialization of Gaussian fit parameters.
 #' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
 #' 
@@ -658,12 +660,12 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #'
 #' 
 #' @export
-findThreshold <- function (data, method=c("gmm", "dens"), cutEdge=0.9, subsample=NULL){
+findThreshold <- function (data, method=c("gmm", "dens"), cross=NULL, cutEdge=0.9, subsample=NULL){
   # Check arguments
   method <- match.arg(method)
   
   if (method == "gmm") {
-    output <- gmmFit(data, cutEdge)
+    output <- gmmFit(data, cross, cutEdge)
   } else if (method == "dens") {
     output <- smoothValley(data, subsample)
   } else {
@@ -749,6 +751,8 @@ smoothValley <- function(distances, subsample=NULL) {
 #' Sensitivity plus Specificity corresponding to the Gaussian distributions.
 #' 
 #' @param    ent         numeric vector of distances returned from \link{distToNearest} function.
+#' @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} function, to support 
+#'                       initialization of the Gaussian fit parameters. 
 #' @param    cutEdge     upper range (a fraction of the data density) to rule initialization of Gaussian fit parameters. 
 #'                       Default value is equal to \eqn{90}\% of the entries.
 #'
@@ -790,191 +794,187 @@ smoothValley <- function(distances, subsample=NULL) {
 #' sigma <- c(output[[5]], output[[6]]) 
 #' threshold <- output[[7]]
 #' 
-#' # You can check the quality of the fit performance and corresponding 
-#' # Threshold location using plot below. 
-#' # Plot histogram of non-NA distances and fitted Gaussian curves and Threshold:
-#' 
-#' # Set the x-axis parameters: 
-#' x_min <- 0 
-#' x_max <- 1.0 
-#' dx <- 0.02  
-#' x_seq <- 0.1
-#'  
-#' # Generate the Gaussian distributions:
-#' x <- seq(x_min, x_max, by=0.002)
-#' G1 <- omega[1]*dnorm(x, mu[1], sigma[1])
-#' GAUSS1 <- data.frame(x=x, G1=G1)
-#' G2 <- omega[2]*dnorm(x, mu[2], sigma[2])   
-#' GAUSS2 <- data.frame(x=x, G2=G2)
-#' 
-#' # Plot all above:
-#'p <- ggplot(data=subset(db, !is.na(DIST_NEAREST)),
-#'             aes(x=DIST_NEAREST, ..density..)) + 
-#'   theme_bw() + xlab("Hamming distance") + ylab("Density") +
-#'   scale_x_continuous(breaks=seq(x_min, x_max, x_seq), limits=c(x_min, x_max)) +
-#'   geom_histogram(breaks=seq(x_min, x_max, by=dx), fill="steelblue", color="white") +
-#'   geom_vline(xintercept=threshold, color="firebrick", linetype="longdash", size = 1) + 
-#'   geom_line(data=GAUSS1, aes(x=x, y=G1), colour = "darkblue", size = 1) +
-#'   geom_line(data=GAUSS2, aes(x=x, y=G2), colour = "darkred", size = 1)
-#' plot(p)
+#' # To check the quality of the fit performance and corresponding 
+#' # threshold location use "plotgmmFit" function in shazam. 
 #' 
 #' 
 #' @export
-gmmFit <- function(ent, cutEdge=0.9) {
-  
-  #************* Filter Unknown Data *************#
-  ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
-  
-  #************* Defult cutEdge *************#
-  cut <- cutEdge*length(ent)
-  
-  #************* Define Scan Step For Initializing *************#
-  if (ent[which.max(ent)] <= 5) {
-    scan_step <- 0.01
-  } else {
-    scan_step <- 1
-  }
-
-  #************* Print some info *************#
-  valley_loc <- 0
-  while (1) {
-    valley_loc <- valley_loc + scan_step
-    if ( length(ent[ent<=valley_loc]) > cut ) break
-  }
-  print(paste0("The number of non-NA entries= ", length(ent)))
-  print(paste0("The 'gmm' would be done in ", ceiling(valley_loc/scan_step), " iterations"))
+gmmFit <- function(ent, cross=NULL, cutEdge=0.9) {
     
-  #*************  set rand seed *************#
-  set.seed(3000)
-  
-  #*************  define Number of Gaussians *************#
-  num_G <- 2
-  
-  vec.omega1 <- 0; vec.omega2 <- 0
-  vec.mu1 <- 0;    vec.mu2 <- 0
-  vec.sigma1 <- 0; vec.sigma2 <- 0
-  vec.lkhood <- 0
-  valley.itr <- 0
-  valley_loc <- 0
-  nEve <- length(ent)
-  while (1) {
-    cat("#")
-    
-    #*************  guess the valley loc *************#
-    valley_loc <- valley_loc + scan_step
-    if ( length(ent[ent<=valley_loc]) > cut ) break
-    
-    #*************  Choosing Random Omega *************#
-    omega <- runif(1)
-    omega <- c(omega, 1.-omega)
-    
-    #*************  Choosing Random Mean *************#
-    mu_int <- mean(ent[ent<=valley_loc])
-    mu_int <- c(mu_int, mean(ent[ent>valley_loc]))
-    
-    #*************  Choosing Random Sigma *************#
-    sigma_int <- sd(ent[ent<valley_loc])
-    sigma_int <- c(sigma_int, sd(ent[ent>valley_loc]))
-    
-    #*************  EM Algorithm *************#
-    temp_lk <- 0
-    itr <- 0
-    while (1){
-      mu <- 0
-      sigma <- 0
-      for (j in 1:num_G){
-        mu[j] <- mu_int[j]
-        sigma[j] <- sigma_int[j]
-      }
-      
-      #*************  E-step Expectation *************#
-      resp <- array(0, dim=c(nEve,num_G))
-      for(i in 1:nEve){
-        for (j in 1:num_G)
-          resp[i,j] <- omega[j]*dnorm(ent[i], mu[j], sigma[j])
-        resp[i,] <- resp[i,]/sum(resp[i,])
-      }
-      
-      #*************  M-step Maximization *************#
-      for (j in 1:num_G){
-        m_c <- sum(resp[,j])
-        
-        omega[j] <- m_c / nEve
-        
-        mu[j] <- sum(resp[,j]*ent) 
-        mu[j] <- mu[j] / m_c
-        
-        sigma[j] <- sum(resp[,j]*(ent-mu[j])*(ent-mu[j]))
-        sigma[j] <- sigma[j] / m_c
-        sigma[j] <- sqrt(sigma[j])
-      }
-      
-      #*************  Log-likelihood calculation *************#
-      log_lk <- 0.
-      for (i in 1:nEve){
-        s <- 0
-        for (j in 1:num_G)
-          s <- s + omega[j]*dnorm(ent[i], mu[j], sigma[j])
-        log_lk <- log_lk + log(s, base = exp(1))
-      }
-      log_lk_err <- abs(log_lk - temp_lk)
-      itr = itr + 1
-      #print(paste0("scaned: ", valley_loc, " itr # ", itr, " -> ", log_lk_err))
-      if (is.na(log_lk_err) | is.nan(log_lk_err) | is.infinite(log_lk_err)) break
-      if (log_lk_err < 1.e-7) break
-      temp_lk <- log_lk;
+    #************* Filter Unknown Data *************#
+    ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
+    if (is.null(cross)) {
+        m <- FALSE
+    } else {
+        m <- mean(cross, na.rm = TRUE) 
     }
-
-    #************************************************************# 
-    #*************  JUST FOR VISUALIZATION PURPOSES *************#
-    #print(paste0("scaned: ", valley_loc, " --------> Log-Likelihood: ", log_lk))
-    # if (ent[which.min(ent)] >= 0 & ent[which.max(ent)] <= 1) {
-    #   h_min <- 0.0
-    #   h_max <- 1
-    #   dh = 0.02
-    # } else {
-    #   h_min <- 0.0
-    #   h_max <- ent[which.max(ent)]
-    #   dh = 1
-    # }
-    # h <- hist(ent, plot = FALSE, breaks=seq(h_min, h_max, by=dh))
-    # plot(h, freq=FALSE, col="steelblue", border="white", xlim=c(h_min, h_max))
-    # curve(omega[1]*dnorm(x, mu[1], sigma[1]), add=TRUE, col="darkblue", lwd=2, xlim = c(h_min, h_max))
-    # curve(omega[2]*dnorm(x, mu[2], sigma[2]), add=TRUE, col="darkred", lwd=2, xlim = c(h_min, h_max))
-    #************************************************************#
-    #************************************************************#
     
-    valley.itr <- valley.itr + 1
-    vec.omega1[valley.itr] <- omega[1]
-    vec.omega2[valley.itr] <- omega[2]
-    vec.mu1[valley.itr] <- mu[1]
-    vec.mu2[valley.itr] <- mu[2]
-    vec.sigma1[valley.itr] <- sigma[1]
-    vec.sigma2[valley.itr] <- sigma[2]
-    vec.lkhood[valley.itr] <- log_lk
-  }
-  MaxLoc <- which.max(vec.lkhood)
-  cat("\n")
-  #print(vec.lkhood[MaxLoc])
-  
-  omega[1] <- vec.omega1[MaxLoc]; omega[2] <- vec.omega2[MaxLoc]
-  mu[1] <- vec.mu1[MaxLoc];       mu[2] <- vec.mu2[MaxLoc]
-  sigma[1] <- vec.sigma1[MaxLoc]; sigma[2] <- vec.sigma2[MaxLoc]  
-  
-  threshold <- function_threshold (omega, mu, sigma)
-  
-  #************* Print OutPuts *************#
-  # print(paste0("Omega_1= ",    round(omega[1],digits = 6),    ",  Omega_2= ", round(omega[2],digits = 6)))
-  # print(paste0("Mu_1= ",       round(mu[1],digits = 6),       ",  Mu_2= ",    round(mu[2],digits = 6)))
-  # print(paste0("Sigma_1= ",    round(sigma[1],digits = 6),    ",  Sigma_2= ", round(sigma[2],digits = 6)))
-  # print(paste0("Threshold= ", round(threshold,digits = 3)))
-  
-  #************* Return OutPuts *************#
-  results<-list(omega_1=omega[1], omega_2=omega[2],
-                mu_1=mu[1],       mu_2=mu[2],
-                sigma_1=sigma[1], sigma_2=sigma[2],
-                threshold = threshold)
-  return(results)
+    #************* Defult cutEdge *************#
+    cut <- cutEdge*length(ent)
+    
+    #************* Define Scan Step For Initializing *************#
+    if (ent[which.max(ent)] <= 5) {
+        scan_step <- 0.01
+    } else {
+        scan_step <- 1
+    }
+    
+    #************* Print some info *************#
+    valley_loc <- 0
+    while (1) {
+        valley_loc <- valley_loc + scan_step
+        if ( length(ent[ent<=valley_loc]) > cut ) break
+    }
+    print(paste0("The number of non-NA entries= ", length(ent)))
+    print(paste0("The 'gmm' would be done in ", ceiling(valley_loc/scan_step), " iterations"))
+    
+    #*************  set rand seed *************#
+    set.seed(3000)
+    
+    #*************  define Number of Gaussians *************#
+    num_G <- 2
+    
+    vec.omega1 <- 0; vec.omega2 <- 0
+    vec.mu1 <- 0;    vec.mu2 <- 0
+    vec.sigma1 <- 0; vec.sigma2 <- 0
+    vec.lkhood <- 0
+    valley.itr <- 0
+    valley_loc <- 0
+    nEve <- length(ent)
+    while (1) {
+        cat("#")
+        
+        #*************  guess the valley loc *************#
+        valley_loc <- valley_loc + scan_step
+        if ( length(ent[ent<=valley_loc]) > cut ) break
+        
+        #*************  Choosing Random Omega *************#
+        omega <- runif(1)
+        omega <- c(omega, 1.-omega)
+        
+        #*************  Choosing Random Mean *************#
+        mu_int <- mean(ent[ent<=valley_loc])
+        mu_int <- c(mu_int, mean(ent[ent>valley_loc]))
+        
+        #*************  Choosing Random Sigma *************#
+        sigma_int <- sd(ent[ent<valley_loc])
+        sigma_int <- c(sigma_int, sd(ent[ent>valley_loc]))
+        
+        #*************  EM Algorithm *************#
+        temp_lk <- 0
+        itr <- 0
+        while (1){
+            mu <- 0
+            sigma <- 0
+            for (j in 1:num_G){
+                mu[j] <- mu_int[j]
+                sigma[j] <- sigma_int[j]
+            }
+            
+            #*************  E-step Expectation *************#
+            resp <- array(0, dim=c(nEve,num_G))
+            for(i in 1:nEve){
+                for (j in 1:num_G)
+                    resp[i,j] <- omega[j]*dnorm(ent[i], mu[j], sigma[j])
+                resp[i,] <- resp[i,]/sum(resp[i,])
+            }
+            
+            #*************  M-step Maximization *************#
+            for (j in 1:num_G){
+                m_c <- sum(resp[,j])
+                
+                omega[j] <- m_c / nEve
+                
+                mu[j] <- sum(resp[,j]*ent) 
+                mu[j] <- mu[j] / m_c
+                
+                sigma[j] <- sum(resp[,j]*(ent-mu[j])*(ent-mu[j]))
+                sigma[j] <- sigma[j] / m_c
+                sigma[j] <- sqrt(sigma[j])
+            }
+            
+            #*************  Log-likelihood calculation *************#
+            log_lk <- 0.
+            for (i in 1:nEve){
+                s <- 0
+                for (j in 1:num_G)
+                    s <- s + omega[j]*dnorm(ent[i], mu[j], sigma[j])
+                log_lk <- log_lk + log(s, base = exp(1))
+            }
+            log_lk_err <- abs(log_lk - temp_lk)
+            itr = itr + 1
+            #print(paste0("scaned: ", valley_loc, " itr # ", itr, " -> ", log_lk_err))
+            if (is.na(log_lk_err) | is.nan(log_lk_err) | is.infinite(log_lk_err)) break
+            if (log_lk_err < 1.e-7) break
+            temp_lk <- log_lk;
+        }
+        
+        #************************************************************# 
+        #*************  JUST FOR VISUALIZATION PURPOSES *************#
+        # print(paste0("scaned: ", valley_loc, " --------> Log-Likelihood: ", log_lk))
+        # if (ent[which.min(ent)] >= 0 & ent[which.max(ent)] <= 5) {
+        #   h_min <- 0.0
+        #   h_max <- 1
+        #   dh = 0.02
+        # } else {
+        #   h_min <- 0.0
+        #   h_max <- ent[which.max(ent)]
+        #   dh = 1
+        # }
+        # h <- hist(ent, plot = FALSE, breaks=seq(h_min, h_max, by=dh))
+        # plot(h, freq=FALSE, col="steelblue", border="white", xlim=c(h_min, h_max))
+        # curve(omega[1]*dnorm(x, mu[1], sigma[1]), add=TRUE, col="darkblue", lwd=2, xlim = c(h_min, h_max))
+        # curve(omega[2]*dnorm(x, mu[2], sigma[2]), add=TRUE, col="darkred", lwd=2, xlim = c(h_min, h_max))
+        #************************************************************#
+        #************************************************************#
+        if (!is.na(log_lk_err) & !is.nan(log_lk_err) & !is.infinite(log_lk_err)){
+            if (!as.logical(m)){
+                valley.itr <- valley.itr + 1
+                vec.omega1[valley.itr] <- omega[1]
+                vec.omega2[valley.itr] <- omega[2]
+                vec.mu1[valley.itr] <- mu[1]
+                vec.mu2[valley.itr] <- mu[2]
+                vec.sigma1[valley.itr] <- sigma[1]
+                vec.sigma2[valley.itr] <- sigma[2]
+                vec.lkhood[valley.itr] <- log_lk
+            } else if ((mu[1]< m & m < mu[2]) | (mu[2]< m & m < mu[1]) | (mu[1]< m & mu[2]< m) ){
+                valley.itr <- valley.itr + 1
+                vec.omega1[valley.itr] <- omega[1]
+                vec.omega2[valley.itr] <- omega[2]
+                vec.mu1[valley.itr] <- mu[1]
+                vec.mu2[valley.itr] <- mu[2]
+                vec.sigma1[valley.itr] <- sigma[1]
+                vec.sigma2[valley.itr] <- sigma[2]
+                vec.lkhood[valley.itr] <- log_lk
+            }
+        }
+    }
+    cat("\n")
+    if (valley.itr != 0) {
+        MaxLoc <- which.max(vec.lkhood)
+        
+        omega[1] <- vec.omega1[MaxLoc]; omega[2] <- vec.omega2[MaxLoc]
+        mu[1] <- vec.mu1[MaxLoc];       mu[2] <- vec.mu2[MaxLoc]
+        sigma[1] <- vec.sigma1[MaxLoc]; sigma[2] <- vec.sigma2[MaxLoc]  
+        threshold <- function_threshold (omega, mu, sigma)
+        
+        #************* Print OutPuts *************#
+        # print(paste0("Omega_1= ",    round(omega[1],digits = 6),    ",  Omega_2= ", round(omega[2],digits = 6)))
+        # print(paste0("Mu_1= ",       round(mu[1],digits = 6),       ",  Mu_2= ",    round(mu[2],digits = 6)))
+        # print(paste0("Sigma_1= ",    round(sigma[1],digits = 6),    ",  Sigma_2= ", round(sigma[2],digits = 6)))
+        # print(paste0("Threshold= ", round(threshold,digits = 3)))
+        
+        #************* Return OutPuts *************#
+        results<-list(omega_1=omega[1], omega_2=omega[2],
+                      mu_1=mu[1],       mu_2=mu[2],
+                      sigma_1=sigma[1], sigma_2=sigma[2],
+                      threshold = threshold)        
+    } else {    
+        print("Error: No Gaussian fit found")
+        results<-FALSE
+    }
+    
+    return(results)
 }
 
 # Calculates the area (integral) bounded in domain[a,b] under an univariate Gaussian 
@@ -1058,6 +1058,8 @@ function_threshold <- function (omega, mu, sigma){
 #'                           of every sequence to its nearest sequence) and \link{gmmFit} (Gaussian fit parameters 
 #'                           plus the distance threshold cut) functions and combines them in single plot.
 #' @param    ent             numeric vector of distances returned from \link{distToNearest} function.
+#' @param    cross           if not \code{NULL} plot histogram of numeric vector \code{cross} invoked from 
+#'                           \link{distToNearest} function in \eqn{-y} direction.
 #' @param    GaussData       output object from \code{gmmFit} function containing optimum threshold cut, 
 #'                           mixing proportion (\eqn{\omega}), mean (\eqn{\mu}), and standard deviation (\eqn{\sigma}).
 #' @param    x_min           x-axis minimum range.
@@ -1066,6 +1068,8 @@ function_threshold <- function (omega, mu, sigma){
 #' @param    hist_binwidth   histogram bin size.
 #' @param    title           string defining the plot title.
 #' @param    size            numeric value for lines in the plot.
+#' @param    threCut         if \code{TRUE} plot a vertical line passing through threshold; if \code{FALSE} do not draw.
+#' @param    gauss           if \code{TRUE} plot Gaussian fit curves; if \code{FALSE} do not draw. 
 #' @param    silent          if \code{TRUE} do not draw the plot and just return the ggplot2 
 #'                           object; if \code{FALSE} draw the plot.
 #' @param    ...             additional arguments to pass to ggplot2::theme.
@@ -1081,56 +1085,71 @@ function_threshold <- function (omega, mu, sigma){
 #' # Use nucleotide Hamming distance and normalize by junction length
 #' db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
 #' 
-#' # To find the Threshold cut, call findThreshold-switch for \code{gmm} method.
+#' # To find the threshold cut, call findThreshold function for "gmm" method.
 #' output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
 #' print(output)
 #' 
-#' # define x-axis limits
-#' x_min <- 0.0  
-#' x_max <- db$DIST_NEAREST[which.max(db$DIST_NEAREST)]
-#' dx = 0.02     
-#' x_seq <- 0.1
-#' 
-#' plotgmmFit(db$DIST_NEAREST, output, x_min, x_max, x_seq, dx, title="plotgmmFit")
-#' 
+#' plotgmmFit(ent=db$DIST_NEAREST, GaussData=output, x_min=0.0, x_max=1, x_seq=0.1,
+#'                 hist_binwidth=0.02, title="plotgmmFit")
 #' @export
-plotgmmFit <- function (ent, GaussData, x_min, x_max, x_seq, hist_binwidth, title=NULL, size=1, silent=FALSE, ...){
+plotgmmFit <- function (ent, cross=NULL, GaussData, x_min, x_max, x_seq, 
+                        hist_binwidth, title=NULL, size=1, threCut=TRUE, gauss=TRUE, silent=FALSE, ...){
     
     # Invoke the distToNearest distribution
     ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
     db <-  data.frame(DIST_NEAREST=ent)
     
-    # Invoke Gaussians parameters
-    omega <- c(GaussData[[1]], GaussData[[2]])
-    mu <-    c(GaussData[[3]], GaussData[[4]])
-    sigma <- c(GaussData[[5]], GaussData[[6]])
-    threshold <- GaussData[[7]]
+    if (is.null(GaussData[[1]]) | GaussData[[1]] == FALSE)
+        print("GaussData is either 'NULL' or 'FALSE'. Histogram is plotted")
     
-    # Generate Gaussian curves
-    x <- seq(x_min, x_max, by=0.002)
-    G1 <- omega[1]*dnorm(x, mu[1], sigma[1])
-    GAUSS1 <- data.frame(x=x, G1=G1)
-    G2 <- omega[2]*dnorm(x, mu[2], sigma[2])
-    GAUSS2 <- data.frame(x=x, G2=G2)
+    if (!is.null(GaussData[[1]]) & GaussData[[1]] != FALSE & gauss==TRUE){
+        # Invoke Gaussians parameters
+        omega <- c(GaussData[[1]], GaussData[[2]])
+        mu <-    c(GaussData[[3]], GaussData[[4]])
+        sigma <- c(GaussData[[5]], GaussData[[6]])
+        
+        # Generate Gaussian curves
+        x <- seq(x_min, x_max, by=0.002)
+        G1 <- omega[1]*dnorm(x, mu[1], sigma[1])
+        GAUSS1 <- data.frame(x=x, G1=G1)
+        G2 <- omega[2]*dnorm(x, mu[2], sigma[2])
+        GAUSS2 <- data.frame(x=x, G2=G2)
+    }
+    if (!is.null(GaussData[[1]]) & GaussData[[1]] != FALSE & threCut == TRUE) 
+        threshold <- GaussData[[7]]
     
     # Plot distToNearest distribution plus Gaussian fits
     p <- ggplot(db,
                 aes(x=DIST_NEAREST, ..density..)) +
         theme_bw() + xlab("Hamming distance") + ylab("Density") +
         scale_x_continuous(breaks=seq(x_min, x_max, x_seq), limits=c(x_min, x_max)) +
-        geom_histogram(breaks=seq(x_min, x_max, by=hist_binwidth), fill="steelblue", color="white") +
-        geom_vline(xintercept=threshold, color="firebrick", linetype="longdash", size = size) +
-        geom_line(data=GAUSS1, aes(x=x, y=G1), colour = "darkblue", size = size) +
-        geom_line(data=GAUSS2, aes(x=x, y=G2), colour = "darkred", size = size)
+        geom_histogram(breaks=seq(x_min, x_max, by=hist_binwidth), fill="gray40", color="white")
+    # Add cross histogram
+    if (!is.null(cross)){
+        cross <- cross[!is.na(cross) & !is.nan(cross) & !is.infinite(cross)]
+        db_cross <-  data.frame(DIST_NEAREST=cross)
+        p <- p + geom_histogram(data=db_cross,
+                                aes(x=DIST_NEAREST, y=-(..density..)),
+                                breaks=seq(x_min, x_max, by=hist_binwidth),
+                                fill="gray69", color="white")
+    }
+    # Add threshold vertical line
+    if (!is.null(GaussData[[1]]) & GaussData[[1]] != FALSE & threCut == TRUE) 
+        p <- p + geom_vline(xintercept=threshold, color="firebrick", linetype="longdash", size = size)
+    # Add Gaussian curves
+    if (!is.null(GaussData[[1]]) & GaussData[[1]] != FALSE & gauss==TRUE){
+        p <- p + geom_line(data=GAUSS1, aes(x=x, y=G1), colour = "darkblue", size = size) +
+            geom_line(data=GAUSS2, aes(x=x, y=G2), colour = "darkred", size = size)
+    }
     # Add Title
     if (!is.null(title)) {
         p <- p + ggtitle(title)
-    } 
+    }
     # Add additional theme elements
     p <- p + do.call(theme, list(...))
     
     # Plot
-    if (!silent) { 
+    if (!silent) {
         plot(p)
     } else {
         return(p)
