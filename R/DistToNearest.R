@@ -4,7 +4,26 @@
 NULL
 
 #### Classes ####
-
+#'
+#' \code{gmmFit} outputs object
+#' 
+#' \code{gmmFitResults} class contains outputs of \link{gmmFit} function including parameters of two 
+#' Gaussian fits and threshold cut:
+#'
+#' @slot   omega1       first Gaussain mixing proportion.
+#' @slot   omega2       second Gaussain mixing proportion.
+#' @slot   mu1          first Gaussian mean.
+#' @slot   mu2          second Gaussain mean.
+#' @slot   sigma1       first Gaussain standard deviation.
+#' @slot   sigma2       second Gaussain standard deviation.
+#' @slot   threshold    optimum threshold cut, i.e. maximum of the average of the Sensitivity plus Specificity 
+#'                      corresponding to the Gaussian fit distributions.
+#'
+#' @name         gmmFitResults-class
+#' @rdname       gmmFitResults-class
+#' @aliases      gmmFitResults
+#' @exportClass  gmmFitResults
+#' @seealso      See \link{gmmFit} for more information.
 setClass("gmmFitResults",
          slots=c(omega1="numeric", 
                  omega2="numeric",
