@@ -631,7 +631,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     
    
 
-    list_db <- foreach(idx=iterators::icount(lenGroups), .errorhandling='pass') %dopar% {
+    list_db <- foreach(idx=iterators::icount(lenGroups), .errorhandling='stop') %dopar% {
         db_group <- db[groups[[idx]], ]
         crossGroups <- NULL
         if (!is.null(cross)) {

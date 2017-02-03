@@ -158,7 +158,7 @@ collapseClones <- function(db,
     
     #cons_list <- foreach(idx=iterators::icount(lenGroups), .combine=c, .verbose=FALSE, 
     cons_mat <- foreach(idx=iterators::icount(lenGroups), .combine="cbind", 
-                        .verbose=FALSE, .errorhandling='pass') %dopar% {
+                        .verbose=FALSE, .errorhandling='stop') %dopar% {
         calcClonalConsensus(inputSeq=db[[sequenceColumn]][groups[[idx]]],
                             germlineSeq=db[[germlineColumn]][groups[[idx]]],
                             regionDefinition=regionDefinition, 
