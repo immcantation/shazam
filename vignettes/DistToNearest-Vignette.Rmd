@@ -95,18 +95,31 @@ dist_s5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f",
 
 The primary use of the distance to nearest calculation in the Change-O pipeline 
 is to determine the optimal threshold for separating clonally related sequences 
-(represented by sequences with "near"" neighbors) from singletons (sequences 
+(represented by sequences with "near" neighbors) from singletons (sequences 
 without "near"" neighbor), which show up as two modes in a histogram. This can 
-be done using the `findThreshold` function, which will look for the minimum 
+be done using two methods, namely called `dens` and `gmm`. The `findThreshold` 
+function is used to choose one of the above methods. 
+
+The `dens` method will look for the minimum 
 between two modes of a distribution based on an input vector (`distances`). 
 Determining the optimal bandwidth parameter for smoothing the distribution can
 be computationally intensive. The bandwidth is typically robust when subsampling 
 down to 15,000 distances (possibly even fewer). The input vector can be 
-subsampled to the size specified using the `subsample` parameter.
+subsampled to the size specified using the `subsample` parameter. 
+
+The `gmm` method (computationally less expensive) follows a Gaussian Mixture Model 
+(GMM) procedure, including the Expectation Maximization (EM) algorithm, for learning 
+the parameters of two univariate Gaussians which fit the bimodal distribution entries. 
+Retrieving the fit parameters, it then calculates, analytically, the optimum threshold, 
+where the average of the Sensitivity plus Specificity reaches its maximum. 
+This threshold can be then invoked for assigning Ig sequences to clonal groups.
+
+Below are some examples applying these two methods in different scenarios.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Find threshold for Hamming nearest neighbor distances
-threshold_ham <- findThreshold(dist_ham$DIST_NEAREST, method="dens")
+output <- findThreshold(dist_ham$DIST_NEAREST, method="dens")
+threshold_ham <- output@threshold
 # Generate Hamming distance histogram
 library(ggplot2)
 p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
@@ -125,7 +138,8 @@ set to a value near 0.12.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Find threshold for HH_S5F nearest neighbor distances
-threshold_s5f <- findThreshold(dist_s5f$DIST_NEAREST, method="dens")
+output <- findThreshold(dist_s5f$DIST_NEAREST, method="dens")
+threshold_s5f <- output@threshold
 # Generate HH_S5F distance histogram
 p2 <- ggplot(subset(dist_s5f, !is.na(DIST_NEAREST)),
              aes(x=DIST_NEAREST)) + 
@@ -207,3 +221,44 @@ plot(p4)
 
 This can give us a sense of overlap between samples or a way to 
 compare within-sample variation to cross-sample variation.
+
+Below is an example showing how the `gmm` method is used to find optimal threshold for 
+separating clonally related sequences. The red dashed-line shown in figure below defines the distance 
+where the average of the Sensitivity plus Specificity reaches its maximum.
+
+```{r, eval=TRUE, warning=FALSE, fig.width=7}
+# Subset example data to one sample as a demo
+data(ExampleDb, package="alakazam")
+db <- subset(ExampleDb, SAMPLE == "-1h")
+
+# Use nucleotide Hamming distance and normalize by junction length
+db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+                            
+# To find the Threshold cut use findThreshold-switch for "gmm" method 
+output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
+
+# you can plot the distToNearest hist, Gaussian Fits, and optimum 
+#threshold cut all together using "plotgmmFit" function
+plotgmmFit(ent=db$DIST_NEAREST, GaussData=output, x_min=0.0, x_max=1, x_seq=0.1,
+                histBinwidth=0.02, title="plotgmmFit")
+```
+
+Following example uses the genotyped V assignments and 5-mer via `hh_s5f` model 
+discussed previously.
+
+```{r, eval=TRUE, warning=FALSE, fig.width=7}
+
+# To find the Threshold cut use findThreshold-switch for "gmm" method 
+output <- findThreshold(dist_s5f$DIST_NEAREST, method="gmm", cutEdge=0.9)
+
+# you can plot the distToNearest hist, Gaussian Fits, and optimum 
+#threshold cut all together using "plotgmmFit" function
+x_max<-dist_s5f$DIST_NEAREST[which.max(dist_s5f$DIST_NEAREST)]
+plotgmmFit(ent=dist_s5f$DIST_NEAREST, GaussData=output, x_min=0.0, x_max=x_max, x_seq=10,
+                histBinwidth=1, title="plotgmmFit", gauss = FALSE)
+```
+
+We note that the shape of histogram is governed by the "histBinwidth" option, meaning that
+any change in bin size will change the form of the distribution, while the `gmm` method is 
+completely bin size independent and only engages the real input data.
+

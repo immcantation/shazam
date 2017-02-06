@@ -5,9 +5,9 @@ NULL
 
 #### Classes ####
 #'
-#' \code{gmmFit} outputs object
+#' \code{gmm} method output object
 #' 
-#' \code{gmmFitResults} class contains outputs of \link{gmmFit} function including parameters of two 
+#' \code{gmmResults} class contains output of \code{gmm} method. It includes parameters of two 
 #' Gaussian fits and threshold cut:
 #'
 #' @slot   omega1       first Gaussain mixing proportion.
@@ -19,12 +19,12 @@ NULL
 #' @slot   threshold    optimum threshold cut, i.e. maximum of the average of the Sensitivity plus Specificity 
 #'                      corresponding to the Gaussian fit distributions.
 #'
-#' @name         gmmFitResults-class
-#' @rdname       gmmFitResults-class
-#' @aliases      gmmFitResults
-#' @exportClass  gmmFitResults
-#' @seealso      See \link{gmmFit} for more information.
-setClass("gmmFitResults",
+#' @name         gmmResults-class
+#' @rdname       gmmResults-class
+#' @aliases      gmmResults
+#' @exportClass  gmmResults
+#' @seealso      See \link{findThreshold} for more information.
+setClass("gmmResults",
          slots=c(omega1="numeric", 
                  omega2="numeric",
                  mu1="numeric",      
@@ -32,6 +32,22 @@ setClass("gmmFitResults",
                  sigma1="numeric", 
                  sigma2="numeric",
                  threshold = "numeric"))
+
+#'
+#' \code{dens} method output object
+#' 
+#' \code{densResults} class contains output of \code{dens} method. 
+#'
+#' @slot   threshold     distance threshold that separates two modes of the input distribution.
+#'
+#' @name         densResults-class
+#' @rdname       densResults-class
+#' @aliases      densResults
+#' @exportClass  densResults
+#' @seealso      See \link{findThreshold} for more information.
+setClass("densResults",
+         slots=c(threshold = "numeric"))
+
 
 
 #### Distance to Nearest ####
@@ -677,18 +693,73 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #'
 #' @param    data       input data (a numeric vector) containing distance distribution. 
 #' @param    method     either one of the \code{"gmm"} or \code{"dens"} techniques.
-#' @param    cross      a supplementary info (numeric vector) invoked from \link{distToNearest} function, to support 
-#'                      initialization of the Gaussian fit parameters. 
-#' @param    cutEdge    upper range (a fraction of the data density) to rule initialization of Gaussian fit parameters.
+#' @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} 
+#'                       function, to support initialization of the Gaussian fit parameters. 
+#' @param    cutEdge     upper range (a fraction of the data density) to rule initialization of 
+#'                       Gaussian fit parameters. Default value is equal to \eqn{90}\% of the entries.
 #' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
 #' 
-#' @return   Calling \link{gmmFit} function, \code{"gmm"} method returns optimum threshold cut and the Gaussian 
-#'           fit parameters, mixing proportion (\eqn{\omega}), mean (\eqn{\mu}), and standard deviation (\eqn{\sigma}), 
-#'           of a two modes distribution.
-#'           
-#'           Calling \link{smoothValley} function, \code{"dens"} method returns distance threshold 
-#'           that separates two modes of the input distribution.            
+#' @return   
+#' \itemize{
+#' \item Calling \code{"gmm"} method, it returns an object including optimum "\code{threshold}" 
+#'       cut and the Gaussian fit parameters, such as mixing proportion ("\code{omega1}" and "\code{omega2}"), 
+#'       mean ("\code{mu1}" and "\code{mu2}"), and standard deviation ("\code{sigma1}" and "\code{sigma2}").
+#'       Returns "\code{NULL}" if no fit has found. See also \link{gmmResults} class.
+#' \item Calling \code{"dens"} method, it returns distance threshold that separates two modes 
+#'       of the input distribution. Returns "\code{NULL}" if no cut has found. 
+#'       See also \link{densResults} class.
+#'       }
+#' 
 #'
+#' @details 
+#' \itemize{ 
+#' \item \code{"gmm"}: This function follows a Gaussian Mixture Model (GMM) procedure, 
+#'       including the Expectation Maximization (EM) algorithm, for learning the parameters  
+#'       of two univariate Gaussians which fit the bimodal distribution entries. 
+#'       Retrieving the fit parameters, it then calculates, analytically, the optimum threshold, 
+#'       where the average of the Sensitivity plus Specificity reaches its maximum. This threshold 
+#'       can be then invoked for assigning Ig sequences to clonal groups.
+#'          
+#' \item \code{"dens"}: The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
+#'       sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
+#'       with the ideal threshold being a value that separates the two modes. This function takes 
+#'       as input a vector of such distances and infers the ideal threshold.
+#' }
+#'   
+#' @examples
+#' # Subset example data to one sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#' 
+#' # Use nucleotide Hamming distance and normalize by junction length
+#' db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+#'                             
+#' # To find the Threshold cut use findThreshold-switch for "gmm" method 
+#' output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
+#' 
+#' # Retrieve outputs:
+#' omega <- c(output@omega1, output@omega2)
+#' mu <-    c(output@mu1,    output@mu2) 
+#' sigma <- c(output@sigma1, output@sigma2) 
+#' threshold <- output@threshold
+#' 
+#' # To check the quality of the fit performance and corresponding 
+#' # threshold location use "plotgmmFit" function in shazam. 
+#' 
+#' # using findThreshold switch for "dens" method
+#' output <- findThreshold(db$DIST_NEAREST, method="dens")
+#'          
+#' # Retrieve outputs:
+#' threshold <- output@threshold
+#' 
+#' # Plot histogram of non-NA distances
+#' p1 <- ggplot(data=subset(db, !is.na(DIST_NEAREST))) + theme_bw() + 
+#'     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
+#'     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
+#'                    fill="steelblue", color="white") + 
+#'     geom_vline(xintercept=threshold, linetype="dashed")
+#' plot(p1)
+#' 
 #' 
 #' @export
 findThreshold <- function (data, method=c("gmm", "dens"), cross=NULL, cutEdge=0.9, subsample=NULL){
@@ -708,52 +779,52 @@ findThreshold <- function (data, method=c("gmm", "dens"), cross=NULL, cutEdge=0.
 }
 
 
-#' Find distance threshold with \code{"dens"} Method
-#'
-#' Infer value of the minimum between the two modes in a bimodal distribution.
-#'
-#' @param    distances  numeric vector of distances.
-#' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
-#' 
-#' @return   Returns distance threshold that separates two modes of the input distribution.
-#'
-#' @details
-#' The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
-#' sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
-#' with the ideal threshold being a value that separates the two modes. This function takes 
-#' as input a vector of such distances and infers the ideal threshold.
-#' 
-#' @seealso  
-#' \itemize{
-#' \item     See \link{distToNearest} for details on generating the input distance vector.
-#' \item         See \link{gmmFit} for a different threshold inference methodology.
-#' \item           See \link{findThreshold} to switch between available methods.
-#'}
-#' 
-#' 
-#' @examples
-#' # Subset example data to one sample as a demo
-#' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, SAMPLE == "-1h")
-#' 
-#' # Use genotyped V assignments, HS1F model, and normalize by junction length
-#' dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
-#'                            model="hs1f", first=FALSE, normalize="length")
-#'                  
-#' # using findThreshold switch
-#' threshold <- findThreshold(dist_hs1f$DIST_NEAREST, method="dens")
-#' # or
-#' threshold <- smoothValley(dist_hs1f$DIST_NEAREST)
-#'                            
-#' # Plot histogram of non-NA distances
-#' p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
-#'     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
-#'     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
-#'                    fill="steelblue", color="white") + 
-#'     geom_vline(xintercept=threshold, linetype="dashed")
-#' plot(p1)
-#'
-#' @export
+# Find distance threshold with \code{"dens"} Method
+#
+# Infer value of the minimum between the two modes in a bimodal distribution.
+#
+# @param    distances  numeric vector of distances.
+# @param    subsample  number of distances to subsample for speeding up bandwidth inference.
+# 
+# @return   Returns distance threshold that separates two modes of the input distribution.
+#
+# @details
+# The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
+# sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
+# with the ideal threshold being a value that separates the two modes. This function takes 
+# as input a vector of such distances and infers the ideal threshold.
+# 
+# @seealso  
+# \itemize{
+# \item     See \link{distToNearest} for details on generating the input distance vector.
+# \item         See \link{gmmFit} for a different threshold inference methodology.
+# \item           See \link{findThreshold} to switch between available methods.
+#}
+# 
+# 
+# @examples
+# # Subset example data to one sample as a demo
+# data(ExampleDb, package="alakazam")
+# db <- subset(ExampleDb, SAMPLE == "-1h")
+# 
+# # Use genotyped V assignments, HS1F model, and normalize by junction length
+# dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
+#                            model="hs1f", first=FALSE, normalize="length")
+#                  
+# # using findThreshold switch
+# threshold <- findThreshold(dist_hs1f$DIST_NEAREST, method="dens")
+# # or
+# threshold <- smoothValley(dist_hs1f$DIST_NEAREST)
+#                            
+# # Plot histogram of non-NA distances
+# p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
+#     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
+#     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
+#                    fill="steelblue", color="white") + 
+#     geom_vline(xintercept=threshold, linetype="dashed")
+# plot(p1)
+#
+# @export
 smoothValley <- function(distances, subsample=NULL) {
   # Remove NA, NaN, and infinite distances
   distances <- distances[!is.na(distances) & !is.nan(distances) & !is.infinite(distances)]
@@ -769,67 +840,69 @@ smoothValley <- function(distances, subsample=NULL) {
   tryCatch(threshold <- dens$x[which(diff(sign(diff(dens$y)))==2)[1]+1], 
            error = function(e) {
              warning('No minimum was found between two modes.')
-             return(NA)
+             return(NULL)
            })
-  return(threshold)
+  results<-new("densResults",
+               threshold = threshold)  
+  return(results)
 }
 
 
 
-#' Find distance threshold with Gaussian Mixture Method
-#'
-#' Fits a bimodal distribution with two Gaussian functions and calculates maximum of the average of the 
-#' Sensitivity plus Specificity corresponding to the Gaussian distributions.
-#' 
-#' @param    ent         numeric vector of distances returned from \link{distToNearest} function.
-#' @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} 
-#'                       function, to support initialization of the Gaussian fit parameters. 
-#' @param    cutEdge     upper range (a fraction of the data density) to rule initialization of 
-#'                       Gaussian fit parameters. Default value is equal to \eqn{90}\% of the entries.
-#'
-#' @return   returns an objrct including optimum "\code{threshold}" cut and the Gaussian fit parameters, 
-#'           such as mixing proportion ("\code{omega1}" and "\code{omega2}"), mean ("\code{mu1}" and "\code{mu2}"), 
-#'           and standard deviation ("\code{sigma1}" and "\code{sigma2}"). Returns "\code{NULL}" if no fit has found.         
-#'
-#' @seealso  
-#' \itemize{
-#' \item     See \link{distToNearest} for details on generating the input distance vector.
-#' \item     See \link{smoothValley} for a different threshold inference methodology.
-#' \item     See \link{findThreshold} to switch between available methods.
-#'}
-#'
-#'
-#' @details This function follows a Gaussian Mixture Model (GMM) procedure, 
-#'          including the Expectation Maximization (EM) algorithm, for learning the parameters  
-#'          of two univariate Gaussians which fit the bimodal distribution entries. 
-#'          Retrieving the fit parameters, it then calculates, analytically, the optimum threshold, 
-#'          where the average of the Sensitivity plus Specificity reaches its maximum. This threshold 
-#'          can be then invoked for assigning Ig sequences to clonal groups.
-#'
-#' @examples
-#' # Subset example data to one sample as a demo
-#' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, SAMPLE == "-1h")
-#' 
-#' # Use nucleotide Hamming distance and normalize by junction length
-#' db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
-#'                             
-#' # To find the Threshold cut use either findThreshold-switch
-#' output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
-#' # or 
-#' output <- gmmFit(db$DIST_NEAREST, cutEdge=0.9) 
-#' 
-#' # Retrieve outputs:
-#' omega <- c(output@omega1, output@omega2)
-#' mu <-    c(output@mu1,    output@mu2) 
-#' sigma <- c(output@sigma1, output@sigma2) 
-#' threshold <- output@threshold
-#' 
-#' # To check the quality of the fit performance and corresponding 
-#' # threshold location use "plotgmmFit" function in shazam. 
-#' 
-#' 
-#' @export
+# Find distance threshold with Gaussian Mixture Method
+#
+# Fits a bimodal distribution with two Gaussian functions and calculates maximum of the average of the 
+# Sensitivity plus Specificity corresponding to the Gaussian distributions.
+# 
+# @param    ent         numeric vector of distances returned from \link{distToNearest} function.
+# @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} 
+#                       function, to support initialization of the Gaussian fit parameters. 
+# @param    cutEdge     upper range (a fraction of the data density) to rule initialization of 
+#                       Gaussian fit parameters. Default value is equal to \eqn{90}\% of the entries.
+#
+# @return   returns an objrct including optimum "\code{threshold}" cut and the Gaussian fit parameters, 
+#           such as mixing proportion ("\code{omega1}" and "\code{omega2}"), mean ("\code{mu1}" and "\code{mu2}"), 
+#           and standard deviation ("\code{sigma1}" and "\code{sigma2}"). Returns "\code{NULL}" if no fit has found.         
+#
+# @seealso  
+# \itemize{
+# \item     See \link{distToNearest} for details on generating the input distance vector.
+# \item     See \link{smoothValley} for a different threshold inference methodology.
+# \item     See \link{findThreshold} to switch between available methods.
+#}
+#
+#
+# @details This function follows a Gaussian Mixture Model (GMM) procedure, 
+#          including the Expectation Maximization (EM) algorithm, for learning the parameters  
+#          of two univariate Gaussians which fit the bimodal distribution entries. 
+#          Retrieving the fit parameters, it then calculates, analytically, the optimum threshold, 
+#          where the average of the Sensitivity plus Specificity reaches its maximum. This threshold 
+#          can be then invoked for assigning Ig sequences to clonal groups.
+#
+# @examples
+# # Subset example data to one sample as a demo
+# data(ExampleDb, package="alakazam")
+# db <- subset(ExampleDb, SAMPLE == "-1h")
+#
+# # Use nucleotide Hamming distance and normalize by junction length
+# db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+#                             
+# # To find the Threshold cut use either findThreshold-switch
+# output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
+# # or 
+# output <- gmmFit(db$DIST_NEAREST, cutEdge=0.9) 
+# 
+# # Retrieve outputs:
+# omega <- c(output@omega1, output@omega2)
+# mu <-    c(output@mu1,    output@mu2) 
+# sigma <- c(output@sigma1, output@sigma2) 
+# threshold <- output@threshold
+# 
+# # To check the quality of the fit performance and corresponding 
+# # threshold location use "plotgmmFit" function in shazam. 
+# 
+# 
+# @export
 gmmFit <- function(ent, cross=NULL, cutEdge=0.9) {
     
     #************* Filter Unknown Data *************#
@@ -996,7 +1069,7 @@ gmmFit <- function(ent, cross=NULL, cutEdge=0.9) {
         # print(paste0("Threshold= ", round(threshold,digits = 3)))
         
         #************* Return OutPuts *************#
-        results<-new("gmmFitResults",
+        results<-new("gmmResults",
                      omega1=omega[1], 
                      omega2=omega[2],
                      mu1=mu[1],
@@ -1090,12 +1163,13 @@ function_threshold <- function (omega, mu, sigma){
 #' Plot gmmFit results 
 #' 
 #' \code{plotgmmFit}         invokes the results of \link{distToNearest} (histogram of distance 
-#'                           of every sequence to its nearest sequence) and \link{gmmFit} (Gaussian fit parameters 
-#'                           plus the distance threshold cut) functions and combines them in single plot.
+#'                           of every sequence to its nearest sequence) and \link{findThreshold}, 
+#'                           (\code{"gmm"} method; Gaussian fit parameters plus the distance threshold cut) 
+#'                           functions and combines them in single plot.
 #' @param    ent             numeric vector of distances returned from \link{distToNearest} function.
-#' @param    cross           if not \code{NULL} plot histogram of numeric vector \code{cross} invoked from 
+#' @param    cross           if not \code{NULL}, plot histogram of numeric vector \code{cross} invoked from 
 #'                           \link{distToNearest} function in \eqn{-y} direction.
-#' @param    GaussData       output object from \link{gmmFit} function including optimum "\code{threshold}" 
+#' @param    GaussData       output object from \link{findThreshold} function including optimum "\code{threshold}" 
 #'                           cut and the Gaussian fit parameters, such as mixing proportion ("\code{omega1}" 
 #'                           and "\code{omega2}"), mean ("\code{mu1}" and "\code{mu2}"), and standard deviation 
 #'                           ("\code{sigma1}" and "\code{sigma2}").
