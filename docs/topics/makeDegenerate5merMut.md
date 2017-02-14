@@ -95,9 +95,9 @@ sum(degenerate5merMut)
 See also
 -------------------
 
-See `[makeAverage1merMut](makeAverage1merMut.md)` for making a 1-mer mutability model by 
+See [makeAverage1merMut](makeAverage1merMut.md) for making a 1-mer mutability model by 
 taking the average of a 5-mer mutability model. See 
-`[extendMutabilityMatrix](extendMutabilityMatrix.md)` for extending the mutability vector.
+[extendMutabilityMatrix](extendMutabilityMatrix.md) for extending the mutability vector.
 
 
 

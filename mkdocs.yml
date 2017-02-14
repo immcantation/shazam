@@ -68,8 +68,11 @@ pages:
     - 'Distance Profiling':
       - topics/distToNearest.md
       - topics/findThreshold.md
+      - topics/plotGmmFit.md
       - topics/calcTargetingDistance.md
       - topics/writeTargetingDistance.md
+      - topics/GmmResults-class.md
+      - topics/DensResults-class.md
     - 'Mutation & Region Definitions':
       - topics/MUTATION_SCHEMES.md
       - topics/IMGT_SCHEMES.md

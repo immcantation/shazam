@@ -86,7 +86,7 @@ presence of negative selection.
 See also
 -------------------
 
-See `[summarizeBaseline](summarizeBaseline.md)` for more information on `@stats`.
+See [summarizeBaseline](summarizeBaseline.md) for more information on `@stats`.
 
 
 

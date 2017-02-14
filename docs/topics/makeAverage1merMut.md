@@ -73,7 +73,7 @@ makeAverage1merMut(mut5mer = degenerate5merMut)
 See also
 -------------------
 
-See `[makeDegenerate5merMut](makeDegenerate5merMut.md)` for making a degenerate 5-mer mutability
+See [makeDegenerate5merMut](makeDegenerate5merMut.md) for making a degenerate 5-mer mutability
 model based on a 1-mer mutability model.
 
 
