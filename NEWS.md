@@ -1,12 +1,17 @@
 Version 0.1.4.999: February 15, 2017
 -------------------------------------------------------------------------------
 
+General:
+
++ License changed to Creative Commons Attribution-ShareAlike 4.0 International
+(CC BY-SA 4.0).
+
 Selection Analysis:
 
 + Fixed a bug in p-value calculation in `summarizeBaseline()`. The returned 
   p-value can now be either positive or negative. Its magnitude (without the 
   sign) should be interpreted as per normal. Its sign indicates the direction 
-  of the selection detected. A positive p-value indicates positive selection, 
+  of the seLicense chalection detected. A positive p-value indicates positive selection, 
   whereas a negative p-value indicates negative selection.
 + Added `editBaseline()` to exported functions, and a corresponding section 
   in the vignette. 
@@ -48,6 +53,7 @@ Mutation Profiling:
   by `slideWindowTune()`.
   
 Distance Calculation:
+
 + Added `findThreshold` function to infer clonal distance threshold from 
   nearest neighbor distances returned by `distToNearest`.
 + Deprecated the `HS1FDistance` and `M1NDistance` distance models, which have 
