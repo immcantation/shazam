@@ -1,4 +1,4 @@
-Version 0.1.4.999: January 24, 2017
+Version 0.1.4.999: February 15, 2017
 -------------------------------------------------------------------------------
 
 Selection Analysis:
@@ -48,7 +48,6 @@ Mutation Profiling:
   by `slideWindowTune()`.
   
 Distance Calculation:
-
 + Added `findThreshold` function to infer clonal distance threshold from 
   nearest neighbor distances returned by `distToNearest`.
 + Deprecated the `HS1FDistance` and `M1NDistance` distance models, which have 
@@ -60,6 +59,12 @@ Distance Calculation:
 + Added support for `MK_RS5NF` models to `distToNearest`.
 + Updated `calcTargetingDistance()` to enable calculation of a symmetric distance
   matrix given a 1-mer substitution matrix normalized by row, such as `HH_S1F`.
++ Changed `findThreshold` functionality to act like a switch to choose between `gmm` 
+and `dens` method.
++ Added the `gmm` method to find optimum distance threshold using Gaussian 
+Mixture Method.
++ Added the `plotgmmFit` function to plot `findThreshold` results where `gmm` 
+method has been ued.
 
 Region Definition:
 

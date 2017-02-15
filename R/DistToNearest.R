@@ -1160,7 +1160,7 @@ function_threshold <- function (omega, mu, sigma){
 }
 
 
-#' Plot gmmFit results 
+#' Plot findThreshold results where \code{"gmm"} method has been ued
 #' 
 #' \code{plotgmmFit}         invokes the results of \link{distToNearest} (histogram of distance 
 #'                           of every sequence to its nearest sequence) and \link{findThreshold}, 
