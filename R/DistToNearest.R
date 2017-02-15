@@ -919,7 +919,7 @@ gmmFit <- function(ent, cross=NULL, cutEdge=0.9) {
     
     #************* Define Scan Step For Initializing *************#
     if (ent[which.max(ent)] <= 5) {
-        scan_step <- 0.01
+        scan_step <- 0.1
     } else {
         scan_step <- 1
     }
