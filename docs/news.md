@@ -1,5 +1,10 @@
-Version 0.1.4.999: January 12, 2017
+Version 0.1.4.999: February 7, 2017
 -------------------------------------------------------------------------------
+
+General:
+
++ License changed to Creative Commons Attribution-ShareAlike 4.0 International
+  (CC BY-SA 4.0).
 
 Selection Analysis:
 

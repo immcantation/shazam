@@ -8,9 +8,10 @@ data set to its nearest neighbor and finding the break point in the resulting
 bi-modal distribution that separates clonally related from unrelated sequences. 
 This is done via the following steps:
 
-1. Calculate the nearest neighbor distances for each sequence.
-2. Generate a histogram of the nearest neighbor distances and inspect for the 
-   threshold separating the two modes.
+1. Calculating of the nearest neighbor distances for each sequence.
+2. Generating a histogram of the nearest neighbor distances followed by either 
+   manual inspect for the threshold separating the two modes or
+   automated threshold detection.
 
 ## Example data
 
@@ -48,18 +49,18 @@ underlying SHM model is used to calculate the distance. The default model is
 single nucleotide Hamming distance with gaps considered as a match to any 
 nucleotide (`ham`). Other options include a human Ig-specific single nucleotide 
 model similar to a transition/transversion model (`hh_s1f`) and the corresponding 
-5-mer context model from Yaari et al, 2013 (`hh_s5f`), and analogous pair of 
+5-mer context model from Yaari et al, 2013 (`hh_s5f`), an analogous pair of 
 mouse specific models from Cui et al, 2016 (`mk_rs1nf` and `mk_rs5nf`), and 
 amino acid Hamming distance (`aa`). 
 
-**Note:** Human mouse distance measure that are backward compatible with 
+**Note:** Human and mouse distance measures that are backward compatible with 
 SHazaM v0.1.4 and Change-O v0.3.3 are also provide as `hs1f_compat` and
 `m1n_compat`, respectively.
 
 For models that are not symmetric (e.g., distance from A to B is not equal to the
 distance from B to A), there is a `symmetry` parameter that allows the user to 
-specify taking the average or the minimum of the two distances to determine the
-overall distance.
+specify whether the average or minimum of the two distances is used to determine 
+the overall distance.
 
 
 ```r
@@ -67,28 +68,33 @@ overall distance.
 dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="length", 
                           nproc=1)
 
-# Use genotyped V assignments and 5-mer model
+# Use genotyped V assignments, a 5-mer model and no normalization
 dist_s5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f", 
                           first=FALSE, normalize="none", nproc=1)
 ```
 
-### Generating histograms of nearest neighbor distances
+## Using nearest neighbor distances to determine clonal assignment thresholds
 
-The primary use of the distance to nearest calculation in the Change-O pipeline 
-is to determine the optimal threshold for separating clonally related sequences 
-(represented by sequences with "near"" neighbors) from singletons (sequences 
-without "near"" neighbor), which show up as two modes in a histogram. This can 
-be done using the `findThreshold` function, which will look for the minimum 
-between two modes of a distribution based on an input vector (`distances`). 
-Determining the optimal bandwidth parameter for smoothing the distribution can
-be computationally intensive. The bandwidth is typically robust when subsampling 
-down to 15,000 distances (possibly even fewer). The input vector can be 
-subsampled to the size specified using the `subsample` parameter.
+The primary use of the distance to nearest calculation in SHazaM is to 
+determine the optimal threshold for clonal assignment using the 
+`DefineClones-bygroup` tool in Change-O. Defining a threshold relies on 
+distinguishing clonally related sequences (represented by sequences with 
+close neighbors) from singletons (sequences without close neighbors), 
+which show up as two modes in a nearest neighbor distance histogram. 
+
+Thresholds may be manually determined by inspection of the nearest neighbor histograms
+or by using one of the automated threshold detection algorithms provided by the 
+`findThreshold` function. The available methods are `dens` (smoothed density) and `gmm` 
+(Guassian mixture model), and are chosen via the `method` parameter of `findThreshold`.
+
+### Threshold determination by manual inspection
+
+Manual threshold detection simply involves generating a histrogram for the 
+values in the `DIST_NEAREST` column of the `distToNearest` output and 
+selecting a suitable value within the valley between the two modes.
 
 
 ```r
-# Find threshold for Hamming nearest neighbor distances
-threshold_ham <- findThreshold(dist_ham$DIST_NEAREST)
 # Generate Hamming distance histogram
 library(ggplot2)
 p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
@@ -97,20 +103,18 @@ p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
     xlab("Hamming distance") + 
     ylab("Count") +
     scale_x_continuous(breaks=seq(0, 1, 0.1)) +
-    geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
-    geom_vline(xintercept=threshold_ham, color="firebrick", linetype=3)
+    geom_histogram(color="white", binwidth=0.02) +
+    geom_vline(xintercept=0.12, color="firebrick", linetype=3)
 plot(p1)
 ```
 
 ![plot of chunk DistToNearest-Vignette-3](figure/DistToNearest-Vignette-3-1.png)
 
-In this example, the length normalized `ham` model distance threshold would be 
-set to a value near 0.12.
+By manual inspection, the length normalized `ham` model distance threshold would be 
+set to a value near 0.12 in the above example.
 
 
 ```r
-# Find threshold for HH_S5F nearest neighbor distances
-threshold_s5f <- findThreshold(dist_s5f$DIST_NEAREST)
 # Generate HH_S5F distance histogram
 p2 <- ggplot(subset(dist_s5f, !is.na(DIST_NEAREST)),
              aes(x=DIST_NEAREST)) + 
@@ -118,8 +122,8 @@ p2 <- ggplot(subset(dist_s5f, !is.na(DIST_NEAREST)),
     xlab("HH_S5F distance") + 
     ylab("Count") +
     scale_x_continuous(breaks=seq(0, 50, 5)) +
-    geom_histogram(fill="steelblue", color="white", binwidth=1) +
-    geom_vline(xintercept=threshold_s5f, color="firebrick", linetype=3)
+    geom_histogram(color="white", binwidth=1) +
+    geom_vline(xintercept=7, color="firebrick", linetype=3)
 plot(p2)
 ```
 
@@ -128,10 +132,120 @@ plot(p2)
 In this example, the unnormalized `hh_s5f` model distance threshold would be 
 set to a value near 7.
 
-### Calculating nearest neighbor distances independently for subsets of data
+### Automated threshold detection via a Guassian mixture model
+
+The `gmm` method, which is computationally less expensive than `dens`, follows a 
+Gaussian mixture model (GMM) procedure, including the expectation maximization (EM) 
+algorithm, for learning the parameters of two univariate Gaussians which fit the bimodal 
+distributions of the input distance vector. Retrieving the fit parameters, it then calculates, 
+analytically, the optimum threshold, where the average of the sensitivity plus specificity 
+reaches its maximum. 
+
+Below is an example showing how the `gmm` method is used to find optimal threshold for 
+separating clonally related sequences. The red dashed-line shown in figure below defines the distance 
+where the average of the Sensitivity plus Specificity reaches its maximum.
+
+
+```r
+# To find the Threshold cut use findThreshold-switch for "gmm" method 
+output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", cutEdge=0.9)
+```
+
+```
+## [1] "The number of non-NA entries= 958"
+## [1] "The 'gmm' would be done in 51 iterations"
+## ##################################################
+```
+
+```r
+# You can plot the nearest neighbor histogram, Gaussian fits, and optimum 
+# threshold together using "plotGmmFit" function
+plotGmmFit(ent=dist_ham$DIST_NEAREST, gaussData=output, xmin=0.0, xmax=1, xseq=0.1,
+           histBinwidth=0.02, title="gmm")
+```
+
+![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
+
+```r
+# Print threshold
+print(output)
+```
+
+```
+## An object of class "GmmResults"
+## Slot "omega1":
+## [1] 0.06707172
+## 
+## Slot "omega2":
+## [1] 0.9329283
+## 
+## Slot "mu1":
+## [1] 0.0395719
+## 
+## Slot "mu2":
+## [1] 0.3669703
+## 
+## Slot "sigma1":
+## [1] 0.02262901
+## 
+## Slot "sigma2":
+## [1] 0.1014838
+## 
+## Slot "threshold":
+## [1] 0.1094083
+```
+
+**Note:** The shape of histogram plotted by `plotGmmFit` is governed by the `histBinwidth` parameter.
+Meaning, any change in bin size will change the form of the distribution, while the `gmm` method is 
+completely bin size independent and only engages the real input data.
+
+
+### Automated threshold detection via smoothed density
+
+The `dens` method will look for the minimum in the valley between two modes of a smoothed 
+distribution based on the input vector (`distances`), which will generally be the 
+`DIST_NEAREST` column from the `distToNearest` output. Determining the optimal bandwidth 
+parameter for smoothing the distribution can be computationally intensive. The bandwidth 
+tuning is typically robust when subsampling down to 15,000 distances, though the ideal 
+subsampling count will depend upon the data set. The input vector can be subsampled to 
+the size specified using the `subsample` parameter.  Below is an example of using the 
+`dens` method for threshold detection.
+
+
+```r
+# Find threshold for Hamming nearest neighbor distances
+output <- findThreshold(dist_ham$DIST_NEAREST, method="dens")
+threshold <- output@threshold
+# Plot
+p3 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
+             aes(x=DIST_NEAREST)) + 
+    theme_bw() + 
+    ggtitle("dens") +
+    xlab("Hamming distance") + 
+    ylab("Count") +
+    scale_x_continuous(breaks=seq(0, 1, 0.1)) +
+    geom_histogram(color="white", binwidth=0.02) +
+    geom_vline(xintercept=threshold, color="firebrick", linetype=3)
+plot(p3)
+```
+
+![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
+
+```r
+# Print threshold
+print(output)
+```
+
+```
+## An object of class "DensResults"
+## Slot "threshold":
+## [1] 0.1226913
+```
+
+## Calculating nearest neighbor distances independently for subsets of data
 
 The `fields` argument to `distToNearest` will split the input `data.frame`
-in groups based on values in the specified fields (columns) and will 
+into groups based on values in the specified fields (columns) and will 
 treat them independently. For example, if the input data has multiple 
 samples, then `fields="SAMPLE"` would allow each sample to be analyzed 
 separately.
@@ -153,28 +267,28 @@ We can plot the nearest neighbor distances for the two samples:
 
 ```r
 # Generate grouped histograms
-p3 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)), 
+p4 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)), 
              aes(x=DIST_NEAREST)) + 
     theme_bw() + 
     xlab("Grouped Hamming distance") + 
     ylab("Count") +
-    geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
-    geom_vline(xintercept=threshold_ham, color="firebrick", linetype=3) +
+    geom_histogram(color="white", binwidth=0.02) +
+    geom_vline(xintercept=0.12, color="firebrick", linetype=3) +
     facet_grid(SAMPLE ~ ., scales="free_y")
-plot(p3)
+plot(p4)
 ```
 
-![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
+![plot of chunk DistToNearest-Vignette-7](figure/DistToNearest-Vignette-7-1.png)
 
 In this case, the threshold selected for `-1h` seems to work well 
 for `+7d` as well.
 
-### Calculating nearest neighbor distances across groups rather than within a groups
+## Calculating nearest neighbor distances across groups rather than within a groups
 
 Specifying the `cross` argument to `distToNearest` forces distance calculations 
 to be performed across groups, such that the nearest neighbor of each sequence 
 will always be a sequence in a different group. In the following example 
-we set `cross="SAMPLE"`, which will grouped the data into `-1h` and 
+we set `cross="SAMPLE"`, which will group the data into `-1h` and 
 `+7d` sample subsets. Thus, nearest neighbor distances for sequences in sample 
 `-1h` will be restricted to the closest sequence in sample `+7d` and vice versa.
 
@@ -187,18 +301,20 @@ dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE,
 
 ```r
 # Generate cross sample histograms
-p4 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)), 
+p5 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)), 
              aes(x=CROSS_DIST_NEAREST)) + 
     theme_bw() + 
     xlab("Cross-sample Hamming distance") + 
     ylab("Count") +
-    geom_histogram(fill="steelblue", color="white", binwidth=0.02) +
-    geom_vline(xintercept=threshold_ham, color="firebrick", linetype=3) +
+    geom_histogram(color="white", binwidth=0.02) +
+    geom_vline(xintercept=0.12, color="firebrick", linetype=3) +
     facet_grid(SAMPLE ~ ., scales="free_y")
-plot(p4)
+plot(p5)
 ```
 
-![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
+![plot of chunk DistToNearest-Vignette-8](figure/DistToNearest-Vignette-8-1.png)
 
-This can give us a sense of overlap between samples or a way to 
+This can provide a sense of overlap between samples or a way to 
 compare within-sample variation to cross-sample variation.
+
+

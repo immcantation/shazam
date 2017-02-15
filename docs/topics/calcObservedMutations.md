@@ -49,8 +49,8 @@ amino acid identity.
 
 returnRaw
 :   return the positions of point mutations and their corresponding
-mutation types (as opposed to counts of mutations; hence "raw"); 
-as well as the number of non-N bases used as the denominator when
+mutation types, as opposed to counts of mutations.
+Also returns the number of non-N bases used as the denominator when
 calculating frequency. Default if `FALSE`.
 
 

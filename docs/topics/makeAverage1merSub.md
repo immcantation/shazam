@@ -77,7 +77,7 @@ T 0.20 0.57 0.23   NA
 See also
 -------------------
 
-See `[makeDegenerate5merSub](makeDegenerate5merSub.md)` for making a degenerate 5-mer substitution 
+See [makeDegenerate5merSub](makeDegenerate5merSub.md) for making a degenerate 5-mer substitution 
 model based on a 1-mer substitution model.
 
 

@@ -54,7 +54,7 @@ sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
-targetingModel = HH_S5F,
+targetingModel=HH_S5F,
 nproc = 1)
 
 ```

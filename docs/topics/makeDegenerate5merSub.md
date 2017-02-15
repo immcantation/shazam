@@ -85,8 +85,8 @@ T  0.24  0.45  0.16    NA
 See also
 -------------------
 
-See `[makeAverage1merSub](makeAverage1merSub.md)` for making a 1-mer substitution model by taking
-the average of a 5-mer substitution model. See `[extendSubstitutionMatrix](extendSubstitutionMatrix.md)`
+See [makeAverage1merSub](makeAverage1merSub.md) for making a 1-mer substitution model by taking
+the average of a 5-mer substitution model. See [extendSubstitutionMatrix](extendSubstitutionMatrix.md)
 for extending the substitution matrix.
 
 
