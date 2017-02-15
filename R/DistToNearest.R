@@ -19,16 +19,11 @@ NULL
 #' @slot   threshold    optimum threshold cut, i.e. maximum of the average of the Sensitivity plus Specificity 
 #'                      corresponding to the Gaussian fit distributions.
 #'
-#' @name         gmmResults-class
-#' @rdname       gmmResults-class
-#' @aliases      gmmResults
-#' @exportClass  gmmResults
-#' @seealso      See \link{findThreshold} for more information.
-#'
 #' @name         GmmResults-class
 #' @rdname       GmmResults-class
 #' @aliases      GmmResults
 #' @exportClass  GmmResults
+#' @seealso      See \link{findThreshold} for more information.
 setClass("GmmResults",
          slots=c(omega1="numeric", 
                  omega2="numeric",
@@ -45,16 +40,11 @@ setClass("GmmResults",
 #'
 #' @slot   threshold     distance threshold that separates two modes of the input distribution.
 #'
-#' @name         densResults-class
-#' @rdname       densResults-class
-#' @aliases      densResults
-#' @exportClass  densResults
-#' @seealso      See \link{findThreshold} for more information.
-#'
 #' @name         DensResults-class
 #' @rdname       DensResults-class
 #' @aliases      DensResults
 #' @exportClass  DensResults
+#' @seealso      See \link{findThreshold} for more information.
 setClass("DensResults",
          slots=c(threshold = "numeric"))
 
