@@ -4,6 +4,7 @@
 NULL
 
 #### Classes ####
+
 #'
 #' Output of the \code{gmm} method of findThreshold
 #' 
@@ -46,7 +47,10 @@ setClass("GmmResults",
 #' @exportClass  DensResults
 #' @seealso      See \link{findThreshold} for more information.
 setClass("DensResults",
-         slots=c(threshold = "numeric"))
+         slots=c(x="numeric",
+                 threshold="numeric",
+                 bandwidth="numeric",
+                 density="list"))
 
 
 
@@ -760,7 +764,6 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #'     geom_vline(xintercept=threshold, linetype="dashed")
 #' plot(p1)
 #' 
-#' 
 #' @export
 findThreshold <- function (data, method=c("gmm", "dens"), cross=NULL, cutEdge=0.9, subsample=NULL){
   # Check arguments
@@ -826,26 +829,29 @@ findThreshold <- function (data, method=c("gmm", "dens"), cross=NULL, cutEdge=0.
 #
 # @export
 smoothValley <- function(distances, subsample=NULL) {
-  # Remove NA, NaN, and infinite distances
-  distances <- distances[!is.na(distances) & !is.nan(distances) & !is.infinite(distances)]
-  # Subsample input distances
-  if(!is.null(subsample)) {
-    distances <- sample(distances, subsample)
-  }
-  # Ideal bandwidth
-  h_ucv <- h.ucv(distances, 4)$h
-  # Density estimate
-  dens <- bkde(distances, bandwidth=h_ucv)
-  # Find threshold
-  tryCatch(threshold <- dens$x[which(diff(sign(diff(dens$y)))==2)[1]+1], 
-           error = function(e) {
-             warning('No minimum was found between two modes.')
-             return(NULL)
-           })
-  results<-new("DensResults",
-               threshold = threshold)  
-  
-  return(results)
+    # Remove NA, NaN, and infinite distances
+    distances <- distances[!is.na(distances) & !is.nan(distances) & !is.infinite(distances)]
+    # Subsample input distances
+    if(!is.null(subsample)) {
+        distances <- sample(distances, subsample)
+    }
+    # Ideal bandwidth
+    h_ucv <- h.ucv(distances, 4)$h
+    # Density estimate
+    dens <- bkde(distances, bandwidth=h_ucv)
+    # Find threshold
+    tryCatch(threshold <- dens$x[which(diff(sign(diff(dens$y))) == 2)[1] + 1], 
+             error = function(e) {
+                 warning('No minimum was found between two modes.')
+                 return(NULL) })
+    
+    results <- new("DensResults",
+                   x=distances,
+                   bandwidth=h_ucv,
+                   density=dens,
+                   threshold=threshold)
+    
+    return(results)
 }
 
 
@@ -1206,7 +1212,7 @@ gmmThreshold <- function (omega, mu, sigma) {
 #' plotGmmFit(ent=db$DIST_NEAREST, gaussData=output, xmin=0.0, xmax=1, xseq=0.1,
 #'                 histBinwidth=0.02, title="plotGmmFit")
 #' @export
-plotGmmFit <- function (ent, cross=NULL, gaussData = NULL, xmin, xmax, xseq, 
+plotGmmFit <- function (ent, cross=NULL, gaussData=NULL, xmin, xmax, xseq, 
                         histBinwidth, title=NULL, size=1, threshCut=TRUE, 
                         gauss=TRUE, silent=FALSE, ...) {
     # Invoke the distToNearest distribution
@@ -1256,6 +1262,86 @@ plotGmmFit <- function (ent, cross=NULL, gaussData = NULL, xmin, xmax, xseq,
             geom_line(data=GAUSS2, aes(x=x, y=G2), colour = "darkred", size = size)
     }
     # Add Title
+    if (!is.null(title)) {
+        p <- p + ggtitle(title)
+    }
+    # Add additional theme elements
+    p <- p + do.call(theme, list(...))
+    
+    # Plot
+    if (!silent) {
+        plot(p)
+    } else {
+        return(p)
+    }
+}
+
+
+#' Plot findThreshold results for the dens method
+#' 
+#' \code{plotDensFit} plots the results from \code{"dens"} method of \link{findThreshold},
+#' including the smoothed density estimate, input nearest neighbor distance histogram, and
+#' threshold selected.
+#'                           
+#' @param    data      \link{DensResults} object output by the \code{"dens"} method 
+#'                     of \link{findThreshold}.
+#' @param    xmin      minimum limit for plotting the x-axis. If \code{NA} the limit will 
+#'                     be set automatically.
+#' @param    xmax      maximum limit for plotting the x-axis. If \code{NA} the limit will 
+#'                     be set automatically.
+#' @param    binwidth  binwidth for the histogram. If \code{NULL} the binwidth 
+#'                     will be set automatically to the bandwidth parameter determined by
+#'                     \link{findThreshold}.
+#' @param    title     string defining the plot title.
+#' @param    size      numeric value for the plot line sizes.
+#' @param    silent    if \code{TRUE} do not draw the plot and just return the ggplot2 
+#'                     object; if \code{FALSE} draw the plot.
+#' @param    ...       additional arguments to pass to ggplot2::theme.
+#' 
+#' @return   A ggplot object defining the plot.
+#'
+#' 
+#' @examples
+#' # Subset example data to one sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#'
+#' # Use nucleotide Hamming distance and normalize by junction length
+#' db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+#' 
+#' # To find the threshold cut, call findThreshold function for "gmm" method.
+#' output <- findThreshold(db$DIST_NEAREST, method="dens")
+#' print(output)
+#' 
+#' plotDensFit(output)
+#' 
+#' @export
+plotDensFit <- function(data, xmin=NA, xmax=NA, binwidth=NULL, 
+                        title=NULL, size=1, silent=FALSE, ...) {
+    
+    # Define plot data.frames
+    x_df <- data.frame(x=data@x)
+    d_df <- data.frame(x=data@density$x, y=data@density$y)
+    
+    # Set binwidth
+    if (is.null(binwidth)) { binwidth <- data@bandwidth }
+    
+    # Plot distToNearest distribution plus Gaussian fits
+    p <- ggplot(x_df, aes_string(x="x")) +
+        getBaseTheme() +
+        xlab("Distance") + 
+        ylab("Density") +
+        geom_histogram(aes_string(y="..density.."), binwidth=binwidth, 
+                       fill="gray40", color="white") +
+        geom_line(data=d_df, aes_string(x="x", y="y"), 
+                  color="darkblue", size=size) +
+        geom_vline(xintercept=data@threshold, 
+                   color="firebrick", linetype="longdash", size=size)
+    # Add x limits
+    if (!is.na(xmin) | !is.na(xmax)) {
+        p <- p + xlim(xmin, xmax)
+    }        
+    # Add title
     if (!is.null(title)) {
         p <- p + ggtitle(title)
     }
