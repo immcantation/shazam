@@ -5,28 +5,29 @@ NULL
 
 #### Classes ####
 
-#'
 #' Output of the \code{gmm} method of findThreshold
 #' 
-#' \code{GmmResults} contains output from the \code{gmm} method \link{findThreshold}. 
+#' \code{GmmThreshold} contains output from the \code{gmm} method \link{findThreshold}. 
 #' It includes parameters of two Gaussian fits and threshold cut.
 #'
+#' @slot   x            input distance vector with NA or infinite values removed.
 #' @slot   omega1       first Gaussain mixing proportion.
 #' @slot   omega2       second Gaussain mixing proportion.
 #' @slot   mu1          first Gaussian mean.
 #' @slot   mu2          second Gaussain mean.
 #' @slot   sigma1       first Gaussain standard deviation.
 #' @slot   sigma2       second Gaussain standard deviation.
-#' @slot   threshold    optimum threshold cut, i.e. maximum of the average of the Sensitivity plus Specificity 
-#'                      corresponding to the Gaussian fit distributions.
+#' @slot   threshold    optimum threshold cut.
 #'
-#' @name         GmmResults-class
-#' @rdname       GmmResults-class
-#' @aliases      GmmResults
-#' @exportClass  GmmResults
-#' @seealso      See \link{findThreshold} for more information.
-setClass("GmmResults",
-         slots=c(omega1="numeric", 
+#' @seealso      \link{findThreshold}
+#'
+#' @name         GmmThreshold-class
+#' @rdname       GmmThreshold-class
+#' @aliases      GmmThreshold
+#' @exportClass  GmmThreshold
+setClass("GmmThreshold",
+         slots=c(x="numeric",
+                 omega1="numeric", 
                  omega2="numeric",
                  mu1="numeric",      
                  mu2="numeric",
@@ -37,21 +38,60 @@ setClass("GmmResults",
 
 #' Output of the \code{dens} method of findThreshold
 #' 
-#' \code{DensResults} contains output from the \code{dens} method \link{findThreshold}. 
+#' \code{DensityThreshold} contains output from the \code{dens} method \link{findThreshold}. 
 #'
-#' @slot   threshold     distance threshold that separates two modes of the input distribution.
+#' @slot   x          input distance vector with NA or infinite values removed.
+#' @slot   bandwidth  bandwidth value fit during density estimation.
+#' @slot   xdens      x-axis (distance value) vector for smoothed density estimate.
+#' @slot   ydens      y-axis (density) vector for smoothed density estimate.
+#' @slot   threshold  distance threshold that separates two modes of the input distribution.
 #'
-#' @name         DensResults-class
-#' @rdname       DensResults-class
-#' @aliases      DensResults
-#' @exportClass  DensResults
-#' @seealso      See \link{findThreshold} for more information.
-setClass("DensResults",
+#' @seealso      \link{findThreshold}
+#'
+#' @name         DensityThreshold-class
+#' @rdname       DensityThreshold-class
+#' @aliases      DensityThreshold
+#' @exportClass  DensityThreshold
+setClass("DensityThreshold",
          slots=c(x="numeric",
-                 threshold="numeric",
                  bandwidth="numeric",
-                 density="list"))
+                 xdens="numeric",
+                 ydens="numeric",
+                 threshold="numeric"))
 
+#### Methods ####
+
+#' @param    x    GmmThreshold object
+#' 
+#' @rdname   GmmThreshold-class
+#' @aliases  GmmThreshold-method
+#' @export
+setMethod("print", c(x="GmmThreshold"), function(x) { print(x@threshold) })
+
+#' @param    y    ignored.
+#' @param    ...  arguments to pass to \link{plotGmmThreshold}.
+#' 
+#' @rdname   GmmThreshold-class
+#' @aliases  GmmThreshold-method
+#' @export
+setMethod("plot", c(x="GmmThreshold", y="missing"),
+          function(x, y, ...) { plotGmmThreshold(x, ...) })
+
+#' @param    x    DensityThreshold object
+#' 
+#' @rdname   DensityThreshold-class
+#' @aliases  DensityThreshold-method
+#' @export
+setMethod("print", c(x="DensityThreshold"), function(x) { print(x@threshold) })
+
+#' @param    y    ignored.
+#' @param    ...  arguments to pass to \link{plotDensityThreshold}.
+#' 
+#' @rdname   DensityThreshold-class
+#' @aliases  DensityThreshold-method
+#' @export
+setMethod("plot", c(x="DensityThreshold", y="missing"),
+          function(x, y, ...) { plotDensityThreshold(x, ...) })
 
 
 #### Distance to Nearest ####
@@ -693,85 +733,82 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 
 #' Find distance threshold
 #'
-#' Switch between \code{"gmm"} or \code{"dens"} method to infer value of the threshold between the two modes in a bimodal distribution.
+#' \code{findThreshold} automtically determines and optimal threshold for clonal assignment of
+#' Ig sequences using a vector of nearest neighbor distances. It provides two alternative methods 
+#' using either a Guassian Mixture Model fit (\code{method="gmm"}) or kernel density 
+#' fit (\code{method="density"}).
 #'
-#' @param    data       input data (a numeric vector) containing distance distribution. 
-#' @param    method     either one of the \code{"gmm"} or \code{"dens"} techniques.
-#' @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} 
-#'                       function, to support initialization of the Gaussian fit parameters. 
-#' @param    cutEdge     upper range (a fraction of the data density) to rule initialization of 
-#'                       Gaussian fit parameters. Default value is equal to \eqn{90}\% of the entries.
+#' @param    data       numeric vector containing nearest neighbor distances. 
+#' @param    method     string defining the method to use for determining the optimal threshold.
+#'                      One of \code{"gmm"} or \code{"density"}. See Details for methodological
+#'                      descriptions.
+#' @param    cutEdge    upper range (a fraction of the data density) to rule initialization of 
+#'                      Gaussian fit parameters. Default value is equal to 90% of the entries.
+#'                      Applies only to the \code{"gmm"} method.
+#' @param    cross      supplementary nearest neighbor distance vector output from \link{distToNearest} 
+#'                      for initialization of the Gaussian fit parameters. 
+#'                      Applies only to the \code{"gmm"} method.
 #' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
+#'                      Applies only to the \code{"density"} method. If \code{NULL} no subsampling
+#'                      is performed. As bandwith inferrence is computationally expensive, subsampling
+#'                      is recommended for large data sets.
 #' 
 #' @return   
 #' \itemize{
-#' \item Calling \code{"gmm"} method, it returns an object including optimum "\code{threshold}" 
-#'       cut and the Gaussian fit parameters, such as mixing proportion ("\code{omega1}" and "\code{omega2}"), 
-#'       mean ("\code{mu1}" and "\code{mu2}"), and standard deviation ("\code{sigma1}" and "\code{sigma2}").
-#'       Returns "\code{NULL}" if no fit has found. See also \link{GmmResults} class.
-#' \item Calling \code{"dens"} method, it returns distance threshold that separates two modes 
-#'       of the input distribution. Returns "\code{NULL}" if no cut has found. 
-#'       See also \link{DensResults} class.
-#'       }
-#' 
+#'   \item \code{"gmm"} method:      Returns a \link{GmmThreshold} object including the optimum 
+#'                                   \code{threshold} and the Gaussian fit parameters.
+#'   \item \code{"density"} method:  Returns a \link{DensityThreshold} object including the optimum 
+#'                                   \code{threshold} and the density fit parameters.
+#' }
 #'
 #' @details 
 #' \itemize{ 
-#' \item \code{"gmm"}: This function follows a Gaussian Mixture Model (GMM) procedure, 
-#'       including the Expectation Maximization (EM) algorithm, for learning the parameters  
-#'       of two univariate Gaussians which fit the bimodal distribution entries. 
-#'       Retrieving the fit parameters, it then calculates, analytically, the optimum threshold, 
-#'       where the average of the Sensitivity plus Specificity reaches its maximum. This threshold 
-#'       can be then invoked for assigning Ig sequences to clonal groups.
-#'          
-#' \item \code{"dens"}: The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
-#'       sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
-#'       with the ideal threshold being a value that separates the two modes. This function takes 
-#'       as input a vector of such distances and infers the ideal threshold.
+#'   \item \code{"gmm"}:     Performs a Gaussian Mixture Model (GMM) procedure, 
+#'                           including the Expectation Maximization (EM) algorithm, for learning 
+#'                           the parameters  of two univariate Gaussians which fit the bimodal 
+#'                           distribution entries. Retrieving the fit parameters, it then calculates
+#'                           the optimum threshold, where the average of the sensitivity plus 
+#'                           specificity reaches its maximum.
+#'   \item \code{"density"}: Fits a binned approximation to the ordinary kernel density estimate
+#'                           to the nearest neighbor distances after determining the optimal
+#'                           bandwidth for the density estimate via least-squares cross-validation of 
+#'                           the 4th derivative of the kernel density estimator. The optimal threshold
+#'                           is set as the minimum value in the valley in the density estimate
+#'                           between the two modes of the distribution.
 #' }
-#'   
+#' 
+#' @seealso  See \link{distToNearest} for generating the nearest neighbor distance vectors.
+#'           See \link{plotGmmThreshold} and \link{plotDensityThreshold} for plotting output.
+#'           
 #' @examples
 #' # Subset example data to one sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
 #' 
 #' # Use nucleotide Hamming distance and normalize by junction length
-#' db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+#' db <- distToNearest(db, model="ham", normalize="length", nproc=1)
 #'                             
-#' # To find the Threshold cut use findThreshold-switch for "gmm" method 
-#' output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
-#' 
-#' # Retrieve outputs:
-#' omega <- c(output@omega1, output@omega2)
-#' mu <-    c(output@mu1,    output@mu2) 
-#' sigma <- c(output@sigma1, output@sigma2) 
-#' threshold <- output@threshold
-#' 
-#' # To check the quality of the fit performance and corresponding 
-#' # threshold location use "plotGmmFit" function in shazam. 
-#' 
-#' # using findThreshold switch for "dens" method
-#' output <- findThreshold(db$DIST_NEAREST, method="dens")
-#'          
-#' # Retrieve outputs:
-#' threshold <- output@threshold
-#' 
-#' # Plot histogram of non-NA distances
-#' p1 <- ggplot(data=subset(db, !is.na(DIST_NEAREST))) + theme_bw() + 
-#'     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
-#'     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
-#'                    fill="steelblue", color="white") + 
-#'     geom_vline(xintercept=threshold, linetype="dashed")
-#' plot(p1)
+#' # Find threshold using the "gmm" method
+#' output <- findThreshold(db$DIST_NEAREST, method="gmm")
+#' print(output)
+#' # Plot "gmm" method results
+#' plot(output, binwidth=0.02)
+#'
+#' # Find threshold using the "density" method 
+#' output <- findThreshold(db$DIST_NEAREST, method="density")
+#' print(output)
+#' # Plot "density" method results
+#' plot(output)
 #' 
 #' @export
-findThreshold <- function (data, method=c("gmm", "dens"), cross=NULL, cutEdge=0.9, subsample=NULL){
+findThreshold <- function (data, method=c("gmm", "density"), cutEdge=0.9, cross=NULL, 
+                           subsample=NULL){
   # Check arguments
   method <- match.arg(method)
   
   if (method == "gmm") {
-    output <- gmmFit(data, cross, cutEdge)
-  } else if (method == "dens") {
+    output <- gmmFit(data, cutEdge, cross)
+  } else if (method == "density") {
     output <- smoothValley(data, subsample)
   } else {
     print("Error: assigned method has not been found")
@@ -782,7 +819,7 @@ findThreshold <- function (data, method=c("gmm", "dens"), cross=NULL, cutEdge=0.
 }
 
 
-# Find distance threshold with \code{"dens"} Method
+# Find distance threshold with \code{"density"} Method
 #
 # Infer value of the minimum between the two modes in a bimodal distribution.
 #
@@ -815,7 +852,7 @@ findThreshold <- function (data, method=c("gmm", "dens"), cross=NULL, cutEdge=0.
 #                            model="hs1f", first=FALSE, normalize="length")
 #                  
 # # using findThreshold switch
-# threshold <- findThreshold(dist_hs1f$DIST_NEAREST, method="dens")
+# threshold <- findThreshold(dist_hs1f$DIST_NEAREST, method="density")
 # # or
 # threshold <- smoothValley(dist_hs1f$DIST_NEAREST)
 #                            
@@ -833,7 +870,8 @@ smoothValley <- function(distances, subsample=NULL) {
     distances <- distances[!is.na(distances) & !is.nan(distances) & !is.infinite(distances)]
     # Subsample input distances
     if(!is.null(subsample)) {
-        distances <- sample(distances, subsample)
+        subsample <- min(length(distances), subsample)
+        distances <- sample(distances, subsample, replace=FALSE)
     }
     # Ideal bandwidth
     h_ucv <- h.ucv(distances, 4)$h
@@ -845,10 +883,11 @@ smoothValley <- function(distances, subsample=NULL) {
                  warning('No minimum was found between two modes.')
                  return(NULL) })
     
-    results <- new("DensResults",
+    results <- new("DensityThreshold",
                    x=distances,
                    bandwidth=h_ucv,
-                   density=dens,
+                   xdens=dens$x,
+                   ydens=dens$y,
                    threshold=threshold)
     
     return(results)
@@ -862,10 +901,10 @@ smoothValley <- function(distances, subsample=NULL) {
 # Sensitivity plus Specificity corresponding to the Gaussian distributions.
 # 
 # @param    ent         numeric vector of distances returned from \link{distToNearest} function.
-# @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} 
-#                       function, to support initialization of the Gaussian fit parameters. 
 # @param    cutEdge     upper range (a fraction of the data density) to rule initialization of 
 #                       Gaussian fit parameters. Default value is equal to \eqn{90}\% of the entries.
+# @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} 
+#                       function, to support initialization of the Gaussian fit parameters. 
 #
 # @return   returns an objrct including optimum "\code{threshold}" cut and the Gaussian fit parameters, 
 #           such as mixing proportion ("\code{omega1}" and "\code{omega2}"), mean ("\code{mu1}" and "\code{mu2}"), 
@@ -906,11 +945,11 @@ smoothValley <- function(distances, subsample=NULL) {
 # threshold <- output@threshold
 # 
 # # To check the quality of the fit performance and corresponding 
-# # threshold location use "plotGmmFit" function in shazam. 
+# # threshold location use "plotGmmThreshold" function in shazam. 
 # 
 # 
 # @export
-gmmFit <- function(ent, cross=NULL, cutEdge=0.9) {
+gmmFit <- function(ent, cutEdge=0.9, cross=NULL) {
     
     #************* Filter Unknown Data *************#
     ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
@@ -1076,14 +1115,15 @@ gmmFit <- function(ent, cross=NULL, cutEdge=0.9) {
         # print(paste0("Threshold= ", round(threshold,digits = 3)))
         
         #************* Return OutPuts *************#
-        results<-new("GmmResults",
+        results<-new("GmmThreshold",
+                     x=ent,
                      omega1=omega[1], 
                      omega2=omega[2],
                      mu1=mu[1],
                      mu2=mu[2],
                      sigma1=sigma[1], 
                      sigma2=sigma[2],
-                     threshold = threshold)        
+                     threshold=threshold)        
     } else {    
         print("Error: No Gaussian fit found")
         results<-NULL
@@ -1169,102 +1209,102 @@ gmmThreshold <- function (omega, mu, sigma) {
 
 #' Plot findThreshold results for the gmm method
 #' 
-#' \code{plotGmmFit}         invokes the results of \link{distToNearest} (histogram of distance 
-#'                           of every sequence to its nearest sequence) and \link{findThreshold}, 
-#'                           (\code{"gmm"} method; Gaussian fit parameters plus the distance threshold cut) 
-#'                           functions and combines them in single plot.
-#' @param    ent             numeric vector of distances returned from \link{distToNearest} function.
-#' @param    cross           if not \code{NULL}, plot histogram of numeric vector \code{cross} invoked from 
-#'                           \link{distToNearest} function in \eqn{-y} direction.
-#' @param    gaussData       output object from \link{findThreshold} function including optimum "\code{threshold}" 
-#'                           cut and the Gaussian fit parameters, such as mixing proportion ("\code{omega1}" 
-#'                           and "\code{omega2}"), mean ("\code{mu1}" and "\code{mu2}"), and standard deviation 
-#'                           ("\code{sigma1}" and "\code{sigma2}").
-#' 
-#'                           mixing proportion (\eqn{\omega}), mean (\eqn{\mu}), and standard deviation (\eqn{\sigma}).
-#' @param    xmin           x-axis minimum range.
-#' @param    xmax           x-axis maximum range.
-#' @param    xseq           x-axis breaking sequence.
-#' @param    histBinwidth   histogram bin size.
-#' @param    title           string defining the plot title.
-#' @param    size            numeric value for lines in the plot.
-#' @param    threshCut         if \code{TRUE} plot a vertical line passing through threshold; if \code{FALSE} do not draw.
-#' @param    gauss           if \code{TRUE} plot Gaussian fit curves; if \code{FALSE} do not draw. 
-#' @param    silent          if \code{TRUE} do not draw the plot and just return the ggplot2 
-#'                           object; if \code{FALSE} draw the plot.
-#' @param    ...             additional arguments to pass to ggplot2::theme.
+#' \code{plotGmmThreshold} plots the results from \code{"gmm"} method of 
+#' \link{findThreshold}, including the Guassian distributions, input nearest neighbor 
+#' distance histogram, and threshold selected.
+#'
+#' @param    data      \link{GmmThreshold} object output by the \code{"gmm"} method 
+#'                     of \link{findThreshold}.
+#' @param    cross     numeric vector of distances from \link{distToNearest} to draw as a
+#'                     histogram below the \code{data} histogram for comparison purposes.
+#' @param    xmin      minimum limit for plotting the x-axis. If \code{NULL} the limit will 
+#'                     be set automatically.
+#' @param    xmax      maximum limit for plotting the x-axis. If \code{NULL} the limit will 
+#'                     be set automatically.
+#' @param    breaks    number of breaks o show on the x-axis. If \code{NULL} the breaks will 
+#'                     be set automatically.
+#' @param    binwidth  binwidth for the histogram. If \code{NULL} the binwidth 
+#'                     will be set automatically.
+#' @param    title     string defining the plot title.
+#' @param    size      numeric value for lines in the plot.
+#' @param    silent    if \code{TRUE} do not draw the plot and just return the ggplot2 
+#'                     object; if \code{FALSE} draw the plot.
+#' @param    ...       additional arguments to pass to ggplot2::theme.
 #' 
 #' @return   A ggplot object defining the plot.
 #'
-#' 
+#' @seealso  See \link{GmmThreshold} for the the input object definition and 
+#'           \link{findThreshold} for generating the input object. See 
+#'           \link{distToNearest} calculating nearest neighbor distances.
+#'
 #' @examples
 #' # Subset example data to one sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
 #'
 #' # Use nucleotide Hamming distance and normalize by junction length
-#' db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+#' db <- distToNearest(db, model="ham", normalize="length", nproc=1)
 #' 
 #' # To find the threshold cut, call findThreshold function for "gmm" method.
-#' output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
+#' output <- findThreshold(db$DIST_NEAREST, method="gmm")
 #' print(output)
 #' 
-#' plotGmmFit(ent=db$DIST_NEAREST, gaussData=output, xmin=0.0, xmax=1, xseq=0.1,
-#'                 histBinwidth=0.02, title="plotGmmFit")
+#' # Plot results
+#' plotGmmThreshold(output, binwidth=0.02)
+#' 
 #' @export
-plotGmmFit <- function (ent, cross=NULL, gaussData=NULL, xmin, xmax, xseq, 
-                        histBinwidth, title=NULL, size=1, threshCut=TRUE, 
-                        gauss=TRUE, silent=FALSE, ...) {
-    # Invoke the distToNearest distribution
-    ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
-    db <-  data.frame(DIST_NEAREST=ent)
+plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL, 
+                             binwidth=NULL, title=NULL, size=1, silent=FALSE, ...) {
+    # Define histogram data.frame and threshold
+    xdf <- data.frame(x=data@x)
     
-    if (is.null(gaussData))
-        warning("gaussData is 'NULL'. Histogram is only plotted")
+    # Invoke Gaussians parameters
+    omega <- c(data@omega1, data@omega2)
+    mu <-    c(data@mu1, data@mu2) 
+    sigma <- c(data@sigma1, data@sigma2) 
     
-    if (!is.null(gaussData) & gauss==TRUE){
-        # Invoke Gaussians parameters
-        omega <- c(gaussData@omega1, gaussData@omega2)
-        mu <-    c(gaussData@mu1, gaussData@mu2) 
-        sigma <- c(gaussData@sigma1, gaussData@sigma2) 
-
-        # Generate Gaussian curves
-        x <- seq(xmin, xmax, by=0.002)
-        G1 <- omega[1]*dnorm(x, mu[1], sigma[1])
-        GAUSS1 <- data.frame(x=x, G1=G1)
-        G2 <- omega[2]*dnorm(x, mu[2], sigma[2])
-        GAUSS2 <- data.frame(x=x, G2=G2)
-    }
-    if (!is.null(gaussData) & threshCut == TRUE) 
-        threshold <- gaussData@threshold
+    # Generate Gaussian curves
+    gx <- seq(min(xdf$x), max(xdf$x), by=0.002)
+    g1 <- data.frame(x=gx, y=omega[1]*dnorm(gx, mu[1], sigma[1]))
+    g2 <- data.frame(x=gx, y=omega[2]*dnorm(gx, mu[2], sigma[2]))
+    
+    # ggplot workaround
+    if (is.null(xmin)) { xmin <- NA }
+    if (is.null(xmax)) { xmax <- NA }
     
     # Plot distToNearest distribution plus Gaussian fits
-    p <- ggplot(db,
-                aes(x=DIST_NEAREST, ..density..)) +
-        theme_bw() + xlab("Hamming distance") + ylab("Density") +
-        scale_x_continuous(breaks=seq(xmin, xmax, xseq), limits=c(xmin, xmax)) +
-        geom_histogram(breaks=seq(xmin, xmax, by=histBinwidth), fill="gray40", color="white")
+    p <- ggplot(xdf, aes_string(x="x")) +
+        getBaseTheme() + 
+        xlab("Distance") + 
+        ylab("Density") +
+        geom_histogram(aes_string(y="..density.."), binwidth=binwidth, 
+                       fill="gray40", color="white") +
+        geom_line(data=g1, aes_string(x="x", y="y"), color="darkslateblue", size=size) +
+        geom_line(data=g2, aes_string(x="x", y="y"), color="darkslateblue", size=size) +
+        geom_vline(xintercept=data@threshold, color="firebrick", 
+                   linetype="longdash", size=size)
+    
     # Add cross histogram
-    if (!is.null(cross)){
-        cross <- cross[!is.na(cross) & !is.nan(cross) & !is.infinite(cross)]
-        db_cross <-  data.frame(DIST_NEAREST=cross)
-        p <- p + geom_histogram(data=db_cross,
-                                aes(x=DIST_NEAREST, y=-(..density..)),
-                                breaks=seq(xmin, xmax, by=histBinwidth),
-                                fill="gray69", color="white")
+    if (!is.null(cross)) {
+        cdf <- data.frame(x=cross[is.finite(cross)])
+        p <- p + geom_histogram(data=cdf, aes_q(x=~x, y=~-(..density..)), binwidth=binwidth, 
+                                fill="gray40", color="white", position="identity") +
+            scale_y_continuous(labels=abs)
     }
-    # Add threshold vertical line
-    if (!is.null(gaussData) & threshCut == TRUE) 
-        p <- p + geom_vline(xintercept=threshold, color="firebrick", linetype="longdash", size = size)
-    # Add Gaussian curves
-    if (!is.null(gaussData) & gauss==TRUE){
-        p <- p + geom_line(data=GAUSS1, aes(x=x, y=G1), colour = "darkblue", size = size) +
-            geom_line(data=GAUSS2, aes(x=x, y=G2), colour = "darkred", size = size)
+    
+    # Add x limits
+    if (!is.na(xmin) | !is.na(xmax) & is.null(breaks)) {
+        p <- p + xlim(xmin, xmax)
+    } else if (!is.null(breaks)) {
+        p <- p + scale_x_continuous(breaks=scales::pretty_breaks(n=breaks),
+                                    limits=c(xmin, xmax))
     }
+    
     # Add Title
     if (!is.null(title)) {
         p <- p + ggtitle(title)
     }
+    
     # Add additional theme elements
     p <- p + do.call(theme, list(...))
     
@@ -1277,17 +1317,21 @@ plotGmmFit <- function (ent, cross=NULL, gaussData=NULL, xmin, xmax, xseq,
 }
 
 
-#' Plot findThreshold results for the dens method
+#' Plot findThreshold results for the density method
 #' 
-#' \code{plotDensFit} plots the results from \code{"dens"} method of \link{findThreshold},
-#' including the smoothed density estimate, input nearest neighbor distance histogram, and
-#' threshold selected.
+#' \code{plotDensityThreshold} plots the results from \code{"density"} method of 
+#' \link{findThreshold}, including the smoothed density estimate, input nearest neighbor 
+#' distance histogram, and threshold selected.
 #'                           
-#' @param    data      \link{DensResults} object output by the \code{"dens"} method 
+#' @param    data      \link{DensityThreshold} object output by the \code{"density"} method 
 #'                     of \link{findThreshold}.
-#' @param    xmin      minimum limit for plotting the x-axis. If \code{NA} the limit will 
+#' @param    cross     numeric vector of distances from \link{distToNearest} to draw as a
+#'                     histogram below the \code{data} histogram for comparison purposes.
+#' @param    xmin      minimum limit for plotting the x-axis. If \code{NULL} the limit will 
 #'                     be set automatically.
-#' @param    xmax      maximum limit for plotting the x-axis. If \code{NA} the limit will 
+#' @param    xmax      maximum limit for plotting the x-axis. If \code{NULL} the limit will 
+#'                     be set automatically.
+#' @param    breaks    number of breaks o show on the x-axis. If \code{NULL} the breaks will 
 #'                     be set automatically.
 #' @param    binwidth  binwidth for the histogram. If \code{NULL} the binwidth 
 #'                     will be set automatically to the bandwidth parameter determined by
@@ -1300,51 +1344,72 @@ plotGmmFit <- function (ent, cross=NULL, gaussData=NULL, xmin, xmax, xseq,
 #' 
 #' @return   A ggplot object defining the plot.
 #'
-#' 
+#' @seealso  See \link{DensityThreshold} for the the input object definition and 
+#'           \link{findThreshold} for generating the input object. See 
+#'           \link{distToNearest} calculating nearest neighbor distances.
+#'           
 #' @examples
 #' # Subset example data to one sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
 #'
 #' # Use nucleotide Hamming distance and normalize by junction length
-#' db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+#' db <- distToNearest(db, model="ham", normalize="length", nproc=1)
 #' 
 #' # To find the threshold cut, call findThreshold function for "gmm" method.
-#' output <- findThreshold(db$DIST_NEAREST, method="dens")
+#' output <- findThreshold(db$DIST_NEAREST, method="density")
 #' print(output)
 #' 
-#' plotDensFit(output)
+#' # Plot
+#' plotDensityThreshold(output)
 #' 
 #' @export
-plotDensFit <- function(data, xmin=NA, xmax=NA, binwidth=NULL, 
-                        title=NULL, size=1, silent=FALSE, ...) {
-    
+plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL, 
+                                 binwidth=NULL, title=NULL, size=1, silent=FALSE, ...) {
     # Define plot data.frames
-    x_df <- data.frame(x=data@x)
-    d_df <- data.frame(x=data@density$x, y=data@density$y)
+    xdf <- data.frame(x=data@x)
+    ddf <- data.frame(x=data@xdens, y=data@ydens)
     
     # Set binwidth
     if (is.null(binwidth)) { binwidth <- data@bandwidth }
     
+    # ggplot workaround
+    if (is.null(xmin)) { xmin <- NA }
+    if (is.null(xmax)) { xmax <- NA }
+    
     # Plot distToNearest distribution plus Gaussian fits
-    p <- ggplot(x_df, aes_string(x="x")) +
+    p <- ggplot(xdf, aes_string(x="x")) +
         getBaseTheme() +
         xlab("Distance") + 
         ylab("Density") +
         geom_histogram(aes_string(y="..density.."), binwidth=binwidth, 
                        fill="gray40", color="white") +
-        geom_line(data=d_df, aes_string(x="x", y="y"), 
-                  color="darkblue", size=size) +
+        geom_line(data=ddf, aes_string(x="x", y="y"), 
+                  color="darkslateblue", size=size) +
         geom_vline(xintercept=data@threshold, 
                    color="firebrick", linetype="longdash", size=size)
+    
+    # Add cross histogram
+    if (!is.null(cross)) {
+        cdf <- data.frame(x=cross[is.finite(cross)])
+        p <- p + geom_histogram(data=cdf, aes_q(x=~x, y=~-(..density..)), binwidth=binwidth, 
+                                fill="gray40", color="white", position="identity") +
+             scale_y_continuous(labels=abs)
+    }
+    
     # Add x limits
-    if (!is.na(xmin) | !is.na(xmax)) {
+    if (!is.na(xmin) | !is.na(xmax) & is.null(breaks)) {
         p <- p + xlim(xmin, xmax)
-    }        
+    } else if (!is.null(breaks)) {
+        p <- p + scale_x_continuous(breaks=scales::pretty_breaks(n=breaks),
+                                    limits=c(xmin, xmax))
+    }
+    
     # Add title
     if (!is.null(title)) {
         p <- p + ggtitle(title)
     }
+    
     # Add additional theme elements
     p <- p + do.call(theme, list(...))
     

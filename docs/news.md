@@ -1,4 +1,4 @@
-Version 0.1.4.999: February 7, 2017
+Version 0.1.4.999: February 15, 2017
 -------------------------------------------------------------------------------
 
 General:
@@ -11,7 +11,7 @@ Selection Analysis:
 + Fixed a bug in p-value calculation in `summarizeBaseline()`. The returned 
   p-value can now be either positive or negative. Its magnitude (without the 
   sign) should be interpreted as per normal. Its sign indicates the direction 
-  of the selection detected. A positive p-value indicates positive selection, 
+  of the seLicense chalection detected. A positive p-value indicates positive selection, 
   whereas a negative p-value indicates negative selection.
 + Added `editBaseline()` to exported functions, and a corresponding section 
   in the vignette. 
@@ -65,6 +65,12 @@ Distance Calculation:
 + Added support for `MK_RS5NF` models to `distToNearest`.
 + Updated `calcTargetingDistance()` to enable calculation of a symmetric distance
   matrix given a 1-mer substitution matrix normalized by row, such as `HH_S1F`.
++ Changed `findThreshold` functionality to act like a switch to choose between `gmm` 
+and `dens` method.
++ Added the `gmm` method to find optimum distance threshold using Gaussian 
+Mixture Method.
++ Added the `plotgmmFit` function to plot `findThreshold` results where `gmm` 
+method has been ued.
 
 Region Definition:
 

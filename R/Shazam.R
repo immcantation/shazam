@@ -131,6 +131,8 @@
 #' @importFrom  tidyr       gather gather_ spread spread_
 #' @importFrom  iterators   icount
 #' @importFrom  SDMTools    wt.sd
+#' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format
+#'                          math_format percent scientific pretty_breaks
 #' @importFrom  seqinr      c2s s2c words translate
 #' @importFrom  stats       na.omit setNames ecdf sd cor cov median mad
 #'                          approx convolve weighted.mean p.adjust

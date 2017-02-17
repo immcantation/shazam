@@ -84,7 +84,7 @@ which show up as two modes in a nearest neighbor distance histogram.
 
 Thresholds may be manually determined by inspection of the nearest neighbor histograms
 or by using one of the automated threshold detection algorithms provided by the 
-`findThreshold` function. The available methods are `dens` (smoothed density) and `gmm` 
+`findThreshold` function. The available methods are `density` (smoothed density) and `gmm` 
 (Guassian mixture model), and are chosen via the `method` parameter of `findThreshold`.
 
 ### Threshold determination by manual inspection
@@ -104,7 +104,7 @@ p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
     ylab("Count") +
     scale_x_continuous(breaks=seq(0, 1, 0.1)) +
     geom_histogram(color="white", binwidth=0.02) +
-    geom_vline(xintercept=0.12, color="firebrick", linetype=3)
+    geom_vline(xintercept=0.12, color="firebrick", linetype=2)
 plot(p1)
 ```
 
@@ -123,7 +123,7 @@ p2 <- ggplot(subset(dist_s5f, !is.na(DIST_NEAREST)),
     ylab("Count") +
     scale_x_continuous(breaks=seq(0, 50, 5)) +
     geom_histogram(color="white", binwidth=1) +
-    geom_vline(xintercept=7, color="firebrick", linetype=3)
+    geom_vline(xintercept=7, color="firebrick", linetype=2)
 plot(p2)
 ```
 
@@ -134,7 +134,7 @@ set to a value near 7.
 
 ### Automated threshold detection via a Guassian mixture model
 
-The `gmm` method, which is computationally less expensive than `dens`, follows a 
+The `gmm` method, which is computationally less expensive than `density`, follows a 
 Gaussian mixture model (GMM) procedure, including the expectation maximization (EM) 
 algorithm, for learning the parameters of two univariate Gaussians which fit the bimodal 
 distributions of the input distance vector. Retrieving the fit parameters, it then calculates, 
@@ -147,21 +147,19 @@ where the average of the Sensitivity plus Specificity reaches its maximum.
 
 
 ```r
-# To find the Threshold cut use findThreshold-switch for "gmm" method 
+# Find threshold using gmm method
 output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", cutEdge=0.9)
 ```
 
 ```
 ## [1] "The number of non-NA entries= 958"
-## [1] "The 'gmm' would be done in 51 iterations"
-## ##################################################
+## [1] "The 'gmm' would be done in 5 iterations"
+## #####
 ```
 
 ```r
-# You can plot the nearest neighbor histogram, Gaussian fits, and optimum 
-# threshold together using "plotGmmFit" function
-plotGmmFit(ent=dist_ham$DIST_NEAREST, gaussData=output, xmin=0.0, xmax=1, xseq=0.1,
-           histBinwidth=0.02, title="gmm")
+# Plot distance histogram, Gaussian fits, and optimum threshold
+plot(output, binwidth=0.02, title="GMM Method")
 ```
 
 ![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
@@ -172,61 +170,33 @@ print(output)
 ```
 
 ```
-## An object of class "GmmResults"
-## Slot "omega1":
-## [1] 0.06707172
-## 
-## Slot "omega2":
-## [1] 0.9329283
-## 
-## Slot "mu1":
-## [1] 0.0395719
-## 
-## Slot "mu2":
-## [1] 0.3669703
-## 
-## Slot "sigma1":
-## [1] 0.02262901
-## 
-## Slot "sigma2":
-## [1] 0.1014838
-## 
-## Slot "threshold":
-## [1] 0.1094083
+## [1] 0.112601
 ```
 
-**Note:** The shape of histogram plotted by `plotGmmFit` is governed by the `histBinwidth` parameter.
+**Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `histBinwidth` parameter.
 Meaning, any change in bin size will change the form of the distribution, while the `gmm` method is 
 completely bin size independent and only engages the real input data.
 
 
 ### Automated threshold detection via smoothed density
 
-The `dens` method will look for the minimum in the valley between two modes of a smoothed 
+The `density` method will look for the minimum in the valley between two modes of a smoothed 
 distribution based on the input vector (`distances`), which will generally be the 
 `DIST_NEAREST` column from the `distToNearest` output. Determining the optimal bandwidth 
 parameter for smoothing the distribution can be computationally intensive. The bandwidth 
 tuning is typically robust when subsampling down to 15,000 distances, though the ideal 
 subsampling count will depend upon the data set. The input vector can be subsampled to 
 the size specified using the `subsample` parameter.  Below is an example of using the 
-`dens` method for threshold detection.
+`density` method for threshold detection.
 
 
 ```r
-# Find threshold for Hamming nearest neighbor distances
-output <- findThreshold(dist_ham$DIST_NEAREST, method="dens")
+# Find threshold using density method
+output <- findThreshold(dist_ham$DIST_NEAREST, method="density")
 threshold <- output@threshold
-# Plot
-p3 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
-             aes(x=DIST_NEAREST)) + 
-    theme_bw() + 
-    ggtitle("dens") +
-    xlab("Hamming distance") + 
-    ylab("Count") +
-    scale_x_continuous(breaks=seq(0, 1, 0.1)) +
-    geom_histogram(color="white", binwidth=0.02) +
-    geom_vline(xintercept=threshold, color="firebrick", linetype=3)
-plot(p3)
+
+# Plot distance histogram, density estimate and optimum threshold
+plot(output, title="Density Method")
 ```
 
 ![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
@@ -237,8 +207,6 @@ print(output)
 ```
 
 ```
-## An object of class "DensResults"
-## Slot "threshold":
 ## [1] 0.1226913
 ```
 
@@ -273,7 +241,7 @@ p4 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)),
     xlab("Grouped Hamming distance") + 
     ylab("Count") +
     geom_histogram(color="white", binwidth=0.02) +
-    geom_vline(xintercept=0.12, color="firebrick", linetype=3) +
+    geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
     facet_grid(SAMPLE ~ ., scales="free_y")
 plot(p4)
 ```
@@ -307,7 +275,7 @@ p5 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)),
     xlab("Cross-sample Hamming distance") + 
     ylab("Count") +
     geom_histogram(color="white", binwidth=0.02) +
-    geom_vline(xintercept=0.12, color="firebrick", linetype=3) +
+    geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
     facet_grid(SAMPLE ~ ., scales="free_y")
 plot(p5)
 ```
