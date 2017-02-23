@@ -83,7 +83,7 @@ setClass("Baseline",
 #'                              and boundaries of the Ig sequences.
 #' @param   testStatistic       \code{character} indicating the statistical framework 
 #'                              used to test for selection. For example, \code{"local"} or 
-#'                              \code{"focused"} or \code{"imbalance"}.                           
+#'                              \code{"focused"} or \code{"imbalanced"}.                           
 #' @param   regions             \code{character} vector defining the regions the BASELINe 
 #'                              analysis was carried out on. For \code{"CDR"} and \code{"FWR"} 
 #'                              or \code{"CDR1"}, \code{"CDR2"}, \code{"CDR3"}, etc. If \code{NULL}
@@ -335,7 +335,7 @@ getBaselineStats <- function(baseline) {
 #' \itemize{
 #'   \item   \code{local} = CDR_R / (CDR_R + CDR_S).
 #'   \item   \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
-#'   \item   \code{imbalance} = CDR_R + CDR_S / (CDR_R + CDR_S + FWR_S + FRW_R).
+#'   \item   \code{imbalanced} = CDR_R + CDR_S / (CDR_R + CDR_S + FWR_S + FRW_R).
 #' }
 #' For \code{focused} the \code{regionDefinition} must only contain two regions. If more 
 #' than two regions are defined the \code{local} test statistic will be used.
@@ -664,7 +664,7 @@ calcBaselineHelper  <- function(observed,
     }
     
     # Evaluate argument choices
-    testStatistic <- match.arg(testStatistic, c("local", "focused","imbalance"))
+    testStatistic <- match.arg(testStatistic, c("local", "focused", "imbalanced"))
     
     #If there are more than two regions (e.g. CDR and FWR then you cannot perform the focused test)
     if (testStatistic=="focused" & length(regions)!=2) {
@@ -703,8 +703,8 @@ calcBaselineHelper  <- function(observed,
             )        
     }     
     
-    # imbalance test statistic
-    if (testStatistic == "imbalance") { 
+    # imbalanced test statistic
+    if (testStatistic == "imbalanced") { 
         obsX_Index <- grep( paste0("OBSERVED_", region),  names(observed) )
         obsN_Index <- grep( "OBSERVED_",names(observed))  
         
