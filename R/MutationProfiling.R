@@ -492,7 +492,7 @@ observedMutations <- function(db,
 #' @param    returnRaw           return the positions of point mutations and their corresponding
 #'                               mutation types, as opposed to counts of mutations.
 #'                               Also returns the number of non-N bases used as the denominator when
-#'                               calculating frequency. Default if \code{FALSE}.                               
+#'                               calculating frequency. Default is \code{FALSE}.                               
 #'                               
 #' @return   For \code{returnRaw=FALSE}, an \code{array} with the number of replacement (R) 
 #'           and silent(S) mutations. For \code{returnRaw=TRUE}, a list containing a data 
