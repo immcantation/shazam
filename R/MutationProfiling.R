@@ -1051,6 +1051,7 @@ slideWindowTune <- function(db, sequenceColumn = "SEQUENCE_IMGT",
 #'                               \code{"topright"}, \code{"center"}, etc. Default is \code{"topright"}.
 #' @param    legendHoriz         whether to make legend horizontal. Default is \code{FALSE}.
 #' @param    legendCex           numeric values by which legend should be magnified relative to 1.
+#' @param    title               plot main title. Default is NULL (no title)
 #' 
 #' @details  For each \code{windowSize}, the numbers of sequences filtered or remaining after applying
 #'           the sliding window approach are plotted on the y-axis against thresholds on the number of
@@ -1106,7 +1107,7 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
                                jitter.y = FALSE, jitter.y.amt = 0.1,
                                pchs = 1, ltys = 2, cols = 1,
                                plotLegend = TRUE, legendPos = "topright", 
-                               legendHoriz = FALSE, legendCex = 1){
+                               legendHoriz = FALSE, legendCex = 1, title=NULL){
   
   # invert (!) tuneList if plotting retained sequences
   ylab.part.2 = "filtered"
@@ -1158,6 +1159,11 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
        cex.lab=1.5, cex.axis=1.5, type="b", lwd=1.5,
        pch=pchs[1], lty=ltys[1], col=cols[1])
   axis(side=1, at=threshes, cex.axis=1.5)
+  
+  # add title
+  if (!is.null(title)) {
+      title(main=title)
+  }
   
   # plot for the rest of the window sizes
   for (i in 1:length(plotList)){
