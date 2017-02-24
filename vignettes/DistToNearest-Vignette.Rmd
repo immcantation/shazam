@@ -1,6 +1,6 @@
 ---
 title: 'Shazam: Tuning clonal assignment thresholds with nearest neighbor distances'
-author: "Namita Gupta and Susanna Marquez"
+author: "Namita Gupta, Susanna Marquez and Nima Nouri"
 date: '`r Sys.Date()`'
 output:
   pdf_document:
