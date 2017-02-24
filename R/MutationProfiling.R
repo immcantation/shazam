@@ -312,6 +312,11 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
 #'                               and silent mutation criteria. If \code{NULL} then 
 #'                               replacement and silent are determined by exact 
 #'                               amino acid identity.
+#' @param    combine             \code{logical} indicating whether for each sequence should
+#'                               the mutation counts for the different regions (CDR, FWR) and 
+#'                               mutation types be combined and return one value of 
+#'                               count/frequency per sequence instead of 
+#'                               multiple values. Default is \code{FALSE}.                          
 #' @param    nproc               number of cores to distribute the operation over. If the 
 #'                               cluster has already been set the call function with 
 #'                               \code{nproc} = 0 to not reset or reinitialize. Default is 
@@ -375,6 +380,7 @@ observedMutations <- function(db,
                               sequenceColumn="SEQUENCE_IMGT",
                               germlineColumn="GERMLINE_IMGT_D_MASK",
                               frequency=FALSE,
+                              combine=FALSE,
                               regionDefinition=NULL,
                               mutationDefinition=NULL,
                               nproc=1) {
@@ -412,7 +418,7 @@ observedMutations <- function(db,
     if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
-                                              'regionDefinition', 'frequency',
+                                              'regionDefinition', 'frequency', 'combine',
                                               'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
                                               'getCodonPos','getContextInCodon','mutationType',
                                               'translateCodonToAminoAcid','AMINO_ACIDS','binMutationsByRegion',
@@ -432,15 +438,33 @@ observedMutations <- function(db,
     numbOfSeqs <- nrow(db)
     observedMutations_list <-
         foreach(idx=iterators::icount(numbOfSeqs)) %dopar% {
-            calcObservedMutations(db[idx, sequenceColumn], 
+            oM <- calcObservedMutations(db[idx, sequenceColumn], 
                                   db[idx, germlineColumn],
-                                  frequency=frequency,
+                                  frequency=frequency & !combine,
                                   regionDefinition=regionDefinition,
-                                  mutationDefinition=mutationDefinition)
+                                  mutationDefinition=mutationDefinition,
+                                  returnRaw = combine)
+            if (combine) {
+                num_mutations <- 0
+                if (!all(is.na(oM$pos))) {
+                    num_mutations <- length(oM$pos$position)
+                }
+                if (!frequency) {
+                    num_mutations
+                } else {
+                    num_nonN <- sum(oM$nonN)
+                    mu_freq <- num_mutations/num_nonN
+                    mu_freq
+                }
+            } else {
+                oM   
+            }
         }
     
     # Convert list of mutations to data.frame
-    if (!is.null(regionDefinition)) {
+    if (combine) {
+        labels_length <- 1
+    } else if (!is.null(regionDefinition)) {
         labels_length <- length(regionDefinition@labels)
     } else{
         #labels_length=1
@@ -456,9 +480,9 @@ observedMutations <- function(db,
     if (ncol(observed_mutations) > 1) sep <- "_"
     observed_mutations[is.na(observed_mutations)] <- 0
     if (frequency == TRUE) {
-        colnames(observed_mutations) <- paste("MU_FREQ", colnames(observed_mutations), sep=sep)
+        colnames(observed_mutations) <- gsub("_$","",paste("MU_FREQ", colnames(observed_mutations), sep=sep))
     } else {
-        colnames(observed_mutations) <- paste("OBSERVED", colnames(observed_mutations), sep=sep)
+        colnames(observed_mutations) <- gsub("_$","",paste("OBSERVED", colnames(observed_mutations), sep=sep))
     }
     
     # Properly shutting down the cluster

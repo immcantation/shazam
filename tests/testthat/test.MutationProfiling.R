@@ -66,6 +66,114 @@ test_that("calcObservedMutations, hydropathy", {
     
 })
 
+test_that("observedMutations, combine", {
+    
+    db <- subset(ExampleDb, ISOTYPE %in% c("IgA") & SAMPLE == "+7d")[1:25,]
+    
+    ##
+    ## With regionDefinition==NULL
+    ##
+    
+    db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                frequency=F,
+                                combine=F,
+                                regionDefinition=NULL,
+                                mutationDefinition=NULL,
+                                nproc=1)
+    
+    db_freq <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                frequency=T,
+                                combine=F,
+                                regionDefinition=NULL,
+                                mutationDefinition=NULL,
+                                nproc=1)
+    
+    db_obs_combined <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                          germlineColumn="GERMLINE_IMGT_D_MASK",
+                                          frequency=F,
+                                          combine=T,
+                                          regionDefinition=NULL,
+                                          mutationDefinition=NULL,
+                                          nproc=1)    
+    
+    db_freq_combined <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                 germlineColumn="GERMLINE_IMGT_D_MASK",
+                                 frequency=T,
+                                 combine=T,
+                                 regionDefinition=NULL,
+                                 mutationDefinition=NULL,
+                                 nproc=1)
+    
+    ## When using the whole sequence, the sum of OBSERVED_SEQ_S and OBSERVED_SEQ_R
+    ## should match OBSERVED 
+    expect_equal(rowSums(db_obs[,grep("OBSERVED",colnames(db_obs))]),
+                 db_obs_combined$OBSERVED)
+
+    ## When using the whole sequence, the sum of MU_FREQ_SEQ_S and MU_FREQ_SEQ_R
+    ## should match MU_FREQ 
+    expect_equal(rowSums(db_freq[,grep("MU_FREQ",colnames(db_freq))]),
+                 db_freq_combined$MU_FREQ)
+    
+    ##
+    ## With regionDefinition==IMGT_V
+    ##
+    
+    db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                frequency=F,
+                                combine=F,
+                                regionDefinition=IMGT_V,
+                                mutationDefinition=NULL,
+                                nproc=1)
+    
+    db_freq <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                 germlineColumn="GERMLINE_IMGT_D_MASK",
+                                 frequency=T,
+                                 combine=F,
+                                 regionDefinition=IMGT_V,
+                                 mutationDefinition=NULL,
+                                 nproc=1)
+    
+    db_obs_combined <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                         germlineColumn="GERMLINE_IMGT_D_MASK",
+                                         frequency=F,
+                                         combine=T,
+                                         regionDefinition=IMGT_V,
+                                         mutationDefinition=NULL,
+                                         nproc=1)    
+    ## Get the number of nonN positions, the denomitator for the frequency
+    db_obs_denominator <- sapply(1:dim(db)[1], 
+                        function(i) {
+                            mu_count <- calcObservedMutations(inputSeq = db[i, "SEQUENCE_IMGT"],
+                                                              germlineSeq = db[i,"GERMLINE_IMGT_D_MASK"],
+                                                              regionDefinition = IMGT_V,
+                                                              returnRaw = T, freq=F)
+                            mu_den <- sum(mu_count$nonN)
+                        })
+    
+    db_freq_combined <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                          germlineColumn="GERMLINE_IMGT_D_MASK",
+                                          frequency=T,
+                                          combine=T,
+                                          regionDefinition=IMGT_V,
+                                          mutationDefinition=NULL,
+                                          nproc=1)
+    
+    ## When using IMGT_V, the sum of OBSERVED_SEQ_S and OBSERVED_SEQ_R
+    ## should match OBSERVED. There is only one denominator, nonN-SEQ
+    expect_equal(rowSums(db_obs[,grep("OBSERVED",colnames(db_obs))]),
+                 db_obs_combined$OBSERVED)
+    
+    ## When not using the whole sequence, the sum of the mutation frequencies
+    ## may not match MU_FREQ, because CDR mutations and FWR mutations use their own
+    ## denominators (nonN-CDR and nonN-FWR)
+    expect_equal(db_obs_combined$OBSERVED/db_obs_denominator,
+        db_freq_combined$MU_FREQ)
+    
+})
+
 test_that("calcExpecteddMutations, hydropathy", {
     
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
