@@ -337,7 +337,25 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
 #'             \item  \code{OBSERVED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           }
-#'           
+#'           If \code{frequency=TRUE}, R and S mutation frequencies are
+#'           calculated over the number of non-N positions in the speficied regions.
+#'           \itemize{
+#'             \item  \code{MU_FREQ_CDR_R}:  frequency of replacement mutations in CDR1 and 
+#'                                            CDR2 of the V-segment.
+#'             \item  \code{MU_FREQ_CDR_S}:  frequency of silent mutations in CDR1 and CDR2 
+#'                                            of the V-segment.
+#'             \item  \code{MU_FREQ_FWR_R}:  frequency of replacement mutations in FWR1, 
+#'                                            FWR2 and FWR3 of the V-segment.
+#'             \item  \code{MU_FREQ_FWR_S}:  frequency of silent mutations in FWR1, FWR2 and
+#'                                            FWR3 of the V-segment.
+#'           } 
+#'           If \code{frequency=TRUE} and \code{combine=TRUE}, the mutations and non-N positions
+#'           are aggregated and a single \code{MU_FREQ} value is returned
+#'           \itemize{
+#'             \item  \code{MU_FREQ}:  frequency of replacement and silent mutations in the 
+#'                                      specified region
+#'           }     
+#'                                  
 #' @details
 #' Mutation count are determined by comparing the input sequences (in the column specified 
 #' by \code{sequenceColumn}) to the germline sequence (in the column specified by 
