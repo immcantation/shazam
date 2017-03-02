@@ -473,8 +473,8 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 
 #' Distance to nearest neighbor
 #'
-#' Get distance of every sequence to its nearest sequence sharing same V gene, J gene, and
-#' sequence length.
+#' Get non-zero distance of every sequence (as defined by \code{sequenceColumn}) to its 
+#' nearest sequence sharing same V gene, J gene, and sequence length.
 #'
 #' @param    db              data.frame containing sequence data.
 #' @param    sequenceColumn  name of the column containing nucleotide sequences to compare. 
@@ -528,6 +528,13 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'   \item \code{"m1n_compat"}:   Backwards compatibley mouse single nucleotide distance matrix used in 
 #'                                SHazaM v0.1.4 and Change-O v0.3.3.
 #' }
+#' 
+#' Note on \code{NA}s: if, for a given combination of V gene, J gene, and sequence length,
+#' there is only 1 sequence (as defined by \code{sequenceColumn}), \code{NA} is returned 
+#' instead of a distance (since it has no neighbor). If for a given combination there are 
+#' multiple sequences but only 1 unique sequence, (in which case every sequence in this 
+#' group is the de facto nearest neighbor to each other, thus giving rise to distances 
+#' of 0), \code{NA}s are returned instead of zero-distances.
 #' 
 #' @references
 #' \enumerate{
