@@ -674,10 +674,16 @@ calcBaselineHelper  <- function(observed,
     # local test statistic
     if (testStatistic == "local") { 
         obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(observed) )
-        obsN_Index <- grep( paste0("OBSERVED_", region),  names(observed) )
+        # important to have "_" after region
+        # otherwise this might happen (leading to bugs in results):
+        # region = codon_1
+        # expect grep to find only codon_1_S and codon_1_R
+        # in fact, however, codon_10_S, codon_10_R, codon_101_S, codon_101_R are matched
+        obsN_Index <- grep( paste0("OBSERVED_", region, "_"),  names(observed) )
         
         expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(expected) )
-        expN_Index <- grep( paste0("EXPECTED_", region),  names(expected) )       
+        # important to have "_" after region
+        expN_Index <- grep( paste0("EXPECTED_", region, "_"),  names(expected) )       
     }
     
     # focused test statistic
