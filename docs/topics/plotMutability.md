@@ -76,7 +76,7 @@ plotMutability(HH_S5F, "C")
 
 ```
 
-![2](plotMutability-2.png)
+*Warning*:`panel.margin` is deprecated. Please use `panel.spacing` property instead*Warning*:`legend.margin` must be specified using `margin()`. For the old behavior use legend.spacing![4](plotMutability-4.png)
 
 ```R
 
@@ -84,7 +84,7 @@ plotMutability(HH_S5F, "C")
 plotMutability(HH_S5F, c("G", "T"), style="bar")
 ```
 
-![4](plotMutability-4.png)
+*Warning*:`panel.margin` is deprecated. Please use `panel.spacing` property instead*Warning*:`legend.margin` must be specified using `margin()`. For the old behavior use legend.spacing![8](plotMutability-8.png)
 
 
 See also

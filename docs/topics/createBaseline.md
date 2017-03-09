@@ -40,7 +40,7 @@ and boundaries of the Ig sequences.
 testStatistic
 :   `character` indicating the statistical framework 
 used to test for selection. For example, `"local"` or 
-`"focused"` or `"imbalance"`.
+`"focused"` or `"imbalanced"`.
 
 regions
 :   `character` vector defining the regions the BASELINe 
@@ -196,7 +196,8 @@ Slot "pdfs":
 list()
 
 Slot "stats":
-[1] GROUP              REGION             BASELINE_SIGMA     BASELINE_CI_LOWER  BASELINE_CI_UPPER  BASELINE_CI_PVALUE
+[1] GROUP              REGION             BASELINE_SIGMA     BASELINE_CI_LOWER 
+[5] BASELINE_CI_UPPER  BASELINE_CI_PVALUE
 <0 rows> (or 0-length row.names)
 
 

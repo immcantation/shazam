@@ -18,7 +18,8 @@ Usage
 ```
 observedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", frequency = FALSE,
-regionDefinition = NULL, mutationDefinition = NULL, nproc = 1)
+combine = FALSE, regionDefinition = NULL, mutationDefinition = NULL,
+nproc = 1)
 ```
 
 Arguments
@@ -38,6 +39,13 @@ the germline or reference sequence.
 frequency
 :   `logical` indicating whether or not to calculate
 mutation frequencies. Default is `FALSE`.
+
+combine
+:   `logical` indicating whether for each sequence should
+the mutation counts for the different regions (CDR, FWR) and 
+mutation types be combined and return one value of 
+count/frequency per sequence instead of 
+multiple values. Default is `FALSE`.
 
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions
@@ -76,6 +84,24 @@ of the V-segment.
 FWR2 and FWR3 of the V-segment.
 + `OBSERVED_FWR_S`:  number of silent mutations in FWR1, FWR2 and
 FWR3 of the V-segment.
+
+If `frequency=TRUE`, R and S mutation frequencies are
+calculated over the number of non-N positions in the speficied regions.
+
++ `MU_FREQ_CDR_R`:  frequency of replacement mutations in CDR1 and 
+CDR2 of the V-segment.
++ `MU_FREQ_CDR_S`:  frequency of silent mutations in CDR1 and CDR2 
+of the V-segment.
++ `MU_FREQ_FWR_R`:  frequency of replacement mutations in FWR1, 
+FWR2 and FWR3 of the V-segment.
++ `MU_FREQ_FWR_S`:  frequency of silent mutations in FWR1, FWR2 and
+FWR3 of the V-segment.
+ 
+If `frequency=TRUE` and `combine=TRUE`, the mutations and non-N positions
+are aggregated and a single `MU_FREQ` value is returned
+
++ `MU_FREQ`:  frequency of replacement and silent mutations in the 
+specified region
 
 
 

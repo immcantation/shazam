@@ -9,8 +9,8 @@
 Description
 --------------------
 
-Get distance of every sequence to its nearest sequence sharing same V gene, J gene, and
-sequence length.
+Get non-zero distance of every sequence (as defined by `sequenceColumn`) to its 
+nearest sequence sharing same V gene, J gene, and sequence length.
 
 
 Usage
@@ -110,6 +110,13 @@ SHazaM v0.1.4 and Change-O v0.3.3.
 +  `"m1n_compat"`:   Backwards compatibley mouse single nucleotide distance matrix used in 
 SHazaM v0.1.4 and Change-O v0.3.3.
 
+
+Note on `NA`s: if, for a given combination of V gene, J gene, and sequence length,
+there is only 1 sequence (as defined by `sequenceColumn`), `NA` is returned 
+instead of a distance (since it has no neighbor). If for a given combination there are 
+multiple sequences but only 1 unique sequence, (in which case every sequence in this 
+group is the de facto nearest neighbor to each other, thus giving rise to distances 
+of 0), `NA`s are returned instead of zero-distances.
 
 
 References

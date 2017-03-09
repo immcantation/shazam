@@ -1,4 +1,4 @@
-Version 0.1.4.999: February 15, 2017
+Version 0.1.4.999: March 9, 2017
 -------------------------------------------------------------------------------
 
 General:
@@ -15,6 +15,8 @@ Selection Analysis:
   whereas a negative p-value indicates negative selection.
 + Added `editBaseline()` to exported functions, and a corresponding section 
   in the vignette. 
++ Fixed a bug in counting the total number of observed mutations when performing
+  a local test for codon-by-codon selection analysis in `calcBaseline()`.
 
 Targeting Models:
 

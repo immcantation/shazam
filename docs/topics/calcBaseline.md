@@ -100,7 +100,7 @@ E.g.
 
 + `local` = CDR_R / (CDR_R + CDR_S).
 + `focused` = CDR_R / (CDR_R + CDR_S + FWR_S).
-+ `imbalance` = CDR_R + CDR_S / (CDR_R + CDR_S + FWR_S + FRW_R).
++ `imbalanced` = CDR_R + CDR_S / (CDR_R + CDR_S + FWR_S + FRW_R).
 
 For `focused` the `regionDefinition` must only contain two regions. If more 
 than two regions are defined the `local` test statistic will be used.
