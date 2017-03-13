@@ -7,8 +7,8 @@ rm(e1)
 
 test_that("Test cross distToNearest with model hh_s1f", {
     ## Reproduce example
-    db <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
-                     BARCODE %in% c("RL016","RL018","RL019","RL021"))
+    db <- subset(db, CPRIMER %in% c("IGHA", "IGHM") & 
+                     BARCODE %in% c("RL016", "RL018", "RL019", "RL021"))
     db_nrow <- nrow(db)
     db2 <- dplyr::bind_rows(db,db)
     db2$SAMPLE<- "S2"
@@ -20,7 +20,7 @@ test_that("Test cross distToNearest with model hh_s1f", {
     ## Test hh_s1f 
     
     dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
-                                    model="hh_s1f", first=FALSE, normalize="length")
+                                    model="hh_s1f", first=FALSE, normalize="len")
     ## Test if the updated function reproduces results
     expect_equal(dist_hs1f$DIST_NEAREST[test_idx],
                  c(NA,NA,NA,NA,0.4040, 0.4447, 0.3963, 0.3469, 0.3050, 0.3050,
@@ -35,12 +35,12 @@ test_that("Test cross distToNearest with model hh_s1f", {
     
     ## fields=NULL and fields=DONOR should give same results
     cross_dist_hs1f <- distToNearest(db2, vCallColumn="V_CALL_GENOTYPED", 
-                                     model="hh_s1f", first=FALSE, normalize="length",nproc=1,
+                                     model="hh_s1f", first=FALSE, normalize="len",nproc=1,
                                      cross="SAMPLE")
     
     
     cross_dist_hs1f_donor <- distToNearest(db2, vCallColumn="V_CALL_GENOTYPED", 
-                               model="hh_s1f", first=FALSE, normalize="length",nproc=1,
+                               model="hh_s1f", first=FALSE, normalize="len",nproc=1,
                                cross="SAMPLE", fields="DONOR")
     
     expect_equal(cross_dist_hs1f, cross_dist_hs1f_donor)
@@ -63,13 +63,13 @@ test_that("Test cross distToNearest with model hh_s1f", {
     # t(db3[c(1,316,nrow(db3)),c("JUNCTION","V_CALL","J_CALL","DONOR","SAMPLE")] )
     
     db2_1_316_630 <- distToNearest(db2[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
-                  model="hh_s1f", first=FALSE, normalize="length",cross="SAMPLE")
+                  model="hh_s1f", first=FALSE, normalize="len",cross="SAMPLE")
     ## Exactly same seq, returns NA
     expect_equal(db2_1_316_630$CROSS_DIST_NEAREST,c(NA,NA,NA))
     
     ## One seq has been edited, will return distance values
     db3_1_316_630 <- distToNearest(db3[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
-                             model="hh_s1f", first=FALSE, normalize="length",cross="SAMPLE")
+                             model="hh_s1f", first=FALSE, normalize="len",cross="SAMPLE")
     expect_equal(db3_1_316_630$CROSS_DIST_NEAREST,c(0.0175,0.0175,0.0175), tolerance=0.005)
 })
 
@@ -164,7 +164,7 @@ test_that("Test distToNearest with unrecognized characters", {
     ## This seq belongs to clone of size 1
     db2$JUNCTION[3] <- gsub("T","Z",db2$JUNCTION[5] )
     expect_warning(
-        dist_hs1f <- distToNearest(db2, model="hh_s1f", first=FALSE, normalize="length"),
+        dist_hs1f <- distToNearest(db2, model="hh_s1f", first=FALSE, normalize="len"),
         "Invalid sequence characters"
     )
     
@@ -172,7 +172,7 @@ test_that("Test distToNearest with unrecognized characters", {
     ## This seq belongs to clone of size > 1
     db2$JUNCTION[5] <- gsub("T","Z",db$JUNCTION[5] )
     expect_warning(
-        dist_hs1f <- distToNearest(db2, model="hh_s1f", first=FALSE, normalize="length"),
+        dist_hs1f <- distToNearest(db2, model="hh_s1f", first=FALSE, normalize="len"),
         "Invalid sequence characters"
     )
 
@@ -180,7 +180,7 @@ test_that("Test distToNearest with unrecognized characters", {
 
 test_that("Test findThreshold", {
     
-    db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+    db <- distToNearest(db, model="ham", first=FALSE, normalize="len", nproc=1)
     
     gmm_output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
     expect_equal(gmm_output@threshold, 0.0896, tolerance=0.01)
