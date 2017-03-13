@@ -118,7 +118,7 @@ window5Mers <- function(sequence) {
 # @param    targetingDistance  targeting distance obtained from a targeting model
 #                              with the function \code{calcTargetingDistance}.
 # @param    normalize          method of normalization. Default is "none".
-#                              "length" = normalize distance by length of junction.
+#                              "len" = normalize distance by length of junction.
 # @param    symmetry           if model is hs5f, distance between seq1 and seq2 is either 
 #                              the average (avg) of seq1->seq2 and seq2->seq1 or the 
 #                              minimum (min).
@@ -132,7 +132,7 @@ window5Mers <- function(sequence) {
 # targeting_distance <- calcTargetingDistance(HH_S5F)
 # shazam:::dist5Mers(seq1, seq2, targeting_distance)
 dist5Mers <- function(seq1, seq2, targetingDistance, 
-                      normalize=c("none", "length", "mutations"),
+                      normalize=c("none", "len", "mut"),
                       symmetry=c("avg", "min")) {
     # Evaluate choices
     normalize <- match.arg(normalize)
@@ -185,9 +185,9 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
     })
     
     # Normalize distances
-    if (normalize == "length") { 
+    if (normalize == "len") { 
         dist <- dist/juncLength
-    } else if (normalize == "mutations") { 
+    } else if (normalize == "mut") { 
         dist <- dist/numbOfMutation 
     }
     
@@ -201,13 +201,13 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
 # @param   targetingDistance  targeting distance obtained from a targeting model
 #                             with the function `calcTargetingDistance`
 # @param   normalize          method of normalization. Default is "none".
-#                             "length" = normalize distance by length of junction.
+#                             "len" = normalize distance by length of junction.
 # @param   symmetry           if model is hs5f, distance between seq1 and seq2 is either the
 #                             average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 #
 # @return  A matrix of pairwise distances between junction sequences.
 pairwise5MerDist <- function(sequences, targetingDistance, 
-                             normalize=c("none", "length", "mutations"),
+                             normalize=c("none", "len", "mut"),
                              symmetry=c("avg", "min")) {
     # Initial checks
     normalize <- match.arg(normalize)
@@ -310,8 +310,8 @@ allValidChars <- function(seq, validChars) {
 # @param    sequences      character vector of sequences.
 # @param    model          5-mer or 1-mer distance model
 # @param    normalize      method of normalization. Default is "none".
-#                          "length" = normalize distance by length of junction.
-#                          "mutations" = normalize distance by number of mutations in 
+#                          "len" = normalize distance by length of junction.
+#                          "mut" = normalize distance by number of mutations in 
 #                          junction.
 # @param    symmetr        if model is hs5f or mrs5nf, distance between seq1 and seq2 is either the
 #                          average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
@@ -327,15 +327,15 @@ allValidChars <- function(seq, validChars) {
 #                "ACGAACGTATCC", "AAAAAAAAAAAA", "A-GAACGTATCC", "AAAAAA---AAA")
 # shazam:::nearestDist(sequences, model="ham", normalize="none")
 # shazam:::nearestDist(sequences, model="aa", normalize="none")
-# shazam:::nearestDist(sequences, model="ham", normalize="length")
-# shazam:::nearestDist(sequences, model="aa", normalize="length")
+# shazam:::nearestDist(sequences, model="ham", normalize="len")
+# shazam:::nearestDist(sequences, model="aa", normalize="len")
 nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "hs1f_compat", "m1n_compat"),
-                       normalize=c("none", "length", "mutations"),
+                       normalize=c("none", "len", "mut"),
                        symmetry=c("avg", "min"),
                        crossGroups=NULL, mst=FALSE) {
     ## DEBUG
     # sequences <- c("ACGTACGTACGT", "ACGAACGTACGT", "AAAAAAAAAAAA", "A-AAAA---AAA")
-    # model="aa"; normalize="length"; crossGroups=NULL; mst=FALSE
+    # model="aa"; normalize="len"; crossGroups=NULL; mst=FALSE
     
     # Initial checks
     model <- match.arg(model)
@@ -389,11 +389,11 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
         # print(dist_mat)
 
         # Normalize distances
-        if (normalize == "length") { 
+        if (normalize == "len") { 
             dist_mat <- dist_mat / seq_length
-        } else if (normalize == "mutations") {
+        } else if (normalize == "mut") {
             #dist <- dist/sum(strsplit(seq1,"")[[1]] != strsplit(seq2,"")[[1]])
-            stop("Sorry! nomalize=mutations is not available.")
+            stop('Sorry! nomalize="mut" is not available.')
         }
         
         ## DEBUG
@@ -484,7 +484,7 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' @param    model           underlying SHM model, which must be one of 
 #'                           \code{c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "hs1f_compat", "m1n_compat")}.
 #'                           See Details for further information.
-#' @param    normalize       method of normalization. The default is \code{"length"}, which 
+#' @param    normalize       method of normalization. The default is \code{"len"}, which 
 #'                           divides the distance by the length of the sequence group. If 
 #'                           \code{"none"} then no normalization if performed.
 #' @param    symmetry        if model is hs5f, distance between seq1 and seq2 is either the
@@ -562,7 +562,7 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' 
 #' # Use genotyped V assignments, Hamming distance, and normalize by junction length
 #' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
-#'                       first=FALSE, normalize="length")
+#'                       first=FALSE, normalize="len")
 #'                            
 #' # Plot histogram of non-NA distances
 #' p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
@@ -579,7 +579,7 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
-                          normalize=c("length", "none"), symmetry=c("avg", "min"),
+                          normalize=c("len", "none"), symmetry=c("avg", "min"),
                           first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE) {
     # Hack for visibility of data.table and foreach index variables
     idx <- yidx <- .I <- NULL
@@ -793,7 +793,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
 #' 
 #' # Use nucleotide Hamming distance and normalize by junction length
-#' db <- distToNearest(db, model="ham", normalize="length", nproc=1)
+#' db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 #'                             
 #' # Find threshold using the "gmm" method
 #' output <- findThreshold(db$DIST_NEAREST, method="gmm")
@@ -856,7 +856,7 @@ findThreshold <- function (data, method=c("gmm", "density"), cutEdge=0.9, cross=
 # 
 # # Use genotyped V assignments, HS1F model, and normalize by junction length
 # dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
-#                            model="hs1f", first=FALSE, normalize="length")
+#                            model="hs1f", first=FALSE, normalize="len")
 #                  
 # # using findThreshold switch
 # threshold <- findThreshold(dist_hs1f$DIST_NEAREST, method="density")
@@ -938,7 +938,7 @@ smoothValley <- function(distances, subsample=NULL) {
 # db <- subset(ExampleDb, SAMPLE == "-1h")
 #
 # # Use nucleotide Hamming distance and normalize by junction length
-# db <- distToNearest(db, model="ham", first=FALSE, normalize="length", nproc=1)
+# db <- distToNearest(db, model="ham", first=FALSE, normalize="len", nproc=1)
 #                             
 # # To find the Threshold cut use either findThreshold-switch
 # output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
@@ -1250,7 +1250,7 @@ gmmThreshold <- function (omega, mu, sigma) {
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
 #'
 #' # Use nucleotide Hamming distance and normalize by junction length
-#' db <- distToNearest(db, model="ham", normalize="length", nproc=1)
+#' db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 #' 
 #' # To find the threshold cut, call findThreshold function for "gmm" method.
 #' output <- findThreshold(db$DIST_NEAREST, method="gmm")
@@ -1361,7 +1361,7 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
 #'
 #' # Use nucleotide Hamming distance and normalize by junction length
-#' db <- distToNearest(db, model="ham", normalize="length", nproc=1)
+#' db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 #' 
 #' # To find the threshold cut, call findThreshold function for "gmm" method.
 #' output <- findThreshold(db$DIST_NEAREST, method="density")

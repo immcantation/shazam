@@ -84,7 +84,7 @@ the overall distance.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Use nucleotide Hamming distance and normalize by junction length
-dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="length", 
+dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="len", 
                           nproc=1)
 
 # Use genotyped V assignments, a 5-mer model and no normalization
@@ -212,7 +212,7 @@ and will set `fields="SAMPLE"`. This will reproduce previous results for sample
 
 ```{r fields, eval=TRUE, warning=FALSE}
 dist_fields <- distToNearest(ExampleDb, model="ham", first=FALSE, 
-                             normalize="length", fields="SAMPLE", 
+                             normalize="len", fields="SAMPLE", 
                              nproc=1)
 ```
 
@@ -245,7 +245,7 @@ we set `cross="SAMPLE"`, which will group the data into `-1h` and
 
 ```{r cross, eval=TRUE, warning=FALSE}
 dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE, 
-                            normalize="length", cross="SAMPLE", nproc=1)
+                            normalize="len", cross="SAMPLE", nproc=1)
 ```
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
