@@ -136,7 +136,13 @@ nproc=1)
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "observedMutations"
+
+```
+Calculating observed number of mutations...
+
+```
+
+
 ```R
 
 # Count of V-region mutations split by FWR and CDR
@@ -148,7 +154,13 @@ mutationDefinition=CHARGE_MUTATIONS,
 nproc=1)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "observedMutations"
+
+```
+Calculating observed number of mutations...
+
+```
+
+
 
 See also
 -------------------

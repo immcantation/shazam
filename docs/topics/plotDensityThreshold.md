@@ -84,30 +84,27 @@ db <- subset(ExampleDb, SAMPLE == "-1h")
 # Use nucleotide Hamming distance and normalize by junction length
 db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 
-```
-
-**Error in eval(expr, envir, enclos)**: could not find function "distToNearest"
-```R
-
 # To find the threshold cut, call findThreshold function for "gmm" method.
 output <- findThreshold(db$DIST_NEAREST, method="density")
-
-```
-
-**Error in eval(expr, envir, enclos)**: could not find function "findThreshold"
-```R
 print(output)
 
 ```
 
-**Error in print(output)**: object 'output' not found
+
+```
+[1] 0.1226913
+
+```
+
+
 ```R
 
 # Plot
 plotDensityThreshold(output)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "plotDensityThreshold"
+![4](plotDensityThreshold-4.png)
+
 
 See also
 -------------------

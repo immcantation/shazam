@@ -73,16 +73,11 @@ Examples
 # Calculate targeting distance of HH_S5F
 dist <- calcTargetingDistance(HH_S5F)
 
-```
-
-**Error in eval(expr, envir, enclos)**: could not find function "calcTargetingDistance"
-```R
-
 # Calculate targeting distance of HH_S1F
 dist <- calcTargetingDistance(HH_S1F)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "calcTargetingDistance"
+
 
 See also
 -------------------

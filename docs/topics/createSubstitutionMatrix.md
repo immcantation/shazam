@@ -129,18 +129,13 @@ db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 subCount <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=TRUE)
 
-```
-
-**Error in eval(expr, envir, enclos)**: could not find function "createSubstitutionMatrix"
-```R
-
 # Create model using only silent mutations
 sub <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=FALSE,
 minNumMutations=20)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "createSubstitutionMatrix"
+
 
 See also
 -------------------

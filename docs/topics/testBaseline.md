@@ -76,7 +76,16 @@ nproc=1)
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "calcBaseline"
+
+```
+Collapsing clonal sequences...
+Calculating observed number of mutations...
+Calculating the expected frequencies of mutations...
+Calculating BASELINe probability density functions...
+
+```
+
+
 ```R
 
 # Group PDFs by the sample identifier
@@ -84,14 +93,29 @@ grouped <- groupBaseline(baseline, groupBy="SAMPLE")
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "groupBaseline"
+
+```
+Grouping BASELINe probability density functions...
+Calculating BASELINe statistics...
+
+```
+
+
 ```R
 
 # Perform test on sample PDFs
 testBaseline(grouped, groupBy="SAMPLE")
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "testBaseline"
+
+```
+  REGION       TEST      PVALUE         FDR
+1    CDR -1h != +7d 0.295621182 0.295621182
+2    FWR -1h != +7d 0.004858044 0.009716087
+
+```
+
+
 
 See also
 -------------------

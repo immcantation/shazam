@@ -59,7 +59,16 @@ nproc = 1)
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "calcBaseline"
+
+```
+Collapsing clonal sequences...
+Calculating observed number of mutations...
+Calculating the expected frequencies of mutations...
+Calculating BASELINe probability density functions...
+
+```
+
+
 ```R
 
 # Grouping the PDFs by the isotype and sample annotations.
@@ -67,14 +76,31 @@ grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "groupBaseline"
+
+```
+Grouping BASELINe probability density functions...
+Calculating BASELINe statistics...
+
+```
+
+
 ```R
 
 # Get a data.frame of the summary statistics
 getBaselineStats(grouped)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "getBaselineStats"
+
+```
+  SAMPLE ISOTYPE REGION BASELINE_SIGMA BASELINE_CI_LOWER BASELINE_CI_UPPER BASELINE_CI_PVALUE
+1    +7d     IgA    CDR     -0.3064983        -0.4979519        -0.1459329      -1.170362e-04
+2    +7d     IgA    FWR     -0.6979453        -0.8253547        -0.5788915      -1.232348e-14
+3    +7d     IgG    CDR     -0.2408167        -0.3704990        -0.1286678      -2.272340e-05
+4    +7d     IgG    FWR     -0.7143657        -0.8118353        -0.6273080      -6.994405e-15
+
+```
+
+
 
 See also
 -------------------

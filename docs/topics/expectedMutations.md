@@ -105,7 +105,13 @@ nproc=1)
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "expectedMutations"
+
+```
+Calculating the expected frequencies of mutations...
+
+```
+
+
 ```R
 
 # Calculate hydropathy expected mutations over V region
@@ -117,7 +123,13 @@ mutationDefinition=HYDROPATHY_MUTATIONS,
 nproc=1)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "expectedMutations"
+
+```
+Calculating the expected frequencies of mutations...
+
+```
+
+
 
 See also
 -------------------

@@ -57,17 +57,22 @@ Examples
 # Make a degenerate 5-mer model (4x1024) based on HKL_S1F (4x4)
 degenerate5merSub <- makeDegenerate5merSub(sub1mer = HKL_S1F)
 
-```
-
-**Error in eval(expr, envir, enclos)**: could not find function "makeDegenerate5merSub"
-```R
-
 # Now make a 1-mer model by averaging over the degenerate 5-mer model
 # Expected to get back HKL_S1F
 makeAverage1merSub(sub5mer = degenerate5merSub)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "makeAverage1merSub"
+
+```
+     A    C    G    T
+A   NA 0.26 0.50 0.24
+C 0.25   NA 0.30 0.45
+G 0.53 0.31   NA 0.16
+T 0.20 0.57 0.23   NA
+
+```
+
+
 
 See also
 -------------------

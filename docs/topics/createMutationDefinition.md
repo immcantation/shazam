@@ -63,7 +63,7 @@ classes <- setNames(translateStrings(chars, hydropathy), chars)
 md <- createMutationDefinition("Hydropathy", classes)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "createMutationDefinition"
+
 
 See also
 -------------------

@@ -54,7 +54,35 @@ Examples
 createRegionDefinition()
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "createRegionDefinition"
+
+```
+An object of class "RegionDefinition"
+Slot "name":
+[1] ""
+
+Slot "description":
+[1] ""
+
+Slot "boundaries":
+factor(0)
+Levels: 
+
+Slot "seqLength":
+[1] 0
+
+Slot "regions":
+character(0)
+
+Slot "labels":
+character(0)
+
+Slot "citation":
+[1] ""
+
+
+```
+
+
 
 See also
 -------------------

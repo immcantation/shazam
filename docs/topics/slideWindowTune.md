@@ -95,7 +95,53 @@ slideWindowTune(db, mutThreshRange=2:4, windowSizeRange=7:9)
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "slideWindowTune"
+
+```
+now computing for windowSize = 7
+>>> mutThresh = 2
+>>> mutThresh = 3
+>>> mutThresh = 4
+now computing for windowSize = 8
+>>> mutThresh = 2
+>>> mutThresh = 3
+>>> mutThresh = 4
+now computing for windowSize = 9
+>>> mutThresh = 2
+>>> mutThresh = 3
+>>> mutThresh = 4
+
+```
+
+
+```
+$`7`
+         2     3     4
+[1,]  TRUE FALSE FALSE
+[2,] FALSE FALSE FALSE
+[3,]  TRUE FALSE FALSE
+[4,]  TRUE FALSE FALSE
+[5,] FALSE FALSE FALSE
+
+$`8`
+         2     3     4
+[1,]  TRUE FALSE FALSE
+[2,] FALSE FALSE FALSE
+[3,]  TRUE FALSE FALSE
+[4,]  TRUE FALSE FALSE
+[5,] FALSE FALSE FALSE
+
+$`9`
+         2     3     4
+[1,]  TRUE FALSE FALSE
+[2,] FALSE FALSE FALSE
+[3,]  TRUE FALSE FALSE
+[4,]  TRUE FALSE FALSE
+[5,] FALSE FALSE FALSE
+
+
+```
+
+
 ```R
 
 # Illegal combinations are skipped, returning NAs.
@@ -104,7 +150,36 @@ verbose=FALSE)
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "slideWindowTune"
+
+```
+$`2`
+         2  3  4
+[1,] FALSE NA NA
+[2,] FALSE NA NA
+[3,] FALSE NA NA
+[4,] FALSE NA NA
+[5,] FALSE NA NA
+
+$`3`
+         2     3  4
+[1,] FALSE FALSE NA
+[2,] FALSE FALSE NA
+[3,]  TRUE FALSE NA
+[4,]  TRUE FALSE NA
+[5,] FALSE FALSE NA
+
+$`4`
+         2     3     4
+[1,]  TRUE FALSE FALSE
+[2,] FALSE FALSE FALSE
+[3,]  TRUE FALSE FALSE
+[4,]  TRUE FALSE FALSE
+[5,] FALSE FALSE FALSE
+
+
+```
+
+
 ```R
 
 # Run calcObservedMutations separately
@@ -112,16 +187,58 @@ exDbMutList <- sapply(1:5, function(i) {
 calcObservedMutations(inputSeq=db[i, "SEQUENCE_IMGT"],
 germlineSeq=db[i, "GERMLINE_IMGT_D_MASK"],
 returnRaw=TRUE)$pos })
-
-```
-
-**Error in FUN(X[[i]], ...)**: could not find function "calcObservedMutations"
-```R
 slideWindowTune(db, dbMutList=exDbMutList, 
 mutThreshRange=2:4, windowSizeRange=2:4)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "slideWindowTune"
+
+```
+dbMutList supplied; skipped calling calcObservedMutations()
+now computing for windowSize = 2
+>>> mutThresh = 2
+>>> mutThresh = 3 > windowSize = 2 (skipped)
+>>> mutThresh = 4 > windowSize = 2 (skipped)
+now computing for windowSize = 3
+>>> mutThresh = 2
+>>> mutThresh = 3
+>>> mutThresh = 4 > windowSize = 3 (skipped)
+now computing for windowSize = 4
+>>> mutThresh = 2
+>>> mutThresh = 3
+>>> mutThresh = 4
+
+```
+
+
+```
+$`2`
+         2  3  4
+[1,] FALSE NA NA
+[2,] FALSE NA NA
+[3,] FALSE NA NA
+[4,] FALSE NA NA
+[5,] FALSE NA NA
+
+$`3`
+         2     3  4
+[1,] FALSE FALSE NA
+[2,] FALSE FALSE NA
+[3,]  TRUE FALSE NA
+[4,]  TRUE FALSE NA
+[5,] FALSE FALSE NA
+
+$`4`
+         2     3     4
+[1,]  TRUE FALSE FALSE
+[2,] FALSE FALSE FALSE
+[3,]  TRUE FALSE FALSE
+[4,]  TRUE FALSE FALSE
+[5,] FALSE FALSE FALSE
+
+
+```
+
+
 
 See also
 -------------------

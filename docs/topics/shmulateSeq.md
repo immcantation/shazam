@@ -54,7 +54,13 @@ sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
 shmulateSeq(sequence, mutations=6)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "shmulateSeq"
+
+```
+[1] "NCATCCGACGACACGGCCGTGTATGCCTGTGCGAGAAATAGTTTT"
+
+```
+
+
 
 See also
 -------------------

@@ -76,14 +76,16 @@ plotMutability(HH_S5F, "C")
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "plotMutability"
+*Warning*:`panel.margin` is deprecated. Please use `panel.spacing` property instead*Warning*:`legend.margin` must be specified using `margin()`. For the old behavior use legend.spacing![4](plotMutability-4.png)
+
 ```R
 
 # Plot two nucleotides in barchart style
 plotMutability(HH_S5F, c("G", "T"), style="bar")
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "plotMutability"
+*Warning*:`panel.margin` is deprecated. Please use `panel.spacing` property instead*Warning*:`legend.margin` must be specified using `margin()`. For the old behavior use legend.spacing![8](plotMutability-8.png)
+
 
 See also
 -------------------

@@ -65,24 +65,32 @@ Examples
 example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)
 degenerate5merMut <- makeDegenerate5merMut(mut1mer = example1merMut)
 
-```
-
-**Error in eval(expr, envir, enclos)**: could not find function "makeDegenerate5merMut"
-```R
-
 # Look at a few 5-mers
 degenerate5merMut[c("AAAAT", "AACAT", "AAGAT", "AATAT")]
 
 ```
 
-**Error in eval(expr, envir, enclos)**: object 'degenerate5merMut' not found
+
+```
+      AAAAT       AACAT       AAGAT       AATAT 
+0.000781250 0.001562500 0.001171875 0.000390625 
+
+```
+
+
 ```R
 
 # Normalized
 sum(degenerate5merMut)
 ```
 
-**Error in eval(expr, envir, enclos)**: object 'degenerate5merMut' not found
+
+```
+[1] 1
+
+```
+
+
 
 See also
 -------------------

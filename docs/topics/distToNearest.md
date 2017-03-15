@@ -149,11 +149,6 @@ db <- subset(ExampleDb, SAMPLE == "-1h")
 dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
 first=FALSE, normalize="len")
 
-```
-
-**Error in eval(expr, envir, enclos)**: could not find function "distToNearest"
-```R
-
 # Plot histogram of non-NA distances
 p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
 theme_bw() + 
@@ -161,23 +156,19 @@ ggtitle("Distance to nearest: Hamming") +
 xlab("distance") +
 geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
 fill="steelblue", color="white")
-
-```
-
-**Error in subset.default(dist, !is.na(DIST_NEAREST))**: object 'DIST_NEAREST' not found
-```R
 plot(p1)
 
 ```
 
-**Error in loadNamespace(i, c(lib.loc, .libPaths()), versionCheck = vI[[i]])**: namespace ‘scales’ 0.4.0 is already loaded, but >= 0.4.1 is required
+![2](distToNearest-2.png)
+
 ```R
 
 # Use human 5-mer model
 dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f")
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "distToNearest"
+
 
 See also
 -------------------

@@ -97,7 +97,14 @@ calcExpectedMutations(in_seq, germ_seq)
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "calcExpectedMutations"
+
+```
+    SEQ_R     SEQ_S 
+0.7659404 0.2340596 
+
+```
+
+
 ```R
 
 # Identify only mutations the V segment minus CDR3
@@ -105,7 +112,14 @@ calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V)
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "calcExpectedMutations"
+
+```
+     CDR_R      CDR_S      FWR_R      FWR_S 
+0.20544721 0.04081758 0.56090228 0.19283293 
+
+```
+
+
 ```R
 
 # Define mutations based on hydropathy
@@ -113,7 +127,14 @@ calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "calcExpectedMutations"
+
+```
+    CDR_R     CDR_S     FWR_R     FWR_S 
+0.1209459 0.1253189 0.3169116 0.4368236 
+
+```
+
+
 
 See also
 -------------------

@@ -115,18 +115,8 @@ subTune = minNumMutationsTune(subCount, seq(from=5, to=50, by=5))
 tuneMtx = c(tuneMtx, list(subTune))
 }
 
-```
-
-**Error**: could not find function "createSubstitutionMatrix"
-```R
-
 # Name tuneMtx after sample names 
 names(tuneMtx) = unique(db$SAMPLE)
-
-```
-
-**Error in names(tuneMtx) = unique(db$SAMPLE)**: 'names' attribute [2] must be the same length as the vector [0]
-```R
 
 # plot with legend for both samples for a subset of minNumMutations values
 plotTune(tuneMtx, thresh=c(5,15,25,40), criterion="3mer",
@@ -135,14 +125,16 @@ plotLegend=TRUE, legendPos=c(5, 100))
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "plotTune"
+![2](plotTune-2.png)
+
 ```R
 
 # plot for only 1 sample for all the minNumMutations values (no legend)
 plotTune(tuneMtx[[1]], thresh=seq(from=5, to=50, by=5), criterion="3mer")
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "plotTune"
+![4](plotTune-4.png)
+
 
 See also
 -------------------

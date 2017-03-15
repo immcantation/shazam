@@ -28,6 +28,6 @@ Examples
 clearConsole()
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "clearConsole"
+
 
 

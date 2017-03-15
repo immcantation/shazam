@@ -62,7 +62,13 @@ germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
 slideWindowSeq(inputSeq=in_seq, germlineSeq=germ_seq, mutThresh=6, windowSize=10)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "slideWindowSeq"
+
+```
+[1] FALSE
+
+```
+
+
 
 See also
 -------------------

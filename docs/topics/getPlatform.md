@@ -34,6 +34,12 @@ Examples
 getPlatform()
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "getPlatform"
+
+```
+[1] "unix"
+
+```
+
+
 
 

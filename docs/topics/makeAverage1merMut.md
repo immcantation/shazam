@@ -55,18 +55,20 @@ Examples
 # Make a degenerate 5-mer model (length of 1024) based on a 1-mer model
 example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)
 degenerate5merMut <- makeDegenerate5merMut(mut1mer = example1merMut)
-
-```
-
-**Error in eval(expr, envir, enclos)**: could not find function "makeDegenerate5merMut"
-```R
  
 # Now make a 1-mer model by averaging over the degenerate 5-mer model
 # Expected to get back example1merMut
 makeAverage1merMut(mut5mer = degenerate5merMut)
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "makeAverage1merMut"
+
+```
+  A   C   G   T 
+0.2 0.4 0.3 0.1 
+
+```
+
+
 
 See also
 -------------------

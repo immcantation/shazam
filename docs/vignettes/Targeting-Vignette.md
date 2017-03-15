@@ -90,7 +90,7 @@ clone_db <- collapseClones(ExampleDb, nproc=1)
 ```
 
 ```
-## Error in eval(expr, envir, enclos): could not find function "collapseClones"
+## Collapsing clonal sequences...
 ```
 
 ```r
@@ -98,10 +98,6 @@ clone_db <- collapseClones(ExampleDb, nproc=1)
 # Use consensus sequence input and germline columns
 model <- createTargetingModel(clone_db, model="S", sequenceColumn="CLONAL_SEQUENCE", 
                               germlineColumn="CLONAL_GERMLINE")
-```
-
-```
-## Error in eval(expr, envir, enclos): could not find function "createTargetingModel"
 ```
 
 ## Visualize targeting model
@@ -120,17 +116,13 @@ this can be specified via the `nucleotides` argument.
 plotMutability(model, nucleotides="A", style="hedgehog")
 ```
 
-```
-## Error in eval(expr, envir, enclos): could not find function "plotMutability"
-```
+![plot of chunk Targeting-Vignette-4](figure/Targeting-Vignette-4-1.png)
 
 ```r
 plotMutability(model, nucleotides="C", style="hedgehog")
 ```
 
-```
-## Error in eval(expr, envir, enclos): could not find function "plotMutability"
-```
+![plot of chunk Targeting-Vignette-4](figure/Targeting-Vignette-4-2.png)
 
 
 ```r
@@ -138,17 +130,13 @@ plotMutability(model, nucleotides="C", style="hedgehog")
 plotMutability(model, nucleotides="G", style="bar")
 ```
 
-```
-## Error in eval(expr, envir, enclos): could not find function "plotMutability"
-```
+![plot of chunk Targeting-Vignette-5](figure/Targeting-Vignette-5-1.png)
 
 ```r
 plotMutability(model, nucleotides="T", style="bar")
 ```
 
-```
-## Error in eval(expr, envir, enclos): could not find function "plotMutability"
-```
+![plot of chunk Targeting-Vignette-5](figure/Targeting-Vignette-5-2.png)
 
 ## Calculate targeting distance matrix
 
@@ -165,8 +153,4 @@ generated and written directly to a file using the function
 ```r
 # Calculate distance matrix
 dist <- calcTargetingDistance(model)
-```
-
-```
-## Error in eval(expr, envir, enclos): could not find function "calcTargetingDistance"
 ```

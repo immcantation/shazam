@@ -136,7 +136,73 @@ Examples
 createBaseline()
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "createBaseline"
+
+```
+An object of class "Baseline"
+Slot "description":
+[1] ""
+
+Slot "db":
+data frame with 0 columns and 0 rows
+
+Slot "regionDefinition":
+An object of class "RegionDefinition"
+Slot "name":
+[1] ""
+
+Slot "description":
+[1] ""
+
+Slot "boundaries":
+factor(0)
+Levels: 
+
+Slot "seqLength":
+[1] 0
+
+Slot "regions":
+character(0)
+
+Slot "labels":
+character(0)
+
+Slot "citation":
+[1] ""
+
+
+Slot "testStatistic":
+[1] ""
+
+Slot "regions":
+character(0)
+
+Slot "numbOfSeqs":
+     [,1]
+[1,]   NA
+
+Slot "binomK":
+     [,1]
+[1,]   NA
+
+Slot "binomN":
+     [,1]
+[1,]   NA
+
+Slot "binomP":
+     [,1]
+[1,]   NA
+
+Slot "pdfs":
+list()
+
+Slot "stats":
+[1] GROUP              REGION             BASELINE_SIGMA     BASELINE_CI_LOWER  BASELINE_CI_UPPER  BASELINE_CI_PVALUE
+<0 rows> (or 0-length row.names)
+
+
+```
+
+
 
 See also
 -------------------

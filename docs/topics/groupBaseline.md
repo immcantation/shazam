@@ -91,7 +91,16 @@ nproc=1)
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "calcBaseline"
+
+```
+Collapsing clonal sequences...
+Calculating observed number of mutations...
+Calculating the expected frequencies of mutations...
+Calculating BASELINe probability density functions...
+
+```
+
+
 ```R
 
 # Group PDFs by sample
@@ -99,14 +108,22 @@ grouped1 <- groupBaseline(baseline, groupBy="SAMPLE")
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "groupBaseline"
+
+```
+Grouping BASELINe probability density functions...
+Calculating BASELINe statistics...
+
+```
+
+
 ```R
 plotBaselineDensity(grouped1, idColumn="SAMPLE", colorElement="group", 
 sigmaLimits=c(-1, 1))
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "plotBaselineDensity"
+![6](groupBaseline-6.png)
+
 ```R
  
 # Group PDFs by both sample (between variable) and isotype (within variable)
@@ -114,7 +131,14 @@ grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "groupBaseline"
+
+```
+Grouping BASELINe probability density functions...
+Calculating BASELINe statistics...
+
+```
+
+
 ```R
 plotBaselineDensity(grouped2, idColumn="SAMPLE", groupColumn="ISOTYPE",
 colorElement="group", colorValues=IG_COLORS,
@@ -122,7 +146,8 @@ sigmaLimits=c(-1, 1))
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "plotBaselineDensity"
+![10](groupBaseline-10.png)
+
 ```R
 
 # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
@@ -130,13 +155,21 @@ grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "groupBaseline"
+
+```
+Grouping BASELINe probability density functions...
+Calculating BASELINe statistics...
+
+```
+
+
 ```R
 plotBaselineDensity(grouped3, idColumn="SAMPLE", colorElement="group",
 sigmaLimits=c(-1, 1))
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "plotBaselineDensity"
+![14](groupBaseline-14.png)
+
 
 See also
 -------------------

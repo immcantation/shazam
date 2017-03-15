@@ -87,7 +87,16 @@ nproc = 1)
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "calcBaseline"
+
+```
+Collapsing clonal sequences...
+Calculating observed number of mutations...
+Calculating the expected frequencies of mutations...
+Calculating BASELINe probability density functions...
+
+```
+
+
 ```R
 
 # Grouping the PDFs by the sample and isotype annotations
@@ -95,14 +104,27 @@ grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "groupBaseline"
+
+```
+Grouping BASELINe probability density functions...
+Calculating BASELINe statistics...
+
+```
+
+
 ```R
 
 # Get a data.frame of the summary statistics
 stats <- summarizeBaseline(grouped, returnType="df")
 ```
 
-**Error in eval(expr, envir, enclos)**: could not find function "summarizeBaseline"
+
+```
+Calculating BASELINe statistics...
+
+```
+
+
 
 See also
 -------------------
