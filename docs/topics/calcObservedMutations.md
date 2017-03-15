@@ -94,121 +94,114 @@ germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
 
 # Identify all mutations in the sequence
 ex1_raw = calcObservedMutations(in_seq, germ_seq, returnRaw=TRUE)
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "calcObservedMutations"
+```R
 # Count all mutations in the sequence
 ex1_count = calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE)
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "calcObservedMutations"
+```R
 ex1_freq = calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE, frequency=TRUE)
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "calcObservedMutations"
+```R
 # Compare this with ex1_count
 table(ex1_raw$pos$region, ex1_raw$pos$type)
 
 ```
 
-
-```
-     
-       R  S
-  SEQ 11  7
-
-```
-
-
+**Error in table(ex1_raw$pos$region, ex1_raw$pos$type)**: object 'ex1_raw' not found
 ```R
 # Compare this with ex1_freq
 table(ex1_raw$pos$region, ex1_raw$pos$type) / ex1_raw$nonN
 
 ```
 
-
-```
-     
-               R          S
-  SEQ 0.03353659 0.02134146
-
-```
-
-
+**Error in table(ex1_raw$pos$region, ex1_raw$pos$type)**: object 'ex1_raw' not found
 ```R
 
 # Identify only mutations the V segment minus CDR3
 ex2_raw = calcObservedMutations(in_seq, germ_seq, 
 regionDefinition=IMGT_V, returnRaw=TRUE)
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "calcObservedMutations"
+```R
 # Count only mutations the V segment minus CDR3
 ex2_count = calcObservedMutations(in_seq, germ_seq, 
 regionDefinition=IMGT_V, returnRaw=FALSE)
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "calcObservedMutations"
+```R
 ex2_freq = calcObservedMutations(in_seq, germ_seq, 
 regionDefinition=IMGT_V, returnRaw=FALSE,
 frequency=TRUE)
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "calcObservedMutations"
+```R
 # Compare this with ex2_count
 table(ex2_raw$pos$region, ex2_raw$pos$type)                                 
 
 ```
 
-
-```
-     
-      R S
-  CDR 4 1
-  FWR 7 4
-
-```
-
-
+**Error in table(ex2_raw$pos$region, ex2_raw$pos$type)**: object 'ex2_raw' not found
 ```R
 # Compare this with ex2_freq
 table(ex2_raw$pos$region, ex2_raw$pos$type) / ex2_raw$nonN                                        
 
 ```
 
-
-```
-     
-               R          S
-  CDR 0.08333333 0.02083333
-  FWR 0.02916667 0.01666667
-
-```
-
-
+**Error in table(ex2_raw$pos$region, ex2_raw$pos$type)**: object 'ex2_raw' not found
 ```R
 
 # Identify mutations by change in hydropathy class
 ex3_raw = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=TRUE)
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "calcObservedMutations"
+```R
 # Count mutations by change in hydropathy class
 ex3_count = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=FALSE)
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "calcObservedMutations"
+```R
 ex3_freq = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=FALSE, 
 frequency=TRUE)
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "calcObservedMutations"
+```R
 # Compre this with ex3_count
 table(ex3_raw$pos$region, ex3_raw$pos$type)                                        
 
 ```
 
-
-```
-     
-      R S
-  CDR 3 2
-  FWR 4 7
-
-```
-
-
+**Error in table(ex3_raw$pos$region, ex3_raw$pos$type)**: object 'ex3_raw' not found
 ```R
 # Compare this with ex3_freq
 table(ex3_raw$pos$region, ex3_raw$pos$type) / ex3_raw$nonN
 ```
 
-
-```
-     
-               R          S
-  CDR 0.06250000 0.04166667
-  FWR 0.01666667 0.02916667
-
-```
-
-
+**Error in table(ex3_raw$pos$region, ex3_raw$pos$type)**: object 'ex3_raw' not found
 
 See also
 -------------------

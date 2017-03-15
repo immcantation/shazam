@@ -141,16 +141,7 @@ targetingModel=HH_S5F,
 nproc=1)
 ```
 
-
-```
-Collapsing clonal sequences...
-Calculating observed number of mutations...
-Calculating the expected frequencies of mutations...
-Calculating BASELINe probability density functions...
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "calcBaseline"
 
 See also
 -------------------

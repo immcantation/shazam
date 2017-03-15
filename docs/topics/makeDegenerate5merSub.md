@@ -66,21 +66,16 @@ Examples
 # Note: not to be confused with HKL_S5F@substitution, which is non-degenerate
 degenerate5merSub <- makeDegenerate5merSub(sub1mer = HKL_S1F)
 
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "makeDegenerate5merSub"
+```R
+
 # Look at a few 5-mers
 degenerate5merSub[, c("AAAAT", "AACAT", "AAGAT", "AATAT")]
 ```
 
-
-```
-  AAAAT AACAT AAGAT AATAT
-A    NA  0.25  0.53  0.20
-C  0.26    NA  0.31  0.57
-G  0.50  0.30    NA  0.23
-T  0.24  0.45  0.16    NA
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: object 'degenerate5merSub' not found
 
 See also
 -------------------

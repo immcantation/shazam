@@ -65,12 +65,22 @@ the overall distance.
 
 ```r
 # Use nucleotide Hamming distance and normalize by junction length
-dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="length", 
+dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="len", 
                           nproc=1)
+```
 
+```
+## Error in eval(expr, envir, enclos): could not find function "distToNearest"
+```
+
+```r
 # Use genotyped V assignments, a 5-mer model and no normalization
 dist_s5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f", 
                           first=FALSE, normalize="none", nproc=1)
+```
+
+```
+## Error in eval(expr, envir, enclos): could not find function "distToNearest"
 ```
 
 ## Using nearest neighbor distances to determine clonal assignment thresholds
@@ -108,7 +118,9 @@ p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
 plot(p1)
 ```
 
-![plot of chunk DistToNearest-Vignette-3](figure/DistToNearest-Vignette-3-1.png)
+```
+## Error in loadNamespace(i, c(lib.loc, .libPaths()), versionCheck = vI[[i]]): namespace 'scales' 0.4.0 is already loaded, but >= 0.4.1 is required
+```
 
 By manual inspection, the length normalized `ham` model distance threshold would be 
 set to a value near 0.12 in the above example.
@@ -127,7 +139,9 @@ p2 <- ggplot(subset(dist_s5f, !is.na(DIST_NEAREST)),
 plot(p2)
 ```
 
-![plot of chunk DistToNearest-Vignette-4](figure/DistToNearest-Vignette-4-1.png)
+```
+## Error in loadNamespace(i, c(lib.loc, .libPaths()), versionCheck = vI[[i]]): namespace 'scales' 0.4.0 is already loaded, but >= 0.4.1 is required
+```
 
 In this example, the unnormalized `hh_s5f` model distance threshold would be 
 set to a value near 7.
@@ -152,9 +166,7 @@ output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", cutEdge=0.9)
 ```
 
 ```
-## [1] "The number of non-NA entries= 958"
-## [1] "The 'gmm' would be done in 5 iterations"
-## #####
+## Error in eval(expr, envir, enclos): could not find function "findThreshold"
 ```
 
 ```r
@@ -162,7 +174,9 @@ output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", cutEdge=0.9)
 plot(output, binwidth=0.02, title="GMM Method")
 ```
 
-![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
+```
+## Error in plot(output, binwidth = 0.02, title = "GMM Method"): object 'output' not found
+```
 
 ```r
 # Print threshold
@@ -170,7 +184,7 @@ print(output)
 ```
 
 ```
-## [1] 0.112601
+## Error in print(output): object 'output' not found
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `histBinwidth` parameter.
@@ -193,13 +207,28 @@ the size specified using the `subsample` parameter.  Below is an example of usin
 ```r
 # Find threshold using density method
 output <- findThreshold(dist_ham$DIST_NEAREST, method="density")
-threshold <- output@threshold
+```
 
+```
+## Error in eval(expr, envir, enclos): could not find function "findThreshold"
+```
+
+```r
+threshold <- output@threshold
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'output' not found
+```
+
+```r
 # Plot distance histogram, density estimate and optimum threshold
 plot(output, title="Density Method")
 ```
 
-![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
+```
+## Error in plot(output, title = "Density Method"): object 'output' not found
+```
 
 ```r
 # Print threshold
@@ -207,7 +236,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1226913
+## Error in print(output): object 'output' not found
 ```
 
 ## Calculating nearest neighbor distances independently for subsets of data
@@ -226,8 +255,12 @@ and will set `fields="SAMPLE"`. This will reproduce previous results for sample
 
 ```r
 dist_fields <- distToNearest(ExampleDb, model="ham", first=FALSE, 
-                             normalize="length", fields="SAMPLE", 
+                             normalize="len", fields="SAMPLE", 
                              nproc=1)
+```
+
+```
+## Error in eval(expr, envir, enclos): could not find function "distToNearest"
 ```
 
 We can plot the nearest neighbor distances for the two samples:
@@ -243,10 +276,19 @@ p4 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)),
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
     facet_grid(SAMPLE ~ ., scales="free_y")
+```
+
+```
+## Error in subset(dist_fields, !is.na(DIST_NEAREST)): object 'dist_fields' not found
+```
+
+```r
 plot(p4)
 ```
 
-![plot of chunk DistToNearest-Vignette-7](figure/DistToNearest-Vignette-7-1.png)
+```
+## Error in plot(p4): object 'p4' not found
+```
 
 In this case, the threshold selected for `-1h` seems to work well 
 for `+7d` as well.
@@ -263,7 +305,11 @@ we set `cross="SAMPLE"`, which will group the data into `-1h` and
 
 ```r
 dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE, 
-                            normalize="length", cross="SAMPLE", nproc=1)
+                            normalize="len", cross="SAMPLE", nproc=1)
+```
+
+```
+## Error in eval(expr, envir, enclos): could not find function "distToNearest"
 ```
 
 
@@ -277,10 +323,19 @@ p5 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)),
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
     facet_grid(SAMPLE ~ ., scales="free_y")
+```
+
+```
+## Error in subset(dist_cross, !is.na(CROSS_DIST_NEAREST)): object 'dist_cross' not found
+```
+
+```r
 plot(p5)
 ```
 
-![plot of chunk DistToNearest-Vignette-8](figure/DistToNearest-Vignette-8-1.png)
+```
+## Error in plot(p5): object 'p5' not found
+```
 
 This can provide a sense of overlap between samples or a way to 
 compare within-sample variation to cross-sample variation.

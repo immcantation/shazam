@@ -110,13 +110,7 @@ clones <- collapseClones(db, nproc=1)
 
 ```
 
-
-```
-Collapsing clonal sequences...
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "collapseClones"
 ```R
 
 # Build clonal consensus for V-region only 
@@ -125,13 +119,7 @@ clones <- collapseClones(db, regionDefinition=IMGT_V,
 expandedDb=TRUE, nproc=1)
 ```
 
-
-```
-Collapsing clonal sequences...
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "collapseClones"
 
 See also
 -------------------

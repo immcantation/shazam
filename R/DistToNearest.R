@@ -117,8 +117,6 @@ window5Mers <- function(sequence) {
 # @param    seq2               second nucleotide sequence, broken into 5mers.
 # @param    targetingDistance  targeting distance obtained from a targeting model
 #                              with the function \code{calcTargetingDistance}.
-# @param    normalize          method of normalization. Default is "none".
-#                              "len" = normalize distance by length of junction.
 # @param    symmetry           if model is hs5f, distance between seq1 and seq2 is either 
 #                              the average (avg) of seq1->seq2 and seq2->seq1 or the 
 #                              minimum (min).
@@ -132,10 +130,8 @@ window5Mers <- function(sequence) {
 # targeting_distance <- calcTargetingDistance(HH_S5F)
 # shazam:::dist5Mers(seq1, seq2, targeting_distance)
 dist5Mers <- function(seq1, seq2, targetingDistance, 
-                      normalize=c("none", "len", "mut"),
                       symmetry=c("avg", "min")) {
     # Evaluate choices
-    normalize <- match.arg(normalize)
     symmetry <- match.arg(symmetry)
     
     # Get distance from targeting model
@@ -145,17 +141,14 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
     # Check all characters in seq1 and seq2 are valid,
     # found in the targetingModel distance matrix
     validChars <- rownames(targetingDistance)
-    allChars <- unique(strsplit(paste(c(seq1,seq2),collapse=""), "")[[1]])
+    allChars <- unique(strsplit(paste(c(seq1, seq2), collapse=""), "")[[1]])
     invalidChars <- allChars[allChars %in% validChars == F]
     if (length(invalidChars) > 0 ) {
         stop(paste0("Character not found in targeting_dist: ", paste(invalidChars, collapse=", ")))
     }
     
-    # Compute length of sequence (for normalization, if specified)
-    juncLength <- length(seq1)
-    
     # Compute distance only on fivemers that have mutations
-    fivemersWithMu <- substr(seq1,3,3)!=substr(seq2,3,3)
+    fivemersWithMu <- substr(seq1, 3, 3) != substr(seq2, 3, 3)
     #fivemersWithNonNuc <- (!is.na(match(substr(seq1,3,3),c("A","C","G","T"))) & 
     #                       !is.na(match(substr(seq2,3,3),c("A","C","G","T"))))
     #fivemersWithMu <- fivemersWithMu & fivemersWithNonNuc
@@ -184,13 +177,6 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
         return(NA)
     })
     
-    # Normalize distances
-    if (normalize == "len") { 
-        dist <- dist/juncLength
-    } else if (normalize == "mut") { 
-        dist <- dist/numbOfMutation 
-    }
-    
     return(dist)
 }
 
@@ -200,17 +186,13 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
 # @param   sequences          character vector of nucleotide sequences.
 # @param   targetingDistance  targeting distance obtained from a targeting model
 #                             with the function `calcTargetingDistance`
-# @param   normalize          method of normalization. Default is "none".
-#                             "len" = normalize distance by length of junction.
 # @param   symmetry           if model is hs5f, distance between seq1 and seq2 is either the
 #                             average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 #
 # @return  A matrix of pairwise distances between junction sequences.
 pairwise5MerDist <- function(sequences, targetingDistance, 
-                             normalize=c("none", "len", "mut"),
                              symmetry=c("avg", "min")) {
     # Initial checks
-    normalize <- match.arg(normalize)
     symmetry <- match.arg(symmetry)
     
     # Convert junctions to uppercase
@@ -237,7 +219,6 @@ pairwise5MerDist <- function(sequences, targetingDistance,
           sapply(i:n_seq, function(j) { dist5Mers(.matSeqSlidingFiveMer[,i],
                                                   .matSeqSlidingFiveMer[,j],
                                                   targetingDistance,
-                                                  normalize=normalize,
                                                   symmetry=symmetry) }))
     }
     dist_mat <- sapply(1:n_seq, .dist)
@@ -329,7 +310,8 @@ allValidChars <- function(seq, validChars) {
 # shazam:::nearestDist(sequences, model="aa", normalize="none")
 # shazam:::nearestDist(sequences, model="ham", normalize="len")
 # shazam:::nearestDist(sequences, model="aa", normalize="len")
-nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "hs1f_compat", "m1n_compat"),
+nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", 
+                                          "hs1f_compat", "m1n_compat"),
                        normalize=c("none", "len", "mut"),
                        symmetry=c("avg", "min"),
                        crossGroups=NULL, mst=FALSE) {
@@ -374,9 +356,9 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
         } else if (model == "mk_rs1nf") {
             dist_mat <- pairwiseDist(seq_uniq, dist_mat=MK_RS1NF_Distance)
         } else if (model == "hh_s5f") {
-            dist_mat <- pairwise5MerDist(seq_uniq, HH_S5F_Distance, normalize, symmetry)
+            dist_mat <- pairwise5MerDist(seq_uniq, HH_S5F_Distance, symmetry=symmetry)
         } else if (model == "mk_rs5nf") {
-            dist_mat <- pairwise5MerDist(seq_uniq, MK_RS5NF_Distance, normalize, symmetry)
+            dist_mat <- pairwise5MerDist(seq_uniq, MK_RS5NF_Distance, symmetry=symmetry)
         } else if (model == "hs1f_compat") {
             dist_mat <- pairwiseDist(seq_uniq, dist_mat=HS1F_Compat)
         } else if (model == "m1n_compat") {

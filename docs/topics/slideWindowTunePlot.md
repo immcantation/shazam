@@ -112,6 +112,11 @@ tuneList = slideWindowTune(db = ExampleDb[1:10, ],
 mutThreshRange = 2:4, windowSizeRange = 3:5,
 verbose = FALSE)
 
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "slideWindowTune"
+```R
+
 # Visualize
 # Plot numbers of sequences filtered without jittering y-axis values
 slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, 
@@ -119,8 +124,7 @@ plotFiltered=TRUE, jitter.y=FALSE)
 
 ```
 
-![2](slideWindowTunePlot-2.png)
-
+**Error in eval(expr, envir, enclos)**: could not find function "slideWindowTunePlot"
 ```R
 
 # Notice that some of the lines overlap
@@ -130,8 +134,7 @@ plotFiltered=TRUE, jitter.y=TRUE)
 
 ```
 
-![4](slideWindowTunePlot-4.png)
-
+**Error in eval(expr, envir, enclos)**: could not find function "slideWindowTunePlot"
 ```R
 
 # Plot numbers of sequences remaining instead of filtered
@@ -141,8 +144,7 @@ legendPos="bottomright")
 
 ```
 
-![6](slideWindowTunePlot-6.png)
-
+**Error in eval(expr, envir, enclos)**: could not find function "slideWindowTunePlot"
 ```R
 
 # Plot percentages of sequences filtered with a tiny amount of jittering
@@ -151,8 +153,7 @@ plotFiltered=TRUE, percentage=TRUE,
 jitter.y=TRUE, jitter.y.amt=0.01)
 ```
 
-![8](slideWindowTunePlot-8.png)
-
+**Error in eval(expr, envir, enclos)**: could not find function "slideWindowTunePlot"
 
 See also
 -------------------

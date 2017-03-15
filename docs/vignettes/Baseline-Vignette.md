@@ -54,6 +54,10 @@ for each clone.
 clones <- collapseClones(ExampleDb, regionDefinition=IMGT_V, nproc=1)
 ```
 
+```
+## Error in eval(expr, envir, enclos): could not find function "collapseClones"
+```
+
 Following construction of an effective sequence for each clone, the observed
 and expected mutation counts are calculated for each sequence of the 
 `CLONAL_SEQUENCE` column adding in the previous step. `observedMutations` 
@@ -85,11 +89,22 @@ Users may define other region sets and boundaries by creating a custom
 observed <- observedMutations(clones, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               regionDefinition=IMGT_V, nproc=1)
+```
+
+```
+## Error in eval(expr, envir, enclos): could not find function "observedMutations"
+```
+
+```r
 # Count observed mutations and append EXPECTED columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               targetingModel=HH_S5F,
                               regionDefinition=IMGT_V, nproc=1)
+```
+
+```
+## Error in eval(expr, envir, enclos): could not find function "expectedMutations"
 ```
 
 The counts of observed and expected mutations can be combined to test for selection 
@@ -104,6 +119,10 @@ baseline <- calcBaseline(expected, testStatistic="focused",
                          regionDefinition=IMGT_V, nproc=1)
 ```
 
+```
+## Error in eval(expr, envir, enclos): could not find function "calcBaseline"
+```
+
 ### Calculating selection in one step
 
 It is not required for `collapseClones`, `observedMutation` and `expectedMutations`
@@ -116,12 +135,22 @@ functions prior to calculating selection scores.
 # Calculate selection scores from scratch on subset
 baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
                          regionDefinition=IMGT_V, nproc=1)
+```
 
+```
+## Error in eval(expr, envir, enclos): could not find function "calcBaseline"
+```
+
+```r
 # Subset the original data to switched isotypes
 db_sub <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
 # Calculate selection scores from scratch on subset
 baseline_sub <- calcBaseline(db_sub, testStatistic="focused", 
                              regionDefinition=IMGT_V, nproc=1)
+```
+
+```
+## Error in eval(expr, envir, enclos): could not find function "calcBaseline"
 ```
 
 ### Using alternative mutation definitions and models
@@ -180,9 +209,19 @@ interpreted as per normal.
 ```r
 # Combine selection scores by time-point
 grouped_1 <- groupBaseline(baseline, groupBy=c("SAMPLE"))
+```
 
+```
+## Error in eval(expr, envir, enclos): could not find function "groupBaseline"
+```
+
+```r
 # Combine selection scores by time-point and isotype
 grouped_2 <- groupBaseline(baseline_sub, groupBy=c("SAMPLE", "ISOTYPE"))
+```
+
+```
+## Error in eval(expr, envir, enclos): could not find function "groupBaseline"
 ```
 
 
@@ -221,9 +260,7 @@ testBaseline(grouped_1, groupBy="SAMPLE")
 ```
 
 ```
-##   REGION       TEST      PVALUE        FDR
-## 1    CDR -1h != +7d 0.012498209 0.01249821
-## 2    FWR -1h != +7d 0.005121936 0.01024387
+## Error in eval(expr, envir, enclos): could not find function "testBaseline"
 ```
 
 ## Plot and compare selection scores for groups
@@ -249,7 +286,9 @@ isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick",
 plotBaselineSummary(grouped_1, "SAMPLE")
 ```
 
-![plot of chunk Baseline-Vignette-10](figure/Baseline-Vignette-10-1.png)
+```
+## Error in eval(expr, envir, enclos): could not find function "plotBaselineSummary"
+```
 
 ```r
 # Plot selection scores by time-point and isotype for only CDR
@@ -257,14 +296,18 @@ plotBaselineSummary(grouped_2, "SAMPLE", "ISOTYPE", groupColors=isotype_colors,
                     subsetRegions="CDR")
 ```
 
-![plot of chunk Baseline-Vignette-10](figure/Baseline-Vignette-10-2.png)
+```
+## Error in eval(expr, envir, enclos): could not find function "plotBaselineSummary"
+```
 
 ```r
 # Group by CDR/FWR and facet by isotype
 plotBaselineSummary(grouped_2, "SAMPLE", "ISOTYPE", facetBy="group")
 ```
 
-![plot of chunk Baseline-Vignette-10](figure/Baseline-Vignette-10-3.png)
+```
+## Error in eval(expr, envir, enclos): could not find function "plotBaselineSummary"
+```
 
 `plotBaselineDensity` plots the full `Baseline` PDF of selection scores for the 
 given groups. The parameters are the same as those for `plotBaselineSummary`.
@@ -278,7 +321,9 @@ plotBaselineDensity(grouped_2, "ISOTYPE", groupColumn="SAMPLE", colorElement="gr
                     colorValues=sample_colors, sigmaLimits=c(-1, 1))
 ```
 
-![plot of chunk Baseline-Vignette-11](figure/Baseline-Vignette-11-1.png)
+```
+## Error in eval(expr, envir, enclos): could not find function "plotBaselineDensity"
+```
 
 
 ## Editing a field in a Baseline object

@@ -48,10 +48,15 @@ db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 
 # Create model using only silent mutations
 sub_model <- createSubstitutionMatrix(db, model="S")
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "createSubstitutionMatrix"
+```R
 ext_model <- extendSubstitutionMatrix(sub_model)
 ```
 
-
+**Error in eval(expr, envir, enclos)**: could not find function "extendSubstitutionMatrix"
 
 See also
 -------------------

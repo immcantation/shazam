@@ -34,12 +34,6 @@ Examples
 getnproc()
 ```
 
-
-```
-[1] 4
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "getnproc"
 
 

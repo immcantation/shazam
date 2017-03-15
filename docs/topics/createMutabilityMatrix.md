@@ -109,13 +109,18 @@ db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 
 # Create model using only silent mutations
 sub_model <- createSubstitutionMatrix(db, model="S")
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "createSubstitutionMatrix"
+```R
 mut_model <- createMutabilityMatrix(db, sub_model, model="S", 
 minNumSeqMutations=200,
 numSeqMutationsOnly=FALSE)
 
 ```
 
-*Warning*:Insufficient number of mutations to infer some 5-mers. Filled with 0. 
+**Error in eval(expr, envir, enclos)**: could not find function "createMutabilityMatrix"
 ```R
 
 # Count the number of mutations in sequences containing each 5-mer
@@ -123,7 +128,7 @@ mut_count <- createMutabilityMatrix(db, sub_model, model="S",
 numSeqMutationsOnly=TRUE)
 ```
 
-
+**Error in eval(expr, envir, enclos)**: could not find function "createMutabilityMatrix"
 
 See also
 -------------------

@@ -65,13 +65,7 @@ data(ExampleDb, package="alakazam")
 slideWindowDb(db = ExampleDb[1:10, ], mutThresh=6, windowSize=10)
 ```
 
-
-```
- [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "slideWindowDb"
 
 See also
 -------------------

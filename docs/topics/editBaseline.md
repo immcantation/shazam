@@ -59,23 +59,14 @@ nproc = 1)
 
 ```
 
-
-```
-Collapsing clonal sequences...
-Calculating observed number of mutations...
-Calculating the expected frequencies of mutations...
-Calculating BASELINe probability density functions...
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "calcBaseline"
 ```R
 # Edit the field "description"
 baseline <- editBaseline(baseline, field_name = "description", 
 value = "+7d IgA & IgG")
 ```
 
-
+**Error in eval(expr, envir, enclos)**: could not find function "editBaseline"
 
 See also
 -------------------

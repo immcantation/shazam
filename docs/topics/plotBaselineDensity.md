@@ -119,16 +119,7 @@ nproc=1)
 
 ```
 
-
-```
-Collapsing clonal sequences...
-Calculating observed number of mutations...
-Calculating the expected frequencies of mutations...
-Calculating BASELINe probability density functions...
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "calcBaseline"
 ```R
  
 # Grouping the PDFs by the sample and isotype annotations
@@ -136,14 +127,7 @@ grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 
 ```
 
-
-```
-Grouping BASELINe probability density functions...
-Calculating BASELINe statistics...
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "groupBaseline"
 ```R
 
 # Plot density faceted by region with custom isotype colors
@@ -154,8 +138,7 @@ colorElement="group", sigmaLimits=c(-1, 1))
 
 ```
 
-![6](plotBaselineDensity-6.png)
-
+**Error in eval(expr, envir, enclos)**: could not find function "plotBaselineDensity"
 ```R
 
 # Facet by isotype instead of region
@@ -163,8 +146,7 @@ plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group",
 sigmaLimits=c(-1, 1))
 ```
 
-![8](plotBaselineDensity-8.png)
-
+**Error in eval(expr, envir, enclos)**: could not find function "plotBaselineDensity"
 
 See also
 -------------------

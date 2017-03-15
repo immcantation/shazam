@@ -76,24 +76,26 @@ sub <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=FALSE,
 minNumMutations=20)
 
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "createSubstitutionMatrix"
+```R
+
 # Count the number of mutations in sequences containing each 5-mer
 mutCount <- createMutabilityMatrix(db, substitutionModel = sub,
 model="S", multipleMutation="independent",
 numSeqMutationsOnly=TRUE)
 
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "createMutabilityMatrix"
+```R
+
 # Tune minNumSeqMutations
 minNumSeqMutationsTune(mutCount, seq(from=100, to=300, by=50))
 ```
 
-
-```
-         100 150 200 250 300
-measured 237 200 140 107  97
-inferred 787 824 884 917 927
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "minNumSeqMutationsTune"
 
 See also
 -------------------

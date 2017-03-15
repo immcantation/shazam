@@ -18,9 +18,9 @@ Usage
 ```
 distToNearest(db, sequenceColumn = "JUNCTION", vCallColumn = "V_CALL",
 jCallColumn = "J_CALL", model = c("ham", "aa", "hh_s1f", "hh_s5f",
-"mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"),
-normalize = c("length", "none"), symmetry = c("avg", "min"),
-first = TRUE, nproc = 1, fields = NULL, cross = NULL, mst = FALSE)
+"mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), normalize = c("len",
+"none"), symmetry = c("avg", "min"), first = TRUE, nproc = 1,
+fields = NULL, cross = NULL, mst = FALSE)
 ```
 
 Arguments
@@ -45,7 +45,7 @@ model
 See Details for further information.
 
 normalize
-:   method of normalization. The default is `"length"`, which 
+:   method of normalization. The default is `"len"`, which 
 divides the distance by the length of the sequence group. If 
 `"none"` then no normalization if performed.
 
@@ -147,7 +147,12 @@ db <- subset(ExampleDb, SAMPLE == "-1h")
 
 # Use genotyped V assignments, Hamming distance, and normalize by junction length
 dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
-first=FALSE, normalize="length")
+first=FALSE, normalize="len")
+
+```
+
+**Error in eval(expr, envir, enclos)**: could not find function "distToNearest"
+```R
 
 # Plot histogram of non-NA distances
 p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
@@ -156,19 +161,23 @@ ggtitle("Distance to nearest: Hamming") +
 xlab("distance") +
 geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
 fill="steelblue", color="white")
+
+```
+
+**Error in subset.default(dist, !is.na(DIST_NEAREST))**: object 'DIST_NEAREST' not found
+```R
 plot(p1)
 
 ```
 
-![2](distToNearest-2.png)
-
+**Error in loadNamespace(i, c(lib.loc, .libPaths()), versionCheck = vI[[i]])**: namespace ‘scales’ 0.4.0 is already loaded, but >= 0.4.1 is required
 ```R
 
 # Use human 5-mer model
 dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f")
 ```
 
-
+**Error in eval(expr, envir, enclos)**: could not find function "distToNearest"
 
 See also
 -------------------

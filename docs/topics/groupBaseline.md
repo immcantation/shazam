@@ -91,16 +91,7 @@ nproc=1)
 
 ```
 
-
-```
-Collapsing clonal sequences...
-Calculating observed number of mutations...
-Calculating the expected frequencies of mutations...
-Calculating BASELINe probability density functions...
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "calcBaseline"
 ```R
 
 # Group PDFs by sample
@@ -108,22 +99,14 @@ grouped1 <- groupBaseline(baseline, groupBy="SAMPLE")
 
 ```
 
-
-```
-Grouping BASELINe probability density functions...
-Calculating BASELINe statistics...
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "groupBaseline"
 ```R
 plotBaselineDensity(grouped1, idColumn="SAMPLE", colorElement="group", 
 sigmaLimits=c(-1, 1))
 
 ```
 
-![6](groupBaseline-6.png)
-
+**Error in eval(expr, envir, enclos)**: could not find function "plotBaselineDensity"
 ```R
  
 # Group PDFs by both sample (between variable) and isotype (within variable)
@@ -131,14 +114,7 @@ grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
 
 ```
 
-
-```
-Grouping BASELINe probability density functions...
-Calculating BASELINe statistics...
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "groupBaseline"
 ```R
 plotBaselineDensity(grouped2, idColumn="SAMPLE", groupColumn="ISOTYPE",
 colorElement="group", colorValues=IG_COLORS,
@@ -146,8 +122,7 @@ sigmaLimits=c(-1, 1))
 
 ```
 
-![10](groupBaseline-10.png)
-
+**Error in eval(expr, envir, enclos)**: could not find function "plotBaselineDensity"
 ```R
 
 # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
@@ -155,21 +130,13 @@ grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
 
 ```
 
-
-```
-Grouping BASELINe probability density functions...
-Calculating BASELINe statistics...
-
-```
-
-
+**Error in eval(expr, envir, enclos)**: could not find function "groupBaseline"
 ```R
 plotBaselineDensity(grouped3, idColumn="SAMPLE", colorElement="group",
 sigmaLimits=c(-1, 1))
 ```
 
-![14](groupBaseline-14.png)
-
+**Error in eval(expr, envir, enclos)**: could not find function "plotBaselineDensity"
 
 See also
 -------------------

@@ -56,8 +56,13 @@ Mutation Profiling:
   
 Distance Calculation:
 
++ Fixed a bug in `distToNearest` wherein `normalize="length"` for 5-mer models
+  was resulting in distances normalized by junction length squared instead of
+  raw junction length.
 + Added `findThreshold` function to infer clonal distance threshold from 
   nearest neighbor distances returned by `distToNearest`.
++ Renamed the `length` option for the `normalize` argument of `distToNearest`
+  to `len` so it matches Change-O.
 + Deprecated the `HS1FDistance` and `M1NDistance` distance models, which have 
   been renamed to `hs1f_compat` and `m1n_compat` in the `model` argument of
   `distToNearest`. These deprecated models should be used for compatibility 
@@ -67,12 +72,13 @@ Distance Calculation:
 + Added support for `MK_RS5NF` models to `distToNearest`.
 + Updated `calcTargetingDistance()` to enable calculation of a symmetric distance
   matrix given a 1-mer substitution matrix normalized by row, such as `HH_S1F`.
-+ Changed `findThreshold` functionality to act like a switch to choose between `gmm` 
-and `dens` method.
-+ Added the `gmm` method to find optimum distance threshold using Gaussian 
-Mixture Method.
-+ Added the `plotgmmFit` function to plot `findThreshold` results where `gmm` 
-method has been ued.
++ Added a Gaussian mixture model (GMM) approach for threshold determination to 
+  `findThreshold`. The previous smoothed density method is available via the 
+  `method="density"` argument and the new GMM method is available via
+  `method="gmm"`.
++ Added the functions `plotGmmThreshold` and `plotDensityThreshold` to plot 
+  the threshold detection results from `findThreshold` for the `"gmm"` and
+  `"density"` methods, respectively.
 
 Region Definition:
 

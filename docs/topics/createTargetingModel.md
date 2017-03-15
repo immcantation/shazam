@@ -111,7 +111,7 @@ db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 model <- createTargetingModel(db, model="S", multipleMutation="ignore")
 ```
 
-*Warning*:Insufficient number of mutations to infer some 5-mers. Filled with 0. 
+**Error in eval(expr, envir, enclos)**: could not find function "createTargetingModel"
 
 See also
 -------------------
