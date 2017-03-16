@@ -154,6 +154,14 @@ test_that("Test cross distToNearest with model hh_s5f", {
     ## Expect error
     seq2[1] <- "NNSCG"
     expect_error(shazam:::dist5Mers(seq1, seq2, targeting_distance), "Character not found")
+    
+    ## Length normalized
+    dist_hs5f_len <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
+                               model="hh_s5f", first=FALSE, normalize="len", nproc=1)
+    
+    expected_len_dist <- dist_hs5f$DIST_NEAREST/nchar(dist_hs5f$JUNCTION)
+    expect_equal(dist_hs5f_len$DIST_NEAREST, expected_len_dist, tolerance=0.001)
+    
 })
 
 test_that("Test distToNearest with unrecognized characters", {
