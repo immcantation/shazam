@@ -1705,6 +1705,9 @@ calcTargetingDistance <- function(model, places=2) {
       for (i in 1:length(center_nuc)) {
           model_dist[center_nuc[i], i] <- 0
       }
+      # Assign 0 to N and 5mers with N in center position 
+      model_dist[,center_nuc=="N"] <- 0
+      model_dist["N",] <- 0
   } else if (input == "1mer") {
       diag(model_dist) <- 0
       model_dist <- rbind(model_dist, matrix(0, 3, 4))
