@@ -100,7 +100,7 @@ test_that("calcTargetingDistance", {
     
     set.seed(15)
     idx <- sample(length(dist), 20)
-    expected_dist <- c(0.94, NA, 0.93, 1.03, NA, 1.03, 0.96, 0, 0.94, 0, NA, NA, 0, 0.96, 0.94, 0, NA, 1.00, 0.85, 0)
+    expected_dist <- c(0.94, 0, 0.93, 1.03, 0, 1.03, 0.96, 0, 0.94, 0, 0, 0, 0, 0.96, 0.94, 0, 0, 1.00, 0.85, 0)
     expect_equal(dist[idx], expected_dist, tolerance=0.001)
 })
 

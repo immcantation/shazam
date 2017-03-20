@@ -244,6 +244,8 @@ test_that("Test distance, Change-O tests", {
     nt_short_len <- 9.0
     
     # hh_hs5f
+    HH_S5F_Distance <- calcTargetingDistance(model=HH_S5F)
+    
     #   GTGCA-GTATT = [0.97, 0.84]
     #   TGCAA-TATTT = [0.93, 0.83]
     #   GCAAG-ATTTG = [1.08, 1.16]
@@ -264,18 +266,18 @@ test_that("Test distance, Change-O tests", {
                            min(c(0.91, 1.07)),
                        0.0)
     
-    expect_equal(dist5Mers( "GTGCA", "GTATT",HH_S5F_Distance, symmetry="raw"),
+    expect_equal(shazam:::dist5Mers( "GTGCA", "GTATT",HH_S5F_Distance, symmetry="raw"),
         c(0.97, 0.84))
-    expect_equal(dist5Mers( "TGCAA", "TATTT",HH_S5F_Distance, symmetry="raw"),
+    expect_equal(shazam:::dist5Mers( "TGCAA", "TATTT",HH_S5F_Distance, symmetry="raw"),
                  c(0.93, 0.83))
-    expect_equal(dist5Mers( "GCAAG", "ATTTG",HH_S5F_Distance, symmetry="raw"),
+    expect_equal(shazam:::dist5Mers( "GCAAG", "ATTTG",HH_S5F_Distance, symmetry="raw"),
                  c(1.08, 1.16))
-    expect_equal(dist5Mers( "CAAGG", "TTTGG",HH_S5F_Distance, symmetry="raw"),
+    expect_equal(shazam:::dist5Mers( "CAAGG", "TTTGG",HH_S5F_Distance, symmetry="raw"),
                  c(0.91, 1.07))
     
     seq1 <- c( "GTGCA", "TGCAA", "GCAAG", "CAAGG")
     seq2 <-  c("GTATT", "TATTT", "ATTTG", "TTTGG")
-    dist5Mers( seq1, seq2, HH_S5F_Distance, symmetry="raw")
+    shazam:::dist5Mers( seq1, seq2, HH_S5F_Distance, symmetry="raw")
     
     seq1_to_seq2 <- (diag(HH_S5F_Distance[substr(seq2, 3, 3), seq1]))
     seq1_to_seq2
