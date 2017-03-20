@@ -196,3 +196,133 @@ test_that("Test findThreshold", {
     dens_output <- findThreshold(db$DIST_NEAREST, method="dens", cutEdge=0.9)
     expect_equal(dens_output@threshold, 0.114, tolerance=0.01)
 })
+
+
+test_that("Test distance, Change-O tests", {
+    
+    nt_seq <- c("TGTGCAAGGGGGCCA",
+                "TGTGCAAGGGGGCCA",
+                "TGTATTTGGGGGCCA",
+                "ACACTTGCCACTGAT",
+                "NNNNNNNNNNNNTGA",
+                "NNNNNNNNNNNNNNN")
+    nt_seq_short <- c("TGTGCAAGG",
+                     "TGTGCAAGG",
+                     "TGTATTTGG",
+                     "NNNNNNNNN")
+    aa_seq <- alakazam::translateDNA(nt_seq)
+
+    # Amino acid distance from sequence 1 to sequence 1,..,5
+    aa_len <- 5.0
+    aa_ham <- c(0.0, 0.0, 2.0, 5.0, 1, 0.0)    
+    
+    # Nucleotide distances sequence 1 to sequence 1,..,6
+    nt_len <- 15.0
+    # 1 vs 3
+    #   A-C = 0; A-G = 1; A-T = 2;
+    #   C-G = 0; C-T = 1; G-T = 0
+    # 1 vs 4
+    #   A-C = 1; A-G = 2; A-T = 4;
+    #   C-G = 6; C-T = 1; G-T = 1
+    # 1 vs 5
+    #   A-C = 0; A-G = 0; A-T = 0;
+    nt_ham <- c(0.0, 0.0, 4.0, 15.0, 2.0, 0.0)
+    nt_hh_s1f <- c(0.0,
+                   0.0,
+                   0.0 + 1*0.64 + 2*1.16 + 0.0 + 1*0.64 + 0.0,
+                   1*1.21 + 2*0.64 + 4*1.16 + 6*1.16 + 1*0.64 + 1*1.21,
+                   0.0 + 0.0 + 0.0 + 0.0 + 1*1.16 + 1*0.64 + 0.0,
+                   0.0)
+    nt_mk_rs1nf <- c(0.0,
+                     0.0,
+                     0.0 + 1*0.32 + 2*1.17 + 0.0 + 1*0.32 + 0.0,
+                     1*1.51 + 2*0.32 + 4*1.17 + 6*1.17 + 1*0.32 + 1*1.51,
+                     0.0 + 0.0 + 0.0 + 0.0 + 1*1.17 + 1*0.32 + 0.0,
+                     0.0)
+    
+    # 5-mer models use shorter sequence
+    nt_short_len <- 9.0
+    
+    # hh_hs5f
+    #   GTGCA-GTATT = [0.97, 0.84]
+    #   TGCAA-TATTT = [0.93, 0.83]
+    #   GCAAG-ATTTG = [1.08, 1.16]
+    #   CAAGG-TTTGG = [0.91, 1.07]
+    nt_hh_s5f_avg <- c(0.0,
+                       0.0,
+                       mean(c(0.97, 0.84)) + 
+                           mean(c(0.93, 0.83)) +
+                           mean(c(1.08, 1.16)) +
+                           mean(c(0.91, 1.07)),
+                       0.0)
+    
+    nt_hh_s5f_min <- c(0.0,
+                       0.0,
+                           min(c(0.97, 0.84)) +
+                           min(c(0.93, 0.83)) +
+                           min(c(1.08, 1.16)) + 
+                           min(c(0.91, 1.07)),
+                       0.0)
+    
+    expect_equal(dist5Mers( "GTGCA", "GTATT",HH_S5F_Distance, symmetry="raw"),
+        c(0.97, 0.84))
+    expect_equal(dist5Mers( "TGCAA", "TATTT",HH_S5F_Distance, symmetry="raw"),
+                 c(0.93, 0.83))
+    expect_equal(dist5Mers( "GCAAG", "ATTTG",HH_S5F_Distance, symmetry="raw"),
+                 c(1.08, 1.16))
+    expect_equal(dist5Mers( "CAAGG", "TTTGG",HH_S5F_Distance, symmetry="raw"),
+                 c(0.91, 1.07))
+    
+    seq1 <- c( "GTGCA", "TGCAA", "GCAAG", "CAAGG")
+    seq2 <-  c("GTATT", "TATTT", "ATTTG", "TTTGG")
+    dist5Mers( seq1, seq2, HH_S5F_Distance, symmetry="raw")
+    
+    seq1_to_seq2 <- (diag(HH_S5F_Distance[substr(seq2, 3, 3), seq1]))
+    seq1_to_seq2
+    seq2_to_seq1 <- (diag(HH_S5F_Distance[substr(seq1, 3, 3), seq2]))
+    seq2_to_seq1
+    
+    # mk_rs5nf
+    #   GTGCA-GTATT = [0.71, 0.77]
+    #   TGCAA-TATTT = [0.71, 0.93]
+    #   GCAAG-ATTTG = [1.05, 1.03]
+    #   CAAGG-TTTGG = [1.08, 1.13]
+    nt_mk_rs5nf_avg <- c(0.0,
+                         0.0,
+                         mean(c(0.71, 0.77)) +
+                             mean(c(0.71, 0.93)) +
+                             mean(c(1.05, 1.03)) + 
+                             mean(c(1.08, 1.13)),
+                         0.0)
+    nt_mk_rs5nf_min <- c(0.0,
+                        0.0,
+                        min(c(0.71, 0.77)) + min(c(0.71, 0.93)) +
+                        min(c(1.05, 1.03)) + min(c(1.08, 1.13)),
+                        0.0)
+    
+    # aa ham
+    expect_equivalent(pairwiseDist(aa_seq, getAAMatrix())[1,],
+                      aa_ham)
+    
+    # nt    
+    expect_equivalent(pairwiseDist(nt_seq, getDNAMatrix())[1,],
+                      nt_ham)
+    
+    # hh_s1f
+    expect_equivalent(pairwiseDist(nt_seq, HH_S1F_Distance)[1,],
+                      nt_hh_s1f)
+    
+    # mk_rs1nf
+    expect_equivalent(pairwiseDist(nt_seq, MK_RS1NF_Distance)[1,],
+                      nt_mk_rs1nf)
+    
+    # hh_s5f avg
+    expect_equivalent(shazam:::pairwise5MerDist(nt_seq_short, 
+                                                HH_S5F_Distance, symmetry="avg")[1,],
+                      nt_hh_s5f_avg)
+    # hh_s5f min
+    expect_equivalent(shazam:::pairwise5MerDist(nt_seq_short, 
+                                                HH_S5F_Distance, symmetry="min")[1,],
+                      nt_hh_s5f_min)    
+    
+})

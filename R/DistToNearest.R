@@ -130,7 +130,7 @@ window5Mers <- function(sequence) {
 # targeting_distance <- calcTargetingDistance(HH_S5F)
 # shazam:::dist5Mers(seq1, seq2, targeting_distance)
 dist5Mers <- function(seq1, seq2, targetingDistance, 
-                      symmetry=c("avg", "min")) {
+                      symmetry=c("avg", "min", "raw")) {
     # Evaluate choices
     symmetry <- match.arg(symmetry)
     
@@ -164,13 +164,15 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
             seq1_to_seq2 <- targetingDistance[substr(seq2, 3, 3), seq1]
             seq2_to_seq1 <- targetingDistance[substr(seq1, 3, 3), seq2]
         } else {
-            seq1_to_seq2 <- sum(diag(targetingDistance[substr(seq2, 3, 3), seq1]))
-            seq2_to_seq1 <- sum(diag(targetingDistance[substr(seq1, 3, 3), seq2]))
+            seq1_to_seq2 <- diag(targetingDistance[substr(seq2, 3, 3), seq1])
+            seq2_to_seq1 <- diag(targetingDistance[substr(seq1, 3, 3), seq2])
         }
         if (symmetry == "avg") {
-            dist <- mean(c(seq1_to_seq2, seq2_to_seq1))
+            dist <- sum(apply(cbind(seq1_to_seq2, seq2_to_seq1), 1, mean))
         } else if (symmetry == "min") {
-            dist <- min(c(seq1_to_seq2, seq2_to_seq1))
+            dist <- sum(apply(cbind(seq1_to_seq2, seq2_to_seq1), 1, min))
+        } else if (symmetry == "raw")  {
+            dist <- c(seq1_to_seq2, seq2_to_seq1)
         }
     }, error = function(e) {
         warning(e)
