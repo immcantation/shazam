@@ -772,6 +772,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #'           See \link{plotGmmThreshold} and \link{plotDensityThreshold} for plotting output.
 #'           
 #' @examples
+#' \donttest{
 #' # Subset example data to one sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
@@ -790,7 +791,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' print(output)
 #' # Plot "density" method results
 #' plot(output)
-#' 
+#' }
 #' @export
 findThreshold <- function (data, method=c("gmm", "density"), cutEdge=0.9, cross=NULL, 
                            subsample=NULL){
@@ -966,8 +967,8 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL) {
         valley_loc <- valley_loc + scan_step
         if ( length(ent[ent<=valley_loc]) > cut ) break
     }
-    print(paste0("The number of non-NA entries= ", length(ent)))
-    print(paste0("The 'gmm' would be done in ", ceiling(valley_loc/scan_step), " iterations"))
+    cat(length(ent), "non-NA entries\n")
+    cat("GMM done in", ceiling(valley_loc/scan_step), "iterations\n")
     
     #*************  set rand seed *************#
     set.seed(3000)
@@ -982,8 +983,9 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL) {
     valley.itr <- 0
     valley_loc <- 0
     nEve <- length(ent)
+    cat("[")
     while (1) {
-        cat("#")
+        cat("=")
         
         #*************  guess the valley loc *************#
         valley_loc <- valley_loc + scan_step
@@ -1090,7 +1092,7 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL) {
             }
         }
     }
-    cat("\n")
+    cat("]\n")
     if (valley.itr != 0) {
         MaxLoc <- which.max(vec.lkhood)
         
@@ -1229,6 +1231,7 @@ gmmThreshold <- function (omega, mu, sigma) {
 #'           \link{distToNearest} calculating nearest neighbor distances.
 #'
 #' @examples
+#' \donttest{
 #' # Subset example data to one sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
@@ -1242,7 +1245,7 @@ gmmThreshold <- function (omega, mu, sigma) {
 #' 
 #' # Plot results
 #' plotGmmThreshold(output, binwidth=0.02)
-#' 
+#' }
 #' @export
 plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL, 
                              binwidth=NULL, title=NULL, size=1, silent=FALSE, ...) {
@@ -1340,6 +1343,7 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
 #'           \link{distToNearest} calculating nearest neighbor distances.
 #'           
 #' @examples
+#' \donttest{
 #' # Subset example data to one sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
@@ -1353,7 +1357,7 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
 #' 
 #' # Plot
 #' plotDensityThreshold(output)
-#' 
+#' }
 #' @export
 plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL, 
                                  binwidth=NULL, title=NULL, size=1, silent=FALSE, ...) {

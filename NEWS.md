@@ -1,4 +1,4 @@
-Version 0.1.4.999: March 9, 2017
+Version 0.1.4.999: March 21, 2017
 -------------------------------------------------------------------------------
 
 General:
@@ -59,6 +59,9 @@ Distance Calculation:
 + Fixed a bug in `distToNearest` wherein `normalize="length"` for 5-mer models
   was resulting in distances normalized by junction length squared instead of
   raw junction length.
++ Fixed a bug in `distToNearest` wherein `symmetry="min"` was calculating the 
+  minimum of the total distance between two sequences instead of the minimum
+  distance at each mutated position.
 + Added `findThreshold` function to infer clonal distance threshold from 
   nearest neighbor distances returned by `distToNearest`.
 + Renamed the `length` option for the `normalize` argument of `distToNearest`
