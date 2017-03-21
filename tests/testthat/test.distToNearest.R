@@ -200,6 +200,19 @@ test_that("Test findThreshold", {
 
 test_that("Test distance, Change-O tests", {
     
+    # aux function. Given a distance matrix,
+    # get the min distance value for each row
+    .getMin <- function(mat) {
+        apply(mat,1,function(x) {
+            gt0 <- which(x>0)
+            if (length(gt0>0)) {
+                min(x[gt0])
+            } else {
+                NA
+            }
+        })
+    }
+    
     nt_seq <- c("TGTGCAAGGGGGCCA",
                 "TGTGCAAGGGGGCCA",
                 "TGTATTTGGGGGCCA",
@@ -243,8 +256,10 @@ test_that("Test distance, Change-O tests", {
     # 5-mer models use shorter sequence
     nt_short_len <- 9.0
     
-    # hh_hs5f
+    HH_S1F_Distance <- calcTargetingDistance(model=HH_S1F)
     HH_S5F_Distance <- calcTargetingDistance(model=HH_S5F)
+    MK_RS5NF_Distance <- calcTargetingDistance(model=MK_RS5NF)
+    MK_RS1NF_Distance <- calcTargetingDistance(model=MK_RS1NF)
     
     #   GTGCA-GTATT = [0.97, 0.84]
     #   TGCAA-TATTT = [0.93, 0.83]
@@ -309,22 +324,100 @@ test_that("Test distance, Change-O tests", {
     # nt    
     expect_equivalent(pairwiseDist(nt_seq, getDNAMatrix())[1,],
                       nt_ham)
+
+    # nt len
+    expect_equivalent(.getMin(pairwiseDist(nt_seq, getDNAMatrix())),
+                 shazam:::nearestDist(nt_seq))
+    expect_equal(.getMin(pairwiseDist(nt_seq, getDNAMatrix())/nt_len),
+                      shazam:::nearestDist(nt_seq, model="ham", normalize = "len"),
+                      tolerance=0.001, check.attributes = FALSE)
     
     # hh_s1f
     expect_equivalent(pairwiseDist(nt_seq, HH_S1F_Distance)[1,],
                       nt_hh_s1f)
     
+    # hh_s1f len 
+    expect_equivalent(.getMin(pairwiseDist(nt_seq, HH_S1F_Distance)),
+                          shazam:::nearestDist(nt_seq, model="hh_s1f"))
+    
+    expect_equal(.getMin(pairwiseDist(nt_seq, HH_S1F_Distance)/nt_len),
+                 shazam:::nearestDist(nt_seq, model="hh_s1f", normalize = "len"),
+                 tolerance=0.001, check.attributes = FALSE)
+    
     # mk_rs1nf
     expect_equivalent(pairwiseDist(nt_seq, MK_RS1NF_Distance)[1,],
                       nt_mk_rs1nf)
     
-    # hh_s5f avg
-    expect_equivalent(shazam:::pairwise5MerDist(nt_seq_short, 
-                                                HH_S5F_Distance, symmetry="avg")[1,],
-                      nt_hh_s5f_avg)
-    # hh_s5f min
-    expect_equivalent(shazam:::pairwise5MerDist(nt_seq_short, 
-                                                HH_S5F_Distance, symmetry="min")[1,],
-                      nt_hh_s5f_min)    
+    # mk_rs1nf len
+    expect_equivalent(.getMin(pairwiseDist(nt_seq, MK_RS1NF_Distance)),
+                      shazam:::nearestDist(nt_seq, model="mk_rs1nf"))
     
+    expect_equal(.getMin(pairwiseDist(nt_seq, MK_RS1NF_Distance)/nt_len),
+                 shazam:::nearestDist(nt_seq, model="mk_rs1nf", normalize = "len"),
+                 tolerance=0.001, check.attributes = FALSE)
+    
+    # hh_s5f avg
+    hh_s5f_avg_dm <- shazam:::pairwise5MerDist(nt_seq_short, 
+                                               HH_S5F_Distance, symmetry="avg")
+    expect_equivalent(hh_s5f_avg_dm[1,],
+                      nt_hh_s5f_avg)
+    
+    expect_equal(.getMin(hh_s5f_avg_dm),
+                 shazam:::nearestDist(nt_seq_short, model="hh_s5f", 
+                                      symmetry="avg", normalize = "none"),
+                 tolerance=0.001, check.attributes = FALSE)
+    
+    # hh_s5f avg len
+    expect_equal(.getMin(hh_s5f_avg_dm/nt_short_len),
+                 shazam:::nearestDist(nt_seq_short, model="hh_s5f", 
+                                      symmetry="avg", normalize = "len"),
+                 tolerance=0.001, check.attributes = FALSE)
+    
+    # hh_s5f min
+    hh_s5f_min_dm <- shazam:::pairwise5MerDist(nt_seq_short, 
+                              HH_S5F_Distance, symmetry="min")
+    expect_equivalent(hh_s5f_min_dm[1,],
+                      nt_hh_s5f_min)  
+    expect_equal(.getMin(hh_s5f_min_dm),
+                 shazam:::nearestDist(nt_seq_short, model="hh_s5f", 
+                                      symmetry="min", normalize = "none"),
+                 tolerance=0.001, check.attributes = FALSE)
+    
+    # hh_s5f min len
+    expect_equal(.getMin(hh_s5f_min_dm/nt_short_len),
+                 shazam:::nearestDist(nt_seq_short, model="hh_s5f", 
+                                      symmetry="min", normalize = "len"),
+                 tolerance=0.001, check.attributes = FALSE)
+    
+    # mk_rs5nf min
+    mk_rs5nf_min_dm <- shazam:::pairwise5MerDist(nt_seq_short, 
+                              MK_RS5NF_Distance, symmetry="min")
+    expect_equivalent(mk_rs5nf_min_dm[1,],
+                      nt_mk_rs5nf_min) 
+    expect_equal(.getMin(mk_rs5nf_min_dm),
+                 shazam:::nearestDist(nt_seq_short, model="mk_rs5nf", 
+                                      symmetry="min", normalize = "none"),
+                 tolerance=0.001, check.attributes = FALSE)
+    
+    # mk_rs5nf min len
+    expect_equal(.getMin(mk_rs5nf_min_dm/nt_short_len),
+                 shazam:::nearestDist(nt_seq_short, model="mk_rs5nf", 
+                                      symmetry="min", normalize = "len"),
+                 tolerance=0.001, check.attributes = FALSE)
+    
+    # mk_rs5nf avg
+    mk_rs5nf_avg_dm <- shazam:::pairwise5MerDist(nt_seq_short, 
+                              MK_RS5NF_Distance, symmetry="avg")
+    expect_equivalent(mk_rs5nf_avg_dm[1,],
+                      nt_mk_rs5nf_avg)    
+    expect_equal(.getMin(mk_rs5nf_avg_dm),
+                 shazam:::nearestDist(nt_seq_short, model="mk_rs5nf", 
+                                      symmetry="avg", normalize = "none"),
+                 tolerance=0.001, check.attributes = FALSE)
+    
+    # mk_rs5nf avg len TODO
+    expect_equal(.getMin(mk_rs5nf_avg_dm/nt_short_len),
+                 shazam:::nearestDist(nt_seq_short, model="mk_rs5nf", 
+                                      symmetry="avg", normalize = "len"),
+                 tolerance=0.001, check.attributes = FALSE)
 })
