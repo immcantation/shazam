@@ -152,9 +152,9 @@ output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", cutEdge=0.9)
 ```
 
 ```
-## [1] "The number of non-NA entries= 958"
-## [1] "The 'gmm' would be done in 5 iterations"
-## #####
+## 958 non-NA entries
+## GMM done in 5 iterations
+## [=====]
 ```
 
 ```r

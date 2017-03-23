@@ -29,9 +29,9 @@ pages:
       - topics/slideWindowDb.md
       - topics/slideWindowSeq.md
       - topics/slideWindowTune.md
+      - topics/slideWindowTunePlot.md
       - topics/shmulateSeq.md
       - topics/shmulateTree.md
-      - topics/slideWindowTunePlot.md
     - 'Targeting Models':
       - topics/createMutabilityMatrix.md
       - topics/createSubstitutionMatrix.md

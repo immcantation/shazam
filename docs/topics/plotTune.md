@@ -44,13 +44,13 @@ criterion
 [minNumSeqMutationsTune](minNumSeqMutationsTune.md)).
 
 pchs
-:   point types to pass on to [plot](http://www.inside-r.org/r-doc/graphics/plot).
+:   point types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
 
 ltys
-:   line types to pass on to [plot](http://www.inside-r.org/r-doc/graphics/plot).
+:   line types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
 
 cols
-:   colors to pass on to [plot](http://www.inside-r.org/r-doc/graphics/plot).
+:   colors to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
 
 plotLegend
 :   whether to plot legend. Default is `TRUE`. Only applicable 
@@ -58,7 +58,7 @@ if `tuneMtx` is a named list with names of the matrices
 corresponding to the names of the samples.
 
 legendPos
-:   position of legend to pass on to [legend](http://www.inside-r.org/r-doc/graphics/legend). Can be either a
+:   position of legend to pass on to [legend](http://www.rdocumentation.org/packages/graphics/topics/legend). Can be either a
 numeric vector specifying x-y coordinates, or one of 
 `"topright"`, `"center"`, etc. Default is `"topright"`.
 

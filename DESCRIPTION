@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
-Version: 0.1.4.999
-Date: 2017-03-09
+Version: 0.1.5
+Date: 2017-03-23
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
@@ -16,6 +16,8 @@ Authors@R: c(person("Mohamed", "Uduman", role=c("aut"),
                     email="susanna.marquez@yale.edu"),
              person("Julian", "Zhou", role=c("ctb"), 
                     email="julian.zhou@yale.edu"),
+             person("Nima", "Nouri", role=c("ctb"), 
+                    email="nima.nouri@yale.edu"),
              person("Steven", "Kleinstein", role=c("aut", "cph"), 
                     email="steven.kleinstein@yale.edu"))
 Title: Immunoglobulin Somatic Hypermutation Analysis
@@ -35,7 +37,7 @@ Depends:
     R (>= 3.1.2),
     ggplot2 (>= 2.0.0)
 Imports:
-    alakazam (>= 0.2.4),
+    alakazam (>= 0.2.5),
     ape,
     data.table (>= 1.9.4),
     doParallel,

@@ -50,6 +50,7 @@ Authors
 [Ang Cui](mailto:angcui@mit.edu) (ctb)  
 [Susanna Marquez](mailto:susanna.marquez@yale.edu) (ctb)  
 [Julian Zhou](mailto:julian.zhou@yale.edu) (ctb)  
+[Nima Nouri](mailto:nima.nouri@yale.edu) (ctb)  
 [Steven Kleinstein](mailto:steven.kleinstein@yale.edu) (aut, cph)
 
 Citing

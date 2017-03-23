@@ -90,9 +90,9 @@ output <- findThreshold(db$DIST_NEAREST, method="gmm")
 
 
 ```
-[1] "The number of non-NA entries= 958"
-[1] "The 'gmm' would be done in 5 iterations"
-#####
+958 non-NA entries
+GMM done in 5 iterations
+[=====]
 
 ```
 

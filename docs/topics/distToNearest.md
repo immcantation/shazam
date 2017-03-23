@@ -94,9 +94,9 @@ with the ideal threshold being a value that separates the two modes.
 The following distance measures are accepted by the `model` parameter.
 
 
-+  `"ham"`:          Single nucleotide Hamming distance matrix from [getDNAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getDNAMatrix) 
++  `"ham"`:          Single nucleotide Hamming distance matrix from [getDNAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getDNAMatrix) 
 with gaps assigned zero distance.
-+  `"aa"`:           Single amino acid Hamming distance matrix from [getAAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getAAMatrix).
++  `"aa"`:           Single amino acid Hamming distance matrix from [getAAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getAAMatrix).
 +  `"hh_s1f"`:       Human single nucleotide distance matrix derived from [HH_S1F](HH_S1F.md) with 
 [calcTargetingDistance](calcTargetingDistance.md).
 +  `"hh_s5f"`:       Human 5-mer nucleotide context distance matix derived from [HH_S5F](HH_S5F.md) with 
@@ -175,7 +175,7 @@ See also
 
 See [calcTargetingDistance](calcTargetingDistance.md) for generating nucleotide distance matrices 
 from a [TargetingModel](TargetingModel-class.md) object. See [HH_S5F](HH_S5F.md), [HH_S1F](HH_S1F.md), 
-[MK_RS1NF](MK_RS1NF.md), [getDNAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getDNAMatrix), and [getAAMatrix](http://www.inside-r.org/packages/cran/alakazam/docs/getAAMatrix)
+[MK_RS1NF](MK_RS1NF.md), [getDNAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getDNAMatrix), and [getAAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getAAMatrix)
 for individual model details.
 
 

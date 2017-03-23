@@ -996,9 +996,9 @@ slideWindowDb <- function(db, sequenceColumn="SEQUENCE_IMGT",
 #'                 mutThreshRange=2:4, windowSizeRange=2:4)
 #'                                                            
 #' @export
-slideWindowTune <- function(db, sequenceColumn = "SEQUENCE_IMGT", 
-                            germlineColumn = "GERMLINE_IMGT_D_MASK",
-                            dbMutList = NULL,
+slideWindowTune <- function(db, sequenceColumn="SEQUENCE_IMGT", 
+                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                            dbMutList=NULL,
                             mutThreshRange, windowSizeRange, verbose=TRUE){
   # check preconditions
   stopifnot(!is.null(db))

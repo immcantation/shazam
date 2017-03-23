@@ -51,19 +51,19 @@ jitter.y.amt
 `jitter.y=TRUE`. Default is 0.1.
 
 pchs
-:   point types to pass on to [plot](http://www.inside-r.org/r-doc/graphics/plot).
+:   point types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
 
 ltys
-:   line types to pass on to [plot](http://www.inside-r.org/r-doc/graphics/plot).
+:   line types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
 
 cols
-:   colors to pass on to [plot](http://www.inside-r.org/r-doc/graphics/plot).
+:   colors to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
 
 plotLegend
 :   whether to plot legend. Default is `TRUE`.
 
 legendPos
-:   position of legend to pass on to [legend](http://www.inside-r.org/r-doc/graphics/legend). Can be either a
+:   position of legend to pass on to [legend](http://www.rdocumentation.org/packages/graphics/topics/legend). Can be either a
 numeric vector specifying x-y coordinates, or one of 
 `"topright"`, `"center"`, etc. Default is `"topright"`.
 
@@ -157,7 +157,7 @@ jitter.y=TRUE, jitter.y.amt=0.01)
 See also
 -------------------
 
-See [slideWindowTune](slideWindowTune.md) for how to get `tuneList`. See [jitter](http://www.inside-r.org/r-doc/base/jitter) for 
+See [slideWindowTune](slideWindowTune.md) for how to get `tuneList`. See [jitter](http://www.rdocumentation.org/packages/base/topics/jitter) for 
 use of `amount` of jittering.
 
 
