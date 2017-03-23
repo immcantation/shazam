@@ -283,6 +283,7 @@ setClass("TargetingModel",
 #'           \link{minNumMutationsTune}.
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
@@ -295,7 +296,8 @@ setClass("TargetingModel",
 #' sub <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
 #'                                 returnModel="5mer", numMutationsOnly=FALSE,
 #'                                 minNumMutations=20)
-#'
+#' }
+#' 
 #' @export
 createSubstitutionMatrix <- function(db, model=c("RS", "S"), 
                                      sequenceColumn="SEQUENCE_IMGT",
@@ -654,6 +656,7 @@ minNumMutationsTune = function(subCount, minNumMutationsRange) {
 #'           \link{minNumSeqMutationsTune}
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
@@ -667,6 +670,7 @@ minNumMutationsTune = function(subCount, minNumMutationsRange) {
 #' # Count the number of mutations in sequences containing each 5-mer
 #' mut_count <- createMutabilityMatrix(db, sub_model, model="S", 
 #'                                    numSeqMutationsOnly=TRUE)
+#' }
 #' 
 #' @export
 createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
@@ -1134,6 +1138,7 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #'           \link{createTargetingModel}
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
@@ -1148,6 +1153,7 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' 
 #' # Create targeting model from substitution and mutability
 #' tar_model <- createTargetingMatrix(sub_model, mut_model)
+#' }
 #' 
 #' @export
 createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
@@ -1210,12 +1216,14 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #'           \link{createTargetingMatrix} for component steps in building a model.
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' model <- createTargetingModel(db, model="S", multipleMutation="ignore")
+#' }
 #' 
 #' @export
 createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENCE_IMGT",
