@@ -17,14 +17,16 @@ installDep <- function(this_pack_v, dep_pack_name, dep_pack_v) {
     this_pack_devel <- length(grep("\\.999$", this_pack_v)) > 0
     
     if (!this_pack_devel & !devel & (required_version %in% cran_versions)) {
-        tryCatch({install.versions(dep_pack_name, required_version)},
-                 warning=function(w) { 
-                     cat(w, "\n")
+        tryCatch({ devtools::install_version(dep_pack_name, required_version, repos=c(CRAN="http://lib.stat.cmu.edu/R/CRAN/")) },
+                 error=function(e) { 
+                     cat(e, "\n")
                      message("Installing from Bitbucket...\n ")
                      install_bitbucket(paste0("kleinstein/", dep_pack_name, "@default"))
                  })
     } else {
-        if (!devel) { warning(paste0(required_version," not found in CRAN. Install most recent version from Bitbucket instead.")) }
+        if (!devel) { 
+            warning(paste0(required_version," not found in CRAN. Install most recent version from Bitbucket instead.")) 
+        }
         install_bitbucket(paste0("kleinstein/", dep_pack_name, "@default"))
     }
 }
@@ -34,6 +36,8 @@ pkg_version <- read.dcf("DESCRIPTION", fields="Version")
 d <- read.dcf("DESCRIPTION", fields="Imports")
 d <- sub("^\\n", "", d)
 imports <- strsplit(d, ",\n")[[1]]
+
+install_version("alakazam", "0.2.6", repos=c(CRAN="http://lib.stat.cmu.edu/R/CRAN/"))
 
 # Install alakazam
 alakazam_version <- imports[grep("alakazam", imports)]
