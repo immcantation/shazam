@@ -37,8 +37,6 @@ d <- read.dcf("DESCRIPTION", fields="Imports")
 d <- sub("^\\n", "", d)
 imports <- strsplit(d, ",\n")[[1]]
 
-install_version("alakazam", "0.2.6", repos=c(CRAN="http://lib.stat.cmu.edu/R/CRAN/"))
-
 # Install alakazam
 alakazam_version <- imports[grep("alakazam", imports)]
 installDep(pkg_version, "alakazam", alakazam_version)
