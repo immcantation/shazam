@@ -1,0 +1,82 @@
+---
+title: 'Shazam: Mutation analysis'
+author: "Susanna Marquez"
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    dev: pdf
+    fig_height: 4.5
+    fig_width: 7.5
+    highlight: pygments
+    toc: yes
+  html_document:
+    fig_height: 4.5
+    fig_width: 7.5
+    highlight: pygments
+    theme: readable
+    toc: yes
+geometry: margin=1in
+fontsize: 11pt
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteIndexEntry{SHM targeting models} 
+  %\usepackage[utf8]{inputenc}
+---
+
+`observedMutations` calculates the observed number or frequencies of Replacement (R) and Silent (S) mutations for each sequence in the `sequenceColumn` colum, grouped by `regionDefinition`. 
+
+## Example data
+
+A small example Change-O database is included in the `shazam` package. 
+Analyzing mutations requires the following fields (columns) to 
+be present in the Change-O database: 
+
+* `SEQUENCE_IMGT`
+* `GERMLINE_IMGT_D_MASK`
+
+```{r, eval=TRUE, warning=FALSE, message=FALSE}
+# Load example data
+library(shazam)
+library(dplyr)
+data(ExampleDb, package="alakazam")
+db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+```
+
+## Calculate the number and frequencies of mutations over the entire sequence
+
+When `regionDefinition=NULL`, the entire sequence in `sequenceColumn` is compared to the germline sequence to identify R and S mutations. If `frequency=TRUE`, the number of mutations is expressed as the frequency of mutations over the total number of positions that are non-N in both the input and the germline sequences.
+
+```{r, eval=T}
+db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                            frequency=FALSE, regionDefinition = NULL,
+                            nproc=1)
+db_obs <- observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
+                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                            frequency=TRUE, regionDefinition = NULL,
+                            nproc=1)
+db_obs %>% 
+    select(SEQUENCE_ID, starts_with("OBSERVED_"), starts_with("MU_")) %>%
+    head()
+```
+
+`combine` can be used to combine the counts or frequencies of R and S mutations in a single value.
+
+```{r, eval=T}
+db_obs <- observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
+                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                            combine=TRUE,
+                            frequency=TRUE, regionDefinition = NULL,
+                            nproc=1)
+db_obs %>% 
+    select(SEQUENCE_ID, starts_with("OBSERVED_"), starts_with("MU_")) %>%
+    head()
+```
+
+```{r}
+ggplot(db_obs, aes(x=ISOTYPE, y=MU_FREQ, fill=ISOTYPE)) +
+    geom_boxplot() +
+    alakazam:::getBaseTheme()
+```
+
+
