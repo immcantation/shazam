@@ -44,39 +44,110 @@ db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 
 ## Calculate the number and frequencies of mutations over the entire sequence
 
-When `regionDefinition=NULL`, the entire sequence in `sequenceColumn` is compared to the germline sequence to identify R and S mutations. If `frequency=TRUE`, the number of mutations is expressed as the frequency of mutations over the total number of positions that are non-N in both the input and the germline sequences.
+When `regionDefinition=NULL`, the entire sequence in `sequenceColumn` is compared to the germline sequence to identify R and S mutations. If `frequency=TRUE`, the number of mutations is expressed as the frequency of mutations over the total number of positions that are non-N in both the input and the germline sequences. 
 
-```{r, eval=T}
+In this example, we calculate the number of R and S mutation counts (`frequency=FALSE` ) and frequencies (`frequency=TRUE`). To get a single mutation value, not taking into account the type of mutation, we can set `combine=TRUE`. 
+
+```{r, eval=TRUE}
 db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                             germlineColumn="GERMLINE_IMGT_D_MASK",
                             frequency=FALSE, regionDefinition = NULL,
                             nproc=1)
+## New columns added by observedMutations
+db_obs %>% 
+    select(SEQUENCE_ID, starts_with("OBSERVED_")) %>%
+    head()
 db_obs <- observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
                             germlineColumn="GERMLINE_IMGT_D_MASK",
                             frequency=TRUE, regionDefinition = NULL,
                             nproc=1)
+## New columns added by observedMutations
 db_obs %>% 
-    select(SEQUENCE_ID, starts_with("OBSERVED_"), starts_with("MU_")) %>%
+    select(SEQUENCE_ID, starts_with("MU_")) %>%
     head()
 ```
 
-`combine` can be used to combine the counts or frequencies of R and S mutations in a single value.
+Now we use `combine` to aggregate the frequencies of R and S mutations over the sequence into a single value.
 
-```{r, eval=T}
+```{r, eval=TRUE}
 db_obs <- observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
                             germlineColumn="GERMLINE_IMGT_D_MASK",
                             combine=TRUE,
                             frequency=TRUE, regionDefinition = NULL,
                             nproc=1)
+## New columns added by observedMutations
 db_obs %>% 
     select(SEQUENCE_ID, starts_with("OBSERVED_"), starts_with("MU_")) %>%
     head()
 ```
 
-```{r}
+We can plot the mutation frequencies a explore differences between samples or isotypes.
+
+```{r, eval=TRUE, warning=FALSE, fig.width=5}
 ggplot(db_obs, aes(x=ISOTYPE, y=MU_FREQ, fill=ISOTYPE)) +
-    geom_boxplot() +
+    geom_boxplot() + ggtitle("Whole sequence Mutation Frequency - change in AA") +
+    alakazam:::getBaseTheme()
+```
+
+## Calculate the number and frequencies of mutations in the V region 
+
+To restrict the mutational analysis to a particular area in the sequence, `regionDefinition` needs to be assigned a `RegionDefinition` object, which simply defines the region boundaries of the Ig sequence. For convenience, `shazam` provides a set of such objects. 
+
+In the next example, we will explore the mutation frequency in the V region. `IMGT_V` defines the limits of the CDR and FWR V-segment regions excluding CDR3, according to the IMGT unique numbering scheme.
+
+```{r, eval=TRUE}
+db_obs_v <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                            frequency=FALSE, regionDefinition = IMGT_V,
+                            nproc=1)
+## New columns added by observedMutations
+db_obs_v %>% 
+    select(SEQUENCE_ID, starts_with("OBSERVED_")) %>%
+    head()
+
+
+## With combine=TRUE
+db_obs_v <- observedMutations(db_obs_v, sequenceColumn="SEQUENCE_IMGT",
+                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                            frequency=TRUE, regionDefinition = IMGT_V,
+                            nproc=1, combine=TRUE)
+## New columns, MU_FREQ
+db_obs_v %>% 
+    select(SEQUENCE_ID, starts_with("MU_")) %>%
+    head()
+```
+
+```{r, eval=TRUE, warning=FALSE, fig.width=5}
+ggplot(db_obs_v, aes(x=ISOTYPE, y=MU_FREQ, fill=ISOTYPE)) +
+    geom_boxplot() + ggtitle("IMGT_V Mutation Frequency - change in AA") +
     alakazam:::getBaseTheme()
 ```
 
 
+## Consider as replacement mutations only those that cause a change in charge
+
+By default, replacement and silent are determined by exact amino acid identity. But this can be changed setting `mutationDefinition`. For convenience, `shazam` provides a set of `MutationDefinition` objects defining changes in charge, hydropathy, polarity and volume.
+
+In the following example, we will define replacement mutation as those that lead to a change in charge, and will consider silent the rest.
+
+```{r, eval=TRUE}
+db_obs_ch <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                            frequency=TRUE, combine=T,
+                            regionDefinition = NULL,
+                            mutationDefinition=CHARGE_MUTATIONS,
+                            nproc=1)
+
+## New MU_FREQ
+db_obs_ch %>% 
+    select(SEQUENCE_ID, starts_with("MU_")) %>%
+    head()
+```
+
+We can make a plot to visualize if mutations that change the sequence charge are more frequent in one isotype.
+
+```{r, eval=TRUE, warning=FALSE, fig.width=5}
+ggplot(db_obs_ch, aes(x=ISOTYPE, y=MU_FREQ, fill=ISOTYPE)) +
+    geom_boxplot() + ggtitle("Whole sequence Mutation Frequency - change in charge") +
+    alakazam:::getBaseTheme()
+```
