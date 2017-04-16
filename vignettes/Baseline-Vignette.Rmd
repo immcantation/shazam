@@ -103,7 +103,7 @@ Users may define other region sets and boundaries by creating a custom
 observed <- observedMutations(clones, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               regionDefinition=IMGT_V, nproc=1)
-# Count observed mutations and append EXPECTED columns to the output
+# Count expected mutations and append EXPECTED columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               targetingModel=HH_S5F,
