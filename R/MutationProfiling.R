@@ -414,6 +414,37 @@ observedMutations <- function(db,
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
     
+    # Check if mutation count/freq columns already exist
+    # and throw overwritting warning
+    if (!is.null(regionDefinition)) {
+        labels <- regionDefinition@labels
+    } else {
+        labels <- makeNullRegionDefinition()@labels
+    }
+    if (frequency == TRUE) {
+        if (combine) {
+            labels <- "MU_FREQ"
+        } else {
+            labels <- paste("MU_FREQ_", labels, sep="")
+        }
+    } else {
+        if (combine) {
+            labels <- "OBSERVED"
+        } else {
+            labels <- paste("OBSERVED_", labels, sep="")
+        }
+    }
+    
+    label_exists <- labels[labels %in% colnames(db)]
+    if (length(label_exists)>0) {
+        warning(paste0("Columns ", 
+                       paste(label_exists, collapse=", "),
+                       " exist and will be overwritten")
+        )
+        db[,label_exists] <- NULL
+    }
+    
+    
     # Check mutation definition
     if (!is.null(mutationDefinition) & !is(mutationDefinition, "MutationDefinition")) {
         stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")

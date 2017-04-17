@@ -202,3 +202,109 @@ test_that("calcExpecteddMutations, hydropathy", {
                  tolerance=0.001
     )
 })    
+
+
+test_that("observedMutations overwrites with a warning pre-existing mutation counts/freqs", {
+    db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+    
+    ## Counts
+    db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                frequency=F,
+                                combine=F,
+                                regionDefinition=NULL,
+                                mutationDefinition=NULL,
+                                nproc=1)
+    expect_warning(observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                frequency=F,
+                                combine=F,
+                                regionDefinition=NULL,
+                                mutationDefinition=NULL,
+                                nproc=1),
+                   "Columns OBSERVED_SEQ_R, OBSERVED_SEQ_S exist and will be overwritten")
+    ## Counts Combine
+    db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                frequency=F,
+                                combine=T,
+                                regionDefinition=NULL,
+                                mutationDefinition=NULL,
+                                nproc=1)
+    expect_warning(observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     frequency=F,
+                                     combine=T,
+                                     regionDefinition=NULL,
+                                     mutationDefinition=NULL,
+                                     nproc=1),
+                   "Columns OBSERVED exist and will be overwritten")    
+    
+    ## Counts  regionDefinition
+    db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                frequency=F,
+                                combine=F,
+                                regionDefinition=IMGT_V,
+                                mutationDefinition=NULL,
+                                nproc=1)
+    expect_warning(observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     frequency=F,
+                                     combine=F,
+                                     regionDefinition=IMGT_V,
+                                     mutationDefinition=NULL,
+                                     nproc=1),
+                   "Columns OBSERVED_CDR_R, OBSERVED_CDR_S, OBSERVED_FWR_R, OBSERVED_FWR_S exist and will be overwritten")  
+    ## Counts combine regionDefinition
+    db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                frequency=F,
+                                combine=T,
+                                regionDefinition=IMGT_V,
+                                mutationDefinition=NULL,
+                                nproc=1)
+    expect_warning(observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     frequency=F,
+                                     combine=T,
+                                     regionDefinition=IMGT_V,
+                                     mutationDefinition=NULL,
+                                     nproc=1),
+                   "Columns OBSERVED exist and will be overwritten")    
+    
+    
+    ## Freq
+    db_freq <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                frequency=T,
+                                combine=F,
+                                regionDefinition=NULL,
+                                mutationDefinition=NULL,
+                                nproc=1)
+    expect_warning(observedMutations(db_freq, sequenceColumn="SEQUENCE_IMGT",
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     frequency=T,
+                                     combine=F,
+                                     regionDefinition=NULL,
+                                     mutationDefinition=NULL,
+                                     nproc=1),
+                   "Columns MU_FREQ_SEQ_R, MU_FREQ_SEQ_S exist and will be overwritten")
+    
+    ## Freq Combine
+    db_freq <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                 germlineColumn="GERMLINE_IMGT_D_MASK",
+                                 frequency=T,
+                                 combine=T,
+                                 regionDefinition=NULL,
+                                 mutationDefinition=NULL,
+                                 nproc=1)
+    expect_warning(observedMutations(db_freq, sequenceColumn="SEQUENCE_IMGT",
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     frequency=T,
+                                     combine=T,
+                                     regionDefinition=NULL,
+                                     mutationDefinition=NULL,
+                                     nproc=1),
+                   "Columns MU_FREQ exist and will be overwritten")
+})
