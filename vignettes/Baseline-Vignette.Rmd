@@ -167,8 +167,8 @@ The default behavior of `expectedMutations` is to use the human 5-mer mutation m
 # Calculate selection on charge class with the mouse 5-mer model
 baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
                          regionDefinition=IMGT_V, 
-                         targetingModel=MK_RS5NFModel,
-                         targetingModel=CHARGE_MUTATIONS,
+                         targetingModel=MK_RS5NF,
+                         mutationDefinition=CHARGE_MUTATIONS,
                          nproc=1)
 ```
 
