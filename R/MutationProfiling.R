@@ -1370,6 +1370,25 @@ expectedMutations <- function(db,
         stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
     }
     
+    # Check if mutation count/freq columns already exist
+    # and throw overwritting warning
+    if (!is.null(regionDefinition)) {
+        labels <- regionDefinition@labels
+    } else {
+        labels <- makeNullRegionDefinition()@labels
+    }
+    
+    labels <- paste("EXPECTED_", labels, sep="")
+
+    label_exists <- labels[labels %in% colnames(db)]
+    if (length(label_exists)>0) {
+        warning(paste0("Columns ", 
+                       paste(label_exists, collapse=", "),
+                       " exist and will be overwritten")
+        )
+        db[,label_exists] <- NULL
+    }    
+    
     # Check targeting model
     if (!is(targetingModel, "TargetingModel")) {
         stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")

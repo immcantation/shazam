@@ -308,3 +308,34 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                      nproc=1),
                    "Columns MU_FREQ exist and will be overwritten")
 })
+
+
+
+test_that("expectedMutations overwrites with a warning pre-existing values", {
+    db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+    
+    db_exp <- expectedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                regionDefinition=NULL,
+                                mutationDefinition=NULL,
+                                nproc=1)
+    expect_warning(expectedMutations(db_exp, sequenceColumn="SEQUENCE_IMGT",
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     regionDefinition=NULL,
+                                     mutationDefinition=NULL,
+                                     nproc=1),
+                   "Columns EXPECTED_SEQ_R, EXPECTED_SEQ_S exist and will be overwritten")
+    
+    db_exp <- expectedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                regionDefinition=IMGT_V,
+                                mutationDefinition=NULL,
+                                nproc=1)
+    expect_warning(expectedMutations(db_exp, sequenceColumn="SEQUENCE_IMGT",
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     regionDefinition=IMGT_V,
+                                     mutationDefinition=NULL,
+                                     nproc=1),
+                   "Columns EXPECTED_CDR_R, EXPECTED_CDR_S, EXPECTED_FWR_R, EXPECTED_FWR_S exist and will be overwritten")
+    
+})
