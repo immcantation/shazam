@@ -1780,7 +1780,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     
     # Plot
     if (!silent) { 
-        p1
+        plot(p1)
     } else {
         invisible(p1)
     }
