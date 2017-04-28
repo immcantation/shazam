@@ -568,6 +568,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
                           normalize=c("len", "none"), symmetry=c("avg", "min"), 
                           first=TRUE, strip_d=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE) {
+							  
     # Hack for visibility of data.table and foreach index variables
     idx <- yidx <- .I <- NULL
     
