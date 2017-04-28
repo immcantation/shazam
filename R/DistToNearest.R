@@ -605,21 +605,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     # Parse V and J columns to get gene
     # cat("V+J Column parsing\n")
     if (first) {
-		if (strip_d) {
-	        db$V <- getGene(db[[vCallColumn]], strip_d=TRUE)
-	        db$J <- getGene(db[[jCallColumn]], strip_d=TRUE)
-		} else {
-	        db$V <- getGene(db[[vCallColumn]], strip_d=FALSE)
-	        db$J <- getGene(db[[jCallColumn]], strip_d=FALSE)
-		}
+        db$V <- getGene(db[[vCallColumn]], strip_d=strip_d)
+        db$J <- getGene(db[[jCallColumn]], strip_d=strip_d)
     } else {
-		if (strip_d) {
-	        db$V1 <- getGene(db[[vCallColumn]], first=TRUE)
-	        db$J1 <- getGene(db[[jCallColumn]], first=TRUE)
-		} else {
-	        db$V1 <- getGene(db[[vCallColumn]], first=FALSE)
-	        db$J1 <- getGene(db[[jCallColumn]], first=FALSE)
-		}
+        db$V1 <- getGene(db[[vCallColumn]], first=FALSE, strip_d=strip_d)
+        db$J1 <- getGene(db[[jCallColumn]], first=FALSE, strip_d=strip_d)
         db$V <- db$V1
         db$J <- db$J1
         # Reassign V genes to most general group of genes
