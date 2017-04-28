@@ -477,6 +477,9 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'                           is used. if \code{FALSE} the union of ambiguous gene 
 #'                           assignments is used to group all sequences with any 
 #'                           overlapping gene calls.
+#' @param    strip_d         if \code{TRUE} V genes that are paralogous (IGKV3-11 vs IGKVD3-11) 
+#'                           are made identical (IGKV3-11). if \code{FALSE} they are kept as 
+#' 						     unique V gene variants.
 #' @param    nproc           number of cores to distribute the function over.
 #' @param    fields          additional fields to use for grouping.
 #' @param    cross           columns for grouping to calculate distances across groups 
@@ -563,8 +566,8 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
-                          normalize=c("len", "none"), symmetry=c("avg", "min"),
-                          first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE) {
+                          normalize=c("len", "none"), symmetry=c("avg", "min"), 
+                          first=TRUE, strip_d=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE) {
     # Hack for visibility of data.table and foreach index variables
     idx <- yidx <- .I <- NULL
     
@@ -601,11 +604,21 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     # Parse V and J columns to get gene
     # cat("V+J Column parsing\n")
     if (first) {
-        db$V <- getGene(db[[vCallColumn]])
-        db$J <- getGene(db[[jCallColumn]])
+		if (strip_d) {
+	        db$V <- getGene(db[[vCallColumn]], strip_d=TRUE)
+	        db$J <- getGene(db[[jCallColumn]], strip_d=TRUE)
+		} else {
+	        db$V <- getGene(db[[vCallColumn]], strip_d=FALSE)
+	        db$J <- getGene(db[[jCallColumn]], strip_d=FALSE)
+		}
     } else {
-        db$V1 <- getGene(db[[vCallColumn]], first=FALSE)
-        db$J1 <- getGene(db[[jCallColumn]], first=FALSE)
+		if (strip_d) {
+	        db$V1 <- getGene(db[[vCallColumn]], first=TRUE)
+	        db$J1 <- getGene(db[[jCallColumn]], first=TRUE)
+		} else {
+	        db$V1 <- getGene(db[[vCallColumn]], first=FALSE)
+	        db$J1 <- getGene(db[[jCallColumn]], first=FALSE)
+		}
         db$V <- db$V1
         db$J <- db$J1
         # Reassign V genes to most general group of genes
