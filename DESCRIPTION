@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
-Version: 0.1.5
-Date: 2017-03-23
+Version: 0.1.5.999
+Date: 2017-05-05
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
@@ -41,7 +41,7 @@ Imports:
     ape,
     data.table (>= 1.9.4),
     doParallel,
-    dplyr,
+    dplyr (>= 0.5.0),
     foreach,
     graphics,
     grid,

@@ -118,7 +118,7 @@
 #'                          filter filter_ select select_ arrange arrange_
 #'                          group_by group_by_ ungroup
 #'                          mutate mutate_ summarize summarize_
-#'                          mutate_each mutate_each_ summarize_each summarize_each_
+#'                          mutate_at summarize_at
 #'                          rename rename_ transmute transmute_
 #' @importFrom  foreach     foreach %dopar% registerDoSEQ
 #' @importFrom  igraph      V E as_adjacency_matrix graph_from_data_frame

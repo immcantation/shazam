@@ -105,7 +105,7 @@ checkColumns <- function(data, columns, logic=c("all", "any")) {
 # @return  The input data.frame with all entries in \code{columns} transformed 
 #          to uppercase.
 toupperColumns <- function(data, columns) {
-    data <- mutate_each_(data, funs(toupper), columns)
+    data <- mutate_at(data, columns, funs(toupper))
     
     return(data)
 }
