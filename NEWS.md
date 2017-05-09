@@ -1,10 +1,14 @@
-Version 0.1.5.999: May 05, 2017
+Version 0.1.5.999: May 09, 2017
 -------------------------------------------------------------------------------
 
 General:
 
 + Internal changes for compatibility with dplyr v0.6.0.
 
+Mutation Profiling:
+
++ Fixed a bug in `collapseClones()` that resulted in erroneous `CLONAL_SEQUENCE`
+  and `CLONAL_GERMLINE` being returned.
 
 Version 0.1.5: March 23, 2017
 -------------------------------------------------------------------------------

@@ -20,7 +20,7 @@ NULL
 #'                              sequences.
 #' @param   expandedDb          \code{logical} indicating whether or not to return the 
 #'                              expanded \code{db}, containing all the sequences (as opposed
-#'                              to returning just one sequence per clone collapsed by )
+#'                              to returning just one sequence per clone).
 #' @param   regionDefinition    \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences.
 #' @param   nonTerminalOnly     \code{logical} indicating whether to include mutations
@@ -47,7 +47,7 @@ NULL
 #' 
 #' For sequences identified to be part of the same clone, an effective clonal sequence, 
 #' representative of all mutations in a clone, is constructed using a stochastic approach. 
-#' Each position in th effective sequence is determined by a weighted sampling 
+#' Each position in the effective sequence is determined by a weighted sampling 
 #' of each mutated non-ambiguous base (excluding "N", "." or "-" characters) from all 
 #' the sequences in the clone. For example, in a clone with 5 sequences that have "C" 
 #' at position 1, and 5 sequences with "T" at this same position, the effective sequence 
@@ -87,9 +87,6 @@ collapseClones <- function(db,
     ## DEBUG
     # cloneColumn="CLONE"; sequenceColumn="SEQUENCE_IMGT"; germlineColumn="GERMLINE_IMGT_D_MASK"
     # expandedDb=FALSE; regionDefinition=NULL; nonTerminalOnly=FALSE; nproc=1
-    
-    # Hack for visibility of data.table and foreach index variables
-    idx <- yidx <- .I <- NULL
 
     # Check for valid columns
     check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
@@ -101,7 +98,7 @@ collapseClones <- function(db,
     }
 
     # Convert sequence columns to uppercase
-    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
+    db <- shazam:::toupperColumns(db, c(sequenceColumn, germlineColumn))
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
@@ -117,21 +114,16 @@ collapseClones <- function(db,
         stop ("nonTerminalOnly must be TRUE or FALSE.")
     }
     
-    # Convert clone identiers to strings
+    # Convert clone identifiers to strings
     db[[cloneColumn]] <- as.character(db[[cloneColumn]])
     
-    # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, getnproc())
+    # get row indices in db for each unique clone
+    uniqueClones = unique(db[, cloneColumn])
+    # crucial to have simplify=FALSE (otherwise won't return a list if uniqueClones has length 1)
+    uniqueClonesIdx = sapply(uniqueClones, function(i){which(db[, cloneColumn]==i)}, simplify=FALSE)
     
-    # Convert the db (data.frame) to a data.table & set keys
-    # This is an efficient way to get the groups of CLONES, instead of doing dplyr
-    dt <- data.table(db)
-    setkeyv(dt, cloneColumn)
-    # Get the group indexes
-    #dt <- dt[, list(yidx=list(.I)), by=list(CLONE)]
-    dt <- dt[, list(yidx=list(.I)), by=cloneColumn]
-    groups <- dt[, yidx]
-    lenGroups <- length(groups)
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, shazam:::getnproc())
     
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
@@ -139,7 +131,7 @@ collapseClones <- function(db,
     if (nproc == 1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
-        registerDoSEQ()
+        foreach::registerDoSEQ()
     } else {
         if (nproc != 0) { 
             #cluster <- makeCluster(nproc, type="SOCK") 
@@ -156,33 +148,38 @@ collapseClones <- function(db,
     # Printing status to console
     cat("Collapsing clonal sequences...\n")
     
-    #cons_list <- foreach(idx=iterators::icount(lenGroups), .combine=c, .verbose=FALSE, 
-    cons_mat <- foreach(idx=iterators::icount(lenGroups), .combine="cbind", 
+    # avoid .combine="cbind"!
+    # if there is only 1 unique clone, .combind="cbind" will result in a vector (as opposed to
+    # a matrix) being returned, which will subsequently result a failure in
+    # cons_db$CLONAL_SEQUENCE <- cons_mat[, 1]
+    cons_mat <- foreach(idx=1:length(uniqueClonesIdx),
                         .verbose=FALSE, .errorhandling='stop') %dopar% {
-        calcClonalConsensus(inputSeq=db[[sequenceColumn]][groups[[idx]]],
-                            germlineSeq=db[[germlineColumn]][groups[[idx]]],
-                            regionDefinition=regionDefinition, 
-                            nonTerminalOnly=nonTerminalOnly)
+        cloneIdx <- uniqueClonesIdx[[idx]]
+        shazam:::calcClonalConsensus(inputSeq=db[cloneIdx, sequenceColumn],
+                                     germlineSeq=db[cloneIdx, germlineColumn],
+                                     regionDefinition=regionDefinition, 
+                                     nonTerminalOnly=nonTerminalOnly)
     }
-
+    # using cbind below will give a matrix with columns being clones
+    # use rbind to have rows be clones
+    cons_mat <- do.call(rbind, cons_mat)
+    
     # Stop cluster
     if(nproc > 1) { parallel::stopCluster(cluster) }
     
     # Build return data.frame
     if (expandedDb) { 
         # Fill all rows with the consensus sequence
-        clone_id <-  unique(db[[cloneColumn]])
-        clone_index <- match(db[[cloneColumn]], clone_id)
+        clone_index <- match(db[[cloneColumn]], uniqueClones)
         cons_db <- db
-        cons_db$CLONAL_SEQUENCE <- cons_mat[1, clone_index]
-        cons_db$CLONAL_GERMLINE <- cons_mat[2, clone_index]
+        cons_db$CLONAL_SEQUENCE <- cons_mat[clone_index, 1]
+        cons_db$CLONAL_GERMLINE <- cons_mat[clone_index, 2]
     } else {
         # Return only the first low of each clone
-        clone_id <-  unique(db[[cloneColumn]])
-        clone_index <- match(clone_id, db[[cloneColumn]])
+        clone_index <- match(uniqueClones, db[[cloneColumn]])
         cons_db <- db[clone_index, ]
-        cons_db$CLONAL_SEQUENCE <- cons_mat[1, ]
-        cons_db$CLONAL_GERMLINE <- cons_mat[2, ]
+        cons_db$CLONAL_SEQUENCE <- cons_mat[, 1]
+        cons_db$CLONAL_GERMLINE <- cons_mat[, 2]
     }
     
     return(cons_db)

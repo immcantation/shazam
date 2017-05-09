@@ -1,6 +1,30 @@
 #load(file.path("tests", "data-tests", "ExampleDb.rda"))
 load(file.path("..", "data-tests", "ExampleDb.rda"))
 
+test_that("collapseClones", {
+    # example data
+    db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+    # clone with most sequences: CLONE 3128
+    
+    # Build clonal consensus for the full sequence
+    set.seed(7)
+    clones.1 <- collapseClones(db, nproc=1, expandedDb=FALSE)
+    set.seed(7)
+    clones.2 <- collapseClones(db, nproc=1, expandedDb=TRUE)
+    
+    for (clone in unique(db$CLONE)) {
+        # expect CLONAL_SEQUENCE for all seqs in the same clone to be the same
+        # expect CLONAL_GERMLINE for all seqs in the same clone to be the same
+        # use result from expandedDb=TRUE to test
+        expect_equal(length(unique(clones.2[clones.2$CLONE==clone, "CLONAL_SEQUENCE"])), 1)
+        expect_equal(length(unique(clones.2[clones.2$CLONE==clone, "CLONAL_GERMLINE"])), 1)
+        
+        # expect result from expandedDb=TRUE to be the same as that from expandedDb=FALSE
+        expect_equal(clones.1[clones.1$CLONE==clone, ], clones.2[clones.2$CLONE==clone, ][1, ])
+    }
+}) 
+
+
 test_that("binMutationsByRegion", {
     set.seed(8)
     numbOfMutations <- sample(3:10, 1) 
