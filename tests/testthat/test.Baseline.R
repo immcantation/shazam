@@ -230,7 +230,7 @@ test_that("calcBaseline", {
 # Commented because working on the code, when clones collapsed.
     expect_equivalent(
         db_baseline_rowSums,
-        c(13, 19, 19, 55, 0))
+        c(12, 39, 7, 6, 7))
     
 #     ## Check 5 examples for each, at different positions
 #     ## CDR_R, first 5
@@ -396,28 +396,28 @@ test_that("Test groupBaseline", {
     pdf1 <- slot(grouped1, "pdfs")
     sigma1 <- slot(grouped1,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf1$CDR[1,]),c(0,6.061), tolerance=0.01)
-    expect_equal(range(pdf1$CDR[2,]),c(0,8.440), tolerance=0.01)
-    expect_equal(sigma1, c(-0.351, -0.7, -0.230, -0.911), tolerance=0.01)
+    expect_equal(range(pdf1$CDR[1,]),c(0,4.649), tolerance=0.01)
+    expect_equal(range(pdf1$CDR[2,]),c(0,7.551), tolerance=0.01)
+    expect_equal(sigma1, c(-0.312, -0.673, -0.147, -0.701), tolerance=0.01)
     
     # Group PDFs by both sample (between variable) and isotype (within variable)
     grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
     pdf2 <- slot(grouped2, "pdfs")
     sigma2 <- slot(grouped2,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf2$CDR[1,]),c(0,4.192), tolerance=0.01)
-    expect_equal(range(pdf2$CDR[2,]),c(0,4.561), tolerance=0.01)    
+    expect_equal(range(pdf2$CDR[1,]),c(0,3.564), tolerance=0.01)
+    expect_equal(range(pdf2$CDR[2,]),c(0,3.078), tolerance=0.01)    
     expect_equal(sigma2, 
-                 c(-0.43, -0.68, -0.27, -0.72, -0.17, -0.99, -0.26, -0.87), tolerance=0.01)
+                 c(-0.34, -0.62, -0.28, -0.73, -0.18, -0.76, -0.13, -0.67), tolerance=0.01)
     
     # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
     grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
     pdf3 <- slot(grouped3, "pdfs")
     sigma3 <- slot(grouped3,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf3$CDR[1,]),c(0,6.089), tolerance=0.01)
-    expect_equal(range(pdf3$CDR[2,]),c(0,8.432), tolerance=0.01)    
+    expect_equal(range(pdf3$CDR[1,]),c(0,4.522), tolerance=0.01)
+    expect_equal(range(pdf3$CDR[2,]),c(0,7.533), tolerance=0.01)    
     expect_equal(sigma3, 
-                 c( -0.35, -0.7, -0.23, -0.91), tolerance=0.01)
+                 c( -0.31, -0.68, -0.15, -0.70), tolerance=0.01)
     
 })
