@@ -212,6 +212,7 @@ test_that("calcBaseline", {
     
     ## With the full db, and CLONE field
     ## Mutations calculated CLONAL_SEQUENCE vs GERMLINE_IMGT_D_MASK    
+    set.seed(723)
     db_baseline <- calcBaseline(db, 
                                 sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
@@ -230,7 +231,7 @@ test_that("calcBaseline", {
 # Commented because working on the code, when clones collapsed.
     expect_equivalent(
         db_baseline_rowSums,
-        c(12, 39, 7, 6, 7))
+        c(13, 19, 55, 0, 0))
     
 #     ## Check 5 examples for each, at different positions
 #     ## CDR_R, first 5
@@ -311,6 +312,7 @@ test_that("calcBaseline", {
     db_1_to_5 <- db[1:5,]
     db_1_to_5$CLONE <- NULL
     
+    set.seed(283)
     db_baseline <- calcBaseline(db_1_to_5, 
                                 sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK", 
@@ -320,6 +322,7 @@ test_that("calcBaseline", {
                                 nproc = 1,
                                 calcStats = T)
     
+    set.seed(2935)
     db_baseline_trim_null <- calcBaseline(db_trim, sequenceColumn="SEQUENCE_IMGT",
                                           germlineColumn="GERMLINE_IMGT_D_MASK",
                                           testStatistic="focused",
