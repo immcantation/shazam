@@ -565,9 +565,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
                           normalize=c("len", "none"), symmetry=c("avg", "min"),
                           first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE) {
-    # Hack for visibility of data.table and foreach index variables
-    idx <- yidx <- .I <- NULL
-    
+
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
@@ -582,7 +580,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     if (check != TRUE) { stop(check) }
     
     # Convert sequence columns to uppercase
-    db <- toupperColumns(db, c(sequenceColumn))
+    db <- shazam:::toupperColumns(db, c(sequenceColumn))
     
     # Check for invalid characters
     valid_seq <- sapply(db[[sequenceColumn]], allValidChars, getCharsInModel(model))
@@ -601,11 +599,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     # Parse V and J columns to get gene
     # cat("V+J Column parsing\n")
     if (first) {
-        db$V <- getGene(db[[vCallColumn]])
-        db$J <- getGene(db[[jCallColumn]])
+        db$V <- alakazam::getGene(db[[vCallColumn]])
+        db$J <- alakazam::getGene(db[[jCallColumn]])
     } else {
-        db$V1 <- getGene(db[[vCallColumn]], first=FALSE)
-        db$J1 <- getGene(db[[jCallColumn]], first=FALSE)
+        db$V1 <- alakazam::getGene(db[[vCallColumn]], first=FALSE)
+        db$J1 <- alakazam::getGene(db[[jCallColumn]], first=FALSE)
         db$V <- db$V1
         db$J <- db$J1
         # Reassign V genes to most general group of genes
@@ -625,7 +623,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     # Create new column for distance to nearest neighbor
     db$TMP_DIST_NEAREST <- rep(NA, nrow(db))
     db$ROW_ID <- 1:nrow(db)
-    db$L <- stri_length(db[[sequenceColumn]])
+    db$L <- stringi::stri_length(db[[sequenceColumn]])
     
     # Create cluster of nproc size and export namespaces
     # If user wants to paralellize this function and specifies nproc > 1, then
@@ -643,19 +641,30 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     }
     
     # Calculate distance to nearest neighbor
-    # cat("Calculating distance to nearest neighbor\n")
+    cat("Calculating distance to nearest neighbor\n")
     
-    # Convert the db (data.frame) to a data.table & set keys
-    # This is an efficient way to get the groups of V J L, instead of doing dplyr
-    dt <- data.table(db)
-    # Get the group indexes
+    # Get indices of unique combinations of V, J, L, and any specified field(s)
+    # groups to use
     group_cols <- c("V","J","L")
     if (!is.null(fields)) {
         group_cols <- append(group_cols,fields)
     }
-    dt <- dt[, list( yidx = list(.I) ) , by = group_cols ]
-    groups <- dt[,yidx]
-    lenGroups <- length(groups)
+    # unique groups
+    uniqueGroups <- unique(db[, group_cols])
+    # indices
+    # crucial to have simplify=FALSE 
+    # (otherwise won't return a list if uniqueClones has length 1)
+    uniqueGroupsIdx <- sapply(1:nrow(uniqueGroups), function(i){
+        curGroup <- uniqueGroups[i, ]
+        # match for each field
+        curIdx <- sapply(group_cols, function(coln){
+            db[, coln]==curGroup[, coln]
+        }, simplify=FALSE)
+        curIdx <- do.call(rbind, curIdx)
+        # intersect to get match across fields 
+        curIdx <- which(colSums(curIdx)==length(group_cols))
+    }, simplify=FALSE)
+    
     
     # Export groups to the clusters
     if (nproc > 1) { 
@@ -682,22 +691,23 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     
    
 
-    list_db <- foreach(idx=iterators::icount(lenGroups), .errorhandling='stop') %dopar% {
-        db_group <- db[groups[[idx]], ]
+    list_db <- foreach(i=1:length(uniqueGroupsIdx), .errorhandling='stop') %dopar% {
+        idx <- uniqueGroupsIdx[[i]]
+        db_group <- db[idx, ]
         crossGroups <- NULL
         if (!is.null(cross)) {
             crossGroups <- db_group %>% dplyr::group_indices_(.dots=cross)
         }
-        arrSeqs <-  as.vector(unlist(db[groups[[idx]], sequenceColumn]))
-        db_group$TMP_DIST_NEAREST <- nearestDist(arrSeqs,
-                                                 model=model,
-                                                 normalize=normalize,
-                                                 symmetry=symmetry,
-                                                 crossGroups=crossGroups,
-                                                 mst=mst)
+        arrSeqs <-  as.vector(unlist(db[idx, sequenceColumn]))
+        db_group$TMP_DIST_NEAREST <- shazam:::nearestDist(arrSeqs,
+                                                          model=model,
+                                                          normalize=normalize,
+                                                          symmetry=symmetry,
+                                                          crossGroups=crossGroups,
+                                                          mst=mst)
         return(db_group)
     }        
-
+    
     ## DEBUG
     # print(list_db)
     # for (i in 1:length(list_db)) {
@@ -705,7 +715,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     # }
 
     # Convert list from foreach into a db data.frame
-    db <- dplyr::bind_rows(list_db)
+    db <- do.call(rbind, list_db)
     db <- db[order(db$ROW_ID), ]
     
     # Stop the cluster
