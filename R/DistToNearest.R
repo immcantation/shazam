@@ -650,12 +650,17 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         group_cols <- append(group_cols,fields)
     }
     # unique groups
-    uniqueGroups <- unique(db[, group_cols])
+    # not necessary but good practice to force as df and assign colnames
+    # (in case group_cols has length 1; which can happen in groupBaseline)
+    uniqueGroups <- data.frame(unique(db[, group_cols]))
+    colnames(uniqueGroups) <- group_cols
+    rownames(uniqueGroups) <- NULL
     # indices
     # crucial to have simplify=FALSE 
     # (otherwise won't return a list if uniqueClones has length 1)
     uniqueGroupsIdx <- sapply(1:nrow(uniqueGroups), function(i){
-        curGroup <- uniqueGroups[i, ]
+        curGroup <- data.frame(uniqueGroups[i, ])
+        colnames(curGroup) <- group_cols
         # match for each field
         curIdx <- sapply(group_cols, function(coln){
             db[, coln]==curGroup[, coln]
