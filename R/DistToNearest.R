@@ -593,9 +593,6 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         db <- db[valid_seq,]
     }    
     
-    # Get targeting distance
-    targeting_distance <- ifelse(model=="hh_s5f", calcTargetingDistance(HH_S5F), NULL)
-
     # Parse V and J columns to get gene
     # cat("V+J Column parsing\n")
     if (first) {
@@ -690,8 +687,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
                                  "M1N_Compat",
                                  "calcTargetingDistance",
                                  "findUniqSeq",
-                                 "pairwise5MerDist",
-                                 "targeting_distance")
+                                 "pairwise5MerDist")
         parallel::clusterExport(cluster, export_functions, envir=environment())
     }
     
