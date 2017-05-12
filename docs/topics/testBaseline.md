@@ -79,7 +79,6 @@ nproc=1)
 
 ```
 Collapsing clonal sequences...
-Calculating observed number of mutations...
 Calculating the expected frequencies of mutations...
 Calculating BASELINe probability density functions...
 
@@ -109,9 +108,9 @@ testBaseline(grouped, groupBy="SAMPLE")
 
 
 ```
-  REGION       TEST      PVALUE         FDR
-1    CDR -1h != +7d 0.295621182 0.295621182
-2    FWR -1h != +7d 0.004858044 0.009716087
+  REGION       TEST    PVALUE       FDR
+1    CDR -1h != +7d 0.1365944 0.2731888
+2    FWR -1h != +7d 0.3536472 0.3536472
 
 ```
 

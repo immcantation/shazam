@@ -43,7 +43,7 @@ sequences.
 expandedDb
 :   `logical` indicating whether or not to return the 
 expanded `db`, containing all the sequences (as opposed
-to returning just one sequence per clone collapsed by )
+to returning just one sequence per clone).
 
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions
@@ -83,7 +83,7 @@ Details
 
 For sequences identified to be part of the same clone, an effective clonal sequence, 
 representative of all mutations in a clone, is constructed using a stochastic approach. 
-Each position in th effective sequence is determined by a weighted sampling 
+Each position in the effective sequence is determined by a weighted sampling 
 of each mutated non-ambiguous base (excluding "N", "." or "-" characters) from all 
 the sequences in the clone. For example, in a clone with 5 sequences that have "C" 
 at position 1, and 5 sequences with "T" at this same position, the effective sequence 

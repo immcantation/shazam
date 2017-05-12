@@ -381,7 +381,7 @@ calcBaseline <- function(db,
                          mutationDefinition=NULL,
                          calcStats=FALSE,
                          nproc=1) {
-    # Hack for visibility of data.table and foreach index variables
+    # Hack for visibility of foreach index variable
     idx <- NULL
     
     # Evaluate argument choices
@@ -1140,7 +1140,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                      
 #' @export
 summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1) {
-    # Hack for visibility of data.table and foreach index variables
+    # Hack for visibility of foreach index variable
     idx <- NULL
     
     # Check arguments

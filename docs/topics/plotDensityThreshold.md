@@ -84,6 +84,17 @@ db <- subset(ExampleDb, SAMPLE == "-1h")
 # Use nucleotide Hamming distance and normalize by junction length
 db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 
+```
+
+
+```
+Calculating distance to nearest neighbor
+
+```
+
+
+```R
+
 # To find the threshold cut, call findThreshold function for "gmm" method.
 output <- findThreshold(db$DIST_NEAREST, method="density")
 print(output)
@@ -103,7 +114,7 @@ print(output)
 plotDensityThreshold(output)
 ```
 
-![4](plotDensityThreshold-4.png)
+![6](plotDensityThreshold-6.png)
 
 
 See also

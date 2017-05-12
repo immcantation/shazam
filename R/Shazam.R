@@ -110,7 +110,6 @@
 #'                          isValidAASeq translateStrings gridPlot
 #'                          getMRCA getPathLengths tableEdges
 #' @importFrom  ape         mst
-#' @importFrom  data.table  data.table setkey setkeyv
 #' @importFrom  doParallel  registerDoParallel
 #' @importFrom  dplyr       do n desc funs %>%
 #'                          as_data_frame data_frame data_frame_

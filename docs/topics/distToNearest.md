@@ -149,6 +149,17 @@ db <- subset(ExampleDb, SAMPLE == "-1h")
 dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
 first=FALSE, normalize="len")
 
+```
+
+
+```
+Calculating distance to nearest neighbor
+
+```
+
+
+```R
+
 # Plot histogram of non-NA distances
 p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
 theme_bw() + 
@@ -160,12 +171,18 @@ plot(p1)
 
 ```
 
-![2](distToNearest-2.png)
+![4](distToNearest-4.png)
 
 ```R
 
 # Use human 5-mer model
 dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f")
+```
+
+
+```
+Calculating distance to nearest neighbor
+
 ```
 
 

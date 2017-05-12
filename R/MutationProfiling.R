@@ -402,7 +402,7 @@ observedMutations <- function(db,
                               regionDefinition=NULL,
                               mutationDefinition=NULL,
                               nproc=1) {
-    # Hack for visibility of data.table and foreach index variables
+    # Hack for visibility of foreach index variable
     idx <- NULL
     
     # Check for valid columns
@@ -481,7 +481,7 @@ observedMutations <- function(db,
     }
     
     # Printing status to console
-    cat("Calculating observed number of mutations...\n")
+    #cat("Calculating observed number of mutations...\n")
     
     # Identify all the mutations in the sequences
     numbOfSeqs <- nrow(db)
@@ -1353,7 +1353,7 @@ expectedMutations <- function(db,
                               regionDefinition=NULL,
                               mutationDefinition=NULL,
                               nproc=1) {
-    # Hack for visibility of data.table and foreach index variables
+    # Hack for visibility of foreach index variable
     idx <- NULL
     
     # Check for valid columns

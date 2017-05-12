@@ -134,17 +134,6 @@ germlineColumn="GERMLINE_IMGT_D_MASK",
 frequency=TRUE,
 nproc=1)
 
-```
-
-
-```
-Calculating observed number of mutations...
-
-```
-
-
-```R
-
 # Count of V-region mutations split by FWR and CDR
 # With mutations only considered replacement if charge changes
 db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
@@ -152,12 +141,6 @@ germlineColumn="GERMLINE_IMGT_D_MASK",
 regionDefinition=IMGT_V,
 mutationDefinition=CHARGE_MUTATIONS,
 nproc=1)
-```
-
-
-```
-Calculating observed number of mutations...
-
 ```
 
 

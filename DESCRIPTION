@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
-Version: 0.1.5.999
-Date: 2017-05-09
+Version: 0.1.6
+Date: 2017-05-12
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
@@ -39,7 +39,6 @@ Depends:
 Imports:
     alakazam (>= 0.2.6),
     ape,
-    data.table (>= 1.9.4),
     doParallel,
     dplyr (>= 0.5.0),
     foreach,

@@ -85,7 +85,7 @@ Users may define other region sets and boundaries by creating a custom
 observed <- observedMutations(clones, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               regionDefinition=IMGT_V, nproc=1)
-# Count observed mutations and append EXPECTED columns to the output
+# Count expected mutations and append EXPECTED columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               targetingModel=HH_S5F,
@@ -152,8 +152,8 @@ The default behavior of `expectedMutations` is to use the human 5-mer mutation m
 # Calculate selection on charge class with the mouse 5-mer model
 baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
                          regionDefinition=IMGT_V, 
-                         targetingModel=MK_RS5NFModel,
-                         targetingModel=CHARGE_MUTATIONS,
+                         targetingModel=MK_RS5NF,
+                         mutationDefinition=CHARGE_MUTATIONS,
                          nproc=1)
 ```
 
@@ -221,9 +221,9 @@ testBaseline(grouped_1, groupBy="SAMPLE")
 ```
 
 ```
-##   REGION       TEST      PVALUE        FDR
-## 1    CDR -1h != +7d 0.012498209 0.01249821
-## 2    FWR -1h != +7d 0.005121936 0.01024387
+##   REGION       TEST     PVALUE        FDR
+## 1    CDR -1h != +7d 0.02582124 0.04372632
+## 2    FWR -1h != +7d 0.04372632 0.04372632
 ```
 
 ## Plot and compare selection scores for groups

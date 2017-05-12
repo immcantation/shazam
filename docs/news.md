@@ -1,3 +1,19 @@
+Version 0.1.6: May 12, 2017
+-------------------------------------------------------------------------------
+
+General:
+
++ Internal changes for compatibility with dplyr v0.6.0.
++ Removed data.table dependency.
+
+Mutation Profiling:
+
++ Fixed a bug in `collapseClones()` that resulted in erroneous `CLONAL_SEQUENCE`
+  and `CLONAL_GERMLINE` being returned.
++ Added a vignette describing basic mutational analysis.
++ Remove console notification that `observedMutations` was running.
+
+
 Version 0.1.5: March 23, 2017
 -------------------------------------------------------------------------------
 

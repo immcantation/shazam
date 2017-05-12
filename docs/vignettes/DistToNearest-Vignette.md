@@ -67,10 +67,20 @@ the overall distance.
 # Use nucleotide Hamming distance and normalize by junction length
 dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="len", 
                           nproc=1)
+```
 
+```
+## Calculating distance to nearest neighbor
+```
+
+```r
 # Use genotyped V assignments, a 5-mer model and no normalization
 dist_s5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f", 
                           first=FALSE, normalize="none", nproc=1)
+```
+
+```
+## Calculating distance to nearest neighbor
 ```
 
 ## Using nearest neighbor distances to determine clonal assignment thresholds
@@ -230,6 +240,10 @@ dist_fields <- distToNearest(ExampleDb, model="ham", first=FALSE,
                              nproc=1)
 ```
 
+```
+## Calculating distance to nearest neighbor
+```
+
 We can plot the nearest neighbor distances for the two samples:
 
 
@@ -264,6 +278,10 @@ we set `cross="SAMPLE"`, which will group the data into `-1h` and
 ```r
 dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE, 
                             normalize="len", cross="SAMPLE", nproc=1)
+```
+
+```
+## Calculating distance to nearest neighbor
 ```
 
 

@@ -37,7 +37,7 @@ Dependencies
 ---------------
 
 **Depends:** ggplot2  
-**Imports:** alakazam, ape, data.table, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, kedd, KernSmooth, methods, lazyeval, parallel, SDMTools, scales, seqinr, stats, stringi, tidyr, utils  
+**Imports:** alakazam, ape, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, kedd, KernSmooth, methods, lazyeval, parallel, SDMTools, scales, seqinr, stats, stringi, tidyr, utils  
 **Suggests:** knitr, rmarkdown, testthat
 
 Authors

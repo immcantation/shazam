@@ -16,6 +16,7 @@ pages:
     - 'Release Notes': news.md
     - 'Related Projects': projects.md
   - 'Vignettes':
+    - 'Basic mutational load analysis': vignettes/Mutation-Vignette.md
     - 'Quantification of selection pressure': vignettes/Baseline-Vignette.md
     - 'Tuning clonal assignment thresholds with nearest neighbor distances': vignettes/DistToNearest-Vignette.md
     - 'Inferring SHM targeting models': vignettes/Targeting-Vignette.md

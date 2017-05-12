@@ -62,7 +62,6 @@ nproc = 1)
 
 ```
 Collapsing clonal sequences...
-Calculating observed number of mutations...
 Calculating the expected frequencies of mutations...
 Calculating BASELINe probability density functions...
 
@@ -93,10 +92,10 @@ getBaselineStats(grouped)
 
 ```
   SAMPLE ISOTYPE REGION BASELINE_SIGMA BASELINE_CI_LOWER BASELINE_CI_UPPER BASELINE_CI_PVALUE
-1    +7d     IgA    CDR     -0.3064983        -0.4979519        -0.1459329      -1.170362e-04
-2    +7d     IgA    FWR     -0.6979453        -0.8253547        -0.5788915      -1.232348e-14
-3    +7d     IgG    CDR     -0.2408167        -0.3704990        -0.1286678      -2.272340e-05
-4    +7d     IgG    FWR     -0.7143657        -0.8118353        -0.6273080      -6.994405e-15
+1    +7d     IgA    CDR     -0.2132284        -0.4239300      -0.029817347      -1.303751e-02
+2    +7d     IgA    FWR     -0.7319032        -0.8841849      -0.588806275      -1.121325e-14
+3    +7d     IgG    CDR     -0.1296777        -0.2682991      -0.005639158      -2.570244e-02
+4    +7d     IgG    FWR     -0.6702504        -0.7797567      -0.567234804      -7.771561e-15
 
 ```
 
