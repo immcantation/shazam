@@ -669,8 +669,9 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     # Export groups to the clusters
     if (nproc > 1) { 
         export_functions <- list("db",
-                                 "groups", 
+                                 "uniqueGroupsIdx", 
                                  "cross",
+                                 "mst",
                                  "sequenceColumn", 
                                  "model",
                                  "normalize",
