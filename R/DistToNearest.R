@@ -156,7 +156,7 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
     seq2 <- seq2[fivemersWithMu]
     
     # Number of mutations (for normalization, if specified)
-    numbOfMutation <- sum(fivemersWithMu)
+    #numbOfMutation <- sum(fivemersWithMu)
     
     dist <- NA
     tryCatch({
@@ -565,7 +565,9 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
                           normalize=c("len", "none"), symmetry=c("avg", "min"),
                           first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE) {
-
+    # Hack for visibility of foreach index variables
+    i=NULL
+    
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
@@ -592,9 +594,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     }    
     
     # Get targeting distance
-    targeting_distance <- if (model == "hs5f") { 
-        calcTargetingDistance(HH_S5F) 
-        } else { NULL }
+    targeting_distance <- ifelse(model=="hh_s5f", calcTargetingDistance(HH_S5F), NULL)
 
     # Parse V and J columns to get gene
     # cat("V+J Column parsing\n")

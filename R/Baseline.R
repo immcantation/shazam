@@ -832,6 +832,8 @@ calcBaselineBinomialPdf <- function (x=3,
 #' }
 #' @export
 groupBaseline <- function(baseline, groupBy, nproc=1) {
+    # Hack for visibility of foreach index variables
+    i=NULL
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())

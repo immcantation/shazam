@@ -84,6 +84,9 @@ collapseClones <- function(db,
                            regionDefinition=NULL,
                            nonTerminalOnly=FALSE,
                            nproc=1) {
+    # Hack for visibility of foreach index variables
+    idx <- NULL
+    
     ## DEBUG
     # cloneColumn="CLONE"; sequenceColumn="SEQUENCE_IMGT"; germlineColumn="GERMLINE_IMGT_D_MASK"
     # expandedDb=FALSE; regionDefinition=NULL; nonTerminalOnly=FALSE; nproc=1
@@ -98,7 +101,7 @@ collapseClones <- function(db,
     }
 
     # Convert sequence columns to uppercase
-    db <- shazam:::toupperColumns(db, c(sequenceColumn, germlineColumn))
+    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
@@ -123,7 +126,7 @@ collapseClones <- function(db,
     uniqueClonesIdx = sapply(uniqueClones, function(i){which(db[, cloneColumn]==i)}, simplify=FALSE)
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, shazam:::getnproc())
+    nproc <- min(nproc, getnproc())
     
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
@@ -131,7 +134,7 @@ collapseClones <- function(db,
     if (nproc == 1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
-        foreach::registerDoSEQ()
+        registerDoSEQ()
     } else {
         if (nproc != 0) { 
             #cluster <- makeCluster(nproc, type="SOCK") 
@@ -155,10 +158,10 @@ collapseClones <- function(db,
     cons_mat <- foreach(idx=1:length(uniqueClonesIdx),
                         .verbose=FALSE, .errorhandling='stop') %dopar% {
         cloneIdx <- uniqueClonesIdx[[idx]]
-        shazam:::calcClonalConsensus(inputSeq=db[cloneIdx, sequenceColumn],
-                                     germlineSeq=db[cloneIdx, germlineColumn],
-                                     regionDefinition=regionDefinition, 
-                                     nonTerminalOnly=nonTerminalOnly)
+        calcClonalConsensus(inputSeq=db[cloneIdx, sequenceColumn],
+                            germlineSeq=db[cloneIdx, germlineColumn],
+                            regionDefinition=regionDefinition, 
+                            nonTerminalOnly=nonTerminalOnly)
     }
     # using cbind below will give a matrix with columns being clones
     # use rbind to have rows be clones

@@ -2172,12 +2172,6 @@ plotTune = function(tuneMtx, thresh,
   
   ### extract plot data into plotMtx
   # if tuneMtx is just a matrix
-  if (criterion=="3mer+1mer") {
-    criterion.for.data = c("")
-  } else {
-    criterion.for.data = criterion
-  }
-  
   if (!is.list(tuneMtx)) {
     if (criterion!="3mer+1mer") {
       plotMtx = matrix(tuneMtx[criterion, as.character(thresh)], nrow=1)
