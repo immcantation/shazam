@@ -582,7 +582,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     if (check != TRUE) { stop(check) }
     
     # Convert sequence columns to uppercase
-    db <- shazam:::toupperColumns(db, c(sequenceColumn))
+    db <- toupperColumns(db, c(sequenceColumn))
     
     # Check for invalid characters
     valid_seq <- sapply(db[[sequenceColumn]], allValidChars, getCharsInModel(model))
@@ -701,12 +701,12 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
             crossGroups <- db_group %>% dplyr::group_indices_(.dots=cross)
         }
         arrSeqs <-  as.vector(unlist(db[idx, sequenceColumn]))
-        db_group$TMP_DIST_NEAREST <- shazam:::nearestDist(arrSeqs,
-                                                          model=model,
-                                                          normalize=normalize,
-                                                          symmetry=symmetry,
-                                                          crossGroups=crossGroups,
-                                                          mst=mst)
+        db_group$TMP_DIST_NEAREST <- nearestDist(arrSeqs,
+                                                 model=model,
+                                                 normalize=normalize,
+                                                 symmetry=symmetry,
+                                                 crossGroups=crossGroups,
+                                                 mst=mst)
         return(db_group)
     }        
     
