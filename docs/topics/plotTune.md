@@ -119,7 +119,7 @@ tuneMtx = c(tuneMtx, list(subTune))
 names(tuneMtx) = unique(db$SAMPLE)
 
 # plot with legend for both samples for a subset of minNumMutations values
-plotTune(tuneMtx, thresh=c(5,15,25,40), criterion="3mer",
+plotTune(tuneMtx, thresh=c(5, 15, 25, 40), criterion="3mer",
 pchs=16:17, ltys=1:2, cols=2:3, 
 plotLegend=TRUE, legendPos=c(5, 100))
 
