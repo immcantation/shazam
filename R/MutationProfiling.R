@@ -143,7 +143,7 @@ collapseClones <- function(db,
         parallel::clusterExport(cluster, 
                                 list('db', 'sequenceColumn', 'germlineColumn', 'cloneColumn',
                                      'regionDefinition', 'calcClonalConsensus',
-                                     'groups', 'c2s', 's2c', 'words', 'translate'), 
+                                     'uniqueClonesIdx', 'c2s', 's2c', 'words', 'translate'), 
                                 envir=environment() )
         registerDoParallel(cluster)
     }
