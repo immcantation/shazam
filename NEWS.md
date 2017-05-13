@@ -1,3 +1,12 @@
+Version 0.1.6.999: May 12, 2017
+-------------------------------------------------------------------------------
+
+Mutation Profiling:
+
++ Fixed a bug in `collapseClones()` that prevented it from running when `nproc`
+  is greater than 1.
+
+
 Version 0.1.6: May 12, 2017
 -------------------------------------------------------------------------------
 
