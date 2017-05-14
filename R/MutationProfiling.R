@@ -377,7 +377,7 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
 #'
 #' # Calculate mutation frequency over the entire sequence
 #' db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
