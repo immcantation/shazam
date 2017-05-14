@@ -1471,6 +1471,7 @@ baseline2DistPValue <-function(base1, base2) {
 #' @seealso  Takes as input a \link{Baseline} object returned from \link{groupBaseline}.
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "-1h")
@@ -1496,6 +1497,7 @@ baseline2DistPValue <-function(base1, base2) {
 #' # Facet by isotype instead of region
 #' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group",
 #'                     sigmaLimits=c(-1, 1))
+#' }
 #' 
 #' @export
 plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorElement=c("id", "group"), 
@@ -1676,6 +1678,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #'           or a data.frame returned from \link{summarizeBaseline}.
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
@@ -1700,6 +1703,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #' 
 #' # Facet by group instead of region
 #' plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", facetBy="group")
+#' }
 #' 
 #' @export
 plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColors=NULL, 
