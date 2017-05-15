@@ -73,13 +73,13 @@ test_that("calcObservedMutations, hydropathy", {
     # Identify only mutations in the V segment minus CDR3
     expect_equivalent(
         calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V),
-        NA)
+        c(NA, NA, NA, NA))
       
     # Identify mutations by change in hydropathy class
     expect_equivalent(
         calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
                            mutationDefinition=HYDROPATHY_MUTATIONS, frequency=TRUE),
-        NA)
+        c(NA, NA, NA, NA))
     
     ## This seq is only V
     v_seq <- ".......................................................................................CGTGTG......CTCTTCCGATCTAAGTCTTCCAAAGTACTANACGGGGGACTCCTGTGCCCCACCATGGACACACTTTGCTCCACGCTC.........CTGCTGCTGACCATCCCTTCATGGGGCTTG...TCCCAGATCACCATCTCGAGGGACACCTCCAAAAACCAGGTGATCCTTTCAATGACCAACATGGGCCCTCTGGACACAGCCACATACTTCTGTGCACACAGAC............................................................"
@@ -362,4 +362,32 @@ test_that("expectedMutations overwrites with a warning pre-existing values", {
                                      nproc=1),
                    "Columns EXPECTED_CDR_R, EXPECTED_CDR_S, EXPECTED_FWR_R, EXPECTED_FWR_S exist and will be overwritten")
     
+})
+
+
+test_that("calcObservedMutations, when no mutations found", {
+  
+    in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
+    germ_seq <- in_seq
+
+    #' Should return c(NA,NA), not c(NA)
+    expect_equivalent(calcObservedMutations(in_seq, germ_seq, regionDefinition = NULL), c(NA, NA))
+    expect_equivalent(calcObservedMutations(in_seq, germ_seq, regionDefinition = IMGT_V), c(NA, NA, NA, NA))
+    
+    inputSeq <- ".......................GGGA...GGCTTGGTACAGCCTGGGGGGTCCCTGAGACTCTCCTGTGCAGCCTCTGGATTCACCTTC............AGTAGCTACGACATGCACTGGGTCCGCCAAGCTACAGGAAAAGGTCTGGAGTGGGTCTCAGCTATTGGTACTGCT.........GGTGACACATACTATCCAGGCTCCGTGAAG...GGCCGATTCACCATCTCCAGAGAAAATGCCAAGAACTCCTTGTATCTTCAAATGAACAGCCTGAGAGCCGGGGACACGGCTGTGTATTACTGTGCAAGAGATAAGGACTGGTACTTCGATCTCTGGGGCCGTGGCACCCTGGTCACTGTCTCCTCAG"
+    germlinSeq <- "GAGGTGCAGCTGGTGGAGTCTGGGGGA...GGCTTGGTACAGCCTGGGGGGTCCCTGAGACTCTCCTGTGCAGCCTCTGGATTCACCTTC............AGTAGCTACGACATGCACTGGGTCCGCCAAGCTACAGGAAAAGGTCTGGAGTGGGTCTCAGCTATTGGTACTGCT.........GGTGACACATACTATCCAGGCTCCGTGAAG...GGCCGATTCACCATCTCCAGAGAAAATGCCAAGAACTCCTTGTATCTTCAAATGAACAGCCTGAGAGCCGGGGACACGGCTGTGTATTACTGTGCAAGAGANNNNNACTGGTACTTCGATCTCTGGGGCCGTGGCACCCTGGTCACTGTCTCCTCAG"
+    expect_equivalent(calcObservedMutations(in_seq, germ_seq, frequency=TRUE, regionDefinition = NULL, mutationDefinition = NULL, returnRaw = F),
+                      c(NA, NA))
+    
+})
+
+test_that("observedMutations, when no mutations found", {
+    
+    in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
+    germ_seq <- in_seq
+    
+    expect_equivalent(observedMutations(data.frame(
+        "SEQUENCE_IMGT"=c(in_seq, in_seq),
+        "GERMLINE_IMGT_D_MASK"=c(in_seq, in_seq)
+    ), regionDefinition = NULL)[,c("OBSERVED_SEQ_R", "OBSERVED_SEQ_S")], data.frame(c(0, 0), c(0, 0)))
 })

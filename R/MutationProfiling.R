@@ -693,7 +693,8 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
     }
     
     mutations_array_raw <- NA
-    mutations_array <- NA
+    mutations_array <- rep(NA, length(regionDefinition@labels))
+    names(mutations_array) <- regionDefinition@labels
     mutations = (c_germlineSeq != c_inputSeq) & (c_germlineSeq%in%NUCLEOTIDES[1:5]) & (c_inputSeq%in%NUCLEOTIDES[1:5])
     if (sum(mutations) > 0) {
         # The nucleotide positions of the mutations
@@ -721,7 +722,8 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
         if(length(mutations_array_raw)==0){
             # NA if mutations_array_raw contains all NAs and they have all been removed
             mutations_array_raw <- NA
-            mutations_array <- NA    
+            mutations_array <- rep(NA, length(regionDefinition@labels))
+            names(mutations_array) <- regionDefinition@labels
         } else {
             # mutation types other than "R" and "S" (e.g. "Stop") will be removed by binMutationsByRegion,
             # and stored in mutations_array
