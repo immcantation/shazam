@@ -186,6 +186,15 @@ test_that("Test distToNearest with unrecognized characters", {
 
 })
 
+test_that("Test distToNearest returns the same result with data.frame and tibble", {
+    db2 <- subset(db, CPRIMER %in% c("IGHA","IGHM") &
+                      BARCODE %in% c("RL016","RL018","RL019","RL021"))
+    expect_equivalent(
+        distToNearest(data.frame(db2)),
+        distToNearest(tibble::as_tibble(db2))
+    )
+})
+
 test_that("Test findThreshold", {
     
     db <- distToNearest(db, model="ham", first=FALSE, normalize="len", nproc=1)
