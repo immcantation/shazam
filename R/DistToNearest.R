@@ -582,7 +582,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     if (check != TRUE) { stop(check) }
     
     # Convert sequence columns to uppercase
-    db <- data.frame(toupperColumns(db, c(sequenceColumn)))
+    db <- toupperColumns(db, c(sequenceColumn))
     
     # Check for invalid characters
     valid_seq <- sapply(db[[sequenceColumn]], allValidChars, getCharsInModel(model))
@@ -660,7 +660,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         colnames(curGroup) <- group_cols
         # match for each field
         curIdx <- sapply(group_cols, function(coln){
-            db[, coln]==curGroup[, coln]
+            db[[coln]]==curGroup[, coln]
         }, simplify=FALSE)
         curIdx <- do.call(rbind, curIdx)
         # intersect to get match across fields 
