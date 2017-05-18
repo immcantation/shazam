@@ -582,7 +582,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     if (check != TRUE) { stop(check) }
     
     # Convert sequence columns to uppercase
-    db <- toupperColumns(db, c(sequenceColumn))
+    db <- data.frame(toupperColumns(db, c(sequenceColumn)))
     
     # Check for invalid characters
     valid_seq <- sapply(db[[sequenceColumn]], allValidChars, getCharsInModel(model))
