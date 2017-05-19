@@ -542,8 +542,8 @@ calcBaseline <- function(db,
         list_region_pdfs <- 
             foreach(idx=iterators::icount(totalNumbOfSequences)) %dopar% {                
                 calcBaselineHelper( 
-                    observed = db[idx, cols_observed],
-                    expected = db[idx, cols_expected],
+                    observed = db[cols_observed][1,],
+                    expected = db[cols_expected][1,],
                     region = region,
                     testStatistic = testStatistic,
                     regionDefinition = regionDefinition
@@ -833,7 +833,7 @@ calcBaselineBinomialPdf <- function (x=3,
 #' @export
 groupBaseline <- function(baseline, groupBy, nproc=1) {
     # Hack for visibility of foreach index variables
-    i=NULL
+    i <- NULL
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
