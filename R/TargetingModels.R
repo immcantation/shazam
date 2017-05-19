@@ -366,14 +366,14 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
                 muCodonPos = {position-1}%%3+1
                 seqAtMutation <- codonSeq[muCodonPos]
                 glAtMutation <- codonGL[muCodonPos]
-                if( !any(codonGL=="N") & !any(codonSeq=="N") ){
+                if (!any(codonGL=="N") & !any(codonSeq=="N")) {
                     codonPermutate <- matrix(rep(codonGL,3),ncol=3,byrow=T)
                     codonPermutate[,muCodonPos] <- canMutateTo(glAtMutation)[-4]
                     codonPermutate <- apply(codonPermutate,1,paste,collapse="")
                     codonPermutate <- matrix( c( codonPermutate, rep(c2s(codonGL),3) ), ncol=2, byrow=F)
                     muType <- mutationTypeOptimized(codonPermutate)
-                    if(!length(grep("N",wrd))){
-                        if( sum(muType=="S") == length(muType) ){
+                    if (!length(grep("N",wrd))) {
+                        if (sum(muType=="S") == length(muType) ){
                             substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] <- (substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] + 1)
                         }
                     }
