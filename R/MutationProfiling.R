@@ -1388,7 +1388,7 @@ expectedMutations <- function(db,
                        paste(label_exists, collapse=", "),
                        " exist and will be overwritten")
         )
-        db[,label_exists] <- NULL
+        db[[label_exists]] <- NULL
     }    
     
     # Check targeting model
@@ -1437,8 +1437,8 @@ expectedMutations <- function(db,
     
     targeting_list <-
         foreach (idx=iterators::icount(numbOfSeqs)) %dopar% {
-            calcExpectedMutations(germlineSeq=db[idx, germlineColumn],
-                                  inputSeq=db[idx, sequenceColumn],
+            calcExpectedMutations(germlineSeq=db[[germlineColumn]][idx],
+                                  inputSeq=db[[sequenceColumn]][idx],
                                   targetingModel=targetingModel,
                                   regionDefinition=regionDefinition,
                                   mutationDefinition=mutationDefinition)

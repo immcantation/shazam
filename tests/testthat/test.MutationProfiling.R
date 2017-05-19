@@ -198,7 +198,7 @@ test_that("observedMutations, combine", {
     
 })
 
-test_that("calcExpecteddMutations, hydropathy", {
+test_that("expecteddMutations, hydropathy", {
     
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
     
