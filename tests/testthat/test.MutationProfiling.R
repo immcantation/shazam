@@ -383,7 +383,7 @@ test_that("calcObservedMutations, when no mutations found", {
 
 test_that("observedMutations, when no mutations found", {
     
-    in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
+    in_seq <- ExampleDb[["SEQUENCE_IMGT"]][1]
     germ_seq <- in_seq
     
     expect_equivalent(observedMutations(data.frame(
