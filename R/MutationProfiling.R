@@ -1388,7 +1388,7 @@ expectedMutations <- function(db,
                        paste(label_exists, collapse=", "),
                        " exist and will be overwritten")
         )
-        db[[label_exists]] <- NULL
+        db[label_exists] <- NULL
     }    
     
     # Check targeting model
