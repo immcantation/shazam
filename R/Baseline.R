@@ -542,8 +542,8 @@ calcBaseline <- function(db,
         list_region_pdfs <- 
             foreach(idx=iterators::icount(totalNumbOfSequences)) %dopar% {                
                 calcBaselineHelper( 
-                    observed = db[cols_observed][1,],
-                    expected = db[cols_expected][1,],
+                    observed = db[cols_observed][idx,],
+                    expected = db[cols_expected][idx,],
                     region = region,
                     testStatistic = testStatistic,
                     regionDefinition = regionDefinition
