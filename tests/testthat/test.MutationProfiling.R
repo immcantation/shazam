@@ -20,7 +20,7 @@ test_that("collapseClones", {
         expect_equal(length(unique(clones.2[clones.2$CLONE==clone, "CLONAL_GERMLINE"])), 1)
         
         # expect result from expandedDb=TRUE to be the same as that from expandedDb=FALSE
-        expect_equal(clones.1[clones.1$CLONE==clone, ], clones.2[clones.2$CLONE==clone, ][1, ])
+        expect_identical(clones.1[clones.1$CLONE==clone, ], clones.2[clones.2$CLONE==clone, ][1,])
     }
 }) 
 

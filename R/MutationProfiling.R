@@ -121,9 +121,9 @@ collapseClones <- function(db,
     db[[cloneColumn]] <- as.character(db[[cloneColumn]])
     
     # get row indices in db for each unique clone
-    uniqueClones = unique(db[, cloneColumn])
+    uniqueClones = unique(db[[cloneColumn]])
     # crucial to have simplify=FALSE (otherwise won't return a list if uniqueClones has length 1)
-    uniqueClonesIdx = sapply(uniqueClones, function(i){which(db[, cloneColumn]==i)}, simplify=FALSE)
+    uniqueClonesIdx = sapply(uniqueClones, function(i){which(db[[cloneColumn]]==i)}, simplify=FALSE)
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
