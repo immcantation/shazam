@@ -487,8 +487,8 @@ observedMutations <- function(db,
     numbOfSeqs <- nrow(db)
     observedMutations_list <-
         foreach(idx=iterators::icount(numbOfSeqs)) %dopar% {
-            oM <- calcObservedMutations(db[idx, sequenceColumn], 
-                                  db[idx, germlineColumn],
+            oM <- calcObservedMutations(db[[sequenceColumn]][idx], 
+                                  db[[germlineColumn]][idx],
                                   frequency=frequency & !combine,
                                   regionDefinition=regionDefinition,
                                   mutationDefinition=mutationDefinition,
