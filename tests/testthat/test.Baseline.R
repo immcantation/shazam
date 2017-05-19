@@ -15,8 +15,8 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     ## calculateTargeting and calculateMutationalPaths 
     ## as used by calcExpectedMutations
     
-    inputSeq <- db[1, "SEQUENCE_IMGT"]
-    germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
+    inputSeq <- db[["SEQUENCE_IMGT"]][1]
+    germlineSeq <-  db[["GERMLINE_IMGT_D_MASK"]][1]
     
     targeting <- shazam:::calculateTargeting(germlineSeq = germlineSeq, 
                                     inputSeq = inputSeq,
@@ -71,8 +71,8 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
 ##--
 
 test_that("calcExpectedMutations works with regionDefinition==NULL",{
-    inputSeq <- db[1, "SEQUENCE_IMGT"]
-    germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
+    inputSeq <- db[["SEQUENCE_IMGT"]][1]
+    germlineSeq <-  db[["GERMLINE_IMGT_D_MASK"]][1]
     
     obs_mutations <- calcExpectedMutations(inputSeq, germlineSeq, targetingModel = HH_S5F, 
                           regionDefinition = IMGT_V)
