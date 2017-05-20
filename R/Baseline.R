@@ -407,7 +407,7 @@ calcBaseline <- function(db,
     }
     
     # Convert sequence columns to uppercase
-    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
+    db <- data.frame(toupperColumns(db, c(sequenceColumn, germlineColumn)))
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
