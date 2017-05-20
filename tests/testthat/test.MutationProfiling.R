@@ -10,6 +10,10 @@ test_that("collapseClones", {
     set.seed(7)
     clones.1 <- collapseClones(db, nproc=1, expandedDb=FALSE)
     set.seed(7)
+    clones.1.df <- collapseClones(db, nproc=1, expandedDb=FALSE)
+    expect_identical(clones.1.df, clones.1)
+    
+    set.seed(7)
     clones.2 <- collapseClones(db, nproc=1, expandedDb=TRUE)
     
     for (clone in unique(db$CLONE)) {

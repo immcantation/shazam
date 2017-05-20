@@ -95,6 +95,12 @@ test_that("expectedMutations works with regionDefinition==NULL",{
                              germlineColumn="GERMLINE_IMGT_D_MASK",
                              regionDefinition=IMGT_V,
                              nproc=1)
+    db_mutations_df <- expectedMutations(data.frame(db_subset),
+                                      sequenceColumn="SEQUENCE_IMGT",
+                                      germlineColumn="GERMLINE_IMGT_D_MASK",
+                                      regionDefinition=IMGT_V,
+                                      nproc=1)
+    expect_identical(db_mutations, db_mutations_df)
     
     ## Check 5 examples for each, at different positions
     ## CDR_R, first 5
@@ -166,6 +172,14 @@ test_that("observedMutations works with regionDefinition==NULL",{
                                       germlineColumn="GERMLINE_IMGT_D_MASK",
                                       regionDefinition=IMGT_V,
                                       nproc=1)
+    
+    db_mutations_df <- observedMutations(data.frame(db_subset),
+                                         sequenceColumn="SEQUENCE_IMGT",
+                                         germlineColumn="GERMLINE_IMGT_D_MASK",
+                                         regionDefinition=IMGT_V,
+                                         nproc=1)
+    expect_identical(db_mutations, db_mutations_df)
+    
     ## Check 5 examples for each
     ## CDR_R, first 5
     obs_cdr_r <- db_mutations$OBSERVED_CDR_R[1:5]
@@ -393,6 +407,17 @@ test_that("Test groupBaseline", {
                              regionDefinition=IMGT_V,
                              targetingModel=HH_S5F,
                              nproc=1)
+    set.seed(4)
+    baseline_df <- calcBaseline(data.frame(db), 
+                             sequenceColumn="SEQUENCE_IMGT",
+                             germlineColumn="GERMLINE_IMGT_D_MASK",
+                             testStatistic="focused",
+                             regionDefinition=IMGT_V,
+                             targetingModel=HH_S5F,
+                             nproc=1)
+    
+    ## expect same results with tbl and data.frame
+    expect_identical(baseline, baseline_df)
     
     # Group PDFs by sample
     grouped1 <- groupBaseline(baseline, groupBy="SAMPLE")
