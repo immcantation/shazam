@@ -1226,7 +1226,7 @@ gmmThreshold <- function (omega, mu, sigma) {
 #'                     be set automatically.
 #' @param    xmax      maximum limit for plotting the x-axis. If \code{NULL} the limit will 
 #'                     be set automatically.
-#' @param    breaks    number of breaks o show on the x-axis. If \code{NULL} the breaks will 
+#' @param    breaks    number of breaks to show on the x-axis. If \code{NULL} the breaks will 
 #'                     be set automatically.
 #' @param    binwidth  binwidth for the histogram. If \code{NULL} the binwidth 
 #'                     will be set automatically.
@@ -1337,7 +1337,7 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
 #'                     be set automatically.
 #' @param    xmax      maximum limit for plotting the x-axis. If \code{NULL} the limit will 
 #'                     be set automatically.
-#' @param    breaks    number of breaks o show on the x-axis. If \code{NULL} the breaks will 
+#' @param    breaks    number of breaks to show on the x-axis. If \code{NULL} the breaks will 
 #'                     be set automatically.
 #' @param    binwidth  binwidth for the histogram. If \code{NULL} the binwidth 
 #'                     will be set automatically to the bandwidth parameter determined by
