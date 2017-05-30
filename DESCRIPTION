@@ -39,6 +39,7 @@ Depends:
 Imports:
     alakazam (>= 0.2.6),
     ape,
+    diptest,
     doParallel,
     dplyr (>= 0.5.0),
     foreach,
@@ -48,8 +49,9 @@ Imports:
     iterators,
     kedd,
     KernSmooth,
-    methods,
     lazyeval,
+    MASS,
+    methods,
     parallel,
     SDMTools,
     scales,
