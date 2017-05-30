@@ -483,6 +483,7 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'                           (self vs others).
 #' @param    mst             if \code{TRUE}, return comma-separated branch lengths from minimum 
 #'                           spanning tree.
+#' @param    progress        if \code{TRUE} print a progress bar.
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
 #'           \code{DIST_NEAREST} column if \code{crossGrups=NULL} or in the 
@@ -564,9 +565,10 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
                           normalize=c("len", "none"), symmetry=c("avg", "min"),
-                          first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE) {
+                          first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE,
+                          progress=FALSE) {
     # Hack for visibility of foreach index variables
-    i=NULL
+    i <- NULL
     
     # Initial checks
     model <- match.arg(model)
@@ -637,9 +639,6 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         stop('Nproc must be positive.')
     }
     
-    # Calculate distance to nearest neighbor
-    cat("Calculating distance to nearest neighbor\n")
-    
     # Get indices of unique combinations of V, J, L, and any specified field(s)
     # groups to use
     group_cols <- c("V","J","L")
@@ -690,10 +689,12 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
                                  "pairwise5MerDist")
         parallel::clusterExport(cluster, export_functions, envir=environment())
     }
-    
-   
 
-    list_db <- foreach(i=1:length(uniqueGroupsIdx), .errorhandling='stop') %dopar% {
+    n_groups <- length(uniqueGroupsIdx)
+    if (progress) { 
+        pb <- txtProgressBar(min=1, max=n_groups, initial=1, width=40, style=3) 
+    }
+    list_db <- foreach(i=1:n_groups, .errorhandling='stop') %dopar% {
         idx <- uniqueGroupsIdx[[i]]
         db_group <- db[idx, ]
         crossGroups <- NULL
@@ -707,14 +708,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
                                                  symmetry=symmetry,
                                                  crossGroups=crossGroups,
                                                  mst=mst)
+        # Update progress
+        if (progress) { setTxtProgressBar(pb, i) }
+        
         return(db_group)
-    }        
-    
-    ## DEBUG
-    # print(list_db)
-    # for (i in 1:length(list_db)) {
-    #     cat(i, ": ", nrow(list_db[[i]]), "\n", sep="")
-    # }
+    }
 
     # Convert list from foreach into a db data.frame
     db <- do.call(rbind, list_db)
@@ -755,6 +753,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #'                      Applies only to the \code{"density"} method. If \code{NULL} no subsampling
 #'                      is performed. As bandwith inferrence is computationally expensive, subsampling
 #'                      is recommended for large data sets.
+#' @param    progress   if \code{TRUE} print a progress bar.
 #' 
 #' @return   
 #' \itemize{
@@ -806,14 +805,14 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' }
 #' @export
 findThreshold <- function (data, method=c("gmm", "density"), cutEdge=0.9, cross=NULL, 
-                           subsample=NULL){
+                           subsample=NULL, progress=FALSE){
   # Check arguments
   method <- match.arg(method)
   
   if (method == "gmm") {
-    output <- gmmFit(data, cutEdge, cross)
+    output <- gmmFit(data, cutEdge=cutEdge, cross=cross, progress=progress)
   } else if (method == "density") {
-    output <- smoothValley(data, subsample)
+    output <- smoothValley(data, subsample=subsample)
   } else {
     print("Error: assigned method has not been found")
     output <- NA
@@ -909,6 +908,7 @@ smoothValley <- function(distances, subsample=NULL) {
 #                       Gaussian fit parameters. Default value is equal to \eqn{90}\% of the entries.
 # @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} 
 #                       function, to support initialization of the Gaussian fit parameters. 
+# @param    progress    if \code{TRUE} print progress.
 #
 # @return   returns an objrct including optimum "\code{threshold}" cut and the Gaussian fit parameters, 
 #           such as mixing proportion ("\code{omega1}" and "\code{omega2}"), mean ("\code{mu1}" and "\code{mu2}"), 
@@ -953,7 +953,7 @@ smoothValley <- function(distances, subsample=NULL) {
 # 
 # 
 # @export
-gmmFit <- function(ent, cutEdge=0.9, cross=NULL) {
+gmmFit <- function(ent, cutEdge=0.9, cross=NULL, progress=FALSE) {
     
     #************* Filter Unknown Data *************#
     ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
@@ -979,8 +979,13 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL) {
         valley_loc <- valley_loc + scan_step
         if ( length(ent[ent<=valley_loc]) > cut ) break
     }
-    cat(length(ent), "non-NA entries\n")
-    cat("GMM done in", ceiling(valley_loc/scan_step), "iterations\n")
+    #cat("length(ent), "non-NA entries\n")
+    #cat("GMM done in", ceiling(valley_loc/scan_step), "iterations\n")
+    n_iter <- ceiling(valley_loc/scan_step)
+    if (progress) {
+        cat("    VALUES> ", length(ent), "\n", sep="")
+        cat("ITERATIONS> ", n_iter, "\n", sep="")
+    }
     
     #*************  set rand seed *************#
     set.seed(3000)
@@ -995,10 +1000,13 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL) {
     valley.itr <- 0
     valley_loc <- 0
     nEve <- length(ent)
-    cat("[")
+    
+    
+    if (progress) {
+        pb <- txtProgressBar(min=0, max=n_iter, initial=0, width=40, style=3) 
+        i_iter <- 1
+    }
     while (1) {
-        cat("=")
-        
         #*************  guess the valley loc *************#
         valley_loc <- valley_loc + scan_step
         if ( length(ent[ent<=valley_loc]) > cut ) break
@@ -1103,8 +1111,14 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL) {
                 vec.lkhood[valley.itr] <- log_lk
             }
         }
+        
+        # Update progress
+        if (progress) { 
+            i_iter <- i_iter + 1
+            setTxtProgressBar(pb, i_iter) 
+        }
     }
-    cat("]\n")
+    
     if (valley.itr != 0) {
         MaxLoc <- which.max(vec.lkhood)
         

@@ -38,16 +38,14 @@ collapseMatrixToVector <- function(mat, byrow = FALSE){
 # Adapated from http://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r
 #
 # @return  NULL
-doparProgressBar <- function(n){
-    pb <- txtProgressBar(min=1, max=n-1,style=3)
+doparProgressBar <- function(n) {
+    pb <- txtProgressBar(min=1, max=n - 1, width=40, style=3)
     count <- 0
     function(...) {
         count <<- count + length(list(...)) - 1
         setTxtProgressBar(pb,count)
-        #Sys.sleep(0.01)
         flush.console()
         rbind(...)
-        
     }
 }
 
