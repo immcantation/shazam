@@ -748,7 +748,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 
 #' Find distance threshold
 #'
-#' \code{findThreshold} automtically determines and optimal threshold for clonal assignment of
+#' \code{findThreshold} automtically determines an optimal threshold for clonal assignment of
 #' Ig sequences using a vector of nearest neighbor distances. It provides two alternative methods 
 #' using either a Gamma/Guassian Mixture Model fit (\code{method="gmm"}) or kernel density 
 #' fit (\code{method="density"}).
