@@ -814,10 +814,10 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 #'                             
 #' # Find threshold using the "gmm" method
-#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model = "norm-norm", cutoff = "opt")
+#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="norm-norm", cutoff="opt")
 #' print(output)
 #' # Plot "gmm" method results
-#' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk= ", output@loglk))
+#' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
 #'
 #' # Find threshold using the "density" method 
 #' output <- findThreshold(db$DIST_NEAREST, method="density")
@@ -1000,12 +1000,18 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, progress=FALSE) 
     }
     
     #************* Print some info *************#
-    valley_loc <- 0
-    while (1) {
-        valley_loc <- valley_loc + scan_step
-        if ( length(ent[ent<=valley_loc]) > cut ) break
+    if (progress) {
+        valley_loc <- 0
+        while (1) {
+            valley_loc <- valley_loc + scan_step
+            if ( length(ent[ent<=valley_loc]) > cut ) break
+        }
+        n_iter <- ceiling(valley_loc/scan_step)-1
+        cat("      STEP> ", "Parameter initialization\n", sep="")
+        cat("    VALUES> ", length(ent), "\n", sep="")
+        cat("ITERATIONS> ", n_iter, "\n", sep="")
+        pb <- progressBar(n_iter)
     }
-
     
     #*************  set rand seed *************#
     set.seed(NULL)
@@ -1020,13 +1026,6 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, progress=FALSE) 
     valley.itr <- 0
     valley_loc <- 0
     nEve <- length(ent)
-    
-    n_iter <- ceiling(valley_loc/scan_step)
-    if (progress) {
-        cat("    VALUES> ", length(ent), "\n", sep="")
-        cat("ITERATIONS> ", n_iter, "\n", sep="")
-        pb <- progressBar(n_iter) 
-    }
     
     while (1) {        
         #*************  guess the valley loc *************#
@@ -1150,7 +1149,8 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, progress=FALSE) 
         mu.gmm    <- c(mu[1], mu[2]) 
         sigma.gmm <- c(sigma[1], sigma[2]) 
         
-        FitResults <- RocSpace (ent=ent, omega.gmm=omega.gmm , mu.gmm=mu.gmm, sigma.gmm=sigma.gmm, model=model, cutoff=cutoff)
+        FitResults <- rocSpace(ent=ent, omega.gmm=omega.gmm , mu.gmm=mu.gmm, sigma.gmm=sigma.gmm, 
+                               model=model, cutoff=cutoff, progress=progress)
         results<-new("GmmThreshold",
                      x=ent,
                      model = model,
@@ -1175,7 +1175,7 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, progress=FALSE) 
 }
 
 
-RocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff) {
+rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, progress=FALSE) {
     func <- model
     bits <- strsplit(func,'-')[[1]]
 
@@ -1207,13 +1207,16 @@ RocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff) {
     set.seed(NULL)
     options(warn=-1)
     LOG_LIK<-0
-    cat("[")
-    for (i in 1:5){
-        itr<-1
+    
+    if (progress) {
+        cat("      STEP> ", "Fitting ", func, "\n", sep="")
+        pb <- progressBar(15)
+    }
+    for (i in 1:15) {
+        #itr<-1
         key<-FALSE
         while (!key){
             # print(paste0(i,":",itr))
-            cat("=")
             # Fit mixture Functions
             MixModel <- try(fitdistr(na.exclude(ent), MixFunctions, 
                                      first_curve = bits[1], second_curve = bits[2], 
@@ -1228,7 +1231,7 @@ RocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff) {
                 func1.2 <- abs(gmmfunc1.2 + sample(c(-1,1), 1)*runif(1))
                 func2.1 <- abs(gmmfunc2.1 + sample(c(-1,1), 1)*runif(1))
                 func2.2 <- abs(gmmfunc2.2 + sample(c(-1,1), 1)*runif(1))
-                itr<-itr+1
+                #itr<-itr+1
                 next
             } else if ( (bits[1] == "norm"  & bits[2] == "gamma" & MixModel$estimate[[2]] > MixModel$estimate[[4]] * MixModel$estimate[[5]]) |
                         (bits[1] == "gamma" & bits[2] == "norm"  & MixModel$estimate[[2]] * MixModel$estimate[[3]] > MixModel$estimate[[4]]) |
@@ -1240,7 +1243,7 @@ RocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff) {
                 func2.1 <- abs(gmmfunc2.1 + sample(c(-1,1), 1)*runif(1))
                 func2.2 <- abs(gmmfunc2.2 + sample(c(-1,1), 1)*runif(1))
                 # print("here")
-                itr<-itr+1
+                #itr<-itr+1
                 next
             } else {
                 key<-TRUE
@@ -1269,6 +1272,7 @@ RocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff) {
         func2.2 <- abs(gmmfunc2.2 + sample(c(-1,1), 1)*runif(1))
         
         # if (i==1 & itr == 1) break
+        if (progress) { pb$tick() }
     }
     options(warn=0)
 
