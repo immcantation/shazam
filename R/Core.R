@@ -34,21 +34,16 @@ collapseMatrixToVector <- function(mat, byrow = FALSE){
 
 #### Logging and error checking functions ####
 
-# Make a progress bar when using %dopar% with a parallel backend
-# Adapated from http://stackoverflow.com/questions/5423760/how-do-you-create-a-progress-bar-when-using-the-foreach-function-in-r
-#
-# @return  NULL
-doparProgressBar <- function(n) {
-    pb <- txtProgressBar(min=1, max=n - 1, width=40, style=3)
-    count <- 0
-    function(...) {
-        count <<- count + length(list(...)) - 1
-        setTxtProgressBar(pb,count)
-        flush.console()
-        rbind(...)
-    }
+# Define a progress bar
+# 
+# @param   n  maximum number of ticks
+# @return  a  a progress_bar object
+progressBar <- function(n) {
+    pb <- progress::progress_bar$new(format="  PROGRESS> [:bar] :percent :elapsed",
+                                     width=40, clear=FALSE, stream=stdout(), force=TRUE,
+                                     total=n)
+    return(pb)
 }
-
 
 # Check data.frame for valid columns and issue message if invalid
 #

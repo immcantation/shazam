@@ -127,6 +127,7 @@
 #' @importFrom  KernSmooth  bkde
 #' @importFrom  lazyeval    interp
 #' @importFrom  MASS        fitdistr
+#' @importFrom  progress    progress_bar
 #' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format
 #'                          math_format percent scientific
 #' @importFrom  tidyr       gather gather_ spread spread_

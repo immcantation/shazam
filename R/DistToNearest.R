@@ -651,9 +651,6 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         stop('Nproc must be positive.')
     }
     
-    # Calculate distance to nearest neighbor
-    cat("Calculating distance to nearest neighbor\n")
-    
     # Get indices of unique combinations of V, J, L, and any specified field(s)
     # groups to use
     group_cols <- c("V","J","L")
@@ -709,7 +706,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 
     n_groups <- length(uniqueGroupsIdx)
     if (progress) { 
-        pb <- txtProgressBar(min=1, max=n_groups, initial=1, width=40, style=3) 
+        pb <- progressBar(n_groups) 
     }
     list_db <- foreach(i=1:n_groups, .errorhandling='stop') %dopar% {
         idx <- uniqueGroupsIdx[[i]]
@@ -726,7 +723,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
                                                  crossGroups=crossGroups,
                                                  mst=mst)
         # Update progress
-        if (progress) { setTxtProgressBar(pb, i) }
+        if (progress) { pb$tick() }
         
         return(db_group)
     }
@@ -843,7 +840,7 @@ findThreshold <- function (data, method=c("gmm", "density"),
   } else if (method == "density") {
     output <- smoothValley(data, subsample=subsample)
   } else {
-    print("Error: assigned method has not been found")
+    cat("Error: assigned method has not been found.\n")
     output <- NA
   }
   
@@ -1008,13 +1005,7 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, progress=FALSE) 
         valley_loc <- valley_loc + scan_step
         if ( length(ent[ent<=valley_loc]) > cut ) break
     }
-    #cat("length(ent), "non-NA entries\n")
-    #cat("GMM done in", ceiling(valley_loc/scan_step), "iterations\n")
-    n_iter <- ceiling(valley_loc/scan_step)
-    if (progress) {
-        cat("    VALUES> ", length(ent), "\n", sep="")
-        cat("ITERATIONS> ", n_iter, "\n", sep="")
-    }
+
     
     #*************  set rand seed *************#
     set.seed(NULL)
@@ -1030,11 +1021,13 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, progress=FALSE) 
     valley_loc <- 0
     nEve <- length(ent)
     
-    
+    n_iter <- ceiling(valley_loc/scan_step)
     if (progress) {
-        pb <- txtProgressBar(min=0, max=n_iter, initial=0, width=40, style=3) 
-        i_iter <- 1
+        cat("    VALUES> ", length(ent), "\n", sep="")
+        cat("ITERATIONS> ", n_iter, "\n", sep="")
+        pb <- progressBar(n_iter) 
     }
+    
     while (1) {        
         #*************  guess the valley loc *************#
         valley_loc <- valley_loc + scan_step
@@ -1142,10 +1135,7 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, progress=FALSE) 
         }
         
         # Update progress
-        if (progress) { 
-            i_iter <- i_iter + 1
-            setTxtProgressBar(pb, i_iter) 
-        }
+        if (progress) { pb$tick() }
     }
     
     if (valley.itr != 0) {
@@ -1209,7 +1199,6 @@ RocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff) {
     }
     
     # Save mixture Function properties
-    cat(func, "fit ...\n")
     gmmfunc1.1 <- func1.1
     gmmfunc1.2 <- func1.2
     gmmfunc2.1 <- func2.1
@@ -1282,7 +1271,7 @@ RocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff) {
         # if (i==1 & itr == 1) break
     }
     options(warn=0)
-    cat("]\n")
+
     # Invoke best fit parameters
     log_lik  <- LOG_LIK
     
