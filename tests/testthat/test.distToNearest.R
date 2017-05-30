@@ -200,7 +200,7 @@ test_that("Test findThreshold", {
     db <- distToNearest(db, model="ham", first=FALSE, normalize="len", nproc=1)
     
     gmm_output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
-    expect_equal(gmm_output@threshold, 0.0896, tolerance=0.01)
+    expect_equal(gmm_output@threshold, 0.121748, tolerance=0.01)
 
     dens_output <- findThreshold(db$DIST_NEAREST, method="dens", cutEdge=0.9)
     expect_equal(dens_output@threshold, 0.114, tolerance=0.01)
