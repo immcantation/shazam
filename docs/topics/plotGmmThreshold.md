@@ -42,7 +42,7 @@ xmax
 be set automatically.
 
 breaks
-:   number of breaks o show on the x-axis. If `NULL` the breaks will 
+:   number of breaks to show on the x-axis. If `NULL` the breaks will 
 be set automatically.
 
 binwidth
@@ -83,39 +83,15 @@ db <- subset(ExampleDb, SAMPLE == "-1h")
 # Use nucleotide Hamming distance and normalize by junction length
 db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 
-```
-
-
-```
-Calculating distance to nearest neighbor
-
-```
-
-
-```R
-
 # To find the threshold cut, call findThreshold function for "gmm" method.
-output <- findThreshold(db$DIST_NEAREST, method="gmm")
-
-```
-
-
-```
-958 non-NA entries
-GMM done in 5 iterations
-[=====]
-
-```
-
-
-```R
+output <- findThreshold(db$DIST_NEAREST, method="gmm", model = "norm-norm", cutoff = "opt")
 print(output)
 
 ```
 
 
 ```
-[1] 0.112601
+[1] 0.1095496
 
 ```
 
@@ -126,7 +102,7 @@ print(output)
 plotGmmThreshold(output, binwidth=0.02)
 ```
 
-![8](plotGmmThreshold-8.png)
+![4](plotGmmThreshold-4.png)
 
 
 See also

@@ -37,7 +37,7 @@ Dependencies
 ---------------
 
 **Depends:** ggplot2  
-**Imports:** alakazam, ape, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, kedd, KernSmooth, methods, lazyeval, parallel, SDMTools, scales, seqinr, stats, stringi, tidyr, utils  
+**Imports:** alakazam, ape, diptest, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, kedd, KernSmooth, lazyeval, MASS, methods, parallel, progress, SDMTools, scales, seqinr, stats, stringi, tidyr, utils  
 **Suggests:** knitr, rmarkdown, testthat
 
 Authors
@@ -72,8 +72,8 @@ To cite the HH_S5F model and the targeting model generation methods, please use:
 
 Yaari G, Vander Heiden J, Uduman M, Gadala-Maria D, Gupta N, Stern J, O'Connor K, Hafler D, Lasserson U, Vigneault F and
 Kleinstein S (2013). “Models of somatic hypermutation targeting and substitution based on synonymous mutations from
-high-throughput immunoglobulin sequencing data.” _Frontiers in Immunology_, *4*(358), pp. 1-11. doi: 10.3389/fimmu.2013.00358
-(URL: http://doi.org/10.3389/fimmu.2013.00358).
+high-throughput immunoglobulin sequencing data.” _Frontiers in Immunology_, *4*(358), pp. 1-11. doi:
+10.3389/fimmu.2013.00358 (URL: http://doi.org/10.3389/fimmu.2013.00358).
 
 To cite the HKL_S1F, HKL_S5F, MK_RS1NF, and MK_RS5NF models, please use:
 

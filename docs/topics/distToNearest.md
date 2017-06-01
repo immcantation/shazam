@@ -20,7 +20,7 @@ distToNearest(db, sequenceColumn = "JUNCTION", vCallColumn = "V_CALL",
 jCallColumn = "J_CALL", model = c("ham", "aa", "hh_s1f", "hh_s5f",
 "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), normalize = c("len",
 "none"), symmetry = c("avg", "min"), first = TRUE, nproc = 1,
-fields = NULL, cross = NULL, mst = FALSE)
+fields = NULL, cross = NULL, mst = FALSE, progress = FALSE)
 ```
 
 Arguments
@@ -72,6 +72,9 @@ cross
 mst
 :   if `TRUE`, return comma-separated branch lengths from minimum 
 spanning tree.
+
+progress
+:   if `TRUE` print a progress bar.
 
 
 
@@ -149,17 +152,6 @@ db <- subset(ExampleDb, SAMPLE == "-1h")
 dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
 first=FALSE, normalize="len")
 
-```
-
-
-```
-Calculating distance to nearest neighbor
-
-```
-
-
-```R
-
 # Plot histogram of non-NA distances
 p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
 theme_bw() + 
@@ -171,18 +163,12 @@ plot(p1)
 
 ```
 
-![4](distToNearest-4.png)
+![2](distToNearest-2.png)
 
 ```R
 
 # Use human 5-mer model
 dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f")
-```
-
-
-```
-Calculating distance to nearest neighbor
-
 ```
 
 

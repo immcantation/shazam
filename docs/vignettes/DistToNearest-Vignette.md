@@ -67,20 +67,10 @@ the overall distance.
 # Use nucleotide Hamming distance and normalize by junction length
 dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="len", 
                           nproc=1)
-```
 
-```
-## Calculating distance to nearest neighbor
-```
-
-```r
 # Use genotyped V assignments, a 5-mer model and no normalization
 dist_s5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f", 
                           first=FALSE, normalize="none", nproc=1)
-```
-
-```
-## Calculating distance to nearest neighbor
 ```
 
 ## Using nearest neighbor distances to determine clonal assignment thresholds
@@ -159,15 +149,7 @@ where the average of the Sensitivity plus Specificity reaches its maximum.
 ```r
 # Find threshold using gmm method
 output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", cutEdge=0.9)
-```
 
-```
-## 958 non-NA entries
-## GMM done in 5 iterations
-## [=====]
-```
-
-```r
 # Plot distance histogram, Gaussian fits, and optimum threshold
 plot(output, binwidth=0.02, title="GMM Method")
 ```
@@ -180,7 +162,7 @@ print(output)
 ```
 
 ```
-## [1] 0.112601
+## [1] 0.157716
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `histBinwidth` parameter.
@@ -240,10 +222,6 @@ dist_fields <- distToNearest(ExampleDb, model="ham", first=FALSE,
                              nproc=1)
 ```
 
-```
-## Calculating distance to nearest neighbor
-```
-
 We can plot the nearest neighbor distances for the two samples:
 
 
@@ -278,10 +256,6 @@ we set `cross="SAMPLE"`, which will group the data into `-1h` and
 ```r
 dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE, 
                             normalize="len", cross="SAMPLE", nproc=1)
-```
-
-```
-## Calculating distance to nearest neighbor
 ```
 
 
