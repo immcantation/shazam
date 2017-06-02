@@ -67,7 +67,13 @@ the overall distance.
 # Use nucleotide Hamming distance and normalize by junction length
 dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="len", 
                           nproc=1)
+```
 
+```
+## Error in {: task 3 failed - "object 'alakazam_pairwiseDistRcpp' not found"
+```
+
+```r
 # Use genotyped V assignments, a 5-mer model and no normalization
 dist_s5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f", 
                           first=FALSE, normalize="none", nproc=1)
@@ -105,10 +111,19 @@ p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
     scale_x_continuous(breaks=seq(0, 1, 0.1)) +
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2)
+```
+
+```
+## Error in subset(dist_ham, !is.na(DIST_NEAREST)): object 'dist_ham' not found
+```
+
+```r
 plot(p1)
 ```
 
-![plot of chunk DistToNearest-Vignette-3](figure/DistToNearest-Vignette-3-1.png)
+```
+## Error in plot(p1): object 'p1' not found
+```
 
 By manual inspection, the length normalized `ham` model distance threshold would be 
 set to a value near 0.12 in the above example.
@@ -149,12 +164,20 @@ where the average of the Sensitivity plus Specificity reaches its maximum.
 ```r
 # Find threshold using gmm method
 output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", cutEdge=0.9)
+```
 
+```
+## Error in gmmFit(data, cutEdge = cutEdge, cross = cross, model = model, : object 'dist_ham' not found
+```
+
+```r
 # Plot distance histogram, Gaussian fits, and optimum threshold
 plot(output, binwidth=0.02, title="GMM Method")
 ```
 
-![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
+```
+## Error in plot(output, binwidth = 0.02, title = "GMM Method"): object 'output' not found
+```
 
 ```r
 # Print threshold
@@ -162,7 +185,7 @@ print(output)
 ```
 
 ```
-## [1] 0.157716
+## Error in print(output): object 'output' not found
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `histBinwidth` parameter.
@@ -185,13 +208,28 @@ the size specified using the `subsample` parameter.  Below is an example of usin
 ```r
 # Find threshold using density method
 output <- findThreshold(dist_ham$DIST_NEAREST, method="density")
-threshold <- output@threshold
+```
 
+```
+## Error in smoothValley(data, subsample = subsample): object 'dist_ham' not found
+```
+
+```r
+threshold <- output@threshold
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'output' not found
+```
+
+```r
 # Plot distance histogram, density estimate and optimum threshold
 plot(output, title="Density Method")
 ```
 
-![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
+```
+## Error in plot(output, title = "Density Method"): object 'output' not found
+```
 
 ```r
 # Print threshold
@@ -199,7 +237,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1226913
+## Error in print(output): object 'output' not found
 ```
 
 ## Calculating nearest neighbor distances independently for subsets of data
@@ -222,6 +260,10 @@ dist_fields <- distToNearest(ExampleDb, model="ham", first=FALSE,
                              nproc=1)
 ```
 
+```
+## Error in {: task 3 failed - "object 'alakazam_pairwiseDistRcpp' not found"
+```
+
 We can plot the nearest neighbor distances for the two samples:
 
 
@@ -235,10 +277,19 @@ p4 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)),
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
     facet_grid(SAMPLE ~ ., scales="free_y")
+```
+
+```
+## Error in subset(dist_fields, !is.na(DIST_NEAREST)): object 'dist_fields' not found
+```
+
+```r
 plot(p4)
 ```
 
-![plot of chunk DistToNearest-Vignette-7](figure/DistToNearest-Vignette-7-1.png)
+```
+## Error in plot(p4): object 'p4' not found
+```
 
 In this case, the threshold selected for `-1h` seems to work well 
 for `+7d` as well.
@@ -258,6 +309,10 @@ dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE,
                             normalize="len", cross="SAMPLE", nproc=1)
 ```
 
+```
+## Error in {: task 1 failed - "object 'alakazam_pairwiseDistRcpp' not found"
+```
+
 
 ```r
 # Generate cross sample histograms
@@ -269,10 +324,19 @@ p5 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)),
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
     facet_grid(SAMPLE ~ ., scales="free_y")
+```
+
+```
+## Error in subset(dist_cross, !is.na(CROSS_DIST_NEAREST)): object 'dist_cross' not found
+```
+
+```r
 plot(p5)
 ```
 
-![plot of chunk DistToNearest-Vignette-8](figure/DistToNearest-Vignette-8-1.png)
+```
+## Error in plot(p5): object 'p5' not found
+```
 
 This can provide a sense of overlap between samples or a way to 
 compare within-sample variation to cross-sample variation.

@@ -108,9 +108,9 @@ testBaseline(grouped, groupBy="SAMPLE")
 
 
 ```
-  REGION       TEST    PVALUE       FDR
-1    CDR -1h != +7d 0.1311908 0.2623815
-2    FWR -1h != +7d 0.3495230 0.3495230
+  REGION       TEST     PVALUE       FDR
+1    CDR -1h != +7d 0.15451224 0.1545122
+2    FWR -1h != +7d 0.09419739 0.1545122
 
 ```
 

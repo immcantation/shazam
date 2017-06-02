@@ -1,9 +1,14 @@
-Version 0.1.7.999: May 30, 2017
+Version 0.1.7.999: June 2, 2017
 -------------------------------------------------------------------------------
 
 Distance Calculation:
 + [Did a thing.]
 
+Mutation Profiling:
+
++ Redesigned `calcClonalConsensus()`, which is called by `collapseClones()`, 
+  adding a new helper function `calcClonalConsensusHelper()` with extensive 
+  documentation.
 
 Version 0.1.7: May 14, 2017
 -------------------------------------------------------------------------------

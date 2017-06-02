@@ -84,27 +84,30 @@ db <- subset(ExampleDb, SAMPLE == "-1h")
 # Use nucleotide Hamming distance and normalize by junction length
 db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 
+```
+
+**Error in {**: task 3 failed - "object 'alakazam_pairwiseDistRcpp' not found"
+```R
+
 # To find the threshold cut, call findThreshold function for "gmm" method.
 output <- findThreshold(db$DIST_NEAREST, method="density")
+
+```
+
+*Warning*:Unknown or uninitialised column: 'DIST_NEAREST'.*Warning*:is.na() applied to non-(list or vector) of type 'NULL'**Error in h.ucv.default(distances, 4)**: argument 'x' must be numeric and need at least 3 data points
+```R
 print(output)
 
 ```
 
-
-```
-[1] 0.1226913
-
-```
-
-
+**Error in print(output)**: object 'output' not found
 ```R
 
 # Plot
 plotDensityThreshold(output)
 ```
 
-![4](plotDensityThreshold-4.png)
-
+**Error in data.frame(x = data@x)**: object 'output' not found
 
 See also
 -------------------

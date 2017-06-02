@@ -196,7 +196,8 @@ Slot "pdfs":
 list()
 
 Slot "stats":
-[1] GROUP              REGION             BASELINE_SIGMA     BASELINE_CI_LOWER  BASELINE_CI_UPPER  BASELINE_CI_PVALUE
+[1] GROUP              REGION             BASELINE_SIGMA     BASELINE_CI_LOWER  BASELINE_CI_UPPER 
+[6] BASELINE_CI_PVALUE
 <0 rows> (or 0-length row.names)
 
 

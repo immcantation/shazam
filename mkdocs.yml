@@ -23,6 +23,8 @@ pages:
   - 'Help Topics':
     - 'Mutation Profiling':
       - topics/collapseClones.md
+      - topics/calcClonalConsensus.md
+      - topics/calcClonalConsensusHelper.md
       - topics/expectedMutations.md
       - topics/observedMutations.md
       - topics/calcExpectedMutations.md
