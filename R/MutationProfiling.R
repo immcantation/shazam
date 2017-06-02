@@ -25,11 +25,16 @@ NULL
 #'                              and boundaries of the Ig sequences.
 #' @param   method              method for calculating input consensus sequence. One of 
 #'                              \code{"thresholdedFreq"}, \code{"mostCommon"}, or 
-#'                              \code{"catchAll"}. See \link{calcClonalConsensusHelper} 
-#'                              for details.
+#'                              \code{"catchAll"}. See \link{calcClonalConsensus} for details.
 #' @param   minimumFrequency    frequency threshold for calculating input consensus sequence.
 #'                              Required for the \code{"thresholdedFreq"} method. Default is
-#'                              0.6. See \link{calcClonalConsensusHelper} for details.                            
+#'                              0.6. See \link{calcClonalConsensus} for details.   
+#' @param   includeAmbiguous    Required for methods \code{"thresholdedFreq"} and \code{"mostCommon"}. 
+#'                              If \code{TRUE}, use ambiguous characters to represent positions at 
+#'                              which there are multiple characters with frequencies that are at least
+#'                              \code{minimumFrequency} or that are maximal. Default is \code{FALSE}. 
+#'                              See \code{Details} for \link{calcClonalConsensus} for rules on 
+#'                              choosing ambiguous characters.                                                       
 #' @param   nproc               Number of cores to distribute the operation over. If the 
 #'                              \code{cluster} has already been set earlier, then pass the 
 #'                              \code{cluster}. This will ensure that it is not reset.
@@ -42,12 +47,20 @@ NULL
 #'             \item \code{CLONAL_GERMLINE}:  germline sequence for the clone.
 #'           }
 #'
-#' @details  See \code{Details} for \link{calcClonalConsensus} and \link{calcClonalConsensusHelper}
-#'           for explanation on how the different methods work.
+#' @details  See \code{Details} for \link{calcClonalConsensus} for explanation on 
+#'           how the different methods work with \code{minimumFrequency} and/or
+#'           \code{includeAmbiguous}.
+#'           
+#'           \strong{Caution: If you intend to run \code{collapseClones} before 
+#'           building a 5-mer targeting model, you MUST choose parameters like
+#'           \code{method} and \code{includeAmbiguous} such that your collapsed
+#'           clonal consensuses do NOT include ambiguous characters. This is 
+#'           because the targeting model functions do NOT support ambiguous 
+#'           characters in their inputs.}
 #' 
 #' @seealso
 #' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
-#' See \link{calcClonalConsensus} and \link{calcClonalConsensusHelper} for helper functions.
+#' See \link{calcClonalConsensus} for constructing consensus for a single clone.
 #' 
 #' @examples
 #' # Subset example data
@@ -73,6 +86,7 @@ collapseClones <- function(db,
                            regionDefinition=NULL,
                            method=c("thresholdedFreq", "mostCommon", "catchAll"),
                            minimumFrequency=0.6,
+                           includeAmbiguous=FALSE,
                            nproc=1) {
     # Hack for visibility of foreach index variables
     idx <- NULL
@@ -80,8 +94,26 @@ collapseClones <- function(db,
     ## DEBUG
     # cloneColumn="CLONE"; sequenceColumn="SEQUENCE_IMGT"; germlineColumn="GERMLINE_IMGT_D_MASK"
     # expandedDb=FALSE; regionDefinition=NULL; method="mostCommon"; nproc=1
-
+    
     method = match.arg(method)
+    
+    # check minimumFrequency
+    if (method=="thresholdedFreq") {
+        if (!is.numeric(minimumFrequency)) {
+            stop("minimumFrequency must be a numeric value.")
+        } else {
+            if ( minimumFrequency<0 | minimumFrequency>1 ) {
+                stop("minimumFrequency must be between 0 and 1.")
+            }
+        }
+    }
+    
+    # check includeAmbiguous
+    if (method %in% c("thresholdedFreq", "mostCommon")) {
+        if (class(includeAmbiguous) != "logical") {
+            stop ("includeAmbiguous must be TRUE or FALSE.")
+        }
+    }
     
     # Check for valid columns
     check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
@@ -91,7 +123,7 @@ collapseClones <- function(db,
     if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
-
+    
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
@@ -130,10 +162,11 @@ collapseClones <- function(db,
         }
         parallel::clusterExport(cluster, 
                                 list('db', 'sequenceColumn', 'germlineColumn', 'cloneColumn',
-                                     'regionDefinition', 'calcClonalConsensus',
+                                     'regionDefinition', 'calcClonalConsensus', 'includeAmbiguous',
                                      'calcClonalConsensusHelper', 'method', 'minimumFrequency',
                                      'uniqueClonesIdx', 'c2s', 's2c',
-                                     'nucs2IUPAC', 'IUPAC_DNA_2'), 
+                                     'nucs2IUPAC', 'chars2Ambiguous', 
+                                     'IUPAC_DNA_2', 'NUCLEOTIDES_AMBIGUOUS'), 
                                 envir=environment() )
         registerDoParallel(cluster)
     }
@@ -147,12 +180,13 @@ collapseClones <- function(db,
     # cons_db$CLONAL_SEQUENCE <- cons_mat[, 1]
     cons_mat <- foreach(idx=1:length(uniqueClonesIdx),
                         .verbose=FALSE, .errorhandling='stop') %dopar% {
-        cloneIdx <- uniqueClonesIdx[[idx]]
-        calcClonalConsensus(inputSeq=db[[sequenceColumn]][cloneIdx],
-                            germlineSeq=db[[germlineColumn]][cloneIdx],
-                            regionDefinition=regionDefinition, 
-                            method=method, minimumFrequency=minimumFrequency)
-    }
+                            cloneIdx <- uniqueClonesIdx[[idx]]
+                            calcClonalConsensus(inputSeq=db[[sequenceColumn]][cloneIdx],
+                                                germlineSeq=db[[germlineColumn]][cloneIdx],
+                                                regionDefinition=regionDefinition, 
+                                                method=method, minimumFrequency=minimumFrequency,
+                                                includeAmbiguous=includeAmbiguous)
+                        }
     # using cbind below will give a matrix with columns being clones
     # use rbind to have rows be clones
     cons_mat <- do.call(rbind, cons_mat)
@@ -180,119 +214,64 @@ collapseClones <- function(db,
 
 
 
-#' Helper function for calcClonalConsensus
-#'
-#' @param   seqs      a character vector of sequences.
-#' @param   mtd       method to calculate consensus sequence. One of \code{thresholdedFreq}, 
-#'                    \code{mostCommon}, or \code{catchAll}.
-#' @param   minFreq   minimum frequency. Required if \code{mtd} is \code{thresholdedFreq}.
-#'                    Default is 0.6.
-#' @param   lenLimit  limit on consensus length. Length of consensus returned will depend on
-#'                    \code{lenLimit} and the longest possible length based on \code{seqs}, 
-#'                    whichever that is shorter. 
-#' @return  A character string that is the consensus sequence for \code{seqs}.
-#'
-#' @details Note that this function does not perform multiple sequence alignment. As a 
-#'          prerequisite, it is assumed that sequences in \code{seqs} have been aligned
-#'          somehow. In the case of immunoglobulin repertoire analysis, this usually means
-#'          that the sequences are IMGT-gapped.
-#' 
-#'          Given a set of sequences of potentially varying lengths, the longest possible 
-#'          length of their consensus sequence is taken to be the longest length along 
-#'          which there is information contained at every nucleotide position across 
-#'          majority of the sequences. Majority is defined to be greater than 
-#'          \code{floor(n/2)}, where \code{n} is the number of sequences. If the longest 
-#'          possible consensus length is 0, there will be a warning and an empty string 
-#'          (\code{""}) will be returned. 
-#'          
-#'          If a length limit is defined by supplying a \code{lenLimit}, the consensus 
-#'          length will be further restricted to the shorter of the longest possible 
-#'          length and \code{lenLimit}.
-#'          
-#'          For the method \code{"thresholdedFreq"}, a value must be supplied to the 
-#'          argument \code{minFreq}. At each position along the length of the consensus 
-#'          sequence, the frequency of each nucleotide/character across sequences is 
-#'          tabulated. The nucleotide/character whose frequency is at least (i.e. 
-#'          \code{>=}) \code{minFreq} becomes the consensus. If frequencies of multiple 
-#'          nucleotides/characters are at least \code{minFreq}, the first one is taken 
-#'          to be the consensus following the order of \code{"A"}, \code{"T"}, \code{"G"}, 
-#'          \code{"C"}, \code{"N"}, \code{"."}, and \code{"-"}. Here are some examples 
-#'          looking at a single position based on 5 sequences with \code{minFreq=0.6}:
-#'          
-#'          \itemize{
-#'              \item If the sequences have \code{"A"}, \code{"A"}, \code{"A"}, \code{"T"}, 
-#'                    \code{"C"}, the consensus will be \code{"A"}, because \code{"A"} has frequency 0.6, which is at least \code{minFreq}.
-#'              \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, \code{"T"}, 
-#'                    \code{"C"}, the consensus will be \code{"N"}, because none of 
-#'                    \code{"A"}, \code{"T"}, or \code{"C"} has frequency that is at least 
-#'                    \code{minFreq}.
-#'                  }
-#'                  
-#'          For the method \code{"mostCommon"}, the most frequent nucleotide/character 
-#'          across sequences at each position along the length of the consensus sequence 
-#'          makes up the consensus. If there are multiple nucleotides/characters with 
-#'          equally maximal frequencies, the first one is taken to be the consensus 
-#'          following the order of \code{"A"}, \code{"T"}, \code{"G"}, \code{"C"}, 
-#'          \code{"N"}, \code{"."}, and \code{"-"}. Here are some examples looking at 
-#'          a single position based on 5 sequences:
-#'          
-#'          \itemize{
-#'               \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, \code{"A"},
-#'                     \code{"C"}, the consensus will be \code{"A"}.
-#'               \item If the sequences have \code{"T"}, \code{"T"}, \code{"C"}, \code{"C"}, 
-#'                     \code{"G"}, the consensus will be \code{"T"}, because \code{"T"} is 
-#'                     before \code{"C"} in the order of \code{"A"}, \code{"T"}, \code{"G"}, 
-#'                     \code{"C"}, \code{"N"}, \code{"."}, and \code{"-"}. 
-#'                  }
-#'                  
-#'          For the method \code{"catchAll"}, a consensus sequence capturing most of the 
-#'          information contained in the sequences is obtained. If a position contains only 
-#'          \code{"N"} across sequences, the consensus at that position is \code{"N"}. If a 
-#'          position contains one or more of \code{"A"}, \code{"T"}, \code{"G"}, or 
-#'          \code{"C"}, the consensus will be an IUPAC character representing all of the 
-#'          characters present, regardless of whether \code{"N"} is present. If a position 
-#'          contains only \code{"-"} and \code{"."} across sequences, the consensus at that 
-#'          position is taken to be \code{"-"}. If a position contains only one of 
-#'          \code{"-"} or \code{"."} across sequences, the consensus at that position is 
-#'          taken to be the character present. Here are some examples looking at a single 
-#'          position based on 5 sequences:
-#'          
-#'          \itemize{
-#'               \item If the sequences have \code{"N"}, \code{"N"}, \code{"N"}, \code{"N"}, 
-#'                     \code{"N"}, the consensus will be \code{"N"}.
-#'               \item If the sequences have \code{"N"}, \code{"A"}, \code{"A"}, \code{"A"}, 
-#'                     \code{"A"}, the consensus will be \code{"A"}.
-#'               \item If the sequences have \code{"N"}, \code{"A"}, \code{"G"}, \code{"A"}, 
-#'                     \code{"A"}, the consensus will be \code{"R"}.
-#'               \item If the sequences have \code{"-"}, \code{"-"}, \code{"."}, \code{"."}, 
-#'                     \code{"."}, the consensus will be \code{"-"}.
-#'               \item If the sequences have \code{"-"}, \code{"-"}, \code{"-"}, \code{"-"}, 
-#'                     \code{"-"}, the consensus will be \code{"-"}.
-#'               \item If the sequences have \code{"."}, \code{"."}, \code{"."}, \code{"."}, 
-#'                     \code{"."}, the consensus will be \code{"."}.
-#'                  }
-#' 
-#' @seealso
-#' \link{calcClonalConsensus} and \link{collapseClones}.
-#' 
-#' @examples
-#' # Subset example data
-#' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
-#' 
-#' # Data corresponding to a single clone
-#' clone <- db[db$CLONE=="3192", ]
-#' # Number of sequences in this clone
-#' nrow(clone)
-#' 
-#' # Get consensus input sequence
-#' consInput <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT, 
-#'                                        mtd="thresholdedFreq", minFreq=0.65)
-#'                             
-#' @export
+# Helper function for calcClonalConsensus
+#
+# @param   seqs              a character vector of sequences.
+# @param   mtd               method to calculate consensus sequence. One of \code{thresholdedFreq}, 
+#                            \code{mostCommon}, or \code{catchAll}.
+# @param   minFreq           minimum frequency. Required if \code{mtd} is \code{thresholdedFreq}.
+#                            Default is 0.6.
+# @param   includeAmbiguous  Required for methods \code{"thresholdedFreq"} and \code{"mostCommon"}. 
+#                            If \code{TRUE}, use ambiguous characters to represent positions at 
+#                            which there are multiple characters with frequencies that are at least
+#                            \code{minFreq} or that are maximal. Default is \code{FALSE}. See
+#                            \code{Details} for rules on choosing ambiguous characters.
+# @param   lenLimit          limit on consensus length. Length of consensus returned will depend on
+#                            \code{lenLimit} and the longest possible length based on \code{seqs}, 
+#                            whichever that is shorter. 
+# @return  A character string that is the consensus sequence for \code{seqs}.
+#
+# @details See \code{Details} for \link{calcClonalConsensus}.
+# 
+# @seealso
+# \link{calcClonalConsensus} and \link{collapseClones}.
+# 
+# @examples
+# # Subset example data
+# data(ExampleDb, package="alakazam")
+# db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+# 
+# # Data corresponding to a single clone
+# clone <- db[db$CLONE=="3192", ]
+# # Number of sequences in this clone
+# nrow(clone)
+# 
+# # Get consensus input sequence
+# consInput <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT, 
+#                                        mtd="thresholdedFreq", minFreq=0.65)
+#                             
 calcClonalConsensusHelper = function(seqs, minFreq=0.6, lenLimit=NULL,
-                                     mtd=c("thresholdedFreq", "mostCommon", "catchAll")) {
+                                     mtd=c("thresholdedFreq", "mostCommon", "catchAll"),
+                                     includeAmbiguous=FALSE) {
     mtd = match.arg(mtd)
+    
+    # check minFreq
+    if (mtd=="thresholdedFreq") {
+        if (!is.numeric(minFreq)) {
+            stop("minFreq must be a numeric value.")
+        } else {
+            if ( minFreq<0 | minFreq>1 ) {
+                stop("minFreq must be between 0 and 1.")
+            }
+        }
+    }
+    
+    # check includeAmbiguous
+    if (mtd %in% c("thresholdedFreq", "mostCommon")) {
+        if (class(includeAmbiguous) != "logical") {
+            stop ("includeAmbiguous must be TRUE or FALSE.")
+        }
+    }
     
     numSeqs = length(seqs)
     
@@ -382,105 +361,199 @@ calcClonalConsensusHelper = function(seqs, minFreq=0.6, lenLimit=NULL,
             if (length(idx)==0) {
                 return("N")
             } else {
-                # if multiple characters >= the threhold, first one is returned
-                # the order is built-in from tabMtxRownames
-                return(names(x)[idx[1]])
+                # if multiple characters >= the threhold, 
+                if (includeAmbiguous) {
+                    # ambiguous character allowed
+                    return(chars2Ambiguous(tabMtxRownames[idx]))
+                } else {
+                    # first one is returned
+                    # the order is built-in from tabMtxRownames
+                    return(names(x)[idx[1]])
+                }
             }
         })
-    } else if (mtd=="mostCommon") {
-        # if multiple characters occur with max freq, first one is returned
-        # the order is built-in from tabMtxRownames
-        # use as.matrix so that apply won't break with ncol(tabMtx)=1
-        max.idx = apply(as.matrix(tabMtx), 2, which.max)
-        # can do this because max.idx cannot exceed nrow(tabMtx) 
-        # so even though last row of tabMtx ("na") has been removed, it's not a problem
-        stopifnot(!any(max.idx>nrow(tabMtx)))
-        consensus = tabMtxRownames[max.idx]
+    } else if (mtd=="mostCommon") { #*
+        if (includeAmbiguous) {
+            # use as.matrix so that apply won't break with ncol(tabMtx)=1
+            consensus = apply(as.matrix(tabMtx), 2, function(x){
+                max.freq = max(x)
+                tol = 1e-5 # tolerance
+                max.idx = which( abs(x-max.freq)<=tol )
+                return( chars2Ambiguous(tabMtxRownames[max.idx]) )
+            })
+        } else {
+            # if multiple characters occur with max freq, first one is returned
+            # the order is built-in from tabMtxRownames
+            # use as.matrix so that apply won't break with ncol(tabMtx)=1
+            max.idx = apply(as.matrix(tabMtx), 2, which.max)
+            # can do this because max.idx cannot exceed nrow(tabMtx) 
+            # so even though last row of tabMtx ("na") has been removed, it's not a problem
+            stopifnot(!any(max.idx>nrow(tabMtx)))
+            consensus = tabMtxRownames[max.idx]
+        }
     } else if (mtd=="catchAll") {
         # use as.matrix so that apply won't break with ncol(tabMtx)=1
         consensus = apply(as.matrix(tabMtx), 2, function(x){
             # all characters that appear at a position across seqs
             nonZeroNucs = rownames(tabMtx)[x>0]
-            # if any of A, T, G, C, N appears
-            if (any(nonZeroNucs %in% c("A","C","G","T","N"))) {
-                
-                # ignore - and .
-                idx.dash.dot = which(nonZeroNucs=="-" | nonZeroNucs==".")
-                if (length(idx.dash.dot)>0) {
-                    nonZeroNucs = nonZeroNucs[!idx.dash.dot]
-                }
-                
-                # if only N appears
-                if (sum(nonZeroNucs=="N")==length(nonZeroNucs)) {
-                    return("N")
-                } else {
-                    # remove N
-                    # e.g. AGN would be treated as AG (R)
-                    # e.g. ATGN would be treated as AGT (D)
-                    # e.g. ATGCN would be treated as ACGT (N)
-                    idx.N = which(nonZeroNucs=="N")
-                    if (length(idx.N)>0) {
-                        nonZeroNucs = nonZeroNucs[!idx.N]
-                    } 
-                    return(nucs2IUPAC(nonZeroNucs))
-                }
-                # otherwise, if there are any of A, T, G, C
-                
-            } else {
-                # otherwise, if only one or both of - and . appear(s)    
-                # if both - and . appear, return -
-                if (sum(nonZeroNucs %in% c("-", "."))==2) {
-                    return("-")
-                } else {
-                    # if only - or . appears, return that
-                    return(nonZeroNucs)
-                }
-            }
+            # convert characters to (ambiguous) characters
+            return(chars2Ambiguous(nonZeroNucs))
         })
     }
     
+    # check there is no ambiguous characters if includeAmbiguous if F 
+    if ( (mtd=="thresholdedFreq" | mtd=="mostCommon") & !includeAmbiguous ) {
+        ambiguous = NUCLEOTIDES_AMBIGUOUS[!NUCLEOTIDES_AMBIGUOUS %in% 
+                                              c("A","C","G","T","N","-",".")]
+        stopifnot( sum(consensus %in% ambiguous)==0 )
+    }
+    
+    # convert from character vector to string
     consensus = c2s(consensus)
     # sanity check
     stopifnot( nchar(consensus)==lenConsensus )
+    
     return(consensus)
 }
 
 #' Calculate clonal consensus for a single clone
+#' 
+#' Given an aligned set of input/observed sequences and an aligned set of germline sequences, 
+#' generate an input/observed consensus and a germline consensus. 
 #'
-#' @param   inputSeq            character vector of observed sequences.
-#' @param   germlineSeq         character vector of germline sequences.
-#' @param   regionDefinition    \link{RegionDefinition} object defining the regions
-#'                              and boundaries of the Ig sequences.
+#' @param   inputSeq            character vector of observed sequences. The lengths of each input
+#'                              sequence should match that of its corresponding germline sequence.
+#' @param   germlineSeq         character vector of germline sequences. The lengths of each germline
+#'                              sequence should match that of its corresponding input sequence.
+#' @param   regionDefinition    \link{RegionDefinition} object defining the regions and boundaries 
+#'                              of the Ig sequences.
 #' @param   method              method to calculate consensus sequence. One of \code{thresholdedFreq}, 
-#'                              \code{mostCommon}, or \code{catchAll}. See \code{Details} for
-#'                              \link{calcClonalConsensusHelper}.
+#'                              \code{mostCommon}, or \code{catchAll}. See \code{Details}.
 #' @param   minimumFrequency    minimum frequency. Required if \code{method} is \code{thresholdedFreq}.
-#'                              Default is 0.6. See \code{Details} for \link{calcClonalConsensusHelper}.
+#'                              Default is 0.6. See \code{Details}.
+#' @param   includeAmbiguous    Required for methods \code{"thresholdedFreq"} and \code{"mostCommon"}. 
+#'                              If \code{TRUE}, use ambiguous characters to represent positions at 
+#'                              which there are multiple characters with frequencies that are at least
+#'                              \code{minimumFrequency} or that are maximal. Default is \code{FALSE}. 
+#'                              See \code{Details} for rules on choosing ambiguous characters.                              
 #'                              
 #' @return  A named vector of length two with "input" and "germline" consensus sequences. The
 #'          input and germline consensus sequences have the same length.
 #' 
-#' @details Note that this function does not perform multiple sequence alignment. As a 
-#'          prerequisite, it is assumed that sequences in \code{inputSeq} and \code{germlineSeq}
-#'          have each been aligned somehow. In the case of immunoglobulin repertoire analysis, 
-#'          this usually means that the sequences are IMGT-gapped.
+#' @details The input/observed consensus is generated with the method of choice indicated by 
+#'          \code{method}. The germline consensus is generated with the \code{mostCommon} method. 
 #' 
-#'          The germline consensus is generated by \link{calcClonalConsensusHelper} with the 
-#'          \code{mostCommon} method. 
-#'          
-#'          An input/observed consensus is generated, also by 
-#'          \link{calcClonalConsensusHelper}, with the method of choice indicated by 
-#'          \code{method}. 
-#'          
-#'          The lengths of the consensus sequences are determined by the longest possible consensus
+#'          The lengths of the consensus sequences are determined by the longest possible consensus 
 #'          sequence (baesd on \code{inputSeq} and \code{germlineSeq}) and 
-#'          \code{regionDefinition@seqLength} (if supplied), whichever that is shorter. 
-#'          
-#'          See \code{Details} for \link{calcClonalConsensusHelper} for details on \code{method}
-#'          and \code{minimumFrequency}.
+#'          \code{regionDefinition@seqLength} (if supplied), whichever is shorter.
 #' 
+#'          The descriptions below use \code{seqs} as a generalization of either \code{inputSeq} 
+#'          or \code{germlineSeq}.
+#' 
+#'          Note that this function does not perform multiple sequence alignment. As a 
+#'          prerequisite, it is assumed that sequences in \code{seqs} have been aligned
+#'          somehow. In the case of immunoglobulin repertoire analysis, this usually means
+#'          that the sequences are IMGT-gapped.
+#' 
+#'          Given a set of sequences of potentially varying lengths, the longest possible 
+#'          length of their consensus sequence is taken to be the longest length along 
+#'          which there is information contained at every nucleotide position across 
+#'          majority of the sequences. Majority is defined to be greater than 
+#'          \code{floor(n/2)}, where \code{n} is the number of sequences. If the longest 
+#'          possible consensus length is 0, there will be a warning and an empty string 
+#'          (\code{""}) will be returned. 
+#'          
+#'          If a length limit is defined by supplying a \code{regionDefinition} via 
+#'          \code{regionDefinition@seqLength}, the consensus length will be further 
+#'          restricted to the shorter of the longest possible length and 
+#'          \code{regionDefinition@seqLength}.
+#'          
+#'          All three methods available are deterministic. Where applicable depending on
+#'          \code{seqs}, the \code{"catchAll"} method always returns a consensus containing
+#'          IUPAC ambiguous characters. Unless specified by \code{includeAmbiguous=TRUE},
+#'          the \code{"thresholdedFreq"} and \code{"mostCommon"} methods do not include 
+#'          ambiguous characters in the consensus returned.
+#'          
+#'          For the \code{"thresholdedFreq"} method, a value must be supplied to the 
+#'          argument \code{minimumFrequency}. At each position along the length of the 
+#'          consensus sequence, the frequency of each nucleotide/character across 
+#'          sequences is tabulated. The nucleotide/character whose frequency is at least 
+#'          (i.e. \code{>=}) \code{minimumFrequency} becomes the consensus. With 
+#'          \code{includeAmbiguous=FALSE}, if frequencies of multiple nucleotides/characters 
+#'          are at least \code{minimumFrequency}, the first one is taken to be the consensus 
+#'          following the order of \code{"A"}, \code{"T"}, \code{"G"}, \code{"C"}, \code{"N"}, 
+#'          \code{"."}, and \code{"-"}. Below are some examples looking at a single position 
+#'          based on 5 sequences with \code{minFreq=0.6}:
+#'          
+#'          \itemize{
+#'              \item If the sequences have \code{"A"}, \code{"A"}, \code{"A"}, \code{"T"}, 
+#'                    \code{"C"}, the consensus will be \code{"A"}, because \code{"A"} has 
+#'                    frequency 0.6, which is at least \code{minimumFrequency}.
+#'              \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, \code{"T"}, 
+#'                    \code{"C"}, the consensus will be \code{"N"}, because none of 
+#'                    \code{"A"}, \code{"T"}, or \code{"C"} has frequency that is at least 
+#'                    \code{minimumFrequency}.
+#'                  }
+#'                  
+#'          For the \code{"mostCommon"} method, the most frequent nucleotide/character 
+#'          across sequences at each position along the length of the consensus sequence 
+#'          makes up the consensus. With \code{includeAmbiguous=FALSE}, if there are multiple 
+#'          nucleotides/characters with equally maximal frequencies, the first one is taken 
+#'          to be the consensus following the order of \code{"A"}, \code{"T"}, \code{"G"}, 
+#'          \code{"C"}, \code{"N"}, \code{"."}, and \code{"-"}. Below are some examples 
+#'          looking at a single position based on 5 sequences:
+#'          
+#'          \itemize{
+#'               \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, \code{"A"},
+#'                     \code{"C"}, the consensus will be \code{"A"}.
+#'               \item If the sequences have \code{"T"}, \code{"T"}, \code{"C"}, \code{"C"}, 
+#'                     \code{"G"}, the consensus will be \code{"T"}, because \code{"T"} is 
+#'                     before \code{"C"} in the order of \code{"A"}, \code{"T"}, \code{"G"}, 
+#'                     \code{"C"}, \code{"N"}, \code{"."}, and \code{"-"}. 
+#'                  }
+#'                  
+#'          For the method \code{"catchAll"}, a consensus sequence capturing most of the 
+#'          information contained in the sequences is obtained. Ambiguous characters are 
+#'          used where applicable. The rules on choosing ambiguous characters are as follows:
+#'          
+#'          \itemize{
+#'               \item If a position contains only \code{"N"} across sequences, the consensus 
+#'                     at that position is \code{"N"}.
+#'               \item If a position contains one or more of \code{"A"}, \code{"T"}, \code{"G"}, 
+#'                     or \code{"C"}, the consensus will be an IUPAC character representing all 
+#'                     of the characters present, regardless of whether \code{"N"}, \code{"-"}, or
+#'                     \code{"."} is present.
+#'               \item If a position contains only \code{"-"} and \code{"."} across sequences, 
+#'                     the consensus at thatp osition is taken to be \code{"-"}. 
+#'               \item If a position contains only one of \code{"-"} or \code{"."} across 
+#'                     sequences, the consensus at that position is taken to be the character 
+#'                     present. 
+#'          }
+#'          
+#'          Below are some examples for \code{method="catchAll"} looking at a single position 
+#'          based on 5 sequences:
+#'          
+#'          \itemize{
+#'               \item If the sequences have \code{"N"}, \code{"N"}, \code{"N"}, \code{"N"}, 
+#'                     \code{"N"}, the consensus will be \code{"N"}.
+#'               \item If the sequences have \code{"N"}, \code{"A"}, \code{"A"}, \code{"A"}, 
+#'                     \code{"A"}, the consensus will be \code{"A"}.
+#'               \item If the sequences have \code{"N"}, \code{"A"}, \code{"G"}, \code{"A"}, 
+#'                     \code{"A"}, the consensus will be \code{"R"}.
+#'               \item If the sequences have \code{"-"}, \code{"-"}, \code{"."}, \code{"."}, 
+#'                     \code{"."}, the consensus will be \code{"-"}.
+#'               \item If the sequences have \code{"-"}, \code{"-"}, \code{"-"}, \code{"-"}, 
+#'                     \code{"-"}, the consensus will be \code{"-"}.
+#'               \item If the sequences have \code{"."}, \code{"."}, \code{"."}, \code{"."}, 
+#'                     \code{"."}, the consensus will be \code{"."}.
+#'                  }
+#'                  
+#'          The same rules on choosing ambiguous characters for \code{method="catchAll"} apply
+#'          to methods \code{"thresholdedFreq"} and \code{"mostCommon"} when 
+#'          \code{includeAmbiguous=TRUE}.
+#'          
 #' @seealso
-#' \link{calcClonalConsensusHelper} and \link{collapseClones}.
+#' See \link{collapseClones} for constructing consensus for all clones.
 #' 
 #' @examples
 #' # Subset example data
@@ -500,9 +573,27 @@ calcClonalConsensusHelper = function(seqs, minFreq=0.6, lenLimit=NULL,
 #' @export
 calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL, 
                                 method=c("thresholdedFreq", "mostCommon", "catchAll"), 
-                                minimumFrequency=0.6) {
+                                minimumFrequency=0.6, includeAmbiguous=FALSE) {
     
     method = match.arg(method)
+    
+    # check minimumFrequency
+    if (method=="thresholdedFreq") {
+        if (!is.numeric(minimumFrequency)) {
+            stop("minimumFrequency must be a numeric value.")
+        } else {
+            if ( minimumFrequency<0 | minimumFrequency>1 ) {
+                stop("minimumFrequency must be between 0 and 1.")
+            }
+        }
+    }
+    
+    # check includeAmbiguous
+    if (method %in% c("thresholdedFreq", "mostCommon")) {
+        if (class(includeAmbiguous) != "logical") {
+            stop ("includeAmbiguous must be TRUE or FALSE.")
+        }
+    }
     
     # length of seqs in inputSeq and those in germlineSeq should match
     if ( sum(nchar(inputSeq)==nchar(germlineSeq)) != length(inputSeq) ) {
@@ -523,11 +614,13 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
     
     ##### get consensus germline sequence (most common)
     germCons = calcClonalConsensusHelper(seqs=germlineSeq, mtd="mostCommon", 
-                                         minFreq=NULL, lenLimit=lenRegion)
+                                         minFreq=NULL, lenLimit=lenRegion,
+                                         includeAmbiguous=includeAmbiguous)
     
     ##### get consensus observed sequence
     inputCons = calcClonalConsensusHelper(seqs=inputSeq, mtd=method, 
-                                          minFreq=minimumFrequency, lenLimit=lenRegion)
+                                          minFreq=minimumFrequency, lenLimit=lenRegion,
+                                          includeAmbiguous=includeAmbiguous)
     
     # sanity check: length of germCons and inputCons should be the same
     stopifnot( nchar(germCons)==nchar(inputCons) )
@@ -734,11 +827,11 @@ observedMutations <- function(db,
     observedMutations_list <-
         foreach(idx=iterators::icount(numbOfSeqs)) %dopar% {
             oM <- calcObservedMutations(db[[sequenceColumn]][idx], 
-                                  db[[germlineColumn]][idx],
-                                  frequency=frequency & !combine,
-                                  regionDefinition=regionDefinition,
-                                  mutationDefinition=mutationDefinition,
-                                  returnRaw = combine)
+                                        db[[germlineColumn]][idx],
+                                        frequency=frequency & !combine,
+                                        regionDefinition=regionDefinition,
+                                        mutationDefinition=mutationDefinition,
+                                        returnRaw = combine)
             if (combine) {
                 num_mutations <- 0
                 if (!all(is.na(oM$pos))) {
@@ -895,7 +988,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
     
     # Assign mutation definition
     aminoAcidClasses <- if (is.null(mutationDefinition)) { NULL } else { mutationDefinition@classes }
-        
+    
     # Removing IMGT gaps (they should come in threes)
     # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
     germlineSeq <- gsub("\\.\\.\\.", "XXX", germlineSeq)
@@ -978,7 +1071,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
                 tempNames <- sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) })
                 # Subset boundaries to only non N bases (in both seq and gl)
                 boundaries <- regionDefinition@boundaries[c_inputSeq%in%NUCLEOTIDES[1:4] &  
-                                                          c_germlineSeq%in%NUCLEOTIDES[1:4]]
+                                                              c_germlineSeq%in%NUCLEOTIDES[1:4]]
                 # Freq = numb of mutations / numb of non N bases (in both seq and gl)
                 denoms <- sapply(tempNames, function(x) { sum(boundaries==x) })
                 mutations_array <- mutations_array/denoms
@@ -991,30 +1084,30 @@ calcObservedMutations <- function(inputSeq, germlineSeq, frequency=FALSE,
     
     # return positions of point mutations and their mutation types ("raw")
     if (returnRaw){
-      # number of non-N bases (in both seq and gl)
-      nonN.regions <- unique(sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) }))
-      nonN.boundaries <- regionDefinition@boundaries[c_inputSeq%in%NUCLEOTIDES[1:4] &  
-                                                       c_germlineSeq%in%NUCLEOTIDES[1:4]]
-      nonN.denoms <- sapply(nonN.regions, function(x) { sum(nonN.boundaries==x) })
-      
-      if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
-        # if mutations_array_raw is NA, or 
-        # if mutations_array_raw is empty due to all mutations being "Stop" and hence removed
-        # avoid is.na(mutations_array_raw) to avoid warning in case mutations_array_raw is a vector
-        return(list(pos=mutations_array_raw, nonN=nonN.denoms))
-      } else {
-        # df indicating position, mutation type (R or S), and region of each mutation
-        rawDf = data.frame(as.numeric(names(mutations_array_raw)))
-        rawDf = cbind(rawDf,
-                      as.character(mutations_array_raw), # as.character to remove names of the vector
-                      as.character(regionDefinition@boundaries[as.numeric(names(mutations_array_raw))]),
-                      stringsAsFactors=F)
-        colnames(rawDf) = c("position", "type", "region")
-      return(list(pos=rawDf, nonN=nonN.denoms))
-      }
+        # number of non-N bases (in both seq and gl)
+        nonN.regions <- unique(sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) }))
+        nonN.boundaries <- regionDefinition@boundaries[c_inputSeq%in%NUCLEOTIDES[1:4] &  
+                                                           c_germlineSeq%in%NUCLEOTIDES[1:4]]
+        nonN.denoms <- sapply(nonN.regions, function(x) { sum(nonN.boundaries==x) })
+        
+        if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
+            # if mutations_array_raw is NA, or 
+            # if mutations_array_raw is empty due to all mutations being "Stop" and hence removed
+            # avoid is.na(mutations_array_raw) to avoid warning in case mutations_array_raw is a vector
+            return(list(pos=mutations_array_raw, nonN=nonN.denoms))
+        } else {
+            # df indicating position, mutation type (R or S), and region of each mutation
+            rawDf = data.frame(as.numeric(names(mutations_array_raw)))
+            rawDf = cbind(rawDf,
+                          as.character(mutations_array_raw), # as.character to remove names of the vector
+                          as.character(regionDefinition@boundaries[as.numeric(names(mutations_array_raw))]),
+                          stringsAsFactors=F)
+            colnames(rawDf) = c("position", "type", "region")
+            return(list(pos=rawDf, nonN=nonN.denoms))
+        }
     } else {
-    # return counts of each mutation type  
-      return(mutations_array)
+        # return counts of each mutation type  
+        return(mutations_array)
     }
 }
 
@@ -1059,7 +1152,7 @@ binMutationsByRegion <- function(mutationsArray,
     if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
-
+    
     # Create full sequence RegionDefinition object 
     # The seqLength will be the largest index of a mutation
     if (is.null(regionDefinition)) {
@@ -1115,20 +1208,20 @@ binMutationsByRegion <- function(mutationsArray,
 #'                                 
 #' @export
 slideWindowSeq <- function(inputSeq, germlineSeq, mutThresh, windowSize){
-  # identify all R and S mutations in input sequence
-  inputMut <- calcObservedMutations(inputSeq=inputSeq, germlineSeq=germlineSeq, returnRaw=T)$pos
-  
-  # extract positions of mutations
-  # inputMut must either be NA (no observed mutation) or a df
-  # avoid is.na (in case inputMut is a data frame then will get multiple T/F values and hence warning)
-  if (!is.data.frame(inputMut)) {
-    inputMutPos = NA
-  } else {
-    inputMutPos = inputMut$position
-  }
-
-  # call helper
-  return(slideWindowSeqHelper(mutPos=inputMutPos, mutThresh=mutThresh, windowSize=windowSize))
+    # identify all R and S mutations in input sequence
+    inputMut <- calcObservedMutations(inputSeq=inputSeq, germlineSeq=germlineSeq, returnRaw=T)$pos
+    
+    # extract positions of mutations
+    # inputMut must either be NA (no observed mutation) or a df
+    # avoid is.na (in case inputMut is a data frame then will get multiple T/F values and hence warning)
+    if (!is.data.frame(inputMut)) {
+        inputMutPos = NA
+    } else {
+        inputMutPos = inputMut$position
+    }
+    
+    # call helper
+    return(slideWindowSeqHelper(mutPos=inputMutPos, mutThresh=mutThresh, windowSize=windowSize))
 }
 
 
@@ -1148,27 +1241,27 @@ slideWindowSeq <- function(inputSeq, germlineSeq, mutThresh, windowSize){
 #           in any window of \code{windowSize} consecutive nucleotides; \code{FALSE} if otherwise.
 #
 slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
-  # check preconditions
-  stopifnot(mutThresh >= 1 & mutThresh <= windowSize & windowSize>=2)
-  
-  if (length(mutPos) == 1 && is.na(mutPos)) {
-    # use && instead of & to short-circuit in case length(mutPos)!=1 (otherwise warning)
-    return(FALSE)
-  } else {
-    # general idea:
-    # only need to check windows containing mutations (as opposed to every possible window)
-    for (i in 1:length(mutPos)){
-      # get window limits
-      lower = mutPos[i]
-      upper = lower + windowSize - 1
-      # how many mutations fall within current window
-      windowCount = sum(mutPos>=lower & mutPos <= upper)
-      # return as soon as a window has >= mutThresh mutations
-      if (windowCount >= mutThresh) { return(TRUE) }
-    }
+    # check preconditions
+    stopifnot(mutThresh >= 1 & mutThresh <= windowSize & windowSize>=2)
     
-    return(FALSE)
-  }
+    if (length(mutPos) == 1 && is.na(mutPos)) {
+        # use && instead of & to short-circuit in case length(mutPos)!=1 (otherwise warning)
+        return(FALSE)
+    } else {
+        # general idea:
+        # only need to check windows containing mutations (as opposed to every possible window)
+        for (i in 1:length(mutPos)){
+            # get window limits
+            lower = mutPos[i]
+            upper = lower + windowSize - 1
+            # how many mutations fall within current window
+            windowCount = sum(mutPos>=lower & mutPos <= upper)
+            # return as soon as a window has >= mutThresh mutations
+            if (windowCount >= mutThresh) { return(TRUE) }
+        }
+        
+        return(FALSE)
+    }
 }
 
 
@@ -1205,11 +1298,11 @@ slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
 slideWindowDb <- function(db, sequenceColumn="SEQUENCE_IMGT", 
                           germlineColumn="GERMLINE_IMGT_D_MASK",
                           mutThresh, windowSize){
-  db_filter <- sapply(1:nrow(db), function(i) { slideWindowSeq(inputSeq = db[i, sequenceColumn],
-                                                               germlineSeq = db[i, germlineColumn],
-                                                               mutThresh = mutThresh,
-                                                               windowSize = windowSize)})
-  return(db_filter)
+    db_filter <- sapply(1:nrow(db), function(i) { slideWindowSeq(inputSeq = db[i, sequenceColumn],
+                                                                 germlineSeq = db[i, germlineColumn],
+                                                                 mutThresh = mutThresh,
+                                                                 windowSize = windowSize)})
+    return(db_filter)
 }
 
 
@@ -1279,72 +1372,72 @@ slideWindowTune <- function(db, sequenceColumn="SEQUENCE_IMGT",
                             germlineColumn="GERMLINE_IMGT_D_MASK",
                             dbMutList=NULL,
                             mutThreshRange, windowSizeRange, verbose=TRUE){
-  # check preconditions
-  stopifnot(!is.null(db))
-  stopifnot(min(mutThreshRange) >= 1 & 
-             max(mutThreshRange) <= max(windowSizeRange) &
-             min(windowSizeRange) >= 2)
-  
-  
-  # get positions of R/S mutations for sequences in db
-  # do this here and then call slideWindowSeqHelper (so it's done only once)
-  # instead of calling slideWindowDb which does this every time it is called
-  if (is.null(dbMutList)) {
-    inputMutList = sapply(1:nrow(db), 
-                          function(i){
-                            calcObservedMutations(inputSeq=db[i, sequenceColumn],
-                                                  germlineSeq=db[i, germlineColumn],
-                                                  returnRaw=T)$pos})    
-  } else {
-    if (verbose) {cat("dbMutList supplied; skipped calling calcObservedMutations()\n")}
-    inputMutList = dbMutList
-  }
-  
-  inputMutPosList = lapply(inputMutList, 
-                           function(x){
-                             if (!is.data.frame(x)) {
-                               return(NA) 
-                             } else {
-                               return(x$position)
-                             }
-                           })
+    # check preconditions
+    stopifnot(!is.null(db))
+    stopifnot(min(mutThreshRange) >= 1 & 
+                  max(mutThreshRange) <= max(windowSizeRange) &
+                  min(windowSizeRange) >= 2)
     
-  # apply slideWindow on combinations of windowSize and mutThresh
-  for (size in windowSizeRange) {
-    if (verbose) {cat(paste0("now computing for windowSize = ", size, "\n"))}
     
-    for (thresh in mutThreshRange) {
-      if (thresh <= size){
-        if (verbose) {cat(paste0(">>> mutThresh = ", thresh, "\n"))}
-        # apply slideWindow using current pair of parameters
-        cur.logical = unlist(lapply(inputMutPosList,
-                                    slideWindowSeqHelper,
-                                    mutThresh = thresh, windowSize = size))
-      } else {
-        if (verbose) {cat(paste0(">>> mutThresh = ", thresh, " > windowSize = ", 
-                                 size, " (skipped)\n"))}
-        # NA if skipped
-        cur.logical = rep(NA, nrow(db))
-      }
-      # store results for each thresh as a column in a logical matrix
-      if (thresh == mutThreshRange[1]) {
-        cur.mtx = matrix(data=cur.logical, nrow=length(cur.logical))
-      } else {
-        cur.mtx = cbind(cur.mtx, cur.logical)
-      }
-    }
-    colnames(cur.mtx) = as.character(mutThreshRange)
-    
-    # store results for each size (and threshes under that size) as a logical matrix in a list
-    if (size == windowSizeRange[1]) {
-      cur.list = list(cur.mtx)
+    # get positions of R/S mutations for sequences in db
+    # do this here and then call slideWindowSeqHelper (so it's done only once)
+    # instead of calling slideWindowDb which does this every time it is called
+    if (is.null(dbMutList)) {
+        inputMutList = sapply(1:nrow(db), 
+                              function(i){
+                                  calcObservedMutations(inputSeq=db[i, sequenceColumn],
+                                                        germlineSeq=db[i, germlineColumn],
+                                                        returnRaw=T)$pos})    
     } else {
-      cur.list = c(cur.list, list(cur.mtx))
+        if (verbose) {cat("dbMutList supplied; skipped calling calcObservedMutations()\n")}
+        inputMutList = dbMutList
     }
-  }
-  names(cur.list) = as.character(windowSizeRange)
-  
-  return(cur.list)
+    
+    inputMutPosList = lapply(inputMutList, 
+                             function(x){
+                                 if (!is.data.frame(x)) {
+                                     return(NA) 
+                                 } else {
+                                     return(x$position)
+                                 }
+                             })
+    
+    # apply slideWindow on combinations of windowSize and mutThresh
+    for (size in windowSizeRange) {
+        if (verbose) {cat(paste0("now computing for windowSize = ", size, "\n"))}
+        
+        for (thresh in mutThreshRange) {
+            if (thresh <= size){
+                if (verbose) {cat(paste0(">>> mutThresh = ", thresh, "\n"))}
+                # apply slideWindow using current pair of parameters
+                cur.logical = unlist(lapply(inputMutPosList,
+                                            slideWindowSeqHelper,
+                                            mutThresh = thresh, windowSize = size))
+            } else {
+                if (verbose) {cat(paste0(">>> mutThresh = ", thresh, " > windowSize = ", 
+                                         size, " (skipped)\n"))}
+                # NA if skipped
+                cur.logical = rep(NA, nrow(db))
+            }
+            # store results for each thresh as a column in a logical matrix
+            if (thresh == mutThreshRange[1]) {
+                cur.mtx = matrix(data=cur.logical, nrow=length(cur.logical))
+            } else {
+                cur.mtx = cbind(cur.mtx, cur.logical)
+            }
+        }
+        colnames(cur.mtx) = as.character(mutThreshRange)
+        
+        # store results for each size (and threshes under that size) as a logical matrix in a list
+        if (size == windowSizeRange[1]) {
+            cur.list = list(cur.mtx)
+        } else {
+            cur.list = c(cur.list, list(cur.mtx))
+        }
+    }
+    names(cur.list) = as.character(windowSizeRange)
+    
+    return(cur.list)
 }
 
 
@@ -1429,94 +1522,94 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
                                pchs = 1, ltys = 2, cols = 1,
                                plotLegend = TRUE, legendPos = "topright", 
                                legendHoriz = FALSE, legendCex = 1, title=NULL){
-  
-  # invert (!) tuneList if plotting retained sequences
-  ylab.part.2 = "filtered"
-  if (!plotFiltered) {
-    tuneList = lapply(tuneList, function(x){!x})
-    ylab.part.2 = "remaining"}
-  
-  # if number of pchs/ltys/cols provided does not match number of lines expected
-  # expand into vector with repeating values (otherwise legend would break)
-  if (length(pchs)!=length(tuneList)) {pchs = rep(pchs, length.out=length(tuneList))}
-  if (length(ltys)!=length(tuneList)) {ltys = rep(ltys, length.out=length(tuneList))}
-  if (length(cols)!=length(tuneList)) {cols = rep(cols, length.out=length(tuneList))}
-  
-  # tabulate tuneList (and if applicable convert to percentage)
-  plotList = lapply(tuneList, colSums)
-  if (percentage) {plotList = lapply(plotList, function(x){x/nrow(tuneList[[1]])})}
-  
-  # get x-axis values (i.e. mutThreshRange; colnames of matrix in tuneList with most columns)
-  #threshes = as.numeric(colnames(tuneList[[which.max(lapply(lapply(tuneList, colnames), length))]]))
-  threshes = as.numeric(colnames(tuneList[[1]]))
-  
-  # plot for first window size
-  x1 = threshes
-  if (jitter.x) {x1 = jitter(x1, amount=jitter.x.amt)}
-  y1 = plotList[[1]]
-  if (jitter.y) {y1 = jitter(y1, amount=jitter.y.amt)}
-  
-  if (percentage) {
-    ylab.part.1 = "Percentage of sequences"
-    # ylim
-    ylim.padding = abs(diff(range(plotList, na.rm=T)))*0.01
-    ylims = c(max(0, min(range(plotList, na.rm=T)) - ylim.padding), 
-              min(1, max(range(plotList, na.rm=T)) + ylim.padding) )
-
-  } else {
-    ylab.part.1 = "Number of sequences"
-    # ylim: non-negative lower limit; upper limit slight above max tabulated sum
-    ylims = c( max(0, min(range(plotList, na.rm=T)) - max(1, jitter.y.amt) ), 
-               max(range(plotList, na.rm=T)) + max(1, jitter.y.amt) )
-  }
-  
-  plot(x1, # mutThreshRange on x-axis
-       y1, # tabulated sums in plotList on y-axis
-       ylim = ylims,
-       # xlim: +/- jitter.x.amt*2 to accommodate for amount of jittering on x-axis
-       xlim = c(min(threshes)-jitter.x.amt*2, max(threshes+jitter.x.amt*2)),
-       xaxt="n", xlab="Threshold on number of mutations",
-       ylab=paste(ylab.part.1, ylab.part.2),
-       cex.lab=1.5, cex.axis=1.5, type="b", lwd=1.5,
-       pch=pchs[1], lty=ltys[1], col=cols[1])
-  axis(side=1, at=threshes, cex.axis=1.5)
-  
-  # add title
-  if (!is.null(title)) {
-      title(main=title)
-  }
-  
-  # plot for the rest of the window sizes
-  for (i in 1:length(plotList)){
-    if (i>=2) {
-      
-      xi = threshes
-      if (jitter.x) {xi = jitter(xi, amount=jitter.x.amt)}
-      yi = plotList[[i]]
-      if (jitter.y) {yi = jitter(yi, amount=jitter.y.amt)}
-      
-      points(xi, yi, type='b', lwd=1.5,
-             pch=pchs[i], lty=ltys[i], col=cols[i])
-    }
-  }
-  
-  # add legend
-  if (plotLegend) {
-    # if legendPos specified as xy coordinates
-    if (is.numeric(legendPos) & length(legendPos)==2) {
-      legend(x=legendPos[1], y=legendPos[2], 
-             legend = c("Window Size", names(tuneList)),
-             horiz = legendHoriz, cex = legendCex,
-             pch=c(NA, pchs), lty=c(NA, ltys), col=c(NA, cols))
+    
+    # invert (!) tuneList if plotting retained sequences
+    ylab.part.2 = "filtered"
+    if (!plotFiltered) {
+        tuneList = lapply(tuneList, function(x){!x})
+        ylab.part.2 = "remaining"}
+    
+    # if number of pchs/ltys/cols provided does not match number of lines expected
+    # expand into vector with repeating values (otherwise legend would break)
+    if (length(pchs)!=length(tuneList)) {pchs = rep(pchs, length.out=length(tuneList))}
+    if (length(ltys)!=length(tuneList)) {ltys = rep(ltys, length.out=length(tuneList))}
+    if (length(cols)!=length(tuneList)) {cols = rep(cols, length.out=length(tuneList))}
+    
+    # tabulate tuneList (and if applicable convert to percentage)
+    plotList = lapply(tuneList, colSums)
+    if (percentage) {plotList = lapply(plotList, function(x){x/nrow(tuneList[[1]])})}
+    
+    # get x-axis values (i.e. mutThreshRange; colnames of matrix in tuneList with most columns)
+    #threshes = as.numeric(colnames(tuneList[[which.max(lapply(lapply(tuneList, colnames), length))]]))
+    threshes = as.numeric(colnames(tuneList[[1]]))
+    
+    # plot for first window size
+    x1 = threshes
+    if (jitter.x) {x1 = jitter(x1, amount=jitter.x.amt)}
+    y1 = plotList[[1]]
+    if (jitter.y) {y1 = jitter(y1, amount=jitter.y.amt)}
+    
+    if (percentage) {
+        ylab.part.1 = "Percentage of sequences"
+        # ylim
+        ylim.padding = abs(diff(range(plotList, na.rm=T)))*0.01
+        ylims = c(max(0, min(range(plotList, na.rm=T)) - ylim.padding), 
+                  min(1, max(range(plotList, na.rm=T)) + ylim.padding) )
+        
     } else {
-    # if legendPos specified as "center", "topright", etc.  
-      legend(legendPos, 
-             legend = c("Window Size", names(tuneList)),
-             horiz = legendHoriz, cex = legendCex,
-             pch=c(NA, pchs), lty=c(NA, ltys), col=c(NA, cols))
+        ylab.part.1 = "Number of sequences"
+        # ylim: non-negative lower limit; upper limit slight above max tabulated sum
+        ylims = c( max(0, min(range(plotList, na.rm=T)) - max(1, jitter.y.amt) ), 
+                   max(range(plotList, na.rm=T)) + max(1, jitter.y.amt) )
     }
-  }
-  
+    
+    plot(x1, # mutThreshRange on x-axis
+         y1, # tabulated sums in plotList on y-axis
+         ylim = ylims,
+         # xlim: +/- jitter.x.amt*2 to accommodate for amount of jittering on x-axis
+         xlim = c(min(threshes)-jitter.x.amt*2, max(threshes+jitter.x.amt*2)),
+         xaxt="n", xlab="Threshold on number of mutations",
+         ylab=paste(ylab.part.1, ylab.part.2),
+         cex.lab=1.5, cex.axis=1.5, type="b", lwd=1.5,
+         pch=pchs[1], lty=ltys[1], col=cols[1])
+    axis(side=1, at=threshes, cex.axis=1.5)
+    
+    # add title
+    if (!is.null(title)) {
+        title(main=title)
+    }
+    
+    # plot for the rest of the window sizes
+    for (i in 1:length(plotList)){
+        if (i>=2) {
+            
+            xi = threshes
+            if (jitter.x) {xi = jitter(xi, amount=jitter.x.amt)}
+            yi = plotList[[i]]
+            if (jitter.y) {yi = jitter(yi, amount=jitter.y.amt)}
+            
+            points(xi, yi, type='b', lwd=1.5,
+                   pch=pchs[i], lty=ltys[i], col=cols[i])
+        }
+    }
+    
+    # add legend
+    if (plotLegend) {
+        # if legendPos specified as xy coordinates
+        if (is.numeric(legendPos) & length(legendPos)==2) {
+            legend(x=legendPos[1], y=legendPos[2], 
+                   legend = c("Window Size", names(tuneList)),
+                   horiz = legendHoriz, cex = legendCex,
+                   pch=c(NA, pchs), lty=c(NA, ltys), col=c(NA, cols))
+        } else {
+            # if legendPos specified as "center", "topright", etc.  
+            legend(legendPos, 
+                   legend = c("Window Size", names(tuneList)),
+                   horiz = legendHoriz, cex = legendCex,
+                   pch=c(NA, pchs), lty=c(NA, ltys), col=c(NA, cols))
+        }
+    }
+    
 }
 
 
@@ -1627,7 +1720,7 @@ expectedMutations <- function(db,
     }
     
     labels <- paste("EXPECTED_", labels, sep="")
-
+    
     label_exists <- labels[labels %in% colnames(db)]
     if (length(label_exists)>0) {
         warning(paste0("Columns ", 
@@ -1854,7 +1947,7 @@ calculateTargeting <- function(germlineSeq,
     if (!is(targetingModel, "TargetingModel")) {
         stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
     }
-
+    
     # If an inputSequence is passed then process the germlineSequence
     # to be the same legth, mask germlineSequence with Ns where inputSequence is also N
     # If not needed then  you may skip this step by passing in inputSequence=NULL 
@@ -1919,17 +2012,17 @@ calculateTargeting <- function(germlineSeq,
     pos<- 3:(gaplessSeqLen - 2)
     subSeq =  substr(rep(gaplessSeq, gaplessSeqLen - 4), (pos - 2), (pos + 2))
     germlineSeqTargeting_gapless <- targetingModel@targeting[,subSeq]
-#     germlineSeqTargeting_gapless <- sapply(subSeq, function(x) { 
-#         targetingModel@targeting[, x] })
+    #     germlineSeqTargeting_gapless <- sapply(subSeq, function(x) { 
+    #         targetingModel@targeting[, x] })
     
     germlineSeqTargeting[, c_germlineSeq != "."] <- germlineSeqTargeting_gapless  
     
     # Set self-mutating targeting values to be NA
     mutatingToSelf <- colnames(germlineSeqTargeting)
     mutatingToSelf[!(mutatingToSelf %in% NUCLEOTIDES[1:5])] <- "N"
-#     # TODO: What's with this <<- business?
-#     # TODO: I think this is assigning NA to all self-mutations, which are already NA
-#     sapply(1:ncol(germlineSeqTargeting), function(pos) { germlineSeqTargeting[mutatingToSelf[pos], pos] <<- NA })
+    #     # TODO: What's with this <<- business?
+    #     # TODO: I think this is assigning NA to all self-mutations, which are already NA
+    #     sapply(1:ncol(germlineSeqTargeting), function(pos) { germlineSeqTargeting[mutatingToSelf[pos], pos] <<- NA })
     
     germlineSeqTargeting[!is.finite(germlineSeqTargeting)] <- NA
     return(germlineSeqTargeting)
@@ -1943,7 +2036,7 @@ calculateMutationalPaths <- function(germlineSeq,
     if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
-
+    
     # Set codon table if required
     if (is.null(codonTable)) { codonTable <- CODON_TABLE }
     
@@ -1984,7 +2077,7 @@ calculateMutationalPaths <- function(germlineSeq,
         c_germlineSeq <- s2c(s_germlineSeq)
     }
     
-
+    
     s_germlineSeq_len <- nchar(s_germlineSeq)    
     vecCodons <- sapply({1:(s_germlineSeq_len/3)}*3 - 2, function(x) { substr(s_germlineSeq, x, x + 2) })
     vecCodons[!vecCodons %in% colnames(codonTable)] <- "NNN"
@@ -1996,13 +2089,19 @@ calculateMutationalPaths <- function(germlineSeq,
 
 #### Additional helper functions ####
 
-# Convert one or more characters to IUPAC code 
+# Convert one or more nucleotide characters to IUPAC code 
 # for incomplete nucleic acid specification
 # 
 # @param   nucs     a character vector of nucleotides. One or more of 
 #                   \code{c("A", "C", "G", "T")}.
 # 
 # @return  a single character from the IUPAC ambiguous code.
+#
+# tests
+# nucs2IUPAC(c("A", "T")) == "W"
+# nucs2IUPAC(c("A", "T", "G", "C")) == "N"
+# nucs2IUPAC(c("C", "T", "G")) == "B"
+# nucs2IUPAC(c("C", "T", "G", "G")) == "B"
 #
 nucs2IUPAC = function(nucs) {
     # input nucleotides must be one of the characters allowed
@@ -2020,6 +2119,71 @@ nucs2IUPAC = function(nucs) {
     return(IUPAC_DNA_2[nucs])
 }
 
+# Convert one or more characters including dash and dots to ambiguous characters
+# 
+# @param   chars     a character vector of nucleotides. One or more of 
+#                    \code{c("A", "C", "G", "T", "N", "-", ".")}.
+# 
+# @return  BLAH
+#
+# tests
+# chars2Ambiguous(c("A", "T")) =="W"
+# chars2Ambiguous(c("A", "T", "N")) =="W"
+# chars2Ambiguous(c("A", "T", "G", "C")) =="N"
+# chars2Ambiguous(c("A", "T", "G", "C", "N")) =="N"
+# chars2Ambiguous(c("A", "T", "G", "C", "-")) =="N"
+# chars2Ambiguous(c(".", "-")) =="-"
+# chars2Ambiguous(c(".", "N")) =="N"
+# chars2Ambiguous(c(".", "A", "T")) =="W"
+#
+chars2Ambiguous = function(chars) {
+    # chars must all be unique
+    stopifnot( length(unique(chars)) == length(chars) )
+    
+    # input characters must be one of the characters allowed
+    legal = c("A", "C", "G", "T", "N", "-", ".")
+    if (sum(! chars %in% legal)>0) {
+        stop("Input characters must be one of A, C, G, T, N, - (dash), or . (dot)")
+    }
+    
+    # if any of A, T, G, C, N appears
+    if (any(chars %in% c("A","C","G","T","N"))) {
+        
+        # ignore - and .
+        idx.dash.dot = which(chars=="-" | chars==".")
+        if (length(idx.dash.dot)>0) {
+            chars = chars[-idx.dash.dot]
+        }
+        
+        # if only N appears
+        if (sum(chars=="N")==length(chars)) {
+            return("N")
+        } else {
+            # otherwise, if there are any of A, T, G, C
+            # remove N
+            # e.g. AGN would be treated as AG (R)
+            # e.g. ATGN would be treated as AGT (D)
+            # e.g. ATGCN would be treated as ACGT (N)
+            idx.N = which(chars=="N")
+            if (length(idx.N)>0) {
+                chars = chars[-idx.N]
+            } 
+            return(nucs2IUPAC(chars))
+        }
+        
+    } else {
+        # otherwise, if only one or both of - and . appear(s)    
+        # if both - and . appear, return -
+        if (sum(chars %in% c("-", "."))==2) {
+            return("-")
+        } else {
+            # if only - or . appears, return that
+            return(chars)
+        }
+    }
+    
+}
+
 # Convert IUPAC incomplete nucleic acid to one or more characters
 #
 # @param   code       a single IUPAC character.
@@ -2027,6 +2191,11 @@ nucs2IUPAC = function(nucs) {
 #                     is \code{N}. Default is \code{TRUE}.
 # @return  a character vector of nucleotides. One or more of 
 #          \code{c("A", "C", "G", "T")}.
+# tests
+# IUPAC2nucs(code="N", excludeN=T)=="N"
+# IUPAC2nucs(code="N", excludeN=F)==c("A", "C", "G", "T")
+# IUPAC2nucs(code="S", excludeN=T)==c("C", "G")
+# IUPAC2nucs(code="S", excludeN=F)==c("C", "G")
 #
 IUPAC2nucs = function(code, excludeN=TRUE) {
     # input character must be one of IUPAC codes
@@ -2045,29 +2214,29 @@ IUPAC2nucs = function(code, excludeN=TRUE) {
 # Given a nuclotide position, returns the codon number
 # e.g. nuc 86  = codon 29
 getCodonNumb <- function(nucPos){
-  return( ceiling(nucPos/3) )
+    return( ceiling(nucPos/3) )
 }
 
 # Given a codon, returns all the nuc positions that make the codon
 getCodonNucs <- function(codonNumb){
-  getCodonPos(codonNumb*3)
+    getCodonPos(codonNumb*3)
 }
 
 # Given a nucleotide postions return the position in the codon
 getContextInCodon <- function(nucPos){
-  return( {nucPos-1}%%3+1 )
+    return( {nucPos-1}%%3+1 )
 }
 
 # Given a nuclotide position, returns the pos of the 3 nucs that made the codon
 # e.g. nuc 86 is part of nucs 85,86,87
 getCodonPos <- function(nucPos) {
-  codonNum =  (ceiling(nucPos / 3)) * 3
-  return ((codonNum - 2):codonNum)
+    codonNum =  (ceiling(nucPos / 3)) * 3
+    return ((codonNum - 2):codonNum)
 }
 
 # Translate codon to amino acid
 translateCodonToAminoAcid <- function(Codon) {
-  return (AMINO_ACIDS[Codon])
+    return (AMINO_ACIDS[Codon])
 }
 
 # Given two codons, tells you if the mutation is R or S (based on your definition)
