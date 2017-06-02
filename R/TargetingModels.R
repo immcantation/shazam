@@ -1807,10 +1807,6 @@ symmetrize <- function(sub1mer) {
 #' 
 #' @export
 writeTargetingDistance <- function(model, file) {
-    if (!is(model, "TargetingModel")) {
-        stop(deparse(substitute(model)), " is not a valid TargetingModel object")
-    }
-    
     to_write <- as.data.frame(calcTargetingDistance(model))
     to_write[is.na(to_write)] <- 0
     write.table(to_write, file, quote=FALSE, sep="\t", col.names=NA, row.names=TRUE)

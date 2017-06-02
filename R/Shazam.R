@@ -109,6 +109,7 @@
 #'                          pairwiseDist pairwiseEqual seqDist seqEqual
 #'                          isValidAASeq translateStrings gridPlot
 #'                          getMRCA getPathLengths tableEdges
+#'                          IUPAC_DNA
 #' @importFrom  ape         mst
 #' @importFrom  diptest     dip.test
 #' @importFrom  doParallel  registerDoParallel
