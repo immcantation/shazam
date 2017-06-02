@@ -1382,10 +1382,13 @@ baselinePValue <- function (base, length_sigma=4001, max_sigma=20){
 
 # Compute p-value of two BASELINe PDFs
 #
-# @param   base1  first selection PDF
-# @param   base2  second selection PDF
+# @param   base1  first selection PDF; must be a numeric vector
+# @param   base2  second selection PDF; must be a numeric vector
 # @return  Two-sided p-value that base1 and base2 differ.
 baseline2DistPValue <-function(base1, base2) {
+    # NOTE: make sure to supply 2 vectors (not 1-row data.frames) when
+    #       calling this function directly
+    
     ## Debug
     # base1=grouped@pdfs[["CDR"]][1, ]; base2=grouped@pdfs[["FWR"]][1, ]
     
