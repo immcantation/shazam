@@ -271,6 +271,11 @@ setClass("TargetingModel",
 #'           For \code{returnModel = "1mer"} or \code{"1mer_raw"}:
 #'           a 4x4 normalized or un-normalized 1-mer substitution matrix respectively.
 #' 
+#' @details  \strong{Caution: The targeting model functions do NOT support ambiguous 
+#'           characters in their inputs. You MUST make sure that your input and germline
+#'           sequences do NOT contain ambiguous characters (especially if they are
+#'           clonal consensuses returned from \code{collapseClones}).}
+#' 
 #' @references
 #' \enumerate{
 #'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based 
@@ -643,6 +648,11 @@ minNumMutationsTune = function(subCount, minNumMutationsRange) {
 #'           When \code{numSeqMutationsOnly} is \code{TRUE}, a named numeric
 #'           vector of length 1024 counting the number of observed mutations in sequences containing 
 #'           each 5-mer.
+#' 
+#' @details  \strong{Caution: The targeting model functions do NOT support ambiguous 
+#'           characters in their inputs. You MUST make sure that your input and germline
+#'           sequences do NOT contain ambiguous characters (especially if they are 
+#'           clonal consensuses returned from \code{collapseClones}).}
 #' 
 #' @references
 #' \enumerate{
@@ -1201,6 +1211,11 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' @param    modelCitation       publication source.
 #' 
 #' @return   A \link{TargetingModel} object.
+#' 
+#' @details  \strong{Caution: The targeting model functions do NOT support ambiguous 
+#'           characters in their inputs. You MUST make sure that your input and germline
+#'           sequences do NOT contain ambiguous characters (especially if they are
+#'           clonal consensuses returned from \code{collapseClones}).}
 #' 
 #' @references
 #' \enumerate{
