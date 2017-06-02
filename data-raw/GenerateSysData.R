@@ -8,6 +8,19 @@ VLENGTH <- 312
 
 NUCLEOTIDES <- c("A", "C", "G", "T", "N", "-", ".")
 
+# IUPAC ambiguous nucleotide alphabet
+NUCLEOTIDES_AMBIGUOUS <- c("A", "C", "G", "T",
+                           "M", "R", "W", "S", "Y", "K", 
+                           "V", "H", "D", "B",  
+                           "N", "-", ".")
+
+# alakazam- & seqinr-dependent
+# IUPAC_DNA_2 <- setNames(object=names(IUPAC_DNA), nm=unlist(lapply(IUPAC_DNA, c2s)))
+# hard-coded but alakazam- & seqinr-independent
+IUPAC_DNA_2 <- c("A"="A", "C"="C", "G"="G", "T"="T",
+                 "AC"="M", "AG"="R", "AT"="W", "CG"="S", "CT"="Y", "GT"="K",
+                 "ACG"="V", "ACT"="H", "AGT"="D", "CGT"="B", "ACGT"="N")
+
 #### Codon translations ####
 
 AMINO_ACIDS <- c("TTT"="F", "TTC"="F",
@@ -73,6 +86,8 @@ devtools::use_data(NUCLEOTIDES,
                    MK_RS5NF_Distance,
                    HS1F_Compat,
                    M1N_Compat,
+                   NUCLEOTIDES_AMBIGUOUS,
+                   IUPAC_DNA_2,
                    internal=TRUE, overwrite=TRUE)
 
 

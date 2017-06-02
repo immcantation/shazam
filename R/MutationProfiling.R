@@ -5,11 +5,11 @@ NULL
 
 #### Clonal consensus building functions ####
 
-#' Constructs effective clonal sequences
+#' Constructs effective clonal sequences for all clones
 #'
-#' \code{collapseClones} creates an effective sequence for each clonal 
-#' group and appends columns to the input \code{data.frame} containing the effective 
-#' sequence and germline for each clone.
+#' \code{collapseClones} creates effective input and germline sequences for each clonal 
+#' group and appends columns containing the consensus sequences to the input 
+#' \code{data.frame}.
 #'
 #' @param   db                  \code{data.frame} containing sequence data.
 #' @param   cloneColumn         \code{character} name of the column containing clonal 
@@ -23,8 +23,13 @@ NULL
 #'                              to returning just one sequence per clone).
 #' @param   regionDefinition    \link{RegionDefinition} object defining the regions
 #'                              and boundaries of the Ig sequences.
-#' @param   nonTerminalOnly     \code{logical} indicating whether to include mutations
-#'                              at the leaves.
+#' @param   method              method for calculating input consensus sequence. One of 
+#'                              \code{"thresholdedFreq"}, \code{"mostCommon"}, or 
+#'                              \code{"catchAll"}. See \link{calcClonalConsensusHelper} 
+#'                              for details.
+#' @param   minimumFrequency    frequency threshold for calculating input consensus sequence.
+#'                              Required for the \code{"thresholdedFreq"} method. Default is
+#'                              0.6. See \link{calcClonalConsensusHelper} for details.                            
 #' @param   nproc               Number of cores to distribute the operation over. If the 
 #'                              \code{cluster} has already been set earlier, then pass the 
 #'                              \code{cluster}. This will ensure that it is not reset.
@@ -35,32 +40,14 @@ NULL
 #'           \itemize{
 #'             \item \code{CLONAL_SEQUENCE}:  effective sequence for the clone.
 #'             \item \code{CLONAL_GERMLINE}:  germline sequence for the clone.
-#'                                            Generally, this will be unchanged from
-#'                                            the data in \code{germlineColumn}, but
-#'                                            may be truncated when the input sequence
-#'                                            is truncated due to inconsistencies 
-#'                                            in the lengths of the input sequences or
-#'                                            \code{regionDefinition} limits.
 #'           }
 #'
-#' @details
-#' 
-#' For sequences identified to be part of the same clone, an effective clonal sequence, 
-#' representative of all mutations in a clone, is constructed using a stochastic approach. 
-#' Each position in the effective sequence is determined by a weighted sampling 
-#' of each mutated non-ambiguous base (excluding "N", "." or "-" characters) from all 
-#' the sequences in the clone. For example, in a clone with 5 sequences that have "C" 
-#' at position 1, and 5 sequences with "T" at this same position, the effective sequence 
-#' will have a "C" 50\% and "T" 50\% of the time it is called.
-#' 
-#' Non-terminal branch mutations are defined as the set of mutations that occur on 
-#' branches of the lineage tree that are not connected to a leaf. For computational 
-#' efficiency, the set of non-terminal branch mutations is approximated as those that are
-#' shared between more than one sequence in a clone. In this case the terminal branch 
-#' mutations are filtered out.
+#' @details  See \code{Details} for \link{calcClonalConsensus} and \link{calcClonalConsensusHelper}
+#'           for explanation on how the different methods work.
 #' 
 #' @seealso
 #' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
+#' See \link{calcClonalConsensus} and \link{calcClonalConsensusHelper} for helper functions.
 #' 
 #' @examples
 #' # Subset example data
@@ -68,11 +55,13 @@ NULL
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 #' 
 #' # Build clonal consensus for the full sequence
-#' clones <- collapseClones(db, nproc=1)
+#' clones <- collapseClones(db, method="thresholdedFreq", 
+#'                          minimumFrequency=0.65, nproc=1)
 #'                          
 #' # Build clonal consensus for V-region only 
 #' # Return the same number of rows as the input
-#' clones <- collapseClones(db, regionDefinition=IMGT_V, 
+#' clones <- collapseClones(db, method="mostCommon", 
+#'                          regionDefinition=IMGT_V, 
 #'                          expandedDb=TRUE, nproc=1)
 #' 
 #' @export
@@ -82,15 +71,18 @@ collapseClones <- function(db,
                            germlineColumn="GERMLINE_IMGT_D_MASK",
                            expandedDb=FALSE,
                            regionDefinition=NULL,
-                           nonTerminalOnly=FALSE,
+                           method=c("thresholdedFreq", "mostCommon", "catchAll"),
+                           minimumFrequency=0.6,
                            nproc=1) {
     # Hack for visibility of foreach index variables
     idx <- NULL
     
     ## DEBUG
     # cloneColumn="CLONE"; sequenceColumn="SEQUENCE_IMGT"; germlineColumn="GERMLINE_IMGT_D_MASK"
-    # expandedDb=FALSE; regionDefinition=NULL; nonTerminalOnly=FALSE; nproc=1
+    # expandedDb=FALSE; regionDefinition=NULL; method="mostCommon"; nproc=1
 
+    method = match.arg(method)
+    
     # Check for valid columns
     check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
@@ -111,10 +103,6 @@ collapseClones <- function(db,
     
     if (class(expandedDb) != "logical") {
         stop ("expandedDb must be TRUE or FALSE.")
-    }
-    
-    if (class(nonTerminalOnly) != "logical") {
-        stop ("nonTerminalOnly must be TRUE or FALSE.")
     }
     
     # Convert clone identifiers to strings
@@ -143,7 +131,9 @@ collapseClones <- function(db,
         parallel::clusterExport(cluster, 
                                 list('db', 'sequenceColumn', 'germlineColumn', 'cloneColumn',
                                      'regionDefinition', 'calcClonalConsensus',
-                                     'uniqueClonesIdx', 'c2s', 's2c', 'words', 'translate'), 
+                                     'calcClonalConsensusHelper', 'method', 'minimumFrequency',
+                                     'uniqueClonesIdx', 'c2s', 's2c',
+                                     'nucs2IUPAC', 'IUPAC_DNA_2'), 
                                 envir=environment() )
         registerDoParallel(cluster)
     }
@@ -158,10 +148,10 @@ collapseClones <- function(db,
     cons_mat <- foreach(idx=1:length(uniqueClonesIdx),
                         .verbose=FALSE, .errorhandling='stop') %dopar% {
         cloneIdx <- uniqueClonesIdx[[idx]]
-        calcClonalConsensus(inputSeq=db[cloneIdx, sequenceColumn],
-                            germlineSeq=db[cloneIdx, germlineColumn],
+        calcClonalConsensus(inputSeq=db[[sequenceColumn]][cloneIdx],
+                            germlineSeq=db[[germlineColumn]][cloneIdx],
                             regionDefinition=regionDefinition, 
-                            nonTerminalOnly=nonTerminalOnly)
+                            method=method, minimumFrequency=minimumFrequency)
     }
     # using cbind below will give a matrix with columns being clones
     # use rbind to have rows be clones
@@ -190,103 +180,359 @@ collapseClones <- function(db,
 
 
 
-# Helper function for calcDBClonalConsensus
-# 
-# @param   inputSeq         character vector of observed sequences
-# @param   germlineSeq         character vector of germline sequences
-# @param   regionDefinition    \link{RegionDefinition} object defining the regions
-#                              and boundaries of the Ig sequences.
-# @param   nonTerminalOnly     \code{logical} indicating whether to include mutations
-#                              at the leaves.
-# @return  A named vector length two with "input" and "germline" consensus sequences
+#' Helper function for calcClonalConsensus
+#'
+#' @param   seqs      a character vector of sequences.
+#' @param   mtd       method to calculate consensus sequence. One of \code{thresholdedFreq}, 
+#'                    \code{mostCommon}, or \code{catchAll}.
+#' @param   minFreq   minimum frequency. Required if \code{mtd} is \code{thresholdedFreq}.
+#'                    Default is 0.6.
+#' @param   lenLimit  limit on consensus length. Length of consensus returned will depend on
+#'                    \code{lenLimit} and the longest possible length based on \code{seqs}, 
+#'                    whichever that is shorter. 
+#' @return  A character string that is the consensus sequence for \code{seqs}.
+#'
+#' @details Note that this function does not perform multiple sequence alignment. As a 
+#'          prerequisite, it is assumed that sequences in \code{seqs} have been aligned
+#'          somehow. In the case of immunoglobulin repertoire analysis, this usually means
+#'          that the sequences are IMGT-gapped.
+#' 
+#'          Given a set of sequences of potentially varying lengths, the longest possible 
+#'          length of their consensus sequence is taken to be the longest length along 
+#'          which there is information contained at every nucleotide position across 
+#'          majority of the sequences. Majority is defined to be greater than 
+#'          \code{floor(n/2)}, where \code{n} is the number of sequences. If the longest 
+#'          possible consensus length is 0, there will be a warning and an empty string 
+#'          (\code{""}) will be returned. 
+#'          
+#'          If a length limit is defined by supplying a \code{lenLimit}, the consensus 
+#'          length will be further restricted to the shorter of the longest possible 
+#'          length and \code{lenLimit}.
+#'          
+#'          For the method \code{"thresholdedFreq"}, a value must be supplied to the 
+#'          argument \code{minFreq}. At each position along the length of the consensus 
+#'          sequence, the frequency of each nucleotide/character across sequences is 
+#'          tabulated. The nucleotide/character whose frequency is at least (i.e. 
+#'          \code{>=}) \code{minFreq} becomes the consensus. If frequencies of multiple 
+#'          nucleotides/characters are at least \code{minFreq}, the first one is taken 
+#'          to be the consensus following the order of \code{"A"}, \code{"T"}, \code{"G"}, 
+#'          \code{"C"}, \code{"N"}, \code{"."}, and \code{"-"}. Here are some examples 
+#'          looking at a single position based on 5 sequences with \code{minFreq=0.6}:
+#'          
+#'          \itemize{
+#'              \item If the sequences have \code{"A"}, \code{"A"}, \code{"A"}, \code{"T"}, 
+#'                    \code{"C"}, the consensus will be \code{"A"}, because \code{"A"} has frequency 0.6, which is at least \code{minFreq}.
+#'              \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, \code{"T"}, 
+#'                    \code{"C"}, the consensus will be \code{"N"}, because none of 
+#'                    \code{"A"}, \code{"T"}, or \code{"C"} has frequency that is at least 
+#'                    \code{minFreq}.
+#'                  }
+#'                  
+#'          For the method \code{"mostCommon"}, the most frequent nucleotide/character 
+#'          across sequences at each position along the length of the consensus sequence 
+#'          makes up the consensus. If there are multiple nucleotides/characters with 
+#'          equally maximal frequencies, the first one is taken to be the consensus 
+#'          following the order of \code{"A"}, \code{"T"}, \code{"G"}, \code{"C"}, 
+#'          \code{"N"}, \code{"."}, and \code{"-"}. Here are some examples looking at 
+#'          a single position based on 5 sequences:
+#'          
+#'          \itemize{
+#'               \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, \code{"A"},
+#'                     \code{"C"}, the consensus will be \code{"A"}.
+#'               \item If the sequences have \code{"T"}, \code{"T"}, \code{"C"}, \code{"C"}, 
+#'                     \code{"G"}, the consensus will be \code{"T"}, because \code{"T"} is 
+#'                     before \code{"C"} in the order of \code{"A"}, \code{"T"}, \code{"G"}, 
+#'                     \code{"C"}, \code{"N"}, \code{"."}, and \code{"-"}. 
+#'                  }
+#'                  
+#'          For the method \code{"catchAll"}, a consensus sequence capturing most of the 
+#'          information contained in the sequences is obtained. If a position contains only 
+#'          \code{"N"} across sequences, the consensus at that position is \code{"N"}. If a 
+#'          position contains one or more of \code{"A"}, \code{"T"}, \code{"G"}, or 
+#'          \code{"C"}, the consensus will be an IUPAC character representing all of the 
+#'          characters present, regardless of whether \code{"N"} is present. If a position 
+#'          contains only \code{"-"} and \code{"."} across sequences, the consensus at that 
+#'          position is taken to be \code{"-"}. If a position contains only one of 
+#'          \code{"-"} or \code{"."} across sequences, the consensus at that position is 
+#'          taken to be the character present. Here are some examples looking at a single 
+#'          position based on 5 sequences:
+#'          
+#'          \itemize{
+#'               \item If the sequences have \code{"N"}, \code{"N"}, \code{"N"}, \code{"N"}, 
+#'                     \code{"N"}, the consensus will be \code{"N"}.
+#'               \item If the sequences have \code{"N"}, \code{"A"}, \code{"A"}, \code{"A"}, 
+#'                     \code{"A"}, the consensus will be \code{"A"}.
+#'               \item If the sequences have \code{"N"}, \code{"A"}, \code{"G"}, \code{"A"}, 
+#'                     \code{"A"}, the consensus will be \code{"R"}.
+#'               \item If the sequences have \code{"-"}, \code{"-"}, \code{"."}, \code{"."}, 
+#'                     \code{"."}, the consensus will be \code{"-"}.
+#'               \item If the sequences have \code{"-"}, \code{"-"}, \code{"-"}, \code{"-"}, 
+#'                     \code{"-"}, the consensus will be \code{"-"}.
+#'               \item If the sequences have \code{"."}, \code{"."}, \code{"."}, \code{"."}, 
+#'                     \code{"."}, the consensus will be \code{"."}.
+#'                  }
+#' 
+#' @seealso
+#' \link{calcClonalConsensus} and \link{collapseClones}.
+#' 
+#' @examples
+#' # Subset example data
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' 
+#' # Data corresponding to a single clone
+#' clone <- db[db$CLONE=="3192", ]
+#' # Number of sequences in this clone
+#' nrow(clone)
+#' 
+#' # Get consensus input sequence
+#' consInput <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT, 
+#'                                        mtd="thresholdedFreq", minFreq=0.65)
+#'                             
+#' @export
+calcClonalConsensusHelper = function(seqs, minFreq=0.6, lenLimit=NULL,
+                                     mtd=c("thresholdedFreq", "mostCommon", "catchAll")) {
+    mtd = match.arg(mtd)
+    
+    numSeqs = length(seqs)
+    
+    ##### if only one sequence in clone, return it
+    if (numSeqs==1) {
+        # restrict length if there is a lenLimit
+        if (!is.null(lenLimit)) {
+            return(substr(seqs, 1, min(lenLimit, nchar(seqs))))
+        } else {
+            # otherwise, return as is
+            return(seqs)
+        }
+    }
+    
+    ##### if all sequences are the same, return now
+    if (length(unique(seqs))==1) {
+        # restrict length if there is a lenLimit
+        if (!is.null(lenLimit)) {
+            return(substr(seqs[1], 1, min(lenLimit, nchar(seqs))))
+        } else {
+            # otherwise, return as is
+            return(seqs[1])
+        }
+    }
+    
+    ##### length of longest sequence in seqs
+    lenSeqs = nchar(seqs)
+    lenMax = max(lenSeqs, na.rm=T)
+    
+    ##### convert seqs to a matrix
+    # if there's no more nucleotide when a seq ends, fill position with NA
+    seqsMtx = matrix(NA, nrow=numSeqs, ncol=lenMax)
+    for (i in 1:numSeqs) {
+        seqsMtx[i, 1:lenSeqs[i]] = s2c(seqs[i])
+    }
+    
+    ##### tabulation matrix
+    # col: nucleotide position
+    # row: A,T,G,C,N,.,-,na (to distinguish from NA)
+    tabMtxRownames = c("A","T","G","C","N",".","-","na")
+    tabMtx = matrix(0, ncol=lenMax, nrow=8, 
+                    dimnames=list(tabMtxRownames, NULL))
+    ## across seqs, at each nuc position, how many A, T, G, C, N, ., -? 
+    # this does not capture NA
+    for (j in 1:ncol(seqsMtx)) {
+        tab = table(seqsMtx[, j])
+        tabMtx[match(names(tab), tabMtxRownames), j] = tab
+    }
+    ## across seqs, at each nuc position, how many NAs?
+    numNAs = colSums(is.na(seqsMtx))
+    tabMtx["na", ] = numNAs
+    # sanity check: counts at each nuc pos (colSum) should sum up to number of seqs
+    stopifnot( sum( colSums(tabMtx)==numSeqs )  == ncol(tabMtx)  )
+    
+    ##### only keep positions at which majority of seqs contain information
+    ### if there are odd number of n seqs, keep position if it has > floor(n/2) non-NAs
+    # e.g. 5 input seqs, >2 non-NA; 2=floor(5/2)
+    ### if there are even number of n seqs,  keep position if it has > n/2 non-NAs
+    # e.g. 6 input seqs, >3 non-NA; 3=6/2=floor(6/2)
+    numNonNAs = numSeqs - numNAs
+    nonNA.keep = numNonNAs > floor(numSeqs/2)
+    # length of longest possible consensus seq
+    lenConsensus = sum(nonNA.keep)
+    if (lenConsensus==0) {
+        warning("Consensus cannot be produced. Empty string returned.")
+        return("")
+    }
+    ##### if there is a lenLimit, restrict consensus length to 
+    # the shorter of longest possible length and lenLimit
+    if (!is.null(lenLimit)) {
+        lenConsensus = min(lenConsensus, lenLimit)
+    }
+    # as.matrix so that it works even with lenConsensus of 1
+    tabMtx = as.matrix(tabMtx[, 1:lenConsensus])
+    
+    ### convert absolute count to fraction
+    tabMtx = tabMtx/numSeqs
+    # remove "na" row
+    # as.matrix so that it works even with lenConsensus of 1
+    tabMtx = as.matrix(tabMtx[-which(rownames(tabMtx)=="na"), ])
+    
+    if (mtd=="thresholdedFreq") {
+        # use as.matrix so that apply won't break with ncol(tabMtx)=1
+        consensus = apply(as.matrix(tabMtx), 2, function(x){
+            idx = which(x >= minFreq)
+            # if no character >= the threshold, assign an N
+            if (length(idx)==0) {
+                return("N")
+            } else {
+                # if multiple characters >= the threhold, first one is returned
+                # the order is built-in from tabMtxRownames
+                return(names(x)[idx[1]])
+            }
+        })
+    } else if (mtd=="mostCommon") {
+        # if multiple characters occur with max freq, first one is returned
+        # the order is built-in from tabMtxRownames
+        # use as.matrix so that apply won't break with ncol(tabMtx)=1
+        max.idx = apply(as.matrix(tabMtx), 2, which.max)
+        # can do this because max.idx cannot exceed nrow(tabMtx) 
+        # so even though last row of tabMtx ("na") has been removed, it's not a problem
+        stopifnot(!any(max.idx>nrow(tabMtx)))
+        consensus = tabMtxRownames[max.idx]
+    } else if (mtd=="catchAll") {
+        # use as.matrix so that apply won't break with ncol(tabMtx)=1
+        consensus = apply(as.matrix(tabMtx), 2, function(x){
+            # all characters that appear at a position across seqs
+            nonZeroNucs = rownames(tabMtx)[x>0]
+            # if any of A, T, G, C, N appears
+            if (any(nonZeroNucs %in% c("A","C","G","T","N"))) {
+                
+                # ignore - and .
+                idx.dash.dot = which(nonZeroNucs=="-" | nonZeroNucs==".")
+                if (length(idx.dash.dot)>0) {
+                    nonZeroNucs = nonZeroNucs[!idx.dash.dot]
+                }
+                
+                # if only N appears
+                if (sum(nonZeroNucs=="N")==length(nonZeroNucs)) {
+                    return("N")
+                } else {
+                    # remove N
+                    # e.g. AGN would be treated as AG (R)
+                    # e.g. ATGN would be treated as AGT (D)
+                    # e.g. ATGCN would be treated as ACGT (N)
+                    idx.N = which(nonZeroNucs=="N")
+                    if (length(idx.N)>0) {
+                        nonZeroNucs = nonZeroNucs[!idx.N]
+                    } 
+                    return(nucs2IUPAC(nonZeroNucs))
+                }
+                # otherwise, if there are any of A, T, G, C
+                
+            } else {
+                # otherwise, if only one or both of - and . appear(s)    
+                # if both - and . appear, return -
+                if (sum(nonZeroNucs %in% c("-", "."))==2) {
+                    return("-")
+                } else {
+                    # if only - or . appears, return that
+                    return(nonZeroNucs)
+                }
+            }
+        })
+    }
+    
+    consensus = c2s(consensus)
+    # sanity check
+    stopifnot( nchar(consensus)==lenConsensus )
+    return(consensus)
+}
+
+#' Calculate clonal consensus for a single clone
+#'
+#' @param   inputSeq            character vector of observed sequences.
+#' @param   germlineSeq         character vector of germline sequences.
+#' @param   regionDefinition    \link{RegionDefinition} object defining the regions
+#'                              and boundaries of the Ig sequences.
+#' @param   method              method to calculate consensus sequence. One of \code{thresholdedFreq}, 
+#'                              \code{mostCommon}, or \code{catchAll}. See \code{Details} for
+#'                              \link{calcClonalConsensusHelper}.
+#' @param   minimumFrequency    minimum frequency. Required if \code{method} is \code{thresholdedFreq}.
+#'                              Default is 0.6. See \code{Details} for \link{calcClonalConsensusHelper}.
+#'                              
+#' @return  A named vector of length two with "input" and "germline" consensus sequences. The
+#'          input and germline consensus sequences have the same length.
+#' 
+#' @details Note that this function does not perform multiple sequence alignment. As a 
+#'          prerequisite, it is assumed that sequences in \code{inputSeq} and \code{germlineSeq}
+#'          have each been aligned somehow. In the case of immunoglobulin repertoire analysis, 
+#'          this usually means that the sequences are IMGT-gapped.
+#' 
+#'          The germline consensus is generated by \link{calcClonalConsensusHelper} with the 
+#'          \code{mostCommon} method. 
+#'          
+#'          An input/observed consensus is generated, also by 
+#'          \link{calcClonalConsensusHelper}, with the method of choice indicated by 
+#'          \code{method}. 
+#'          
+#'          The lengths of the consensus sequences are determined by the longest possible consensus
+#'          sequence (baesd on \code{inputSeq} and \code{germlineSeq}) and 
+#'          \code{regionDefinition@seqLength} (if supplied), whichever that is shorter. 
+#'          
+#'          See \code{Details} for \link{calcClonalConsensusHelper} for details on \code{method}
+#'          and \code{minimumFrequency}.
+#' 
+#' @seealso
+#' \link{calcClonalConsensusHelper} and \link{collapseClones}.
+#' 
+#' @examples
+#' # Subset example data
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' 
+#' # Data corresponding to a single clone
+#' clone <- db[db$CLONE=="3192", ]
+#' # Number of sequences in this clone
+#' nrow(clone)
+#' 
+#' # Get consensus input and germline sequences
+#' cons <- calcClonalConsensus(inputSeq=clone$SEQUENCE_IMGT, 
+#'                             germlineSeq=clone$GERMLINE_IMGT_D_MASK,
+#'                             method="catchAll")
+#' 
+#' @export
 calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL, 
-                                nonTerminalOnly=FALSE) {
-    ## DEBUG
-    # inputSeq=db$SEQUENCE_IMGT[4:6]; germlineSeq=db$GERMLINE_IMGT_D_MASK[4:6]; regionDefinition=NULL; nonTerminalOnly=FALSE
+                                method=c("thresholdedFreq", "mostCommon", "catchAll"), 
+                                minimumFrequency=0.6) {
+    
+    method = match.arg(method)
+    
+    # length of seqs in inputSeq and those in germlineSeq should match
+    if ( sum(nchar(inputSeq)==nchar(germlineSeq)) != length(inputSeq) ) {
+        stop("Sequences in inputSeq and germlineSeq have different lengths.")
+    }
     
     # Check region definition
     if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
     
-    # If only one sequence in clone, return it
-    if (length(inputSeq) == 1) {
-        returnSeq <- c("input"=inputSeq, "germline"=germlineSeq)
-        return(returnSeq)
+    # length limit from regionDefinition
+    if (!is.null(regionDefinition)) {
+        lenRegion = regionDefinition@seqLength
+    } else {
+        lenRegion = NULL
     }
     
-    # Find length of shortest input sequence
-    # This is used to trim all the sequences to that length
-    # or, if a regionDefinition is passed, then only analyze till the end of the defined length
-    len_inputSeq <- stri_length(inputSeq)
-    len_shortest <- min(len_inputSeq, na.rm=TRUE)
-    if(!is.null(regionDefinition)) {
-        len_shortest <- min(len_shortest, regionDefinition@seqLength, na.rm=TRUE)
-    }
+    ##### get consensus germline sequence (most common)
+    germCons = calcClonalConsensusHelper(seqs=germlineSeq, mtd="mostCommon", 
+                                         minFreq=NULL, lenLimit=lenRegion)
     
-    if (class(nonTerminalOnly) != "logical") {
-        stop ("nonTerminalOnly must be TRUE or FALSE.")
-    }
+    ##### get consensus observed sequence
+    inputCons = calcClonalConsensusHelper(seqs=inputSeq, mtd=method, 
+                                          minFreq=minimumFrequency, lenLimit=lenRegion)
     
-    #Find the length of the longest germline sequence
-    len_germlineSeq <- stri_length(germlineSeq)
-    germlineSeq <- germlineSeq[(which.max(len_germlineSeq))]
+    # sanity check: length of germCons and inputCons should be the same
+    stopifnot( nchar(germCons)==nchar(inputCons) )
     
-    # Identify the consensus sequence
-    inputSeq <- unique(inputSeq)
-    charInputSeqs <- sapply(inputSeq, function(x) { s2c(x)[1:len_shortest] })
-    charGLSeq <- s2c(germlineSeq)
-    matClone <- sapply(1:len_shortest, function(i) {
-        # Identify the nucleotides (in seqs and germline) at the current position
-        posNucs = unique(charInputSeqs[i,])
-        posGL = charGLSeq[i]
-        error = FALSE
-        
-        # If the current position is a gap in both germline and the sequence,
-        # return a gap
-        if(posGL %in% c("-", ".") & sum(!(posNucs%in%c("-", ".", "N", "n")))==0 ){
-            return(c(".", error))
-        }
-        
-        # If all the sequences in the clone have the same nucleotide at the current
-        # position, return the value at the current positions
-        if(length(posNucs)==1) {
-            return(c(posNucs[1], error))
-        } else {         
-            if("N"%in%posNucs) { error=TRUE }
-            
-            # If the current nucleotide matches germline, return germline 
-            if(sum(!posNucs[!posNucs%in%c("N", "n")] %in% posGL) == 0) {
-                return(c(posGL, error))
-            }else{
-                #return( c(sample(posNucs[posNucs!="N"],1),error) )
-                
-                # If we look at all nodes (including terminal nodes), sample a nucleotide from the possible
-                # nucleotides in the clonal sequences at this position
-                if(!nonTerminalOnly){
-                    return( c(sample(charInputSeqs[i, !charInputSeqs[i, ] %in% c("N", "n") & charInputSeqs[i, ] != posGL], 1), error))
-                }else{
-                    
-                    # If we look at only non-terminal nodes, we only sample the nucleotides that appear more 
-                    # than once (this is a quick approximation)
-                    posNucs = charInputSeqs[i,!charInputSeqs[i,]%in% c("N", "n") & charInputSeqs[i,]!=posGL]
-                    posNucsTable = table(posNucs)
-                    if(sum(posNucsTable > 1) == 0) {
-                        return(c(posGL,error))
-                    } else {
-                        return(c(sample(posNucs[posNucs %in% names(posNucsTable)[posNucsTable > 1]], 1), error))
-                    }
-                }
-                
-            }
-        }
-        if (error==TRUE) { warning("Error while attempting to collapse by clone!") }
-    })
-    
-    returnSeq <- c("input"=stri_join(matClone[1,], collapse=""), 
-                   "germline"=stri_join(charGLSeq[1:len_shortest], collapse=""))
-    
-    return (returnSeq)
+    return(c("input"=inputCons, "germline"=germCons))
 }
 
 
@@ -1749,6 +1995,53 @@ calculateMutationalPaths <- function(germlineSeq,
 }
 
 #### Additional helper functions ####
+
+# Convert one or more characters to IUPAC code 
+# for incomplete nucleic acid specification
+# 
+# @param   nucs     a character vector of nucleotides. One or more of 
+#                   \code{c("A", "C", "G", "T")}.
+# 
+# @return  a single character from the IUPAC ambiguous code.
+#
+nucs2IUPAC = function(nucs) {
+    # input nucleotides must be one of the characters allowed
+    legal = c("A", "C", "G", "T")
+    if (sum(! nucs %in% legal)>0) {
+        stop("Input nucleotides must be one of A, C, G, or T.")
+    }
+    
+    # sort by alphabetical order (important)
+    nucs = sort(unique(nucs))
+    # concatenate
+    nucs = c2s(nucs)
+    
+    # convert
+    return(IUPAC_DNA_2[nucs])
+}
+
+# Convert IUPAC incomplete nucleic acid to one or more characters
+#
+# @param   code       a single IUPAC character.
+# @param   excludeN   if \code{TRUE}, do not translate when \code{code} 
+#                     is \code{N}. Default is \code{TRUE}.
+# @return  a character vector of nucleotides. One or more of 
+#          \code{c("A", "C", "G", "T")}.
+#
+IUPAC2nucs = function(code, excludeN=TRUE) {
+    # input character must be one of IUPAC codes
+    if (! code %in% names(IUPAC_DNA) ) {
+        stop("Input character must be one of IUPAC DNA codes.")
+    }
+    
+    # convert
+    if (code=="N" & excludeN) {
+        return(code)
+    } else {
+        return(IUPAC_DNA[[code]])
+    }
+}
+
 # Given a nuclotide position, returns the codon number
 # e.g. nuc 86  = codon 29
 getCodonNumb <- function(nucPos){
