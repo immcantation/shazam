@@ -376,6 +376,9 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
                     codonPermutate[,muCodonPos] <- canMutateTo(glAtMutation)[-4]
                     codonPermutate <- apply(codonPermutate,1,paste,collapse="")
                     codonPermutate <- matrix( c( codonPermutate, rep(c2s(codonGL),3) ), ncol=2, byrow=F)
+                    # not intended to be used where input sequences have 
+                    # ambiguous characters; it assumes that only 1 entry (R/S/Stop/na) from
+                    # mutationType is non-zero/1
                     muType <- mutationTypeOptimized(codonPermutate)
                     if (!length(grep("N",wrd))) {
                         if (sum(muType=="S") == length(muType) ){
@@ -2282,8 +2285,17 @@ canMutateTo <- function(nuc) {
 
 
 # Compute the mutations types
+# matOfCodons: nx2; n=pairs of codons; 1st col=codonTo, 2nd col=codonFrom
+# NOTE: this function is not intended to be used where input sequences have 
+#       ambiguous characters; it assumes that only 1 entry (R/S/Stop/na) from
+#       mutationType is non-zero/1
 mutationTypeOptimized <- function(matOfCodons) {
-    apply(matOfCodons, 1, function(x) { mutationType(x[2], x[1]) })
+    # mutType: 4xn; rows: R/S/Stop/na
+    mutType = apply(matOfCodons, 1, function(x) { mutationType(x[2], x[1]) })
+    idx = apply(mutType, 2, function(y){which(y>0)[1]})
+    mutType = rownames(mutType)[idx]
+    mutType[which(mutType=="na")] = NA
+    return(mutType)
 }
 
 
@@ -2321,7 +2333,15 @@ analyzeMutations2NucUri <- function(in_matrix) {
             codonSeq[is.na(codonSeq)] <- "N"
             GLcodons =  apply(matrix(codonGL,length_mutations,3,byrow=TRUE),1,c2s)
             Seqcodons =   apply(codonSeq,2,c2s)
-            mutationInfo = apply(rbind(GLcodons , Seqcodons),2,function(x){mutationType(c2s(x[1]),c2s(x[2]))})
+            mutationInfo = apply(rbind(GLcodons , Seqcodons),2,function(x){
+                # not intended to be used where input sequences have 
+                # ambiguous characters; it assumes that only 1 entry (R/S/Stop/na) from
+                # mutationType is non-zero/1
+                mutType = mutationType(c2s(x[1]),c2s(x[2]))
+                mutType = names(mutType)[which(mutType>0)]
+                if (mutType=="na") {mutType=NA}
+                return(mutType)
+                })
             names(mutationInfo) = mutationPos
         }
         if (any(!is.na(mutationInfo))) {

@@ -30,21 +30,23 @@ test_that("collapseClones", {
 
 
 test_that("binMutationsByRegion", {
+
     set.seed(8)
     numbOfMutations <- sample(3:10, 1) 
     set.seed(60)
     posOfMutations <- sort(sample(330, numbOfMutations))
     set.seed(13)
-    mutation_types <- sample(c("R", "S"), length(posOfMutations), replace=TRUE)
-    mutations_array <- array(mutation_types, dimnames=list(posOfMutations))
+    mutations_array <- matrix(0, nrow=2, ncol=numbOfMutations, dimnames=list(c("R", "S"), posOfMutations))
+    mutations_array["R", ] = sample(x=0:10, size=numbOfMutations, replace=TRUE)
+    mutations_array["S", ] = sample(x=0:10, size=numbOfMutations, replace=TRUE)
     
     observed_bin <- binMutationsByRegion(mutations_array, regionDefinition=IMGT_V)
-    expected_bin <- c(1, 0, 3, 2)
+    expected_bin <- c(2, 8, 22, 31)
     names(expected_bin) <- c("CDR_R", "CDR_S", "FWR_R", "FWR_S")
     expect_equal(observed_bin, expected_bin)
     
     observed_bin <- binMutationsByRegion(mutations_array, regionDefinition=NULL)
-    expected_bin <- c(4, 2)
+    expected_bin <- c(24, 39)
     names(expected_bin) <- c("SEQ_R", "SEQ_S")
     expect_equal(observed_bin,expected_bin)
 })
@@ -52,7 +54,7 @@ test_that("binMutationsByRegion", {
 
 test_that("observedMutations, charge mutations", {
 
-    db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+    db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")[1:10, ]
 
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                              germlineColumn="GERMLINE_IMGT_D_MASK",
@@ -60,10 +62,10 @@ test_that("observedMutations, charge mutations", {
                              mutationDefinition=CHARGE_MUTATIONS,
                              nproc=1)
     
-    expect_equal(db_obs$OBSERVED_CDR_R[1:10], c(0, 0, 0, 0, 0, 0, 2, 2, 2, 0))
-    expect_equal(db_obs$OBSERVED_CDR_S[1:10], c(0, 0, 0, 0, 0, 0, 3, 3, 3, 16))
-    expect_equal(db_obs$OBSERVED_FWR_R[1:10], c(0, 1, 1, 0, 0, 0, 0, 0, 0, 3))
-    expect_equal(db_obs$OBSERVED_FWR_S[1:10], c(0, 6, 6, 0, 0, 0, 10, 10, 10, 14))
+    expect_equal(db_obs$OBSERVED_CDR_R, c(0, 0, 0, 0, 0, 0, 2, 2, 2, 0))
+    expect_equal(db_obs$OBSERVED_CDR_S, c(0, 0, 0, 0, 0, 0, 3, 3, 3, 16))
+    expect_equal(db_obs$OBSERVED_FWR_R, c(0, 1, 1, 0, 0, 0, 0, 0, 0, 3))
+    expect_equal(db_obs$OBSERVED_FWR_S, c(0, 6, 6, 0, 0, 0, 10, 10, 10, 14))
     
 })
 
@@ -233,7 +235,7 @@ test_that("expecteddMutations, hydropathy", {
 
 
 test_that("observedMutations overwrites with a warning pre-existing mutation counts/freqs", {
-    db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+    db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")[1:10, ]
     
     ## Counts
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
@@ -340,7 +342,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
 
 
 test_that("expectedMutations overwrites with a warning pre-existing values", {
-    db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+    db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")[1:10, ]
     
     db_exp <- expectedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
