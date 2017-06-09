@@ -1,4 +1,4 @@
-Version 0.1.7.999: June 8, 2017
+Version 0.1.7.999: June 9, 2017
 -------------------------------------------------------------------------------
 
 Distance Calculation:
@@ -16,6 +16,10 @@ Mutation Profiling:
   
 + Added support for including ambiguous IUPAC characters in input for 
   `observedMutations()` and `calcObservedMutations()`.
+  
++ Renamed column names of observed mutations (previously `OBSERVED`) and 
+  expected mutations (previously `EXPECTED`) returned by `observedMutations()`
+  and `expectedMutations()` to `MU_COUNT` and `MU_EXPECTED` respectively. 
 
 Selection Analysis:
 
