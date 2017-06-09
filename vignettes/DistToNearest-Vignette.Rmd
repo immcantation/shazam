@@ -145,31 +145,46 @@ plot(p2)
 In this example, the unnormalized `hh_s5f` model distance threshold would be 
 set to a value near 7.
 
-### Automated threshold detection via a Guassian mixture model
+### Automated threshold detection via a mixture model
 
-The `gmm` method, which is computationally less expensive than `density`, follows a 
-Gaussian mixture model (GMM) procedure, including the expectation maximization (EM) 
-algorithm, for learning the parameters of two univariate Gaussians which fit the bimodal 
-distributions of the input distance vector. Retrieving the fit parameters, it then calculates, 
-analytically, the optimum threshold, where the average of the sensitivity plus specificity 
-reaches its maximum. 
+A mixture of two univariate density distribution functions is considered:
+\begin{equation}
+f(x)= \lambda_1 f_1(x|\phi_1) + \lambda_2 f_2(x|\phi_2).
+\end{equation}
+Here, the $\lambda_1$ and $\lambda_2$ represent the mixing weights (sum to one), 
+$x$ represents the nearest neighbor distance (calculated by function `distToNearest`), 
+and $\phi$ represents the vector of each component parameters; mean and standard deviation 
+$(\mu, \sigma)$ of a Normal distribution, shape and scale $(k, \theta)$ of a Gamma distribution.
 
-Below is an example showing how the `gmm` method is used to find optimal threshold for 
+The `"gmm"` (Gamma/Gaussian Mixture Method) is enabled to perform a maximum-likelihood fitting 
+procedure over the dist-to-nearest distribution through one of the four combinations of 
+$f_1$ and $f_2$: (1) `"norm-norm"`, (2) `"norm-gamma"`, (3) `"gamma-norm"`, and (4) `"gamma-gamma"`. 
+A Gaussian mixture model, including expectation maximization algorithm, is also 
+implemented into the `findThreshold` function to initialize the fit component parameters 
+automatically. The Gaussian mixture model estimates two sets of values; (1) mixing weight $\lambda_i$, 
+(2) mean $\mu_i$, and (3) standard deviation $\sigma_i$ where $i\in\{1,2\}$  refers to the first 
+and second curve. These parameters are then used as initial values to begin the fitting procedure 
+(if Gamma distribution is chosen, the initial values are translated accordingly). 
+After maximum-likelihood fitting procedure converges, through an optimization approach, 
+it then calculates the optimum threshold where the average of Sensitivity and 
+Specificity reaches its maximum.
+
+Below is an example showing how the `"gmm"` method is used to find optimal threshold for 
 separating clonally related sequences. The red dashed-line shown in figure below defines the distance 
 where the average of the Sensitivity plus Specificity reaches its maximum.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Find threshold using gmm method
-output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", cutEdge=0.9)
+output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm")
 
 # Plot distance histogram, Gaussian fits, and optimum threshold
-plot(output, binwidth=0.02, title="GMM Method")
+plot(output, binwidth=0.02, title="GMM Method: gamma-gamma")
 
 # Print threshold
 print(output)
 ```
 
-**Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `histBinwidth` parameter.
+**Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `binwidth` parameter.
 Meaning, any change in bin size will change the form of the distribution, while the `gmm` method is 
 completely bin size independent and only engages the real input data.
 

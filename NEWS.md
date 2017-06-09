@@ -2,7 +2,10 @@ Version 0.1.7.999: June 8, 2017
 -------------------------------------------------------------------------------
 
 Distance Calculation:
-+ [Did a thing.]
++ Updated `findThreshold()`, new fitting procedure added such that allows user 
+  to choose a mixture of two univariate density distribution functions among 
+  four available combinations: (1) `"norm-norm"`, (2) `"norm-gamma"`, (3) 
+  `"gamma-norm"`, and (4) `"gamma-gamma"`.
 
 Mutation Profiling:
 
