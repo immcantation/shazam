@@ -1272,8 +1272,8 @@ calcClonalConsensus <- function(db,
 #'                               sequences. IUPAC ambiguous characters for DNA are 
 #'                               supported.
 #' @param    germlineColumn      \code{character} name of the column containing 
-#'                               the germline or reference sequence. IUPAC ambiguous 
-#'                               characters for DNA are supported.
+#'                               the germline or reference sequence. Germline should 
+#'                               \strong{not} contain ambiguous characters.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences. If NULL, mutations 
 #'                               are counted for entire sequence.
@@ -1522,7 +1522,8 @@ observedMutations <- function(db,
 #' to its germline sequence.
 #'
 #' @param    inputSeq            input sequence. IUPAC ambiguous characters for DNA are supported.
-#' @param    germlineSeq         germline sequence. IUPAC ambiguous characters for DNA are supported.
+#' @param    germlineSeq         germline sequence. Germline should \strong{not} contain ambiguous
+#'                               characters.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences. Note, only the part of
 #'                               sequences defined in \code{regionDefinition} are analyzed.
@@ -1582,8 +1583,8 @@ observedMutations <- function(db,
 #' @examples
 #' # Use an entry in the example data for input and germline sequence
 #' data(ExampleDb, package="alakazam")
-#' in_seq <- ExampleDb[100, "SEQUENCE_IMGT"]
-#' germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
+#' in_seq <- ExampleDb[["SEQUENCE_IMGT"]][100]
+#' germ_seq <-  ExampleDb[["GERMLINE_IMGT_D_MASK"]][100]
 #' 
 #' # Identify all mutations in the sequence
 #' ex1_raw = calcObservedMutations(in_seq, germ_seq, returnRaw=TRUE)
@@ -1643,6 +1644,16 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
         stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
     }
     
+    # IMPORTANT: convert to uppercase 
+    # NUCLEOTIDES, NUCLEOTIDES_AMBIGUOUS are in uppercases only
+    inputSeq = toupper(inputSeq)
+    germlineSeq = toupper(germlineSeq)
+    
+    # check germlineSeq does not have ambiguous character (except for N)
+    if (any(s2c(germlineSeq) %in% NUCLEOTIDES_AMBIGUOUS[5:14])) {
+        stop("germlineSeq cannot contain ambiguous characters.")
+    }
+    
     # Assign mutation definition
     aminoAcidClasses <- if (is.null(mutationDefinition)) { NULL } else { mutationDefinition@classes }
     
@@ -1697,64 +1708,75 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     # "GNA" "NA" (2 codons!)
     stopifnot(length(c_inputSeq)==length(c_germlineSeq))
     seqLen = length(c_inputSeq)
-    if ( (seqLen%%3)!=0 ) {
-        c_inputSeq = c_inputSeq[ 1:(seqLen-(seqLen%%3)) ]
-        c_germlineSeq = c_germlineSeq[ 1:(seqLen-(seqLen%%3)) ]
+    # return NA if seqLen shorter than one complete codon
+    # consistent with policy that non-triplet overhang is ignored
+    if (seqLen<3) {
+        tooShort = TRUE
+    } else {
+        tooShort = FALSE
+        # if there's non-triplet overhang, trim/ignore
+        if ( (seqLen%%3)!=0 ) {
+            c_inputSeq = c_inputSeq[ 1:(seqLen-(seqLen%%3)) ]
+            c_germlineSeq = c_germlineSeq[ 1:(seqLen-(seqLen%%3)) ]
+        }
+        stopifnot( (length(c_inputSeq)%%3)==0 )
+        stopifnot( (length(c_germlineSeq)%%3)==0 )
     }
-    stopifnot( (length(c_inputSeq)%%3)==0 )
-    stopifnot( (length(c_germlineSeq)%%3)==0 )
     
     mutations_array_raw <- NA
     mutations_array <- setNames(object=rep(NA, length(regionDefinition@labels)), 
                                 nm=regionDefinition@labels)
-    # locate mutations
-    # germline is one of ATGCN and IUPAC ambiguous characters
-    # input is one of ATGCN and IUPAC ambiguous characters
-    # character mismatch between germline & input (captures both cases like A vs. T, and W vs. T)
-    mutations = ( (c_germlineSeq != c_inputSeq) & 
-                      (c_germlineSeq %in% NUCLEOTIDES_AMBIGUOUS[1:15]) & 
-                      (c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:15]) ) 
-    #print(sum(mutations))
-    if (sum(mutations) > 0) {
-        # The nucleotide positions of the mutations
-        mutations_pos <- which(mutations==TRUE)
-        # For every mutations_pos, extract the entire codon from germline
-        mutations_pos_codons <- array(sapply(mutations_pos, getCodonPos))
-        c_germlineSeq_codons <- c_germlineSeq[mutations_pos_codons]
-        # For every mutations_pos, extract the codon from input (without other mutations 
-        # at the same codon, if any).
-        c_inputSeq_codons <- array(sapply(mutations_pos, function(x) {
-            seqP = c_germlineSeq[getCodonPos(x)]
-            seqP[getContextInCodon(x)] = c_inputSeq[x]
-            return(seqP) }))
-        # split the string of codons into vector of codons
-        c_germlineSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_germlineSeq_codons)), " ")[[1]]
-        c_inputSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
-        
-        # Determine whether the mutations are R or S
-        # a table where rows are R/S/Stop/na, cols are codon positions
-        mutations_array_raw <- apply(rbind(c_germlineSeq_codons, c_inputSeq_codons), 2, 
-                                     function(x) { mutationType(x[1], x[2], aminoAcidClasses=aminoAcidClasses) })
-        # check dimension before assigning nucleotide positions to colnames
-        stopifnot(ncol(mutations_array_raw)==length(mutations_pos))
-        colnames(mutations_array_raw) = mutations_pos
-        
-        # keep only columns in which there are R or S mutations; and keep only R and S rows
-        # use drop=FALSE so that matrix won't be collapsed into a vector if there is only 1 TRUE in keep.idx
-        keep.idx = apply(mutations_array_raw, 2, function(x) { any(x[c("R", "S")]>0) } )
-        keep.pos = colnames(mutations_array_raw)[keep.idx]
-        mutations_array_raw = mutations_array_raw[c("R", "S"), keep.idx, drop=FALSE]
-        colnames(mutations_array_raw) = keep.pos
-        
-        # if none of columns have R or S > 1, dim will be 2x0
-        if ( ncol(mutations_array_raw)==0 ) {
-            # NA if mutations_array_raw contains all NAs and they have all been removed
-            mutations_array_raw <- NA
-            mutations_array <- setNames(object=rep(NA, length(regionDefinition@labels)), 
-                                        nm=regionDefinition@labels)
-        } else {
-            # count each mutation type by region
-            mutations_array <- binMutationsByRegion(mutations_array_raw, regionDefinition)
+    
+    if (!tooShort) {
+        # locate mutations
+        # germline is one of ATGCN 
+        # input is one of ATGCN and IUPAC ambiguous characters
+        # character mismatch between germline & input (captures both cases like A vs. T, and W vs. T)
+        mutations = ( (c_germlineSeq != c_inputSeq) & 
+                          (c_germlineSeq %in% NUCLEOTIDES[1:5]) & 
+                          (c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:15]) ) 
+        #print(sum(mutations))
+        if (sum(mutations) > 0) {
+            # The nucleotide positions of the mutations
+            mutations_pos <- which(mutations==TRUE)
+            # For every mutations_pos, extract the entire codon from germline
+            mutations_pos_codons <- array(sapply(mutations_pos, getCodonPos))
+            c_germlineSeq_codons <- c_germlineSeq[mutations_pos_codons]
+            # For every mutations_pos, extract the codon from input (without other mutations 
+            # at the same codon, if any).
+            c_inputSeq_codons <- array(sapply(mutations_pos, function(x) {
+                seqP = c_germlineSeq[getCodonPos(x)]
+                seqP[getContextInCodon(x)] = c_inputSeq[x]
+                return(seqP) }))
+            # split the string of codons into vector of codons
+            c_germlineSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_germlineSeq_codons)), " ")[[1]]
+            c_inputSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
+            
+            # Determine whether the mutations are R or S
+            # a table where rows are R/S/Stop/na, cols are codon positions
+            mutations_array_raw <- apply(rbind(c_germlineSeq_codons, c_inputSeq_codons), 2, 
+                                         function(x) { mutationType(x[1], x[2], aminoAcidClasses=aminoAcidClasses) })
+            # check dimension before assigning nucleotide positions to colnames
+            stopifnot(ncol(mutations_array_raw)==length(mutations_pos))
+            colnames(mutations_array_raw) = mutations_pos
+            
+            # keep only columns in which there are R or S mutations; and keep only R and S rows
+            # use drop=FALSE so that matrix won't be collapsed into a vector if there is only 1 TRUE in keep.idx
+            keep.idx = apply(mutations_array_raw, 2, function(x) { any(x[c("R", "S")]>0) } )
+            keep.pos = colnames(mutations_array_raw)[keep.idx]
+            mutations_array_raw = mutations_array_raw[c("R", "S"), keep.idx, drop=FALSE]
+            colnames(mutations_array_raw) = keep.pos
+            
+            # if none of columns have R or S > 1, dim will be 2x0
+            if ( ncol(mutations_array_raw)==0 ) {
+                # NA if mutations_array_raw contains all NAs and they have all been removed
+                mutations_array_raw <- NA
+                mutations_array <- setNames(object=rep(NA, length(regionDefinition@labels)), 
+                                            nm=regionDefinition@labels)
+            } else {
+                # count each mutation type by region
+                mutations_array <- binMutationsByRegion(mutations_array_raw, regionDefinition)
+            }
         }
     }
     
