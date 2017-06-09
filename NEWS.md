@@ -21,6 +21,8 @@ Selection Analysis:
   users are advised to obtain effective clonal sequences (by, for example, calling
   `collapseClones()`) before running `calcBaseline()`.
 
++ Updated vignette to reflect changes in `calcBaseline()`.
+
 Version 0.1.7: May 14, 2017
 -------------------------------------------------------------------------------
 
