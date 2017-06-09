@@ -60,7 +60,7 @@ over the total number of positions that are non-N in both the input and the germ
 
 In the example below, the counts (`frequency=FALSE` ) and frequencies (`frequency=TRUE`) of 
 R and S mutations are calculated separately. New columns containing mutation counts are 
-appended to the input data.frame with names in the form `OBSERVED_<Region>_<R/S>`. 
+appended to the input data.frame with names in the form `MU_COUNT_<Region>_<R/S>`. 
 Mutation frequencies appear in new columns named `MU_FREQ_<Region>_<R/S>`.
 
 ```{r, eval=TRUE}
@@ -72,7 +72,7 @@ db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                             nproc=1)
 # Show new mutation count columns
 db_obs %>% 
-    select(SEQUENCE_ID, starts_with("OBSERVED_")) %>%
+    select(SEQUENCE_ID, starts_with("MU_COUNT_")) %>%
     head(n=4)
 
 # Calculate R and S mutation frequencies
@@ -134,7 +134,7 @@ db_obs_v <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                               nproc=1)
 # Show new FWR mutation columns
 db_obs_v %>% 
-    select(SEQUENCE_ID, starts_with("OBSERVED_FWR")) %>%
+    select(SEQUENCE_ID, starts_with("MU_COUNT_FWR")) %>%
     head(n=4)
 
 # Calculate aggregate CDR and FWR V-segment R and S mutation frequencies

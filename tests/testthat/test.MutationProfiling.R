@@ -62,10 +62,10 @@ test_that("observedMutations, charge mutations", {
                              mutationDefinition=CHARGE_MUTATIONS,
                              nproc=1)
     
-    expect_equal(db_obs$OBSERVED_CDR_R, c(0, 0, 0, 0, 0, 0, 2, 2, 2, 0))
-    expect_equal(db_obs$OBSERVED_CDR_S, c(0, 0, 0, 0, 0, 0, 3, 3, 3, 16))
-    expect_equal(db_obs$OBSERVED_FWR_R, c(0, 1, 1, 0, 0, 0, 0, 0, 0, 3))
-    expect_equal(db_obs$OBSERVED_FWR_S, c(0, 6, 6, 0, 0, 0, 10, 10, 10, 14))
+    expect_equal(db_obs$MU_COUNT_CDR_R, c(0, 0, 0, 0, 0, 0, 2, 2, 2, 0))
+    expect_equal(db_obs$MU_COUNT_CDR_S, c(0, 0, 0, 0, 0, 0, 3, 3, 3, 16))
+    expect_equal(db_obs$MU_COUNT_FWR_R, c(0, 1, 1, 0, 0, 0, 0, 0, 0, 3))
+    expect_equal(db_obs$MU_COUNT_FWR_S, c(0, 6, 6, 0, 0, 0, 10, 10, 10, 14))
     
 })
 
@@ -136,10 +136,10 @@ test_that("observedMutations, combine", {
                                  mutationDefinition=NULL,
                                  nproc=1)
     
-    ## When using the whole sequence, the sum of OBSERVED_SEQ_S and OBSERVED_SEQ_R
-    ## should match OBSERVED 
-    expect_equal(rowSums(db_obs[,grep("OBSERVED",colnames(db_obs))]),
-                 db_obs_combined$OBSERVED)
+    ## When using the whole sequence, the sum of MU_COUNT_SEQ_S and MU_COUNT_SEQ_R
+    ## should match MU_COUNT 
+    expect_equal(rowSums(db_obs[,grep("MU_COUNT",colnames(db_obs))]),
+                 db_obs_combined$MU_COUNT)
 
     ## When using the whole sequence, the sum of MU_FREQ_SEQ_S and MU_FREQ_SEQ_R
     ## should match MU_FREQ 
@@ -191,15 +191,15 @@ test_that("observedMutations, combine", {
                                           mutationDefinition=NULL,
                                           nproc=1)
     
-    ## When using IMGT_V, the sum of OBSERVED_SEQ_S and OBSERVED_SEQ_R
-    ## should match OBSERVED. There is only one denominator, nonN-SEQ
-    expect_equal(rowSums(db_obs[,grep("OBSERVED",colnames(db_obs))]),
-                 db_obs_combined$OBSERVED)
+    ## When using IMGT_V, the sum of MU_COUNT_SEQ_S and MU_COUNT_SEQ_R
+    ## should match MU_COUNT. There is only one denominator, nonN-SEQ
+    expect_equal(rowSums(db_obs[,grep("MU_COUNT",colnames(db_obs))]),
+                 db_obs_combined$MU_COUNT)
     
     ## When not using the whole sequence, the sum of the mutation frequencies
     ## may not match MU_FREQ, because CDR mutations and FWR mutations use their own
     ## denominators (nonN-CDR and nonN-FWR)
-    expect_equal(db_obs_combined$OBSERVED/db_obs_denominator,
+    expect_equal(db_obs_combined$MU_COUNT/db_obs_denominator,
         db_freq_combined$MU_FREQ)
     
 })
@@ -215,19 +215,19 @@ test_that("expecteddMutations, hydropathy", {
                                regionDefinition=IMGT_V,
                                mutationDefinition=HYDROPATHY_MUTATIONS,
                                nproc=1)    
-    expect_equal(db_exp$EXPECTED_CDR_R[1:10],
+    expect_equal(db_exp$MU_EXPECTED_CDR_R[1:10],
                 c(0.123, 0.114, 0.114, 0.131, 0.131, 0.131, 0.118, 0.118, 0.118, 0.139),
                 tolerance=0.001
     )
-    expect_equal(db_exp$EXPECTED_CDR_S[10:20],
+    expect_equal(db_exp$MU_EXPECTED_CDR_S[10:20],
                  c(0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.150),
                  tolerance=0.001
     )
-    expect_equal(db_exp$EXPECTED_FWR_R[20:30],
+    expect_equal(db_exp$MU_EXPECTED_FWR_R[20:30],
                  c(0.318, 0.318, 0.318, 0.318, 0.332, 0.332, 0.323, 0.323, 0.323, 0.323, 0.315),
                  tolerance=0.001
     )
-    expect_equal(db_exp$EXPECTED_FWR_S[30:40],
+    expect_equal(db_exp$MU_EXPECTED_FWR_S[30:40],
                  c(0.436, 0.436, 0.437, 0.436, 0.439, 0.462, 0.429, 0.484, 0.462, 0.462, 0.433),
                  tolerance=0.001
     )
@@ -252,7 +252,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                 regionDefinition=NULL,
                                 mutationDefinition=NULL,
                                 nproc=1),
-                   "Columns OBSERVED_SEQ_R, OBSERVED_SEQ_S exist and will be overwritten")
+                   "Columns MU_COUNT_SEQ_R, MU_COUNT_SEQ_S exist and will be overwritten")
     ## Counts Combine
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
@@ -268,7 +268,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                      regionDefinition=NULL,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns OBSERVED exist and will be overwritten")    
+                   "Columns MU_COUNT exist and will be overwritten")    
     
     ## Counts  regionDefinition
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
@@ -285,7 +285,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                      regionDefinition=IMGT_V,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns OBSERVED_CDR_R, OBSERVED_CDR_S, OBSERVED_FWR_R, OBSERVED_FWR_S exist and will be overwritten")  
+                   "Columns MU_COUNT_CDR_R, MU_COUNT_CDR_S, MU_COUNT_FWR_R, MU_COUNT_FWR_S exist and will be overwritten")  
     ## Counts combine regionDefinition
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
@@ -301,7 +301,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                      regionDefinition=IMGT_V,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns OBSERVED exist and will be overwritten")    
+                   "Columns MU_COUNT exist and will be overwritten")    
     
     
     ## Freq
@@ -354,7 +354,7 @@ test_that("expectedMutations overwrites with a warning pre-existing values", {
                                      regionDefinition=NULL,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns EXPECTED_SEQ_R, EXPECTED_SEQ_S exist and will be overwritten")
+                   "Columns MU_EXPECTED_SEQ_R, MU_EXPECTED_SEQ_S exist and will be overwritten")
     
     db_exp <- expectedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
@@ -366,7 +366,7 @@ test_that("expectedMutations overwrites with a warning pre-existing values", {
                                      regionDefinition=IMGT_V,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns EXPECTED_CDR_R, EXPECTED_CDR_S, EXPECTED_FWR_R, EXPECTED_FWR_S exist and will be overwritten")
+                   "Columns MU_EXPECTED_CDR_R, MU_EXPECTED_CDR_S, MU_EXPECTED_FWR_R, MU_EXPECTED_FWR_S exist and will be overwritten")
     
 })
 
@@ -395,7 +395,7 @@ test_that("observedMutations, when no mutations found", {
     expect_equivalent(observedMutations(data.frame(
         "SEQUENCE_IMGT"=c(in_seq, in_seq),
         "GERMLINE_IMGT_D_MASK"=c(in_seq, in_seq)
-    ), regionDefinition = NULL)[,c("OBSERVED_SEQ_R", "OBSERVED_SEQ_S")], data.frame(c(0, 0), c(0, 0)))
+    ), regionDefinition = NULL)[,c("MU_COUNT_SEQ_R", "MU_COUNT_SEQ_S")], data.frame(c(0, 0), c(0, 0)))
 })
 
 ##### Tests 1A-1H added on June 9 2017
@@ -1037,8 +1037,8 @@ test_that("observedMutations, 1H, using mock data from 1A through 1F", {
                                              regionDefinition=NULL, 
                                              frequency=F, combine=F)
     
-    expect_equal(freqF.combF.noRegDef$OBSERVED_SEQ_R, exp.noRegDef.R)
-    expect_equal(freqF.combF.noRegDef$OBSERVED_SEQ_S, exp.noRegDef.S)
+    expect_equal(freqF.combF.noRegDef$MU_COUNT_SEQ_R, exp.noRegDef.R)
+    expect_equal(freqF.combF.noRegDef$MU_COUNT_SEQ_S, exp.noRegDef.S)
     
     # frequency=F, combine=T, no regDef
     freqF.combT.noRegDef = observedMutations(db=testDb, sequenceColumn="obsv", 
@@ -1046,7 +1046,7 @@ test_that("observedMutations, 1H, using mock data from 1A through 1F", {
                                              regionDefinition=NULL, 
                                              frequency=F, combine=T)
     
-    expect_equal(freqF.combT.noRegDef$OBSERVED, 
+    expect_equal(freqF.combT.noRegDef$MU_COUNT, 
                  exp.noRegDef.R+exp.noRegDef.S)
     
     # frequency=T, combine=F, no regDef

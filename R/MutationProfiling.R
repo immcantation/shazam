@@ -1299,13 +1299,13 @@ calcClonalConsensus <- function(db,
 #'           \link{IMGT_V} definition, which defines positions for CDR and
 #'           FWR, the following columns are added:
 #'           \itemize{
-#'             \item  \code{OBSERVED_CDR_R}:  number of replacement mutations in CDR1 and 
+#'             \item  \code{MU_COUNT_CDR_R}:  number of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{OBSERVED_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'             \item  \code{MU_COUNT_CDR_S}:  number of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{OBSERVED_FWR_R}:  number of replacement mutations in FWR1, 
+#'             \item  \code{MU_COUNT_FWR_R}:  number of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{OBSERVED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'             \item  \code{MU_COUNT_FWR_S}:  number of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           }
 #'           If \code{frequency=TRUE}, R and S mutation frequencies are
@@ -1401,9 +1401,9 @@ observedMutations <- function(db,
         }
     } else {
         if (combine) {
-            labels <- "OBSERVED"
+            labels <- "MU_COUNT"
         } else {
-            labels <- paste("OBSERVED_", labels, sep="")
+            labels <- paste("MU_COUNT_", labels, sep="")
         }
     }
     
@@ -1504,7 +1504,7 @@ observedMutations <- function(db,
     if (frequency == TRUE) {
         colnames(observed_mutations) <- gsub("_$","",paste("MU_FREQ", colnames(observed_mutations), sep=sep))
     } else {
-        colnames(observed_mutations) <- gsub("_$","",paste("OBSERVED", colnames(observed_mutations), sep=sep))
+        colnames(observed_mutations) <- gsub("_$","",paste("MU_COUNT", colnames(observed_mutations), sep=sep))
     }
     
     # Properly shutting down the cluster
@@ -2355,13 +2355,13 @@ slideWindowTunePlot = function(tuneList, plotFiltered = TRUE, percentage = FALSE
 #'           definition, which defines positions for CDR and FWR, the following columns are
 #'           added:  
 #'           \itemize{
-#'             \item  \code{EXPECTED_CDR_R}:  number of replacement mutations in CDR1 and 
+#'             \item  \code{MU_EXPECTED_CDR_R}:  number of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{EXPECTED_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'             \item  \code{MU_EXPECTED_CDR_S}:  number of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{EXPECTED_FWR_R}:  number of replacement mutations in FWR1, 
+#'             \item  \code{MU_EXPECTED_FWR_R}:  number of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{EXPECTED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'             \item  \code{MU_EXPECTED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           }
 #'           
@@ -2429,7 +2429,7 @@ expectedMutations <- function(db,
         labels <- makeNullRegionDefinition()@labels
     }
     
-    labels <- paste("EXPECTED_", labels, sep="")
+    labels <- paste("MU_EXPECTED_", labels, sep="")
     
     label_exists <- labels[labels %in% colnames(db)]
     if (length(label_exists)>0) {
@@ -2504,7 +2504,7 @@ expectedMutations <- function(db,
         return(x) })) 
     
     expectedMutationFrequencies[is.na(expectedMutationFrequencies)] <- 0
-    colnames(expectedMutationFrequencies) <- paste0("EXPECTED_", colnames(expectedMutationFrequencies))
+    colnames(expectedMutationFrequencies) <- paste0("MU_EXPECTED_", colnames(expectedMutationFrequencies))
     
     # Properly shutting down the cluster
     if(nproc>1){ parallel::stopCluster(cluster) }
@@ -2541,13 +2541,13 @@ expectedMutations <- function(db,
 #'           \link{IMGT_V} definition, which defines positions for CDR and 
 #'           FWR, the following columns are calculated:
 #'           \itemize{
-#'              \item  \code{EXPECTED_CDR_R}:  number of replacement mutations in CDR1 and 
+#'              \item  \code{MU_EXPECTED_CDR_R}:  number of replacement mutations in CDR1 and 
 #'                                             CDR2 of the V-segment.
-#'              \item  \code{EXPECTED_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'              \item  \code{MU_EXPECTED_CDR_S}:  number of silent mutations in CDR1 and CDR2 
 #'                                             of the V-segment.
-#'              \item  \code{EXPECTED_FWR_R}:  number of replacement mutations in FWR1, 
+#'              \item  \code{MU_EXPECTED_FWR_R}:  number of replacement mutations in FWR1, 
 #'                                             FWR2 and FWR3 of the V-segment.
-#'              \item  \code{EXPECTED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'              \item  \code{MU_EXPECTED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
 #'                                             FWR3 of the V-segment.
 #'            }
 #'           
@@ -2568,8 +2568,8 @@ expectedMutations <- function(db,
 #' data(ExampleDb, package="alakazam")
 #' 
 #' # Use first entry in the exampled data for input and germline sequence
-#' in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
-#' germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]
+#' in_seq <- ExampleDb[["SEQUENCE_IMGT"]][1]
+#' germ_seq <-  ExampleDb[["GERMLINE_IMGT_D_MASK"]][1]
 #' 
 #' # Identify all mutations in the sequence
 #' calcExpectedMutations(in_seq, germ_seq)
