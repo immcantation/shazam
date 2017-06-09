@@ -894,14 +894,14 @@ calcClonalConsensusHelper = function(seqs, muFreqColumn=NULL, lenLimit=NULL,
         if (!is.null(lenLimit)) {
             lenConsensus = min(lenConsensus, lenLimit)
         }
-        # as.matrix so that it works even with lenConsensus of 1
-        tabMtx = as.matrix(tabMtx[, 1:lenConsensus])
+        # drop=FALSE so that it works even with lenConsensus of 1
+        tabMtx = tabMtx[, 1:lenConsensus, drop=FALSE]
         
         ### convert absolute count to fraction
         tabMtx = tabMtx/numSeqs
         # remove "na" row
-        # as.matrix so that it works even with lenConsensus of 1
-        tabMtx = as.matrix(tabMtx[-which(rownames(tabMtx)=="na"), ])
+        # drop=FALSE so that it works even with lenConsensus of 1
+        tabMtx = tabMtx[-which(rownames(tabMtx)=="na"), , drop=FALSE]
         
         if (mtd=="thresholdedFreq") {
             #print(mtd) # for testing
@@ -1740,10 +1740,10 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
         colnames(mutations_array_raw) = mutations_pos
         
         # keep only columns in which there are R or S mutations; and keep only R and S rows
-        # use as.matrix so that matrix won't be collapsed into a vector if there is only 1 TRUE in keep.idx
+        # use drop=FALSE so that matrix won't be collapsed into a vector if there is only 1 TRUE in keep.idx
         keep.idx = apply(mutations_array_raw, 2, function(x) { any(x[c("R", "S")]>0) } )
         keep.pos = colnames(mutations_array_raw)[keep.idx]
-        mutations_array_raw = as.matrix(mutations_array_raw[c("R", "S"), keep.idx])
+        mutations_array_raw = mutations_array_raw[c("R", "S"), keep.idx, drop=FALSE]
         colnames(mutations_array_raw) = keep.pos
         
         # if none of columns have R or S > 1, dim will be 2x0
