@@ -224,12 +224,19 @@ test_that("observedMutations works with regionDefinition==NULL",{
 
 test_that("calcBaseline", {
     
+    # collapse baseline
+    db_clonal <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="thresholdedFreq", minimumFrequency=0.6,
+                                includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+    
+    
     ## With the full db, and CLONE field
     ## Mutations calculated CLONAL_SEQUENCE vs GERMLINE_IMGT_D_MASK    
-    set.seed(723)
-    db_baseline <- calcBaseline(db, 
-                                sequenceColumn="SEQUENCE_IMGT",
-                                germlineColumn="GERMLINE_IMGT_D_MASK", 
+    #set.seed(723)
+    db_baseline <- calcBaseline(db=db_clonal, 
+                                sequenceColumn="CLONAL_SEQUENCE",
+                                germlineColumn="CLONAL_GERMLINE", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
                                 targetingModel = HH_S5F,
@@ -314,35 +321,35 @@ test_that("calcBaseline", {
                     "germlineSeq"=paste(c_germlineSeq,collapse="")))
     }
     
-    db_trim <- db[1:5, ]
-    db_trim$CLONE <- NULL
+    db_clonal_trim <- db_clonal[1:5, ]
     
-    for (i in 1:nrow(db_trim)) {
-        trim_seqs <- trimToLength(db_trim$SEQUENCE_IMGT[i], db_trim$GERMLINE_IMGT_D_MASK[i], 312)
-        db_trim$SEQUENCE_IMGT[i] <- trim_seqs$inputSeq
-        db_trim$GERMLINE_IMGT_D_MASK[i] <- trim_seqs$germlineSeq
+    for (i in 1:nrow(db_clonal_trim)) {
+        trim_seqs <- trimToLength(db_clonal_trim$CLONAL_SEQUENCE[i], 
+                                  db_clonal_trim$CLONAL_GERMLINE[i], 312)
+        db_clonal_trim$CLONAL_SEQUENCE[i] <- trim_seqs$inputSeq
+        db_clonal_trim$CLONAL_GERMLINE[i] <- trim_seqs$germlineSeq
     }
     
-    db_1_to_5 <- db[1:5,]
-    db_1_to_5$CLONE <- NULL
+    db_1_to_5 <- db_clonal[1:5,]
     
-    set.seed(283)
+    #set.seed(283)
     db_baseline <- calcBaseline(db_1_to_5, 
-                                sequenceColumn="SEQUENCE_IMGT",
-                                germlineColumn="GERMLINE_IMGT_D_MASK", 
+                                sequenceColumn="CLONAL_SEQUENCE",
+                                germlineColumn="CLONAL_GERMLINE", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
                                 targetingModel = HH_S5F,
                                 nproc = 1,
                                 calcStats = T)
     
-    set.seed(2935)
-    db_baseline_trim_null <- calcBaseline(db_trim, sequenceColumn="SEQUENCE_IMGT",
-                                          germlineColumn="GERMLINE_IMGT_D_MASK",
+    #set.seed(2935)
+    db_baseline_trim_null <- calcBaseline(db_clonal_trim, sequenceColumn="CLONAL_SEQUENCE",
+                                          germlineColumn="CLONAL_GERMLINE",
                                           testStatistic="focused",
                                           regionDefinition=NULL,
                                           targetingModel = HH_S5F,
-                                          nproc = 1)
+                                          nproc = 1, 
+                                          calcStats=T)
  
     total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$OBSERVED_SEQ_S,
         slot(db_baseline_trim_null,"db")$OBSERVED_SEQ_R))
@@ -354,8 +361,8 @@ test_that("calcBaseline", {
     ## Should match observedMutations, with the full seqs and region 
     ## IMGT_V and the trimmed seqs and region NULL
     obs_mu <- observedMutations(db_1_to_5,
-                                sequenceColumn="SEQUENCE_IMGT",
-                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                sequenceColumn="CLONAL_SEQUENCE",
+                                germlineColumn="CLONAL_GERMLINE",
                                 regionDefinition=IMGT_V,
                                 nproc=1)
     expect_equivalent(
@@ -363,9 +370,9 @@ test_that("calcBaseline", {
         total_baseline
         )
     
-    obs_mu <- observedMutations(db_trim,
-                                sequenceColumn="SEQUENCE_IMGT",
-                                germlineColumn="GERMLINE_IMGT_D_MASK",
+    obs_mu <- observedMutations(db_clonal_trim,
+                                sequenceColumn="CLONAL_SEQUENCE",
+                                germlineColumn="CLONAL_GERMLINE",
                                 regionDefinition=NULL,
                                 nproc=1)
     expect_equivalent(
@@ -373,9 +380,9 @@ test_that("calcBaseline", {
         total_baseline
     )
     
-    # db_baseline_null <- calcBaseline(db,
-    #                             sequenceColumn="SEQUENCE_IMGT",
-    #                             germlineColumn="GERMLINE_IMGT_D_MASK",
+    # db_baseline_null <- calcBaseline(db_clonal,
+    #                             sequenceColumn="CLONAL_SEQUENCE",
+    #                             germlineColumn="CLONAL_GERMLINE",
     #                             testStatistic="focused",
     #                             regionDefinition=NULL,
     #                             targetingModel = HH_S5F,
@@ -398,18 +405,25 @@ test_that("Test groupBaseline", {
     # Subset example data from alakazam
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
                       
+    # collapse baseline
+    db_clonal <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="thresholdedFreq", minimumFrequency=0.6,
+                                includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+    
+    
     # Calculate BASELINe
-    baseline <- calcBaseline(db, 
-                             sequenceColumn="SEQUENCE_IMGT",
-                             germlineColumn="GERMLINE_IMGT_D_MASK",
+    baseline <- calcBaseline(db=db_clonal, 
+                             sequenceColumn="CLONAL_SEQUENCE",
+                             germlineColumn="CLONAL_GERMLINE",
                              testStatistic="focused",
                              regionDefinition=IMGT_V,
                              targetingModel=HH_S5F,
                              nproc=1)
     
-    baseline_df <- calcBaseline(data.frame(db), 
-                             sequenceColumn="SEQUENCE_IMGT",
-                             germlineColumn="GERMLINE_IMGT_D_MASK",
+    baseline_df <- calcBaseline(data.frame(db_clonal), 
+                             sequenceColumn="CLONAL_SEQUENCE",
+                             germlineColumn="CLONAL_GERMLINE",
                              testStatistic="focused",
                              regionDefinition=IMGT_V,
                              targetingModel=HH_S5F,
@@ -423,8 +437,8 @@ test_that("Test groupBaseline", {
     pdf1 <- slot(grouped1, "pdfs")
     sigma1 <- slot(grouped1,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf1$CDR[1,]),c(0,5.018), tolerance=0.01)
-    expect_equal(range(pdf1$CDR[2,]),c(0,7.333), tolerance=0.01)
+    expect_equal(range(pdf1$CDR[1,]), c(0,5.018), tolerance=0.01)
+    expect_equal(range(pdf1$CDR[2,]), c(0,7.333), tolerance=0.01)
     expect_equal(sigma1, c(-0.263, -0.693, -0.100, -0.694), tolerance=0.01)
     
     # Group PDFs by both sample (between variable) and isotype (within variable)
@@ -432,8 +446,8 @@ test_that("Test groupBaseline", {
     pdf2 <- slot(grouped2, "pdfs")
     sigma2 <- slot(grouped2,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf2$CDR[1,]),c(0,3.643), tolerance=0.01)
-    expect_equal(range(pdf2$CDR[2,]),c(0,3.539), tolerance=0.01)    
+    expect_equal(range(pdf2$CDR[1,]), c(0,3.643), tolerance=0.01)
+    expect_equal(range(pdf2$CDR[2,]), c(0,3.539), tolerance=0.01)    
     expect_equal(sigma2, 
                  c(-0.31, -0.59, -0.20, -0.82, -0.15, -0.78, -0.08, -0.65), tolerance=0.01)
     
@@ -442,8 +456,8 @@ test_that("Test groupBaseline", {
     pdf3 <- slot(grouped3, "pdfs")
     sigma3 <- slot(grouped3,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf3$CDR[1,]),c(0,4.975), tolerance=0.01)
-    expect_equal(range(pdf3$CDR[2,]),c(0,7.320), tolerance=0.01)    
+    expect_equal(range(pdf3$CDR[1,]), c(0,4.975), tolerance=0.01)
+    expect_equal(range(pdf3$CDR[2,]), c(0,7.319), tolerance=0.01)    
     expect_equal(sigma3, 
                  c( -0.25, -0.72, -0.10, -0.69), tolerance=0.01)
     

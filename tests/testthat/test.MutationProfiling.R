@@ -8,13 +8,13 @@ test_that("collapseClones", {
     
     # Build clonal consensus for the full sequence
     set.seed(7)
-    clones.1 <- collapseClones(db, nproc=1, expandedDb=FALSE)
+    clones.1 <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=FALSE)
     set.seed(7)
-    clones.1.df <- collapseClones(db, nproc=1, expandedDb=FALSE)
+    clones.1.df <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=FALSE)
     expect_identical(clones.1.df, clones.1)
     
     set.seed(7)
-    clones.2 <- collapseClones(db, nproc=1, expandedDb=TRUE)
+    clones.2 <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=TRUE)
     
     for (clone in unique(db$CLONE)) {
         # expect CLONAL_SEQUENCE for all seqs in the same clone to be the same
@@ -40,15 +40,15 @@ test_that("binMutationsByRegion", {
     mutations_array["R", ] = sample(x=0:10, size=numbOfMutations, replace=TRUE)
     mutations_array["S", ] = sample(x=0:10, size=numbOfMutations, replace=TRUE)
     
-    observed_bin <- binMutationsByRegion(mutations_array, regionDefinition=IMGT_V)
+    observed_bin <- shazam:::binMutationsByRegion(mutations_array, regionDefinition=IMGT_V)
     expected_bin <- c(2, 8, 22, 31)
     names(expected_bin) <- c("CDR_R", "CDR_S", "FWR_R", "FWR_S")
     expect_equal(observed_bin, expected_bin)
     
-    observed_bin <- binMutationsByRegion(mutations_array, regionDefinition=NULL)
+    observed_bin <- shazam:::binMutationsByRegion(mutations_array, regionDefinition=NULL)
     expected_bin <- c(24, 39)
     names(expected_bin) <- c("SEQ_R", "SEQ_S")
-    expect_equal(observed_bin,expected_bin)
+    expect_equal(observed_bin, expected_bin)
 })
 
 

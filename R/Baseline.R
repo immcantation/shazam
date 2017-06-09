@@ -319,11 +319,17 @@ getBaselineStats <- function(baseline) {
 #' Calculates the BASELINe posterior probability density function (PDF) for 
 #' sequences in the provided \code{db}. 
 #'          
+#' \strong{Note}: Individual sequences within clonal groups are not, strictly speaking, 
+#' independent events and it is generally appropriate to only analyze selection 
+#' pressures on an effective sequence for each clonal group. For this reason,
+#' it is strongly recommended that the input \code{db} contains one effective 
+#' sequence per clone. Effective clonal sequences can be obtained by calling 
+#' the \link{collapseClones} function.
+#'                   
 #' If the \code{db} does not contain the 
 #' required columns to calculate the PDFs (namely OBSERVED & EXPECTED mutations)
 #' then the function will:
 #'   \enumerate{
-#'   \item  Collapse the sequences by the CLONE column (if present).
 #'   \item  Calculate the numbers of observed mutations.
 #'   \item  Calculate the expected frequencies of mutations and modify the provided 
 #'          \code{db}. The modified \code{db} will be included as part of the 
@@ -361,11 +367,16 @@ getBaselineStats <- function(baseline) {
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' # Collapse clones
+#' db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
+#'                      germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                      method="thresholdedFreq", minimumFrequency=0.6,
+#'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 #'  
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="SEQUENCE_IMGT",
-#'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                          sequenceColumn="CLONAL_SEQUENCE",
+#'                          germlineColumn="CLONAL_GERMLINE", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -373,8 +384,8 @@ getBaselineStats <- function(baseline) {
 #'                          
 #' @export
 calcBaseline <- function(db,
-                         sequenceColumn="SEQUENCE_IMGT",
-                         germlineColumn="GERMLINE_IMGT_D_MASK",
+                         sequenceColumn="CLONAL_SEQUENCE",
+                         germlineColumn="CLONAL_GERMLINE",
                          testStatistic=c("local", "focused", "imbalanced"),
                          regionDefinition=NULL,
                          targetingModel=HH_S5F,
@@ -424,7 +435,8 @@ calcBaseline <- function(db,
         cluster <- parallel::makeCluster(nproc, type= "PSOCK")
         parallel::clusterExport(cluster, list('db',
                                               'sequenceColumn', 'germlineColumn', 
-                                              'regionDefinition',
+                                              'testStatistic', 'regionDefinition',
+                                              'targetingModel', 'mutationDefinition','calcStats',
                                               'break2chunks', 'PowersOfTwo', 
                                               'convolutionPowersOfTwo', 
                                               'convolutionPowersOfTwoByTwos', 
@@ -434,17 +446,17 @@ calcBaseline <- function(db,
                                               'calcBaselineHelper',
                                               'c2s', 's2c', 'words', 'translate',
                                               'calcBaselineBinomialPdf','CONST_I',
-                                              'BAYESIAN_FITTED','calcClonalConsensus', 'calcClonalConsensusHelper',
+                                              'BAYESIAN_FITTED',
                                               'calcObservedMutations','NUCLEOTIDES',
                                               'NUCLEOTIDES_AMBIGUOUS', 'IUPAC2nucs',
-                                              'makeNullRegionDefinition', 'mutationDefinition',
+                                              'makeNullRegionDefinition',
                                               'getCodonPos','getContextInCodon',
                                               'mutationType','translateCodonToAminoAcid',
                                               'AMINO_ACIDS','binMutationsByRegion',
                                               'collapseMatrixToVector','calcExpectedMutations',
                                               'calculateTargeting','HH_S5F','calculateMutationalPaths',
                                               'CODON_TABLE'
-        ), 
+                                              ), 
         envir=environment() )    
         registerDoParallel(cluster, cores=nproc)
         nproc_arg <- cluster
@@ -456,9 +468,8 @@ calcBaseline <- function(db,
     
     # If db does not contain the required columns to calculate the PDFs (namely OBSERVED 
     # & EXPECTED mutations), then the function will:
-    #          1. Collapse the sequences by the CLONE column (if present)
-    #          2. Calculate the numbers of observed mutations
-    #          3. Calculate the expected frequencies of mutations    
+    #          1. Calculate the numbers of observed mutations
+    #          2. Calculate the expected frequencies of mutations    
     # After that BASELINe prob. densities can be calcualted per sequence. 
     if (is.null(regionDefinition)) {
         rd_labels <- makeNullRegionDefinition()@labels
@@ -476,24 +487,13 @@ calcBaseline <- function(db,
                          " columns need to be present in the db"))
         }
         
-        # Collapse the sequences by the CLONE column (if present)
-        if ("CLONE" %in% colnames(db)) {                       
-            db <- collapseClones(db, 
-                                  cloneColumn="CLONE", 
-                                  sequenceColumn=sequenceColumn,
-                                  germlineColumn=germlineColumn,
-                                  expandedDb=FALSE, 
-                                  nproc=nproc_arg)
-            sequenceColumn="CLONAL_SEQUENCE"
-            germlineColumn="CLONAL_GERMLINE"
-        }
-        
         # Calculate the numbers of observed mutations
         db <- observedMutations(db,
                                 sequenceColumn=sequenceColumn,
                                 germlineColumn=germlineColumn,
                                 regionDefinition=regionDefinition,
                                 mutationDefinition=mutationDefinition,
+                                frequency=FALSE, combine=FALSE,
                                 nproc=0)
         
         # Calculate the expected frequencies of mutations

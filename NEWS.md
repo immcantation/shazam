@@ -1,4 +1,4 @@
-Version 0.1.7.999: June 2, 2017
+Version 0.1.7.999: June 8, 2017
 -------------------------------------------------------------------------------
 
 Distance Calculation:
@@ -6,9 +6,20 @@ Distance Calculation:
 
 Mutation Profiling:
 
-+ Redesigned `calcClonalConsensus()`, which is called by `collapseClones()`, 
-  adding a new helper function `calcClonalConsensusHelper()` with extensive 
-  documentation.
++ Redesigned `collapseClones()`, adding various deterministic and stochastic
+  methods to obtain effective clonal sequences, support for including ambiguous 
+  IUPAC characters in output, as well as extensive documentation. Removed 
+  `calcClonalConsensus()` from exported functions.
+  
++ Added support for including ambiguous IUPAC characters in input for 
+  `observedMutations()` and `calcObservedMutations()`.
+
+Selection Analysis:
+
++ `calcBaseline()` no longer calls `collapseClones()` automatically if a `CLONE`
+  column is present. As indicated by the documentation for `calcBaseline()` 
+  users are advised to obtain effective clonal sequences (by, for example, calling
+  `collapseClones()`) before running `calcBaseline()`.
 
 Version 0.1.7: May 14, 2017
 -------------------------------------------------------------------------------

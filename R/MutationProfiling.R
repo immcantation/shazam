@@ -11,82 +11,352 @@ NULL
 #' group and appends columns containing the consensus sequences to the input 
 #' \code{data.frame}.
 #'
-#' @param   db                  \code{data.frame} containing sequence data.
+#' @param   db                  \code{data.frame} containing sequence data. Required.
 #' @param   cloneColumn         \code{character} name of the column containing clonal 
-#'                              identifiers.
+#'                              identifiers. Required.
 #' @param   sequenceColumn      \code{character} name of the column containing input 
-#'                              sequences.
+#'                              sequences. Required. The length of each input sequence should 
+#'                              match that of its corresponding germline sequence.
 #' @param   germlineColumn      \code{character} name of the column containing germline 
-#'                              sequences.
+#'                              sequences. Required. The length of each germline sequence should 
+#'                              match that of its corresponding input sequence.
+#' @param   muFreqColumn        \code{character} name of the column containing mutation
+#'                              frequency. Optional. Applicable to the \code{"mostMutated"}
+#'                              and \code{"leastMutated"} methods. If not supplied, mutation
+#'                              frequency is computed by calling \code{observedMutations}.
+#'                              Default is \code{NULL}. See Cautions for note on usage.
+#' @param   regionDefinition    \link{RegionDefinition} object defining the regions
+#'                              and boundaries of the Ig sequences. Optional. Default is 
+#'                              \code{NULL}.
+#' @param   method              method for calculating input consensus sequence. Required. One of 
+#'                              \code{"thresholdedFreq"}, \code{"mostCommon"}, \code{"catchAll"},
+#'                              \code{"mostMutated"}, or \code{"leastMutated"}. See "Methods" for 
+#'                              details.
+#' @param   minimumFrequency    frequency threshold for calculating input consensus sequence.
+#'                              Applicable to and required for the \code{"thresholdedFreq"} method.
+#'                              A canonical choice is 0.6. Default is \code{NULL}. 
+#' @param   includeAmbiguous    whether to use ambiguous characters to represent positions at
+#'                              which there are multiple characters with frequencies that are at least
+#'                              \code{minimumFrequency} or that are maximal (i.e. ties). Applicable to 
+#'                              and required for the \code{"thresholdedFreq"} and \code{"mostCommon"} 
+#'                              methods. Default is \code{FALSE}. See "Choosing ambiguous characters" 
+#'                              for rules on choosing ambiguous characters.
+#' @param   breakTiesStochastic In case of ties, whether to randomly pick a sequence from sequences that
+#'                              fulfill the criteria as consensus. Applicable to and required for all methods
+#'                              except for \code{"catchAll"}. Default is \code{FALSE}. See "Methods" for 
+#'                              details. 
+#' @param   breakTiesByColumns  A list of the form \code{list(c(col_1, col_2, ...), c(fun_1, fun_2, ...))}, 
+#'                              where \code{col_i} is a \code{character} name of a column in \code{db},
+#'                              and \code{fun_i} is a function to be applied on that column. Currently, 
+#'                              only \code{max} and \code{min} are supported. Note that the two \code{c()}'s
+#'                              in \code{list()} are essential (i.e. if there is only 1 column, the list 
+#'                              should be of the form \code{list(c(col_1), c(func_1))}. Applicable to and 
+#'                              optional for the \code{"mostMutated"} and \code{"leastMutated"} methods. 
+#'                              If supplied, \code{fun_i}'s are applied on \code{col_i}'s to help break 
+#'                              ties. Default is \code{NULL}. See "Methods" for details. 
 #' @param   expandedDb          \code{logical} indicating whether or not to return the 
 #'                              expanded \code{db}, containing all the sequences (as opposed
 #'                              to returning just one sequence per clone).
-#' @param   regionDefinition    \link{RegionDefinition} object defining the regions
-#'                              and boundaries of the Ig sequences.
-#' @param   method              method for calculating input consensus sequence. One of 
-#'                              \code{"thresholdedFreq"}, \code{"mostCommon"}, or 
-#'                              \code{"catchAll"}. See \link{calcClonalConsensus} for details.
-#' @param   minimumFrequency    frequency threshold for calculating input consensus sequence.
-#'                              Required for the \code{"thresholdedFreq"} method. Default is
-#'                              0.6. See \link{calcClonalConsensus} for details.   
-#' @param   includeAmbiguous    Required for methods \code{"thresholdedFreq"} and \code{"mostCommon"}. 
-#'                              If \code{TRUE}, use ambiguous characters to represent positions at 
-#'                              which there are multiple characters with frequencies that are at least
-#'                              \code{minimumFrequency} or that are maximal. Default is \code{FALSE}. 
-#'                              See \code{Details} for \link{calcClonalConsensus} for rules on 
-#'                              choosing ambiguous characters.                                                       
 #' @param   nproc               Number of cores to distribute the operation over. If the 
 #'                              \code{cluster} has already been set earlier, then pass the 
 #'                              \code{cluster}. This will ensure that it is not reset.
 #'                              
 #' 
-#' @return   A modified \code{db} with clonal consensus sequences added 
-#'           in the following columns:
+#' @return   A modified \code{db} with the following additional columns: 
 #'           \itemize{
 #'             \item \code{CLONAL_SEQUENCE}:  effective sequence for the clone.
 #'             \item \code{CLONAL_GERMLINE}:  germline sequence for the clone.
+#'             \item \code{CLONAL_SEQUENCE_MUFREQ}:  mutation frequency of 
+#'                   \code{CLONAL_SEQUENCE}; only added for the \code{"mostMutated"}
+#'                   and \code{"leastMutated"} methods.
+#'           }
+#'                      
+#'           \code{CLONAL_SEQUENCE} is generated with the method of choice indicated 
+#'           by \code{method}, and \code{CLONAL_GERMLINE} is generated with the 
+#'           \code{"mostCommon"} method, along with, where applicable, user-defined 
+#'           parameters such as \code{minimumFrequency}, \code{includeAmbiguous}, 
+#'           \code{breakTiesStochastic}, and \code{breakTiesByColumns}.
+#'           
+#'
+#' @section Lengths of consensuses: For each clone, \code{CLONAL_SEQUENCE} and 
+#'          \code{CLONAL_GERMLINE} have the same length. 
+#'          
+#'          \itemize{
+#'                \item For the \code{"thresholdedFreq"}, \code{"mostCommon"}, and \code{"catchAll"}
+#'                methods:
+#'          
+#'                The length of the consensus sequences is determined by the longest possible
+#'                consensus sequence (baesd on \code{inputSeq} and \code{germlineSeq}) and 
+#'                \code{regionDefinition@seqLength} (if supplied), whichever is shorter.
+#'
+#'                Given a set of sequences of potentially varying lengths, the longest possible 
+#'                length of their consensus sequence is taken to be the longest length along 
+#'                which there is information contained at every nucleotide position across 
+#'                majority of the sequences. Majority is defined to be greater than 
+#'                \code{floor(n/2)}, where \code{n} is the number of sequences. If the longest 
+#'                possible consensus length is 0, there will be a warning and an empty string 
+#'                (\code{""}) will be returned. 
+#'          
+#'                If a length limit is defined by supplying a \code{regionDefinition} via 
+#'                \code{regionDefinition@seqLength}, the consensus length will be further 
+#'                restricted to the shorter of the longest possible length and 
+#'                \code{regionDefinition@seqLength}.
+#'          
+#'                \item For the \code{"mostMutated"} and \code{"leastMutated"} methods:
+#'                
+#'                The length of the consensus sequences depends on that of the most/least 
+#'                mutated input sequence, and, if supplied, the length limit defined by 
+#'                \code{regionDefinition@seqLength}, whichever is shorter. If the germline 
+#'                consensus computed using the \code{"mostCommon"} method is longer than 
+#'                the most/least mutated input sequence, the germline consensus is trimmed 
+#'                to be of the same length as the input consensus.
+#'               
 #'           }
 #'
-#' @details  See \code{Details} for \link{calcClonalConsensus} for explanation on 
-#'           how the different methods work with \code{minimumFrequency} and/or
-#'           \code{includeAmbiguous}.
-#'           
-#'           \strong{Caution: If you intend to run \code{collapseClones} before 
-#'           building a 5-mer targeting model, you MUST choose parameters like
-#'           \code{method} and \code{includeAmbiguous} such that your collapsed
-#'           clonal consensuses do NOT include ambiguous characters. This is 
-#'           because the targeting model functions do NOT support ambiguous 
-#'           characters in their inputs.}
+#' @section Methods: The descriptions below use "sequences" as a generalization of input sequences
+#'          and germline sequences. 
+#'          
+#'          \itemize{
+#'          
+#'              \item \code{method="thresholdedFreq"}
+#'              
+#'                    A threshold must be supplied to the argument \code{minimumFrequency}. At 
+#'                    each position along the length of the consensus sequence, the frequency 
+#'                    of each nucleotide/character across sequences is tabulated. The 
+#'                    nucleotide/character whose frequency is at least (i.e. \code{>=}) 
+#'                    \code{minimumFrequency} becomes the consensus.
+#'                    
+#'                    When there are ties (frequencies of multiple nucleotides/characters 
+#'                    are at least \code{minimumFrequency}), this method can be deterministic 
+#'                    or stochastic, depending on additional parameters.
+#'                    
+#'                    \itemize{
+#'                         \item With \code{includeAmbiguous=TRUE}, ties are resolved 
+#'                               deterministically by representing ties using ambiguous characters. 
+#'                               See "Choosing ambiguous characters" for how ambiguous characters 
+#'                               are chosen.
+#'                         \item With \code{breakTiesStochastic=TRUE}, ties are resolved 
+#'                               stochastically by randomly picking a character amongst the ties.
+#'                         \item When both \code{TRUE}, \code{includeAmbiguous} takes precedence 
+#'                               over \code{breakTiesStochastic}.
+#'                         \item When both \code{FALSE}, the first character from the ties is 
+#'                               taken to be the consensus following the order of \code{"A"}, 
+#'                               \code{"T"}, \code{"G"}, \code{"C"}, \code{"N"}, \code{"."}, and 
+#'                               \code{"-"}.
+#'                    }
+#'                    
+#'                    Below are some examples looking at a single position based on 5 sequences 
+#'                    with \code{minimumFrequency=0.6}:
+#'                    
+#'                    \itemize{
+#'                         \item If the sequences have \code{"A"}, \code{"A"}, \code{"A"}, 
+#'                               \code{"T"}, \code{"C"}, the consensus will be \code{"A"}, because 
+#'                               \code{"A"} has frequency 0.6, which is at least 
+#'                               \code{minimumFrequency}.
+#'                         \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, 
+#'                               \code{"T"}, \code{"C"}, the consensus will be \code{"N"}, because 
+#'                               none of \code{"A"}, \code{"T"}, or \code{"C"} has frequency that 
+#'                               is at least \code{minimumFrequency}.
+#'                    }
+#'          
+#'               \item \code{method="mostCommon"}
+#'               
+#'                     The most frequent nucleotide/character across sequences at each position 
+#'                     along the length of the consensus sequence makes up the consensus.
+#'                    
+#'                     When there are ties (multiple nucleotides/characters with equally maximal 
+#'                     frequencies), this method can be deterministic or stochastic, depending on 
+#'                     additional parameters. The same rules for breaking ties for 
+#'                     \code{method="thresholdedFreq"} apply.
+#'                    
+#'                     Below are some examples looking at a single position based on 5 sequences:
+#'                     
+#'                     \itemize{
+#'                          \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, 
+#'                                \code{"A"}, \code{"C"}, the consensus will be \code{"A"}.
+#'                          \item If the sequences have \code{"T"}, \code{"T"}, \code{"C"}, 
+#'                                \code{"C"}, \code{"G"}, the consensus will be \code{"T"}, 
+#'                                because \code{"T"} is before \code{"C"} in the order of 
+#'                                \code{"A"}, \code{"T"}, \code{"G"}, \code{"C"}, \code{"N"}, 
+#'                                \code{"."}, and \code{"-"}. 
+#'                     }       
+#'                     
+#'                     
+#'               \item \code{method="catchAll"}
+#'               
+#'                     This method returns a consensus sequence capturing most of the information 
+#'                     contained in the sequences. Ambiguous characters are used where applicable.
+#'                     See "Choosing ambiguous characters" for how ambiguous characters are chosen.
+#'                     This method is deterministic and does not involve breaking ties.
+#'                     
+#'                     Below are some examples for \code{method="catchAll"} looking at a single 
+#'                     position based on 5 sequences:
+#'                     
+#'                     \itemize{
+#'                          \item If the sequences have \code{"N"}, \code{"N"}, \code{"N"}, 
+#'                                \code{"N"}, \code{"N"}, the consensus will be \code{"N"}.
+#'                          \item If the sequences have \code{"N"}, \code{"A"}, \code{"A"}, 
+#'                                \code{"A"}, \code{"A"}, the consensus will be \code{"A"}.
+#'                          \item If the sequences have \code{"N"}, \code{"A"}, \code{"G"}, 
+#'                                \code{"A"}, \code{"A"}, the consensus will be \code{"R"}.
+#'                          \item If the sequences have \code{"-"}, \code{"-"}, \code{"."}, 
+#'                                \code{"."}, \code{"."}, the consensus will be \code{"-"}.
+#'                          \item If the sequences have \code{"-"}, \code{"-"}, \code{"-"}, 
+#'                                \code{"-"}, \code{"-"}, the consensus will be \code{"-"}.
+#'                          \item If the sequences have \code{"."}, \code{"."}, \code{"."}, 
+#'                                \code{"."}, \code{"."}, the consensus will be \code{"."}.
+#'                    }
+#'                    
+#'              \item \code{method="mostMutated"} and \code{method="leastMutated"}
+#'              
+#'                    These methods return the most/least mutated sequence as the consensus 
+#'                    sequence. 
+#'                    
+#'                    When there are ties (multple sequences have the maximal/minimal mutation
+#'                    frequency), this method can be deterministic or stochastic, depending on 
+#'                    additional parameters.
+#'                    
+#'                    \itemize{
+#'                         \item With \code{breakTiesStochastic=TRUE}, ties are resolved 
+#'                               stochastically by randomly picking a sequence out of sequences 
+#'                               with the maximal/minimal mutation frequency.
+#'                         \item When \code{breakTiesByColumns} is supplied, ties are resolved
+#'                               deterministically. Column by column, a function is applied on 
+#'                               the column and sequences with column value matching the 
+#'                               functional value are retained, until ties are resolved or columns
+#'                               run out. In the latter case, the first remaining sequence is 
+#'                               taken as the consensus.
+#'                         \item When \code{breakTiesStochastic=TRUE} and \code{breakTiesByColumns} 
+#'                               is also supplied, \code{breakTiesStochastic} takes precedence 
+#'                               over \code{breakTiesByColumns}.
+#'                         \item When \code{breakTiesStochastic=FALSE} and \code{breakTiesByColumns} 
+#'                               is not supplied (i.e. \code{NULL}), the sequence that appears first
+#'                               amongst the ties is taken as the consensus.
+#'                    }
+#'          
+#'          }
+#'          
+#' 
+#' @section Choosing ambiguous characters: 
+#'          
+#'          Ambiguous characters may be present in the returned consensuses when using the
+#'          \code{"catchAll"} method and when using the \code{"thresholdedFreq"} or 
+#'          \code{"mostCommon"} methods with \code{includeAmbiguous=TRUE}. 
+#'          
+#'          The rules on choosing ambiguous characters are as follows:
+#'          
+#'          \itemize{
+#'               \item If a position contains only \code{"N"} across sequences, the consensus 
+#'                     at that position is \code{"N"}.
+#'               \item If a position contains one or more of \code{"A"}, \code{"T"}, \code{"G"}, 
+#'                     or \code{"C"}, the consensus will be an IUPAC character representing all 
+#'                     of the characters present, regardless of whether \code{"N"}, \code{"-"}, or
+#'                     \code{"."} is present.
+#'               \item If a position contains only \code{"-"} and \code{"."} across sequences, 
+#'                     the consensus at thatp osition is taken to be \code{"-"}. 
+#'               \item If a position contains only one of \code{"-"} or \code{"."} across 
+#'                     sequences, the consensus at that position is taken to be the character 
+#'                     present. 
+#'          }
+#' 
+#' @section Cautions: 
+#' 
+#'          \itemize{
+#'               \item   Note that this function does not perform multiple sequence alignment. 
+#'                       As a prerequisite, it is assumed that the sequences in 
+#'                       \code{sequenceColumn} and \code{germlineColumn} have been aligned somehow. 
+#'                       In the case of immunoglobulin repertoire analysis, this usually means that 
+#'                       the sequences are IMGT-gapped.
+#'               \item   When using the \code{"mostMutated"} and \code{"leastMutated"} methods, 
+#'                       if you supply both \code{muFreqColumn} and \code{regionDefinition},
+#'                       it is your responsibility to ensure that the mutation frequency in
+#'                       \code{muFreqColumn} was calculated with sequence lengths restricted 
+#'                       to the \strong{same} \code{regionDefinition} you are supplying. Otherwise, 
+#'                       the "most/least mutated" sequence you obtain might not be the most/least 
+#'                       mutated given the \code{regionDefinition} supplied, because your mutation
+#'                       frequency was based on a \code{regionDefinition} different from the one 
+#'                       supplied.
+#'               \item   If you intend to run \code{collapseClones} before 
+#'                       building a 5-mer targeting model, you \strong{must} choose 
+#'                       parameters such that your collapsed clonal consensuses do 
+#'                       \strong{not} include ambiguous characters. This is because the 
+#'                       targeting model functions do NOT support ambiguous characters 
+#'                       in their inputs.
+#'               }
 #' 
 #' @seealso
 #' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
-#' See \link{calcClonalConsensus} for constructing consensus for a single clone.
 #' 
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d" &
+#'                         CLONE %in% c("3100", "3141", "3184"))
+#' # make a copy of db that has a mutation frequency column
+#' db2 <- observedMutations(db, frequency=TRUE, combine=TRUE)
 #' 
 #' # Build clonal consensus for the full sequence
-#' clones <- collapseClones(db, method="thresholdedFreq", 
-#'                          minimumFrequency=0.65, nproc=1)
-#'                          
-#' # Build clonal consensus for V-region only 
+#' 
+#' # thresholdedFreq method, resolving ties deterministically without using ambiguous characters
+#' clones1 <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.6,
+#'                           includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+#' # thresholdedFreq method, resolving ties deterministically using ambiguous characters
+#' clones2 <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.6,
+#'                           includeAmbiguous=TRUE, breakTiesStochastic=FALSE)
+#' # thresholdedFreq method, resolving ties stochastically
+#' clones3 <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.6,
+#'                           includeAmbiguous=FALSE, breakTiesStochastic=TRUE)
+#' 
+#' # mostCommon method, resolving ties deterministically without using ambiguous characters
+#' clones4 <- collapseClones(db, method="mostCommon", 
+#'                           includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+#' # mostCommon method, resolving ties deterministically using ambiguous characters
+#' clones5 <- collapseClones(db, method="mostCommon", 
+#'                           includeAmbiguous=TRUE, breakTiesStochastic=FALSE)
+#' # mostCommon method, resolving ties stochastically
+#' clones6 <- collapseClones(db, method="mostCommon", 
+#'                           includeAmbiguous=FALSE, breakTiesStochastic=TRUE)
+#' 
+#' # catchAll method
+#' clones7 <- collapseClones(db, method="catchAll")
+#' 
+#' # mostMutated method, resolving ties stochastically
+#' clones8 <- collapseClones(db, method="mostMutated", muFreqColumn=NULL, 
+#'                           breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
+#' clones9 <- collapseClones(db2, method="mostMutated", muFreqColumn="MU_FREQ", 
+#'                           breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
+#' # mostMutated method, resolving ties deterministically using additional columns
+#' clones10 <- collapseClones(db, method="mostMutated", muFreqColumn=NULL, 
+#'                            breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
+#' clones11 <- collapseClones(db2, method="mostMutated", muFreqColumn="MU_FREQ", 
+#'                            breakTiesStochastic=FALSE, 
+#'                            breakTiesByColumns=list(c("DUPCOUNT"), c(max)))
+#' # mostMutated method, resolving ties deterministically without using additional columns
+#' clones12 <- collapseClones(db, method="mostMutated", muFreqColumn=NULL, 
+#'                            breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
+#' clones13 <- collapseClones(db2, method="mostMutated", muFreqColumn="MU_FREQ", 
+#'                            breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
+#' 
+#' 
+#' # Build clonal consensus for V-region only
+#' clones14 <- collapseClones(db, method="mostCommon", regionDefinition=IMGT_V)
+#' 
 #' # Return the same number of rows as the input
-#' clones <- collapseClones(db, method="mostCommon", 
-#'                          regionDefinition=IMGT_V, 
-#'                          expandedDb=TRUE, nproc=1)
+#' clones15 <- collapseClones(db, method="mostCommon", expandedDb=TRUE)
 #' 
 #' @export
 collapseClones <- function(db, 
                            cloneColumn="CLONE", 
                            sequenceColumn="SEQUENCE_IMGT",
                            germlineColumn="GERMLINE_IMGT_D_MASK",
-                           expandedDb=FALSE,
+                           muFreqColumn=NULL,
                            regionDefinition=NULL,
-                           method=c("thresholdedFreq", "mostCommon", "catchAll"),
-                           minimumFrequency=0.6,
+                           method=c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
+                           minimumFrequency=NULL,
                            includeAmbiguous=FALSE,
+                           breakTiesStochastic=FALSE,
+                           breakTiesByColumns=NULL,
+                           expandedDb=FALSE,
                            nproc=1) {
     # Hack for visibility of foreach index variables
     idx <- NULL
@@ -95,9 +365,11 @@ collapseClones <- function(db,
     # cloneColumn="CLONE"; sequenceColumn="SEQUENCE_IMGT"; germlineColumn="GERMLINE_IMGT_D_MASK"
     # expandedDb=FALSE; regionDefinition=NULL; method="mostCommon"; nproc=1
     
+    #### parameter checks
+    
     method = match.arg(method)
     
-    # check minimumFrequency
+    # check minFreq for thresholdedFreq method
     if (method=="thresholdedFreq") {
         if (!is.numeric(minimumFrequency)) {
             stop("minimumFrequency must be a numeric value.")
@@ -108,10 +380,67 @@ collapseClones <- function(db,
         }
     }
     
-    # check includeAmbiguous
-    if (method %in% c("thresholdedFreq", "mostCommon")) {
+    # check includeAmbiguous & breakTiesStochastic for methods other than catchAll
+    if (method %in% c("thresholdedFreq", "mostCommon", "mostMutated", "leastMutated")) {
         if (class(includeAmbiguous) != "logical") {
             stop ("includeAmbiguous must be TRUE or FALSE.")
+        }
+        if (class(breakTiesStochastic) != "logical") {
+            stop ("breakTiesStochastic must be TRUE or FALSE.")
+        }
+    }
+    
+    # check breakTiesByColumns and muFreqColumn for methods most/leastMutated
+    if (method %in% c("mostMutated", "leastMutated")) {
+        
+        if (!is.null(breakTiesByColumns)) {
+            if (class(breakTiesByColumns) != "list") {
+                stop ("breakTiesByColumns must be a list.")
+            }
+            if (length(breakTiesByColumns) != 2) {
+                stop ("breakTiesByColumns must be a nested list of length 2.")
+            }
+            if ( length(breakTiesByColumns[[1]]) != length(breakTiesByColumns[[2]]) ) {
+                stop ("Nested vectors in breakTiesByColumns must have the same lengths.")
+            }
+            if ( !all(is.character(breakTiesByColumns[[1]])) ) {
+                stop ("The first vector in breakTiesByColumns must contain column names.")
+            }
+            if ( !all( unlist( lapply(breakTiesByColumns[[2]], is.function) ) ) ) {
+                stop ("The second vector in breakTiesByColumns must contain functions.")
+            }
+            if ( !all(breakTiesByColumns[[1]] %in% colnames(db)) ) {
+                stop ("All column named included in breakTiesByColumns must be present in db.")
+            }
+        }
+        
+        if ( (!is.null(muFreqColumn)) && (!muFreqColumn %in% colnames(db)) ) {
+            stop ("If specified, muFreqColumn must be a column present in db.")
+        }
+    }
+    
+    # check mutual exclusivitiy
+    if (method %in% c("thresholdedFreq", "mostCommon")){
+        if (includeAmbiguous & breakTiesStochastic) {
+            message("includeAmbiguous and breakTiesStochastic are mutually exclusive. When both TRUE, includeAmbiguous will take precedence.")
+        }
+        if ( (!includeAmbiguous) & (!breakTiesStochastic) ) {
+            message("When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.")
+        }
+        if (!is.null(breakTiesByColumns)) {
+            message("breakTiesByColumns is ignored when method is thresholdedFreq or mostCommon.")
+        }
+    }
+    
+    if (method %in% c("mostMutated", "leastMutated")){
+        if (breakTiesStochastic & !is.null(breakTiesByColumns)) {
+            message("breakTiesStochastic and breakTiesByColumns are mutually exclusive. When both set, breakTiesStochastic will take precedence.")
+        }
+        if ( (!breakTiesStochastic) & is.null(breakTiesByColumns) ) {
+            message("When breakTiesStochastic is FALSE and breakTiesByColumns is NULL, ties are broken by taking the sequence that appears earlier in the data.frame.")
+        }
+        if (includeAmbiguous) {
+            message("includeAmbiguous is ignored when method is mostMutated or leastMutated.")
         }
     }
     
@@ -124,7 +453,7 @@ collapseClones <- function(db,
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
     
-    # Convert sequence columns to uppercase
+    ### Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
     # If the user has previously set the cluster and does not wish to reset it
@@ -145,6 +474,21 @@ collapseClones <- function(db,
     # crucial to have simplify=FALSE (otherwise won't return a list if uniqueClones has length 1)
     uniqueClonesIdx = sapply(uniqueClones, function(i){which(db[[cloneColumn]]==i)}, simplify=FALSE)
     
+    # if method is most/leastMutated and muFreqColumn not specified,
+    # first calculate mutation frequency ($MU_FREQ)
+    # IMPORTANT: do this OUTSIDE foreach loop for calcClonalConsensus
+    # otherwise will get an error saying muFreqColumn not found in db
+    # (something to do with parallelization/foreach)
+    if ( (method %in% c("mostMutated", "leastMutated")) & is.null(muFreqColumn) ) {
+        message("Calculating observed mutation frequency...")
+        db <- observedMutations(db=db, sequenceColumn=sequenceColumn,
+                                     germlineColumn=germlineColumn, 
+                                     regionDefinition=regionDefinition,
+                                     frequency=TRUE, combine=TRUE, 
+                                     mutationDefinition=NULL, nproc=nproc)
+        muFreqColumn <- "MU_FREQ"
+    }
+    
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, getnproc())
     
@@ -161,12 +505,12 @@ collapseClones <- function(db,
             cluster <- parallel::makeCluster(nproc, type= "PSOCK")
         }
         parallel::clusterExport(cluster, 
-                                list('db', 'sequenceColumn', 'germlineColumn', 'cloneColumn',
-                                     'regionDefinition', 'calcClonalConsensus', 'includeAmbiguous',
-                                     'calcClonalConsensusHelper', 'method', 'minimumFrequency',
-                                     'uniqueClonesIdx', 'c2s', 's2c',
-                                     'nucs2IUPAC', 'chars2Ambiguous', 
-                                     'IUPAC_DNA_2', 'NUCLEOTIDES_AMBIGUOUS'), 
+                                list('db', 'cloneColumn', 'sequenceColumn', 'germlineColumn', 'muFreqColumn',
+                                     'regionDefinition', 'method', 'minimumFrequency','includeAmbiguous',
+                                     'breakTiesStochastic', 'breakTiesByColumns', 
+                                     'calcClonalConsensus', 'calcClonalConsensusHelper', 'breakTiesHelper',
+                                     'chars2Ambiguous', 'nucs2IUPAC', 'IUPAC_DNA_2',  'NUCLEOTIDES_AMBIGUOUS',
+                                     'uniqueClonesIdx', 'c2s', 's2c'), 
                                 envir=environment() )
         registerDoParallel(cluster)
     }
@@ -180,15 +524,25 @@ collapseClones <- function(db,
     # cons_db$CLONAL_SEQUENCE <- cons_mat[, 1]
     cons_mat <- foreach(idx=1:length(uniqueClonesIdx),
                         .verbose=FALSE, .errorhandling='stop') %dopar% {
+                            
                             cloneIdx <- uniqueClonesIdx[[idx]]
-                            calcClonalConsensus(inputSeq=db[[sequenceColumn]][cloneIdx],
-                                                germlineSeq=db[[germlineColumn]][cloneIdx],
-                                                regionDefinition=regionDefinition, 
-                                                method=method, minimumFrequency=minimumFrequency,
-                                                includeAmbiguous=includeAmbiguous)
+                            cloneDb <- db[cloneIdx, ]
+                            
+                            # collapse clone
+                            calcClonalConsensus(db=cloneDb,
+                                                sequenceColumn=sequenceColumn,
+                                                germlineColumn=germlineColumn,
+                                                muFreqColumn=muFreqColumn,
+                                                regionDefinition=regionDefinition,
+                                                method=method,
+                                                minimumFrequency=minimumFrequency,
+                                                includeAmbiguous=includeAmbiguous,
+                                                breakTiesStochastic=breakTiesStochastic,
+                                                breakTiesByColumns=breakTiesByColumns)
                         }
     # using cbind below will give a matrix with columns being clones
     # use rbind to have rows be clones
+    # cols: inputCons, germlineCons, inputMuFreq
     cons_mat <- do.call(rbind, cons_mat)
     
     # Stop cluster
@@ -199,42 +553,557 @@ collapseClones <- function(db,
         # Fill all rows with the consensus sequence
         clone_index <- match(db[[cloneColumn]], uniqueClones)
         cons_db <- db
-        cons_db$CLONAL_SEQUENCE <- cons_mat[clone_index, 1]
-        cons_db$CLONAL_GERMLINE <- cons_mat[clone_index, 2]
+        cons_db$CLONAL_SEQUENCE <- unlist(cons_mat[, 1])[clone_index]
+        cons_db$CLONAL_GERMLINE <- unlist(cons_mat[, 2])[clone_index]
+        
+        # assign mutation frequency corresponding to consensus into CLONAL_SEQUENCE_MUFREQ
+        if (method %in% c("mostMutated", "leastMutated")) {
+            cons_db$CLONAL_SEQUENCE_MUFREQ = unlist(cons_mat[, 3])[clone_index]
+        }
     } else {
-        # Return only the first low of each clone
+        # Return only the first row of each clone
         clone_index <- match(uniqueClones, db[[cloneColumn]])
         cons_db <- db[clone_index, ]
-        cons_db$CLONAL_SEQUENCE <- cons_mat[, 1]
-        cons_db$CLONAL_GERMLINE <- cons_mat[, 2]
+        cons_db$CLONAL_SEQUENCE <- unlist(cons_mat[, 1])
+        cons_db$CLONAL_GERMLINE <- unlist(cons_mat[, 2])
+        
+        # assign mutation frequency corresponding to consensus into CLONAL_SEQUENCE_MUFREQ
+        if (method %in% c("mostMutated", "leastMutated")) {
+            cons_db$CLONAL_SEQUENCE_MUFREQ = unlist(cons_mat[, 3])
+        }
     }
     
     return(cons_db)
 }
 
 
+# Break ties given additional columns in db and functions to compute on them
+#
+# @param     idx     vector of indices.
+# @param     cols    character vector of colnames. Currently, only columns containing
+#                    numeric values are supported/expected.
+# @param     funs    list of functions. Currently, only \code{max} and \code{min} are 
+#                    supported/expected.
+# @param     db      \code{data.frame} containing columns named after \code{cols} with 
+#                    corresponding rows for \code{idx}.
+#
+# @return    a single value from \code{idx}.
+# 
+# @details   Column by column, \code{breakTiesHelper} calls the corresponding function
+#            from \code{funs} on a column in \code{db} and finds the index/indices in 
+#            \code{idx} that match(es) the returned value from the function. This stops
+#            when only a single matching index is obtained, or columns run out. In the 
+#            latter case, the first remaining index is returned.
+#
+# testing
+# expect index 18
+# test.idx = c(2,4,18,37,102,76)
+# test.db = data.frame(cbind(DUPCOUNT= c(3,5,5,4,5,1),
+#                            CONSCOUNT=c(6,6,6,2,3,4), 
+#                            ERR=c(0.9, 0.14, 0.12, 0.07, 0.3, 0.5)))
+# test.cols = c("DUPCOUNT", "CONSCOUNT", "ERR")
+# test.funs = c(max, max, min)
+# stopifnot( breakTiesHelper(test.idx, test.cols, test.funs, test.db)==18 )
+# # make index 4 and 18 tie for ERR
+# # index 4 is expected because it appears before 18
+# test.db[3,"ERR"] = 0.14
+# stopifnot( breakTiesHelper(test.idx, test.cols, test.funs, test.db)==4 )
+#
+breakTiesHelper = function(idx, cols, funs, db) {
+    # debug
+    # idx=test.idx; cols=test.cols; funs=test.funs; db=test.db
+    
+    counter = 1
+    while (length(idx)>1 & counter<=length(cols)) {
+        cur.col = cols[counter]
+        cur.fun = funs[[counter]]
+        cur.db = db[[cur.col]]
+        
+        target = cur.fun(cur.db)
+        tol = 1e-5 # tolerance
+        target.idx = which( abs(cur.db-target)<=tol ) # wrt idx & db
+        
+        idx = idx[target.idx]
+        db = db[target.idx, ]
+        counter = counter+1
+    }
+    
+    if (length(idx)==1) {
+        return(idx)
+    } else if (length(idx)>1) {
+        #print("Failed to resolve ties.") # for testing/debugging
+        return(idx[1])
+    } else {
+        stop("breakTieHelper failed unexpectedly.")
+    }
+}
 
 # Helper function for calcClonalConsensus
 #
-# @param   seqs              a character vector of sequences.
-# @param   mtd               method to calculate consensus sequence. One of \code{thresholdedFreq}, 
-#                            \code{mostCommon}, or \code{catchAll}.
-# @param   minFreq           minimum frequency. Required if \code{mtd} is \code{thresholdedFreq}.
-#                            Default is 0.6.
-# @param   includeAmbiguous  Required for methods \code{"thresholdedFreq"} and \code{"mostCommon"}. 
-#                            If \code{TRUE}, use ambiguous characters to represent positions at 
-#                            which there are multiple characters with frequencies that are at least
-#                            \code{minFreq} or that are maximal. Default is \code{FALSE}. See
-#                            \code{Details} for rules on choosing ambiguous characters.
-# @param   lenLimit          limit on consensus length. Length of consensus returned will depend on
-#                            \code{lenLimit} and the longest possible length based on \code{seqs}, 
-#                            whichever that is shorter. 
-# @return  A character string that is the consensus sequence for \code{seqs}.
+# @param   seqs                 a character vector of sequences.
+# @param   muFreqColumn         \code{character} name of the column in db containing mutation
+#                               frequency. Applicable to and required for the \code{"mostMutated"} 
+#                               and \code{"leastmutated"} methods. Default is \code{NULL}. 
+# @param   lenLimit             limit on consensus length. 
+# @param   mtd                  method to calculate consensus sequence. One of 
+#                               \code{"thresholdedFreq"}, \code{"mostCommon"}, \code{"catchAll"},
+#                               \code{"mostMutated"}, or \code{"leastMutated"}. See "Methods" under
+#                               \link{collapseClones} for details.
+# @param   minFreq              frequency threshold for calculating input consensus sequence.
+#                               Applicable to and required for the \code{"thresholdedFreq"} method. 
+#                               A canonical choice is 0.6. Default is \code{NULL}.
+# @param   includeAmbiguous     whether to use ambiguous characters to represent positions at
+#                               which there are multiple characters with frequencies that are at least
+#                               \code{minimumFrequency} or that are maximal (i.e. ties). Applicable to 
+#                               and required for the \code{"thresholdedFreq"} and \code{"mostCommon"} 
+#                               methods. Default is \code{FALSE}. See "Choosing ambiguous characters" 
+#                               under \link{collapseClones} for rules on choosing ambiguous characters. 
+# @param   breakTiesStochastic  In case of ties, whether to randomly pick a sequence from sequences that
+#                               fulfill the criteria as consensus. Applicable to and required for all methods
+#                               except for \code{"catchAll"}. Default is \code{FALSE}. See "Methods" 
+#                               under \link{collapseClones} for details. 
+# @param   breakTiesByColumns   A list of the form \code{list(c(col_1, col_2, ...), c(fun_1, fun_2, ...))}, 
+#                               where \code{col_i} is a \code{character} name of a column in \code{db},
+#                               and \code{fun_i} is a function to be applied on that column. Currently, 
+#                               only \code{max} and \code{min} are supported. Note that the two \code{c()}'s
+#                               in \code{list()} are essential (i.e. if there is only 1 column, the list 
+#                               should be of the form \code{list(c(col_1), c(func_1))}. Applicable to and 
+#                               optional for the \code{"mostMutated"} and \code{"leastMutated"} methods. 
+#                               If supplied, \code{fun_i}'s are applied on \code{col_i}'s to help break 
+#                               ties. Default is \code{NULL}. See "Methods" under \link{collapseClones} 
+#                               for details.                                                  
+# @param   db                   \code{data.frame} containing sequence data for a single clone. 
+#                               Applicable to and required for the \code{"mostMutated"} and 
+#                               \code{"leastmutated"} methods. Default is \code{NULL}.
 #
-# @details See \code{Details} for \link{calcClonalConsensus}.
+# @return  A list containing \code{cons}, which is a character string that is the consensus sequence 
+#          for \code{seqs}; and \code{muFreq}, which is the maximal/minimal mutation frequency of
+#          the consensus sequence for the \code{"mostMutated"} and \code{"leastMutated"} methods, or
+#          \code{NULL} for all other methods.
+#
+# @details See \link{collapseClones} for detailed documentation on methods and additional parameters.
 # 
 # @seealso
 # \link{calcClonalConsensus} and \link{collapseClones}.
+# 
+# @examples
+# Subset example data
+# data(ExampleDb, package="alakazam")
+# db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+# 
+# Data corresponding to a single clone
+# clone <- db[db$CLONE=="3192", ]
+# Number of sequences in this clone
+# nrow(clone)
+# first compute mutation frequency for most/leastMutated methods
+# clone = observedMutations(db=clone, frequency=TRUE, combine=TRUE)
+# manually create tie
+# clone = rbind(clone, clone[which.max(clone$MU_FREQ), ])
+# 
+# Get consensus input sequence
+# thresholdedFreq method, resolve ties deterministically without using ambiguous characters
+# consInput1 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                         muFreqColumn=NULL, lenLimit=NULL,
+#                                         mtd="thresholdedFreq", minFreq=0.3,
+#                                         includeAmbiguous=FALSE, 
+#                                         breakTiesStochastic=FALSE,
+#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# thresholdedFreq method, resolve ties deterministically using ambiguous characters
+# consInput2 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                         muFreqColumn=NULL, lenLimit=NULL,
+#                                         mtd="thresholdedFreq", minFreq=0.3,
+#                                         includeAmbiguous=TRUE, 
+#                                         breakTiesStochastic=FALSE,
+#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# thresholdedFreq method, resolve ties stochastically
+# consInput3 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                         muFreqColumn=NULL, lenLimit=NULL,
+#                                         mtd="thresholdedFreq", minFreq=0.3,
+#                                         includeAmbiguous=FALSE, 
+#                                         breakTiesStochastic=TRUE,
+#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# mostCommon method, resolve ties deterministically without using ambiguous characters
+# consInput4 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                         muFreqColumn=NULL, lenLimit=NULL,
+#                                         mtd="mostCommon", minFreq=NULL,
+#                                         includeAmbiguous=FALSE, 
+#                                         breakTiesStochastic=FALSE,
+#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# mostCommon method, resolve ties deterministically using ambiguous characters
+# consInput5 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                         muFreqColumn=NULL, lenLimit=NULL,
+#                                         mtd="mostCommon", minFreq=NULL,
+#                                         includeAmbiguous=TRUE, 
+#                                         breakTiesStochastic=FALSE,
+#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# mostCommon method, resolve ties stochastically
+# consInput6 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                         muFreqColumn=NULL, lenLimit=NULL,
+#                                         mtd="mostCommon", minFreq=NULL,
+#                                         includeAmbiguous=FALSE, 
+#                                         breakTiesStochastic=TRUE,
+#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# catchAll method
+# consInput7 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                         muFreqColumn=NULL, lenLimit=NULL,
+#                                         mtd="catchAll", minFreq=NULL,
+#                                         includeAmbiguous=FALSE, 
+#                                         breakTiesStochastic=FALSE,
+#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# mostMutated method, resolve ties stochastically
+# consInput8 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                         muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                         mtd="mostMutated", minFreq=NULL,
+#                                         includeAmbiguous=FALSE, 
+#                                         breakTiesStochastic=TRUE,
+#                                         breakTiesByColumns=NULL, db=clone)$cons
+# mostMutated method, resolve ties deterministically using additional columns
+# consInput9 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                         muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                         mtd="mostMutated", minFreq=NULL,
+#                                         includeAmbiguous=FALSE, 
+#                                         breakTiesStochastic=FALSE,
+#                                         breakTiesByColumns=list(c("JUNCTION_LENGTH","DUPCOUNT"), c(max, max)), 
+#                                         db=clone)$cons
+# consInput10 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                         muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                         mtd="mostMutated", minFreq=NULL,
+#                                         includeAmbiguous=FALSE, 
+#                                         breakTiesStochastic=FALSE,
+#                                         breakTiesByColumns=list(c("DUPCOUNT"), c(max)), 
+#                                         db=clone)$cons
+# mostMutated method, resolve ties deterministically withou using additional columns
+# consInput11 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#                                          muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                          mtd="mostMutated", minFreq=NULL,
+#                                          includeAmbiguous=FALSE, 
+#                                          breakTiesStochastic=FALSE,
+#                                          breakTiesByColumns=NULL, db=clone)$cons
+# 
+calcClonalConsensusHelper = function(seqs, muFreqColumn=NULL, lenLimit=NULL,
+                                     mtd=c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
+                                     minFreq=NULL,
+                                     includeAmbiguous=FALSE,
+                                     breakTiesStochastic=FALSE,
+                                     breakTiesByColumns=NULL, db=NULL) {
+    mtd = match.arg(mtd)
+    
+    # check muFreqColumn and get muFreq for most/leastMutated
+    if (mtd %in% c("mostMutated", "leastMutated")) {
+        if ( is.null(muFreqColumn) ) {
+            stop ("muFreqColumn must be specified when method is most/leastMutated.")
+        }
+        if ( is.null(db) ) {
+            stop ("db containing muFreqColumn must be supplied when method is most/leastMutated.")
+        }
+        if (!muFreqColumn %in% colnames(db)) {
+            print(c("Helper", muFreqColumn))
+            print(c("Helper", colnames(db)))
+            stop ("muFreqColumn must be a column present in db.")
+        }
+        
+        # get muFreq
+        muFreq = db[[muFreqColumn]]
+    }
+    
+    
+    numSeqs = length(seqs)
+    
+    ##### if only one sequence in clone, return it
+    if (numSeqs==1) {
+        # restrict length if there is a lenLimit
+        if (!is.null(lenLimit)) {
+            consensus = substr(seqs, 1, min(lenLimit, nchar(seqs)))
+        } else {
+            # otherwise, return as is
+            consensus = seqs
+        }
+        
+        # return with mutation frequency (if applicable)
+        if (mtd %in% c("mostMutated", "leastMutated")) {
+            return(list(cons=consensus, muFreq=db[[muFreqColumn]]))
+        } else {
+            return(list(cons=consensus, muFreq=NULL))
+        }
+    }
+    
+    ##### if all sequences are the same, return now
+    if (length(unique(seqs))==1) {
+        # restrict length if there is a lenLimit
+        if (!is.null(lenLimit)) {
+            consensus = substr(seqs[1], 1, min(lenLimit, nchar(seqs)))
+        } else {
+            # otherwise, return as is
+            consensus = seqs[1]
+        }
+        
+        # return with mutation frequency (if applicable)
+        if (mtd %in% c("mostMutated", "leastMutated")) {
+            return(list(cons=consensus, muFreq=db[[muFreqColumn]][1]))
+        } else {
+            return(list(cons=consensus, muFreq=NULL))
+        }
+    }
+    
+    ##### length of longest sequence in seqs
+    lenSeqs = nchar(seqs)
+    lenMax = max(lenSeqs, na.rm=T)
+    
+    ##### methods = thresholdedFreq, mostCommon, catchAll
+    if (mtd %in% c("thresholdedFreq", "mostCommon", "catchAll")) {
+        ##### convert seqs to a matrix
+        # if there's no more nucleotide when a seq ends, fill position with NA
+        seqsMtx = matrix(NA, nrow=numSeqs, ncol=lenMax)
+        for (i in 1:numSeqs) {
+            seqsMtx[i, 1:lenSeqs[i]] = s2c(seqs[i])
+        }
+        
+        ##### tabulation matrix
+        # col: nucleotide position
+        # row: A,T,G,C,N,.,-,na (to distinguish from NA)
+        tabMtxRownames = c("A","T","G","C","N",".","-","na")
+        tabMtx = matrix(0, ncol=lenMax, nrow=8, 
+                        dimnames=list(tabMtxRownames, NULL))
+        ## across seqs, at each nuc position, how many A, T, G, C, N, ., -? 
+        # this does not capture NA
+        for (j in 1:ncol(seqsMtx)) {
+            tab = table(seqsMtx[, j])
+            tabMtx[match(names(tab), tabMtxRownames), j] = tab
+        }
+        ## across seqs, at each nuc position, how many NAs?
+        numNAs = colSums(is.na(seqsMtx))
+        tabMtx["na", ] = numNAs
+        # sanity check: counts at each nuc pos (colSum) should sum up to number of seqs
+        stopifnot( sum( colSums(tabMtx)==numSeqs )  == ncol(tabMtx)  )
+        
+        ##### only keep positions at which majority of seqs contain information
+        ### if there are odd number of n seqs, keep position if it has > floor(n/2) non-NAs
+        # e.g. 5 input seqs, >2 non-NA; 2=floor(5/2)
+        ### if there are even number of n seqs,  keep position if it has > n/2 non-NAs
+        # e.g. 6 input seqs, >3 non-NA; 3=6/2=floor(6/2)
+        numNonNAs = numSeqs - numNAs
+        nonNA.keep = numNonNAs > floor(numSeqs/2)
+        # length of longest possible consensus seq
+        lenConsensus = sum(nonNA.keep)
+        if (lenConsensus==0) {
+            warning("Consensus cannot be produced. Empty string returned.")
+            return("")
+        }
+        ##### if there is a lenLimit, restrict consensus length to 
+        # the shorter of longest possible length and lenLimit
+        if (!is.null(lenLimit)) {
+            lenConsensus = min(lenConsensus, lenLimit)
+        }
+        # as.matrix so that it works even with lenConsensus of 1
+        tabMtx = as.matrix(tabMtx[, 1:lenConsensus])
+        
+        ### convert absolute count to fraction
+        tabMtx = tabMtx/numSeqs
+        # remove "na" row
+        # as.matrix so that it works even with lenConsensus of 1
+        tabMtx = as.matrix(tabMtx[-which(rownames(tabMtx)=="na"), ])
+        
+        if (mtd=="thresholdedFreq") {
+            #print(mtd) # for testing
+            # use as.matrix so that apply won't break with ncol(tabMtx)=1
+            consensus = apply(as.matrix(tabMtx), 2, function(x){
+                idx = which(x >= minFreq)
+                # if no character >= the threshold, assign an N
+                if (length(idx)==0) {
+                    return("N")
+                    # if there is no tie
+                } else if (length(idx)==1){
+                    return(names(x)[idx])
+                    # if there are ties (multiple characters >= the threhold)
+                } else if (length(idx)>1) {
+                    # ambiguous character allowed
+                    if (includeAmbiguous) {
+                        return(chars2Ambiguous(tabMtxRownames[idx]))
+                        # ambiguous characters not allowed
+                    } else {
+                        # stochastic
+                        if (breakTiesStochastic) {
+                            return(names(x)[sample(x=idx, size=1)])
+                            # first one is returned
+                            # the order is built-in from tabMtxRownames
+                        } else {
+                            return(names(x)[idx[1]])
+                        }
+                    }
+                }
+            })
+        } else if (mtd=="mostCommon") { 
+            #print(mtd) # for testing
+            # use as.matrix so that apply won't break with ncol(tabMtx)=1
+            consensus = apply(as.matrix(tabMtx), 2, function(x){
+                max.freq = max(x)
+                tol = 1e-5 # tolerance
+                max.idx = which( abs(x-max.freq)<=tol )
+                
+                # if there is no tie
+                if (length(max.idx)==1){
+                    return(names(x)[max.idx])
+                    # if there are ties (multiple characters with maximal frequency)
+                } else if (length(max.idx)>1) {
+                    # ambiguous character allowed
+                    if (includeAmbiguous) {
+                        return(chars2Ambiguous(tabMtxRownames[max.idx]))
+                        # ambiguous characters not allowed
+                    } else {
+                        # stochastic
+                        if (breakTiesStochastic) {
+                            return(names(x)[sample(x=max.idx, size=1)])
+                            # first one is returned
+                            # the order is built-in from tabMtxRownames
+                        } else {
+                            return(names(x)[max.idx[1]])
+                        }
+                    }
+                }
+            })
+        } else if (mtd=="catchAll") {
+            #print(mtd) # for testing
+            # use as.matrix so that apply won't break with ncol(tabMtx)=1
+            consensus = apply(as.matrix(tabMtx), 2, function(x){
+                # all characters that appear at a position across seqs
+                nonZeroNucs = rownames(tabMtx)[x>0]
+                # convert characters to (ambiguous) characters
+                return(chars2Ambiguous(nonZeroNucs))
+            })
+        }
+        
+        # check there is no ambiguous characters if includeAmbiguous if F 
+        if ( (mtd=="thresholdedFreq" | mtd=="mostCommon") & !includeAmbiguous ) {
+            ambiguous = NUCLEOTIDES_AMBIGUOUS[!NUCLEOTIDES_AMBIGUOUS %in% 
+                                                           c("A","C","G","T","N","-",".")]
+            stopifnot( !any(consensus %in% ambiguous) )
+        }
+        
+        # convert from character vector to string
+        consensus = c2s(consensus)
+        # sanity check
+        stopifnot( nchar(consensus)==lenConsensus )
+    }
+    
+    ##### methods = mostMutated, leastMutated
+    if (mtd %in% c("mostMutated", "leastMutated")) {
+        # if there's a lenLimit
+        # if a seq is longer than lenLimit, trim it; otherwise, leave it as is
+        if (!is.null(lenLimit)) {
+            idxLong = which(lenSeqs > lenLimit)
+            seqs[idxLong] = substr(seqs[idxLong], 1, lenLimit)
+        }
+        
+        ##### get index of seqs that fulfill the criterion
+        # muFreq should have been calculated being on sequences with restricted lengths as defined by
+        # regionDefinition (which gives rise to lenLimit)
+        if (mtd=="mostMutated") {
+            #print(mtd) # for testing
+            targetMuFreq = max(muFreq)
+        } else if (mtd=="leastMutated") {
+            #print(mtd) # for testing
+            targetMuFreq = min(muFreq)
+        }
+        tol = 1e-5 # tolerance
+        idx = which( abs(muFreq-targetMuFreq)<=tol )
+        
+        ##### if there are no ties
+        if (length(idx)==1) {
+            consensus = seqs[idx]
+            ##### if there are ties
+        } else if (length(idx)>1) {
+            
+            ### stochastic: randomly pick one from idx
+            if (breakTiesStochastic) {
+                consensus = seqs[sample(x=idx, size=1)]
+                
+                ### deterministic: pick one from idx based on breakTiesByColumns    
+            } else if (!is.null(breakTiesByColumns)) {
+                idx = breakTiesHelper(idx=idx, cols=breakTiesByColumns[[1]], 
+                                      funs=breakTiesByColumns[[2]], db=db[idx, ])
+                consensus = seqs[idx]
+                
+                ### deterministic: pick first one from idx    
+            } else {
+                consensus = seqs[idx[1]]
+            }
+        }
+        
+    }
+    
+    # check length
+    if (!is.null(lenLimit)) {
+        stopifnot(nchar(consensus) <= lenLimit)
+    }
+    
+    if (mtd %in% c("mostMutated", "leastMutated")) {
+        return(list(cons=consensus, muFreq=targetMuFreq))
+    } else {
+        return(list(cons=consensus, muFreq=NULL))
+    }
+}
+
+# Calculate clonal consensus for a single clone
+# 
+# Given an aligned set of input/observed sequences and an aligned set of germline sequences, 
+# generate an input/observed consensus and a germline consensus. 
+#
+# @param   db                  \code{data.frame} containing sequence data for a single clone. 
+#                              Required.
+# @param   sequenceColumn      \code{character} name of the column containing input 
+#                              sequences. Required. The length of each input sequence should 
+#                              match that of its corresponding germline sequence.
+# @param   germlineColumn      \code{character} name of the column containing germline 
+#                              sequences. Required. The length of each germline sequence should 
+#                              match that of its corresponding input sequence.
+# @param   muFreqColumn        \code{character} name of the column containing mutation
+#                              frequency. Applicable to and required for the \code{"mostMutated"}
+#                              and \code{"leastMutated"} methods. Default is \code{NULL}. See 
+#                              "Details" for a note of caution.
+# @param   regionDefinition    \link{RegionDefinition} object defining the regions and boundaries 
+#                              of the Ig sequences. Optional. Default is \code{NULL}.
+# @param   method              method for calculating input consensus sequence. Required. One of 
+#                              \code{"thresholdedFreq"}, \code{"mostCommon"}, \code{"catchAll"},
+#                              \code{"mostMutated"}, or \code{"leastMutated"}. See "Methods" under
+#                              \link{collapseClones} for details.
+# @param   minimumFrequency    frequency threshold for calculating input consensus sequence.
+#                              Applicable to and required for the \code{"thresholdedFreq"} method. 
+#                              A canonical choice is 0.6. Default is \code{NULL}. 
+# @param   includeAmbiguous    whether to use ambiguous characters to represent positions at
+#                              which there are multiple characters with frequencies that are at least
+#                              \code{minimumFrequency} or that are maximal (i.e. ties). Applicable to 
+#                              and required for the \code{"thresholdedFreq"} and \code{"mostCommon"} 
+#                              methods. Default is \code{FALSE}. See "Choosing ambiguous characters" 
+#                              under \link{collapseClones} for rules on choosing ambiguous characters. 
+# @param   breakTiesStochastic In case of ties, whether to randomly pick a sequence from sequences that
+#                              fulfill the criteria as consensus. Applicable to and required for all methods
+#                              except for \code{"catchAll"}. Default is \code{FALSE}. See "Methods" 
+#                              under \link{collapseClones} for details. 
+# @param   breakTiesByColumns  A list of the form \code{list(c(col_1, col_2, ...), c(fun_1, fun_2, ...))}, 
+#                              where \code{col_i} is a \code{character} name of a column in \code{db},
+#                              and \code{fun_i} is a function to be applied on that column. Currently, 
+#                              only \code{max} and \code{min} are supported. Applicable to and optional for
+#                              the \code{"mostMutated"} and \code{"leastMutated"} methods. If supplied, 
+#                              \code{fun_i}'s are applied on \code{col_i}'s to help break ties. Default is 
+#                              \code{NULL}. See "Methods" under \link{collapseClones} for details.                                                             
+#                              
+# @return  A named list of length 3. "inputCons" and "germlineCons" are the consensus sequences. 
+#          The input and germline consensus sequences have the same length. "inputMuFreq" is the 
+#          maximal/minimal mutation frequency for the input consensus for the \code{"mostMutated"} 
+#          and \code{"leastMutated"} methods, and \code{NULL} for all other methods.
+# 
+# @details See \link{collapseClones} for detailed documention on methods and additional parameters.
+# 
+#          Caution: when using the \code{"mostMutated"} and \code{"leastMutated"} methods, if you 
+#          supply a \code{regionDefinition}, it is your responsibility to ensure that the mutation 
+#          frequency in\code{muFreqColumn} was calculated with sequence lengths restricted to the 
+#          \strong{same} \code{regionDefinition} you are supplying. Otherwise, the 
+#          "most/least mutated" sequence you obtain might not be the most/least mutated given the 
+#          \code{regionDefinition} supplied, because your mutation frequency was based on a 
+#          \code{regionDefinition} different from the one supplied.
+#                                       
+# @seealso
+# See \link{collapseClones} for constructing consensus for all clones.
 # 
 # @examples
 # # Subset example data
@@ -245,355 +1114,92 @@ collapseClones <- function(db,
 # clone <- db[db$CLONE=="3192", ]
 # # Number of sequences in this clone
 # nrow(clone)
+# # compute mutation frequency for most/leastMutated methods
+# clone = observedMutations(db=clone, frequency=TRUE, combine=TRUE)
+# # manually create a tie
+# clone = rbind(clone, clone[which.max(clone$MU_FREQ), ])
 # 
-# # Get consensus input sequence
-# consInput <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT, 
-#                                        mtd="thresholdedFreq", minFreq=0.65)
-#                             
-calcClonalConsensusHelper = function(seqs, minFreq=0.6, lenLimit=NULL,
-                                     mtd=c("thresholdedFreq", "mostCommon", "catchAll"),
-                                     includeAmbiguous=FALSE) {
-    mtd = match.arg(mtd)
-    
-    # check minFreq
-    if (mtd=="thresholdedFreq") {
-        if (!is.numeric(minFreq)) {
-            stop("minFreq must be a numeric value.")
-        } else {
-            if ( minFreq<0 | minFreq>1 ) {
-                stop("minFreq must be between 0 and 1.")
-            }
-        }
-    }
-    
-    # check includeAmbiguous
-    if (mtd %in% c("thresholdedFreq", "mostCommon")) {
-        if (class(includeAmbiguous) != "logical") {
-            stop ("includeAmbiguous must be TRUE or FALSE.")
-        }
-    }
-    
-    numSeqs = length(seqs)
-    
-    ##### if only one sequence in clone, return it
-    if (numSeqs==1) {
-        # restrict length if there is a lenLimit
-        if (!is.null(lenLimit)) {
-            return(substr(seqs, 1, min(lenLimit, nchar(seqs))))
-        } else {
-            # otherwise, return as is
-            return(seqs)
-        }
-    }
-    
-    ##### if all sequences are the same, return now
-    if (length(unique(seqs))==1) {
-        # restrict length if there is a lenLimit
-        if (!is.null(lenLimit)) {
-            return(substr(seqs[1], 1, min(lenLimit, nchar(seqs))))
-        } else {
-            # otherwise, return as is
-            return(seqs[1])
-        }
-    }
-    
-    ##### length of longest sequence in seqs
-    lenSeqs = nchar(seqs)
-    lenMax = max(lenSeqs, na.rm=T)
-    
-    ##### convert seqs to a matrix
-    # if there's no more nucleotide when a seq ends, fill position with NA
-    seqsMtx = matrix(NA, nrow=numSeqs, ncol=lenMax)
-    for (i in 1:numSeqs) {
-        seqsMtx[i, 1:lenSeqs[i]] = s2c(seqs[i])
-    }
-    
-    ##### tabulation matrix
-    # col: nucleotide position
-    # row: A,T,G,C,N,.,-,na (to distinguish from NA)
-    tabMtxRownames = c("A","T","G","C","N",".","-","na")
-    tabMtx = matrix(0, ncol=lenMax, nrow=8, 
-                    dimnames=list(tabMtxRownames, NULL))
-    ## across seqs, at each nuc position, how many A, T, G, C, N, ., -? 
-    # this does not capture NA
-    for (j in 1:ncol(seqsMtx)) {
-        tab = table(seqsMtx[, j])
-        tabMtx[match(names(tab), tabMtxRownames), j] = tab
-    }
-    ## across seqs, at each nuc position, how many NAs?
-    numNAs = colSums(is.na(seqsMtx))
-    tabMtx["na", ] = numNAs
-    # sanity check: counts at each nuc pos (colSum) should sum up to number of seqs
-    stopifnot( sum( colSums(tabMtx)==numSeqs )  == ncol(tabMtx)  )
-    
-    ##### only keep positions at which majority of seqs contain information
-    ### if there are odd number of n seqs, keep position if it has > floor(n/2) non-NAs
-    # e.g. 5 input seqs, >2 non-NA; 2=floor(5/2)
-    ### if there are even number of n seqs,  keep position if it has > n/2 non-NAs
-    # e.g. 6 input seqs, >3 non-NA; 3=6/2=floor(6/2)
-    numNonNAs = numSeqs - numNAs
-    nonNA.keep = numNonNAs > floor(numSeqs/2)
-    # length of longest possible consensus seq
-    lenConsensus = sum(nonNA.keep)
-    if (lenConsensus==0) {
-        warning("Consensus cannot be produced. Empty string returned.")
-        return("")
-    }
-    ##### if there is a lenLimit, restrict consensus length to 
-    # the shorter of longest possible length and lenLimit
-    if (!is.null(lenLimit)) {
-        lenConsensus = min(lenConsensus, lenLimit)
-    }
-    # as.matrix so that it works even with lenConsensus of 1
-    tabMtx = as.matrix(tabMtx[, 1:lenConsensus])
-    
-    ### convert absolute count to fraction
-    tabMtx = tabMtx/numSeqs
-    # remove "na" row
-    # as.matrix so that it works even with lenConsensus of 1
-    tabMtx = as.matrix(tabMtx[-which(rownames(tabMtx)=="na"), ])
-    
-    if (mtd=="thresholdedFreq") {
-        # use as.matrix so that apply won't break with ncol(tabMtx)=1
-        consensus = apply(as.matrix(tabMtx), 2, function(x){
-            idx = which(x >= minFreq)
-            # if no character >= the threshold, assign an N
-            if (length(idx)==0) {
-                return("N")
-            } else {
-                # if multiple characters >= the threhold, 
-                if (includeAmbiguous) {
-                    # ambiguous character allowed
-                    return(chars2Ambiguous(tabMtxRownames[idx]))
-                } else {
-                    # first one is returned
-                    # the order is built-in from tabMtxRownames
-                    return(names(x)[idx[1]])
-                }
-            }
-        })
-    } else if (mtd=="mostCommon") { #*
-        if (includeAmbiguous) {
-            # use as.matrix so that apply won't break with ncol(tabMtx)=1
-            consensus = apply(as.matrix(tabMtx), 2, function(x){
-                max.freq = max(x)
-                tol = 1e-5 # tolerance
-                max.idx = which( abs(x-max.freq)<=tol )
-                return( chars2Ambiguous(tabMtxRownames[max.idx]) )
-            })
-        } else {
-            # if multiple characters occur with max freq, first one is returned
-            # the order is built-in from tabMtxRownames
-            # use as.matrix so that apply won't break with ncol(tabMtx)=1
-            max.idx = apply(as.matrix(tabMtx), 2, which.max)
-            # can do this because max.idx cannot exceed nrow(tabMtx) 
-            # so even though last row of tabMtx ("na") has been removed, it's not a problem
-            stopifnot(!any(max.idx>nrow(tabMtx)))
-            consensus = tabMtxRownames[max.idx]
-        }
-    } else if (mtd=="catchAll") {
-        # use as.matrix so that apply won't break with ncol(tabMtx)=1
-        consensus = apply(as.matrix(tabMtx), 2, function(x){
-            # all characters that appear at a position across seqs
-            nonZeroNucs = rownames(tabMtx)[x>0]
-            # convert characters to (ambiguous) characters
-            return(chars2Ambiguous(nonZeroNucs))
-        })
-    }
-    
-    # check there is no ambiguous characters if includeAmbiguous if F 
-    if ( (mtd=="thresholdedFreq" | mtd=="mostCommon") & !includeAmbiguous ) {
-        ambiguous = NUCLEOTIDES_AMBIGUOUS[!NUCLEOTIDES_AMBIGUOUS %in% 
-                                              c("A","C","G","T","N","-",".")]
-        stopifnot( sum(consensus %in% ambiguous)==0 )
-    }
-    
-    # convert from character vector to string
-    consensus = c2s(consensus)
-    # sanity check
-    stopifnot( nchar(consensus)==lenConsensus )
-    
-    return(consensus)
-}
-
-#' Calculate clonal consensus for a single clone
-#' 
-#' Given an aligned set of input/observed sequences and an aligned set of germline sequences, 
-#' generate an input/observed consensus and a germline consensus. 
-#'
-#' @param   inputSeq            character vector of observed sequences. The lengths of each input
-#'                              sequence should match that of its corresponding germline sequence.
-#' @param   germlineSeq         character vector of germline sequences. The lengths of each germline
-#'                              sequence should match that of its corresponding input sequence.
-#' @param   regionDefinition    \link{RegionDefinition} object defining the regions and boundaries 
-#'                              of the Ig sequences.
-#' @param   method              method to calculate consensus sequence. One of \code{thresholdedFreq}, 
-#'                              \code{mostCommon}, or \code{catchAll}. See \code{Details}.
-#' @param   minimumFrequency    minimum frequency. Required if \code{method} is \code{thresholdedFreq}.
-#'                              Default is 0.6. See \code{Details}.
-#' @param   includeAmbiguous    Required for methods \code{"thresholdedFreq"} and \code{"mostCommon"}. 
-#'                              If \code{TRUE}, use ambiguous characters to represent positions at 
-#'                              which there are multiple characters with frequencies that are at least
-#'                              \code{minimumFrequency} or that are maximal. Default is \code{FALSE}. 
-#'                              See \code{Details} for rules on choosing ambiguous characters.                              
-#'                              
-#' @return  A named vector of length two with "input" and "germline" consensus sequences. The
-#'          input and germline consensus sequences have the same length.
-#' 
-#' @details The input/observed consensus is generated with the method of choice indicated by 
-#'          \code{method}. The germline consensus is generated with the \code{mostCommon} method. 
-#' 
-#'          The lengths of the consensus sequences are determined by the longest possible consensus 
-#'          sequence (baesd on \code{inputSeq} and \code{germlineSeq}) and 
-#'          \code{regionDefinition@seqLength} (if supplied), whichever is shorter.
-#' 
-#'          The descriptions below use \code{seqs} as a generalization of either \code{inputSeq} 
-#'          or \code{germlineSeq}.
-#' 
-#'          Note that this function does not perform multiple sequence alignment. As a 
-#'          prerequisite, it is assumed that sequences in \code{seqs} have been aligned
-#'          somehow. In the case of immunoglobulin repertoire analysis, this usually means
-#'          that the sequences are IMGT-gapped.
-#' 
-#'          Given a set of sequences of potentially varying lengths, the longest possible 
-#'          length of their consensus sequence is taken to be the longest length along 
-#'          which there is information contained at every nucleotide position across 
-#'          majority of the sequences. Majority is defined to be greater than 
-#'          \code{floor(n/2)}, where \code{n} is the number of sequences. If the longest 
-#'          possible consensus length is 0, there will be a warning and an empty string 
-#'          (\code{""}) will be returned. 
-#'          
-#'          If a length limit is defined by supplying a \code{regionDefinition} via 
-#'          \code{regionDefinition@seqLength}, the consensus length will be further 
-#'          restricted to the shorter of the longest possible length and 
-#'          \code{regionDefinition@seqLength}.
-#'          
-#'          All three methods available are deterministic. Where applicable depending on
-#'          \code{seqs}, the \code{"catchAll"} method always returns a consensus containing
-#'          IUPAC ambiguous characters. Unless specified by \code{includeAmbiguous=TRUE},
-#'          the \code{"thresholdedFreq"} and \code{"mostCommon"} methods do not include 
-#'          ambiguous characters in the consensus returned.
-#'          
-#'          For the \code{"thresholdedFreq"} method, a value must be supplied to the 
-#'          argument \code{minimumFrequency}. At each position along the length of the 
-#'          consensus sequence, the frequency of each nucleotide/character across 
-#'          sequences is tabulated. The nucleotide/character whose frequency is at least 
-#'          (i.e. \code{>=}) \code{minimumFrequency} becomes the consensus. With 
-#'          \code{includeAmbiguous=FALSE}, if frequencies of multiple nucleotides/characters 
-#'          are at least \code{minimumFrequency}, the first one is taken to be the consensus 
-#'          following the order of \code{"A"}, \code{"T"}, \code{"G"}, \code{"C"}, \code{"N"}, 
-#'          \code{"."}, and \code{"-"}. Below are some examples looking at a single position 
-#'          based on 5 sequences with \code{minFreq=0.6}:
-#'          
-#'          \itemize{
-#'              \item If the sequences have \code{"A"}, \code{"A"}, \code{"A"}, \code{"T"}, 
-#'                    \code{"C"}, the consensus will be \code{"A"}, because \code{"A"} has 
-#'                    frequency 0.6, which is at least \code{minimumFrequency}.
-#'              \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, \code{"T"}, 
-#'                    \code{"C"}, the consensus will be \code{"N"}, because none of 
-#'                    \code{"A"}, \code{"T"}, or \code{"C"} has frequency that is at least 
-#'                    \code{minimumFrequency}.
-#'                  }
-#'                  
-#'          For the \code{"mostCommon"} method, the most frequent nucleotide/character 
-#'          across sequences at each position along the length of the consensus sequence 
-#'          makes up the consensus. With \code{includeAmbiguous=FALSE}, if there are multiple 
-#'          nucleotides/characters with equally maximal frequencies, the first one is taken 
-#'          to be the consensus following the order of \code{"A"}, \code{"T"}, \code{"G"}, 
-#'          \code{"C"}, \code{"N"}, \code{"."}, and \code{"-"}. Below are some examples 
-#'          looking at a single position based on 5 sequences:
-#'          
-#'          \itemize{
-#'               \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, \code{"A"},
-#'                     \code{"C"}, the consensus will be \code{"A"}.
-#'               \item If the sequences have \code{"T"}, \code{"T"}, \code{"C"}, \code{"C"}, 
-#'                     \code{"G"}, the consensus will be \code{"T"}, because \code{"T"} is 
-#'                     before \code{"C"} in the order of \code{"A"}, \code{"T"}, \code{"G"}, 
-#'                     \code{"C"}, \code{"N"}, \code{"."}, and \code{"-"}. 
-#'                  }
-#'                  
-#'          For the method \code{"catchAll"}, a consensus sequence capturing most of the 
-#'          information contained in the sequences is obtained. Ambiguous characters are 
-#'          used where applicable. The rules on choosing ambiguous characters are as follows:
-#'          
-#'          \itemize{
-#'               \item If a position contains only \code{"N"} across sequences, the consensus 
-#'                     at that position is \code{"N"}.
-#'               \item If a position contains one or more of \code{"A"}, \code{"T"}, \code{"G"}, 
-#'                     or \code{"C"}, the consensus will be an IUPAC character representing all 
-#'                     of the characters present, regardless of whether \code{"N"}, \code{"-"}, or
-#'                     \code{"."} is present.
-#'               \item If a position contains only \code{"-"} and \code{"."} across sequences, 
-#'                     the consensus at thatp osition is taken to be \code{"-"}. 
-#'               \item If a position contains only one of \code{"-"} or \code{"."} across 
-#'                     sequences, the consensus at that position is taken to be the character 
-#'                     present. 
-#'          }
-#'          
-#'          Below are some examples for \code{method="catchAll"} looking at a single position 
-#'          based on 5 sequences:
-#'          
-#'          \itemize{
-#'               \item If the sequences have \code{"N"}, \code{"N"}, \code{"N"}, \code{"N"}, 
-#'                     \code{"N"}, the consensus will be \code{"N"}.
-#'               \item If the sequences have \code{"N"}, \code{"A"}, \code{"A"}, \code{"A"}, 
-#'                     \code{"A"}, the consensus will be \code{"A"}.
-#'               \item If the sequences have \code{"N"}, \code{"A"}, \code{"G"}, \code{"A"}, 
-#'                     \code{"A"}, the consensus will be \code{"R"}.
-#'               \item If the sequences have \code{"-"}, \code{"-"}, \code{"."}, \code{"."}, 
-#'                     \code{"."}, the consensus will be \code{"-"}.
-#'               \item If the sequences have \code{"-"}, \code{"-"}, \code{"-"}, \code{"-"}, 
-#'                     \code{"-"}, the consensus will be \code{"-"}.
-#'               \item If the sequences have \code{"."}, \code{"."}, \code{"."}, \code{"."}, 
-#'                     \code{"."}, the consensus will be \code{"."}.
-#'                  }
-#'                  
-#'          The same rules on choosing ambiguous characters for \code{method="catchAll"} apply
-#'          to methods \code{"thresholdedFreq"} and \code{"mostCommon"} when 
-#'          \code{includeAmbiguous=TRUE}.
-#'          
-#' @seealso
-#' See \link{collapseClones} for constructing consensus for all clones.
-#' 
-#' @examples
-#' # Subset example data
-#' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
-#' 
-#' # Data corresponding to a single clone
-#' clone <- db[db$CLONE=="3192", ]
-#' # Number of sequences in this clone
-#' nrow(clone)
-#' 
-#' # Get consensus input and germline sequences
-#' cons <- calcClonalConsensus(inputSeq=clone$SEQUENCE_IMGT, 
-#'                             germlineSeq=clone$GERMLINE_IMGT_D_MASK,
-#'                             method="catchAll")
-#' 
-#' @export
-calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL, 
-                                method=c("thresholdedFreq", "mostCommon", "catchAll"), 
-                                minimumFrequency=0.6, includeAmbiguous=FALSE) {
-    
+# # Get consensus input and germline sequences
+# # thresholdedFreq method, resolve ties deterministically without using ambiguous characters
+# cons1 <- calcClonalConsensus(db=clone,
+#                              muFreqColumn=NULL, regionDefinition=NULL,
+#                              method="thresholdedFreq", 
+#                              minimumFrequency=0.3, includeAmbiguous=FALSE,
+#                              breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
+# # thresholdedFreq method, resolve ties deterministically using ambiguous characters
+# cons2 <- calcClonalConsensus(db=clone,
+#                              muFreqColumn=NULL, regionDefinition=NULL,
+#                              method="thresholdedFreq", 
+#                              minimumFrequency=0.3, includeAmbiguous=TRUE,
+#                              breakTiesStochastic=FALSE, breakTiesByColumns=NULL)  
+# # thresholdedFreq method, resolve ties stochastically
+# cons3 <- calcClonalConsensus(db=clone,
+#                              muFreqColumn=NULL, regionDefinition=NULL,
+#                              method="thresholdedFreq", 
+#                              minimumFrequency=0.3, includeAmbiguous=FALSE,
+#                              breakTiesStochastic=TRUE, breakTiesByColumns=NULL)  
+# # mostCommon method, resolve ties deterministically without using ambiguous characters
+# cons4 <- calcClonalConsensus(db=clone,
+#                              muFreqColumn=NULL, regionDefinition=NULL,
+#                              method="mostCommon", 
+#                              minimumFrequency=NULL, includeAmbiguous=FALSE,
+#                              breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
+# # mostCommon method, resolve ties deterministically  using ambiguous characters
+# cons5 <- calcClonalConsensus(db=clone,
+#                              muFreqColumn=NULL, regionDefinition=NULL,
+#                              method="mostCommon", 
+#                              minimumFrequency=NULL, includeAmbiguous=TRUE,
+#                              breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
+# # mostCommon method, resolve ties stochastically
+# cons6 <- calcClonalConsensus(db=clone,
+#                              muFreqColumn=NULL, regionDefinition=NULL,
+#                              method="mostCommon", 
+#                              minimumFrequency=NULL, includeAmbiguous=FALSE,
+#                              breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
+# # catchAll method
+# cons7 <- calcClonalConsensus(db=clone,
+#                              muFreqColumn=NULL, regionDefinition=NULL,
+#                              method="catchAll", 
+#                              minimumFrequency=NULL, includeAmbiguous=FALSE,
+#                              breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
+# # mostMutated method, resolve ties stochastically
+# cons8 <- calcClonalConsensus(db=clone,
+#                              muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                              method="mostMutated", 
+#                              minimumFrequency=NULL, includeAmbiguous=FALSE,
+#                              breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
+# # mostMutated method, resolve ties deterministically using additional columns
+# cons9 <- calcClonalConsensus(db=clone,
+#                              muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                              method="mostMutated", 
+#                              minimumFrequency=NULL, includeAmbiguous=FALSE,
+#                              breakTiesStochastic=FALSE, 
+#                              breakTiesByColumns=list(c("JUNCTION_LENGTH", "DUPCOUNT"), c(max, max)))
+# cons10 <- calcClonalConsensus(db=clone,
+#                               muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                               method="mostMutated", 
+#                               minimumFrequency=NULL, includeAmbiguous=FALSE,
+#                               breakTiesStochastic=FALSE, 
+#                               breakTiesByColumns=list(c("DUPCOUNT"), c(max)))
+# # mostMutated method, resolve ties deterministically without using additional columns
+# cons11 <- calcClonalConsensus(db=clone,
+#                               muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                               method="mostMutated", 
+#                               minimumFrequency=NULL, includeAmbiguous=FALSE,
+#                               breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
+# @export
+calcClonalConsensus <- function(db, 
+                                sequenceColumn="SEQUENCE_IMGT", 
+                                germlineColumn="GERMLINE_IMGT_D_MASK", 
+                                muFreqColumn=NULL,
+                                regionDefinition=NULL, 
+                                method=c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"), 
+                                minimumFrequency=NULL, includeAmbiguous=FALSE,
+                                breakTiesStochastic=FALSE, breakTiesByColumns=NULL) {
     method = match.arg(method)
     
-    # check minimumFrequency
-    if (method=="thresholdedFreq") {
-        if (!is.numeric(minimumFrequency)) {
-            stop("minimumFrequency must be a numeric value.")
-        } else {
-            if ( minimumFrequency<0 | minimumFrequency>1 ) {
-                stop("minimumFrequency must be between 0 and 1.")
-            }
-        }
-    }
-    
-    # check includeAmbiguous
-    if (method %in% c("thresholdedFreq", "mostCommon")) {
-        if (class(includeAmbiguous) != "logical") {
-            stop ("includeAmbiguous must be TRUE or FALSE.")
-        }
-    }
+    inputSeq = db[[sequenceColumn]]
+    germlineSeq = db[[germlineColumn]]
     
     # length of seqs in inputSeq and those in germlineSeq should match
     if ( sum(nchar(inputSeq)==nchar(germlineSeq)) != length(inputSeq) ) {
@@ -613,20 +1219,44 @@ calcClonalConsensus <- function(inputSeq, germlineSeq, regionDefinition=NULL,
     }
     
     ##### get consensus germline sequence (most common)
-    germCons = calcClonalConsensusHelper(seqs=germlineSeq, mtd="mostCommon", 
-                                         minFreq=NULL, lenLimit=lenRegion,
-                                         includeAmbiguous=includeAmbiguous)
+    # NULL for minFreq and muFreqColumn b/c mostCommon definitely doesn't need them
+    germCons = calcClonalConsensusHelper(seqs=germlineSeq, minFreq=NULL, lenLimit=lenRegion,
+                                         mtd="mostCommon", 
+                                         includeAmbiguous=includeAmbiguous,
+                                         breakTiesStochastic=breakTiesStochastic,
+                                         breakTiesByColumns=breakTiesByColumns,
+                                         muFreqColumn=NULL, db=db)$cons
     
     ##### get consensus observed sequence
-    inputCons = calcClonalConsensusHelper(seqs=inputSeq, mtd=method, 
-                                          minFreq=minimumFrequency, lenLimit=lenRegion,
-                                          includeAmbiguous=includeAmbiguous)
+    inputConsMuFreq = calcClonalConsensusHelper(seqs=inputSeq, minFreq=minimumFrequency, lenLimit=lenRegion,
+                                                mtd=method, 
+                                                includeAmbiguous=includeAmbiguous,
+                                                breakTiesStochastic=breakTiesStochastic,
+                                                breakTiesByColumns=breakTiesByColumns,
+                                                muFreqColumn=muFreqColumn, db=db)
+    inputCons = inputConsMuFreq$cons
+    inputMuFreq = inputConsMuFreq$muFreq
+    
+    if (method %in% c("mostMutated", "leastMutated")) {
+        # possible to have inputCons shorter than germCons 
+        # (when length of most/least mutated seq < lenLimit; 
+        #  recall that length of germCons is at max. lenLimit)
+        # in that case, trim germCons to same length as inputCons
+        if (nchar(inputCons)<nchar(germCons)) {
+            germCons = substr(inputCons, 1, nchar(inputCons))
+        # by design, inputCons should not be longer than germCons (at most equal length)
+        } else if (nchar(inputCons)>nchar(germCons)) {
+            stop ("Unexpected input consensus (longer than germline consensus) returned.")
+        }
+    }
     
     # sanity check: length of germCons and inputCons should be the same
+    # all methods other than most/leastMutated should expect same lengths of inputCons & germCons
     stopifnot( nchar(germCons)==nchar(inputCons) )
     
-    return(c("input"=inputCons, "germline"=germCons))
+    return(list("inputCons"=inputCons, "germlineCons"=germCons, "inputMuFreq"=inputMuFreq))
 }
+
 
 
 
@@ -2167,7 +2797,7 @@ nucs2IUPAC = function(nucs) {
 # @param   chars     a character vector of nucleotides. One or more of 
 #                    \code{c("A", "C", "G", "T", "N", "-", ".")}.
 # 
-# @return  BLAH
+# @return  a single IUPAC character or "-" or "."
 #
 # tests
 # chars2Ambiguous(c("A", "T")) =="W"
