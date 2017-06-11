@@ -1070,3 +1070,296 @@ test_that("observedMutations, 1H, using mock data from 1A through 1F", {
                  (exp.noRegDef.R+exp.noRegDef.S)/exp.noRegDef.nonN)
     
 })
+
+test_that("calcClonalConsensusHelper, 2A, miscellaneous", {
+    ##### only 1 seq
+    seq1 = "ATGCATGCATGCA"
+    # region def spanning nucleotides 1 through 12
+    regDef1 = createRegionDefinition(boundaries=factor(rep(c("W", "Y"), each=6)))
+    # no region def
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seq1),
+                 list(cons=seq1, muFreq=NULL))
+    # with region def
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seq1, 
+                                                    lenLimit=regDef1@seqLength),
+                 list(cons=substr(seq1, 1, regDef1@seqLength), muFreq=NULL))
+    
+    ##### multiple identical seqs
+    # no region def
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=rep(seq1, 7)),
+                 list(cons=seq1, muFreq=NULL))
+    # with region def
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=rep(seq1, 7), 
+                                                    lenLimit=regDef1@seqLength),
+                 list(cons=substr(seq1, 1, regDef1@seqLength), muFreq=NULL))
+})
+
+test_that("calcClonalConsensusHelper, 2B, methods = thresholdedFreq, mostCommon, catchAll", {
+    # seq1: A T G C A T G C A T  -  G  .  N  T  C  
+    # seq2: A T G G A T C G N T  -  A  .  G  N  C  G  C
+    # seq3: A C T G A C T . A T  -  T  .  T  A  .  N 
+    # seq4: T C G A A C C T A G  .  C  .  G  -  G  A  A  A
+    # seq5: C G T A A T G - A A  -  A  .  C  G  A  T  T  A
+    # pos   1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+    
+    # frequencies (by pos)
+    # 1: A 0.6 T 0.2 C 0.2 | thresh=0.6: A | thresh=0.4: A | mostCommon: A | catchAll: H
+    # 2: T 0.4 G 0.2 C 0.4 | thresh=0.6: N | thresh=0.4: TC=Y | mostCommon: TC=Y | catchAll: B
+    # 3: T 0.4 G 0.6 | thresh=0.6: G | thresh=0.4: TG=K | mostCommon: G | catchAll: K
+    # 4: A 0.4 G 0.4 C 0.2 | thresh=0.6: N | thresh=0.4: AG=R | mostCommon: AG=R | catchAll: V
+    # 5: A 1 | thresh=0.6: A | thresh=0.4: A | mostCommon: A | catchAll: A
+    # 6: T 0.6 C 0.4 | thresh=0.6: T | thresh=0.4: TC=Y | mostCommon: T | catchAll: Y
+    # 7: T 0.2 G 0.4 C 0.4 | thresh=0.6: N | thresh=0.4: GC=S | mostCommon: GC=S | catchAll: B
+    # 8: T 0.2 G 0.2 C 0.2 - 0.2 . 0.2 | thresh=0.6: N | thresh=0.4:N | mostCommon: TGC-.=TGC=B | catchAll: TGC-.=TGC=B
+    # 9: A 0.8 N 0.2 | thresh=0.6: A | thresh=0.4: AN=A | mostCommon: A | catchAll: AN=A
+    #10: A 0.2 T 0.6 G 0.2 | thresh=0.6: T | thresh=0.4: T | mostCommon: T | catchAll: ATG=D
+    #11: - 0.8 . 0.2 | thresh=0.6: - | thresh=0.4: - | mostCommon: - | catchAll: -.=-
+    #12: A 0.4 T 0.2 G 0.2 C 0.2 | thresh=0.6: N | thresh=0.4: A | mostCommon: A | catchAll: ATGC=N
+    #13: . 1 | thresh=0.6: . | thresh=0.4: . | mostCommon: . | catchAll: .
+    #14: T 0.2 G 0.4 C 0.2 N 0.2 | thresh=0.6: N | thresh=0.4: G | mostCommon: G | catchAll: TGCN=TGC=B
+    #15: A 0.2 T 0.2 G 0.2 N 0.2 - 0.2 | thresh=0.6: N | thresh=0.4: N | mostCommon: ATGN-=ATG=D | catchAll: ATGN-=ATG=D
+    #16: A 0.2 G 0.2 C 0.4 . 0.2 | thresh=0.6: N | thresh=0.4: C | mostCommon: C | catchAll: AGC.=AGC=V
+    #17: (majority=floor(5/2)=2; 4>2 seqs have info at pos 17)
+    #    A 0.25 T 0.25 G 0.25 N 0.25 | thresh=0.6: N | thresh=0.4: N | mostCommon: ATGN=ATG=D | catchAll: ATGN=ATG=D
+    #18: (majority=floor(5/2)=2; 3>2 seqs have info at pos 18)
+    #    A 1/3 T 1/3 C 1/3 | thresh=0.6: N | thresh=0.4: N | mostCommon: ATC=H | catchAll: ATC=H
+    #19: freq doesn't matter b/c longest possible length is 17 (2<=2 seqs have info at pos 18)
+    
+    seqs1 = c("ATGCATGCAT-G.NTC",
+              "ATGGATCGNT-A.GNCGC",
+              "ACTGACT.AT-T.TA.N",
+              "TCGAACCTAG.C.G-GAAA",
+              "CGTAATG-AA-A.CGATTA")
+    
+    # region def spanning nucleotides 1 through 14
+    regDef1 = createRegionDefinition(boundaries=factor(rep(c("W", "Y"), each=7)))
+    
+    ##### staggering lengths of sequences in seqs1 also allow for 
+    # testing on correct output length
+    
+    ##### mostCommon
+    ### ties resolved deterministically by representing ties using ambiguous chars 
+    ## no region definition
+    mostCommon.ambi.noRegDef = "AYGRATSBAT-A.GDCDH"
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                    mtd="mostCommon", includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=mostCommon.ambi.noRegDef, muFreq=NULL))
+    # when both includeAmbiguous and breakTiesStochastic are TRUE, includeAmbiguous takes precedence
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                    mtd="mostCommon", includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=TRUE),
+                 list(cons=mostCommon.ambi.noRegDef, muFreq=NULL))
+    
+    ## with region definition
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                    mtd="mostCommon", includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=substr(mostCommon.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
+    # when both includeAmbiguous and breakTiesStochastic are TRUE, includeAmbiguous takes precedence
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                    mtd="mostCommon", includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=TRUE),
+                 list(cons=substr(mostCommon.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
+    
+    ### ties resolved stochastically
+    # all possible combinations
+    mostCommon.sto.noRegDef = expand.grid("A", c("T", "C"), "G", c("A","G"), "A",
+                                          "T", c("G","C"), c("T","G","C", "-", "."), "A", "T",
+                                          "-", "A", ".", "G", c("A", "T", "G", "N", "-"),
+                                          "C", c("A", "T", "G", "N"), c("A", "T", "C"))
+    mostCommon.sto.noRegDef = apply(mostCommon.sto.noRegDef, 1, paste, collapse="")
+    ## run stochastically 100 times without region definition
+    test.mostCommon.sto.noRegDef = replicate(100, 
+                                             shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                                                mtd="mostCommon", includeAmbiguous=FALSE, 
+                                                                                breakTiesStochastic=TRUE)$cons)
+    # for debugging: manually look at chars at each position
+    #table(sapply(test.mostCommon.sto.noRegDef, function(x){substr(x,18,18)}))
+    
+    # result from each of 100 runs should be one of the possible combinations
+    expect_true(all(test.mostCommon.sto.noRegDef %in% mostCommon.sto.noRegDef))
+    
+    ## run stochastically 100 times with region definition
+    test.mostCommon.sto.regDef = replicate(100, 
+                                           shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                                              mtd="mostCommon", includeAmbiguous=FALSE, 
+                                                                              breakTiesStochastic=TRUE)$cons)
+    # for debugging: manually look at chars at each position
+    #table(sapply(test.mostCommon.sto.regDef, function(x){substr(x,12,12)}))
+    
+    # result from each of 100 runs should be one of the possible combinations
+    expect_true(all(test.mostCommon.sto.regDef %in% substr(mostCommon.sto.noRegDef, 1, regDef1@seqLength)))
+    
+    ### resolve ties deterministcally by taking first char in the order of ATGCN-.
+    mostCommon.det.1st.noRegDef = "ATGAATGTAT-A.GACAA"
+    # no region definition
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                    mtd="mostCommon", includeAmbiguous=FALSE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=mostCommon.det.1st.noRegDef, muFreq=NULL))
+    
+    # with region definitioin
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                    mtd="mostCommon", includeAmbiguous=FALSE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=substr(mostCommon.det.1st.noRegDef,1,regDef1@seqLength), muFreq=NULL))
+    
+    ##### thresholdedFreq
+    ## no region definition
+    thresh0.6.ambi.noRegDef = "ANGNATNNAT-N.NNNNN"
+    thresh0.4.ambi.noRegDef = "AYKRAYSNAT-A.GNCNN"
+    # thresh 0.6
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                    mtd="thresholdedFreq", minFreq=0.6,
+                                                    includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=thresh0.6.ambi.noRegDef, muFreq=NULL))
+    # thresh 0.4
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                    mtd="thresholdedFreq", minFreq=0.4,
+                                                    includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=thresh0.4.ambi.noRegDef, muFreq=NULL))    
+    # when both includeAmbiguous and breakTiesStochastic are TRUE, includeAmbiguous takes precedence
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                    mtd="thresholdedFreq", minFreq=0.6,
+                                                    includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=TRUE),
+                 list(cons=thresh0.6.ambi.noRegDef, muFreq=NULL))
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                    mtd="thresholdedFreq", minFreq=0.4,
+                                                    includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=TRUE),
+                 list(cons=thresh0.4.ambi.noRegDef, muFreq=NULL))
+    
+    ## with region definition
+    # thresh 0.6
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                    mtd="thresholdedFreq", minFreq=0.6,
+                                                    includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=substr(thresh0.6.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
+    # thresh 0.4
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                    mtd="thresholdedFreq", minFreq=0.4,
+                                                    includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=substr(thresh0.4.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
+    # when both includeAmbiguous and breakTiesStochastic are TRUE, includeAmbiguous takes precedence
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                    mtd="thresholdedFreq", minFreq=0.6,
+                                                    includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=TRUE),
+                 list(cons=substr(thresh0.6.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                    mtd="thresholdedFreq", minFreq=0.4,
+                                                    includeAmbiguous=TRUE, 
+                                                    breakTiesStochastic=TRUE),
+                 list(cons=substr(thresh0.4.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
+    
+    
+    ### ties resolved stochastically
+    # all possible combinations
+    thresh0.6.sto.noRegDef = expand.grid("A", "N", "G", "N", "A",
+                                         "T", "N", "N", "A", "T",
+                                         "-", "N", '.', "N", "N",
+                                         "N", "N", "N")
+    thresh0.6.sto.noRegDef = apply(thresh0.6.sto.noRegDef, 1, paste, collapse="")
+    
+    thresh0.4.sto.noRegDef = expand.grid("A", c("T", "C"), c("T", "G"), c("A", "G"), "A",
+                                         c("T", "C"), c("G","C"), "N", c("A", "N"), "T",
+                                         "-", "A", ".", "G", "N", 
+                                         "C", "N", "N")
+    thresh0.4.sto.noRegDef = apply(thresh0.4.sto.noRegDef, 1, paste, collapse="")
+    
+    ## run stochastically 100 times without region definition
+    test.thresh0.6.sto.noRegDef = replicate(100, 
+                                            shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                                               mtd="thresholdedFreq", minFreq=0.6,
+                                                                               includeAmbiguous=FALSE, 
+                                                                               breakTiesStochastic=TRUE)$cons)
+    test.thresh0.4.sto.noRegDef = replicate(100, 
+                                            shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                                               mtd="thresholdedFreq", minFreq=0.4,
+                                                                               includeAmbiguous=FALSE, 
+                                                                               breakTiesStochastic=TRUE)$cons)
+    # for debugging: manually look at chars at each position
+    #table(sapply(test.thresh0.4.sto.noRegDef, function(x){substr(x,18,18)}))
+    
+    # result from each of 100 runs should be one of the possible combinations
+    expect_true(all(test.thresh0.6.sto.noRegDef %in% thresh0.6.sto.noRegDef))
+    expect_true(all(test.thresh0.4.sto.noRegDef %in% thresh0.4.sto.noRegDef))
+    
+    ## run stochastically 100 times with region definition
+    test.thresh0.6.sto.regDef = replicate(100, 
+                                          shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                                             mtd="thresholdedFreq", minFreq=0.6,
+                                                                             includeAmbiguous=FALSE, 
+                                                                             breakTiesStochastic=TRUE)$cons)
+    test.thresh0.4.sto.regDef = replicate(100, 
+                                          shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                                             mtd="thresholdedFreq", minFreq=0.4,
+                                                                             includeAmbiguous=FALSE, 
+                                                                             breakTiesStochastic=TRUE)$cons)
+    
+    # for debugging: manually look at chars at each position
+    #table(sapply(test.thresh0.4.sto.regDef, function(x){substr(x,12,12)}))
+    
+    # result from each of 100 runs should be one of the possible combinations
+    expect_true(all(test.thresh0.6.sto.regDef %in% substr(thresh0.6.sto.noRegDef, 1, regDef1@seqLength)))
+    expect_true(all(test.thresh0.4.sto.regDef %in% substr(thresh0.4.sto.noRegDef, 1, regDef1@seqLength)))
+    
+    ### resolve ties deterministcally by taking first char in the order of ATGCN-.
+    thresh0.6.det.1st.noRegDef = "ANGNATNNAT-N.NNNNN"
+    thresh0.4.det.1st.noRegDef = "ATTAATGNAT-A.GNCNN"
+    ## no region definition
+    # thresh 0.6
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                    mtd="thresholdedFreq", minFreq=0.6,
+                                                    includeAmbiguous=FALSE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=thresh0.6.det.1st.noRegDef, muFreq=NULL))
+    # thresh 0.4
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, 
+                                                    mtd="thresholdedFreq", minFreq=0.4,
+                                                    includeAmbiguous=FALSE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=thresh0.4.det.1st.noRegDef, muFreq=NULL))
+    
+    ## with region definitioin
+    # thresh 0.6
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                    mtd="thresholdedFreq", minFreq=0.6,
+                                                    includeAmbiguous=FALSE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=substr(thresh0.6.det.1st.noRegDef,1,regDef1@seqLength), muFreq=NULL))
+    # thresh 0.4
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, 
+                                                    mtd="thresholdedFreq", minFreq=0.4,
+                                                    includeAmbiguous=FALSE, 
+                                                    breakTiesStochastic=FALSE),
+                 list(cons=substr(thresh0.4.det.1st.noRegDef,1,regDef1@seqLength), muFreq=NULL))
+    
+    ##### catchAll
+    catchAll.noRegDef = "HBKVAYBBAD-N.BDVDH"
+    # no region definition
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=NULL, mtd="catchAll"),
+                 list(cons=catchAll.noRegDef, muFreq=NULL))
+    # with region definition
+    expect_equal(shazam:::calcClonalConsensusHelper(seqs=seqs1, lenLimit=regDef1@seqLength, mtd="catchAll"),
+                 list(cons=substr(catchAll.noRegDef,1,regDef1@seqLength), muFreq=NULL))
+    
+    ##### longest possible length 
+    ## note that this had also been tested by the tests above (by seqs1 having staggering lengths)
+    # total number of seqs = 4
+    # floor(n/2) = floor(4/2) = floor(2) = 2
+    # longest possible length = number of positions at which >2 seqs have information
+    seqs2 = c("ATGC",
+              "AAG",
+              "AT",
+              "A")
+    # expect longest possible length = 2 = length of consensus
+    expect_equal(nchar(shazam:::calcClonalConsensusHelper(seqs=seqs2, mtd="catchAll")$cons), 
+                 2)
+})

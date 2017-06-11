@@ -124,7 +124,8 @@ NULL
 #'                    each position along the length of the consensus sequence, the frequency 
 #'                    of each nucleotide/character across sequences is tabulated. The 
 #'                    nucleotide/character whose frequency is at least (i.e. \code{>=}) 
-#'                    \code{minimumFrequency} becomes the consensus.
+#'                    \code{minimumFrequency} becomes the consensus; if there is none, the
+#'                    consensus nucleotide will be \code{"N"}.
 #'                    
 #'                    When there are ties (frequencies of multiple nucleotides/characters 
 #'                    are at least \code{minimumFrequency}), this method can be deterministic 
@@ -146,7 +147,8 @@ NULL
 #'                    }
 #'                    
 #'                    Below are some examples looking at a single position based on 5 sequences 
-#'                    with \code{minimumFrequency=0.6}:
+#'                    with \code{minimumFrequency=0.6}, \code{includeAmbiguous=FALSE}, and 
+#'                    \code{breakTiesStochastic=FALSE}:
 #'                    
 #'                    \itemize{
 #'                         \item If the sequences have \code{"A"}, \code{"A"}, \code{"A"}, 
@@ -169,7 +171,8 @@ NULL
 #'                     additional parameters. The same rules for breaking ties for 
 #'                     \code{method="thresholdedFreq"} apply.
 #'                    
-#'                     Below are some examples looking at a single position based on 5 sequences:
+#'                     Below are some examples looking at a single position based on 5 sequences
+#'                     with \code{includeAmbiguous=FALSE}, and \code{breakTiesStochastic=FALSE}:
 #'                     
 #'                     \itemize{
 #'                          \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, 
