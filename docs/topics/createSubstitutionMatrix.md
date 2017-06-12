@@ -106,6 +106,15 @@ For `returnModel = "1mer"` or `"1mer_raw"`:
 a 4x4 normalized or un-normalized 1-mer substitution matrix respectively.
 
 
+Details
+-------------------
+
+**Caution: The targeting model functions do NOT support ambiguous 
+characters in their inputs. You MUST make sure that your input and germline
+sequences do NOT contain ambiguous characters (especially if they are
+clonal consensuses returned from `collapseClones`).**
+
+
 References
 -------------------
 

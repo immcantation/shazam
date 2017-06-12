@@ -17,8 +17,8 @@ Usage
 --------------------
 ```
 observedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", frequency = FALSE,
-combine = FALSE, regionDefinition = NULL, mutationDefinition = NULL,
+germlineColumn = "GERMLINE_IMGT_D_MASK", regionDefinition = NULL,
+mutationDefinition = NULL, frequency = FALSE, combine = FALSE,
 nproc = 1)
 ```
 
@@ -30,22 +30,13 @@ db
 
 sequenceColumn
 :   `character` name of the column containing input 
-sequences.
+sequences. IUPAC ambiguous characters for DNA are 
+supported.
 
 germlineColumn
 :   `character` name of the column containing 
-the germline or reference sequence.
-
-frequency
-:   `logical` indicating whether or not to calculate
-mutation frequencies. Default is `FALSE`.
-
-combine
-:   `logical` indicating whether for each sequence should
-the mutation counts for the different regions (CDR, FWR) and 
-mutation types be combined and return one value of 
-count/frequency per sequence instead of 
-multiple values. Default is `FALSE`.
+the germline or reference sequence. Germline should 
+**not** contain ambiguous characters.
 
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions
@@ -57,6 +48,17 @@ mutationDefinition
 and silent mutation criteria. If `NULL` then 
 replacement and silent are determined by exact 
 amino acid identity.
+
+frequency
+:   `logical` indicating whether or not to calculate
+mutation frequencies. Default is `FALSE`.
+
+combine
+:   `logical` indicating whether for each sequence should
+the mutation counts for the different regions (CDR, FWR) and 
+mutation types be combined and return one value of 
+count/frequency per sequence instead of 
+multiple values. Default is `FALSE`.
 
 nproc
 :   number of cores to distribute the operation over. If the 
@@ -76,13 +78,13 @@ regions in the `regionDefinition`. For example, when using the
 [IMGT_V](IMGT_SCHEMES.md) definition, which defines positions for CDR and
 FWR, the following columns are added:
 
-+ `OBSERVED_CDR_R`:  number of replacement mutations in CDR1 and 
++ `MU_COUNT_CDR_R`:  number of replacement mutations in CDR1 and 
 CDR2 of the V-segment.
-+ `OBSERVED_CDR_S`:  number of silent mutations in CDR1 and CDR2 
++ `MU_COUNT_CDR_S`:  number of silent mutations in CDR1 and CDR2 
 of the V-segment.
-+ `OBSERVED_FWR_R`:  number of replacement mutations in FWR1, 
++ `MU_COUNT_FWR_R`:  number of replacement mutations in FWR1, 
 FWR2 and FWR3 of the V-segment.
-+ `OBSERVED_FWR_S`:  number of silent mutations in FWR1, FWR2 and
++ `MU_COUNT_FWR_S`:  number of silent mutations in FWR1, FWR2 and
 FWR3 of the V-segment.
 
 If `frequency=TRUE`, R and S mutation frequencies are
@@ -108,9 +110,9 @@ specified region
 Details
 -------------------
 
-Mutation count are determined by comparing the input sequences (in the column specified 
+Mutation counts are determined by comparing the input sequences (in the column specified 
 by `sequenceColumn`) to the germline sequence (in the column specified by 
-`germlineColumn`). 
+`germlineColumn`). See [calcObservedMutations](calcObservedMutations.md) for more technical details.
 
 The mutations are binned as either replacement (R) or silent (S) across the different 
 regions of the sequences as defined by `regionDefinition`. Typically, this would 

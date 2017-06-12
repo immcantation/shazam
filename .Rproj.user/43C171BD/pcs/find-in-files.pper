@@ -1,0 +1,12 @@
+{
+    "dialog-state" : {
+        "caseSensitive" : true,
+        "filePatterns" : [
+            "*.R",
+            "*.Rmd"
+        ],
+        "path" : "~/sync_smartgit/shazam",
+        "query" : "HS5F_Targeting.RData",
+        "regex" : false
+    }
+}

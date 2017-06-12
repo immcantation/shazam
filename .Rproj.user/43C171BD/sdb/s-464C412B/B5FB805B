@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#library(shazam)\n\n# Returns a vector of codons 1 mutation away from the given codon\npermutateAllCodon <- function(codon){\n    cCodon = seqinr::s2c(codon)\n    matCodons = t(array(cCodon,dim=c(3,12)))\n    matCodons[1:4,1] = shazam:::NUCLEOTIDES[1:4]\n    matCodons[5:8,2] = shazam:::NUCLEOTIDES[1:4]\n    matCodons[9:12,3] = shazam:::NUCLEOTIDES[1:4]\n    apply(matCodons, 1, seqinr::c2s)\n}\n\nCODON_TABLE <- as.data.frame(matrix(NA,ncol=64,nrow=12))\n\nintCounter = 1\nfor(pOne in shazam:::NUCLEOTIDES[1:4]){\n    for(pTwo in shazam:::NUCLEOTIDES[1:4]){\n        for(pThree in shazam:::NUCLEOTIDES[1:4]){\n            codon = paste(pOne,pTwo,pThree,sep=\"\")\n            colnames(CODON_TABLE)[intCounter] =  codon\n            intCounter = intCounter + 1\n            CODON_TABLE[,codon] = shazam:::mutationTypeOptimized(cbind(permutateAllCodon(codon),rep(codon,12)))\n        }  \n    }\n}\n\nchars = c(\"N\",\"A\",\"C\",\"G\",\"T\", \".\")\nfor(a in chars){\n    for(b in chars){\n        for(c in chars){\n            if(a==\"N\" | b==\"N\" | c==\"N\"){ \n                #cat(paste(a,b,c),sep=\"\",\"\\n\") \n                CODON_TABLE[,paste(a,b,c,sep=\"\")] = rep(NA,12)\n            }\n        }  \n    }\n}\n\nchars = c(\"N\",\"A\",\"C\",\"G\",\"T\", \".\")\nfor(a in chars){\n    for(b in chars){\n        for(c in chars){\n            if(a==\".\" | b==\".\" | c==\".\"){ \n                #cat(paste(a,b,c),sep=\"\",\"\\n\") \n                CODON_TABLE[,paste(a,b,c,sep=\"\")] = rep(NA,12)\n            }\n        }  \n    }\n}\n\ngenerate_CT_old <- as.matrix(CODON_TABLE,nrow(CODON_TABLE),ncol(CODON_TABLE))\ngenerate_CT <- as.matrix(CODON_TABLE,nrow(CODON_TABLE),ncol(CODON_TABLE))\nsave(generate_CT_old,file=\"generate_CT_old.RData\")\nsave(generate_CT,file=\"generate_CT.RData\")\n\n# compute\ncompute_CT_old = shazam:::computeCodonTable()\nsave(compute_CT_old, file=\"compute_CT_old.RData\")\n\ncompute_CT = shazam:::computeCodonTable()\nsave(compute_CT, file=\"compute_CT.RData\")\n",
+    "created" : 1497297781238.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "399418439",
+    "id" : "B5FB805B",
+    "lastKnownWriteTime" : 1497300767,
+    "last_content_update" : 1497300767653,
+    "path" : "~/Desktop/generate_CT_old.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

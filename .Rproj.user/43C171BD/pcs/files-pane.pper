@@ -1,0 +1,9 @@
+{
+    "path" : "~/sync_smartgit/shazam/data-raw",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}

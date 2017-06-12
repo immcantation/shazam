@@ -16,11 +16,10 @@ functions (PDFs) for sequences in the given Change-O `data.frame`.
 Usage
 --------------------
 ```
-calcBaseline(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", testStatistic = c("local",
-"focused", "imbalanced"), regionDefinition = NULL,
-targetingModel = HH_S5F, mutationDefinition = NULL, calcStats = FALSE,
-nproc = 1)
+calcBaseline(db, sequenceColumn = "CLONAL_SEQUENCE",
+germlineColumn = "CLONAL_GERMLINE", testStatistic = c("local", "focused",
+"imbalanced"), regionDefinition = NULL, targetingModel = HH_S5F,
+mutationDefinition = NULL, calcStats = FALSE, nproc = 1)
 ```
 
 Arguments
@@ -84,11 +83,17 @@ Details
 Calculates the BASELINe posterior probability density function (PDF) for 
 sequences in the provided `db`. 
 
+**Note**: Individual sequences within clonal groups are not, strictly speaking, 
+independent events and it is generally appropriate to only analyze selection 
+pressures on an effective sequence for each clonal group. For this reason,
+it is strongly recommended that the input `db` contains one effective 
+sequence per clone. Effective clonal sequences can be obtained by calling 
+the [collapseClones](collapseClones.md) function.
+
 If the `db` does not contain the 
-required columns to calculate the PDFs (namely OBSERVED & EXPECTED mutations)
+required columns to calculate the PDFs (namely MU_COUNT & MU_EXPECTED)
 then the function will:
 
-1. Collapse the sequences by the CLONE column (if present).
 1. Calculate the numbers of observed mutations.
 1. Calculate the expected frequencies of mutations and modify the provided 
 `db`. The modified `db` will be included as part of the 
@@ -130,11 +135,27 @@ Examples
 # Subset example data
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+# Collapse clones
+db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
+germlineColumn="GERMLINE_IMGT_D_MASK",
+method="thresholdedFreq", minimumFrequency=0.6,
+includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+
+```
+
+*When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.*
+```
+Collapsing clonal sequences...
+
+```
+
+
+```R
  
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
-sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK", 
+sequenceColumn="CLONAL_SEQUENCE",
+germlineColumn="CLONAL_GERMLINE", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
 targetingModel=HH_S5F,
@@ -143,7 +164,6 @@ nproc=1)
 
 
 ```
-Collapsing clonal sequences...
 Calculating the expected frequencies of mutations...
 Calculating BASELINe probability density functions...
 

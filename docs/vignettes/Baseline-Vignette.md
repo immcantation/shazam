@@ -51,7 +51,14 @@ for each clone.
 
 ```r
 # Collapse clonal groups into single sequences
-clones <- collapseClones(ExampleDb, regionDefinition=IMGT_V, nproc=1)
+clones <- collapseClones(db=ExampleDb, regionDefinition=IMGT_V, 
+                         method="thresholdedFreq", minimumFrequency=0.6,
+                         includeAmbiguous=FALSE, breakTiesStochastic=FALSE, 
+                         nproc=1)
+```
+
+```
+## When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.
 ```
 
 Following construction of an effective sequence for each clone, the observed
@@ -81,11 +88,11 @@ Users may define other region sets and boundaries by creating a custom
 
 
 ```r
-# Count observed mutations and append OBSERVED columns to the output
+# Count observed mutations and append MU_COUNT columns to the output
 observed <- observedMutations(clones, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               regionDefinition=IMGT_V, nproc=1)
-# Count expected mutations and append EXPECTED columns to the output
+# Count expected mutations and append MU_EXPECTED columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               targetingModel=HH_S5F,
@@ -100,27 +107,39 @@ on mutation counts can be specified using the `testStatistic` parameter.
 
 ```r
 # Calculate selection scores using the output from expectedMutations
-baseline <- calcBaseline(expected, testStatistic="focused", 
+baseline <- calcBaseline(db=expected, testStatistic="focused", 
                          regionDefinition=IMGT_V, nproc=1)
 ```
 
 ### Calculating selection in one step
 
-It is not required for `collapseClones`, `observedMutation` and `expectedMutations`
-to be run prior to `calcBaseline`. If the output of the previous three steps 
-does not appear in the input data.frame, then `calcBaseline` will call the appropriate
-functions prior to calculating selection scores.
+It is not required for `observedMutation` and `expectedMutations` to be run prior to 
+`calcBaseline`. If the output of these two steps does not appear in the input 
+data.frame, then `calcBaseline` will call the appropriate functions prior to 
+calculating selection scores.
 
 
 ```r
 # Calculate selection scores from scratch on subset
-baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
+baseline <- calcBaseline(db=clones, testStatistic="focused", 
                          regionDefinition=IMGT_V, nproc=1)
 
 # Subset the original data to switched isotypes
 db_sub <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
+# Collapse clonal groups into single sequences for subset
+clones_sub <- collapseClones(db=db_sub, regionDefinition=IMGT_V, 
+                             method="thresholdedFreq", minimumFrequency=0.6,
+                             includeAmbiguous=FALSE, breakTiesStochastic=FALSE, 
+                             nproc=1)
+```
+
+```
+## When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.
+```
+
+```r
 # Calculate selection scores from scratch on subset
-baseline_sub <- calcBaseline(db_sub, testStatistic="focused", 
+baseline_sub <- calcBaseline(clones_sub, testStatistic="focused", 
                              regionDefinition=IMGT_V, nproc=1)
 ```
 
@@ -150,7 +169,7 @@ The default behavior of `expectedMutations` is to use the human 5-mer mutation m
 
 ```r
 # Calculate selection on charge class with the mouse 5-mer model
-baseline <- calcBaseline(ExampleDb, testStatistic="focused", 
+baseline <- calcBaseline(db=clones, testStatistic="focused", 
                          regionDefinition=IMGT_V, 
                          targetingModel=MK_RS5NF,
                          mutationDefinition=CHARGE_MUTATIONS,

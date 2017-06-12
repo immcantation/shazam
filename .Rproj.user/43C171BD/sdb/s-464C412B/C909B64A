@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "all.equal(CODON_TABLE, shazam:::CODON_TABLE)\n\nall.equal(HH_S1F_Distance, shazam:::HH_S1F_Distance)\nall.equal(HH_S5F_Distance, shazam:::HH_S5F_Distance)\n\nall.equal(HKL_S1F_Distance, shazam:::HKL_S1F_Distance)\nall.equal(HKL_S5F_Distance, shazam:::HKL_S5F_Distance)\n\na\n\nall.equal(MK_RS5NF_Distance, shazam:::MK_RS5NF_Distance)\nall.equal(MK_RS1NF_Distance, shazam:::MK_RS1NF_Distance)\n",
+    "created" : 1497300799112.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "692217156",
+    "id" : "C909B64A",
+    "lastKnownWriteTime" : 0,
+    "last_content_update" : 1497300929956,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -68,13 +68,13 @@ The columns names are dynamically created based on the regions in
 definition, which defines positions for CDR and FWR, the following columns are
 added:  
 
-+ `EXPECTED_CDR_R`:  number of replacement mutations in CDR1 and 
++ `MU_EXPECTED_CDR_R`:  number of replacement mutations in CDR1 and 
 CDR2 of the V-segment.
-+ `EXPECTED_CDR_S`:  number of silent mutations in CDR1 and CDR2 
++ `MU_EXPECTED_CDR_S`:  number of silent mutations in CDR1 and CDR2 
 of the V-segment.
-+ `EXPECTED_FWR_R`:  number of replacement mutations in FWR1, 
++ `MU_EXPECTED_FWR_R`:  number of replacement mutations in FWR1, 
 FWR2 and FWR3 of the V-segment.
-+ `EXPECTED_FWR_S`:  number of silent mutations in FWR1, FWR2 and
++ `MU_EXPECTED_FWR_S`:  number of silent mutations in FWR1, FWR2 and
 FWR3 of the V-segment.
 
 

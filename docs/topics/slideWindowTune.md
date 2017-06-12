@@ -36,8 +36,8 @@ germlineColumn
 :   name of the column containing IMGT-gapped germline sequences.
 
 dbMutList
-:   if supplied, this should be a list of `data.frame`s returned 
-as `$pos` of the nested list produced by 
+:   if supplied, this should be a list consisting of `data.frame`s 
+returned as `$pos` in the nested list produced by 
 [calcObservedMutations](calcObservedMutations.md) with `returnRaw=TRUE`; otherwise, 
 [calcObservedMutations](calcObservedMutations.md) is called on columns `sequenceColumn`
 and `germlineColumn` of `db`. Default is `NULL`.
