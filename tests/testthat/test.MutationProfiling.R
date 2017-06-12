@@ -440,7 +440,7 @@ test_that("calcObservedMutations, 1A, without ambiguous characters, length is mu
     expect_equal(freqF.rawT.noRegDef$pos$region, rep("SEQ", length(exp.raw.noRegDef.position)))
     # $nonN is named; use expect_equivalent instead of expect_equal
     exp.noRegDef.nonN.Dash.Dot = sum( seqinr::s2c(obsv) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES[1:4] )
     expect_equivalent(freqF.rawT.noRegDef$nonN, exp.noRegDef.nonN.Dash.Dot)
     
     ##### freq=F, returnRaw=F, regDef=NULL
@@ -475,9 +475,9 @@ test_that("calcObservedMutations, 1A, without ambiguous characters, length is mu
     expect_identical(freqF.rawT.regDef$pos[, 1:3], freqF.rawT.noRegDef$pos[, 1:3])
     
     exp.regDef.W.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES[1:4] )
     exp.regDef.Y.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ)[regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ)[regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES[1:4] )
     expect_equal(freqF.rawT.regDef$nonN, c("W"=exp.regDef.W.nonN.Dash.Dot, "Y"=exp.regDef.Y.nonN.Dash.Dot))
     
     ##### freq=F, returnRaw=F, with regDef
@@ -551,7 +551,7 @@ test_that("calcObservedMutations, 1B, with ambiguous characters, length is multi
     expect_equal(freqF.rawT.noRegDef$pos$region, rep("SEQ", length(exp.raw.noRegDef.position)))
     # $nonN is named; use expect_equivalent instead of expect_equal
     exp.noRegDef.nonN.Dash.Dot = sum( seqinr::s2c(obsv) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES[1:4] )
     expect_equivalent(freqF.rawT.noRegDef$nonN, exp.noRegDef.nonN.Dash.Dot)
     
     ##### freq=F, returnRaw=F, regDef=NULL
@@ -586,9 +586,9 @@ test_that("calcObservedMutations, 1B, with ambiguous characters, length is multi
     expect_identical(freqF.rawT.regDef$pos[, 1:3], freqF.rawT.noRegDef$pos[, 1:3])
     
     exp.regDef.W.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES[1:4] )
     exp.regDef.Y.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ)[regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ)[regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES[1:4] )
     expect_equal(freqF.rawT.regDef$nonN, c("W"=exp.regDef.W.nonN.Dash.Dot, "Y"=exp.regDef.Y.nonN.Dash.Dot))
     
     ##### freq=F, returnRaw=F, with regDef
@@ -660,8 +660,9 @@ test_that("calcObservedMutations, 1C, without ambiguous characters, length is no
     expect_equal(freqF.rawT.noRegDef$pos$S, exp.raw.noRegDef.S)
     expect_equal(freqF.rawT.noRegDef$pos$region, rep("SEQ", length(exp.raw.noRegDef.position)))
     # $nonN is named; use expect_equivalent instead of expect_equal
-    exp.noRegDef.nonN.Dash.Dot = sum( seqinr::s2c(obsv) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+    # hard-coded; length is not multiple of 3; non-triplet overhang ignored
+    exp.noRegDef.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[1:18] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
+                                      seqinr::s2c(germ)[1:18] %in% shazam:::NUCLEOTIDES[1:4] )
     expect_equivalent(freqF.rawT.noRegDef$nonN, exp.noRegDef.nonN.Dash.Dot)
     
     ##### freq=F, returnRaw=F, regDef=NULL
@@ -695,10 +696,11 @@ test_that("calcObservedMutations, 1C, without ambiguous characters, length is no
     # counts should be the same
     expect_identical(freqF.rawT.regDef$pos[, 1:3], freqF.rawT.noRegDef$pos[, 1:3])
     
-    exp.regDef.W.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
-    exp.regDef.Y.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ)[regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+    # hard-coded; length is not multiple of 3; non-triplet overhang ignored
+    exp.regDef.W.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[1:18][regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
+                                          seqinr::s2c(germ)[1:18][regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES[1:4] )
+    exp.regDef.Y.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[1:18][regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
+                                          seqinr::s2c(germ)[1:18][regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES[1:4] )
     expect_equal(freqF.rawT.regDef$nonN, c("W"=exp.regDef.W.nonN.Dash.Dot, "Y"=exp.regDef.Y.nonN.Dash.Dot))
     
     ##### freq=F, returnRaw=F, with regDef
@@ -758,7 +760,7 @@ test_that("calcObservedMutations, 1D, without ambiguous characters, only 1 codon
     
     expect_equal(freqF.rawT.noRegDef$pos, NA)
     exp.noRegDef.nonN.Dash.Dot = sum( seqinr::s2c(obsv) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES[1:4] )
     expect_equivalent(freqF.rawT.noRegDef$nonN, exp.noRegDef.nonN.Dash.Dot)
     
     ##### freq=F, returnRaw=F, regDef=NULL
@@ -788,7 +790,7 @@ test_that("calcObservedMutations, 1D, without ambiguous characters, only 1 codon
     expect_equal(freqF.rawT.regDef$pos, NA)
     
     exp.regDef.W.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES[1:4] )
     expect_equal(freqF.rawT.regDef$nonN, c("W"=exp.regDef.W.nonN.Dash.Dot))
     
     ##### freq=F, returnRaw=F, with regDef
@@ -846,7 +848,7 @@ test_that("calcObservedMutations, 1E, with ambiguous characters, only 1 codon, w
     expect_equal(freqF.rawT.noRegDef$pos$region, rep("SEQ", length(exp.raw.noRegDef.position)))
     
     exp.noRegDef.nonN.Dash.Dot = sum( seqinr::s2c(obsv) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES[1:4] )
     expect_equivalent(freqF.rawT.noRegDef$nonN, exp.noRegDef.nonN.Dash.Dot)
     
     ##### freq=F, returnRaw=F, regDef=NULL
@@ -883,7 +885,7 @@ test_that("calcObservedMutations, 1E, with ambiguous characters, only 1 codon, w
     expect_identical(freqF.rawT.regDef$pos[, 1:3], freqF.rawT.noRegDef$pos[, 1:3])
     
     exp.regDef.W.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES[1:4] )
     expect_equal(freqF.rawT.regDef$nonN, c("W"=exp.regDef.W.nonN.Dash.Dot))
     
     
@@ -934,8 +936,9 @@ test_that("calcObservedMutations, 1F, less than 1 codon", {
                                                 regionDefinition=NULL)
     
     expect_equal(freqF.rawT.noRegDef$pos, NA)
-    exp.noRegDef.nonN.Dash.Dot = sum( seqinr::s2c(obsv) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+    
+    # hard-coded; non-triplet overhang ignored
+    exp.noRegDef.nonN.Dash.Dot = NA
     expect_equivalent(freqF.rawT.noRegDef$nonN, exp.noRegDef.nonN.Dash.Dot)
     
     ##### freq=F, returnRaw=F, regDef=NULL
@@ -964,8 +967,8 @@ test_that("calcObservedMutations, 1F, less than 1 codon", {
     
     expect_equal(freqF.rawT.regDef$pos, NA)
     
-    exp.regDef.W.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                          seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+    # hard-coded; non-triplet overhang ignored
+    exp.regDef.W.nonN.Dash.Dot = NA
     expect_equal(freqF.rawT.regDef$nonN, c("W"=exp.regDef.W.nonN.Dash.Dot))
     
     ##### freq=F, returnRaw=F, with regDef
@@ -1025,7 +1028,7 @@ test_that("observedMutations, 1H, using mock data from 1A through 1F", {
     # these are results from calcObservedMutations which have been tested
     exp.noRegDef.R = c(6, 10, 3, NA, 2, NA)
     exp.noRegDef.S = c(2, 2, 2, NA, 0, NA)
-    exp.noRegDef.nonN = c(19, 19, 18, 3, 3, 2)
+    exp.noRegDef.nonN = c(19, 19, 16, 3, 3, NA)
     
     # convert NA to 0
     exp.noRegDef.R[is.na(exp.noRegDef.R)] = 0
@@ -1055,10 +1058,17 @@ test_that("observedMutations, 1H, using mock data from 1A through 1F", {
                                              regionDefinition=NULL, 
                                              frequency=T, combine=F)
     
+    # $nonN has NA; division gets NA; but observedMutations converts all NA to 0
+    exp.noRegDef.R.freq = exp.noRegDef.R/exp.noRegDef.nonN
+    exp.noRegDef.R.freq[is.na(exp.noRegDef.R.freq)] = 0
+    
+    exp.noRegDef.S.freq = exp.noRegDef.S/exp.noRegDef.nonN
+    exp.noRegDef.S.freq[is.na(exp.noRegDef.S.freq)] = 0
+    
     expect_equal(freqT.combF.noRegDef$MU_FREQ_SEQ_R, 
-                 exp.noRegDef.R/exp.noRegDef.nonN)
+                 exp.noRegDef.R.freq)
     expect_equal(freqT.combF.noRegDef$MU_FREQ_SEQ_S, 
-                 exp.noRegDef.S/exp.noRegDef.nonN)
+                 exp.noRegDef.S.freq)
     
     # frequency=T, combine=T, no regDef
     freqT.combT.noRegDef = observedMutations(db=testDb, sequenceColumn="obsv", 
@@ -1066,8 +1076,12 @@ test_that("observedMutations, 1H, using mock data from 1A through 1F", {
                                              regionDefinition=NULL, 
                                              frequency=T, combine=T)
     
+    # $nonN has NA; division gets NA; but observedMutations converts all NA to 0
+    exp.noRegDef.comb.freq = (exp.noRegDef.R+exp.noRegDef.S)/exp.noRegDef.nonN
+    exp.noRegDef.comb.freq[is.na(exp.noRegDef.comb.freq)] = 0
+    
     expect_equal(freqT.combT.noRegDef$MU_FREQ, 
-                 (exp.noRegDef.R+exp.noRegDef.S)/exp.noRegDef.nonN)
+                 exp.noRegDef.comb.freq)
     
 })
 

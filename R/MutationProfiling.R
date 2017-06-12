@@ -1555,8 +1555,8 @@ observedMutations <- function(db,
 #'                      the number of S mutations, and the region in which the nucleotide position is 
 #'                      in.
 #'                \item A vector (\code{$nonN}) indicating the number of bases in regions defined by 
-#'                      \code{regionDefinition} that are not one of "N", "-", or "." in either the 
-#'                      observed or the germline.
+#'                      \code{regionDefinition} (excluding non-triplet overhang, if any) that are not 
+#'                      one of "N", "-", or "." in either the observed or the germline.
 #'           }
 #'           
 #'           For \code{frequency=TRUE}, regardless of \code{returnRaw}, an \code{array} with the 
@@ -1790,9 +1790,11 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             return(mutations_array)
         } else {
             tempNames <- sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) })
-            # Subset boundaries to only non N bases (in both seq and gl)
-            boundaries <- regionDefinition@boundaries[c_inputSeq%in%NUCLEOTIDES_AMBIGUOUS[1:14] &  
-                                                          c_germlineSeq%in%NUCLEOTIDES_AMBIGUOUS[1:14]]
+            # Subset boundaries to only non-N & non-dash & non-dot bases (in both seq and gl)
+            # "which" in next line is ESSENTIAL; otherwise @boundaries won't be truncated
+            # e.g. (1:6)[c(T,T,T)] returns 1:6, not 1:3
+            boundaries <- regionDefinition@boundaries[which(c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14] &  
+                                                            c_germlineSeq%in%NUCLEOTIDES[1:4])]
             # Freq = numb of mutations / numb of non N bases (in both seq and gl)
             denoms <- sapply(tempNames, function(x) { sum(boundaries==x) })
             mutations_array <- mutations_array/denoms
@@ -1802,11 +1804,18 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     
     # return positions of point mutations and their mutation types ("raw")
     if (returnRaw){
-        # number of non-N bases (in both seq and gl)
+        # number of non-N, non-dash, non-dot bases (in both seq and gl)
         nonN.regions <- unique(sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) }))
-        nonN.boundaries <- regionDefinition@boundaries[c_inputSeq%in%NUCLEOTIDES_AMBIGUOUS[1:14] &  
-                                                           c_germlineSeq%in%NUCLEOTIDES_AMBIGUOUS[1:14]]
-        nonN.denoms <- sapply(nonN.regions, function(x) { sum(nonN.boundaries==x) })
+        
+        if (!tooShort) {
+            # "which" in next line is ESSENTIAL; otherwise @boundaries won't be truncated
+            # e.g. (1:6)[c(T,T,T)] returns 1:6, not 1:3
+            nonN.boundaries <- regionDefinition@boundaries[which(c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14] &  
+                                                                     c_germlineSeq %in% NUCLEOTIDES[1:4])]
+            nonN.denoms <- sapply(nonN.regions, function(x) { sum(nonN.boundaries==x) })
+        } else {
+            nonN.denoms = setNames(object=rep(NA, length(nonN.regions)), nm=nonN.regions)
+        }
         
         if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
             # if mutations_array_raw is NA, or 
