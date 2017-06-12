@@ -125,7 +125,7 @@ parameters such as `minimumFrequency`, `includeAmbiguous`,
 `breakTiesStochastic`, and `breakTiesByColumns`.
 
 
-Lengths of consensuses
+Consensus lengths
 -------------------
 
  For each clone, `CLONAL_SEQUENCE` and 
