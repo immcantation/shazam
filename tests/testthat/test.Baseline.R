@@ -34,7 +34,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
                             regionDefinition = IMGT_V)
     
     obs_mpath <- mutationalPaths[3,c(1,10,50,78,312)]
-    exp_mpath <- c("S", "R", "S", "S", "R" )
+    exp_mpath <- c(NA, "R", NA, "S", "R" )
     names(exp_mpath) <- c("G", "C", "G", "T", "T")
     expect_equal(obs_mpath, exp_mpath)
     
@@ -60,7 +60,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
         regionDefinition = NULL)
     
     obs_mpath_null <- mutationalPaths_null[3,c(1,10,50,78,312)]
-    exp_mpath_null <- c("S", "R", "S", "S", "R" )
+    exp_mpath_null <- c(NA, "R", NA, "S", "R" )
     names(exp_mpath_null) <- c("G", "C", "G", "T", "T")
     expect_equal(obs_mpath_null, exp_mpath_null)
 })

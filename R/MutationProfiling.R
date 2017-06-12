@@ -1599,8 +1599,8 @@ observedMutations <- function(db,
 #' table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"]
 #' table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"]
 #' # Compare this with ex1_freq
-#' table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"] / ex1_raw$nonN
-#' table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"] / ex1_raw$nonN
+#' table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"]/ex1_raw$nonN
+#' table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"]/ex1_raw$nonN
 #' 
 #' # Identify only mutations the V segment minus CDR3
 #' ex2_raw = calcObservedMutations(in_seq, germ_seq, 
@@ -1615,24 +1615,26 @@ observedMutations <- function(db,
 #' table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"]
 #' table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"]                              
 #' # Compare this with ex2_freq
-#' table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"] / ex2_raw$nonN     
-#' table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"] / ex2_raw$nonN                                       
+#' table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"]/ex2_raw$nonN     
+#' table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"]/ex2_raw$nonN                                       
 #' 
 #' # Identify mutations by change in hydropathy class
 #' ex3_raw = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
-#'                                 mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=TRUE)
+#'                                 mutationDefinition=HYDROPATHY_MUTATIONS, 
+#'                                 returnRaw=TRUE)
 #' # Count mutations by change in hydropathy class
 #' ex3_count = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
-#'                                   mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=FALSE)
+#'                                   mutationDefinition=HYDROPATHY_MUTATIONS, 
+#'                                   returnRaw=FALSE)
 #' ex3_freq = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
-#'                                  mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=FALSE, 
-#'                                  frequency=TRUE)
+#'                                  mutationDefinition=HYDROPATHY_MUTATIONS, 
+#'                                  returnRaw=FALSE, frequency=TRUE)
 #' # Compre this with ex3_count
 #' table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"]
 #' table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"]
 #' # Compare this with ex3_freq
-#' table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"] / ex3_raw$nonN                                        
-#' table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"] / ex3_raw$nonN                                        
+#' table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"]/ex3_raw$nonN                                        
+#' table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"]/ex3_raw$nonN                                        
 #'                                 
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq,
