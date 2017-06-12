@@ -88,6 +88,15 @@ Value
 A [TargetingModel](TargetingModel-class.md) object.
 
 
+Details
+-------------------
+
+**Caution: The targeting model functions do NOT support ambiguous 
+characters in their inputs. You MUST make sure that your input and germline
+sequences do NOT contain ambiguous characters (especially if they are
+clonal consensuses returned from `collapseClones`).**
+
+
 References
 -------------------
 
