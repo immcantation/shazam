@@ -84,7 +84,15 @@ computeCodonTable <- function(aminoAcidClasses=NULL) {
                 colnames(codon_table)[counter] <- codon
                 counter <- counter + 1
                 all_muts <- allCodonMuts(codon)
-                codon_table[, codon] <- sapply(all_muts, function(x) { mutationType(x, codon, aminoAcidClasses=aminoAcidClasses) })
+                codon_table[, codon] <- sapply(all_muts, function(x) { 
+                    mutType = mutationType(x, codon, aminoAcidClasses=aminoAcidClasses) 
+                    mutType = names(mutType)[which(mutType>0)]
+                    # does not support ambiguous characters
+                    # assumes that only 1 entry (R/S/Stop/na) from mutationType is non-zero/1
+                    stopifnot(length(mutType)==1)
+                    if (mutType=="na") {mutType=NA}
+                    return(mutType)
+                })
             }
         }
     }

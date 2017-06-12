@@ -48,6 +48,6 @@ CDR_Codon <- (1-FWR_Codon)
 CDR_Codon <- as.logical(CDR_Codon)
 
 
-save(FWR_Nuc_Mat,file="data/FWR_Nuc_Mat.RData")
-save(CDR_Nuc_Mat,file="data/CDR_Nuc_Mat.RData")
+save(FWR_Nuc_Mat,file="data-raw/FWR_Nuc_Mat.RData")
+save(CDR_Nuc_Mat,file="data-raw/CDR_Nuc_Mat.RData")
 
