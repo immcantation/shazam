@@ -372,7 +372,7 @@ collapseClones <- function(db,
     
     method = match.arg(method)
     
-    # check minFreq for thresholdedFreq method
+    # check minimumFrequency for thresholdedFreq method
     if (method=="thresholdedFreq") {
         if (!is.numeric(minimumFrequency)) {
             stop("minimumFrequency must be a numeric value.")
@@ -1227,8 +1227,8 @@ calcClonalConsensus <- function(db,
                                          mtd="mostCommon", 
                                          includeAmbiguous=includeAmbiguous,
                                          breakTiesStochastic=breakTiesStochastic,
-                                         breakTiesByColumns=breakTiesByColumns,
-                                         muFreqColumn=NULL, db=db)$cons
+                                         breakTiesByColumns=NULL,
+                                         muFreqColumn=NULL, db=NULL)$cons
     
     ##### get consensus observed sequence
     inputConsMuFreq = calcClonalConsensusHelper(seqs=inputSeq, minFreq=minimumFrequency, lenLimit=lenRegion,
@@ -1241,15 +1241,16 @@ calcClonalConsensus <- function(db,
     inputMuFreq = inputConsMuFreq$muFreq
     
     if (method %in% c("mostMutated", "leastMutated")) {
-        # possible to have inputCons shorter than germCons 
-        # (when length of most/least mutated seq < lenLimit; 
-        #  recall that length of germCons is at max. lenLimit)
-        # in that case, trim germCons to same length as inputCons
-        if (nchar(inputCons)<nchar(germCons)) {
-            germCons = substr(inputCons, 1, nchar(inputCons))
-            # by design, inputCons should not be longer than germCons (at most equal length)
-        } else if (nchar(inputCons)>nchar(germCons)) {
-            stop ("Unexpected input consensus (longer than germline consensus) returned.")
+        # possible to have inputCons and germCons of varying lengths
+        # germCons (mostCommon) length is "longest possible length" for mostCommon
+        # inputCons length is min of length of most/least mutated and lenLimit
+        # if different, trim the two to same length
+        lenInput = nchar(inputCons)
+        lenGerm = nchar(germCons)
+        if (lenInput != lenGerm) {
+            minLen = min(lenInput, lenGerm)
+            inputCons = substr(inputCons, 1, minLen)
+            germCons = substr(germCons, 1, minLen)
         }
     }
     
