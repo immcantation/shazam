@@ -78,7 +78,7 @@ NULL
 #'           \code{breakTiesStochastic}, and \code{breakTiesByColumns}.
 #'           
 #'
-#' @section Lengths of consensuses: For each clone, \code{CLONAL_SEQUENCE} and 
+#' @section Consensus lengths: For each clone, \code{CLONAL_SEQUENCE} and 
 #'          \code{CLONAL_GERMLINE} have the same length. 
 #'          
 #'          \itemize{
@@ -2920,7 +2920,7 @@ chars2Ambiguous = function(chars) {
 # IUPAC2nucs(code="S", excludeN=T)==c("C", "G")
 # IUPAC2nucs(code="S", excludeN=F)==c("C", "G")
 #
-IUPAC2nucs = function(code, excludeN=TRUE) {
+IUPAC2nucs <- function(code, excludeN=TRUE) {
     # input character must be one of IUPAC codes
     if (! code %in% names(IUPAC_DNA) ) {
         stop("Input character must be one of IUPAC DNA codes.")

@@ -63,6 +63,14 @@ allCodonMuts <- function(codon) {
 #                            if NULL then R or S is determined by amino acid identity
 # @return  matrix with all codons as row and column names and the type of mutation as 
 #           the corresponding value in the matrix.
+# @examples
+# library(alakazam)
+# hydropathy <- list(hydrophobic=c("A", "I", "L", "M", "F", "W", "V"),
+#                                  hydrophilic=c("R", "N", "D", "C", "Q", "E", "K"),
+#                                  neutral=c("G", "H", "P", "S", "T", "Y"))
+# chars <- unlist(hydropathy, use.names=FALSE)
+# classes <- setNames(translateStrings(chars, hydropathy), chars)
+# computeCodonTable(aminoAcidClasses=classes)
 computeCodonTable <- function(aminoAcidClasses=NULL) {
     # Initialize empty data.frame
     codon_table <- as.data.frame(matrix(NA, ncol=64, nrow=12))
