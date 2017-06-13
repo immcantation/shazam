@@ -770,9 +770,13 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' @param    model      allows the user to choose among four possible combinations of fitting curves: 
 #'                      (1) \code{"norm-norm"}, (2) \code{"norm-gamma"}, (3) \code{"gamma-norm"}, 
 #'                      and (4) \code{"gamma-gamma"}. Applies only to the \code{"gmm"} method.
-#' @param    cutoff     allows the user to choose the type of the threshold, either the intersection point
-#'                      of the two fitted curves \code{"intxn"}, or the optimal threshold \code{"opt"}. 
-#'                      Applies only to the \code{"gmm"} method.
+#' @param    cutoff     applies only to the \code{"gmm"} method. Allows the user to choose the type of the 
+#'                      threshold among options: (1) the optimal threshold \code{"opt"}, (2) the intersection point
+#'                      of the two fitted curves \code{"intxn"}, or (3) a vlue defined by user for one of the 
+#'                      sensitivity or specificity \code{"user"}.
+#' @param    sen        the sensitivity. Applies only where method=\code{"gmm"} and cutoff=\code{"user"}.
+#' @param    spc        the specificity. Applies only where method=\code{"gmm"} and cutoff=\code{"user"}.
+#'                      
 #' @param    progress   if \code{TRUE} print a progress bar. 
 #' @return   
 #' \itemize{
@@ -829,14 +833,26 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 findThreshold <- function (data, method=c("gmm", "density"), 
                            cutEdge=0.9, cross=NULL, subsample=NULL,
                            model=c("gamma-gamma", "gamma-norm", "norm-gamma", "norm-norm"),
-                           cutoff=c("opt", "intxn"), progress=FALSE){
+                           cutoff=c("opt", "intxn", "user"), sen=NULL, spc=NULL, progress=FALSE){
   # Check arguments
   method <- match.arg(method)
   
   if (method == "gmm") {
       model <- match.arg(model)
       cutoff <- match.arg(cutoff)
-      output <- gmmFit(data, cutEdge=cutEdge, cross=cross, model=model, cutoff=cutoff, progress=progress)
+      if (cutoff=="user"){
+          if (is.null(sen) & is.null(spc)) {
+              cat("Error: one of 'sen' or 'spc' values should be specified.")
+              output <- NA
+          } else if (!is.null(sen) & !is.null(spc)) {
+              cat("Error: only one of 'sen' or 'spc' values can be specified.")
+              output <- NA
+          } else {
+              output <- gmmFit(ent=data, cutEdge=cutEdge, cross=cross, model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress)
+          }
+      } else {
+          output <- gmmFit(ent=data, cutEdge=cutEdge, cross=cross, model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress)
+      }
   } else if (method == "density") {
     output <- smoothValley(data, subsample=subsample)
   } else {
@@ -979,7 +995,7 @@ smoothValley <- function(distances, subsample=NULL) {
 # 
 # 
 # @export
-gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, progress=FALSE) {
+gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, sen, spc, progress=FALSE) {
     
     #************* Filter Unknown Data *************#
     ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
@@ -1150,7 +1166,7 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, progress=FALSE) 
         sigma.gmm <- c(sigma[1], sigma[2]) 
         
         FitResults <- rocSpace(ent=ent, omega.gmm=omega.gmm , mu.gmm=mu.gmm, sigma.gmm=sigma.gmm, 
-                               model=model, cutoff=cutoff, progress=progress)
+                               model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress)
         results<-new("GmmThreshold",
                      x=ent,
                      model = model,
@@ -1175,7 +1191,7 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, progress=FALSE) 
 }
 
 
-rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, progress=FALSE) {
+rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc, progress=FALSE) {
     func <- model
     bits <- strsplit(func,'-')[[1]]
 
@@ -1205,7 +1221,7 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, progress=
     gmmfunc2.2 <- func2.2
     
     set.seed(NULL)
-    options(warn=-1)
+    # options(warn=-1)
     LOG_LIK<-0
     
     if (progress) {
@@ -1218,12 +1234,12 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, progress=
         while (!key){
             # print(paste0(i,":",itr))
             # Fit mixture Functions
-            MixModel <- try(fitdistr(na.exclude(ent), MixFunctions, 
+            MixModel <- try(suppressWarnings(fitdistr(na.exclude(ent), MixFunctions, 
                                      first_curve = bits[1], second_curve = bits[2], 
                                      start=list(omega = func1.0, 
                                                 func1.1 = func1.1, func1.2 = func1.2,
                                                 func2.1 = func2.1, func2.2 = func2.2), 
-                                     lower = c(0.001, 0.001, 0.001, 0.001, 0.001), upper = c(0.999, +Inf, +Inf, +Inf, +Inf)), 
+                                     lower = c(0.001, 0.001, 0.001, 0.001, 0.001), upper = c(0.999, +Inf, +Inf, +Inf, +Inf))), 
                             silent = TRUE)
             if (inherits(MixModel, "try-error")) {
                 func1.0 <- runif(1)
@@ -1274,7 +1290,7 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, progress=
         # if (i==1 & itr == 1) break
         if (progress) { pb$tick() }
     }
-    options(warn=0)
+    # options(warn=0)
 
     # Invoke best fit parameters
     log_lik  <- LOG_LIK
@@ -1346,6 +1362,14 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, progress=
                          func1.0=func1.0, func1.1=func1.1, func1.2=func1.2, 
                          func2.0=func2.0, func2.1=func2.1, func2.2=func2.2)
         threshold <- intxn$root
+    } else if (cutoff == "user") {
+        user <- uniroot(userDefineSenSpc, interval = c(t1, t2), tol=1e-8, extendInt="no",
+                      t1=t1, t2=t2, 
+                      first_curve = bits[1], second_curve = bits[2], 
+                      sen = sen, spc = spc,
+                      func1.0=func1.0, func1.1=func1.1, func1.2=func1.2, 
+                      func2.0=func2.0, func2.1=func2.1, func2.2=func2.2)
+        threshold <- user$root
     }
     
     # Calculate Sensitivity and Specificity
@@ -1470,6 +1494,32 @@ Intersection <- function(t, first_curve=NULL, second_curve=NULL,
         fit2 <- func2.0*dgamma(t, shape = func2.1, scale = func2.2)
     }
     fit <- fit1 - fit2
+}
+
+# useDefineSenSpc
+userDefineSenSpc <- function(t, t1=0, t2=0, first_curve=NULL, second_curve=NULL, 
+                             sen = NULL, spc = NULL,
+                             func1.0 = 0, func1.1 = 0, func1.2 = 0,
+                             func2.0 = 0, func2.1 = 0, func2.2 = 0) {
+    if (!is.null(sen)) {
+        if (first_curve == "norm") {
+            TP <- NormArea(t1=t1, t2=t, omega=func1.0, mu=func1.1, sigma=func1.2)
+            FN <- NormArea(t1=t, t2=t2, omega=func1.0, mu=func1.1, sigma=func1.2)
+        } else if (first_curve == "gamma") {
+            TP <- GammaArea(t1=t1, t2=t, omega=func1.0, k=func1.1, theta=func1.2)
+            FN <- GammaArea(t1=t, t2=t2, omega=func1.0, k=func1.1, theta=func1.2)
+        }
+        SEN <- (TP/(TP+FN)) - sen
+    } else if (!is.null(spc)) {
+        if (second_curve == "norm") {
+            FP <- NormArea(t1=t1, t2=t, omega=func2.0, mu=func2.1, sigma=func2.2)
+            TN <- NormArea(t1=t, t2=t2, omega=func2.0, mu=func2.1, sigma=func2.2)
+        } else if (second_curve == "gamma") {
+            FP <- GammaArea(t1=t1, t2=t, omega=func2.0, k=func2.1, theta=func2.2)
+            TN <- GammaArea(t1=t, t2=t2, omega=func2.0, k=func2.1, theta=func2.2)
+        }
+        SPC <- (TN/(TN+FP)) - spc
+    }
 }
 
 # Mixture Functions
