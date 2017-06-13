@@ -519,7 +519,7 @@ collapseClones <- function(db,
     }
     
     # Printing status to console
-    cat("Collapsing clonal sequences...\n")
+    #cat("Collapsing clonal sequences...\n")
     
     # avoid .combine="cbind"!
     # if there is only 1 unique clone, .combind="cbind" will result in a vector (as opposed to
@@ -1276,8 +1276,8 @@ calcClonalConsensus <- function(db,
 #'                               sequences. IUPAC ambiguous characters for DNA are 
 #'                               supported.
 #' @param    germlineColumn      \code{character} name of the column containing 
-#'                               the germline or reference sequence. Germline should 
-#'                               \strong{not} contain ambiguous characters.
+#'                               the germline or reference sequence. IUPAC ambiguous 
+#'                               characters for DNA are supported.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences. If NULL, mutations 
 #'                               are counted for entire sequence.
@@ -1522,12 +1522,13 @@ observedMutations <- function(db,
 
 #' Count the number of observed mutations in a sequence.
 #'
-#' \code{calcObservedMutations} determines all the mutations in a given input seqeunce compared
-#' to its germline sequence.
+#' \code{calcObservedMutations} determines all the mutations in a given input seqeunce 
+#' compared to its germline sequence.
 #'
-#' @param    inputSeq            input sequence. IUPAC ambiguous characters for DNA are supported.
-#' @param    germlineSeq         germline sequence. Germline should \strong{not} contain ambiguous
-#'                               characters.
+#' @param    inputSeq            input sequence. IUPAC ambiguous characters for DNA are 
+#'                               supported.
+#' @param    germlineSeq         germline sequence. IUPAC ambiguous characters for DNA 
+#'                               are supported.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences. Note, only the part of
 #'                               sequences defined in \code{regionDefinition} are analyzed.
@@ -1536,32 +1537,34 @@ observedMutations <- function(db,
 #'                               and silent mutation criteria. If \code{NULL} then 
 #'                               replacement and silent are determined by exact 
 #'                               amino acid identity.
-#' @param    returnRaw           return the positions of point mutations and their corresponding
-#'                               mutation types, as opposed to counts of mutations across positions.
-#'                               Also returns the number of bases used as the denominator when 
-#'                               calculating frequency. Default is \code{FALSE}.                               
+#' @param    returnRaw           return the positions of point mutations and their 
+#'                               corresponding mutation types, as opposed to counts of 
+#'                               mutations across positions. Also returns the number of 
+#'                               bases used as the denominator when calculating frequency. 
+#'                               Default is \code{FALSE}.                               
 #' @param    frequency           \code{logical} indicating whether or not to calculate
-#'                               mutation frequencies. The denominator used is the number of bases
-#'                               that are not one of "N", "-", or "." in either the input or the 
-#'                               germline sequences. If set, this overwrites \code{returnRaw}. 
-#'                               Default is \code{FALSE}.
+#'                               mutation frequencies. The denominator used is the number 
+#'                               of bases that are not one of "N", "-", or "." in either 
+#'                               the input or the germline sequences. If set, this 
+#'                               overwrites \code{returnRaw}. Default is \code{FALSE}.
 #'                               
 #' @return   For \code{returnRaw=FALSE}, an \code{array} with the numbers of replacement (R) 
 #'           and silent (S) mutations. 
 #'           
 #'           For \code{returnRaw=TRUE}, a list containing 
 #'           \itemize{
-#'                \item A data frame (\code{$pos}) whose columns (\code{position}, \code{R}, \code{S}, 
-#'                      and \code{region}) indicate the nucleotide position, the number of R mutations, 
-#'                      the number of S mutations, and the region in which the nucleotide position is 
-#'                      in.
-#'                \item A vector (\code{$nonN}) indicating the number of bases in regions defined by 
-#'                      \code{regionDefinition} (excluding non-triplet overhang, if any) that are not 
-#'                      one of "N", "-", or "." in either the observed or the germline.
+#'                \item A data frame (\code{$pos}) whose columns (\code{position}, \code{R}, 
+#'                      \code{S}, and \code{region}) indicate the nucleotide position, 
+#'                      the number of R mutations, the number of S mutations, and the 
+#'                      region in which the nucleotide position is in.
+#'                \item A vector (\code{$nonN}) indicating the number of bases in regions 
+#'                      defined by \code{regionDefinition} (excluding non-triplet overhang, 
+#'                      if any) that are not one of "N", "-", or "." in either the 
+#'                      observed or the germline.
 #'           }
 #'           
-#'           For \code{frequency=TRUE}, regardless of \code{returnRaw}, an \code{array} with the 
-#'           frequencies of replacement (R) and silent (S) mutations.
+#'           For \code{frequency=TRUE}, regardless of \code{returnRaw}, an \code{array} 
+#'           with the frequencies of replacement (R) and silent (S) mutations.
 #'           
 #' @details
 #' Each mutation is considered independently in the germline context. Note, only the part of 
@@ -1655,11 +1658,6 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     inputSeq = toupper(inputSeq)
     germlineSeq = toupper(germlineSeq)
     
-    # check germlineSeq does not have ambiguous character (except for N)
-    if (any(s2c(germlineSeq) %in% NUCLEOTIDES_AMBIGUOUS[5:14])) {
-        stop("germlineSeq cannot contain ambiguous characters.")
-    }
-    
     # Assign mutation definition
     aminoAcidClasses <- if (is.null(mutationDefinition)) { NULL } else { mutationDefinition@classes }
     
@@ -1735,11 +1733,11 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     
     if (!tooShort) {
         # locate mutations
-        # germline is one of ATGCN 
+        # germline is one of ATGCN and IUPAC ambiguous characters
         # input is one of ATGCN and IUPAC ambiguous characters
         # character mismatch between germline & input (captures both cases like A vs. T, and W vs. T)
         mutations = ( (c_germlineSeq != c_inputSeq) & 
-                          (c_germlineSeq %in% NUCLEOTIDES[1:5]) & 
+                          (c_germlineSeq %in% NUCLEOTIDES_AMBIGUOUS[1:15]) & 
                           (c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:15]) ) 
         #print(sum(mutations))
         if (sum(mutations) > 0) {
@@ -1796,8 +1794,9 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             # Subset boundaries to only non-N & non-dash & non-dot bases (in both seq and gl)
             # "which" in next line is ESSENTIAL; otherwise @boundaries won't be truncated
             # e.g. (1:6)[c(T,T,T)] returns 1:6, not 1:3
-            boundaries <- regionDefinition@boundaries[which(c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14] &  
-                                                            c_germlineSeq%in%NUCLEOTIDES[1:4])]
+            boundaries <- regionDefinition@boundaries[
+                which(c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14] &  
+                      c_germlineSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14])]
             # Freq = numb of mutations / numb of non N bases (in both seq and gl)
             denoms <- sapply(tempNames, function(x) { sum(boundaries==x) })
             mutations_array <- mutations_array/denoms
@@ -1813,8 +1812,9 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
         if (!tooShort) {
             # "which" in next line is ESSENTIAL; otherwise @boundaries won't be truncated
             # e.g. (1:6)[c(T,T,T)] returns 1:6, not 1:3
-            nonN.boundaries <- regionDefinition@boundaries[which(c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14] &  
-                                                                     c_germlineSeq %in% NUCLEOTIDES[1:4])]
+            nonN.boundaries <- regionDefinition@boundaries[
+                which(c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14] &  
+                      c_germlineSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14])]
             nonN.denoms <- sapply(nonN.regions, function(x) { sum(nonN.boundaries==x) })
         } else {
             nonN.denoms = setNames(object=rep(NA, length(nonN.regions)), nm=nonN.regions)
