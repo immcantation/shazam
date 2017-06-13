@@ -58,13 +58,13 @@ regions in the `regionDefinition`. For example, when using the default
 [IMGT_V](IMGT_SCHEMES.md) definition, which defines positions for CDR and 
 FWR, the following columns are calculated:
 
-+ `EXPECTED_CDR_R`:  number of replacement mutations in CDR1 and 
++ `MU_EXPECTED_CDR_R`:  number of replacement mutations in CDR1 and 
 CDR2 of the V-segment.
-+ `EXPECTED_CDR_S`:  number of silent mutations in CDR1 and CDR2 
++ `MU_EXPECTED_CDR_S`:  number of silent mutations in CDR1 and CDR2 
 of the V-segment.
-+ `EXPECTED_FWR_R`:  number of replacement mutations in FWR1, 
++ `MU_EXPECTED_FWR_R`:  number of replacement mutations in FWR1, 
 FWR2 and FWR3 of the V-segment.
-+ `EXPECTED_FWR_S`:  number of silent mutations in FWR1, FWR2 and
++ `MU_EXPECTED_FWR_S`:  number of silent mutations in FWR1, FWR2 and
 FWR3 of the V-segment.
 
 
@@ -89,18 +89,18 @@ Examples
 data(ExampleDb, package="alakazam")
 
 # Use first entry in the exampled data for input and germline sequence
-in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
-germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]
+in_seq <- ExampleDb[["SEQUENCE_IMGT"]][1]
+germ_seq <-  ExampleDb[["GERMLINE_IMGT_D_MASK"]][1]
 
 # Identify all mutations in the sequence
 calcExpectedMutations(in_seq, germ_seq)
 
 ```
 
-*Warning*:Wrong argument type in s2c(), NA returned*Warning*:Wrong argument type in s2c(), NA returned
+
 ```
-SEQ_R SEQ_S 
-  NaN   NaN 
+    SEQ_R     SEQ_S 
+0.7659404 0.2340596 
 
 ```
 
@@ -112,10 +112,10 @@ calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V)
 
 ```
 
-*Warning*:Wrong argument type in s2c(), NA returned*Warning*:Wrong argument type in s2c(), NA returned
+
 ```
-CDR_R CDR_S FWR_R FWR_S 
-  NaN   NaN   NaN   NaN 
+     CDR_R      CDR_S      FWR_R      FWR_S 
+0.20544721 0.04081758 0.56090228 0.19283293 
 
 ```
 
@@ -127,10 +127,10 @@ calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS)
 ```
 
-*Warning*:Wrong argument type in s2c(), NA returned*Warning*:Wrong argument type in s2c(), NA returned
+
 ```
-CDR_R CDR_S FWR_R FWR_S 
-  NaN   NaN   NaN   NaN 
+    CDR_R     CDR_S     FWR_R     FWR_S 
+0.1209459 0.1253189 0.3169116 0.4368236 
 
 ```
 

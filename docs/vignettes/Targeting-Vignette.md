@@ -90,6 +90,10 @@ clone_db <- collapseClones(ExampleDb, nproc=1)
 ```
 
 ```
+## When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.
+```
+
+```
 ## Collapsing clonal sequences...
 ```
 

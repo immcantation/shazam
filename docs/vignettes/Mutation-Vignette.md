@@ -40,7 +40,7 @@ over the total number of positions that are non-N in both the input and the germ
 
 In the example below, the counts (`frequency=FALSE` ) and frequencies (`frequency=TRUE`) of 
 R and S mutations are calculated separately. New columns containing mutation counts are 
-appended to the input data.frame with names in the form `OBSERVED_<Region>_<R/S>`. 
+appended to the input data.frame with names in the form `MU_COUNT_<Region>_<R/S>`. 
 Mutation frequencies appear in new columns named `MU_FREQ_<Region>_<R/S>`.
 
 
@@ -53,12 +53,12 @@ db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                             nproc=1)
 # Show new mutation count columns
 db_obs %>% 
-    select(SEQUENCE_ID, starts_with("OBSERVED_")) %>%
+    select(SEQUENCE_ID, starts_with("MU_COUNT_")) %>%
     head(n=4)
 ```
 
 ```
-##      SEQUENCE_ID OBSERVED_SEQ_R OBSERVED_SEQ_S
+##      SEQUENCE_ID MU_COUNT_SEQ_R MU_COUNT_SEQ_S
 ## 1 GN5SHBT07FUXY8              0              0
 ## 2 GN5SHBT05JMPI5              8              2
 ## 3 GN5SHBT08H4LPP              8              2
@@ -79,11 +79,11 @@ db_obs %>%
 ```
 
 ```
-##      SEQUENCE_ID MU_FREQ_SEQ_R MU_FREQ_SEQ_S
-## 1 GN5SHBT07FUXY8    0.00000000   0.000000000
-## 2 GN5SHBT05JMPI5    0.02359882   0.005899705
-## 3 GN5SHBT08H4LPP    0.02352941   0.005882353
-## 4 GN5SHBT05JGND3    0.00000000   0.000000000
+##      SEQUENCE_ID MU_COUNT_SEQ_R MU_COUNT_SEQ_S MU_FREQ_SEQ_R MU_FREQ_SEQ_S
+## 1 GN5SHBT07FUXY8              0              0    0.00000000   0.000000000
+## 2 GN5SHBT05JMPI5              8              2    0.02366864   0.005917160
+## 3 GN5SHBT08H4LPP              8              2    0.02359882   0.005899705
+## 4 GN5SHBT05JGND3              0              0    0.00000000   0.000000000
 ```
 
 Specifying the `combine=TRUE` argument will aggregate all mutation 
@@ -107,8 +107,8 @@ db_obs %>%
 ```
 ##      SEQUENCE_ID    MU_FREQ
 ## 1 GN5SHBT07FUXY8 0.00000000
-## 2 GN5SHBT05JMPI5 0.02949853
-## 3 GN5SHBT08H4LPP 0.02941176
+## 2 GN5SHBT05JMPI5 0.02958580
+## 3 GN5SHBT08H4LPP 0.02949853
 ## 4 GN5SHBT05JGND3 0.00000000
 ```
 
@@ -146,17 +146,17 @@ db_obs_v <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                               nproc=1)
 # Show new FWR mutation columns
 db_obs_v %>% 
-    select(SEQUENCE_ID, starts_with("OBSERVED_FWR")) %>%
+    select(SEQUENCE_ID, starts_with("MU_COUNT_FWR")) %>%
     head(n=4)
 ```
 
 ```
-##      SEQUENCE_ID OBSERVED_FWR1_R OBSERVED_FWR1_S OBSERVED_FWR2_R
+##      SEQUENCE_ID MU_COUNT_FWR1_R MU_COUNT_FWR1_S MU_COUNT_FWR2_R
 ## 1 GN5SHBT07FUXY8               0               0               0
 ## 2 GN5SHBT05JMPI5               1               0               0
 ## 3 GN5SHBT08H4LPP               1               0               0
 ## 4 GN5SHBT05JGND3               0               0               0
-##   OBSERVED_FWR2_S OBSERVED_FWR3_R OBSERVED_FWR3_S
+##   MU_COUNT_FWR2_S MU_COUNT_FWR3_R MU_COUNT_FWR3_S
 ## 1               0               0               0
 ## 2               0               5               1
 ## 3               0               5               1
@@ -177,11 +177,26 @@ db_obs_v %>%
 ```
 
 ```
-##      SEQUENCE_ID MU_FREQ_CDR_R MU_FREQ_CDR_S MU_FREQ_FWR_R MU_FREQ_FWR_S
-## 1 GN5SHBT07FUXY8             0             0     0.0000000   0.000000000
-## 2 GN5SHBT05JMPI5             0             0     0.0251046   0.004184100
-## 3 GN5SHBT08H4LPP             0             0     0.0250000   0.004166667
-## 4 GN5SHBT05JGND3             0             0     0.0000000   0.000000000
+##      SEQUENCE_ID MU_COUNT_CDR1_R MU_COUNT_CDR1_S MU_COUNT_CDR2_R
+## 1 GN5SHBT07FUXY8               0               0               0
+## 2 GN5SHBT05JMPI5               0               0               0
+## 3 GN5SHBT08H4LPP               0               0               0
+## 4 GN5SHBT05JGND3               0               0               0
+##   MU_COUNT_CDR2_S MU_COUNT_FWR1_R MU_COUNT_FWR1_S MU_COUNT_FWR2_R
+## 1               0               0               0               0
+## 2               0               1               0               0
+## 3               0               1               0               0
+## 4               0               0               0               0
+##   MU_COUNT_FWR2_S MU_COUNT_FWR3_R MU_COUNT_FWR3_S MU_FREQ_CDR_R
+## 1               0               0               0             0
+## 2               0               5               1             0
+## 3               0               5               1             0
+## 4               0               0               0             0
+##   MU_FREQ_CDR_S MU_FREQ_FWR_R MU_FREQ_FWR_S
+## 1             0     0.0000000   0.000000000
+## 2             0     0.0251046   0.004184100
+## 3             0     0.0250000   0.004166667
+## 4             0     0.0000000   0.000000000
 ```
 
 Plot a comparison between CDR silent and replacement mutations.
@@ -233,8 +248,8 @@ db_obs_ch %>%
 ```
 ##      SEQUENCE_ID MU_FREQ_SEQ_R MU_FREQ_SEQ_S
 ## 1 GN5SHBT07FUXY8   0.000000000    0.00000000
-## 2 GN5SHBT05JMPI5   0.002949853    0.02654867
-## 3 GN5SHBT08H4LPP   0.002941176    0.02647059
+## 2 GN5SHBT05JMPI5   0.002958580    0.02662722
+## 3 GN5SHBT08H4LPP   0.002949853    0.02654867
 ## 4 GN5SHBT05JGND3   0.000000000    0.00000000
 ```
 

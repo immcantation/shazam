@@ -1,14 +1,35 @@
-Version 0.1.7.999: June 2, 2017
+Version 0.1.8: June 12, 2017
 -------------------------------------------------------------------------------
 
+General
++ Corrected several functions so that they accept both tibbles and data.frames.
+
 Distance Calculation:
-+ [Did a thing.]
++ Adding new fitting procedures to `findThreshold()` that allows users to 
+  choose a mixture of two univariate density distribution functions among 
+  four available combinations: `"norm-norm"`, `"norm-gamma"`,  `"gamma-norm"`,
+  or `"gamma-gamma"`.
 
 Mutation Profiling:
 
-+ Redesigned `calcClonalConsensus()`, which is called by `collapseClones()`, 
-  adding a new helper function `calcClonalConsensusHelper()` with extensive 
-  documentation.
++ Redesigned `collapseClones()`, adding various deterministic and stochastic
+  methods to obtain effective clonal sequences, support for including ambiguous 
+  IUPAC characters in output, as well as extensive documentation. Removed 
+  `calcClonalConsensus()` from exported functions.
++ Added support for including ambiguous IUPAC characters in input for 
+  `observedMutations()` and `calcObservedMutations()`.
++ Renamed column names of observed mutations (previously `OBSERVED`) and 
+  expected mutations (previously `EXPECTED`) returned by `observedMutations()`
+  and `expectedMutations()` to `MU_COUNT` and `MU_EXPECTED` respectively.
+
+Selection Analysis:
+
++ `calcBaseline()` no longer calls `collapseClones()` automatically if a `CLONE`
+  column is present. As indicated by the documentation for `calcBaseline()` 
+  users are advised to obtain effective clonal sequences (for example, calling
+  `collapseClones()`) before running `calcBaseline()`.
++ Updated vignette to reflect changes in `calcBaseline()`.
+
 
 Version 0.1.7: May 14, 2017
 -------------------------------------------------------------------------------

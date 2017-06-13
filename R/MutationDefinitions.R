@@ -63,6 +63,14 @@ allCodonMuts <- function(codon) {
 #                            if NULL then R or S is determined by amino acid identity
 # @return  matrix with all codons as row and column names and the type of mutation as 
 #           the corresponding value in the matrix.
+# @examples
+# library(alakazam)
+# hydropathy <- list(hydrophobic=c("A", "I", "L", "M", "F", "W", "V"),
+#                                  hydrophilic=c("R", "N", "D", "C", "Q", "E", "K"),
+#                                  neutral=c("G", "H", "P", "S", "T", "Y"))
+# chars <- unlist(hydropathy, use.names=FALSE)
+# classes <- setNames(translateStrings(chars, hydropathy), chars)
+# computeCodonTable(aminoAcidClasses=classes)
 computeCodonTable <- function(aminoAcidClasses=NULL) {
     # Initialize empty data.frame
     codon_table <- as.data.frame(matrix(NA, ncol=64, nrow=12))
@@ -76,7 +84,15 @@ computeCodonTable <- function(aminoAcidClasses=NULL) {
                 colnames(codon_table)[counter] <- codon
                 counter <- counter + 1
                 all_muts <- allCodonMuts(codon)
-                codon_table[, codon] <- sapply(all_muts, function(x) { mutationType(x, codon, aminoAcidClasses=aminoAcidClasses) })
+                codon_table[, codon] <- sapply(all_muts, function(x) { 
+                    mutType = mutationType(x, codon, aminoAcidClasses=aminoAcidClasses) 
+                    mutType = names(mutType)[which(mutType>0)]
+                    # does not support ambiguous characters
+                    # assumes that only 1 entry (R/S/Stop/na) from mutationType is non-zero/1
+                    stopifnot(length(mutType)==1)
+                    if (mutType=="na") {mutType=NA}
+                    return(mutType)
+                })
             }
         }
     }

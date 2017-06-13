@@ -16,24 +16,19 @@ to its germline sequence.
 Usage
 --------------------
 ```
-calcObservedMutations(inputSeq, germlineSeq, frequency = FALSE,
-regionDefinition = NULL, mutationDefinition = NULL, returnRaw = FALSE)
+calcObservedMutations(inputSeq, germlineSeq, regionDefinition = NULL,
+mutationDefinition = NULL, returnRaw = FALSE, frequency = FALSE)
 ```
 
 Arguments
 -------------------
 
 inputSeq
-:   input sequence.
+:   input sequence. IUPAC ambiguous characters for DNA are supported.
 
 germlineSeq
-:   germline sequence.
-
-frequency
-:   `logical` indicating whether or not to calculate
-mutation frequencies. The denominator used is the number of bases
-that are non-N in both the input and the germline sequences.
-Default is `FALSE`.
+:   germline sequence. Germline should **not** contain ambiguous
+characters.
 
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions
@@ -49,9 +44,16 @@ amino acid identity.
 
 returnRaw
 :   return the positions of point mutations and their corresponding
-mutation types, as opposed to counts of mutations.
-Also returns the number of non-N bases used as the denominator when
+mutation types, as opposed to counts of mutations across positions.
+Also returns the number of bases used as the denominator when 
 calculating frequency. Default is `FALSE`.
+
+frequency
+:   `logical` indicating whether or not to calculate
+mutation frequencies. The denominator used is the number of bases
+that are not one of "N", "-", or "." in either the input or the 
+germline sequences. If set, this overwrites `returnRaw`. 
+Default is `FALSE`.
 
 
 
@@ -59,12 +61,22 @@ calculating frequency. Default is `FALSE`.
 Value
 -------------------
 
-For `returnRaw=FALSE`, an `array` with the number of replacement (R) 
-and silent(S) mutations. For `returnRaw=TRUE`, a list containing a data 
-frame (`$pos`) whose columns (`position`, `type`, and `region`) 
-indicate the position, mutation type (R or S), and region of each mutation; and a 
-vector (`$nonN`) indicating the number of non-N bases in regions defined by
-`regionDefinition`.
+For `returnRaw=FALSE`, an `array` with the numbers of replacement (R) 
+and silent (S) mutations. 
+
+For `returnRaw=TRUE`, a list containing 
+
++  A data frame (`$pos`) whose columns (`position`, `R`, `S`, 
+and `region`) indicate the nucleotide position, the number of R mutations, 
+the number of S mutations, and the region in which the nucleotide position is 
+in.
++  A vector (`$nonN`) indicating the number of bases in regions defined by 
+`regionDefinition` (excluding non-triplet overhang, if any) that are not 
+one of "N", "-", or "." in either the observed or the germline.
+
+
+For `frequency=TRUE`, regardless of `returnRaw`, an `array` with the 
+frequencies of replacement (R) and silent (S) mutations.
 
 
 Details
@@ -73,13 +85,19 @@ Details
 Each mutation is considered independently in the germline context. Note, only the part of 
 `inputSeq` defined in `regionDefinition` is analyzed. For example, when using 
 the default [IMGT_V](IMGT_SCHEMES.md) definition, then mutations in positions beyond 
-312 will be ignored. 
+312 will be ignored. Additionally, non-triplet overhang at the sequence end is ignored.
 
-Note that only replacement (R) and silent (S) mutations are included in the 
-results. Stop mutations and mutations such as the case in which NNN in the germline
-sequence is observed as NNC in the input sequence are excluded. In other words,
-a result that is `NA` or zero indicates absence of R and S mutations, not 
-necessarily all types of mutations, such as the excluded ones mentioned above.
+Only replacement (R) and silent (S) mutations are included in the results. Excluded are: 
+
++  Stop mutations
++  Mutations occurring in codons where one or both of the observed and the 
+germline involve(s) one or more of "N", "-", or ".".
+
+E.g.: the case in which NNN in the germline sequence is observed as NNC in 
+the input sequence.
+
+In other words, a result that is `NA` or zero indicates absence of R and S mutations, 
+not necessarily all types of mutations, such as the excluded ones mentioned above.
 
 
 
@@ -89,8 +107,8 @@ Examples
 ```R
 # Use an entry in the example data for input and germline sequence
 data(ExampleDb, package="alakazam")
-in_seq <- ExampleDb[100, "SEQUENCE_IMGT"]
-germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
+in_seq <- ExampleDb[["SEQUENCE_IMGT"]][100]
+germ_seq <-  ExampleDb[["GERMLINE_IMGT_D_MASK"]][100]
 
 # Identify all mutations in the sequence
 ex1_raw = calcObservedMutations(in_seq, germ_seq, returnRaw=TRUE)
@@ -98,30 +116,52 @@ ex1_raw = calcObservedMutations(in_seq, germ_seq, returnRaw=TRUE)
 ex1_count = calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE)
 ex1_freq = calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE, frequency=TRUE)
 # Compare this with ex1_count
-table(ex1_raw$pos$region, ex1_raw$pos$type)
+table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"]
 
 ```
 
 
 ```
-     
-       R  S
-  SEQ 11  7
+[1] 11
+
+```
+
+
+```R
+table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"]
+
+```
+
+
+```
+[1] 7
 
 ```
 
 
 ```R
 # Compare this with ex1_freq
-table(ex1_raw$pos$region, ex1_raw$pos$type) / ex1_raw$nonN
+table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"] / ex1_raw$nonN
 
 ```
 
 
 ```
-     
-               R          S
-  SEQ 0.03353659 0.02134146
+       SEQ 
+0.03363914 
+
+```
+
+
+```R
+table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"] / ex1_raw$nonN
+
+```
+
+
+```
+       SEQ 
+0.02140673 
 
 ```
 
@@ -138,32 +178,54 @@ ex2_freq = calcObservedMutations(in_seq, germ_seq,
 regionDefinition=IMGT_V, returnRaw=FALSE,
 frequency=TRUE)
 # Compare this with ex2_count
-table(ex2_raw$pos$region, ex2_raw$pos$type)                                 
+table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"]
 
 ```
 
 
 ```
-     
-      R S
-  CDR 4 1
-  FWR 7 4
+CDR FWR 
+  4   7 
+
+```
+
+
+```R
+table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"]                              
+
+```
+
+
+```
+CDR FWR 
+  1   4 
 
 ```
 
 
 ```R
 # Compare this with ex2_freq
-table(ex2_raw$pos$region, ex2_raw$pos$type) / ex2_raw$nonN                                        
+table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"] / ex2_raw$nonN     
 
 ```
 
 
 ```
-     
-               R          S
-  CDR 0.08333333 0.02083333
-  FWR 0.02916667 0.01666667
+       CDR        FWR 
+0.08333333 0.02916667 
+
+```
+
+
+```R
+table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"] / ex2_raw$nonN                                       
+
+```
+
+
+```
+       CDR        FWR 
+0.02083333 0.01666667 
 
 ```
 
@@ -180,31 +242,53 @@ ex3_freq = calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS, returnRaw=FALSE, 
 frequency=TRUE)
 # Compre this with ex3_count
-table(ex3_raw$pos$region, ex3_raw$pos$type)                                        
+table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"]
 
 ```
 
 
 ```
-     
-      R S
-  CDR 3 2
-  FWR 4 7
+CDR FWR 
+  3   4 
+
+```
+
+
+```R
+table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"]
+
+```
+
+
+```
+CDR FWR 
+  2   7 
 
 ```
 
 
 ```R
 # Compare this with ex3_freq
-table(ex3_raw$pos$region, ex3_raw$pos$type) / ex3_raw$nonN
+table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"] / ex3_raw$nonN                                        
+
 ```
 
 
 ```
-     
-               R          S
-  CDR 0.06250000 0.04166667
-  FWR 0.01666667 0.02916667
+       CDR        FWR 
+0.06250000 0.01666667 
+
+```
+
+
+```R
+table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"] / ex3_raw$nonN
+```
+
+
+```
+       CDR        FWR 
+0.04166667 0.02916667 
 
 ```
 

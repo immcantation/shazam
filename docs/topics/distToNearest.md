@@ -152,11 +152,6 @@ db <- subset(ExampleDb, SAMPLE == "-1h")
 dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
 first=FALSE, normalize="len")
 
-```
-
-**Error in {**: task 3 failed - "object 'alakazam_pairwiseDistRcpp' not found"
-```R
-
 # Plot histogram of non-NA distances
 p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
 theme_bw() + 
@@ -164,16 +159,12 @@ ggtitle("Distance to nearest: Hamming") +
 xlab("distance") +
 geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
 fill="steelblue", color="white")
-
-```
-
-**Error in subset.default(dist, !is.na(DIST_NEAREST))**: object 'DIST_NEAREST' not found
-```R
 plot(p1)
 
 ```
 
-**Error in plot(p1)**: object 'p1' not found
+![2](distToNearest-2.png)
+
 ```R
 
 # Use human 5-mer model

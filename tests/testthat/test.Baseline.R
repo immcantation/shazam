@@ -34,7 +34,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
                             regionDefinition = IMGT_V)
     
     obs_mpath <- mutationalPaths[3,c(1,10,50,78,312)]
-    exp_mpath <- c("S", "R", "S", "S", "R" )
+    exp_mpath <- c(NA, "R", NA, "S", "R" )
     names(exp_mpath) <- c("G", "C", "G", "T", "T")
     expect_equal(obs_mpath, exp_mpath)
     
@@ -60,7 +60,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
         regionDefinition = NULL)
     
     obs_mpath_null <- mutationalPaths_null[3,c(1,10,50,78,312)]
-    exp_mpath_null <- c("S", "R", "S", "S", "R" )
+    exp_mpath_null <- c(NA, "R", NA, "S", "R" )
     names(exp_mpath_null) <- c("G", "C", "G", "T", "T")
     expect_equal(obs_mpath_null, exp_mpath_null)
 })
@@ -104,22 +104,22 @@ test_that("expectedMutations works with regionDefinition==NULL",{
     
     ## Check 5 examples for each, at different positions
     ## CDR_R, first 5
-    obs_cdr_r <- db_mutations$EXPECTED_CDR_R[1:5]
+    obs_cdr_r <- db_mutations$MU_EXPECTED_CDR_R[1:5]
     exp_cdr_r <- c(0.2072431, 0.2054472, 0.1870927, 0.1507470, 0.2200854)
     expect_equal(obs_cdr_r, exp_cdr_r, tolerance=0.001)
     
     ## CDR_S 311:315
-    obs_cdr_s <- db_mutations$EXPECTED_CDR_S[311:315]
+    obs_cdr_s <- db_mutations$MU_EXPECTED_CDR_S[311:315]
     exp_cdr_s <- c(0.03682467, 0.03682467, 0.03682467, 0.03682467, 0.03682467)
     expect_equal(obs_cdr_r, exp_cdr_r, tolerance=0.001)
     
     ## FWR_R, 120:124
-    obs_fwr_r <- db_mutations$EXPECTED_FWR_R[120:124]
+    obs_fwr_r <- db_mutations$MU_EXPECTED_FWR_R[120:124]
     exp_fwr_r<- c(0.5883452, 0.5883452, 0.5883452, 0.5883452, 0.5883452)
     expect_equal(obs_fwr_r, exp_fwr_r, tolerance=0.001)
     
     ## FWR_S, 993:997
-    obs_fwr_s <- db_mutations$EXPECTED_FWR_S[207:211]
+    obs_fwr_s <- db_mutations$MU_EXPECTED_FWR_S[207:211]
     exp_fwr_s<- c(0.1950189, 0.1950189, 0.1928329, 0.1928329, 0.1950189)
     expect_equal(obs_fwr_s, exp_fwr_s, tolerance=0.001)
     
@@ -129,12 +129,12 @@ test_that("expectedMutations works with regionDefinition==NULL",{
                                            regionDefinition=NULL,
                                            nproc=1)
     ## SEQ_R, first 5
-    obs_seq_r <- db_mutations_null$EXPECTED_SEQ_R[1:5]
+    obs_seq_r <- db_mutations_null$MU_EXPECTED_SEQ_R[1:5]
     exp_seq_r <- c(0.7590282, 0.7635794, 0.7611897, 0.7585786, 0.7761334)
     expect_equal(obs_seq_r, exp_seq_r, tolerance=0.001)
     
     ## SEQ_S 311:315
-    obs_seq_s <- db_mutations_null$EXPECTED_SEQ_S[311:315]
+    obs_seq_s <- db_mutations_null$MU_EXPECTED_SEQ_S[311:315]
     exp_seq_s <- c(0.2383252, 0.2361719, 0.2361354, 0.2400638, 0.2389921)
     expect_equal(obs_seq_s, exp_seq_s, tolerance=0.001)
     
@@ -182,22 +182,22 @@ test_that("observedMutations works with regionDefinition==NULL",{
     
     ## Check 5 examples for each
     ## CDR_R, first 5
-    obs_cdr_r <- db_mutations$OBSERVED_CDR_R[1:5]
+    obs_cdr_r <- db_mutations$MU_COUNT_CDR_R[1:5]
     exp_cdr_r <- c(2, 0, 0, 0, 0)
     expect_equal(obs_cdr_r, exp_cdr_r)
     
     ## CDR_S 311:315
-    obs_cdr_s <- db_mutations$OBSERVED_CDR_S[311:315]
+    obs_cdr_s <- db_mutations$MU_COUNT_CDR_S[311:315]
     exp_cdr_s <- c(0, 0, 0, 0, 0)
     expect_equal(obs_cdr_r, exp_cdr_r)
     
     ## FWR_R, 120:124
-    obs_fwr_r <- db_mutations$OBSERVED_FWR_R[120:124]
+    obs_fwr_r <- db_mutations$MU_COUNT_FWR_R[120:124]
     exp_fwr_r<- c(0, 0, 0, 0, 0)
     expect_equal(obs_fwr_r, exp_fwr_r)
     
     ## FWR_S, 40:44
-    obs_fwr_s <- db_mutations$OBSERVED_FWR_S[40:44]
+    obs_fwr_s <- db_mutations$MU_COUNT_FWR_S[40:44]
     exp_fwr_s<- c(0, 0, 0, 1, 0)
     expect_equal(obs_fwr_s, exp_fwr_s)
      
@@ -207,12 +207,12 @@ test_that("observedMutations works with regionDefinition==NULL",{
                                            regionDefinition=NULL,
                                            nproc=1)
     ## SEQ_R, first 5
-    obs_seq_r <- db_mutations_null$OBSERVED_SEQ_R[1:5]
+    obs_seq_r <- db_mutations_null$MU_COUNT_SEQ_R[1:5]
     exp_seq_r <- c(12, 0, 0, 0, 0)
     expect_equal(obs_seq_r, exp_seq_r)
     
     ## SEQ_S 38:42
-    obs_seq_s <- db_mutations_null$OBSERVED_SEQ_S[38:42]
+    obs_seq_s <- db_mutations_null$MU_COUNT_SEQ_S[38:42]
     exp_seq_s <- c(0, 2, 2, 0, 0)
     expect_equal(obs_seq_s, exp_seq_s)
     
@@ -247,7 +247,7 @@ test_that("calcBaseline", {
     expect_gt(nrow(slot(db_baseline,"stats")),0)
     
     db_baseline_rowSums <- rowSums(
-        slot(db_baseline,"db")[1:5,grep("OBSERVED",colnames(slot(db_baseline,"db")))])
+        slot(db_baseline,"db")[1:5,grep("MU_COUNT",colnames(slot(db_baseline,"db")))])
 
 # Commented because working on the code, when clones collapsed.
     expect_equivalent(
@@ -256,22 +256,22 @@ test_that("calcBaseline", {
     
 #     ## Check 5 examples for each, at different positions
 #     ## CDR_R, first 5
-#     obs_cdr_r <- slot(db_baseline,"db")$OBSERVED_CDR_R[1:5]
+#     obs_cdr_r <- slot(db_baseline,"db")$MU_COUNT_CDR_R[1:5]
 #     exp_cdr_r<- c(2, 6, 17, 18, 0)
 #     expect_equal(obs_cdr_r, exp_cdr_r)
 #     
 #     ## CDR_S, 673:677
-#     obs_cdr_s <- slot(db_baseline,"db")$OBSERVED_CDR_S[673:677]
+#     obs_cdr_s <- slot(db_baseline,"db")$MU_COUNT_CDR_S[673:677]
 #     exp_cdr_s <- c(3, 5, 5, 5, 0)
 #     expect_equal(obs_cdr_s, exp_cdr_s)
 #     
 #     ## FWR_R, 937:941
-#     obs_fwr_r <- slot(db_baseline,"db")$OBSERVED_FWR_R[937:941]
+#     obs_fwr_r <- slot(db_baseline,"db")$MU_COUNT_FWR_R[937:941]
 #     exp_fwr_r<- c(0, 7, 14, 7, 0)
 #     expect_equal(obs_fwr_r, exp_fwr_r)
 #     
 #     ## FWR_S, 993:997
-#     obs_fwr_s <- slot(db_baseline,"db")$OBSERVED_FWR_S[993:997]
+#     obs_fwr_s <- slot(db_baseline,"db")$MU_COUNT_FWR_S[993:997]
 #     exp_fwr_s<- c(10, 0, 0, 0, 0)
 #     expect_equal(obs_fwr_s, exp_fwr_s)
 
@@ -351,10 +351,10 @@ test_that("calcBaseline", {
                                           nproc = 1, 
                                           calcStats=T)
  
-    total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$OBSERVED_SEQ_S,
-        slot(db_baseline_trim_null,"db")$OBSERVED_SEQ_R))
+    total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$MU_COUNT_SEQ_S,
+        slot(db_baseline_trim_null,"db")$MU_COUNT_SEQ_R))
     
-    total_baseline <- rowSums(slot(db_baseline,"db")[,grep("OBSERVED.*", colnames(slot(db_baseline,"db")))])
+    total_baseline <- rowSums(slot(db_baseline,"db")[,grep("MU_COUNT.*", colnames(slot(db_baseline,"db")))])
     
     expect_equivalent(total_trim_null, total_baseline)
     
@@ -366,7 +366,7 @@ test_that("calcBaseline", {
                                 regionDefinition=IMGT_V,
                                 nproc=1)
     expect_equivalent(
-        rowSums(obs_mu[,grep("OBSERVED", colnames(obs_mu))]), 
+        rowSums(obs_mu[,grep("MU_COUNT", colnames(obs_mu))]), 
         total_baseline
         )
     
@@ -376,7 +376,7 @@ test_that("calcBaseline", {
                                 regionDefinition=NULL,
                                 nproc=1)
     expect_equivalent(
-        rowSums(obs_mu[,grep("OBSERVED", colnames(obs_mu))]), 
+        rowSums(obs_mu[,grep("MU_COUNT", colnames(obs_mu))]), 
         total_baseline
     )
     
@@ -389,11 +389,11 @@ test_that("calcBaseline", {
     #                             nproc = 1)
     # ## Check 5 examples for each, at different positions
     # ## CDR_R, first 5
-    # obs_seq_r <- slot(db_baseline_null,"db")$OBSERVED_SEQ_R[1:5]
+    # obs_seq_r <- slot(db_baseline_null,"db")$MU_COUNT_SEQ_R[1:5]
     # exp_seq_r<- c(12, 18, 74, 73)
     # expect_equal(obs_seq_r, exp_seq_r)
     # 
-    # obs_seq_s <- slot(db_baseline_null,"db")$OBSERVED_SEQ_S[1:5]
+    # obs_seq_s <- slot(db_baseline_null,"db")$MU_COUNT_SEQ_S[1:5]
     # exp_seq_s<- c(5, 6, 34, 46, 1)
     # expect_equal(obs_seq_r, exp_seq_r)
 

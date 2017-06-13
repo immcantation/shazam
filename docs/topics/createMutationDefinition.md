@@ -63,7 +63,7 @@ classes <- setNames(translateStrings(chars, hydropathy), chars)
 md <- createMutationDefinition("Hydropathy", classes)
 ```
 
-
+**Error in `[<-.data.frame`(`*tmp*`, , codon, value = structure(c(0, 0, **: replacement has 4 rows, data has 12
 
 See also
 -------------------

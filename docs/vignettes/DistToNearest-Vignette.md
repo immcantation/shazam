@@ -67,13 +67,7 @@ the overall distance.
 # Use nucleotide Hamming distance and normalize by junction length
 dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="len", 
                           nproc=1)
-```
 
-```
-## Error in {: task 3 failed - "object 'alakazam_pairwiseDistRcpp' not found"
-```
-
-```r
 # Use genotyped V assignments, a 5-mer model and no normalization
 dist_s5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f", 
                           first=FALSE, normalize="none", nproc=1)
@@ -111,19 +105,10 @@ p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
     scale_x_continuous(breaks=seq(0, 1, 0.1)) +
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2)
-```
-
-```
-## Error in subset(dist_ham, !is.na(DIST_NEAREST)): object 'dist_ham' not found
-```
-
-```r
 plot(p1)
 ```
 
-```
-## Error in plot(p1): object 'p1' not found
-```
+![plot of chunk DistToNearest-Vignette-3](figure/DistToNearest-Vignette-3-1.png)
 
 By manual inspection, the length normalized `ham` model distance threshold would be 
 set to a value near 0.12 in the above example.
@@ -147,37 +132,44 @@ plot(p2)
 In this example, the unnormalized `hh_s5f` model distance threshold would be 
 set to a value near 7.
 
-### Automated threshold detection via a Guassian mixture model
+### Automated threshold detection via a mixture model
 
-The `gmm` method, which is computationally less expensive than `density`, follows a 
-Gaussian mixture model (GMM) procedure, including the expectation maximization (EM) 
-algorithm, for learning the parameters of two univariate Gaussians which fit the bimodal 
-distributions of the input distance vector. Retrieving the fit parameters, it then calculates, 
-analytically, the optimum threshold, where the average of the sensitivity plus specificity 
-reaches its maximum. 
+A mixture of two univariate density distribution functions is considered:
+\begin{equation}
+f(x)= \lambda_1 f_1(x|\phi_1) + \lambda_2 f_2(x|\phi_2).
+\end{equation}
+Here, the $\lambda_1$ and $\lambda_2$ represent the mixing weights (sum to one), 
+$x$ represents the nearest neighbor distance (calculated by function `distToNearest`), 
+and $\phi$ represents the vector of each component parameters; mean and standard deviation 
+$(\mu, \sigma)$ of a Normal distribution, shape and scale $(k, \theta)$ of a Gamma distribution.
 
-Below is an example showing how the `gmm` method is used to find optimal threshold for 
+The `"gmm"` (Gamma/Gaussian Mixture Method) is enabled to perform a maximum-likelihood fitting 
+procedure over the dist-to-nearest distribution through one of the four combinations of 
+$f_1$ and $f_2$: (1) `"norm-norm"`, (2) `"norm-gamma"`, (3) `"gamma-norm"`, and (4) `"gamma-gamma"`. 
+A Gaussian mixture model, including expectation maximization algorithm, is also 
+implemented into the `findThreshold` function to initialize the fit component parameters 
+automatically. The Gaussian mixture model estimates two sets of values; (1) mixing weight $\lambda_i$, 
+(2) mean $\mu_i$, and (3) standard deviation $\sigma_i$ where $i\in\{1,2\}$  refers to the first 
+and second curve. These parameters are then used as initial values to begin the fitting procedure 
+(if Gamma distribution is chosen, the initial values are translated accordingly). 
+After maximum-likelihood fitting procedure converges, through an optimization approach, 
+it then calculates the optimum threshold where the average of Sensitivity and 
+Specificity reaches its maximum.
+
+Below is an example showing how the `"gmm"` method is used to find optimal threshold for 
 separating clonally related sequences. The red dashed-line shown in figure below defines the distance 
 where the average of the Sensitivity plus Specificity reaches its maximum.
 
 
 ```r
 # Find threshold using gmm method
-output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", cutEdge=0.9)
-```
+output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm")
 
-```
-## Error in gmmFit(data, cutEdge = cutEdge, cross = cross, model = model, : object 'dist_ham' not found
-```
-
-```r
 # Plot distance histogram, Gaussian fits, and optimum threshold
-plot(output, binwidth=0.02, title="GMM Method")
+plot(output, binwidth=0.02, title="GMM Method: gamma-gamma")
 ```
 
-```
-## Error in plot(output, binwidth = 0.02, title = "GMM Method"): object 'output' not found
-```
+![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
 
 ```r
 # Print threshold
@@ -185,10 +177,10 @@ print(output)
 ```
 
 ```
-## Error in print(output): object 'output' not found
+## [1] 0.1589916
 ```
 
-**Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `histBinwidth` parameter.
+**Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `binwidth` parameter.
 Meaning, any change in bin size will change the form of the distribution, while the `gmm` method is 
 completely bin size independent and only engages the real input data.
 
@@ -208,28 +200,13 @@ the size specified using the `subsample` parameter.  Below is an example of usin
 ```r
 # Find threshold using density method
 output <- findThreshold(dist_ham$DIST_NEAREST, method="density")
-```
-
-```
-## Error in smoothValley(data, subsample = subsample): object 'dist_ham' not found
-```
-
-```r
 threshold <- output@threshold
-```
 
-```
-## Error in eval(expr, envir, enclos): object 'output' not found
-```
-
-```r
 # Plot distance histogram, density estimate and optimum threshold
 plot(output, title="Density Method")
 ```
 
-```
-## Error in plot(output, title = "Density Method"): object 'output' not found
-```
+![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
 
 ```r
 # Print threshold
@@ -237,7 +214,7 @@ print(output)
 ```
 
 ```
-## Error in print(output): object 'output' not found
+## [1] 0.1226913
 ```
 
 ## Calculating nearest neighbor distances independently for subsets of data
@@ -260,10 +237,6 @@ dist_fields <- distToNearest(ExampleDb, model="ham", first=FALSE,
                              nproc=1)
 ```
 
-```
-## Error in {: task 3 failed - "object 'alakazam_pairwiseDistRcpp' not found"
-```
-
 We can plot the nearest neighbor distances for the two samples:
 
 
@@ -277,19 +250,10 @@ p4 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)),
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
     facet_grid(SAMPLE ~ ., scales="free_y")
-```
-
-```
-## Error in subset(dist_fields, !is.na(DIST_NEAREST)): object 'dist_fields' not found
-```
-
-```r
 plot(p4)
 ```
 
-```
-## Error in plot(p4): object 'p4' not found
-```
+![plot of chunk DistToNearest-Vignette-7](figure/DistToNearest-Vignette-7-1.png)
 
 In this case, the threshold selected for `-1h` seems to work well 
 for `+7d` as well.
@@ -309,10 +273,6 @@ dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE,
                             normalize="len", cross="SAMPLE", nproc=1)
 ```
 
-```
-## Error in {: task 1 failed - "object 'alakazam_pairwiseDistRcpp' not found"
-```
-
 
 ```r
 # Generate cross sample histograms
@@ -324,19 +284,10 @@ p5 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)),
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
     facet_grid(SAMPLE ~ ., scales="free_y")
-```
-
-```
-## Error in subset(dist_cross, !is.na(CROSS_DIST_NEAREST)): object 'dist_cross' not found
-```
-
-```r
 plot(p5)
 ```
 
-```
-## Error in plot(p5): object 'p5' not found
-```
+![plot of chunk DistToNearest-Vignette-8](figure/DistToNearest-Vignette-8-1.png)
 
 This can provide a sense of overlap between samples or a way to 
 compare within-sample variation to cross-sample variation.

@@ -327,7 +327,7 @@ getBaselineStats <- function(baseline) {
 #' the \link{collapseClones} function.
 #'                   
 #' If the \code{db} does not contain the 
-#' required columns to calculate the PDFs (namely OBSERVED & EXPECTED mutations)
+#' required columns to calculate the PDFs (namely MU_COUNT & MU_EXPECTED)
 #' then the function will:
 #'   \enumerate{
 #'   \item  Calculate the numbers of observed mutations.
@@ -466,18 +466,18 @@ calcBaseline <- function(db,
         registerDoSEQ()
     }
     
-    # If db does not contain the required columns to calculate the PDFs (namely OBSERVED 
-    # & EXPECTED mutations), then the function will:
+    # If db does not contain the required columns to calculate the PDFs (namely MU_COUNT 
+    # & MU_EXPECTED mutations), then the function will:
     #          1. Calculate the numbers of observed mutations
     #          2. Calculate the expected frequencies of mutations    
     # After that BASELINe prob. densities can be calcualted per sequence. 
     if (is.null(regionDefinition)) {
         rd_labels <- makeNullRegionDefinition()@labels
-        observedColumns <- paste0("OBSERVED_", rd_labels)
-        expectedColumns <- paste0("EXPECTED_", rd_labels)
+        observedColumns <- paste0("MU_COUNT_", rd_labels)
+        expectedColumns <- paste0("MU_EXPECTED_", rd_labels)
     } else {
-        observedColumns <- paste0("OBSERVED_", regionDefinition@labels)
-        expectedColumns <- paste0("EXPECTED_", regionDefinition@labels)
+        observedColumns <- paste0("MU_COUNT_", regionDefinition@labels)
+        expectedColumns <- paste0("MU_EXPECTED_", regionDefinition@labels)
     }
     
     if (!all(c(observedColumns, expectedColumns) %in% colnames(db))) {
@@ -513,9 +513,9 @@ calcBaseline <- function(db,
     
     # Number of sequences (used in foreach)
     totalNumbOfSequences <- nrow(db)
-    # The column indexes of the OBSERVED_ and EXPECTED_
-    cols_observed <- grep( paste0("OBSERVED_"),  colnames(db) ) 
-    cols_expected <- grep( paste0("EXPECTED_"),  colnames(db) ) 
+    # The column indexes of the MU_COUNT_ and MU_EXPECTED_
+    cols_observed <- grep( paste0("MU_COUNT_"),  colnames(db) ) 
+    cols_expected <- grep( paste0("MU_EXPECTED_"),  colnames(db) ) 
     
     # Exporting additional environment variables and functions needed to run foreach 
     if( nproc!=1 ) {
@@ -675,37 +675,37 @@ calcBaselineHelper  <- function(observed,
     
     # local test statistic
     if (testStatistic == "local") { 
-        obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(observed) )
+        obsX_Index <- grep( paste0("MU_COUNT_", region,"_R"),  names(observed) )
         # important to have "_" after region
         # otherwise this might happen (leading to bugs in results):
         # region = codon_1
         # expect grep to find only codon_1_S and codon_1_R
         # in fact, however, codon_10_S, codon_10_R, codon_101_S, codon_101_R are matched
-        obsN_Index <- grep( paste0("OBSERVED_", region, "_"),  names(observed) )
+        obsN_Index <- grep( paste0("MU_COUNT_", region, "_"),  names(observed) )
         
-        expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(expected) )
+        expX_Index <- grep( paste0("MU_EXPECTED_", region,"_R"),  names(expected) )
         # important to have "_" after region
-        expN_Index <- grep( paste0("EXPECTED_", region, "_"),  names(expected) )       
+        expN_Index <- grep( paste0("MU_EXPECTED_", region, "_"),  names(expected) )       
     }
     
     # focused test statistic
     if (testStatistic == "focused") { 
-        obsX_Index <- grep( paste0("OBSERVED_", region,"_R"),  names(observed) )
+        obsX_Index <- grep( paste0("MU_COUNT_", region,"_R"),  names(observed) )
         obsN_Index <- 
             grep( 
                 paste0( 
-                    "OBSERVED_", region, "|", 
-                    "OBSERVED_", regions[regions!=region], "_S"
+                    "MU_COUNT_", region, "|", 
+                    "MU_COUNT_", regions[regions!=region], "_S"
                 ),
                 names(observed) 
             )
         
-        expX_Index <- grep( paste0("EXPECTED_", region,"_R"),  names(expected) )
+        expX_Index <- grep( paste0("MU_EXPECTED_", region,"_R"),  names(expected) )
         expN_Index <- 
             grep( 
                 paste0( 
-                    "EXPECTED_", region, "|", 
-                    "EXPECTED_",  regions[regions!=region], "_S"
+                    "MU_EXPECTED_", region, "|", 
+                    "MU_EXPECTED_",  regions[regions!=region], "_S"
                 ),
                 names(expected) 
             )        
@@ -713,11 +713,11 @@ calcBaselineHelper  <- function(observed,
     
     # imbalanced test statistic
     if (testStatistic == "imbalanced") { 
-        obsX_Index <- grep( paste0("OBSERVED_", region),  names(observed) )
-        obsN_Index <- grep( "OBSERVED_",names(observed))  
+        obsX_Index <- grep( paste0("MU_COUNT_", region),  names(observed) )
+        obsN_Index <- grep( "MU_COUNT_",names(observed))  
         
-        expX_Index <- grep( paste0("EXPECTED_", region),  names(expected) )
-        expN_Index <-   grep( "EXPECTED_",names(expected)) 
+        expX_Index <- grep( paste0("MU_EXPECTED_", region),  names(expected) )
+        expN_Index <-   grep( "MU_EXPECTED_",names(expected)) 
         
     }
     

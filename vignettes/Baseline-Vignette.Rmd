@@ -102,11 +102,11 @@ Users may define other region sets and boundaries by creating a custom
 `RegionDefinition` object.
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
-# Count observed mutations and append OBSERVED columns to the output
+# Count observed mutations and append MU_COUNT columns to the output
 observed <- observedMutations(clones, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               regionDefinition=IMGT_V, nproc=1)
-# Count expected mutations and append EXPECTED columns to the output
+# Count expected mutations and append MU_EXPECTED columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="CLONAL_SEQUENCE",
                               targetingModel=HH_S5F,
