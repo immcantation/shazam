@@ -816,7 +816,7 @@ calcClonalConsensusHelper = function(seqs, muFreqColumn=NULL, lenLimit=NULL,
     if (numSeqs==1) {
         # restrict length if there is a lenLimit
         if (!is.null(lenLimit)) {
-            consensus = substr(seqs, 1, min(lenLimit, nchar(seqs)))
+            consensus = substr(seqs, 1, min(lenLimit, stri_length(seqs)))
         } else {
             # otherwise, return as is
             consensus = seqs
@@ -834,7 +834,7 @@ calcClonalConsensusHelper = function(seqs, muFreqColumn=NULL, lenLimit=NULL,
     if (length(unique(seqs))==1) {
         # restrict length if there is a lenLimit
         if (!is.null(lenLimit)) {
-            consensus = substr(seqs[1], 1, min(lenLimit, nchar(seqs)))
+            consensus = substr(seqs[1], 1, min(lenLimit, stri_length(seqs)))
         } else {
             # otherwise, return as is
             consensus = seqs[1]
@@ -849,7 +849,7 @@ calcClonalConsensusHelper = function(seqs, muFreqColumn=NULL, lenLimit=NULL,
     }
     
     ##### length of longest sequence in seqs
-    lenSeqs = nchar(seqs)
+    lenSeqs = stri_length(seqs)
     lenMax = max(lenSeqs, na.rm=T)
     
     ##### methods = thresholdedFreq, mostCommon, catchAll
@@ -985,7 +985,7 @@ calcClonalConsensusHelper = function(seqs, muFreqColumn=NULL, lenLimit=NULL,
         # convert from character vector to string
         consensus = c2s(consensus)
         # sanity check
-        stopifnot( nchar(consensus)==lenConsensus )
+        stopifnot( stri_length(consensus)==lenConsensus )
     }
     
     ##### methods = mostMutated, leastMutated
@@ -1036,7 +1036,7 @@ calcClonalConsensusHelper = function(seqs, muFreqColumn=NULL, lenLimit=NULL,
     
     # check length
     if (!is.null(lenLimit)) {
-        stopifnot(nchar(consensus) <= lenLimit)
+        stopifnot(stri_length(consensus) <= lenLimit)
     }
     
     if (mtd %in% c("mostMutated", "leastMutated")) {
@@ -1205,7 +1205,7 @@ calcClonalConsensus <- function(db,
     germlineSeq = db[[germlineColumn]]
     
     # length of seqs in inputSeq and those in germlineSeq should match
-    if ( sum(nchar(inputSeq)==nchar(germlineSeq)) != length(inputSeq) ) {
+    if ( sum(stri_length(inputSeq)==stri_length(germlineSeq)) != length(inputSeq) ) {
         stop("Sequences in inputSeq and germlineSeq have different lengths.")
     }
     
@@ -1245,8 +1245,8 @@ calcClonalConsensus <- function(db,
         # germCons (mostCommon) length is "longest possible length" for mostCommon
         # inputCons length is min of length of most/least mutated and lenLimit
         # if different, trim the two to same length
-        lenInput = nchar(inputCons)
-        lenGerm = nchar(germCons)
+        lenInput = stri_length(inputCons)
+        lenGerm = stri_length(germCons)
         if (lenInput != lenGerm) {
             minLen = min(lenInput, lenGerm)
             inputCons = substr(inputCons, 1, minLen)
@@ -1256,7 +1256,7 @@ calcClonalConsensus <- function(db,
     
     # sanity check: length of germCons and inputCons should be the same
     # all methods other than most/leastMutated should expect same lengths of inputCons & germCons
-    stopifnot( nchar(germCons)==nchar(inputCons) )
+    stopifnot( stri_length(germCons)==stri_length(inputCons) )
     
     return(list("inputCons"=inputCons, "germlineCons"=germCons, "inputMuFreq"=inputMuFreq))
 }
@@ -1678,8 +1678,8 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     inputSeq <- gsub("XXX", "...", inputSeq)    
     
     # Trim the input and germline sequence to the shortest
-    len_inputSeq <- nchar(inputSeq)
-    len_germlineSeq <- nchar(germlineSeq)
+    len_inputSeq <- stri_length(inputSeq)
+    len_germlineSeq <- stri_length(germlineSeq)
     
     # If a regionDefinition is passed,
     # then only analyze till the end of the defined length
@@ -1737,8 +1737,8 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
         # input is one of ATGCN and IUPAC ambiguous characters
         # character mismatch between germline & input (captures both cases like A vs. T, and W vs. T)
         mutations = ( (c_germlineSeq != c_inputSeq) & 
-                          (c_germlineSeq %in% NUCLEOTIDES_AMBIGUOUS[1:15]) & 
-                          (c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:15]) ) 
+                          (c_germlineSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14]) & 
+                          (c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14]) ) 
         #print(sum(mutations))
         if (sum(mutations) > 0) {
             # The nucleotide positions of the mutations
@@ -1790,7 +1790,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
         if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
             return(mutations_array)
         } else {
-            tempNames <- sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) })
+            tempNames <- sapply(regionDefinition@labels, function(x) { substr(x, 1, stri_length(x)-2) })
             # Subset boundaries to only non-N & non-dash & non-dot bases (in both seq and gl)
             # "which" in next line is ESSENTIAL; otherwise @boundaries won't be truncated
             # e.g. (1:6)[c(T,T,T)] returns 1:6, not 1:3
@@ -1807,7 +1807,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     # return positions of point mutations and their mutation types ("raw")
     if (returnRaw){
         # number of non-N, non-dash, non-dot bases (in both seq and gl)
-        nonN.regions <- unique(sapply(regionDefinition@labels, function(x) { substr(x, 1, nchar(x)-2) }))
+        nonN.regions <- unique(sapply(regionDefinition@labels, function(x) { substr(x, 1, stri_length(x)-2) }))
         
         if (!tooShort) {
             # "which" in next line is ESSENTIAL; otherwise @boundaries won't be truncated
@@ -2635,7 +2635,7 @@ calcExpectedMutations <- function(germlineSeq,
     mutationalPaths[!(mutationalPaths %in% typesOfMutations)] <- NA
     
     if (is.null(regionDefinition)) {
-        rdLength <- max(nchar(inputSeq), nchar(germlineSeq), na.rm=TRUE)
+        rdLength <- max(stri_length(inputSeq), stri_length(germlineSeq), na.rm=TRUE)
         regionDefinition <- makeNullRegionDefinition(rdLength)
     }
     listExpectedMutationFrequencies <- list()
@@ -2679,8 +2679,8 @@ calculateTargeting <- function(germlineSeq,
     # (which is default). 
     if(!is.null(inputSeq)){    
         # Trim the input and germline sequence to the shortest
-        len_inputSeq <- nchar(inputSeq)
-        len_germlineSeq <- nchar(germlineSeq)
+        len_inputSeq <- stri_length(inputSeq)
+        len_germlineSeq <- stri_length(germlineSeq)
         # If a regionDefinition is passed,
         # then only analyze till the end of the defined length
         if(!is.null(regionDefinition)){
@@ -2720,7 +2720,7 @@ calculateTargeting <- function(germlineSeq,
     c_germlineSeq <- s2c(s_germlineSeq)
     # Matrix to hold targeting values for each position in c_germlineSeq
     germlineSeqTargeting <- matrix(NA, 
-                                   ncol=nchar(s_germlineSeq), 
+                                   ncol=stri_length(s_germlineSeq), 
                                    nrow=length(NUCLEOTIDES[1:5]),
                                    dimnames=list(NUCLEOTIDES[1:5], c_germlineSeq))
     
@@ -2729,11 +2729,11 @@ calculateTargeting <- function(germlineSeq,
     # GAGAAA......TAG yields: "GAGAA" "AGAAA" "GAAAT" "AAATA" "AATAG"
     # (because the IMGT gaps are NOT real gaps in sequence!!!)
     gaplessSeq <- gsub("\\.\\.\\.", "", s_germlineSeq)
-    gaplessSeqLen <- nchar(gaplessSeq)
+    gaplessSeqLen <- stri_length(gaplessSeq)
     
     #Slide through 5-mers and look up targeting
     gaplessSeq <- paste("NN", gaplessSeq, "NN", sep="")
-    gaplessSeqLen <- nchar(gaplessSeq)
+    gaplessSeqLen <- stri_length(gaplessSeq)
     pos<- 3:(gaplessSeqLen - 2)
     subSeq =  substr(rep(gaplessSeq, gaplessSeqLen - 4), (pos - 2), (pos + 2))
     germlineSeqTargeting_gapless <- targetingModel@targeting[,subSeq]
@@ -2772,8 +2772,8 @@ calculateMutationalPaths <- function(germlineSeq,
     # some processing time.
     if(!is.null(inputSeq)){    
         # Trim the input and germline sequence to the shortest
-        len_inputSeq <- nchar(inputSeq)
-        len_germlineSeq <- nchar(germlineSeq)
+        len_inputSeq <- stri_length(inputSeq)
+        len_germlineSeq <- stri_length(germlineSeq)
         # If a regionDefinition is passed,
         # then only analyze till the end of the defined length
         if(!is.null(regionDefinition)){
@@ -2803,7 +2803,7 @@ calculateMutationalPaths <- function(germlineSeq,
     }
     
     
-    s_germlineSeq_len <- nchar(s_germlineSeq)    
+    s_germlineSeq_len <- stri_length(s_germlineSeq)    
     vecCodons <- sapply({1:(s_germlineSeq_len/3)}*3 - 2, function(x) { substr(s_germlineSeq, x, x + 2) })
     vecCodons[!vecCodons %in% colnames(codonTable)] <- "NNN"
     matMutationTypes = matrix(codonTable[, vecCodons], nrow=4, byrow=F,
