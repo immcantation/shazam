@@ -202,7 +202,7 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
                 seq <- shmulateSeq(sequence=sim_tree$SEQUENCE[sim_tree$NAME == p], 
                                    mutations=adj[p, ch],
                                    targetingModel=targetingModel)
-                new_node <- data.frame("NAME"=ch, "SEQUENCE"=seq, "DISTANCE"=adj[p, ch])
+                new_node <- data.frame("NAME"=ch, "SEQUENCE"=seq, "DISTANCE"=adj[p, ch], stringsAsFactors = F)
                 # Update output data.frame (bind_rows from dplyr)
                 sim_tree <- bind_rows(sim_tree, new_node)
             }
