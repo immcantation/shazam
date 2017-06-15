@@ -2,6 +2,8 @@ load(file.path("..", "data-tests", "ExampleTrees.rda"))
 
 test_that("Test shmulateSeq", {
     
+    cat("\nTest shmulateSeq\n")
+    
     # Example input sequence
     input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
      
@@ -24,6 +26,9 @@ test_that("Test shmulateSeq", {
 })
 
 test_that("Test shmulateTree", { 
+    
+    cat("\nTest shmulateTree\n")
+    
     input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
     graph <- ExampleTrees[[17]]
     set.seed(7)

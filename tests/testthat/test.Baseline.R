@@ -9,6 +9,7 @@ load(file.path("..", "data-tests", "ExampleDb.rda"))
 
 test_that("calculateTargeting and calculateMutationalPaths with regionDefinition==NULL", {
     
+    cat("\nTest calculateTargeting and calculateMutationalPaths with regionDefinition==NULL\n")
     ##--
     ## With regionDefinition = IMGT_V
     ##--
@@ -71,6 +72,8 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
 ##--
 
 test_that("calcExpectedMutations works with regionDefinition==NULL",{
+    cat("\nTest calcExpectedMutations works with regionDefinition==NULL\n")
+    
     inputSeq <- db[["SEQUENCE_IMGT"]][1]
     germlineSeq <-  db[["GERMLINE_IMGT_D_MASK"]][1]
     
@@ -88,6 +91,8 @@ test_that("calcExpectedMutations works with regionDefinition==NULL",{
 })
 
 test_that("expectedMutations works with regionDefinition==NULL",{
+    cat("\nTest expectedMutations works with regionDefinition==NULL\n")
+    
     db_subset <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
                         BARCODE %in% c("RL016","RL018","RL019","RL021"))
     db_mutations <- expectedMutations(db_subset,
@@ -145,6 +150,8 @@ test_that("expectedMutations works with regionDefinition==NULL",{
 ##--
 
 test_that("calcObservedMutations works with regionDefinition==NULL",{
+    cat("\nTest calcObservedMutations works with regionDefinition==NULL\n")
+    
     inputSeq <- db[1, "SEQUENCE_IMGT"]
     germlineSeq <-  db[1, "GERMLINE_IMGT_D_MASK"]
     
@@ -165,6 +172,8 @@ test_that("calcObservedMutations works with regionDefinition==NULL",{
 })
 
 test_that("observedMutations works with regionDefinition==NULL",{
+    cat("\nTest observedMutations works with regionDefinition==NULL\n")
+    
     db_subset <- subset(db, CPRIMER %in% c("IGHA","IGHM") & 
                             BARCODE %in% c("RL016","RL018","RL019","RL021"))
     db_mutations <- observedMutations(db_subset,
@@ -223,6 +232,8 @@ test_that("observedMutations works with regionDefinition==NULL",{
 ##--
 
 test_that("calcBaseline", {
+    
+    cat("\nTest calcBaseline\n")
     
     # collapse baseline
     db_clonal <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
@@ -402,6 +413,9 @@ test_that("calcBaseline", {
 
 
 test_that("Test groupBaseline", {
+    
+    cat("\nTest groupBaseline\n")
+    
     # Subset example data from alakazam
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
                       
