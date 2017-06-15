@@ -109,7 +109,8 @@ test_that("rescaleMutability", {
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
     
     # Create model and rescale mutabilities
-    model <- createTargetingModel(db, model="S", multipleMutation="ignore")
+    expect_warning(model <- createTargetingModel(db, model="S", multipleMutation="ignore"),
+                   "Insufficient number of mutations")
     mut <- shazam:::rescaleMutability(model)    
     
     set.seed(95)
