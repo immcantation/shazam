@@ -6,7 +6,7 @@ library(profvis)
 #### Load example data ####
 
 # Subset data for demo purposes
-db <- subset(ExampleDb, ISTOYPE %in% c("IGHA","IGHG") & SAMPLE == "+7d")
+db <- subset(ExampleDb, ISOTYPE %in% c("IGHA","IGHG") & SAMPLE == "+7d")
 
 #### createSubstitutionMatrix ####
 
