@@ -1758,8 +1758,15 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             
             # Determine whether the mutations are R or S
             # a table where rows are R/S/Stop/na, cols are codon positions
-            mutations_array_raw <- apply(rbind(c_germlineSeq_codons, c_inputSeq_codons), 2, 
-                                         function(x) { mutationType(x[1], x[2], aminoAcidClasses=aminoAcidClasses) })
+            # Makes use of the fact that c_germlineSeq_codons and c_inputSeqCodons have
+            # the same length
+            mutations_array_raw = sapply(1:length(c_germlineSeq_codons),
+                                         function(i){
+                                             mutationType(codonFrom=c_germlineSeq_codons[i], 
+                                                          codonTo=c_inputSeq_codons[i],
+                                                          aminoAcidClasses)
+                                         })
+            
             # check dimension before assigning nucleotide positions to colnames
             stopifnot(ncol(mutations_array_raw)==length(mutations_pos))
             colnames(mutations_array_raw) = mutations_pos
