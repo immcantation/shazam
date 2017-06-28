@@ -45,6 +45,28 @@ AMINO_ACIDS <- c("TTT"="F", "TTC"="F",
                  "GGT"="G", "GGC"="G", "GGA"="G", "GGG"="G",
                  "TAA"="*", "TAG"="*", "TGA"="*")
 
+# List of expanded, unambiguous codons based on ambiguous codons
+EXPANDED_AMBIGUOUS_CODONS = vector(mode="list", length=15^3)
+counter=1
+for (nuc1 in NUCLEOTIDES_AMBIGUOUS[1:15]) {
+    for (nuc2 in NUCLEOTIDES_AMBIGUOUS[1:15]) {
+        for (nuc3 in NUCLEOTIDES_AMBIGUOUS[1:15]) {
+            # ambiguous codon (string)
+            codonUnexpanded = seqinr::c2s(c(nuc1, nuc2, nuc3))
+            # expand into unambiguous codons (df consisting of character vectors)
+            codonExpandedChar = expand.grid(sapply(c(nuc1, nuc2, nuc3), 
+                                                   shazam:::IUPAC2nucs, 
+                                                   excludeN=TRUE, simplify=FALSE))
+            # convert char into string
+            codonExpandedString = apply(codonExpandedChar, 1, seqinr::c2s)
+            # add to list
+            names(EXPANDED_AMBIGUOUS_CODONS)[counter] = codonUnexpanded
+            EXPANDED_AMBIGUOUS_CODONS[[counter]] = codonExpandedString
+            counter = counter+1
+        }
+    }
+}
+
 #### Distance matrices ####
 
 HH_S1F_Distance <- calcTargetingDistance(model=HH_S1F)
@@ -88,6 +110,7 @@ devtools::use_data(NUCLEOTIDES,
                    M1N_Compat,
                    NUCLEOTIDES_AMBIGUOUS,
                    IUPAC_DNA_2,
+                   EXPANDED_AMBIGUOUS_CODONS,
                    internal=TRUE, overwrite=TRUE)
 
 
