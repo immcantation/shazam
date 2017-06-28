@@ -2822,12 +2822,6 @@ calculateMutationalPaths <- function(germlineSeq,
 # 
 # @return  a single character from the IUPAC ambiguous code.
 #
-# tests
-# nucs2IUPAC(c("A", "T")) == "W"
-# nucs2IUPAC(c("A", "T", "G", "C")) == "N"
-# nucs2IUPAC(c("C", "T", "G")) == "B"
-# nucs2IUPAC(c("C", "T", "G", "G")) == "B"
-#
 nucs2IUPAC = function(nucs) {
     # input nucleotides must be one of the characters allowed
     legal = c("A", "C", "G", "T")
@@ -2850,16 +2844,6 @@ nucs2IUPAC = function(nucs) {
 #                    \code{c("A", "C", "G", "T", "N", "-", ".")}.
 # 
 # @return  a single IUPAC character or "-" or "."
-#
-# tests
-# chars2Ambiguous(c("A", "T")) =="W"
-# chars2Ambiguous(c("A", "T", "N")) =="W"
-# chars2Ambiguous(c("A", "T", "G", "C")) =="N"
-# chars2Ambiguous(c("A", "T", "G", "C", "N")) =="N"
-# chars2Ambiguous(c("A", "T", "G", "C", "-")) =="N"
-# chars2Ambiguous(c(".", "-")) =="-"
-# chars2Ambiguous(c(".", "N")) =="N"
-# chars2Ambiguous(c(".", "A", "T")) =="W"
 #
 chars2Ambiguous = function(chars) {
     # chars must all be unique
@@ -2916,11 +2900,6 @@ chars2Ambiguous = function(chars) {
 #                     is \code{N}. Default is \code{TRUE}.
 # @return  a character vector of nucleotides. One or more of 
 #          \code{c("A", "C", "G", "T")}.
-# tests
-# IUPAC2nucs(code="N", excludeN=T)=="N"
-# IUPAC2nucs(code="N", excludeN=F)==c("A", "C", "G", "T")
-# IUPAC2nucs(code="S", excludeN=T)==c("C", "G")
-# IUPAC2nucs(code="S", excludeN=F)==c("C", "G")
 #
 IUPAC2nucs <- function(code, excludeN=TRUE) {
     # input character must be one of IUPAC codes
@@ -2988,23 +2967,6 @@ translateCodonToAminoAcid <- function(Codon) {
 # mutationType("TTT", "TCT", aminoAcidClasses=classes)
 # mutationType("TTT", "TGA", aminoAcidClasses=classes)
 # 
-# testing
-# TGG (Trp) -> TGG (Trp); expect na 1
-# mutationType("TGG", "TGG") 
-# TGG (Trp) -> TAG (Stop); expect Stop 1
-# mutationType("TGG", "TAG") 
-# TGG (Trp) -> TCG (Ser); expect R 1
-# mutationType("TGG", "TCG") 
-# TGG (Trp) -> TAG (Stop), TGG (Trp) -> TTG (Leu); expect R 1 + 
-# mutationType("TGG", "TWG") 
-# TGG (Trp) -> TCG (Ser), TGG (Trp) -> TGG (Trp); expect R 1 + na 1
-# mutationType("TGG", "TSG") 
-# TGG (Trp) -> TCA (Ser)
-# TGG (Trp) -> TCC (SER)
-# TGG (Trp) -> TGA (Stop)
-# TGG (Trp) -> TGC (Cys)
-# expect R 3 + stop 1
-# mutationType("TGG", "TSM") 
 mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
     # codonFrom="TTT"; codonTo="TTA"
     # codonFrom="TTT"; codonTo="TGA"
@@ -3013,24 +2975,23 @@ mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
     tab = setNames(object=rep(0, 4), nm=c("R", "S", "Stop", "na"))
     
     if ( grepl(pattern="[-.]", x=codonFrom) | grepl(pattern="[-.]", x=codonTo) ) {
-        tab["na"] = 1
+        # "na"
+        tab[4] = 1
     } else {
         # get all combinations of codons made up of unambiguous characters in data.frame
         # simplify=FALSE is essential for working with codons containing no ambiguous char
         # expand.grid works with codons containing no ambiguous char without problem
         # crucial to have excludeN=TRUE for IUPAC2nucs (so that codons like NNN lead to NA)
-        codonFrom.all = expand.grid(sapply(s2c(codonFrom), IUPAC2nucs, excludeN=TRUE, simplify=FALSE))
-        codonTo.all = expand.grid(sapply(s2c(codonTo), IUPAC2nucs, excludeN=TRUE, simplify=FALSE))
+        codonFrom.all = EXPANDED_AMBIGUOUS_CODONS[[codonFrom]]
+        codonTo.all = EXPANDED_AMBIGUOUS_CODONS[[codonTo]]
         
-        for (i in 1:nrow(codonFrom.all)) {
-            for (j in 1:nrow(codonTo.all)) {
-                # can't just as.character(codonFrom.all[i, ]); will get numbers like "111"
-                cur.codonFrom = c2s(as.character(unlist(codonFrom.all[i, ], use.names=F)))
-                cur.codonTo = c2s(as.character(unlist(codonTo.all[j, ], use.names=F)))
+        for (cur.codonFrom in codonFrom.all) {
+            for (cur.codonTo in codonTo.all) {
                 
                 # if codons are the same, there is no mutation; count as NA
                 if (cur.codonFrom == cur.codonTo) {
-                    tab["na"] = tab["na"] + 1
+                    # "na"
+                    tab[4] = tab[4] + 1
                 } else {
                     # Translate codons
                     aaFrom <- translateCodonToAminoAcid(cur.codonFrom)
@@ -3038,10 +2999,11 @@ mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
                     
                     # If any codon is NA then return NA
                     if (any(is.na(c(codonFrom, codonTo, aaFrom, aaTo)))) { 
-                        tab["na"] = tab["na"] + 1
+                        # "na"
+                        tab[4] = tab[4] + 1
                     } else if (any(c(aaFrom, aaTo) == "*")) {
                         # If any amino acid is Stop then return "Stop"
-                        tab["Stop"] = tab["Stop"] + 1
+                        tab[3] = tab[3] + 1
                     } else if (is.null(aminoAcidClasses)) {
                         # Check for exact identity if no amino acid classes are specified
                         mutation <- if (aaFrom == aaTo) { "S" } else { "R" }
