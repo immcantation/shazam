@@ -1,7 +1,7 @@
 #load(file.path("tests", "data-tests", "ExampleDb.rda"))
 load(file.path("..", "data-tests", "ExampleDb.rda"))
 
-#####
+#### collapseClones ####
 test_that("collapseClones", {
     # example data
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
@@ -29,7 +29,7 @@ test_that("collapseClones", {
     }
 }) 
 
-#####
+#### binMutationsByRegion ####
 test_that("binMutationsByRegion", {
 
     set.seed(8)
@@ -52,7 +52,7 @@ test_that("binMutationsByRegion", {
     expect_equal(observed_bin, expected_bin)
 })
 
-#####
+#### observedMutations, charge mutations ####
 test_that("observedMutations, charge mutations", {
 
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")[1:10, ]
@@ -70,7 +70,7 @@ test_that("observedMutations, charge mutations", {
     
 })
 
-#####
+#### calcObservedMutations, hydropathy ####
 test_that("calcObservedMutations, hydropathy", {
     in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
     germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]
@@ -98,7 +98,7 @@ test_that("calcObservedMutations, hydropathy", {
     
 })
 
-#####
+#### observedMutations, combine ####
 test_that("observedMutations, combine", {
     
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA") & SAMPLE == "+7d")[1:25,]
@@ -207,8 +207,8 @@ test_that("observedMutations, combine", {
     
 })
 
-#####
-test_that("expecteddMutations, hydropathy", {
+#### expectedMutations, hydropathy ####
+test_that("expectedMutations, hydropathy", {
     
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
     
@@ -237,7 +237,7 @@ test_that("expecteddMutations, hydropathy", {
     )
 })    
 
-#####
+#### observedMutations, warning ####
 test_that("observedMutations overwrites with a warning pre-existing mutation counts/freqs", {
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")[1:10, ]
     
@@ -344,7 +344,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
 })
 
 
-#####
+#### expectedMutations, warning ####
 test_that("expectedMutations overwrites with a warning pre-existing values", {
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")[1:10, ]
     
@@ -374,7 +374,7 @@ test_that("expectedMutations overwrites with a warning pre-existing values", {
     
 })
 
-#####
+#### calcObservedMutations, no mutations ####
 test_that("calcObservedMutations, when no mutations found", {
   
     in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
@@ -391,7 +391,7 @@ test_that("calcObservedMutations, when no mutations found", {
     
 })
 
-#####
+#### observedMutations, no mutations ####
 test_that("observedMutations, when no mutations found", {
     
     in_seq <- ExampleDb[["SEQUENCE_IMGT"]][1]
@@ -407,7 +407,7 @@ test_that("observedMutations, when no mutations found", {
 ##### Tests 2A-2E (calcClonalConsensusHelper, calcClonalConsensus, collapseClones) 
 ##### are for changed made during commits pushed during June 2-June 12 2017
 
-#####
+#### observedMutations 1A ####
 test_that("calcObservedMutations, 1A, without ambiguous characters, length is multiple of 3", {
     # 7 codons exactly
     #set.seed(1835)
@@ -527,7 +527,7 @@ test_that("calcObservedMutations, 1A, without ambiguous characters, length is mu
     
 })
 
-#####
+#### observedMutations 1B ####
 test_that("calcObservedMutations, 1B, with ambiguous characters, length is multiple of 3", {
     #obsv: "TAT ATA WSC -GT CDG CTC TCG" 
     #germ: "TAT TAT ATA GGT CTT CNC AAC" 
@@ -639,7 +639,7 @@ test_that("calcObservedMutations, 1B, with ambiguous characters, length is multi
     
 })
 
-#####
+#### observedMutations 1C ####
 test_that("calcObservedMutations, 1C, without ambiguous characters, length is not multiple of 3", {
     # 6 codons + 1 two-nucleotide overhang
     # non-triplet overhang should be ignored
@@ -752,7 +752,7 @@ test_that("calcObservedMutations, 1C, without ambiguous characters, length is no
     
 })
 
-#####
+#### observedMutations 1D ####
 test_that("calcObservedMutations, 1D, without ambiguous characters, only 1 codon, no mutation", {
     # 1 codon only
     
@@ -831,7 +831,7 @@ test_that("calcObservedMutations, 1D, without ambiguous characters, only 1 codon
     
 })
 
-#####
+#### observedMutations 1E ####
 test_that("calcObservedMutations, 1E, with ambiguous characters, only 1 codon, with mutations", {
     # 1 codon only
     
@@ -934,7 +934,7 @@ test_that("calcObservedMutations, 1E, with ambiguous characters, only 1 codon, w
     
 })
 
-#####
+#### observedMutations 1F ####
 test_that("calcObservedMutations, 1F, less than 1 codon", {
     # non-triplet overhang should be ignored
     # in this case, NA
@@ -1012,7 +1012,7 @@ test_that("calcObservedMutations, 1F, less than 1 codon", {
 })
 
 
-#####
+#### observedMutations 1H ####
 test_that("observedMutations, 1H, using mock data from 1A through 1F", {
     # pull sequences from 1A-1F
     testDb = data.frame(obsv=c("TATATAATC-GTCAGCTCTCG", # 1A
@@ -1090,7 +1090,7 @@ test_that("observedMutations, 1H, using mock data from 1A through 1F", {
     
 })
 
-#####
+#### calcClonalConsensus 2A ####
 test_that("calcClonalConsensusHelper, 2A, miscellaneous", {
     ##### only 1 seq
     seq1 = "ATGCATGCATGCA"
@@ -1114,7 +1114,7 @@ test_that("calcClonalConsensusHelper, 2A, miscellaneous", {
                  list(cons=substr(seq1, 1, regDef1@seqLength), muFreq=NULL))
 })
 
-#####
+#### calcClonalConsensus 2B ####
 test_that("calcClonalConsensusHelper, 2B, methods = thresholdedFreq, mostCommon, catchAll", {
     # seq1: A T G C A T G C A T  -  G  .  N  T  C  
     # seq2: A T G G A T C G N T  -  A  .  G  N  C  G  C
@@ -1385,7 +1385,7 @@ test_that("calcClonalConsensusHelper, 2B, methods = thresholdedFreq, mostCommon,
                  2)
 })
 
-#####
+#### calcClonalConsensus 2C ####
 test_that("calcClonalConsensusHelper, 2C, methods = mostMutated, leastMutated", {
     # seq1: DUPCOUNT=37; CONSCONT=25; ERR=0.3
     # obsv: [full length=15] 1 R; nonN=15; muFreq = 1/15
@@ -1601,7 +1601,7 @@ test_that("calcClonalConsensusHelper, 2C, methods = mostMutated, leastMutated", 
     expect_equal(least.det.2, substr(testDb$obsv[1], 1, 7))
 })
 
-#####
+#### calcClonalConsensus 2D ####
 test_that("calcClonalConsensus, 2D", {
     ##### same testDb from test 2C for calcClonalConsensusHelper
     testDb = data.frame(obsv=c("ATGCATGCATGCATA",      # seq1
@@ -1690,7 +1690,7 @@ test_that("calcClonalConsensus, 2D", {
     
 })
 
-#####
+#### collapseClones ####
 test_that("collapseClones, 2E", {
     ##### same testDb from test 2C for calcClonalConsensusHelper
     testDb = data.frame(obsv=c("ATGCATGCATGCATA",      # seq1
@@ -1846,7 +1846,7 @@ test_that("collapseClones, 2E", {
     
 })
 
-#####
+#### mutationType ####
 test_that("mutationType", {
     # R, S, Stop, na
     
@@ -1868,7 +1868,7 @@ test_that("mutationType", {
     expect_equivalent(shazam:::mutationType("TGG", "TSM"), c(3,0,1,0))
 })
 
-#####
+#### nucs2IUPAC ####
 test_that("nucs2IUPAC", {
     expect_equivalent(shazam:::nucs2IUPAC(c("A", "T")), "W")
     expect_equivalent(shazam:::nucs2IUPAC(c("A", "T", "G", "C")), "N")
@@ -1876,7 +1876,7 @@ test_that("nucs2IUPAC", {
     expect_equivalent(shazam:::nucs2IUPAC(c("C", "T", "G", "G")), "B")
 })
 
-#####
+#### chars2Ambiguous ####
 test_that("chars2Ambiguous", {
     expect_equivalent(shazam:::chars2Ambiguous(c("A", "T")), "W")
     expect_equivalent(shazam:::chars2Ambiguous(c("A", "T", "N")), "W")
@@ -1888,7 +1888,7 @@ test_that("chars2Ambiguous", {
     expect_equivalent(shazam:::chars2Ambiguous(c(".", "A", "T")), "W")
 })
 
-#####
+#### IUPAC2nucs ####
 test_that("IUPAC2nucs", {
     expect_equivalent(shazam:::IUPAC2nucs(code="N", excludeN=T), "N")
     expect_equivalent(shazam:::IUPAC2nucs(code="N", excludeN=F), c("A", "C", "G", "T"))
