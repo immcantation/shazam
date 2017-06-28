@@ -53,7 +53,10 @@ for (nuc1 in NUCLEOTIDES_AMBIGUOUS[1:15]) {
         for (nuc3 in NUCLEOTIDES_AMBIGUOUS[1:15]) {
             # ambiguous codon (string)
             codonUnexpanded = seqinr::c2s(c(nuc1, nuc2, nuc3))
-            # expand into unambiguous codons (df consisting of character vectors)
+            # get all combinations of codons made up of unambiguous characters in data.frame
+            # simplify=FALSE is essential for working with codons containing no ambiguous char
+            # expand.grid works with codons containing no ambiguous char without problem
+            # crucial to have excludeN=TRUE for IUPAC2nucs (so that codons like NNN lead to NA)
             codonExpandedChar = expand.grid(sapply(c(nuc1, nuc2, nuc3), 
                                                    shazam:::IUPAC2nucs, 
                                                    excludeN=TRUE, simplify=FALSE))

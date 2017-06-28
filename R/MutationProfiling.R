@@ -2985,10 +2985,6 @@ mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
         # "na"
         tab[4] = 1
     } else {
-        # get all combinations of codons made up of unambiguous characters in data.frame
-        # simplify=FALSE is essential for working with codons containing no ambiguous char
-        # expand.grid works with codons containing no ambiguous char without problem
-        # crucial to have excludeN=TRUE for IUPAC2nucs (so that codons like NNN lead to NA)
         codonFrom.all = EXPANDED_AMBIGUOUS_CODONS[[codonFrom]]
         codonTo.all = EXPANDED_AMBIGUOUS_CODONS[[codonTo]]
         
