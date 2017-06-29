@@ -31,7 +31,7 @@ test_that("collapseClones", {
 
 #### binMutationsByRegion ####
 test_that("binMutationsByRegion", {
-
+    
     set.seed(8)
     numbOfMutations <- sample(3:10, 1) 
     set.seed(60)
@@ -54,14 +54,14 @@ test_that("binMutationsByRegion", {
 
 #### observedMutations, charge mutations ####
 test_that("observedMutations, charge mutations", {
-
+    
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")[1:10, ]
-
+    
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-                             germlineColumn="GERMLINE_IMGT_D_MASK",
-                             regionDefinition=IMGT_V,
-                             mutationDefinition=CHARGE_MUTATIONS,
-                             nproc=1)
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                regionDefinition=IMGT_V,
+                                mutationDefinition=CHARGE_MUTATIONS,
+                                nproc=1)
     
     expect_equal(db_obs$MU_COUNT_CDR_R, c(0, 0, 0, 0, 0, 0, 2, 2, 2, 0))
     expect_equal(db_obs$MU_COUNT_CDR_S, c(0, 0, 0, 0, 0, 0, 3, 3, 3, 16))
@@ -74,19 +74,19 @@ test_that("observedMutations, charge mutations", {
 test_that("calcObservedMutations, hydropathy", {
     in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
     germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]
-     
+    
     #' # Identify all mutations in the sequence
     expect_equivalent(calcObservedMutations(in_seq, germ_seq), c(0,2))
-     
+    
     # Identify only mutations in the V segment minus CDR3
     expect_equivalent(
         calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V),
         c(NA, NA, NA, NA))
-      
+    
     # Identify mutations by change in hydropathy class
     expect_equivalent(
         calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
-                           mutationDefinition=HYDROPATHY_MUTATIONS, frequency=TRUE),
+                              mutationDefinition=HYDROPATHY_MUTATIONS, frequency=TRUE),
         c(NA, NA, NA, NA))
     
     ## This seq is only V
@@ -116,34 +116,34 @@ test_that("observedMutations, combine", {
                                 nproc=1)
     
     db_freq <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-                                germlineColumn="GERMLINE_IMGT_D_MASK",
-                                frequency=T,
-                                combine=F,
-                                regionDefinition=NULL,
-                                mutationDefinition=NULL,
-                                nproc=1)
-    
-    db_obs_combined <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-                                          germlineColumn="GERMLINE_IMGT_D_MASK",
-                                          frequency=F,
-                                          combine=T,
-                                          regionDefinition=NULL,
-                                          mutationDefinition=NULL,
-                                          nproc=1)    
-    
-    db_freq_combined <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                                  germlineColumn="GERMLINE_IMGT_D_MASK",
                                  frequency=T,
-                                 combine=T,
+                                 combine=F,
                                  regionDefinition=NULL,
                                  mutationDefinition=NULL,
                                  nproc=1)
+    
+    db_obs_combined <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                         germlineColumn="GERMLINE_IMGT_D_MASK",
+                                         frequency=F,
+                                         combine=T,
+                                         regionDefinition=NULL,
+                                         mutationDefinition=NULL,
+                                         nproc=1)    
+    
+    db_freq_combined <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
+                                          germlineColumn="GERMLINE_IMGT_D_MASK",
+                                          frequency=T,
+                                          combine=T,
+                                          regionDefinition=NULL,
+                                          mutationDefinition=NULL,
+                                          nproc=1)
     
     ## When using the whole sequence, the sum of MU_COUNT_SEQ_S and MU_COUNT_SEQ_R
     ## should match MU_COUNT 
     expect_equal(rowSums(db_obs[,grep("MU_COUNT",colnames(db_obs))]),
                  db_obs_combined$MU_COUNT)
-
+    
     ## When using the whole sequence, the sum of MU_FREQ_SEQ_S and MU_FREQ_SEQ_R
     ## should match MU_FREQ 
     expect_equal(rowSums(db_freq[,grep("MU_FREQ",colnames(db_freq))]),
@@ -178,13 +178,13 @@ test_that("observedMutations, combine", {
                                          nproc=1)    
     ## Get the number of nonN positions, the denomitator for the frequency
     db_obs_denominator <- sapply(1:dim(db)[1], 
-                        function(i) {
-                            mu_count <- calcObservedMutations(inputSeq = db[i, "SEQUENCE_IMGT"],
-                                                              germlineSeq = db[i,"GERMLINE_IMGT_D_MASK"],
-                                                              regionDefinition = IMGT_V,
-                                                              returnRaw = T, freq=F)
-                            mu_den <- sum(mu_count$nonN)
-                        })
+                                 function(i) {
+                                     mu_count <- calcObservedMutations(inputSeq = db[i, "SEQUENCE_IMGT"],
+                                                                       germlineSeq = db[i,"GERMLINE_IMGT_D_MASK"],
+                                                                       regionDefinition = IMGT_V,
+                                                                       returnRaw = T, freq=F)
+                                     mu_den <- sum(mu_count$nonN)
+                                 })
     
     db_freq_combined <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                                           germlineColumn="GERMLINE_IMGT_D_MASK",
@@ -203,7 +203,7 @@ test_that("observedMutations, combine", {
     ## may not match MU_FREQ, because CDR mutations and FWR mutations use their own
     ## denominators (nonN-CDR and nonN-FWR)
     expect_equal(db_obs_combined$MU_COUNT/db_obs_denominator,
-        db_freq_combined$MU_FREQ)
+                 db_freq_combined$MU_FREQ)
     
 })
 
@@ -214,14 +214,14 @@ test_that("expectedMutations, hydropathy", {
     
     # Calculate hydropathy expected mutations over V region
     db_exp <- expectedMutations(db,
-                               sequenceColumn="SEQUENCE_IMGT",
-                               germlineColumn="GERMLINE_IMGT_D_MASK",
-                               regionDefinition=IMGT_V,
-                               mutationDefinition=HYDROPATHY_MUTATIONS,
-                               nproc=1)    
+                                sequenceColumn="SEQUENCE_IMGT",
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                regionDefinition=IMGT_V,
+                                mutationDefinition=HYDROPATHY_MUTATIONS,
+                                nproc=1)    
     expect_equal(db_exp$MU_EXPECTED_CDR_R[1:10],
-                c(0.123, 0.114, 0.114, 0.131, 0.131, 0.131, 0.118, 0.118, 0.118, 0.139),
-                tolerance=0.001
+                 c(0.123, 0.114, 0.114, 0.131, 0.131, 0.131, 0.118, 0.118, 0.118, 0.139),
+                 tolerance=0.001
     )
     expect_equal(db_exp$MU_EXPECTED_CDR_S[10:20],
                  c(0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.150),
@@ -250,12 +250,12 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                 mutationDefinition=NULL,
                                 nproc=1)
     expect_warning(observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
-                                germlineColumn="GERMLINE_IMGT_D_MASK",
-                                frequency=F,
-                                combine=F,
-                                regionDefinition=NULL,
-                                mutationDefinition=NULL,
-                                nproc=1),
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     frequency=F,
+                                     combine=F,
+                                     regionDefinition=NULL,
+                                     mutationDefinition=NULL,
+                                     nproc=1),
                    "Columns MU_COUNT_SEQ_R, MU_COUNT_SEQ_S exist and will be overwritten")
     ## Counts Combine
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
@@ -310,12 +310,12 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
     
     ## Freq
     db_freq <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-                                germlineColumn="GERMLINE_IMGT_D_MASK",
-                                frequency=T,
-                                combine=F,
-                                regionDefinition=NULL,
-                                mutationDefinition=NULL,
-                                nproc=1)
+                                 germlineColumn="GERMLINE_IMGT_D_MASK",
+                                 frequency=T,
+                                 combine=F,
+                                 regionDefinition=NULL,
+                                 mutationDefinition=NULL,
+                                 nproc=1)
     expect_warning(observedMutations(db_freq, sequenceColumn="SEQUENCE_IMGT",
                                      germlineColumn="GERMLINE_IMGT_D_MASK",
                                      frequency=T,
@@ -376,10 +376,10 @@ test_that("expectedMutations overwrites with a warning pre-existing values", {
 
 #### calcObservedMutations, no mutations ####
 test_that("calcObservedMutations, when no mutations found", {
-  
+    
     in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
     germ_seq <- in_seq
-
+    
     #' Should return c(NA,NA), not c(NA)
     expect_equivalent(calcObservedMutations(in_seq, germ_seq, regionDefinition = NULL), c(NA, NA))
     expect_equivalent(calcObservedMutations(in_seq, germ_seq, regionDefinition = IMGT_V), c(NA, NA, NA, NA))
@@ -407,7 +407,7 @@ test_that("observedMutations, when no mutations found", {
 ##### Tests 2A-2E (calcClonalConsensusHelper, calcClonalConsensus, collapseClones) 
 ##### are for changed made during commits pushed during June 2-June 12 2017
 
-#### calcObservedMutations 1A ####
+#### observedMutations 1A ####
 test_that("calcObservedMutations, 1A, without ambiguous characters, length is multiple of 3", {
     # 7 codons exactly
     #set.seed(1835)
@@ -527,7 +527,7 @@ test_that("calcObservedMutations, 1A, without ambiguous characters, length is mu
     
 })
 
-#### calcObservedMutations 1B ####
+#### observedMutations 1B ####
 test_that("calcObservedMutations, 1B, with ambiguous characters, length is multiple of 3", {
     #obsv: "TAT ATA WSC -GT CDG CTC TCG" 
     #germ: "TAT TAT ATA GGT CTT CNC AAC" 
@@ -557,7 +557,7 @@ test_that("calcObservedMutations, 1B, with ambiguous characters, length is multi
     # recall that only R+S mutations are recorded; na or Stop are dropped
     freqF.rawT.noRegDef = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
                                                 frequency=FALSE, returnRaw=TRUE, 
-                                                regionDefinition=NULL, ambiguousMode="and")
+                                                regionDefinition=NULL)
     # based on annotations above 
     exp.raw.noRegDef.position = c(4, 5, 7, 8, 9, 14, 15, 19, 20, 21)
     exp.raw.noRegDef.R = c(1,1,1,2,0,2,0,1,1,1)
@@ -576,7 +576,7 @@ test_that("calcObservedMutations, 1B, with ambiguous characters, length is multi
     
     freqF.rawF.noRegDef = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
                                                 frequency=FALSE, returnRaw=FALSE, 
-                                                regionDefinition=NULL, ambiguousMode="and")
+                                                regionDefinition=NULL)
     expect_equal(freqF.rawF.noRegDef, c("SEQ_R"=sum(exp.raw.noRegDef.R), 
                                         "SEQ_S"=sum(exp.raw.noRegDef.S)))
     
@@ -584,10 +584,10 @@ test_that("calcObservedMutations, 1B, with ambiguous characters, length is multi
     # returnRaw value doesn't matter if frequency=T
     freqT.rawF.noRegDef = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
                                                 frequency=TRUE, returnRaw=FALSE, 
-                                                regionDefinition=NULL, ambiguousMode="and")
+                                                regionDefinition=NULL)
     freqT.rawT.noRegDef = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
                                                 frequency=TRUE, returnRaw=TRUE, 
-                                                regionDefinition=NULL, ambiguousMode="and")
+                                                regionDefinition=NULL)
     
     expect_equal(freqT.rawF.noRegDef, c("SEQ_R"=sum(exp.raw.noRegDef.R)/exp.noRegDef.nonN.Dash.Dot, 
                                         "SEQ_S"=sum(exp.raw.noRegDef.S)/exp.noRegDef.nonN.Dash.Dot))
@@ -597,7 +597,7 @@ test_that("calcObservedMutations, 1B, with ambiguous characters, length is multi
     ##### freq=F, returnRaw=T, with regDef
     freqF.rawT.regDef = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
                                               frequency=FALSE, returnRaw=TRUE, 
-                                              regionDefinition=regDef, ambiguousMode="and")
+                                              regionDefinition=regDef)
     exp.raw.regDef.region = c("Y","Y","Y","Y","Y","Y","Y","W","W","W")
     expect_equal(freqF.rawT.regDef$pos$region, exp.raw.regDef.region)
     # counts should be the same
@@ -612,7 +612,7 @@ test_that("calcObservedMutations, 1B, with ambiguous characters, length is multi
     ##### freq=F, returnRaw=F, with regDef
     freqF.rawF.regDef = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
                                               frequency=FALSE, returnRaw=FALSE, 
-                                              regionDefinition=regDef, ambiguousMode="and")
+                                              regionDefinition=regDef)
     
     exp.raw.regDef.W.R = sum(subset(freqF.rawT.regDef$pos, region=="W")$R)
     exp.raw.regDef.W.S = sum(subset(freqF.rawT.regDef$pos, region=="W")$S)
@@ -628,10 +628,10 @@ test_that("calcObservedMutations, 1B, with ambiguous characters, length is multi
     # returnRaw value doesn't matter if frequency=T
     freqT.rawF.regDef = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
                                               frequency=TRUE, returnRaw=FALSE, 
-                                              regionDefinition=regDef, ambiguousMode="and")
+                                              regionDefinition=regDef)
     freqT.rawT.regDef = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
                                               frequency=TRUE, returnRaw=TRUE, 
-                                              regionDefinition=regDef, ambiguousMode="and")
+                                              regionDefinition=regDef)
     expect_equal(freqT.rawF.regDef, c("W_R"=exp.raw.regDef.W.R/exp.regDef.W.nonN.Dash.Dot,
                                       "W_S"=exp.raw.regDef.W.S/exp.regDef.W.nonN.Dash.Dot,
                                       "Y_R"=exp.raw.regDef.Y.R/exp.regDef.Y.nonN.Dash.Dot,
@@ -639,7 +639,7 @@ test_that("calcObservedMutations, 1B, with ambiguous characters, length is multi
     
 })
 
-#### calcObservedMutations 1C ####
+#### observedMutations 1C ####
 test_that("calcObservedMutations, 1C, without ambiguous characters, length is not multiple of 3", {
     # 6 codons + 1 two-nucleotide overhang
     # non-triplet overhang should be ignored
@@ -681,7 +681,7 @@ test_that("calcObservedMutations, 1C, without ambiguous characters, length is no
     # $nonN is named; use expect_equivalent instead of expect_equal
     # hard-coded; length is not multiple of 3; non-triplet overhang ignored
     exp.noRegDef.nonN.Dash.Dot = sum( seqinr::s2c(obsv)[1:18] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                      seqinr::s2c(germ)[1:18] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
+                                          seqinr::s2c(germ)[1:18] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
     expect_equivalent(freqF.rawT.noRegDef$nonN, exp.noRegDef.nonN.Dash.Dot)
     
     ##### freq=F, returnRaw=F, regDef=NULL
@@ -752,7 +752,7 @@ test_that("calcObservedMutations, 1C, without ambiguous characters, length is no
     
 })
 
-#### calcObservedMutations 1D ####
+#### observedMutations 1D ####
 test_that("calcObservedMutations, 1D, without ambiguous characters, only 1 codon, no mutation", {
     # 1 codon only
     
@@ -831,7 +831,7 @@ test_that("calcObservedMutations, 1D, without ambiguous characters, only 1 codon
     
 })
 
-#### calcObservedMutations 1E ####
+#### observedMutations 1E ####
 test_that("calcObservedMutations, 1E, with ambiguous characters, only 1 codon, with mutations", {
     # 1 codon only
     
@@ -934,7 +934,7 @@ test_that("calcObservedMutations, 1E, with ambiguous characters, only 1 codon, w
     
 })
 
-#### calcObservedMutations 1F ####
+#### observedMutations 1F ####
 test_that("calcObservedMutations, 1F, less than 1 codon", {
     # non-triplet overhang should be ignored
     # in this case, NA
@@ -1011,354 +1011,9 @@ test_that("calcObservedMutations, 1F, less than 1 codon", {
     
 })
 
-#### calcObservedMutations 1G ####
-test_that("calcObservedMutations, 1G, with ambiguous characters in germline", {
-    
-    #obsv: THS AGM SAA C  C  K  A  A  G
-    #germ: TMC RGC SAT C  C  K  A  T  G
-    #pos   123 456 789 10 11 12 13 14 15
-    #mut    ** * *   *             *
-    #reg   WWW YYY PPP Y  Y  Y  P  P  P
-    
-    # non-N, non-dash, non-dot positions w/o mutations: 9
-    
-    # pos 2
-    # "and": R=4; S=0; nonN=6
-    # "eitherOr": na
-    # TMC->THC =>
-    # (M)  (H)  
-    # TAC->TAC: na
-    # TAC->TCC: R
-    # TAC->TTC: R
-    # TCC->TAC: R
-    # TCC->TCC: na
-    # TCC->TTC: R
-    
-    # pos 3
-    # "and": R=3; S=1; nonN=8
-    # "eitherOr": na
-    # TMC->TMS =>
-    # (M)  (MS)
-    # TAC->TAC: na
-    # TAC->TAG: Stop
-    # TAC->TCC: R
-    # TAC->TCG: R
-    # TCC->TAC: R
-    # TCC->TAG: stop
-    # TCC->TCC: na
-    # TCC->TCG: S
-    
-    # pos 4
-    # "and": R=1; S=0; nonN=2
-    # "eitherOr": na
-    # RGC->AGC =>
-    #(R)
-    # AGC->AGC: na
-    # GGC->AGC: R
-    
-    # pos 6
-    # "and": R=5; S=1; nonN=8
-    # "eitherOr": na
-    # RGC->RGM =>
-    #(R)  (R M)
-    # AGC->AGA: R
-    # AGC->AGC: na
-    # AGC->GGA: R
-    # AGC->GGC: R
-    # GGC->AGA: R
-    # GGC->AGC: R
-    # GGC->GGA: S
-    # GGC->GGC: na
-    
-    # pos 9
-    # "and": R=4; S=0; nonN=4
-    # "eitherOr": R
-    # SAT->SAA =>
-    #(S)  (S)
-    # CAT->CAA: R
-    # CAT->GAA: R
-    # GAT->CAA: R
-    # GAT->GAA: R
-    
-    # pos 14
-    # "and": R=1; S=0; nonN=1
-    # "either": R=1; S=0
-    # ATG->AAG: R
-    
-    obsv = "THSAGMSAACCKAAG" 
-    germ = "TMCRGCSATCCKATG"
-    
-    regDef = createRegionDefinition(name="mock", 
-                                    boundaries=factor( rep(c("W", "Y", "P", "Y", "P"), each=3) ))
-    
-    ##### freq=F, returnRaw=T, regDef=NULL
-    # recall that only R+S mutations are recorded; na or Stop are dropped
-    freqF.rawT.noRegDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=FALSE, returnRaw=TRUE, 
-                                                    regionDefinition=NULL, ambiguousMode="and")
-    freqF.rawT.noRegDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=FALSE, returnRaw=TRUE, 
-                                                    regionDefinition=NULL, ambiguousMode="eitherOr")
-    # based on annotations above 
-    exp.raw.noRegDef.position.and = c(2,3,4,6,9,14)
-    exp.raw.noRegDef.R.and = c(4,3,1,5,4,1)
-    exp.raw.noRegDef.S.and = c(0,1,0,1,0,0)
-    
-    exp.raw.noRegDef.position.eor = c(9,14)
-    exp.raw.noRegDef.R.eor = c(1,1)
-    exp.raw.noRegDef.S.eor = c(0,0)
-    
-    expect_equal(freqF.rawT.noRegDef.and$pos$position, exp.raw.noRegDef.position.and)
-    expect_equal(freqF.rawT.noRegDef.and$pos$R, exp.raw.noRegDef.R.and)
-    expect_equal(freqF.rawT.noRegDef.and$pos$S, exp.raw.noRegDef.S.and)
-    expect_equal(freqF.rawT.noRegDef.and$pos$region, rep("SEQ", length(exp.raw.noRegDef.position.and)))
-    
-    expect_equal(freqF.rawT.noRegDef.eor$pos$position, exp.raw.noRegDef.position.eor)
-    expect_equal(freqF.rawT.noRegDef.eor$pos$R, exp.raw.noRegDef.R.eor)
-    expect_equal(freqF.rawT.noRegDef.eor$pos$S, exp.raw.noRegDef.S.eor)
-    expect_equal(freqF.rawT.noRegDef.eor$pos$region, rep("SEQ", length(exp.raw.noRegDef.position.eor)))
-    
-    # $nonN is named; use expect_equivalent instead of expect_equal
-    exp.noRegDef.nonN.Dash.Dot.and = 9 + sum(c(6,8,2,8,4,1)) # 9 non-N positions w/o mutations
-    expect_equivalent(freqF.rawT.noRegDef.and$nonN, exp.noRegDef.nonN.Dash.Dot.and)
-    
-    exp.noRegDef.nonN.Dash.Dot.eor = sum( seqinr::s2c(obsv) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                              seqinr::s2c(germ) %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
-    expect_equivalent(freqF.rawT.noRegDef.eor$nonN, exp.noRegDef.nonN.Dash.Dot.eor)
-    
-    ##### freq=F, returnRaw=F, regDef=NULL
-    
-    freqF.rawF.noRegDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=FALSE, returnRaw=FALSE, 
-                                                    regionDefinition=NULL, ambiguousMode="and")
-    expect_equal(freqF.rawF.noRegDef.and, c("SEQ_R"=sum(exp.raw.noRegDef.R.and), 
-                                            "SEQ_S"=sum(exp.raw.noRegDef.S.and)))
-    
-    freqF.rawF.noRegDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=FALSE, returnRaw=FALSE, 
-                                                    regionDefinition=NULL, ambiguousMode="eitherOr")
-    expect_equal(freqF.rawF.noRegDef.eor, c("SEQ_R"=sum(exp.raw.noRegDef.R.eor), 
-                                            "SEQ_S"=sum(exp.raw.noRegDef.S.eor)))
-    
-    ##### freq=T, returnRaw=F/T, regDef=NULL
-    # returnRaw value doesn't matter if frequency=T
-    freqT.rawF.noRegDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=TRUE, returnRaw=FALSE, 
-                                                    regionDefinition=NULL, ambiguousMode="and")
-    freqT.rawT.noRegDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=TRUE, returnRaw=TRUE, 
-                                                    regionDefinition=NULL, ambiguousMode="and")
-    
-    freqT.rawF.noRegDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=TRUE, returnRaw=FALSE, 
-                                                    regionDefinition=NULL, ambiguousMode="eitherOr")
-    freqT.rawT.noRegDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=TRUE, returnRaw=TRUE, 
-                                                    regionDefinition=NULL, ambiguousMode="eitherOr")
-    
-    
-    expect_equal(freqT.rawF.noRegDef.and, c("SEQ_R"=sum(exp.raw.noRegDef.R.and)/exp.noRegDef.nonN.Dash.Dot.and, 
-                                            "SEQ_S"=sum(exp.raw.noRegDef.S.and)/exp.noRegDef.nonN.Dash.Dot.and))
-    expect_equal(freqT.rawT.noRegDef.and, c("SEQ_R"=sum(exp.raw.noRegDef.R.and)/exp.noRegDef.nonN.Dash.Dot.and, 
-                                            "SEQ_S"=sum(exp.raw.noRegDef.S.and)/exp.noRegDef.nonN.Dash.Dot.and))
-    
-    expect_equal(freqT.rawF.noRegDef.eor, c("SEQ_R"=sum(exp.raw.noRegDef.R.eor)/exp.noRegDef.nonN.Dash.Dot.eor, 
-                                            "SEQ_S"=sum(exp.raw.noRegDef.S.eor)/exp.noRegDef.nonN.Dash.Dot.eor))
-    expect_equal(freqT.rawT.noRegDef.eor, c("SEQ_R"=sum(exp.raw.noRegDef.R.eor)/exp.noRegDef.nonN.Dash.Dot.eor, 
-                                            "SEQ_S"=sum(exp.raw.noRegDef.S.eor)/exp.noRegDef.nonN.Dash.Dot.eor))
-    
-    
-    ##### freq=F, returnRaw=T, with regDef
-    freqF.rawT.regDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=FALSE, returnRaw=TRUE, 
-                                                  regionDefinition=regDef, ambiguousMode="and")
-    exp.raw.regDef.region.and = c("W","W","Y","Y","P","P")
-    expect_equal(freqF.rawT.regDef.and$pos$region, exp.raw.regDef.region.and)
-    
-    freqF.rawT.regDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=FALSE, returnRaw=TRUE, 
-                                                  regionDefinition=regDef, ambiguousMode="eitherOr")
-    exp.raw.regDef.region.eor = c("P","P")
-    expect_equal(freqF.rawT.regDef.eor$pos$region, exp.raw.regDef.region.eor)
-    
-    # counts should be the same
-    expect_identical(freqF.rawT.regDef.and$pos[, 1:3], freqF.rawT.noRegDef.and$pos[, 1:3])
-    expect_identical(freqF.rawT.regDef.eor$pos[, 1:3], freqF.rawT.noRegDef.eor$pos[, 1:3])
-    
-    expect_equal(freqF.rawT.regDef.and$nonN, c("P"=sum(c(4,1,4)), # 4 non-N P positions w/o mutation
-                                               "W"=sum(c(1,6,8)), # 1 non-N P positions w/o mutation
-                                               "Y"=sum(c(2,8,4)))) # 2 non-N P positions w/o mutation
-    
-    exp.regDef.W.nonN.Dash.Dot.eor = sum( seqinr::s2c(obsv)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                              seqinr::s2c(germ)[regDef@boundaries=="W"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
-    exp.regDef.Y.nonN.Dash.Dot.eor = sum( seqinr::s2c(obsv)[regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                              seqinr::s2c(germ)[regDef@boundaries=="Y"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
-    exp.regDef.P.nonN.Dash.Dot.eor = sum( seqinr::s2c(obsv)[regDef@boundaries=="P"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] &
-                                              seqinr::s2c(germ)[regDef@boundaries=="P"] %in% shazam:::NUCLEOTIDES_AMBIGUOUS[1:14] )
-    expect_equal(freqF.rawT.regDef.eor$nonN, c("P"=exp.regDef.P.nonN.Dash.Dot.eor, 
-                                               "W"=exp.regDef.W.nonN.Dash.Dot.eor, 
-                                               "Y"=exp.regDef.Y.nonN.Dash.Dot.eor))
-    
-    ##### freq=F, returnRaw=F, with regDef
-    freqF.rawF.regDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=FALSE, returnRaw=FALSE, 
-                                                  regionDefinition=regDef, ambiguousMode="eitherOr")
-    freqF.rawF.regDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=FALSE, returnRaw=FALSE, 
-                                                  regionDefinition=regDef, ambiguousMode="and")
-    
-    exp.raw.regDef.W.R.and = sum(subset(freqF.rawT.regDef.and$pos, region=="W")$R)
-    exp.raw.regDef.W.S.and = sum(subset(freqF.rawT.regDef.and$pos, region=="W")$S)
-    exp.raw.regDef.Y.R.and = sum(subset(freqF.rawT.regDef.and$pos, region=="Y")$R)
-    exp.raw.regDef.Y.S.and = sum(subset(freqF.rawT.regDef.and$pos, region=="Y")$S)
-    exp.raw.regDef.P.R.and = sum(subset(freqF.rawT.regDef.and$pos, region=="P")$R)
-    exp.raw.regDef.P.S.and = sum(subset(freqF.rawT.regDef.and$pos, region=="P")$S)
-    
-    expect_equal(freqF.rawF.regDef.and, c("P_R"=exp.raw.regDef.P.R.and,
-                                          "P_S"=exp.raw.regDef.P.S.and,
-                                          "W_R"=exp.raw.regDef.W.R.and,
-                                          "W_S"=exp.raw.regDef.W.S.and,
-                                          "Y_R"=exp.raw.regDef.Y.R.and,
-                                          "Y_S"=exp.raw.regDef.Y.S.and))
-    
-    exp.raw.regDef.W.R.eor = sum(subset(freqF.rawT.regDef.eor$pos, region=="W")$R)
-    exp.raw.regDef.W.S.eor = sum(subset(freqF.rawT.regDef.eor$pos, region=="W")$S)
-    exp.raw.regDef.Y.R.eor = sum(subset(freqF.rawT.regDef.eor$pos, region=="Y")$R)
-    exp.raw.regDef.Y.S.eor = sum(subset(freqF.rawT.regDef.eor$pos, region=="Y")$S)
-    exp.raw.regDef.P.R.eor = sum(subset(freqF.rawT.regDef.eor$pos, region=="P")$R)
-    exp.raw.regDef.P.S.eor = sum(subset(freqF.rawT.regDef.eor$pos, region=="P")$S)
-    
-    expect_equal(freqF.rawF.regDef.eor, c("P_R"=exp.raw.regDef.P.R.eor,
-                                          "P_S"=exp.raw.regDef.P.S.eor,
-                                          "W_R"=exp.raw.regDef.W.R.eor,
-                                          "W_S"=exp.raw.regDef.W.S.eor,
-                                          "Y_R"=exp.raw.regDef.Y.R.eor,
-                                          "Y_S"=exp.raw.regDef.Y.S.eor))
-    
-    ##### freq=T, returnRaw=F/T, with regDef
-    # returnRaw value doesn't matter if frequency=T
-    freqT.rawF.regDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=TRUE, returnRaw=FALSE, 
-                                                  regionDefinition=regDef, ambiguousMode="eitherOr")
-    freqT.rawT.regDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=TRUE, returnRaw=TRUE, 
-                                                  regionDefinition=regDef, ambiguousMode="eitherOr")
-    
-    freqT.rawF.regDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=TRUE, returnRaw=FALSE, 
-                                                  regionDefinition=regDef, ambiguousMode="and")
-    freqT.rawT.regDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=TRUE, returnRaw=TRUE, 
-                                                  regionDefinition=regDef, ambiguousMode="and")
-    
-    expect_equal(freqT.rawF.regDef.eor, freqT.rawT.regDef.eor)
-    expect_equal(freqT.rawF.regDef.and, freqT.rawT.regDef.and)
-    
-    expect_equivalent(freqT.rawF.regDef.and, c("P_R"=exp.raw.regDef.P.R.and/freqF.rawT.regDef.and$nonN["P"],
-                                               "P_S"=exp.raw.regDef.P.S.and/freqF.rawT.regDef.and$nonN["P"],
-                                               "W_R"=exp.raw.regDef.W.R.and/freqF.rawT.regDef.and$nonN["W"],
-                                               "W_S"=exp.raw.regDef.W.S.and/freqF.rawT.regDef.and$nonN["W"],
-                                               "Y_R"=exp.raw.regDef.Y.R.and/freqF.rawT.regDef.and$nonN["Y"],
-                                               "Y_S"=exp.raw.regDef.Y.S.and/freqF.rawT.regDef.and$nonN["Y"]))
-    
-})
 
-#### calcObservedMutations 1H ####
-test_that("calcObservedMutations, 1H, eitherOr vs. and when there is no ambiguous chars", {
-    # expect result from "eitherOr" and that from "and" to be the same
-    
-    obsv = "TATATAATC-GTCAGCTCTCG" 
-    germ = "TATTATATAGGTCTTCNCAAC"
-    
-    regDef = createRegionDefinition(name="mock", 
-                                    boundaries=factor(rep(c("W","Y","Y","W","Y","W","W"), each=3)))
-    
-    ##### freq=F, returnRaw=T, regDef=NULL
-    # recall that only R+S mutations are recorded; na or Stop are dropped
-    freqF.rawT.noRegDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=FALSE, returnRaw=TRUE, 
-                                                    regionDefinition=NULL, ambiguousMode="and")
-    freqF.rawT.noRegDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=FALSE, returnRaw=TRUE, 
-                                                    regionDefinition=NULL, ambiguousMode="eitherOr")
-    
-    expect_equal(freqF.rawT.noRegDef.and, freqF.rawT.noRegDef.eor)
-    
-    ##### freq=F, returnRaw=F, regDef=NULL
-    freqF.rawF.noRegDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=FALSE, returnRaw=FALSE, 
-                                                    regionDefinition=NULL, ambiguousMode="and")
-    
-    freqF.rawF.noRegDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=FALSE, returnRaw=FALSE, 
-                                                    regionDefinition=NULL, ambiguousMode="eitherOr")
-    expect_equal(freqF.rawF.noRegDef.and, freqF.rawF.noRegDef.eor)
-    
-    ##### freq=T, returnRaw=F/T, regDef=NULL
-    # returnRaw value doesn't matter if frequency=T
-    freqT.rawF.noRegDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=TRUE, returnRaw=FALSE, 
-                                                    regionDefinition=NULL, ambiguousMode="and")
-    freqT.rawT.noRegDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=TRUE, returnRaw=TRUE, 
-                                                    regionDefinition=NULL, ambiguousMode="and")
-    
-    freqT.rawF.noRegDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=TRUE, returnRaw=FALSE, 
-                                                    regionDefinition=NULL, ambiguousMode="eitherOr")
-    freqT.rawT.noRegDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                    frequency=TRUE, returnRaw=TRUE, 
-                                                    regionDefinition=NULL, ambiguousMode="eitherOr")
-    
-    expect_equal(freqT.rawF.noRegDef.and, freqT.rawF.noRegDef.eor)
-    expect_equal(freqT.rawT.noRegDef.and, freqT.rawT.noRegDef.eor)
-    expect_equal(freqT.rawF.noRegDef.and, freqT.rawT.noRegDef.eor)
-    
-    ##### freq=F, returnRaw=T, with regDef
-    freqF.rawT.regDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=FALSE, returnRaw=TRUE, 
-                                                  regionDefinition=regDef, ambiguousMode="and")
-
-    freqF.rawT.regDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=FALSE, returnRaw=TRUE, 
-                                                  regionDefinition=regDef, ambiguousMode="eitherOr")
-    
-    expect_equal(freqF.rawT.regDef.and, freqF.rawT.regDef.eor)
-    
-    ##### freq=F, returnRaw=F, with regDef
-    freqF.rawF.regDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=FALSE, returnRaw=FALSE, 
-                                                  regionDefinition=regDef, ambiguousMode="eitherOr")
-    freqF.rawF.regDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=FALSE, returnRaw=FALSE, 
-                                                  regionDefinition=regDef, ambiguousMode="and")
-    
-    expect_equal(freqF.rawF.regDef.and, freqF.rawF.regDef.eor)
-    
-    ##### freq=T, returnRaw=F/T, with regDef
-    # returnRaw value doesn't matter if frequency=T
-    freqT.rawF.regDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=TRUE, returnRaw=FALSE, 
-                                                  regionDefinition=regDef, ambiguousMode="eitherOr")
-    freqT.rawT.regDef.eor = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=TRUE, returnRaw=TRUE, 
-                                                  regionDefinition=regDef, ambiguousMode="eitherOr")
-    
-    freqT.rawF.regDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=TRUE, returnRaw=FALSE, 
-                                                  regionDefinition=regDef, ambiguousMode="and")
-    freqT.rawT.regDef.and = calcObservedMutations(inputSeq=obsv, germlineSeq=germ, 
-                                                  frequency=TRUE, returnRaw=TRUE, 
-                                                  regionDefinition=regDef, ambiguousMode="and")
-    
-    expect_equal(freqT.rawF.regDef.and, freqT.rawF.regDef.eor)
-    expect_equal(freqT.rawT.regDef.and, freqT.rawT.regDef.eor)
-    expect_equal(freqT.rawF.regDef.and, freqT.rawT.regDef.eor)
-    
-})
-
-#### observedMutations 1I ####
-test_that("observedMutations, 1I, using mock data from 1A through 1F", {
+#### observedMutations 1H ####
+test_that("observedMutations, 1H, using mock data from 1A through 1F", {
     # pull sequences from 1A-1F
     testDb = data.frame(obsv=c("TATATAATC-GTCAGCTCTCG", # 1A
                                "TATATAWSC-GTCDGCTCTCG", # 1B
