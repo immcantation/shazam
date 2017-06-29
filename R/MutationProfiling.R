@@ -1824,26 +1824,36 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     
     # return positions of point mutations and their mutation types ("raw")
     if (returnRaw){
-        # number of non-N, non-dash, non-dot bases (in both seq and gl)
-        nonN.regions <- unique(sapply(regionDefinition@labels, function(x) { substr(x, 1, stri_length(x)-2) }))
-        
-        if (!tooShort) {
-            nonN.denoms = countNonNByRegion(regDef=regionDefinition, ambiMode=ambiguousMode, 
-                                            inputChars=c_inputSeq, germChars=c_germlineSeq,
-                                            inputCodons=c_inputSeq_codons, 
-                                            germCodons=c_germlineSeq_codons, 
-                                            mutPos=mutations_pos)
-        } else {
-            nonN.denoms = setNames(object=rep(NA, length(regionDefinition@regions)), 
-                                   nm=regionDefinition@regions)
-        }
         
         if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
             # if mutations_array_raw is NA, or 
             # if mutations_array_raw is empty due to all mutations being "Stop" and hence removed
             # avoid is.na(mutations_array_raw) to avoid warning in case mutations_array_raw is a vector
+            
+            if (!tooShort) {
+                # when input and germline are >=3 nucleotides but there's no mutation
+                # c_inputSeq_codons, c_germlineSeq_codons, and mutations_pos won't exist
+                # this won't be a problem if ambiguousMode="eitherOr", but would for "and"
+                # set inputCodons, germCodons, and mutPos to NULL to work around that
+                nonN.denoms = countNonNByRegion(regDef=regionDefinition, ambiMode=ambiguousMode, 
+                                                inputChars=c_inputSeq, germChars=c_germlineSeq,
+                                                inputCodons=NULL, 
+                                                germCodons=NULL, 
+                                                mutPos=NULL)
+            } else {
+                nonN.denoms = setNames(object=rep(NA, length(regionDefinition@regions)), 
+                                       nm=regionDefinition@regions)
+            }
+            
             return(list(pos=mutations_array_raw, nonN=nonN.denoms))
         } else {
+            
+            nonN.denoms = countNonNByRegion(regDef=regionDefinition, ambiMode=ambiguousMode, 
+                                            inputChars=c_inputSeq, germChars=c_germlineSeq,
+                                            inputCodons=c_inputSeq_codons, 
+                                            germCodons=c_germlineSeq_codons, 
+                                            mutPos=mutations_pos)
+            
             # df indicating position, mutation type (R or S), and region of each mutation
             rawDf = data.frame(as.numeric(colnames(mutations_array_raw)))
             rawDf = cbind(rawDf,
@@ -1980,28 +1990,31 @@ countNonNByRegion = function(regDef, ambiMode, inputChars, germChars,
         nonN.1 <- sapply(regionNames, function(x) { sum(boundaries.1==x) })
         
         ### positions where there's mutation:
-        # expand codon with ambiguous character(s) into codons with unambiguous characters
-        # calculate the number of possible combinations between input and germline codons
-        
-        # this makes use of the important fact that each mutation is considered 
-        # independently in the germline context
-        inputNumExpanded = sapply(inputCodons, 
-                                  function(codon){
-                                      length(EXPANDED_AMBIGUOUS_CODONS[[codon]])
-                                  })
-        germlineNumExpanded = sapply(germCodons, 
-                                     function(codon){
-                                         length(EXPANDED_AMBIGUOUS_CODONS[[codon]])
-                                     })
-        totalNumExpanded = inputNumExpanded * germlineNumExpanded
-        
-        # use mutations_pos to capture positions at which R/S is absent (Stop or na instead)
-        # such positions would have been omitted from mutations_array_raw or mutations_array
-        boundaries.2 <- regDef@boundaries[mutPos]
-        # makes use of the fact that inputCodons, germCodons, and 
-        # mutPos align exactly
-        nonN.2 = sapply(regionNames, function(x){ sum(totalNumExpanded[boundaries.2==x]) })
-        
+        if ( (!is.null(inputCodons)) & (!is.null(germCodons)) & (!is.null(mutPos)) ) {
+            # expand codon with ambiguous character(s) into codons with unambiguous characters
+            # calculate the number of possible combinations between input and germline codons
+            
+            # this makes use of the important fact that each mutation is considered 
+            # independently in the germline context
+            inputNumExpanded = sapply(inputCodons, 
+                                      function(codon){
+                                          length(EXPANDED_AMBIGUOUS_CODONS[[codon]])
+                                      })
+            germlineNumExpanded = sapply(germCodons, 
+                                         function(codon){
+                                             length(EXPANDED_AMBIGUOUS_CODONS[[codon]])
+                                         })
+            totalNumExpanded = inputNumExpanded * germlineNumExpanded
+            
+            # use mutations_pos to capture positions at which R/S is absent (Stop or na instead)
+            # such positions would have been omitted from mutations_array_raw or mutations_array
+            boundaries.2 <- regDef@boundaries[mutPos]
+            # makes use of the fact that inputCodons, germCodons, and 
+            # mutPos align exactly
+            nonN.2 = sapply(regionNames, function(x){ sum(totalNumExpanded[boundaries.2==x]) })
+        } else {
+            nonN.2 = setNames(object=rep(0, length(regionNames)), nm=regionNames)
+        }
         nonN = nonN.1 + nonN.2
     }
     return(nonN)
