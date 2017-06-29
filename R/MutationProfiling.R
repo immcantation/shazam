@@ -1375,11 +1375,14 @@ observedMutations <- function(db,
                               germlineColumn="GERMLINE_IMGT_D_MASK",
                               regionDefinition=NULL,
                               mutationDefinition=NULL,
+                              ambiguousMode=c("eitherOr", "and"),
                               frequency=FALSE,
                               combine=FALSE,
                               nproc=1) {
     # Hack for visibility of foreach index variable
     idx <- NULL
+    
+    ambiguousMode = match.arg(ambiguousMode)
     
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
@@ -1444,6 +1447,7 @@ observedMutations <- function(db,
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
                                               'regionDefinition', 'frequency', 'combine',
+                                              'ambiguousMode',
                                               'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
                                               'NUCLEOTIDES_AMBIGUOUS', 'IUPAC2nucs',
                                               'EXPANDED_AMBIGUOUS_CODONS',
@@ -1471,7 +1475,8 @@ observedMutations <- function(db,
                                         frequency=frequency & !combine,
                                         regionDefinition=regionDefinition,
                                         mutationDefinition=mutationDefinition,
-                                        returnRaw = combine)
+                                        returnRaw = combine,
+                                        ambiguousMode=ambiguousMode)
             if (combine) {
                 num_mutations <- 0
                 if (!all(is.na(oM$pos))) {
@@ -1644,7 +1649,11 @@ observedMutations <- function(db,
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq,
                                   regionDefinition=NULL, mutationDefinition=NULL,
-                                  returnRaw=FALSE, frequency=FALSE) {
+                                  returnRaw=FALSE, frequency=FALSE,
+                                  ambiguousMode=c("eitherOr", "and")) {
+    
+    ambiguousMode = match.arg(ambiguousMode)
+    
     # Check region definition
     if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
@@ -1760,12 +1769,15 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             
             # Determine whether the mutations are R or S
             # a table where rows are R/S/Stop/na, cols are codon positions
+            # Count ambiguous characters as "eithe-or" or "and" based on user setting 
+            
             # Makes use of the fact that c_germlineSeq_codons and c_inputSeqCodons have
             # the same length
             mutations_array_raw = sapply(1:length(c_germlineSeq_codons),
                                          function(i){
                                              mutationType(codonFrom=c_germlineSeq_codons[i], 
                                                           codonTo=c_inputSeq_codons[i],
+                                                          ambiguousMode=ambiguousMode,
                                                           aminoAcidClasses)
                                          })
             
@@ -2958,9 +2970,9 @@ translateCodonToAminoAcid <- function(Codon) {
 # @param   codonTo           ending codon.  IUPAC ambiguous characters are allowed.
 # @param   ambiguousMode     whether to consider ambiguous characters as "either or"
 #                            or "and" when determining (and counting) the type(s) of 
-#                            mutations. Required if \code{codonFrom} and/or \code{codonTo}
-#                            contains ambiguous characters. One of 
-#                            \code{c("eitherOr", "and")}. Default is \code{NULL}.
+#                            mutations. Applicable only if \code{codonFrom} and/or 
+#                            \code{codonTo} contains ambiguous characters. One of 
+#                            \code{c("eitherOr", "and")}. Default is \code{"eitherOr"}.
 # @param   aminoAcidClasses  vector of amino acid trait classes.
 #                            if NULL then R or S is determined by amino acid identity
 # @return  A vector with entries named by mutation type, including "R" (replacement), 
@@ -2995,10 +3007,12 @@ translateCodonToAminoAcid <- function(Codon) {
 # mutationType("TTT", "TGA", aminoAcidClasses=classes)
 # 
 mutationType <- function(codonFrom, codonTo, 
-                         ambiguousMode=NULL,
+                         ambiguousMode=c("eitherOr", "and"),
                          aminoAcidClasses=NULL) {
     # codonFrom="TTT"; codonTo="TTA"
     # codonFrom="TTT"; codonTo="TGA"
+    
+    ambiguousMode = match.arg(ambiguousMode)
     
     # placeholder for tabulation
     tab = setNames(object=rep(0, 4), nm=c("R", "S", "Stop", "na"))
@@ -3046,9 +3060,6 @@ mutationType <- function(codonFrom, codonTo,
     
     # if there's ambiguous char in observed or germline
     if ( (length(codonFrom.all)>1) | (length(codonTo.all)>1) ) {
-        if (is.null(ambiguousMode)) {
-            stop ("ambiguousMode must be 'eitherOr' or 'and' when codons have ambiguous chars.")
-        }
         if (ambiguousMode=="eitherOr") {
             if (tab[4]>0) { # "na"
                 tab = setNames(object=c(0,0,0,1), nm=c("R", "S", "Stop", "na"))

@@ -1850,31 +1850,71 @@ test_that("collapseClones, 2E", {
 test_that("mutationType", {
     # R, S, Stop, na
     
+    ##### no ambiguous char in input
+    # no need to specify ambiguousMode
+    # if specified, there should be no effect
+    
     # TGG (Trp) -> TGG (Trp); expect na 1
     expect_equivalent(shazam:::mutationType("TGG", "TGG"), c(0,0,0,1))
+    expect_equivalent(shazam:::mutationType("TGG", "TGG", ambiguousMode="eitherOr"), c(0,0,0,1))
+    expect_equivalent(shazam:::mutationType("TGG", "TGG", ambiguousMode="and"), c(0,0,0,1))
+    
     # TGG (Trp) -> TAG (Stop); expect Stop 1
     expect_equivalent(shazam:::mutationType("TGG", "TAG"), c(0,0,1,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TAG", ambiguousMode="eitherOr"), c(0,0,1,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TAG", ambiguousMode="and"), c(0,0,1,0))
+    
+    
     # TGG (Trp) -> TCG (Ser); expect R 1
     expect_equivalent(shazam:::mutationType("TGG", "TCG"), c(1,0,0,0))
-    # TGG (Trp) -> TAG (Stop), TGG (Trp) -> TTG (Leu); expect R 1 + Stop 1
-    expect_equivalent(shazam:::mutationType("TGG", "TWG", ambiguousMode="eitherOr"), 
-                      c(1,0,0,0))
-    expect_equivalent(shazam:::mutationType("TGG", "TWG", ambiguousMode="and"), 
-                      c(1,0,1,0))
-    # TGG (Trp) -> TCG (Ser), TGG (Trp) -> TGG (Trp); expect R 1 + na 1
-    expect_equivalent(shazam:::mutationType("TGG", "TSG", ambiguousMode="eitherOr"), 
-                      c(0,0,0,1))
-    expect_equivalent(shazam:::mutationType("TGG", "TSG", ambiguousMode="and"), 
-                      c(1,0,0,1))
+    expect_equivalent(shazam:::mutationType("TGG", "TCG", ambiguousMode="eitherOr"), c(1,0,0,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TCG", ambiguousMode="and"), c(1,0,0,0))
+    
+    # TGC (Cys) -> TGT (Cys); expect S 1
+    expect_equivalent(shazam:::mutationType("TGC", "TGT"), c(0,1,0,0))
+    expect_equivalent(shazam:::mutationType("TGC", "TGT", ambiguousMode="eitherOr"), c(0,1,0,0))
+    expect_equivalent(shazam:::mutationType("TGC", "TGT", ambiguousMode="and"), c(0,1,0,0))
+    
+    ##### ambiguous char in input
+    # ambiguousMode matters
+    # if not specified, default is eitherOr
+    
+    # TGG (Trp) -> TAG (Stop), TGG (Trp) -> TTG (Leu)
+    # "and": expects R 1 + Stop 1
+    # "eitherOr": expects R 1
+    expect_equivalent(shazam:::mutationType("TGG", "TWG"), c(1,0,0,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TWG", ambiguousMode="eitherOr"), c(1,0,0,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TWG", ambiguousMode="and"), c(1,0,1,0))
+    
+    # TGG (Trp) -> TCG (Ser), TGG (Trp) -> TGG (Trp)
+    # "and": expects R 1 + na 1
+    # "eitherOr": expects na 1
+    expect_equivalent(shazam:::mutationType("TGG", "TSG"), c(0,0,0,1))
+    expect_equivalent(shazam:::mutationType("TGG", "TSG", ambiguousMode="eitherOr"), c(0,0,0,1))
+    expect_equivalent(shazam:::mutationType("TGG", "TSG", ambiguousMode="and"), c(1,0,0,1))
+    
     # TGG (Trp) -> TCA (Ser)
     # TGG (Trp) -> TCC (SER)
     # TGG (Trp) -> TGA (Stop)
     # TGG (Trp) -> TGC (Cys)
-    # expect R 3 + stop 1
-    expect_equivalent(shazam:::mutationType("TGG", "TSM", ambiguousMode="eitherOr"), 
+    # "and": expects R 3 + stop 1
+    # "eitherOr": expects R 1
+    expect_equivalent(shazam:::mutationType("TGG", "TSM"), c(1,0,0,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TSM", ambiguousMode="eitherOr"), c(1,0,0,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TSM", ambiguousMode="and"), c(3,0,1,0))
+    
+    ##### With classes
+    classes <- HYDROPATHY_MUTATIONS@classes
+    #HYDROPATHY_MUTATIONS@codonTable[, "TTT"]
+    expect_equivalent(shazam:::mutationType("TTT", "TTC", aminoAcidClasses=classes),
+                      c(0,1,0,0))
+    expect_equivalent(shazam:::mutationType("TTT", "TTA", aminoAcidClasses=classes),
+                      c(0,1,0,0))
+    expect_equivalent(shazam:::mutationType("TTT", "TCT", aminoAcidClasses=classes),
                       c(1,0,0,0))
-    expect_equivalent(shazam:::mutationType("TGG", "TSM", ambiguousMode="and"), 
-                      c(3,0,1,0))
+    expect_equivalent(shazam:::mutationType("TTT", "TGA", aminoAcidClasses=classes),
+                      c(0,0,1,0)) # TGA=Stop
+    
 })
 
 #### nucs2IUPAC ####
