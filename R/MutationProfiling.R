@@ -3128,29 +3128,29 @@ mutationType <- function(codonFrom, codonTo,
                 }
             }
         }
-    }
-    
-    # if there's ambiguous char in observed or germline
-    if ((length(codonFrom.all) > 1) | (length(codonTo.all) > 1)) {
-        if (ambiguousMode=="eitherOr") {
-            if (tab[4] > 0) { # "na"
-                tab <- setNames(object=c(0, 0, 0, 1), nm=c("R", "S", "Stop", "na"))
-            } else if (tab[2] > 0) { # "S"
-                tab <- setNames(object=c(0, 1, 0, 0), nm=c("R", "S", "Stop", "na"))
-            } else if (tab[1] > 0) { # "R"
-                tab <- setNames(object=c(1, 0, 0, 0), nm=c("R", "S", "Stop", "na"))
+        
+        # if there's ambiguous char in observed or germline
+        if ((length(codonFrom.all) > 1) | (length(codonTo.all) > 1)) {
+            if (ambiguousMode=="eitherOr") {
+                if (tab[4] > 0) { # "na"
+                    tab <- setNames(object=c(0, 0, 0, 1), nm=c("R", "S", "Stop", "na"))
+                } else if (tab[2] > 0) { # "S"
+                    tab <- setNames(object=c(0, 1, 0, 0), nm=c("R", "S", "Stop", "na"))
+                } else if (tab[1] > 0) { # "R"
+                    tab <- setNames(object=c(1, 0, 0, 0), nm=c("R", "S", "Stop", "na"))
+                } else {
+                    tab <- setNames(object=c(0, 0, 1, 0), nm=c("R", "S", "Stop", "na"))
+                }
+                stopifnot(sum(tab) == 1)
             } else {
-                tab <- setNames(object=c(0, 0, 1, 0), nm=c("R", "S", "Stop", "na"))
+                stopifnot(sum(tab) >= 1)
             }
-            stopifnot(sum(tab) == 1)
         } else {
-            stopifnot(sum(tab) >= 1)
+            # no need to do anything if there isn't ambiguous char in observed or germline
+            # there should be only 1 mutation 
+            stopifnot(sum(tab) == 1)
         }
-    } else {
-        # no need to do anything if there isn't ambiguous char in observed or germline
-        # there should be only 1 mutation 
-        stopifnot(sum(tab) == 1)
-    }    
+    }
     
     return(tab)
 }
