@@ -1651,8 +1651,9 @@ observedMutations <- function(db,
 #'            
 #'            Using the same example from above, the final result returned for this example
 #'            is that there are 5 R mutations at position 2. The number of non-N, non-dash,
-#'            and non-dot positions is 8, since there are 6 combinations after expanding 
-#'            the germline codon (\code{"TST"}) and the observed codon (\code{"THT"}).
+#'            and non-dot positions is 8, since there are 6 combinations stemming from 
+#'            position 2 after expanding the germline codon (\code{"TST"}) and the observed 
+#'            codon (\code{"THT"}).
 #' }
 #' 
 #' @seealso  See \link{observedMutations} for counting the number of observed mutations 
