@@ -1857,15 +1857,24 @@ test_that("mutationType", {
     # TGG (Trp) -> TCG (Ser); expect R 1
     expect_equivalent(shazam:::mutationType("TGG", "TCG"), c(1,0,0,0))
     # TGG (Trp) -> TAG (Stop), TGG (Trp) -> TTG (Leu); expect R 1 + Stop 1
-    expect_equivalent(shazam:::mutationType("TGG", "TWG"), c(1,0,1,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TWG", ambiguousMode="eitherOr"), 
+                      c(1,0,0,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TWG", ambiguousMode="and"), 
+                      c(1,0,1,0))
     # TGG (Trp) -> TCG (Ser), TGG (Trp) -> TGG (Trp); expect R 1 + na 1
-    expect_equivalent(shazam:::mutationType("TGG", "TSG"), c(1,0,0,1))
+    expect_equivalent(shazam:::mutationType("TGG", "TSG", ambiguousMode="eitherOr"), 
+                      c(0,0,0,1))
+    expect_equivalent(shazam:::mutationType("TGG", "TSG", ambiguousMode="and"), 
+                      c(1,0,0,1))
     # TGG (Trp) -> TCA (Ser)
     # TGG (Trp) -> TCC (SER)
     # TGG (Trp) -> TGA (Stop)
     # TGG (Trp) -> TGC (Cys)
     # expect R 3 + stop 1
-    expect_equivalent(shazam:::mutationType("TGG", "TSM"), c(3,0,1,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TSM", ambiguousMode="eitherOr"), 
+                      c(1,0,0,0))
+    expect_equivalent(shazam:::mutationType("TGG", "TSM", ambiguousMode="and"), 
+                      c(3,0,1,0))
 })
 
 #### nucs2IUPAC ####

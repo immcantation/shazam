@@ -1446,9 +1446,11 @@ observedMutations <- function(db,
                                               'regionDefinition', 'frequency', 'combine',
                                               'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
                                               'NUCLEOTIDES_AMBIGUOUS', 'IUPAC2nucs',
+                                              'EXPANDED_AMBIGUOUS_CODONS',
                                               'makeNullRegionDefinition', 'mutationDefinition',
                                               'getCodonPos','getContextInCodon','mutationType',
-                                              'translateCodonToAminoAcid','AMINO_ACIDS','binMutationsByRegion'), 
+                                              'translateCodonToAminoAcid','AMINO_ACIDS',
+                                              'binMutationsByRegion'), 
                                 envir=environment())
         registerDoParallel(cluster)
     } else if (nproc == 1) {
@@ -2954,11 +2956,29 @@ translateCodonToAminoAcid <- function(Codon) {
 #
 # @param   codonFrom         starting codon. IUPAC ambiguous characters are allowed.
 # @param   codonTo           ending codon.  IUPAC ambiguous characters are allowed.
-# @param   aminoAcidClasses  vector of amino acid trait classes
+# @param   ambiguousMode     whether to consider ambiguous characters as "either or"
+#                            or "and" when determining (and counting) the type(s) of 
+#                            mutations. Required if \code{codonFrom} and/or \code{codonTo}
+#                            contains ambiguous characters. One of 
+#                            \code{c("eitherOr", "and")}. Default is \code{NULL}.
+# @param   aminoAcidClasses  vector of amino acid trait classes.
 #                            if NULL then R or S is determined by amino acid identity
 # @return  A vector with entries named by mutation type, including "R" (replacement), 
 #          "S" (silent), "Stop" (stop) or "na" (input codons are identical or include NA).
 #          Each entry indicates the count of its corresponding type of mutation.
+#
+# @details When there are ambiguous characters in \code{codonFrom} and/or \code{codonTo}:
+#          \itemize{
+#               \item  If \code{ambiguousMode="eitherOr"}, ambiguous characters will each 
+#                      be expanded but only 1 mutation will be recorded. The priority for 
+#                      different types of mutations, in decreasing order, is as follows:
+#                      no mutation ("na"), replacement mutation ("R"), silent mutation ("S"),
+#                      and stop mutation ("Stop"). The returned vector will have exactly one
+#                      entry with a count of 1 and 0 in all other entries.
+#               \item  If \code{ambiguousMode="and"}, ambiguous characters will each be 
+#                      expanded and mutation(s) from each expansion will be recorded. 
+#                      Each entry in the returned vector could potentially be greater than 1.
+#          }
 #
 # @examples
 # # Without classes
@@ -2974,7 +2994,9 @@ translateCodonToAminoAcid <- function(Codon) {
 # mutationType("TTT", "TCT", aminoAcidClasses=classes)
 # mutationType("TTT", "TGA", aminoAcidClasses=classes)
 # 
-mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
+mutationType <- function(codonFrom, codonTo, 
+                         ambiguousMode=NULL,
+                         aminoAcidClasses=NULL) {
     # codonFrom="TTT"; codonTo="TTA"
     # codonFrom="TTT"; codonTo="TGA"
     
@@ -2997,23 +3019,24 @@ mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
                     tab[4] = tab[4] + 1
                 } else {
                     # Translate codons
-                    aaFrom <- translateCodonToAminoAcid(cur.codonFrom)
-                    aaTo <- translateCodonToAminoAcid(cur.codonTo)
+                    cur.aaFrom <- translateCodonToAminoAcid(cur.codonFrom)
+                    cur.aaTo <- translateCodonToAminoAcid(cur.codonTo)
                     
                     # If any codon is NA then return NA
-                    if (any(is.na(c(codonFrom, codonTo, aaFrom, aaTo)))) { 
+                    if (any(is.na(c(codonFrom, codonTo, cur.aaFrom, cur.aaTo)))) { 
                         # "na"
                         tab[4] = tab[4] + 1
-                    } else if (any(c(aaFrom, aaTo) == "*")) {
+                    } else if (any(c(cur.aaFrom, cur.aaTo) == "*")) {
                         # If any amino acid is Stop then return "Stop"
                         tab[3] = tab[3] + 1
                     } else if (is.null(aminoAcidClasses)) {
                         # Check for exact identity if no amino acid classes are specified
-                        mutation <- if (aaFrom == aaTo) { "S" } else { "R" }
+                        mutation <- if (cur.aaFrom == cur.aaTo) { "S" } else { "R" }
                         tab[mutation] = tab[mutation]+1
                     } else {
                         # Check for amino acid class identity if classes are specified
-                        mutation <- if (aminoAcidClasses[aaFrom] == aminoAcidClasses[aaTo]) { "S" } else { "R" }
+                        mutation <- if (aminoAcidClasses[cur.aaFrom] == 
+                                        aminoAcidClasses[cur.aaTo]) { "S" } else { "R" }
                         tab[mutation] = tab[mutation]+1
                     }
                 }
@@ -3021,7 +3044,31 @@ mutationType <- function(codonFrom, codonTo, aminoAcidClasses=NULL) {
         }
     }
     
-    stopifnot(sum(tab)>0)
+    # if there's ambiguous char in observed or germline
+    if ( (length(codonFrom.all)>1) | (length(codonTo.all)>1) ) {
+        if (is.null(ambiguousMode)) {
+            stop ("ambiguousMode must be 'eitherOr' or 'and' when codons have ambiguous chars.")
+        }
+        if (ambiguousMode=="eitherOr") {
+            if (tab[4]>0) { # "na"
+                tab = setNames(object=c(0,0,0,1), nm=c("R", "S", "Stop", "na"))
+            } else if (tab[2]>0) { # "S"
+                tab = setNames(object=c(0,1,0,0), nm=c("R", "S", "Stop", "na"))
+            } else if (tab[1]>0) { # "R"
+                tab = setNames(object=c(1,0,0,0), nm=c("R", "S", "Stop", "na"))
+            } else {
+                tab = setNames(object=c(0,0,1,0), nm=c("R", "S", "Stop", "na"))
+            }
+            stopifnot(sum(tab)==1)
+        } else {
+            stopifnot(sum(tab)>=1)
+        }
+    } else {
+        # no need to do anything if there isn't ambiguous char in observed or germline
+        # there should be only 1 mutation 
+        stopifnot(sum(tab)==1)
+    }    
+    
     return(tab)
 }
 
