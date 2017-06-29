@@ -2795,9 +2795,9 @@ calculateTargeting <- function(germlineSeq,
         }
         
         # Mask germline with Ns where input sequence has Ns
-        c_germlineSeq[ c_inputSeq=="N" |  !c_inputSeq%in%c(NUCLEOTIDES[1:5],".") ] = "N"    
+        c_germlineSeq[c_inputSeq == "N" |  !c_inputSeq%in%c(NUCLEOTIDES[1:5],".") ] = "N"    
         s_germlineSeq <- c2s(c_germlineSeq)
-    }else{
+    } else {
         s_germlineSeq <- germlineSeq
         c_germlineSeq <- s2c(s_germlineSeq)
     }
@@ -2954,7 +2954,7 @@ chars2Ambiguous <- function(chars) {
         # ignore - and .
         idx.dash.dot <- which(chars == "-" | chars == ".")
         if (length(idx.dash.dot)>0) {
-            chars = chars[-idx.dash.dot]
+            chars <- chars[-idx.dash.dot]
         }
         
         # if only N appears
@@ -2966,9 +2966,9 @@ chars2Ambiguous <- function(chars) {
             # e.g. AGN would be treated as AG (R)
             # e.g. ATGN would be treated as AGT (D)
             # e.g. ATGCN would be treated as ACGT (N)
-            idx.N = which(chars=="N")
-            if (length(idx.N)>0) {
-                chars = chars[-idx.N]
+            idx.N = which(chars == "N")
+            if (length(idx.N) > 0) {
+                chars <- chars[-idx.N]
             } 
             return(nucs2IUPAC(chars))
         }
