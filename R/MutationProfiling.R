@@ -1285,6 +1285,12 @@ calcClonalConsensus <- function(db,
 #'                               and silent mutation criteria. If \code{NULL} then 
 #'                               replacement and silent are determined by exact 
 #'                               amino acid identity.
+#' @param    ambiguousMode       whether to consider ambiguous characters as 
+#'                               \code{"either or"} or \code{"and"} when determining and 
+#'                               counting the type(s) of mutations. Applicable only if
+#'                               \code{sequenceColumn} and/or \code{germlineColumn} 
+#'                               contain(s) ambiguous characters. One of 
+#'                               \code{c("eitherOr", "and")}. Default is \code{"eitherOr"}.                               
 #' @param    frequency           \code{logical} indicating whether or not to calculate
 #'                               mutation frequencies. Default is \code{FALSE}.
 #' @param    combine             \code{logical} indicating whether for each sequence should
@@ -1544,6 +1550,12 @@ observedMutations <- function(db,
 #'                               and silent mutation criteria. If \code{NULL} then 
 #'                               replacement and silent are determined by exact 
 #'                               amino acid identity.
+#' @param    ambiguousMode       whether to consider ambiguous characters as 
+#'                               \code{"either or"} or \code{"and"} when determining and 
+#'                               counting the type(s) of mutations. Applicable only if
+#'                               \code{inputSeq} and/or \code{germlineSeq} 
+#'                               contain(s) ambiguous characters. One of 
+#'                               \code{c("eitherOr", "and")}. Default is \code{"eitherOr"}.                               
 #' @param    returnRaw           return the positions of point mutations and their 
 #'                               corresponding mutation types, as opposed to counts of 
 #'                               mutations across positions. Also returns the number of 
@@ -1560,23 +1572,24 @@ observedMutations <- function(db,
 #'           
 #'           For \code{returnRaw=TRUE}, a list containing 
 #'           \itemize{
-#'                \item A data frame (\code{$pos}) whose columns (\code{position}, \code{R}, 
-#'                      \code{S}, and \code{region}) indicate the nucleotide position, 
-#'                      the number of R mutations, the number of S mutations, and the 
-#'                      region in which the nucleotide position is in.
-#'                \item A vector (\code{$nonN}) indicating the number of bases in regions 
+#'                \item \code{$pos}: A data frame whose columns (\code{position}, \code{R}, 
+#'                      \code{S}, and \code{region}) indicate, respecitively, the nucleotide 
+#'                      position, the number of R mutations at that position, the number of S 
+#'                      mutations at that position, and the region in which that nucleotide
+#'                      is in.
+#'                \item \code{$nonN}: A vector indicating the number of bases in regions 
 #'                      defined by \code{regionDefinition} (excluding non-triplet overhang, 
 #'                      if any) that are not one of "N", "-", or "." in either the 
-#'                      observed or the germline.
+#'                      \code{inputSeq} or \code{germlineSeq}.
 #'           }
 #'           
 #'           For \code{frequency=TRUE}, regardless of \code{returnRaw}, an \code{array} 
 #'           with the frequencies of replacement (R) and silent (S) mutations.
 #'           
 #' @details
-#' Each mutation is considered independently in the germline context. Note, only the part of 
-#' \code{inputSeq} defined in \code{regionDefinition} is analyzed. For example, when using 
-#' the default \link{IMGT_V} definition, then mutations in positions beyond 
+#' Each mutation is considered independently in the germline context. If specified, only 
+#' the part of \code{inputSeq} defined in \code{regionDefinition} is analyzed. For example, 
+#' when using the default \link{IMGT_V} definition, then mutations in positions beyond 
 #' 312 will be ignored. Additionally, non-triplet overhang at the sequence end is ignored.
 #' 
 #' Only replacement (R) and silent (S) mutations are included in the results. Excluded are: 
@@ -1590,6 +1603,57 @@ observedMutations <- function(db,
 #' }
 #' In other words, a result that is \code{NA} or zero indicates absence of R and S mutations, 
 #' not necessarily all types of mutations, such as the excluded ones mentioned above.
+#' 
+#' \code{NA} is also returned if \code{inputSeq} or \code{germlineSeq} is shorter than 3
+#' nucleotides.
+#' 
+#' @section Ambiguous characters:
+#' When there are ambiguous characters present, the user could choose how mutations involving
+#' ambiguous characters are counted through \code{ambiguousMode}. The two available modes 
+#' are \code{"eitherOr"} and \code{"and"}. 
+#' \itemize{
+#'      \item With \code{"eitherOr"}, ambiguous characters are each expanded but only 
+#'            1 mutation is recorded. When determining the type of mutation, the 
+#'            priority for different types of mutations, in decreasing order, is as follows:
+#'            no mutation, replacement mutation, silent mutation, and stop mutation. 
+#'            
+#'            When counting the number of non-N, non-dash, and non-dot positions, each
+#'            position is counted only once, regardless of the presence of ambiguous
+#'            characters.
+#'            
+#'            As an example, consider the case where \code{germlineSeq} is \code{"TST"} and
+#'            \code{inputSeq} is \code{"THT"}. Expanding \code{"H"} at position 2 in 
+#'            \code{inputSeq} into \code{"A"}, \code{"C"}, and \code{"T"}, as well as 
+#'            expanding \code{"S"} at position 2 in \code{germlineSeq} into \code{"C"} and 
+#'            \code{"G"}, one gets:
+#'            
+#'            \itemize{
+#'                 \item \code{"TCT"} (germline) to \code{"TAT"} (observed): replacement
+#'                 \item \code{"TCT"} (germline) to \code{"TCT"} (observed): no mutation
+#'                 \item \code{"TCT"} (germline) to \code{"TTT"} (observed): replacement 
+#'                 \item \code{"TGT"} (germline) to \code{"TAT"} (observed): replacement 
+#'                 \item \code{"TGT"} (germline) to \code{"TCT"} (observed): replacement
+#'                 \item \code{"TGT"} (germline) to \code{"TTT"} (observed): replacement
+#'            }
+#'            
+#'            Because "no mutation" takes priority over replacement mutation, the final 
+#'            mutation count returned for this example is \code{NA} (recall that only R and 
+#'            S mutations are returned). The number of non-N, non-dash, and non-dot 
+#'            positions is 3.
+#'            
+#'      \item With \code{"and"}, ambiguous characters are each expanded and mutation(s)
+#'            from all expansions are recorded.
+#'            
+#'            When counting the number of non-N, non-dash, and non-dot positions, if a 
+#'            position contains ambiguous character(s) in \code{inputSeq} and/or 
+#'            \code{germlineSeq}, the count at that position is taken to be the total 
+#'            number of combinations of germline and observed codons after expansion.
+#'            
+#'            Using the same example from above, the final result returned for this example
+#'            is that there are 5 R mutations at position 2. The number of non-N, non-dash,
+#'            and non-dot positions is 8, since there are 6 combinations after expanding 
+#'            the germline codon (\code{"TST"}) and the observed codon (\code{"THT"}).
+#' }
 #' 
 #' @seealso  See \link{observedMutations} for counting the number of observed mutations 
 #' in a \code{data.frame}.
@@ -1649,8 +1713,8 @@ observedMutations <- function(db,
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq,
                                   regionDefinition=NULL, mutationDefinition=NULL,
-                                  returnRaw=FALSE, frequency=FALSE,
-                                  ambiguousMode=c("eitherOr", "and")) {
+                                  ambiguousMode=c("eitherOr", "and"),
+                                  returnRaw=FALSE, frequency=FALSE) {
     
     ambiguousMode = match.arg(ambiguousMode)
     
