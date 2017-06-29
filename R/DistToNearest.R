@@ -13,17 +13,22 @@ NULL
 #' @slot   x            input distance vector with NA or infinite values removed.
 #' @slot   model        first-second fit functions. 
 #' @slot   cutoff       type of threshold cut.
-#' @slot   func1.0      mixing weight of the first curve.
-#' @slot   func1.1      second parameter of the first curve (either mean of a Normal distribution or shape of a Gamma distribution).
-#' @slot   func1.2      third parameter of the first curve (either standard deviation of a Normal distribution or scale of a Gamma distribution).
-#' @slot   func2.0      mixing weight of the second curve.
-#' @slot   func2.1      second parameter of the second curve (either mean of a Normal distribution or shape of a Gamma distribution)..
-#' @slot   func2.2      third parameter of the second curve (either standard deviation of a Normal distribution or scale of a Gamma distribution).
-#' @slot   loglk        the fit log-likelihood.
-#' @slot   threshold    the threshold cut.
-#' @slot   sensitivity  the sensitivity.
-#' @slot   specificity  the specificity.
-#' @slot   pvalue       the p-value from Hartigans' dip statistic (HDS) test, with values less than 0.05 indicating significant bimodality.
+#' @slot   a1           mixing weight of the first curve.
+#' @slot   b1           second parameter of the first curve. Either the mean of a Normal 
+#'                      distribution or shape of a Gamma distribution.
+#' @slot   c1           third parameter of the first curve. Either the standard deviation of a 
+#'                      Normal distribution or scale of a Gamma distribution.
+#' @slot   a2           mixing weight of the second curve.
+#' @slot   b2           second parameter of the second curve. Either the mean of a Normal 
+#'                      distribution or shape of a Gamma distribution.
+#' @slot   c2           third parameter of the second curve. Either the standard deviation 
+#'                      of a Normal distribution or scale of a Gamma distribution.
+#' @slot   loglk        log-likelihood of the fit.
+#' @slot   threshold    threshold.
+#' @slot   sensitivity  sensitivity.
+#' @slot   specificity  specificity.
+#' @slot   pvalue       p-value from Hartigans' dip statistic (HDS) test. 
+#'                      Values less than 0.05 indicate significant bimodality.
 #'
 #' @seealso      \link{findThreshold}
 #'
@@ -35,18 +40,17 @@ setClass("GmmThreshold",
          slots=c(x="numeric",
                  model = "character",
                  cutoff = "character",
-                 func1.0="numeric", 
-                 func1.1="numeric", 
-                 func1.2="numeric", 
-                 func2.0="numeric", 
-                 func2.1="numeric", 
-                 func2.2="numeric",
+                 a1="numeric", 
+                 b1="numeric", 
+                 c1="numeric", 
+                 a2="numeric", 
+                 b2="numeric", 
+                 c2="numeric",
                  loglk="numeric",
                  threshold="numeric",
                  sensitivity="numeric", 
                  specificity="numeric",
                  pvalue="numeric"))
-
 
 #' Output of the \code{dens} method of findThreshold
 #' 
@@ -70,6 +74,7 @@ setClass("DensityThreshold",
                  xdens="numeric",
                  ydens="numeric",
                  threshold="numeric"))
+
 
 #### Methods ####
 
@@ -757,7 +762,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' @param    method     string defining the method to use for determining the optimal threshold.
 #'                      One of \code{"gmm"} or \code{"density"}. See Details for methodological
 #'                      descriptions.
-#' @param    cutEdge    upper range (a fraction of the data density) to rule initialization of 
+#' @param    edge       upper range (a fraction of the data density) to rule initialization of 
 #'                      Gaussian fit parameters. Default value is equal to 90% of the entries.
 #'                      Applies only to the \code{"gmm"} method.
 #' @param    cross      supplementary nearest neighbor distance vector output from \link{distToNearest} 
@@ -771,11 +776,12 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #'                      (1) \code{"norm-norm"}, (2) \code{"norm-gamma"}, (3) \code{"gamma-norm"}, 
 #'                      and (4) \code{"gamma-gamma"}. Applies only to the \code{"gmm"} method.
 #' @param    cutoff     applies only to the \code{"gmm"} method. Allows the user to choose the type of the 
-#'                      threshold among options: (1) the optimal threshold \code{"opt"}, (2) the intersection point
-#'                      of the two fitted curves \code{"intxn"}, or (3) a vlue defined by user for one of the 
+#'                      threshold among options: (1) the optimal threshold \code{"opt"}, (2) the 
+#'                      intersection point of the two fitted curves \code{"intersect"}, or 
+#'                      (3) a value defined by user for one of the 
 #'                      sensitivity or specificity \code{"user"}.
-#' @param    sen        the sensitivity. Applies only where method=\code{"gmm"} and cutoff=\code{"user"}.
-#' @param    spc        the specificity. Applies only where method=\code{"gmm"} and cutoff=\code{"user"}.
+#' @param    sen        sensitivity. Applies only where method=\code{"gmm"} and cutoff=\code{"user"}.
+#' @param    spc        specificity. Applies only where method=\code{"gmm"} and cutoff=\code{"user"}.
 #'                      
 #' @param    progress   if \code{TRUE} print a progress bar. 
 #' @return   
@@ -795,7 +801,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #'                           which fit the bimodal distribution entries. Retrieving the fit parameters, 
 #'                           it then calculates the optimum threshold \code{"opt"}, where the average of the sensitivity 
 #'                           plus specificity reaches its maximum. In addition, findThreshold function is also able 
-#'                           to calculate the intersection point (\code{"intxn"}) of the two fitted curves and allows 
+#'                           to calculate the intersection point (\code{"intersect"}) of the two fitted curves and allows 
 #'                           the user to invoke its value as the cut-off point, instead of optimum \code{"opt"} point.
 #'   \item \code{"density"}: Fits a binned approximation to the ordinary kernel density estimate
 #'                           to the nearest neighbor distances after determining the optimal
@@ -831,16 +837,17 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' }
 #' @export
 findThreshold <- function (data, method=c("gmm", "density"), 
-                           cutEdge=0.9, cross=NULL, subsample=NULL,
+                           edge=0.9, cross=NULL, subsample=NULL,
                            model=c("gamma-gamma", "gamma-norm", "norm-gamma", "norm-norm"),
-                           cutoff=c("opt", "intxn", "user"), sen=NULL, spc=NULL, progress=FALSE){
+                           cutoff=c("optimal", "intersect", "user"), sen=NULL, spc=NULL, 
+                           progress=FALSE){
   # Check arguments
   method <- match.arg(method)
+  model <- match.arg(model)
+  cutoff <- match.arg(cutoff)
   
   if (method == "gmm") {
-      model <- match.arg(model)
-      cutoff <- match.arg(cutoff)
-      if (cutoff=="user"){
+      if (cutoff == "user"){
           if (is.null(sen) & is.null(spc)) {
               cat("Error: one of 'sen' or 'spc' values should be specified.")
               output <- NA
@@ -848,10 +855,12 @@ findThreshold <- function (data, method=c("gmm", "density"),
               cat("Error: only one of 'sen' or 'spc' values can be specified.")
               output <- NA
           } else {
-              output <- gmmFit(ent=data, cutEdge=cutEdge, cross=cross, model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress)
+              output <- gmmFit(ent=data, edge=edge, cross=cross, model=model, cutoff=cutoff, 
+                               sen=sen, spc=spc, progress=progress)
           }
       } else {
-          output <- gmmFit(ent=data, cutEdge=cutEdge, cross=cross, model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress)
+          output <- gmmFit(ent=data, edge=edge, cross=cross, model=model, cutoff=cutoff, 
+                           sen=sen, spc=spc, progress=progress)
       }
   } else if (method == "density") {
     output <- smoothValley(data, subsample=subsample)
@@ -946,13 +955,13 @@ smoothValley <- function(distances, subsample=NULL) {
 # Sensitivity plus Specificity corresponding to the Gaussian distributions.
 # 
 # @param    ent         numeric vector of distances returned from \link{distToNearest} function.
-# @param    cutEdge     upper range (a fraction of the data density) to rule initialization of 
+# @param    edge        upper range (a fraction of the data density) to rule initialization of 
 #                       Gaussian fit parameters. Default value is equal to \eqn{90}\% of the entries.
 # @param    cross       a supplementary info (numeric vector) invoked from \link{distToNearest} 
 #                       function, to support initialization of the Gaussian fit parameters. 
 # @param    progress    if \code{TRUE} print progress.
 #
-# @return   returns an objrct including optimum "\code{threshold}" cut and the Gaussian fit parameters, 
+# @return   returns an object including optimum "\code{threshold}" cut and the Gaussian fit parameters, 
 #           such as mixing proportion ("\code{omega1}" and "\code{omega2}"), mean ("\code{mu1}" and "\code{mu2}"), 
 #           and standard deviation ("\code{sigma1}" and "\code{sigma2}"). Returns "\code{NULL}" if no fit has found.         
 #
@@ -980,22 +989,10 @@ smoothValley <- function(distances, subsample=NULL) {
 # db <- distToNearest(db, model="ham", first=FALSE, normalize="len", nproc=1)
 #                             
 # # To find the Threshold cut use either findThreshold-switch
-# output <- findThreshold(db$DIST_NEAREST, method="gmm", cutEdge=0.9)
+# output <- findThreshold(db$DIST_NEAREST, method="gmm", edge=0.9)
 # # or 
-# output <- gmmFit(db$DIST_NEAREST, cutEdge=0.9) 
-# 
-# # Retrieve outputs:
-# omega <- c(output@omega1, output@omega2)
-# mu <-    c(output@mu1,    output@mu2) 
-# sigma <- c(output@sigma1, output@sigma2) 
-# threshold <- output@threshold
-# 
-# # To check the quality of the fit performance and corresponding 
-# # threshold location use "plotGmmThreshold" function in shazam. 
-# 
-# 
-# @export
-gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, sen, spc, progress=FALSE) {
+# output <- gmmFit(db$DIST_NEAREST, edge=0.9) 
+gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=FALSE) {
     
     #************* Filter Unknown Data *************#
     ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
@@ -1005,8 +1002,8 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, sen, spc, progre
         m <- mean(cross, na.rm = TRUE) 
     }
     
-    #************* Defult cutEdge *************#
-    cut <- cutEdge*length(ent)
+    #************* Defult edge *************#
+    cut <- edge*length(ent)
     
     #************* Define Scan Step For Initializing *************#
     if (ent[which.max(ent)] <= 5) {
@@ -1165,26 +1162,26 @@ gmmFit <- function(ent, cutEdge=0.9, cross=NULL, model, cutoff, sen, spc, progre
         mu.gmm    <- c(mu[1], mu[2]) 
         sigma.gmm <- c(sigma[1], sigma[2]) 
         
-        FitResults <- rocSpace(ent=ent, omega.gmm=omega.gmm , mu.gmm=mu.gmm, sigma.gmm=sigma.gmm, 
+        fit_results <- rocSpace(ent=ent, omega.gmm=omega.gmm , mu.gmm=mu.gmm, sigma.gmm=sigma.gmm, 
                                model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress)
-        results<-new("GmmThreshold",
-                     x=ent,
-                     model = model,
-                     cutoff = cutoff,
-                     func1.0=FitResults@func1.0, 
-                     func1.1=FitResults@func1.1, 
-                     func1.2=FitResults@func1.2, 
-                     func2.0=FitResults@func2.0, 
-                     func2.1=FitResults@func2.1, 
-                     func2.2=FitResults@func2.2,
-                     loglk=FitResults@loglk,
-                     threshold=FitResults@threshold,
-                     sensitivity=FitResults@sensitivity, 
-                     specificity=FitResults@specificity,
-                     pvalue=FitResults@pvalue)
+        results <- new("GmmThreshold",
+                       x=ent,
+                       model=model,
+                       cutoff=cutoff,
+                       a1=fit_results@a1, 
+                       b1=fit_results@b1, 
+                       c1=fit_results@c1, 
+                       a2=fit_results@a2,  
+                       b2=fit_results@b2,  
+                       c2=fit_results@c2, 
+                       loglk=fit_results@loglk,
+                       threshold=fit_results@threshold,
+                       sensitivity=fit_results@sensitivity, 
+                       specificity=fit_results@specificity,
+                       pvalue=fit_results@pvalue)
     } else {    
         print("Error: No fit found")
-        results<-NULL
+        results <- NULL
     }
     
     return(results)
@@ -1234,7 +1231,7 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
         while (!key){
             # print(paste0(i,":",itr))
             # Fit mixture Functions
-            MixModel <- try(suppressWarnings(fitdistr(na.exclude(ent), MixFunctions, 
+            MixModel <- try(suppressWarnings(fitdistr(na.exclude(ent), mixFunction, 
                                      first_curve = bits[1], second_curve = bits[2], 
                                      start=list(omega = func1.0, 
                                                 func1.1 = func1.1, func1.2 = func1.2,
@@ -1347,17 +1344,17 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
         maxInt<-func2.1*func2.2
     }    
     
-    if (cutoff == "opt"){
+    if (cutoff == "optimal"){
         # Calculate optimum
-        opt <- optimize(ave_SenSpc, interval = c(minInt, maxInt), tol=1e-8, maximum = TRUE, 
+        opt <- optimize(avgSenSpc, interval = c(minInt, maxInt), tol=1e-8, maximum = TRUE, 
                         t1=t1, t2=t2, 
                         first_curve = bits[1], second_curve = bits[2], 
                         func1.0=func1.0, func1.1=func1.1, func1.2=func1.2, 
                         func2.0=func2.0, func2.1=func2.1, func2.2=func2.2)
         threshold <- opt$maximum
-    } else if (cutoff == "intxn") {
+    } else if (cutoff == "intersect") {
         # Calculate intersection
-        intxn <- uniroot(Intersection, interval = c(minInt, maxInt), tol=1e-8, extendInt="yes",
+        intxn <- uniroot(intersectPoint, interval = c(minInt, maxInt), tol=1e-8, extendInt="yes",
                          first_curve = bits[1], second_curve = bits[2], 
                          func1.0=func1.0, func1.1=func1.1, func1.2=func1.2, 
                          func2.0=func2.0, func2.1=func2.1, func2.2=func2.2)
@@ -1374,70 +1371,58 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
     
     # Calculate Sensitivity and Specificity
     if (bits[1]=="norm") {
-        TP = NormArea(t1=t1, t2=threshold, omega=func1.0, mu=func1.1, sigma=func1.2)
+        TP = normArea(t1=t1, t2=threshold, omega=func1.0, mu=func1.1, sigma=func1.2)
     } else if (bits[1]=="gamma") {
-        TP = GammaArea(t1=t1, t2=threshold, omega=func1.0, k=func1.1, theta=func1.2)
+        TP = gammaArea(t1=t1, t2=threshold, omega=func1.0, k=func1.1, theta=func1.2)
     }
     if (bits[1]=="norm") {
-        FN = NormArea(t1=threshold, t2=t2, omega=func1.0, mu=func1.1, sigma=func1.2)
+        FN = normArea(t1=threshold, t2=t2, omega=func1.0, mu=func1.1, sigma=func1.2)
     } else if (bits[1]=="gamma") {
-        FN = GammaArea(t1=threshold, t2=t2, omega=func1.0, k=func1.1, theta=func1.2)
+        FN = gammaArea(t1=threshold, t2=t2, omega=func1.0, k=func1.1, theta=func1.2)
     }
     
     if (bits[2]=="norm") {
-        TN = NormArea(t1=threshold, t2=t2, omega=func2.0, mu=func2.1, sigma=func2.2)
+        TN = normArea(t1=threshold, t2=t2, omega=func2.0, mu=func2.1, sigma=func2.2)
     } else if (bits[2]=="gamma") {
-        TN = GammaArea(t1=threshold, t2=t2, omega=func2.0, k=func2.1, theta=func2.2)
+        TN = gammaArea(t1=threshold, t2=t2, omega=func2.0, k=func2.1, theta=func2.2)
     }
     if (bits[2]=="norm") {
-        FP = NormArea(t1=t1, t2=threshold, omega=func2.0, mu=func2.1, sigma=func2.2)
+        FP = normArea(t1=t1, t2=threshold, omega=func2.0, mu=func2.1, sigma=func2.2)
     } else if (bits[2]=="gamma") {
-        FP = GammaArea(t1=t1, t2=threshold, omega=func2.0, k=func2.1, theta=func2.2)
+        FP = gammaArea(t1=t1, t2=threshold, omega=func2.0, k=func2.1, theta=func2.2)
     }
     
     sensitivity <- TP/(TP+FN)
     specificity <- TN/(TN+FP)  
     
     # Hartigans dip statistic (HDS) test
-    invisible(capture.output(pvalue <- dip.test(ent)$p.value[[1]], type = "message"))
+    invisible(capture.output(pvalue <- dip.test(ent)$p.value[[1]], type="message"))
     
-    FitResults<-new("FitResults",
-                    func1.0=func1.0, func1.1=func1.1, func1.2=func1.2, 
-                    func2.0=func2.0, func2.1=func2.1, func2.2=func2.2,
-                    loglk=log_lik, threshold=threshold,
-                    sensitivity=sensitivity, specificity=specificity,
-                    pvalue=pvalue)
+    fit_results <- new("GmmThreshold",
+                       x=numeric(), model=character(), cutoff=character(),
+                       a1=func1.0, b1=func1.1, c1=func1.2, 
+                       a2=func2.0, b2=func2.1, c2=func2.2,
+                       loglk=log_lik, threshold=threshold,
+                       sensitivity=sensitivity, specificity=specificity,
+                       pvalue=pvalue)
     
-    return(FitResults)
+    return(fit_results)
 }
-
-setClass("FitResults",
-         slots = c(func1.0="numeric", 
-                   func1.1="numeric", 
-                   func1.2="numeric",
-                   func2.0="numeric", 
-                   func2.1="numeric", 
-                   func2.2="numeric",
-                   loglk="numeric",
-                   threshold="numeric",
-                   sensitivity="numeric", 
-                   specificity="numeric",
-                   pvalue="numeric"))
 
 # Calculates the area (integral) bounded 
 # in domain[t1,t2] under Gamma distribution
-GammaArea <- function (t1, t2, omega, k, theta){
-    trm1 <- pgamma(t1/theta, shape = k, lower.tail = FALSE) * gamma(k)
-    trm2 <- pgamma(t2/theta, shape = k, lower.tail = FALSE) * gamma(k)
+gammaArea <- function (t1, t2, omega, k, theta){
+    trm1 <- pgamma(t1/theta, shape=k, lower.tail=FALSE) * gamma(k)
+    trm2 <- pgamma(t2/theta, shape=k, lower.tail=FALSE) * gamma(k)
     
-    area <- omega*(trm1-trm2)/gamma(k)
+    area <- omega*(trm1 - trm2)/gamma(k)
     
     return(area)
 }
 
 # Calculates the area (integral) bounded 
 # in domain[t1,t2] under Normal distribution
-NormArea <- function (t1, t2, omega, mu, sigma){
+normArea <- function (t1, t2, omega, mu, sigma){
     erf1 <- (t1-mu)/(sqrt(2)*sigma)
     erf1 <- 2*pnorm(erf1*sqrt(2)) - 1
     
@@ -1451,24 +1436,24 @@ NormArea <- function (t1, t2, omega, mu, sigma){
 
 # find the optimum threshold using 
 # optimize function fit
-ave_SenSpc <- function(t, t1=0, t2=0, first_curve=NULL, second_curve=NULL, 
+avgSenSpc <- function(t, t1=0, t2=0, first_curve=NULL, second_curve=NULL, 
                        func1.0 = 0, func1.1 = 0, func1.2 = 0,
                        func2.0 = 0, func2.1 = 0, func2.2 = 0) {
     
     if (first_curve == "norm") {
-        TP <- NormArea(t1=t1, t2=t, omega=func1.0, mu=func1.1, sigma=func1.2)
-        FN <- NormArea(t1=t, t2=t2, omega=func1.0, mu=func1.1, sigma=func1.2)
+        TP <- normArea(t1=t1, t2=t, omega=func1.0, mu=func1.1, sigma=func1.2)
+        FN <- normArea(t1=t, t2=t2, omega=func1.0, mu=func1.1, sigma=func1.2)
     } else if (first_curve == "gamma") {
-        TP <- GammaArea(t1=t1, t2=t, omega=func1.0, k=func1.1, theta=func1.2)
-        FN <- GammaArea(t1=t, t2=t2, omega=func1.0, k=func1.1, theta=func1.2)
+        TP <- gammaArea(t1=t1, t2=t, omega=func1.0, k=func1.1, theta=func1.2)
+        FN <- gammaArea(t1=t, t2=t2, omega=func1.0, k=func1.1, theta=func1.2)
     }
     
     if (second_curve == "norm") {
-        FP <- NormArea(t1=t1, t2=t, omega=func2.0, mu=func2.1, sigma=func2.2)
-        TN <- NormArea(t1=t, t2=t2, omega=func2.0, mu=func2.1, sigma=func2.2)
+        FP <- normArea(t1=t1, t2=t, omega=func2.0, mu=func2.1, sigma=func2.2)
+        TN <- normArea(t1=t, t2=t2, omega=func2.0, mu=func2.1, sigma=func2.2)
     } else if (second_curve == "gamma") {
-        FP <- GammaArea(t1=t1, t2=t, omega=func2.0, k=func2.1, theta=func2.2)
-        TN <- GammaArea(t1=t, t2=t2, omega=func2.0, k=func2.1, theta=func2.2)
+        FP <- gammaArea(t1=t1, t2=t, omega=func2.0, k=func2.1, theta=func2.2)
+        TN <- gammaArea(t1=t, t2=t2, omega=func2.0, k=func2.1, theta=func2.2)
     }
     
     SEN <- TP/(TP+FN)        
@@ -1478,7 +1463,7 @@ ave_SenSpc <- function(t, t1=0, t2=0, first_curve=NULL, second_curve=NULL,
 }
 
 # Intersection Function
-Intersection <- function(t, first_curve=NULL, second_curve=NULL, 
+intersectPoint <- function(t, first_curve=NULL, second_curve=NULL, 
                          func1.0 = 0, func1.1 = 0, func1.2 = 0,
                          func2.0 = 0, func2.1 = 0, func2.2 = 0) {
     
@@ -1503,30 +1488,30 @@ userDefineSenSpc <- function(t, t1=0, t2=0, first_curve=NULL, second_curve=NULL,
                              func2.0 = 0, func2.1 = 0, func2.2 = 0) {
     if (!is.null(sen)) {
         if (first_curve == "norm") {
-            TP <- NormArea(t1=t1, t2=t, omega=func1.0, mu=func1.1, sigma=func1.2)
-            FN <- NormArea(t1=t, t2=t2, omega=func1.0, mu=func1.1, sigma=func1.2)
+            TP <- normArea(t1=t1, t2=t, omega=func1.0, mu=func1.1, sigma=func1.2)
+            FN <- normArea(t1=t, t2=t2, omega=func1.0, mu=func1.1, sigma=func1.2)
         } else if (first_curve == "gamma") {
-            TP <- GammaArea(t1=t1, t2=t, omega=func1.0, k=func1.1, theta=func1.2)
-            FN <- GammaArea(t1=t, t2=t2, omega=func1.0, k=func1.1, theta=func1.2)
+            TP <- gammaArea(t1=t1, t2=t, omega=func1.0, k=func1.1, theta=func1.2)
+            FN <- gammaArea(t1=t, t2=t2, omega=func1.0, k=func1.1, theta=func1.2)
         }
         SEN <- (TP/(TP+FN)) - sen
     } else if (!is.null(spc)) {
         if (second_curve == "norm") {
-            FP <- NormArea(t1=t1, t2=t, omega=func2.0, mu=func2.1, sigma=func2.2)
-            TN <- NormArea(t1=t, t2=t2, omega=func2.0, mu=func2.1, sigma=func2.2)
+            FP <- normArea(t1=t1, t2=t, omega=func2.0, mu=func2.1, sigma=func2.2)
+            TN <- normArea(t1=t, t2=t2, omega=func2.0, mu=func2.1, sigma=func2.2)
         } else if (second_curve == "gamma") {
-            FP <- GammaArea(t1=t1, t2=t, omega=func2.0, k=func2.1, theta=func2.2)
-            TN <- GammaArea(t1=t, t2=t2, omega=func2.0, k=func2.1, theta=func2.2)
+            FP <- gammaArea(t1=t1, t2=t, omega=func2.0, k=func2.1, theta=func2.2)
+            TN <- gammaArea(t1=t, t2=t2, omega=func2.0, k=func2.1, theta=func2.2)
         }
         SPC <- (TN/(TN+FP)) - spc
     }
 }
 
 # Mixture Functions
-MixFunctions <- function (t, first_curve=NULL, second_curve=NULL,
-                          omega = 0, 
-                          func1.1 = 0, func1.2 = 0,
-                          func2.1 = 0, func2.2 = 0) {
+mixFunction <- function(t, first_curve=NULL, second_curve=NULL,
+                         omega = 0, 
+                         func1.1 = 0, func1.2 = 0,
+                         func2.1 = 0, func2.2 = 0) {
     
     if (first_curve == "norm"){
         r <- omega*dnorm(t, mean=func1.1, sd=func1.2)
@@ -1581,7 +1566,7 @@ MixFunctions <- function (t, first_curve=NULL, second_curve=NULL,
 #' db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 #' 
 #' # To find the threshold cut, call findThreshold function for "gmm" method.
-#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model = "norm-norm", cutoff = "opt")
+#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="norm-norm", cutoff="opt")
 #' print(output)
 #' 
 #' # Plot results
@@ -1597,17 +1582,16 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
     gx <- seq(min(xdf$x), max(xdf$x), by=0.002)
     bits <- strsplit(data@model,'-')[[1]]
     if (bits[1] == "norm") {
-        fit1 <- data.frame(x=gx, y=data@func1.0*dnorm(gx, mean = data@func1.1, sd = data@func1.2))
+        fit1 <- data.frame(x=gx, y=data@a1*dnorm(gx, mean=data@b1, sd=data@c1))
     } else if (bits[1] == "gamma") {
-        fit1 <- data.frame(x=gx, y=data@func1.0*dgamma(gx, shape = data@func1.1, scale = data@func1.2))
+        fit1 <- data.frame(x=gx, y=data@a1*dgamma(gx, shape=data@b1, scale=data@c1))
     }
     
     if (bits[2] == "norm") {
-        fit2 <- data.frame(x=gx, y=data@func2.0*dnorm(gx, mean = data@func2.1, sd = data@func2.2))
+        fit2 <- data.frame(x=gx, y=data@a2*dnorm(gx, mean = data@b2, sd=data@c2))
     } else if (bits[2] == "gamma") {
-        fit2 <- data.frame(x=gx, y=data@func2.0*dgamma(gx, shape = data@func2.1, scale = data@func2.2))
+        fit2 <- data.frame(x=gx, y=data@a2*dgamma(gx, shape = data@b2, scale=data@c2))
     }
-    
     
     # ggplot workaround
     if (is.null(xmin)) { xmin <- NA }

@@ -2883,12 +2883,12 @@ calculateMutationalPaths <- function(germlineSeq,
         # than the length_regionDefinition, pad it with Ns
         if(len_shortest<length_regionDefinition){
             fillWithNs <- array("N",length_regionDefinition-len_shortest)
-            c_inputSeq <- c( c_inputSeq, fillWithNs)
-            c_germlineSeq <- c( c_germlineSeq, fillWithNs)
+            c_inputSeq <- c(c_inputSeq, fillWithNs)
+            c_germlineSeq <- c(c_germlineSeq, fillWithNs)
         }
         
         # Mask germline with Ns where input sequence has Ns
-        c_germlineSeq[c_inputSeq=="N" |  !c_inputSeq %in% c(NUCLEOTIDES[1:5], ".") ] = "N"    
+        c_germlineSeq[c_inputSeq == "N" |  !c_inputSeq %in% c(NUCLEOTIDES[1:5], ".") ] = "N"    
         s_germlineSeq <- c2s(c_germlineSeq)
     } else {
         s_germlineSeq <- germlineSeq
@@ -2899,7 +2899,7 @@ calculateMutationalPaths <- function(germlineSeq,
     s_germlineSeq_len <- stri_length(s_germlineSeq)    
     vecCodons <- sapply({1:(s_germlineSeq_len/3)}*3 - 2, function(x) { substr(s_germlineSeq, x, x + 2) })
     vecCodons[!vecCodons %in% colnames(codonTable)] <- "NNN"
-    matMutationTypes = matrix(codonTable[, vecCodons], nrow=4, byrow=F,
+    matMutationTypes <- matrix(codonTable[, vecCodons], nrow=4, byrow=F,
                               dimnames=list(NUCLEOTIDES[1:4], c_germlineSeq[ 1:(3 * length(vecCodons))]))
     
     return(matMutationTypes)
@@ -2915,17 +2915,17 @@ calculateMutationalPaths <- function(germlineSeq,
 # 
 # @return  a single character from the IUPAC ambiguous code.
 #
-nucs2IUPAC = function(nucs) {
+nucs2IUPAC <- function(nucs) {
     # input nucleotides must be one of the characters allowed
-    legal = c("A", "C", "G", "T")
+    legal <- c("A", "C", "G", "T")
     if (sum(! nucs %in% legal)>0) {
         stop("Input nucleotides must be one of A, C, G, or T.")
     }
     
     # sort by alphabetical order (important)
-    nucs = sort(unique(nucs))
+    nucs <- sort(unique(nucs))
     # concatenate
-    nucs = c2s(nucs)
+    nucs <- c2s(nucs)
     
     # convert
     return(IUPAC_DNA_2[nucs])
@@ -2938,27 +2938,27 @@ nucs2IUPAC = function(nucs) {
 # 
 # @return  a single IUPAC character or "-" or "."
 #
-chars2Ambiguous = function(chars) {
+chars2Ambiguous <- function(chars) {
     # chars must all be unique
-    stopifnot( length(unique(chars)) == length(chars) )
+    stopifnot(length(unique(chars)) == length(chars))
     
     # input characters must be one of the characters allowed
-    legal = c("A", "C", "G", "T", "N", "-", ".")
-    if (sum(! chars %in% legal)>0) {
+    legal <- c("A", "C", "G", "T", "N", "-", ".")
+    if (sum(! chars %in% legal) > 0) {
         stop("Input characters must be one of A, C, G, T, N, - (dash), or . (dot)")
     }
     
     # if any of A, T, G, C, N appears
-    if (any(chars %in% c("A","C","G","T","N"))) {
+    if (any(chars %in% c("A", "C", "G", "T", "N"))) {
         
         # ignore - and .
-        idx.dash.dot = which(chars=="-" | chars==".")
+        idx.dash.dot <- which(chars == "-" | chars == ".")
         if (length(idx.dash.dot)>0) {
             chars = chars[-idx.dash.dot]
         }
         
         # if only N appears
-        if (sum(chars=="N")==length(chars)) {
+        if (sum(chars=="N") == length(chars)) {
             return("N")
         } else {
             # otherwise, if there are any of A, T, G, C
@@ -2976,7 +2976,7 @@ chars2Ambiguous = function(chars) {
     } else {
         # otherwise, if only one or both of - and . appear(s)    
         # if both - and . appear, return -
-        if (sum(chars %in% c("-", "."))==2) {
+        if (sum(chars %in% c("-", ".")) == 2) {
             return("-")
         } else {
             # if only - or . appears, return that
@@ -3001,7 +3001,7 @@ IUPAC2nucs <- function(code, excludeN=TRUE) {
     }
     
     # convert
-    if (code=="N" & excludeN) {
+    if (code == "N" & excludeN) {
         return(code)
     } else {
         return(IUPAC_DNA[[code]])
@@ -3021,13 +3021,13 @@ getCodonNucs <- function(codonNumb){
 
 # Given a nucleotide postions return the position in the codon
 getContextInCodon <- function(nucPos){
-    return( {nucPos-1}%%3+1 )
+    return((nucPos - 1)%%3 + 1 )
 }
 
 # Given a nuclotide position, returns the pos of the 3 nucs that made the codon
 # e.g. nuc 86 is part of nucs 85,86,87
 getCodonPos <- function(nucPos) {
-    codonNum =  (ceiling(nucPos / 3)) * 3
+    codonNum <-  (ceiling(nucPos / 3)) * 3
     return ((codonNum - 2):codonNum)
 }
 
@@ -3084,17 +3084,17 @@ mutationType <- function(codonFrom, codonTo,
     # codonFrom="TTT"; codonTo="TTA"
     # codonFrom="TTT"; codonTo="TGA"
     
-    ambiguousMode = match.arg(ambiguousMode)
+    ambiguousMode <- match.arg(ambiguousMode)
     
     # placeholder for tabulation
-    tab = setNames(object=rep(0, 4), nm=c("R", "S", "Stop", "na"))
+    tab <- setNames(object=rep(0, 4), nm=c("R", "S", "Stop", "na"))
     
-    if ( grepl(pattern="[-.]", x=codonFrom) | grepl(pattern="[-.]", x=codonTo) ) {
+    if (grepl(pattern="[-.]", x=codonFrom) | grepl(pattern="[-.]", x=codonTo)) {
         # "na"
-        tab[4] = 1
+        tab[4] <- 1
     } else {
-        codonFrom.all = EXPANDED_AMBIGUOUS_CODONS[[codonFrom]]
-        codonTo.all = EXPANDED_AMBIGUOUS_CODONS[[codonTo]]
+        codonFrom.all <- EXPANDED_AMBIGUOUS_CODONS[[codonFrom]]
+        codonTo.all <- EXPANDED_AMBIGUOUS_CODONS[[codonTo]]
         
         for (cur.codonFrom in codonFrom.all) {
             for (cur.codonTo in codonTo.all) {
@@ -3102,7 +3102,7 @@ mutationType <- function(codonFrom, codonTo,
                 # if codons are the same, there is no mutation; count as NA
                 if (cur.codonFrom == cur.codonTo) {
                     # "na"
-                    tab[4] = tab[4] + 1
+                    tab[4] <- tab[4] + 1
                 } else {
                     # Translate codons
                     cur.aaFrom <- translateCodonToAminoAcid(cur.codonFrom)
@@ -3111,19 +3111,19 @@ mutationType <- function(codonFrom, codonTo,
                     # If any codon is NA then return NA
                     if (any(is.na(c(codonFrom, codonTo, cur.aaFrom, cur.aaTo)))) { 
                         # "na"
-                        tab[4] = tab[4] + 1
+                        tab[4] <- tab[4] + 1
                     } else if (any(c(cur.aaFrom, cur.aaTo) == "*")) {
                         # If any amino acid is Stop then return "Stop"
-                        tab[3] = tab[3] + 1
+                        tab[3] <- tab[3] + 1
                     } else if (is.null(aminoAcidClasses)) {
                         # Check for exact identity if no amino acid classes are specified
                         mutation <- if (cur.aaFrom == cur.aaTo) { "S" } else { "R" }
-                        tab[mutation] = tab[mutation]+1
+                        tab[mutation] <- tab[mutation]+1
                     } else {
                         # Check for amino acid class identity if classes are specified
                         mutation <- if (aminoAcidClasses[cur.aaFrom] == 
                                         aminoAcidClasses[cur.aaTo]) { "S" } else { "R" }
-                        tab[mutation] = tab[mutation]+1
+                        tab[mutation] <- tab[mutation]+1
                     }
                 }
             }
@@ -3131,25 +3131,25 @@ mutationType <- function(codonFrom, codonTo,
     }
     
     # if there's ambiguous char in observed or germline
-    if ( (length(codonFrom.all)>1) | (length(codonTo.all)>1) ) {
+    if ((length(codonFrom.all) > 1) | (length(codonTo.all) > 1)) {
         if (ambiguousMode=="eitherOr") {
-            if (tab[4]>0) { # "na"
-                tab = setNames(object=c(0,0,0,1), nm=c("R", "S", "Stop", "na"))
-            } else if (tab[2]>0) { # "S"
-                tab = setNames(object=c(0,1,0,0), nm=c("R", "S", "Stop", "na"))
-            } else if (tab[1]>0) { # "R"
-                tab = setNames(object=c(1,0,0,0), nm=c("R", "S", "Stop", "na"))
+            if (tab[4] > 0) { # "na"
+                tab <- setNames(object=c(0, 0, 0, 1), nm=c("R", "S", "Stop", "na"))
+            } else if (tab[2] > 0) { # "S"
+                tab <- setNames(object=c(0, 1, 0, 0), nm=c("R", "S", "Stop", "na"))
+            } else if (tab[1] > 0) { # "R"
+                tab <- setNames(object=c(1, 0, 0, 0), nm=c("R", "S", "Stop", "na"))
             } else {
-                tab = setNames(object=c(0,0,1,0), nm=c("R", "S", "Stop", "na"))
+                tab <- setNames(object=c(0, 0, 1, 0), nm=c("R", "S", "Stop", "na"))
             }
-            stopifnot(sum(tab)==1)
+            stopifnot(sum(tab) == 1)
         } else {
-            stopifnot(sum(tab)>=1)
+            stopifnot(sum(tab) >= 1)
         }
     } else {
         # no need to do anything if there isn't ambiguous char in observed or germline
         # there should be only 1 mutation 
-        stopifnot(sum(tab)==1)
+        stopifnot(sum(tab) == 1)
     }    
     
     return(tab)
