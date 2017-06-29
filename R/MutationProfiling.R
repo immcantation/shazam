@@ -1447,14 +1447,14 @@ observedMutations <- function(db,
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
                                               'regionDefinition', 'frequency', 'combine',
-                                              'ambiguousMode',
+                                              'ambiguousMode', 
                                               'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
                                               'NUCLEOTIDES_AMBIGUOUS', 'IUPAC2nucs',
                                               'EXPANDED_AMBIGUOUS_CODONS',
                                               'makeNullRegionDefinition', 'mutationDefinition',
                                               'getCodonPos','getContextInCodon','mutationType',
                                               'translateCodonToAminoAcid','AMINO_ACIDS',
-                                              'binMutationsByRegion'), 
+                                              'binMutationsByRegion', 'countNonNByRegion'), 
                                 envir=environment())
         registerDoParallel(cluster)
     } else if (nproc == 1) {
@@ -1811,16 +1811,13 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
         if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
             return(mutations_array)
         } else {
-            tempNames <- sapply(regionDefinition@labels, function(x) { substr(x, 1, stri_length(x)-2) })
-            # Subset boundaries to only non-N & non-dash & non-dot bases (in both seq and gl)
-            # "which" in next line is ESSENTIAL; otherwise @boundaries won't be truncated
-            # e.g. (1:6)[c(T,T,T)] returns 1:6, not 1:3
-            boundaries <- regionDefinition@boundaries[
-                which(c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14] &  
-                      c_germlineSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14])]
             # Freq = numb of mutations / numb of non N bases (in both seq and gl)
-            denoms <- sapply(tempNames, function(x) { sum(boundaries==x) })
-            mutations_array <- mutations_array/denoms
+            denoms <- countNonNByRegion(regDef=regionDefinition, ambiMode=ambiguousMode, 
+                                        inputChars=c_inputSeq, germChars=c_germlineSeq,
+                                        inputCodons=c_inputSeq_codons, 
+                                        germCodons=c_germlineSeq_codons, 
+                                        mutPos=mutations_pos)
+            mutations_array <- mutations_array/rep(denoms, each=2)
             return(mutations_array)
         }
     }
@@ -1831,14 +1828,14 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
         nonN.regions <- unique(sapply(regionDefinition@labels, function(x) { substr(x, 1, stri_length(x)-2) }))
         
         if (!tooShort) {
-            # "which" in next line is ESSENTIAL; otherwise @boundaries won't be truncated
-            # e.g. (1:6)[c(T,T,T)] returns 1:6, not 1:3
-            nonN.boundaries <- regionDefinition@boundaries[
-                which(c_inputSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14] &  
-                      c_germlineSeq %in% NUCLEOTIDES_AMBIGUOUS[1:14])]
-            nonN.denoms <- sapply(nonN.regions, function(x) { sum(nonN.boundaries==x) })
+            nonN.denoms = countNonNByRegion(regDef=regionDefinition, ambiMode=ambiguousMode, 
+                                            inputChars=c_inputSeq, germChars=c_germlineSeq,
+                                            inputCodons=c_inputSeq_codons, 
+                                            germCodons=c_germlineSeq_codons, 
+                                            mutPos=mutations_pos)
         } else {
-            nonN.denoms = setNames(object=rep(NA, length(nonN.regions)), nm=nonN.regions)
+            nonN.denoms = setNames(object=rep(NA, length(regionDefinition@regions)), 
+                                   nm=regionDefinition@regions)
         }
         
         if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
@@ -1934,6 +1931,81 @@ binMutationsByRegion <- function(mutationsArray,
     return(mutations_region_counts)
 }
 
+# Count the number of non-N, non-dash, and non-dot positions
+# 
+# @param   regDef       regionDefinition
+# @param   ambiMode     ambiguousMode
+# @param   inputChars   c_inputSeq
+# @param   germChars    c_germlineSeq
+# @param   inputCodons  c_inputSeq_codons
+# @param   germCodons   c_germlineSeq_codons
+# @param   mutPos       mutations_pos
+# 
+# @return  The number of non-N, non-dash, and non-dot characters. Calculation method
+#          differs depending on ambiMode being "eitherOr" or "and". By design, when 
+#          there is no ambiguous character in the input or germline, the result should be
+#          the same regardless of ambiMode.
+#
+# @details This is a helper function for calcObservedMutations() and is not intended to
+#          be called directly. All input arguments are, by design, expected to be 
+#          generated as intermediate products during a call to calcObservedMutations().
+#          
+countNonNByRegion = function(regDef, ambiMode, inputChars, germChars,
+                             inputCodons, germCodons, mutPos) {
+    
+    regionNames = unique(sapply(regDef@labels, 
+                                function(x) { substr(x, 1, stri_length(x)-2) }))
+    
+    if (ambiMode=="eitherOr") {
+        
+        # Subset boundaries to only non-N & non-dash & non-dot bases (in both seq and gl)
+        # "which" in next line is ESSENTIAL; otherwise @boundaries won't be truncated
+        # e.g. (1:6)[c(T,T,T)] returns 1:6, not 1:3
+        boundaries <- regDef@boundaries[
+            which(inputChars %in% NUCLEOTIDES_AMBIGUOUS[1:14] &  
+                  germChars %in% NUCLEOTIDES_AMBIGUOUS[1:14])]
+        
+        # number of non-N & non-dash & non-dot bases (in both seq and gl)
+        nonN <- sapply(regionNames, function(x) { sum(boundaries==x) })
+        
+    } else if (ambiMode=="and") {
+        
+        ### positions where there's no mutation:
+        # simply count the positions where both input and germline are 
+        # non-N, non-dash, and non-dot
+        boundaries.1 <- regDef@boundaries[
+            which(inputChars %in% NUCLEOTIDES_AMBIGUOUS[1:14] &  
+                  germChars %in% NUCLEOTIDES_AMBIGUOUS[1:14] &
+                  (germChars == inputChars))]
+        nonN.1 <- sapply(regionNames, function(x) { sum(boundaries.1==x) })
+        
+        ### positions where there's mutation:
+        # expand codon with ambiguous character(s) into codons with unambiguous characters
+        # calculate the number of possible combinations between input and germline codons
+        
+        # this makes use of the important fact that each mutation is considered 
+        # independently in the germline context
+        inputNumExpanded = sapply(inputCodons, 
+                                  function(codon){
+                                      length(EXPANDED_AMBIGUOUS_CODONS[[codon]])
+                                  })
+        germlineNumExpanded = sapply(germCodons, 
+                                     function(codon){
+                                         length(EXPANDED_AMBIGUOUS_CODONS[[codon]])
+                                     })
+        totalNumExpanded = inputNumExpanded * germlineNumExpanded
+        
+        # use mutations_pos to capture positions at which R/S is absent (Stop or na instead)
+        # such positions would have been omitted from mutations_array_raw or mutations_array
+        boundaries.2 <- regDef@boundaries[mutPos]
+        # makes use of the fact that inputCodons, germCodons, and 
+        # mutPos align exactly
+        nonN.2 = sapply(regionNames, function(x){ sum(totalNumExpanded[boundaries.2==x]) })
+        
+        nonN = nonN.1 + nonN.2
+    }
+    return(nonN)
+}
 
 
 #### Sliding window approach ####
