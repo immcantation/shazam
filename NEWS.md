@@ -5,10 +5,14 @@ General
 + Corrected several functions so that they accept both tibbles and data.frames.
 
 Distance Calculation:
-+ Adding new fitting procedures to `findThreshold()` that allows users to 
-  choose a mixture of two univariate density distribution functions among 
-  four available combinations: `"norm-norm"`, `"norm-gamma"`,  `"gamma-norm"`,
-  or `"gamma-gamma"`.
++ Adding new fitting procedures to the `"gmm"` method of `findThreshold()` 
+  that allows users to choose a mixture of two univariate density distribution 
+  functions among four available combinations: `"norm-norm"`, `"norm-gamma"`,  
+  `"gamma-norm"`, or `"gamma-gamma"`.
++ Added the ability to choose the threshold selection criteria in the `"gmm"`
+  method of `findThreshold()` from the best average sensitivity and specificity, 
+  the curve intersection or user defined sensitivity or specificity.
++ Renamed the `cutEdge` argument of `findThreshold()` to `edge`.
 
 Mutation Profiling:
 

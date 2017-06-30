@@ -823,17 +823,21 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' # Use nucleotide Hamming distance and normalize by junction length
 #' db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 #'                             
-#' # Find threshold using the "gmm" method
+#' # Find threshold using the "gmm" method with optimal threshold
 #' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="norm-norm", cutoff="opt")
-#' print(output)
-#' # Plot "gmm" method results
 #' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
-#'
-#' # Find threshold using the "density" method 
-#' output <- findThreshold(db$DIST_NEAREST, method="density")
 #' print(output)
-#' # Plot "density" method results
+#'
+#' # Find threshold using the "gmm" method with user defined specificity
+#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="norm-norm", 
+#'                         cutoff="user", spc=0.99)
+#' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
+#' print(output)
+#'
+#' # Find threshold using the "density" method and plot the results
+#' output <- findThreshold(db$DIST_NEAREST, method="density")
 #' plot(output)
+#' print(output)
 #' }
 #' @export
 findThreshold <- function (data, method=c("gmm", "density"), 
@@ -1437,8 +1441,8 @@ normArea <- function (t1, t2, omega, mu, sigma){
 # find the optimum threshold using 
 # optimize function fit
 avgSenSpc <- function(t, t1=0, t2=0, first_curve=NULL, second_curve=NULL, 
-                       func1.0 = 0, func1.1 = 0, func1.2 = 0,
-                       func2.0 = 0, func2.1 = 0, func2.2 = 0) {
+                      func1.0 = 0, func1.1 = 0, func1.2 = 0,
+                      func2.0 = 0, func2.1 = 0, func2.2 = 0) {
     
     if (first_curve == "norm") {
         TP <- normArea(t1=t1, t2=t, omega=func1.0, mu=func1.1, sigma=func1.2)
@@ -1456,10 +1460,10 @@ avgSenSpc <- function(t, t1=0, t2=0, first_curve=NULL, second_curve=NULL,
         TN <- gammaArea(t1=t, t2=t2, omega=func2.0, k=func2.1, theta=func2.2)
     }
     
-    SEN <- TP/(TP+FN)        
-    SPC <- TN/(TN+FP)
+    SEN <- TP/(TP + FN)        
+    SPC <- TN/(TN + FP)
     
-    ave<-(SEN + SPC)/2
+    return((SEN + SPC)/2)
 }
 
 # Intersection Function
@@ -1478,14 +1482,15 @@ intersectPoint <- function(t, first_curve=NULL, second_curve=NULL,
     } else if (second_curve == "gamma") {
         fit2 <- func2.0*dgamma(t, shape = func2.1, scale = func2.2)
     }
-    fit <- fit1 - fit2
+    
+    return(fit1 - fit2)
 }
 
 # useDefineSenSpc
 userDefineSenSpc <- function(t, t1=0, t2=0, first_curve=NULL, second_curve=NULL, 
-                             sen = NULL, spc = NULL,
-                             func1.0 = 0, func1.1 = 0, func1.2 = 0,
-                             func2.0 = 0, func2.1 = 0, func2.2 = 0) {
+                             sen=NULL, spc=NULL,
+                             func1.0=0, func1.1=0, func1.2=0,
+                             func2.0=0, func2.1=0, func2.2=0) {
     if (!is.null(sen)) {
         if (first_curve == "norm") {
             TP <- normArea(t1=t1, t2=t, omega=func1.0, mu=func1.1, sigma=func1.2)
@@ -1494,7 +1499,7 @@ userDefineSenSpc <- function(t, t1=0, t2=0, first_curve=NULL, second_curve=NULL,
             TP <- gammaArea(t1=t1, t2=t, omega=func1.0, k=func1.1, theta=func1.2)
             FN <- gammaArea(t1=t, t2=t2, omega=func1.0, k=func1.1, theta=func1.2)
         }
-        SEN <- (TP/(TP+FN)) - sen
+        threshold <- (TP/(TP+FN)) - sen
     } else if (!is.null(spc)) {
         if (second_curve == "norm") {
             FP <- normArea(t1=t1, t2=t, omega=func2.0, mu=func2.1, sigma=func2.2)
@@ -1503,8 +1508,10 @@ userDefineSenSpc <- function(t, t1=0, t2=0, first_curve=NULL, second_curve=NULL,
             FP <- gammaArea(t1=t1, t2=t, omega=func2.0, k=func2.1, theta=func2.2)
             TN <- gammaArea(t1=t, t2=t2, omega=func2.0, k=func2.1, theta=func2.2)
         }
-        SPC <- (TN/(TN+FP)) - spc
+        threshold <- (TN/(TN+FP)) - spc
     }
+    
+    return(threshold)
 }
 
 # Mixture Functions

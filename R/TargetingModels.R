@@ -1070,6 +1070,7 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' @seealso  \link{createMutabilityMatrix}, \link{extendSubstitutionMatrix}
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
@@ -1078,6 +1079,7 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' sub_model <- createSubstitutionMatrix(db, model="S")
 #' mut_model <- createMutabilityMatrix(db, sub_model, model="S")
 #' ext_model <- extendMutabilityMatrix(mut_model)
+#' }
 #' 
 #' @export
 extendMutabilityMatrix <- function(mutabilityModel) {
