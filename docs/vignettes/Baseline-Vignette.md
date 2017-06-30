@@ -38,32 +38,30 @@ be performed with a single call to `calcBaseline`, which performs all
 required steps. Alternatively, one can perform each step separately for
 greater control over the analysis parameters.
 
-### Calculating selection in multiple steps
+### Constructing clonal consensus sequences
 
 Individual sequences within clonal groups are not, strictly speaking, 
 independent events and it is generally appropriate to only analyze selection
 pressures on an effective sequence for each clonal group. The `collapseClones`
 function provides one strategy for generating an effective sequences for 
 each clone. It reduces the input database to one row per clone and appends 
-a `CLONAL_SEQUENCE` column which contains the consensus sequence 
-for each clone.
+`CLONAL_SEQUENCE` and `CLONAL_GERMLINE` columns which contain the 
+consensus sequences for each clone.
 
 
 ```r
 # Collapse clonal groups into single sequences
-clones <- collapseClones(db=ExampleDb, regionDefinition=IMGT_V, 
+clones <- collapseClones(ExampleDb, regionDefinition=IMGT_V, 
                          method="thresholdedFreq", minimumFrequency=0.6,
                          includeAmbiguous=FALSE, breakTiesStochastic=FALSE, 
                          nproc=1)
 ```
 
-```
-## When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.
-```
+### Calculating selection in multiple steps
 
 Following construction of an effective sequence for each clone, the observed
-and expected mutation counts are calculated for each sequence of the 
-`CLONAL_SEQUENCE` column adding in the previous step. `observedMutations` 
+and expected mutation counts are calculated for each sequence in the 
+`CLONAL_SEQUENCE` column relative to the `CLONAL_GERMLINE`. `observedMutations` 
 is used to calculate the number of observed mutations and 
 `expectedMutations` calculates the expected frequency of mutations. 
 The underlying targeting model for calculating expectations can be specified 
@@ -91,10 +89,12 @@ Users may define other region sets and boundaries by creating a custom
 # Count observed mutations and append MU_COUNT columns to the output
 observed <- observedMutations(clones, 
                               sequenceColumn="CLONAL_SEQUENCE",
+                              germlineColumn="CLONAL_GERMLINE",
                               regionDefinition=IMGT_V, nproc=1)
 # Count expected mutations and append MU_EXPECTED columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="CLONAL_SEQUENCE",
+                              germlineColumn="CLONAL_GERMLINE",
                               targetingModel=HH_S5F,
                               regionDefinition=IMGT_V, nproc=1)
 ```
@@ -107,7 +107,7 @@ on mutation counts can be specified using the `testStatistic` parameter.
 
 ```r
 # Calculate selection scores using the output from expectedMutations
-baseline <- calcBaseline(db=expected, testStatistic="focused", 
+baseline <- calcBaseline(expected, testStatistic="focused", 
                          regionDefinition=IMGT_V, nproc=1)
 ```
 
@@ -120,27 +120,9 @@ calculating selection scores.
 
 
 ```r
-# Calculate selection scores from scratch on subset
-baseline <- calcBaseline(db=clones, testStatistic="focused", 
+# Calculate selection scores from scratch
+baseline <- calcBaseline(clones, testStatistic="focused", 
                          regionDefinition=IMGT_V, nproc=1)
-
-# Subset the original data to switched isotypes
-db_sub <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
-# Collapse clonal groups into single sequences for subset
-clones_sub <- collapseClones(db=db_sub, regionDefinition=IMGT_V, 
-                             method="thresholdedFreq", minimumFrequency=0.6,
-                             includeAmbiguous=FALSE, breakTiesStochastic=FALSE, 
-                             nproc=1)
-```
-
-```
-## When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.
-```
-
-```r
-# Calculate selection scores from scratch on subset
-baseline_sub <- calcBaseline(clones_sub, testStatistic="focused", 
-                             regionDefinition=IMGT_V, nproc=1)
 ```
 
 ### Using alternative mutation definitions and models
@@ -169,7 +151,7 @@ The default behavior of `expectedMutations` is to use the human 5-mer mutation m
 
 ```r
 # Calculate selection on charge class with the mouse 5-mer model
-baseline <- calcBaseline(db=clones, testStatistic="focused", 
+baseline <- calcBaseline(clones, testStatistic="focused", 
                          regionDefinition=IMGT_V, 
                          targetingModel=MK_RS5NF,
                          mutationDefinition=CHARGE_MUTATIONS,
@@ -198,7 +180,18 @@ interpreted as per normal.
 
 ```r
 # Combine selection scores by time-point
-grouped_1 <- groupBaseline(baseline, groupBy=c("SAMPLE"))
+grouped_1 <- groupBaseline(baseline, groupBy="SAMPLE")
+
+# Subset the original data to switched isotypes
+db_sub <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG"))
+# Collapse clonal groups into single sequences for subset
+clones_sub <- collapseClones(db_sub, regionDefinition=IMGT_V, 
+                             method="thresholdedFreq", minimumFrequency=0.6,
+                             includeAmbiguous=FALSE, breakTiesStochastic=FALSE, 
+                             nproc=1)
+# Calculate selection scores from scratch
+baseline_sub <- calcBaseline(clones, testStatistic="focused", 
+                             regionDefinition=IMGT_V, nproc=1)
 
 # Combine selection scores by time-point and isotype
 grouped_2 <- groupBaseline(baseline_sub, groupBy=c("SAMPLE", "ISOTYPE"))
@@ -324,7 +317,7 @@ grouped_2 <- editBaseline(grouped_2, "binomK", grouped_2@binomK[-dbIgMIndex, ])
 grouped_2 <- editBaseline(grouped_2, "binomN", grouped_2@binomN[-dbIgMIndex, ])
 grouped_2 <- editBaseline(grouped_2, "binomP", grouped_2@binomP[-dbIgMIndex, ])
 grouped_2 <- editBaseline(grouped_2, "pdfs", 
-                         lapply(grouped_2@pdfs, function(pdfs) {pdfs[-dbIgMIndex, ]} ))
+                          lapply(grouped_2@pdfs, function(pdfs) {pdfs[-dbIgMIndex, ]} ))
 
 # The indices corresponding to IgA are slightly different in the field "stats"
 # In this example, there is one row of IgA for each sample and for each region

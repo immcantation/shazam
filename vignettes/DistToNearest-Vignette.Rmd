@@ -104,7 +104,7 @@ which show up as two modes in a nearest neighbor distance histogram.
 Thresholds may be manually determined by inspection of the nearest neighbor histograms
 or by using one of the automated threshold detection algorithms provided by the 
 `findThreshold` function. The available methods are `density` (smoothed density) and `gmm` 
-(Guassian mixture model), and are chosen via the `method` parameter of `findThreshold`.
+(gamma/Guassian mixture model), and are chosen via the `method` parameter of `findThreshold`.
 
 ### Threshold determination by manual inspection
 
@@ -147,35 +147,27 @@ set to a value near 7.
 
 ### Automated threshold detection via a mixture model
 
-A mixture of two univariate density distribution functions is considered:
-\begin{equation}
-f(x)= \lambda_1 f_1(x|\phi_1) + \lambda_2 f_2(x|\phi_2).
-\end{equation}
-Here, the $\lambda_1$ and $\lambda_2$ represent the mixing weights (sum to one), 
-$x$ represents the nearest neighbor distance (calculated by function `distToNearest`), 
-and $\phi$ represents the vector of each component parameters; mean and standard deviation 
-$(\mu, \sigma)$ of a Normal distribution, shape and scale $(k, \theta)$ of a Gamma distribution.
+The `findThreshold` function includes approaches for automatically determining
+a clonal assignment threshold. The `"gmm"` method (gamma/Gaussian mixture method) 
+of `findThreshold` (`method="gmm"`) performs a maximum-likelihood fitting 
+procedure over the distance-to-nearest distribution using one of four combinations of 
+univariate density distribution functions: `"norm-norm"` (two Gaussian distributions), 
+`"norm-gamma"` (lower Guassian and upper gamma distribution), 
+`"gamma-norm"` (lower gamm and upper Guassian distribution), and `"gamma-gamma"`
+(two gamma distributions). By default, the threshold will be selected by calculating 
+the distance at which the average of sensitivity and specificity reaches its maximum 
+(`cutoff="optimal"`). Alternative threshold selection criteria are also providing, including
+the curve intersection (`cutoff="intersect"`), user defined sensitivity 
+(`cutoff="user", sen=x`), or user defined specificity (`cutoff="user", spc=x`)
 
-The `"gmm"` (Gamma/Gaussian Mixture Method) is enabled to perform a maximum-likelihood fitting 
-procedure over the dist-to-nearest distribution through one of the four combinations of 
-$f_1$ and $f_2$: (1) `"norm-norm"`, (2) `"norm-gamma"`, (3) `"gamma-norm"`, and (4) `"gamma-gamma"`. 
-A Gaussian mixture model, including expectation maximization algorithm, is also 
-implemented into the `findThreshold` function to initialize the fit component parameters 
-automatically. The Gaussian mixture model estimates two sets of values; (1) mixing weight $\lambda_i$, 
-(2) mean $\mu_i$, and (3) standard deviation $\sigma_i$ where $i\in\{1,2\}$  refers to the first 
-and second curve. These parameters are then used as initial values to begin the fitting procedure 
-(if Gamma distribution is chosen, the initial values are translated accordingly). 
-After maximum-likelihood fitting procedure converges, through an optimization approach, 
-it then calculates the optimum threshold where the average of Sensitivity and 
-Specificity reaches its maximum.
-
-Below is an example showing how the `"gmm"` method is used to find optimal threshold for 
-separating clonally related sequences. The red dashed-line shown in figure below defines the distance 
-where the average of the Sensitivity plus Specificity reaches its maximum.
+In the example below the mixture model method (`method="gmm"`) is used to find the optimal 
+threshold for separating clonally related sequences by fitting two gamma distributions 
+(`model="gamma-gamma"`). The red dashed-line shown in figure below defines the distance 
+where the average of the sensitivity and specificity reaches its maximum.
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
 # Find threshold using gmm method
-output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm")
+output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", model="gamma-gamma")
 
 # Plot distance histogram, Gaussian fits, and optimum threshold
 plot(output, binwidth=0.02, title="GMM Method: gamma-gamma")

@@ -132,25 +132,15 @@ Examples
 -------------------
 
 ```R
-# Subset example data
+# Load and subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
+
 # Collapse clones
 db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK",
 method="thresholdedFreq", minimumFrequency=0.6,
 includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
-
-```
-
-*When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.*
-```
-Collapsing clonal sequences...
-
-```
-
-
-```R
  
 # Calculate BASELINe
 baseline <- calcBaseline(db, 

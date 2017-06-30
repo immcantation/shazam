@@ -48,6 +48,12 @@ Examples
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
 
+# Collapse clones
+db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
+germlineColumn="GERMLINE_IMGT_D_MASK",
+method="thresholdedFreq", minimumFrequency=0.6,
+includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
 sequenceColumn="SEQUENCE_IMGT",
@@ -55,7 +61,7 @@ germlineColumn="GERMLINE_IMGT_D_MASK",
 testStatistic="focused",
 regionDefinition=IMGT_V,
 targetingModel=HH_S5F,
-nproc = 1)
+nproc=1)
 
 ```
 
@@ -91,10 +97,10 @@ getBaselineStats(grouped)
 
 ```
   SAMPLE ISOTYPE REGION BASELINE_SIGMA BASELINE_CI_LOWER BASELINE_CI_UPPER BASELINE_CI_PVALUE
-1    +7d     IgA    CDR     -0.2080342        -0.2889629        -0.1396927      -1.180959e-08
-2    +7d     IgA    FWR     -1.1986445        -1.2705434        -1.1378867      -1.132427e-14
-3    +7d     IgG    CDR     -0.1821307        -0.2394180        -0.1371911      -5.165313e-12
-4    +7d     IgG    FWR     -0.7655547        -0.8151123        -0.7280470      -3.974598e-14
+1    +7d     IgA    CDR    -0.19271210        -0.4058692      -0.006841995      -2.431237e-02
+2    +7d     IgA    FWR    -0.75752486        -0.9141143      -0.612111517      -1.121325e-14
+3    +7d     IgG    CDR    -0.09634024        -0.2390083       0.032375324      -8.012879e-02
+4    +7d     IgG    FWR    -0.66205655        -0.7761334      -0.555534408      -6.217249e-15
 
 ```
 

@@ -74,16 +74,16 @@ db_obs <- observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
                             nproc=1)
 # Show new mutation frequency columns
 db_obs %>% 
-    select(SEQUENCE_ID, starts_with("MU_")) %>%
+    select(SEQUENCE_ID, starts_with("MU_FREQ_")) %>%
     head(n=4)
 ```
 
 ```
-##      SEQUENCE_ID MU_COUNT_SEQ_R MU_COUNT_SEQ_S MU_FREQ_SEQ_R MU_FREQ_SEQ_S
-## 1 GN5SHBT07FUXY8              0              0    0.00000000   0.000000000
-## 2 GN5SHBT05JMPI5              8              2    0.02366864   0.005917160
-## 3 GN5SHBT08H4LPP              8              2    0.02359882   0.005899705
-## 4 GN5SHBT05JGND3              0              0    0.00000000   0.000000000
+##      SEQUENCE_ID MU_FREQ_SEQ_R MU_FREQ_SEQ_S
+## 1 GN5SHBT07FUXY8    0.00000000   0.000000000
+## 2 GN5SHBT05JMPI5    0.02366864   0.005917160
+## 3 GN5SHBT08H4LPP    0.02359882   0.005899705
+## 4 GN5SHBT05JGND3    0.00000000   0.000000000
 ```
 
 Specifying the `combine=TRUE` argument will aggregate all mutation 
@@ -100,16 +100,12 @@ db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                             nproc=1)
 # Show new mutation frequency columns
 db_obs %>% 
-    select(SEQUENCE_ID, starts_with("MU_")) %>%
+    select(SEQUENCE_ID, starts_with("MU_FREQ_")) %>%
     head(n=4)
 ```
 
 ```
-##      SEQUENCE_ID    MU_FREQ
-## 1 GN5SHBT07FUXY8 0.00000000
-## 2 GN5SHBT05JMPI5 0.02958580
-## 3 GN5SHBT08H4LPP 0.02949853
-## 4 GN5SHBT05JGND3 0.00000000
+## data frame with 0 columns and 4 rows
 ```
 
 We can plot the mutation frequencies a explore differences between samples or isotypes.
@@ -172,31 +168,16 @@ db_obs_v <- observedMutations(db_obs_v, sequenceColumn="SEQUENCE_IMGT",
                               nproc=1)
 # Show new CDR and FWR mutation frequency columns
 db_obs_v %>% 
-    select(SEQUENCE_ID, starts_with("MU_")) %>%
+    select(SEQUENCE_ID, starts_with("MU_FREQ_")) %>%
     head(n=4)
 ```
 
 ```
-##      SEQUENCE_ID MU_COUNT_CDR1_R MU_COUNT_CDR1_S MU_COUNT_CDR2_R
-## 1 GN5SHBT07FUXY8               0               0               0
-## 2 GN5SHBT05JMPI5               0               0               0
-## 3 GN5SHBT08H4LPP               0               0               0
-## 4 GN5SHBT05JGND3               0               0               0
-##   MU_COUNT_CDR2_S MU_COUNT_FWR1_R MU_COUNT_FWR1_S MU_COUNT_FWR2_R
-## 1               0               0               0               0
-## 2               0               1               0               0
-## 3               0               1               0               0
-## 4               0               0               0               0
-##   MU_COUNT_FWR2_S MU_COUNT_FWR3_R MU_COUNT_FWR3_S MU_FREQ_CDR_R
-## 1               0               0               0             0
-## 2               0               5               1             0
-## 3               0               5               1             0
-## 4               0               0               0             0
-##   MU_FREQ_CDR_S MU_FREQ_FWR_R MU_FREQ_FWR_S
-## 1             0     0.0000000   0.000000000
-## 2             0     0.0251046   0.004184100
-## 3             0     0.0250000   0.004166667
-## 4             0     0.0000000   0.000000000
+##      SEQUENCE_ID MU_FREQ_CDR_R MU_FREQ_CDR_S MU_FREQ_FWR_R MU_FREQ_FWR_S
+## 1 GN5SHBT07FUXY8             0             0     0.0000000   0.000000000
+## 2 GN5SHBT05JMPI5             0             0     0.0251046   0.004184100
+## 3 GN5SHBT08H4LPP             0             0     0.0250000   0.004166667
+## 4 GN5SHBT05JGND3             0             0     0.0000000   0.000000000
 ```
 
 Plot a comparison between CDR silent and replacement mutations.
@@ -241,7 +222,7 @@ db_obs_ch <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                                nproc=1)
 # Show new charge mutation frequency columns
 db_obs_ch %>% 
-    select(SEQUENCE_ID, starts_with("MU_")) %>%
+    select(SEQUENCE_ID, starts_with("MU_FREQ_")) %>%
     head(n=4)
 ```
 

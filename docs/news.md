@@ -1,14 +1,18 @@
-Version 0.1.8: June 12, 2017
+Version 0.1.8: June 30, 2017
 -------------------------------------------------------------------------------
 
 General
 + Corrected several functions so that they accept both tibbles and data.frames.
 
 Distance Calculation:
-+ Adding new fitting procedures to `findThreshold()` that allows users to 
-  choose a mixture of two univariate density distribution functions among 
-  four available combinations: `"norm-norm"`, `"norm-gamma"`,  `"gamma-norm"`,
-  or `"gamma-gamma"`.
++ Adding new fitting procedures to the `"gmm"` method of `findThreshold()` 
+  that allows users to choose a mixture of two univariate density distribution 
+  functions among four available combinations: `"norm-norm"`, `"norm-gamma"`,  
+  `"gamma-norm"`, or `"gamma-gamma"`.
++ Added the ability to choose the threshold selection criteria in the `"gmm"`
+  method of `findThreshold()` from the best average sensitivity and specificity, 
+  the curve intersection or user defined sensitivity or specificity.
++ Renamed the `cutEdge` argument of `findThreshold()` to `edge`.
 
 Mutation Profiling:
 
@@ -18,6 +22,8 @@ Mutation Profiling:
   `calcClonalConsensus()` from exported functions.
 + Added support for including ambiguous IUPAC characters in input for 
   `observedMutations()` and `calcObservedMutations()`.
++ Fixed a minor bug in calculating the denominator for mutation frequency in 
+  `calcObservedMutations()` for sequences with non-triplet overhang at the tail.
 + Renamed column names of observed mutations (previously `OBSERVED`) and 
   expected mutations (previously `EXPECTED`) returned by `observedMutations()`
   and `expectedMutations()` to `MU_COUNT` and `MU_EXPECTED` respectively.

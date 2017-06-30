@@ -100,7 +100,7 @@ calcExpectedMutations(in_seq, germ_seq)
 
 ```
     SEQ_R     SEQ_S 
-0.7659404 0.2340596 
+0.7668156 0.2331844 
 
 ```
 

@@ -18,8 +18,8 @@ Usage
 ```
 observedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", regionDefinition = NULL,
-mutationDefinition = NULL, frequency = FALSE, combine = FALSE,
-nproc = 1)
+mutationDefinition = NULL, ambiguousMode = c("eitherOr", "and"),
+frequency = FALSE, combine = FALSE, nproc = 1)
 ```
 
 Arguments
@@ -35,8 +35,8 @@ supported.
 
 germlineColumn
 :   `character` name of the column containing 
-the germline or reference sequence. Germline should 
-**not** contain ambiguous characters.
+the germline or reference sequence. IUPAC ambiguous 
+characters for DNA are supported.
 
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions
@@ -48,6 +48,14 @@ mutationDefinition
 and silent mutation criteria. If `NULL` then 
 replacement and silent are determined by exact 
 amino acid identity.
+
+ambiguousMode
+:   whether to consider ambiguous characters as 
+`"either or"` or `"and"` when determining and 
+counting the type(s) of mutations. Applicable only if
+`sequenceColumn` and/or `germlineColumn` 
+contain(s) ambiguous characters. One of 
+`c("eitherOr", "and")`. Default is `"eitherOr"`.
 
 frequency
 :   `logical` indicating whether or not to calculate

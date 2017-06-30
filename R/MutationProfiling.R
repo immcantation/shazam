@@ -304,11 +304,6 @@ NULL
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d" &
 #'                         CLONE %in% c("3100", "3141", "3184"))
-#'                         
-#' # make a copy of db that has a mutation frequency column
-#' db2 <- observedMutations(db, frequency=TRUE, combine=TRUE)
-#' 
-#' # Build clonal consensus for the full sequence
 #' 
 #' # thresholdedFreq method, resolving ties deterministically without using ambiguous characters
 #' clones <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.6,
@@ -317,18 +312,19 @@ NULL
 #' # mostCommon method, resolving ties deterministically using ambiguous characters
 #' clones <- collapseClones(db, method="mostCommon", 
 #'                          includeAmbiguous=TRUE, breakTiesStochastic=FALSE)
-#'
-#' # catchAll method
-#' clones <- collapseClones(db, method="catchAll")
 #' 
+#' # Make a copy of db that has a mutation frequency column
+#' db2 <- observedMutations(db, frequency=TRUE, combine=TRUE)
 #' # mostMutated method, resolving ties stochastically
 #' clones <- collapseClones(db2, method="mostMutated", muFreqColumn="MU_FREQ", 
 #'                          breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
-#'                          
 #' # mostMutated method, resolving ties deterministically using additional columns
 #' clones <- collapseClones(db2, method="mostMutated", muFreqColumn="MU_FREQ", 
 #'                          breakTiesStochastic=FALSE, 
 #'                          breakTiesByColumns=list(c("DUPCOUNT"), c(max)))
+#' 
+#' # catchAll method
+#' clones <- collapseClones(db, method="catchAll")
 #' 
 #' # Build clonal consensus for V-region only
 #' clones <- collapseClones(db, method="mostCommon", regionDefinition=IMGT_V)
@@ -1108,9 +1104,9 @@ calcClonalConsensusHelper = function(seqs, muFreqColumn=NULL, lenLimit=NULL,
 # # Number of sequences in this clone
 # nrow(clone)
 # # compute mutation frequency for most/leastMutated methods
-# clone = observedMutations(db=clone, frequency=TRUE, combine=TRUE)
+# clone <- observedMutations(db=clone, frequency=TRUE, combine=TRUE)
 # # manually create a tie
-# clone = rbind(clone, clone[which.max(clone$MU_FREQ), ])
+# clone <- rbind(clone, clone[which.max(clone$MU_FREQ), ])
 # 
 # # Get consensus input and germline sequences
 # # thresholdedFreq method, resolve ties deterministically without using ambiguous characters
@@ -1250,8 +1246,6 @@ calcClonalConsensus <- function(db,
     
     return(list("inputCons"=inputCons, "germlineCons"=germCons, "inputMuFreq"=inputMuFreq))
 }
-
-
 
 
 #### Mutation counting functions ####

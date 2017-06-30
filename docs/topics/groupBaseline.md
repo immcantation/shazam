@@ -77,8 +77,14 @@ Examples
 
 ```R
 # Subset example data from alakazam
-library(alakazam)
-db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
+data(ExampleDb, package="alakazam")
+db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG"))
+
+# Collapse clones
+db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
+germlineColumn="GERMLINE_IMGT_D_MASK",
+method="thresholdedFreq", minimumFrequency=0.6,
+includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
@@ -115,7 +121,8 @@ Calculating BASELINe statistics...
 
 
 ```R
-plotBaselineDensity(grouped1, idColumn="SAMPLE", colorElement="group", 
+sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
+plotBaselineDensity(grouped1, idColumn="SAMPLE", colorValues=sample_colors, 
 sigmaLimits=c(-1, 1))
 
 ```
@@ -138,8 +145,10 @@ Calculating BASELINe statistics...
 
 
 ```R
+isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
+"IgG"="seagreen", "IgA"="steelblue")
 plotBaselineDensity(grouped2, idColumn="SAMPLE", groupColumn="ISOTYPE",
-colorElement="group", colorValues=IG_COLORS,
+colorElement="group", colorValues=isotype_colors,
 sigmaLimits=c(-1, 1))
 
 ```
@@ -162,7 +171,8 @@ Calculating BASELINe statistics...
 
 
 ```R
-plotBaselineDensity(grouped3, idColumn="SAMPLE", colorElement="group",
+sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
+plotBaselineDensity(grouped3, idColumn="SAMPLE", colorValues=sample_colors,
 sigmaLimits=c(-1, 1))
 ```
 

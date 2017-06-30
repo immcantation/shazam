@@ -65,6 +65,12 @@ Examples
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, ISOTYPE == "IgG")
 
+# Collapse clones
+db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
+germlineColumn="GERMLINE_IMGT_D_MASK",
+method="thresholdedFreq", minimumFrequency=0.6,
+includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
 sequenceColumn="SEQUENCE_IMGT",
@@ -108,8 +114,8 @@ testBaseline(grouped, groupBy="SAMPLE")
 
 ```
   REGION       TEST    PVALUE       FDR
-1    CDR -1h != +7d 0.2074262 0.4148524
-2    FWR -1h != +7d 0.4390677 0.4390677
+1    CDR -1h != +7d 0.1786408 0.1786408
+2    FWR -1h != +7d 0.1155223 0.1786408
 
 ```
 

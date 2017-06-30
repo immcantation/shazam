@@ -84,7 +84,7 @@ db <- subset(ExampleDb, SAMPLE == "-1h")
 db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 
 # To find the threshold cut, call findThreshold function for "gmm" method.
-output <- findThreshold(db$DIST_NEAREST, method="gmm", model = "norm-norm", cutoff = "opt")
+output <- findThreshold(db$DIST_NEAREST, method="gmm", model="norm-norm", cutoff="opt")
 print(output)
 
 ```

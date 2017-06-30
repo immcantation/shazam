@@ -87,17 +87,6 @@ using the `collapseClones` function.
 ```r
 # Collapse sequences into clonal consensus
 clone_db <- collapseClones(ExampleDb, nproc=1)
-```
-
-```
-## When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.
-```
-
-```
-## Collapsing clonal sequences...
-```
-
-```r
 # Create targeting model in one step using only silent mutations
 # Use consensus sequence input and germline columns
 model <- createTargetingModel(clone_db, model="S", sequenceColumn="CLONAL_SEQUENCE", 

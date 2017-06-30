@@ -106,7 +106,13 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "-1h")
+db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG"))
+
+# Collapse clones
+db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
+germlineColumn="GERMLINE_IMGT_D_MASK",
+method="thresholdedFreq", minimumFrequency=0.6,
+includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
@@ -157,8 +163,9 @@ colorElement="group", sigmaLimits=c(-1, 1))
 ```R
 
 # Facet by isotype instead of region
+sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
 plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group",
-sigmaLimits=c(-1, 1))
+colorValues=sample_colors, sigmaLimits=c(-1, 1))
 ```
 
 ![8](plotBaselineDensity-8.png)

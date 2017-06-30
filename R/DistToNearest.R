@@ -762,26 +762,25 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' @param    method     string defining the method to use for determining the optimal threshold.
 #'                      One of \code{"gmm"} or \code{"density"}. See Details for methodological
 #'                      descriptions.
-#' @param    edge       upper range (a fraction of the data density) to rule initialization of 
-#'                      Gaussian fit parameters. Default value is equal to 90% of the entries.
-#'                      Applies only to the \code{"gmm"} method.
+#' @param    edge       upper range as a fraction of the data density to rule initialization of 
+#'                      Gaussian fit parameters. Default value is 90% of the entries (0.9).
+#'                      Applies only when \code{method="density"}. .
 #' @param    cross      supplementary nearest neighbor distance vector output from \link{distToNearest} 
 #'                      for initialization of the Gaussian fit parameters. 
-#'                      Applies only to the \code{"gmm"} method.
+#'                      Applies only when \code{method="gmm"}. 
 #' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
-#'                      Applies only to the \code{"density"} method. If \code{NULL} no subsampling
-#'                      is performed. As bandwith inferrence is computationally expensive, subsampling
-#'                      is recommended for large data sets.
+#'                      If \code{NULL} no subsampling is performed. As bandwith inferrence 
+#'                      is computationally expensive, subsampling is recommended for large data sets.
+#'                      Applies only when \code{method="density"}. 
 #' @param    model      allows the user to choose among four possible combinations of fitting curves: 
-#'                      (1) \code{"norm-norm"}, (2) \code{"norm-gamma"}, (3) \code{"gamma-norm"}, 
-#'                      and (4) \code{"gamma-gamma"}. Applies only to the \code{"gmm"} method.
-#' @param    cutoff     applies only to the \code{"gmm"} method. Allows the user to choose the type of the 
-#'                      threshold among options: (1) the optimal threshold \code{"opt"}, (2) the 
-#'                      intersection point of the two fitted curves \code{"intersect"}, or 
-#'                      (3) a value defined by user for one of the 
-#'                      sensitivity or specificity \code{"user"}.
-#' @param    sen        sensitivity. Applies only where method=\code{"gmm"} and cutoff=\code{"user"}.
-#' @param    spc        specificity. Applies only where method=\code{"gmm"} and cutoff=\code{"user"}.
+#'                      \code{"norm-norm"}, \code{"norm-gamma"}, \code{"gamma-norm"}, 
+#'                      and \code{"gamma-gamma"}. Applies only when \code{method="gmm"}.
+#' @param    cutoff     method to use for threshold selection: the optimal threshold \code{"opt"}, 
+#'                      the intersection point of the two fitted curves \code{"intersect"}, or 
+#'                      a value defined by user for one of the sensitivity or specificity \code{"user"}.
+#'                      Applies only when \code{method="gmm"}.
+#' @param    sen        sensitivity required. Applies only when \code{method="gmm"} and \code{cutoff="user"}.
+#' @param    spc        specificity required. Applies only when \code{method="gmm"} and \code{cutoff="user"}.
 #'                      
 #' @param    progress   if \code{TRUE} print a progress bar. 
 #' @return   
@@ -799,10 +798,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #'   \item \code{"gmm"}:     Performs a maximum-likelihood fitting procedure, for learning 
 #'                           the parameters of two mixture univariate, either Gamma or Gaussian, distributions 
 #'                           which fit the bimodal distribution entries. Retrieving the fit parameters, 
-#'                           it then calculates the optimum threshold \code{"opt"}, where the average of the sensitivity 
-#'                           plus specificity reaches its maximum. In addition, findThreshold function is also able 
-#'                           to calculate the intersection point (\code{"intersect"}) of the two fitted curves and allows 
-#'                           the user to invoke its value as the cut-off point, instead of optimum \code{"opt"} point.
+#'                           it then calculates the optimum threshold \code{method="optimal"}, where the 
+#'                           average of the sensitivity plus specificity reaches its maximum. In addition, 
+#'                           the \code{findThreshold} function is also able 
+#'                           to calculate the intersection point (\code{method="intersect"}) of the two fitted curves 
+#'                           and allows the user to invoke its value as the cut-off point, instead of optimal point.
 #'   \item \code{"density"}: Fits a binned approximation to the ordinary kernel density estimate
 #'                           to the nearest neighbor distances after determining the optimal
 #'                           bandwidth for the density estimate via least-squares cross-validation of 
