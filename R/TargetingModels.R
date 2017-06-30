@@ -958,6 +958,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #'              for what it does.  
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
@@ -974,7 +975,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
 #' 
 #' # Tune minNumSeqMutations
 #' minNumSeqMutationsTune(mutCount, seq(from=100, to=300, by=50))
-#'                                       
+#' }                                      
 #' @export
 minNumSeqMutationsTune = function(mutCount, minNumSeqMutationsRange) {
   stopifnot( length(mutCount) == 1024 )
