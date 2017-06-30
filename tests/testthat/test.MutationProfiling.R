@@ -2204,9 +2204,9 @@ test_that("collapseClones, 2E", {
     expect_message(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="obsv", germlineColumn="germ",
                                   method="mostCommon", includeAmbiguous=TRUE, breakTiesStochastic=TRUE),
                    "includeAmbiguous and breakTiesStochastic are mutually exclusive. When both TRUE, includeAmbiguous will take precedence.")
-    expect_message(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="obsv", germlineColumn="germ",
-                                  method="mostCommon", includeAmbiguous=FALSE, breakTiesStochastic=FALSE),
-                   "When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.")
+    #expect_message(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="obsv", germlineColumn="germ",
+    #                              method="mostCommon", includeAmbiguous=FALSE, breakTiesStochastic=FALSE),
+    #               "When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.")
     expect_message(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="obsv", germlineColumn="germ",
                                   method="mostCommon", includeAmbiguous=TRUE, breakTiesStochastic=FALSE,
                                   breakTiesByColumns=list(c("DUPCOUNT", "CONSCOUNT"), c(max,max))),
@@ -2216,10 +2216,10 @@ test_that("collapseClones, 2E", {
                                   method="mostMutated", breakTiesStochastic=TRUE,
                                   breakTiesByColumns=list(c("DUPCOUNT", "CONSCOUNT"), c(max,max))),
                    "breakTiesStochastic and breakTiesByColumns are mutually exclusive. When both set, breakTiesStochastic will take precedence.")
-    expect_message(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="obsv", germlineColumn="germ",
-                                  method="mostMutated", breakTiesStochastic=FALSE,
-                                  breakTiesByColumns=NULL),
-                   "When breakTiesStochastic is FALSE and breakTiesByColumns is NULL, ties are broken by taking the sequence that appears earlier in the data.frame.")
+    #expect_message(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="obsv", germlineColumn="germ",
+    #                              method="mostMutated", breakTiesStochastic=FALSE,
+    #                              breakTiesByColumns=NULL),
+    #               "When breakTiesStochastic is FALSE and breakTiesByColumns is NULL, ties are broken by taking the sequence that appears earlier in the data.frame.")
     expect_message(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="obsv", germlineColumn="germ",
                                   method="mostMutated", breakTiesStochastic=FALSE,
                                   breakTiesByColumns=list(c("DUPCOUNT", "CONSCOUNT"), c(max,max)),

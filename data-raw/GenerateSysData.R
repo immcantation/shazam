@@ -46,26 +46,26 @@ AMINO_ACIDS <- c("TTT"="F", "TTC"="F",
                  "TAA"="*", "TAG"="*", "TGA"="*")
 
 # List of expanded, unambiguous codons based on ambiguous codons
-EXPANDED_AMBIGUOUS_CODONS = vector(mode="list", length=15^3)
-counter=1
+EXPANDED_AMBIGUOUS_CODONS <- vector(mode="list", length=15^3)
+counter <- 1
 for (nuc1 in NUCLEOTIDES_AMBIGUOUS[1:15]) {
     for (nuc2 in NUCLEOTIDES_AMBIGUOUS[1:15]) {
         for (nuc3 in NUCLEOTIDES_AMBIGUOUS[1:15]) {
             # ambiguous codon (string)
-            codonUnexpanded = seqinr::c2s(c(nuc1, nuc2, nuc3))
+            codonUnexpanded <- seqinr::c2s(c(nuc1, nuc2, nuc3))
             # get all combinations of codons made up of unambiguous characters in data.frame
             # simplify=FALSE is essential for working with codons containing no ambiguous char
             # expand.grid works with codons containing no ambiguous char without problem
             # crucial to have excludeN=TRUE for IUPAC2nucs (so that codons like NNN lead to NA)
-            codonExpandedChar = expand.grid(sapply(c(nuc1, nuc2, nuc3), 
+            codonExpandedChar <- expand.grid(sapply(c(nuc1, nuc2, nuc3), 
                                                    shazam:::IUPAC2nucs, 
                                                    excludeN=TRUE, simplify=FALSE))
             # convert char into string
-            codonExpandedString = apply(codonExpandedChar, 1, seqinr::c2s)
+            codonExpandedString <- apply(codonExpandedChar, 1, seqinr::c2s)
             # add to list
-            names(EXPANDED_AMBIGUOUS_CODONS)[counter] = codonUnexpanded
-            EXPANDED_AMBIGUOUS_CODONS[[counter]] = codonExpandedString
-            counter = counter+1
+            names(EXPANDED_AMBIGUOUS_CODONS)[counter] <- codonUnexpanded
+            EXPANDED_AMBIGUOUS_CODONS[[counter]] <- codonExpandedString
+            counter <- counter+1
         }
     }
 }
