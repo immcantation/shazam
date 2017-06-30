@@ -262,6 +262,7 @@ editBaseline <- function(baseline, field_name, value) {
 #' @seealso  For calculating the BASELINe summary statistics see \link{summarizeBaseline}.
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
@@ -286,7 +287,7 @@ editBaseline <- function(baseline, field_name, value) {
 #' 
 #' # Get a data.frame of the summary statistics
 #' getBaselineStats(grouped)
-#' 
+#' }
 #' @export
 getBaselineStats <- function(baseline) {
     return(baseline@stats)
@@ -1144,6 +1145,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #' }
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgG")
@@ -1168,7 +1170,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #' 
 #' # Get a data.frame of the summary statistics
 #' stats <- summarizeBaseline(grouped, returnType="df")
-#'                      
+#' }                     
 #' @export
 summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1) {
     # Hack for visibility of foreach index variable
@@ -1273,6 +1275,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'  }
 #' 
 #' @examples
+#' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgG")
@@ -1297,7 +1300,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' 
 #' # Perform test on sample PDFs
 #' testBaseline(grouped, groupBy="SAMPLE")
-#' 
+#' }
 #' @export
 testBaseline <- function(baseline, groupBy) {
     ## DEBUG
