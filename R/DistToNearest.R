@@ -503,7 +503,7 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' @param    progress        if \code{TRUE} print a progress bar.
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
-#'           \code{DIST_NEAREST} column if \code{crossGrups=NULL} or in the 
+#'           \code{DIST_NEAREST} column if \code{crossGroups=NULL} or in the 
 #'           \code{CROSS_DIST_NEAREST} column if \code{crossGroups} was specified.
 #'
 #' @details
