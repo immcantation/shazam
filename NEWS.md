@@ -7,10 +7,12 @@ Nothing yet.
 Version 0.1.8: June 30, 2017
 -------------------------------------------------------------------------------
 
-General
+General:
+
 + Corrected several functions so that they accept both tibbles and data.frames.
 
 Distance Calculation:
+
 + Adding new fitting procedures to the `"gmm"` method of `findThreshold()` 
   that allows users to choose a mixture of two univariate density distribution 
   functions among four available combinations: `"norm-norm"`, `"norm-gamma"`,  
