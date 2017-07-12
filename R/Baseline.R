@@ -1554,9 +1554,9 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
                                 colorValues=NULL, title=NULL, subsetRegions=NULL, sigmaLimits=c(-5, 5), 
                                 facetBy=c("region", "group"), style=c("density"), size=1, 
                                 silent=FALSE, ...) {
-    # Test variable settings
-    # baseline=baseline_two
-    # idColumn="BARCODE"; groupColumn="CPRIMER"; subsetRegions=NULL; sigmaLimits=c(-5, 5)
+    ## DEBUG
+    # baseline=grouped
+    # idColumn="SAMPLE"; groupColumn="ISOTYPE"; subsetRegions=NULL; sigmaLimits=c(-5, 5)
     # facetBy="region"; style="density"; size=1; silent=FALSE
     
     # Check input
@@ -1582,7 +1582,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
         # Subset to regions of interest
         dens_names <- baseline@regions        
         if (!is.null(subsetRegions)) {
-            dens_names <- dens_names[dens_names %in% subsetRegions]        
+            dens_names <- dens_names[dens_names %in% subsetRegions]
         }
         dens_list <- baseline@pdfs[dens_names]
         
@@ -1597,7 +1597,8 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
             rownames(dens_list[[i]]) <- group_df$GROUP_COLLAPSE
             colnames(dens_list[[i]]) <- col_names
             dens_list[[i]] <- dens_list[[i]][, col_names >= sigmaLimits[1] & 
-                                                 col_names <= sigmaLimits[2]]
+                                               col_names <= sigmaLimits[2],
+                                             drop=FALSE]
         }
         
         # Melt density matrices
@@ -1630,9 +1631,9 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
         # Apply color order
         if (!is.null(colorValues)) {
             if (colorElement == "id") {
-                dens_df[,idColumn] <- factor(dens_df[,idColumn], levels=names(colorValues))
+                dens_df[, idColumn] <- factor(dens_df[, idColumn], levels=names(colorValues))
             } else {
-                dens_df[,groupColumn] <- factor(dens_df[,groupColumn], levels=names(colorValues))
+                dens_df[, groupColumn] <- factor(dens_df[, groupColumn], levels=names(colorValues))
             }
         }
         

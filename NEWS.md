@@ -1,7 +1,10 @@
-Version 0.1.8.999: July 7, 2017
+Version 0.1.8.999: July 12, 2017
 -------------------------------------------------------------------------------
 
-Nothing yet.
+Selection Analysis:
+
++ Fixed a bug in `plotBaselineDensity` which caused an empty plot to be
+  generated if there was only a single value in the `idColumn`.
 
 
 Version 0.1.8: June 30, 2017
