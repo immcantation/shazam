@@ -46,7 +46,7 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HH_S5F) {
     } else {
         sim_seq <- sequence
     }
-    sim_seq <- gsub("\\.", "-", sim_seq)
+    
     sim_leng <- stri_length(sim_seq)
     stopifnot((sim_leng %% 3)==0)
     
