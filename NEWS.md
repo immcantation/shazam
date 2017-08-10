@@ -1,10 +1,15 @@
-Version 0.1.8.999: July 12, 2017
+Version 0.1.8.999: August 10, 2017
 -------------------------------------------------------------------------------
 
 Selection Analysis:
 
 + Fixed a bug in `plotBaselineDensity` which caused an empty plot to be
   generated if there was only a single value in the `idColumn`.
+
+Shmulate:
+
++ Fixed a bug in `shmulateSeq` which caused a crash when the input 
+  sequence contains gaps (`.`).
 
 
 Version 0.1.8: June 30, 2017
