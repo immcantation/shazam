@@ -225,16 +225,16 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
 # determine what types of mutations are possible. Returns \code{matrix}
 # of all possible mutations and corresponding types.
 #
-# @param   seq   sequence for which to compute mutation types
+# @param   inputSeq   sequence for which to compute mutation types
 # @return  A \code{matrix} of mutation types for each position in the sequence.
-computeMutationTypes <- function(seq){
+computeMutationTypes <- function(inputSeq){
     #* counts on constant variable CODON_TABLE, NUCLEOTIDES (ACTGN-.)
     #* caution: this breaks down if length of seq is not a multiple of 3
     
-    leng_seq <- stri_length(seq)
+    leng_seq <- stri_length(inputSeq)
     try(if( (leng_seq %%3 !=0) ) stop("length of input sequence must be a multiple of 3"))
     
-    codons <- sapply(seq(1, leng_seq, by=3), function(x) {substr(seq,x,x+2)})
+    codons <- sapply(seq(1, leng_seq, by=3), function(x) {substr(inputSeq,x,x+2)})
     mut_types <- matrix(unlist(CODON_TABLE[, codons]), ncol=leng_seq, nrow=4, byrow=F)
     dimnames(mut_types) <-  list(NUCLEOTIDES[1:4], 1:leng_seq)
     return(mut_types)
