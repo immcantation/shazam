@@ -1302,25 +1302,57 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
     return(model_obj)
 }
 
-# Rescales mutability probabilities from a TargetingModel
-# 
-# \code{rescaleMutability} renormalizes the mutability probabilities
-# in a TargetingModel model and returns a rescaled matrix of mutability scores.
-# 
-# @param    model     \link{TargetingModel} object with mutation likelihood information.
-# @param    mean      the mean value for the rescaled mutability scores.
-#                                                
-# @return   A named vector of mutability scores for each 5-mer motif with mean
-#           equal to \code{mean}.
-#           
-# @seealso  Takes as input a \link{TargetingModel} object.
-# 
-# @examples
-# # Subset example data to one isotype and sample as a demo
-# data(ExampleDb, package="alakazam")
-# db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
-#
-# # Create model and rescale mutabilities
+
+#' calculate the mutability
+#' 
+#' \code{calculateMutability} calculates the mutability of the input sequences based on a 5-mer nucleotide mutability model.
+#'
+#' @param    sequences           a vector of sequences.
+#' @param    model               type of a 5-mer model. The default model is \link{HH_S5F}, 
+#'                               a human heavy chain, silent, 5-mer, functional targeting model.
+#' @param    progress            if \code{TRUE} print a progress bar.
+#' 
+#' @return   a numeric vector of mutabilities are generated. 
+#' 
+#' @examples
+#' \donttest{
+#' # Subset example data to one isotype and sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
+#'
+#' # calculate mutability of GERMLINE_IMGT_D_MASK sequences using \link{HH_S5F} model
+#' db$MUTABILITY <- calculateMutability(sequences=db$GERMLINE_IMGT_D_MASK, model=HH_S5F)
+#' }
+#' 
+#' @export
+calculateMutability <- function(sequences, model=HH_S5F, progress=FALSE) {
+    # initialize variables
+    alphb <- seqinr::s2c("ACGTN")
+    model_kmer<-names(model@mutability)
+    model_rates<-as.vector(model@mutability)
+    sequences <- toupper(sequences)
+    sequences <- gsub("\\.", "N", sequences)
+    # mutability calculation
+    mutability <- vector(mode="numeric", length=length(sequences))
+    if (progress) { 
+        pb <- progressBar(length(sequences)) 
+    }
+    for (s in 1:length(sequences)) {
+        kmer <- seqinr::count(seqinr::s2c(sequences[s]), wordsize=5, alphabet=alphb)
+        seq_kmer <- names(kmer)
+        seq_counts <- as.vector(kmer)
+        
+        index <- match(seq_kmer, model_kmer)
+        mutability[s] <- sum(seq_counts*model_rates[index], na.rm=TRUE)
+        
+        if (progress) { pb$tick() }
+    }
+    return(mutability)
+}
+
+
+
+# Create model and rescale mutabilities
 # model <- createTargetingModel(db, model="S", multipleMutation="ignore")
 # mut <- rescaleMutability(model)
 #
