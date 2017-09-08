@@ -1303,16 +1303,16 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 }
 
 
-#' calculate the mutability
+#' Calculate total mutability
 #' 
-#' \code{calculateMutability} calculates the mutability of the input sequences based on a 5-mer nucleotide mutability model.
+#' \code{calculateMutability} calculates the total (summed) mutability for a set of sequences 
+#' based on a 5-mer nucleotide mutability model.
 #'
-#' @param    sequences           a vector of sequences.
-#' @param    model               type of a 5-mer model. The default model is \link{HH_S5F}, 
-#'                               a human heavy chain, silent, 5-mer, functional targeting model.
+#' @param    sequences           character vector of sequences.
+#' @param    model               \link{TargetingModel} object with mutation likelihood information.
 #' @param    progress            if \code{TRUE} print a progress bar.
 #' 
-#' @return   a numeric vector of mutabilities are generated. 
+#' @return   Numeric vector with a total mutability score for each sequence.
 #' 
 #' @examples
 #' \donttest{
@@ -1320,19 +1320,20 @@ createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENC
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 #'
-#' # calculate mutability of GERMLINE_IMGT_D_MASK sequences using \link{HH_S5F} model
-#' db$MUTABILITY <- calculateMutability(sequences=db$GERMLINE_IMGT_D_MASK, model=HH_S5F)
+#' # Calculate mutability of germline sequences using \link{HH_S5F} model
+#' mutability <- calculateMutability(sequences=db$GERMLINE_IMGT_D_MASK, model=HH_S5F)
 #' }
 #' 
 #' @export
 calculateMutability <- function(sequences, model=HH_S5F, progress=FALSE) {
-    # initialize variables
+    # Initialize variables
     alphb <- seqinr::s2c("ACGTN")
-    model_kmer<-names(model@mutability)
-    model_rates<-as.vector(model@mutability)
+    model_kmer <- names(model@mutability)
+    model_rates <- as.vector(model@mutability)
     sequences <- toupper(sequences)
     sequences <- gsub("\\.", "N", sequences)
-    # mutability calculation
+    
+    # Mutability calculation
     mutability <- vector(mode="numeric", length=length(sequences))
     if (progress) { 
         pb <- progressBar(length(sequences)) 
@@ -1347,6 +1348,7 @@ calculateMutability <- function(sequences, model=HH_S5F, progress=FALSE) {
         
         if (progress) { pb$tick() }
     }
+    
     return(mutability)
 }
 
