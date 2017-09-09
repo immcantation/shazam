@@ -1,14 +1,14 @@
 Package: shazam
 Type: Package
 Version: 0.1.8.999
-Date: 2017-07-12
+Date: 2017-09-09
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
                     email="gur.yaari@biu.ac.il"),
              person("Namita", "Gupta", role=c("aut"), 
                     email="namita.gupta@yale.edu"),
-             person("Jason", "Vander Heiden", role=c("aut", "cre"), 
+             person("Jason", "Vander Heiden", role=c("aut"), 
                     email="jason.vanderheiden@yale.edu"),
              person("Ang", "Cui", role=c("ctb"), 
                     email="angcui@mit.edu"),
@@ -18,8 +18,10 @@ Authors@R: c(person("Mohamed", "Uduman", role=c("aut"),
                     email="julian.zhou@yale.edu"),
              person("Nima", "Nouri", role=c("ctb"), 
                     email="nima.nouri@yale.edu"),
-             person("Steven", "Kleinstein", role=c("aut", "cph"), 
-                    email="steven.kleinstein@yale.edu"))
+             person("Steven", "Kleinstein", role=c("aut"), 
+                    email="steven.kleinstein@yale.edu"),
+             person("Kleinstein Lab", role=c("cre", "cph"), 
+                    email="immcantation@googlegroups.com"))
 Title: Immunoglobulin Somatic Hypermutation Analysis
 Description: Provides a computational framework for Bayesian estimation of
     antigen-driven selection in immunoglobulin (Ig) sequences, providing an
