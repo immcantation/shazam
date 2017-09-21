@@ -105,7 +105,11 @@ db_obs %>%
 ```
 
 ```
-## data frame with 0 columns and 4 rows
+##      SEQUENCE_ID
+## 1 GN5SHBT07FUXY8
+## 2 GN5SHBT05JMPI5
+## 3 GN5SHBT08H4LPP
+## 4 GN5SHBT05JGND3
 ```
 
 We can plot the mutation frequencies a explore differences between samples or isotypes.

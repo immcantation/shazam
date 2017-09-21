@@ -1,10 +1,31 @@
+Version 0.1.8.999: August 10, 2017
+-------------------------------------------------------------------------------
+
+Selection Analysis:
+
++ Fixed a bug in `plotBaselineDensity` which caused an empty plot to be
+  generated if there was only a single value in the `idColumn`.
+
+Mutation Profiling:
+
++ Fixed a bug in `shmulateSeq` which caused a crash when the input 
+  sequence contains gaps (`.`).
+
+Targeting Models:
+
++ Added the `calculateMutability` function which computes the aggregate 
+  mutability for sequences.
+  
+
 Version 0.1.8: June 30, 2017
 -------------------------------------------------------------------------------
 
-General
+General:
+
 + Corrected several functions so that they accept both tibbles and data.frames.
 
 Distance Calculation:
+
 + Adding new fitting procedures to the `"gmm"` method of `findThreshold()` 
   that allows users to choose a mixture of two univariate density distribution 
   functions among four available combinations: `"norm-norm"`, `"norm-gamma"`,  

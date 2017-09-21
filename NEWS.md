@@ -6,11 +6,16 @@ Selection Analysis:
 + Fixed a bug in `plotBaselineDensity` which caused an empty plot to be
   generated if there was only a single value in the `idColumn`.
 
-Shmulate:
+Mutation Profiling:
 
 + Fixed a bug in `shmulateSeq` which caused a crash when the input 
   sequence contains gaps (`.`).
 
+Targeting Models:
+
++ Added the `calculateMutability` function which computes the aggregate 
+  mutability for sequences.
+  
 
 Version 0.1.8: June 30, 2017
 -------------------------------------------------------------------------------

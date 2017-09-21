@@ -83,7 +83,7 @@ Value
 -------------------
 
 Returns a modified `db` data.frame with nearest neighbor distances in the 
-`DIST_NEAREST` column if `crossGrups=NULL` or in the 
+`DIST_NEAREST` column if `crossGroups=NULL` or in the 
 `CROSS_DIST_NEAREST` column if `crossGroups` was specified.
 
 

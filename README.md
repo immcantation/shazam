@@ -32,3 +32,9 @@ analysis topics:
    sequences or set of sequences based on SHM targeting models. This 
    information is particularly useful in understanding and defining 
    clonal relationships.
+
+Contact
+-------------------------------------------------------------------------------
+
+For help and questions please contact the [Immcantation Group](mailto:immcantation@googlegroups.com)
+or use the [issue tracker](https://bitbucket.org/kleinstein/shazam/issues?status=new&status=open).

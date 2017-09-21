@@ -34,6 +34,7 @@ pages:
       - topics/shmulateSeq.md
       - topics/shmulateTree.md
     - 'Targeting Models':
+      - topics/calculateMutability.md
       - topics/createMutabilityMatrix.md
       - topics/createSubstitutionMatrix.md
       - topics/extendMutabilityMatrix.md
