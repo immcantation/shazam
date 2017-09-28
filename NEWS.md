@@ -1,4 +1,4 @@
-Version 0.1.8.999: September 21, 2017
+Version 0.1.8.999: September 27, 2017
 -------------------------------------------------------------------------------
 
 Selection Analysis:
@@ -15,6 +15,8 @@ Targeting Models:
 
 + Added the `calculateMutability` function which computes the aggregate 
   mutability for sequences.
++ Fixed a bug that caused `createSubstitutionMatrix` to fail for data 
+  containing only a single V family.
   
 
 Version 0.1.8: June 30, 2017

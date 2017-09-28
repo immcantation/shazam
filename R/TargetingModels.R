@@ -408,7 +408,7 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
                 glAtMutation <- codonGL[muCodonPos]
                 if( !any(codonGL=="N") & !any(codonSeq=="N") ){
                     if(!length(grep("N",wrd))){
-                        substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] <- substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] + 1
+                        substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] <- substitutionList[[v_fam]][[wrd]][glAtMutation, seqAtMutation] + 1
                     }
                 }
             }
@@ -418,19 +418,31 @@ createSubstitutionMatrix <- function(db, model=c("RS", "S"),
     
     # Convert substitutionList to listSubstitution to facilitate the aggregation of mutations
     arrNames <- c(outer(unique(v_families), nuc_words, paste, sep = "_"))
-    listSubstitution <- array(0, dim=c(length(arrNames),4,4), dimnames=list(arrNames, nuc_chars, nuc_chars))
+    listSubstitution <- array(0, dim=c(length(arrNames), 4, 4), 
+                              dimnames=list(arrNames, nuc_chars, nuc_chars))
     
     for(v_fam in unique(v_families)){
-        listSubstitution[paste(v_fam, nuc_words, sep="_"),,]<-t(sapply(nuc_words,function(word){substitutionList[[v_fam]][[word]]}))
+        listSubstitution[paste(v_fam, nuc_words, sep="_"), , ] <- t(sapply(nuc_words, 
+                                                                           function(word) { substitutionList[[v_fam]][[word]] }))
     }
     
     # Aggregate mutations from all V families
-    M<-list()
-    subMat1mer <- matrix(0,4,4) # a single substitution matrix for all fivemers
-    listSubNames<-sapply(dimnames(listSubstitution)[[1]],function(x)strsplit(x,"_",fixed=TRUE)[[1]])
+    M <- list()
+    subMat1mer <- matrix(0, 4, 4) # a single substitution matrix for all fivemers
+    listSubNames <- sapply(dimnames(listSubstitution)[[1]], 
+                           function(x) { strsplit(x, "_", fixed=TRUE)[[1]] })
     
+    .sumSub <- function(i, n) {
+        x <- listSubstitution[listSubNames[2, ] == n, i, ]
+        if(is.null(dim(x))) {
+            return (x)
+        } else {
+            return (colSums(x))
+        }
+    }
     for (nuc_word in nuc_words) {
-        M[[nuc_word]] <- t(sapply(1:4,function(i)apply(listSubstitution[listSubNames[2,] == nuc_word,i,],2,sum))) # sums mutations from all families
+        # Sums mutations from all families
+        M[[nuc_word]] <- t(sapply(1:4, .sumSub, n=nuc_word))
         rownames(M[[nuc_word]]) <- nuc_chars
         subMat1mer <- subMat1mer + M[[nuc_word]]
     }
