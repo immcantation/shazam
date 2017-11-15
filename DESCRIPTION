@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 0.1.8.999
-Date: 2017-09-21
+Date: 2017-11-15
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
@@ -27,6 +27,11 @@ Description: Provides a computational framework for Bayesian estimation of
     selective pressure. Also provides tools to profile mutations in Ig
     sequences, build models of somatic hypermutation (SHM) in Ig sequences,
     and make model-dependent distance comparisons of Ig repertoires.
+    Citations: 
+    Gupta and Vander Heiden, et al (2015) <doi:10.1093/bioinformatics/btv359>,
+    Yaari, et al (2012) <doi:10.1093/nar/gks457>,
+    Yaari, et al (2013) <doi:10.3389/fimmu.2013.00358>,
+    Cui, et al (2016) <doi:10.4049/jimmunol.1502263>.
 License: CC BY-SA 4.0
 URL: http://shazam.readthedocs.io
 BugReports: https://bitbucket.org/kleinstein/shazam/issues
