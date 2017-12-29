@@ -2772,6 +2772,9 @@ calcExpectedMutations <- function(germlineSeq,
         stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
     }
     
+    # Mask ambiguous nucleotide characters
+    germlineSeq <- gsub("[MRWSYKVHDB]", "N", germlineSeq)
+    
     # Assign codon table
     codonTable <- if (is.null(mutationDefinition)) { CODON_TABLE } else { mutationDefinition@codonTable }
     
@@ -2869,8 +2872,6 @@ calculateTargeting <- function(germlineSeq,
     gaplessSeq <- gsub("\\.", "N", gaplessSeq)
     # Re-assigning s_germlineSeq (now has all "." that are not IMGT gaps converted to Ns)
     gaplessSeq <- gsub("XXX", "...", gaplessSeq)
-    # Mask non-ACGTN characters.
-    s_germlineSeq <- gsub("[^ACGTN]", "N", gaplessSeq)
     c_germlineSeq <- s2c(s_germlineSeq)
     # Matrix to hold targeting values for each position in c_germlineSeq
     germlineSeqTargeting <- matrix(NA, 
