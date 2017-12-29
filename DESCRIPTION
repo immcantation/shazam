@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 0.1.8.999
-Date: 2017-11-15
+Date: 2017-12-29
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 

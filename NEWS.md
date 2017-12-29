@@ -1,4 +1,4 @@
-Version 0.1.8.999: September 27, 2017
+Version 0.1.8.999: December 19, 2017
 -------------------------------------------------------------------------------
 
 Selection Analysis:
@@ -10,6 +10,8 @@ Mutation Profiling:
 
 + Fixed a bug in `shmulateSeq` which caused a crash when the input 
   sequence contains gaps (`.`).
++ `calcExpectedMutations` will now treat non-ACTG characters as Ns rather
+  than produce an error.
 
 Targeting Models:
 
