@@ -217,10 +217,12 @@ setClass("TargetingModel",
 #' motifs.
 #'
 #' @param    db                data.frame containing sequence data.
-#' @param    model             type of model to create. The default model, "RS", creates 
-#'                             a model by counting both replacement and silent mutations.
-#'                             The "S" specification builds a model by counting only 
-#'                             silent mutations.
+#' @param    model             type of model to create. The default model, "S", 
+#'                             builds a model by counting only silent mutations. \code{model="S"}
+#'                             should be used for data that includes functional sequences.
+#'                             Setting \code{model="RS"} creates a model by counting both 
+#'                             replacement and silent mutations and may be used on fully 
+#'                             non-functional sequence data sets.
 #' @param    sequenceColumn    name of the column containing IMGT-gapped sample sequences.
 #' @param    germlineColumn    name of the column containing IMGT-gapped germline sequences.
 #' @param    vCallColumn       name of the column containing the V-segment allele call.
@@ -304,7 +306,7 @@ setClass("TargetingModel",
 #' }
 #' 
 #' @export
-createSubstitutionMatrix <- function(db, model=c("RS", "S"), 
+createSubstitutionMatrix <- function(db, model=c("S", "RS"), 
                                      sequenceColumn="SEQUENCE_IMGT",
                                      germlineColumn="GERMLINE_IMGT_D_MASK",
                                      vCallColumn="V_CALL",
@@ -630,11 +632,15 @@ minNumMutationsTune = function(subCount, minNumMutationsRange) {
 #'
 #' @param    db                  data.frame containing sequence data.
 #' @param    substitutionModel   matrix of 5-mer substitution rates built by 
-#'                               \link{createSubstitutionMatrix}.
-#' @param    model               type of model to create. The default model, "RS", creates 
-#'                               a model by counting both replacement and silent mutations.
-#'                               The "S" specification builds a model by counting only 
-#'                               silent mutations.
+#'                               \link{createSubstitutionMatrix}. Note, this model will
+#'                               only impact mutability scores when \code{model="S"}
+#'                               (using only silent mutations).
+#' @param    model               type of model to create. The default model, "S", 
+#'                               builds a model by counting only silent mutations. \code{model="S"}
+#'                               should be used for data that includes functional sequences.
+#'                               Setting \code{model="RS"} creates a model by counting both 
+#'                               replacement and silent mutations and may be used on fully 
+#'                               non-functional sequence data sets.
 #' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
 #' @param    germlineColumn      name of the column containing IMGT-gapped germline sequences.
 #' @param    vCallColumn         name of the column containing the V-segment allele call.
@@ -698,7 +704,7 @@ minNumMutationsTune = function(subCount, minNumMutationsRange) {
 #' }
 #' 
 #' @export
-createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
+createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
                                    sequenceColumn="SEQUENCE_IMGT", 
                                    germlineColumn="GERMLINE_IMGT_D_MASK",
                                    vCallColumn="V_CALL",
@@ -818,9 +824,10 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("RS", "S"),
                     } else { 
                         muChars <- nuc_chars[1:4][nuc_chars[1:4] != glAtMutation]
                     }
-                    
+
                     # Update counts
                     if (length(muChars) > 0) {
+                        #cat(stri_flatten(muChars), substitutionSums[stri_flatten(muChars), wrd5], "\n")
                         tmpCounts[pos, wrd5] <- substitutionSums[stri_flatten(muChars), wrd5]
                     }
                 }
@@ -1201,10 +1208,12 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' \code{createTargetingModel} creates a 5-mer \code{TargetingModel}.
 #'
 #' @param    db                  data.frame containing sequence data.
-#' @param    model               type of model to create. The default model, "RS", creates 
-#'                               a model by counting both replacement and silent mutations.
-#'                               The "S" specification builds a model by counting only 
-#'                               silent mutations.
+#' @param    model               type of model to create. The default model, "S", 
+#'                               builds a model by counting only silent mutations. \code{model="S"}
+#'                               should be used for data that includes functional sequences.
+#'                               Setting \code{model="RS"} creates a model by counting both 
+#'                               replacement and silent mutations and may be used on fully 
+#'                               non-functional sequence data sets.
 #' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
 #' @param    germlineColumn      name of the column containing IMGT-gapped germline sequences.
 #' @param    vCallColumn         name of the column containing the V-segment allele calls.
@@ -1259,7 +1268,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' }
 #' 
 #' @export
-createTargetingModel <- function(db, model=c("RS", "S"), sequenceColumn="SEQUENCE_IMGT",
+createTargetingModel <- function(db, model=c("S", "RS"), sequenceColumn="SEQUENCE_IMGT",
                                  germlineColumn="GERMLINE_IMGT_D_MASK",
                                  vCallColumn="V_CALL",
                                  multipleMutation=c("independent", "ignore"),

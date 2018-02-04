@@ -1,4 +1,4 @@
-Version 0.1.8.999: December 19, 2017
+Version 0.1.8.999: February 4, 2018
 -------------------------------------------------------------------------------
 
 Selection Analysis:
@@ -19,6 +19,9 @@ Targeting Models:
   mutability for sequences.
 + Fixed a bug that caused `createSubstitutionMatrix` to fail for data 
   containing only a single V family.
++ Changed the default model to silent mutations only (`model="S"`) in 
+  `createSubstitutionMatrix`, `createSubstitutionMatrix` and 
+  `createTargetingModel`
   
 
 Version 0.1.8: June 30, 2017
