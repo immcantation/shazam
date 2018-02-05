@@ -2859,7 +2859,7 @@ calculateTargeting <- function(germlineSeq,
         }
         
         # Mask germline with Ns where input sequence has Ns
-        c_germlineSeq[c_inputSeq == "N" |  !c_inputSeq %in% c(NUCLEOTIDES[1:5],".") ] <- "N"    
+        c_germlineSeq[c_inputSeq == "N" |  !c_inputSeq %in% c(NUCLEOTIDES[1:5], ".") ] <- "N"    
         s_germlineSeq <- c2s(c_germlineSeq)
     } else {
         s_germlineSeq <- germlineSeq
@@ -2872,10 +2872,12 @@ calculateTargeting <- function(germlineSeq,
     gaplessSeq <- gsub("\\.", "N", gaplessSeq)
     # Re-assigning s_germlineSeq (now has all "." that are not IMGT gaps converted to Ns)
     gaplessSeq <- gsub("XXX", "...", gaplessSeq)
-    c_germlineSeq <- s2c(s_germlineSeq)
+
+    # Vector of seq    
+    c_germlineSeq <- s2c(gaplessSeq)
     # Matrix to hold targeting values for each position in c_germlineSeq
     germlineSeqTargeting <- matrix(NA, 
-                                   ncol=stri_length(s_germlineSeq), 
+                                   ncol=stri_length(gaplessSeq), 
                                    nrow=length(NUCLEOTIDES[1:5]),
                                    dimnames=list(NUCLEOTIDES[1:5], c_germlineSeq))
     
@@ -2883,18 +2885,18 @@ calculateTargeting <- function(germlineSeq,
     # targeting. e.g.
     # GAGAAA......TAG yields: "GAGAA" "AGAAA" "GAAAT" "AAATA" "AATAG"
     # (because the IMGT gaps are NOT real gaps in sequence!!!)
-    gaplessSeq <- gsub("\\.\\.\\.", "", s_germlineSeq)
+    gaplessSeq <- gsub("\\.\\.\\.", "", gaplessSeq)
     gaplessSeqLen <- stri_length(gaplessSeq)
     
     #Slide through 5-mers and look up targeting
     gaplessSeq <- paste("NN", gaplessSeq, "NN", sep="")
     gaplessSeqLen <- stri_length(gaplessSeq)
-    pos<- 3:(gaplessSeqLen - 2)
-    subSeq =  substr(rep(gaplessSeq, gaplessSeqLen - 4), (pos - 2), (pos + 2))
+    pos <- 3:(gaplessSeqLen - 2)
+    subSeq <- substr(rep(gaplessSeq, gaplessSeqLen - 4), (pos - 2), (pos + 2))
     germlineSeqTargeting_gapless <- targetingModel@targeting[, subSeq]
     #     germlineSeqTargeting_gapless <- sapply(subSeq, function(x) { 
     #         targetingModel@targeting[, x] })
-    
+
     germlineSeqTargeting[, c_germlineSeq != "."] <- germlineSeqTargeting_gapless  
     
     # Set self-mutating targeting values to be NA
