@@ -1722,20 +1722,20 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     aminoAcidClasses <- if (is.null(mutationDefinition)) { NULL } else { mutationDefinition@classes }
     
     # Removing IMGT gaps (they should come in threes)
-    # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
-    germlineSeq <- gsub("\\.\\.\\.", "XXX", germlineSeq)
+    # After converting ... to ZZZ any other . is not an IMGT gap & will be treated like N
+    germlineSeq <- gsub("\\.\\.\\.", "ZZZ", germlineSeq)
     #If there is a single gap left convert it to an N
     germlineSeq <- gsub("\\.", "N", germlineSeq)
     # Re-assigning s_germlineSeq (now has all "." that are not IMGT gaps converted to Ns)
-    germlineSeq <- gsub("XXX", "...", germlineSeq)
+    germlineSeq <- gsub("ZZZ", "...", germlineSeq)
     
     # Removing IMGT gaps (they should come in threes)
-    # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
-    inputSeq <- gsub("\\.\\.\\.", "XXX", inputSeq)
+    # After converting ... to ZZZ any other . is not an IMGT gap & will be treated like N
+    inputSeq <- gsub("\\.\\.\\.", "ZZZ", inputSeq)
     #If there is a single gap left convert it to an N
     inputSeq <- gsub("\\.", "N", inputSeq)
     # Re-assigning s_germlineSeq (now has all "." that are not IMGT gaps converted to Ns)
-    inputSeq <- gsub("XXX", "...", inputSeq)    
+    inputSeq <- gsub("ZZZ", "...", inputSeq)    
     
     # Trim the input and germline sequence to the shortest
     len_inputSeq <- stri_length(inputSeq)
@@ -2866,12 +2866,12 @@ calculateTargeting <- function(germlineSeq,
     }
     
     # Removing IMGT gaps (they should come in threes)
-    # After converting ... to XXX any other . is not an IMGT gap & will be treated like N
-    gaplessSeq <- gsub("\\.\\.\\.", "XXX", s_germlineSeq)
+    # After converting ... to ZZZ any other . is not an IMGT gap & will be treated like N
+    gaplessSeq <- gsub("\\.\\.\\.", "ZZZ", s_germlineSeq)
     #If there is a single gap left convert it to an N
     gaplessSeq <- gsub("\\.", "N", gaplessSeq)
     # Re-assigning s_germlineSeq (now has all "." that are not IMGT gaps converted to Ns)
-    gaplessSeq <- gsub("XXX", "...", gaplessSeq)
+    gaplessSeq <- gsub("ZZZ", "...", gaplessSeq)
 
     # Vector of seq    
     c_germlineSeq <- s2c(gaplessSeq)
