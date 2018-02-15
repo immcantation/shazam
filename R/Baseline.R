@@ -1213,7 +1213,15 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
             db_seq <- data.frame(db[idx, ])
             names(db_seq) <- names(db)
             for (region in regions) {
-                baseline_pdf <- baseline@pdfs[[region]][idx, ]
+                
+                # baseline@pdfs[[region]] will be a matrix if baseline@db has >1 rows
+                # if only 1 row, numeric vector
+                if (class(baseline@pdfs[[region]])=="matrix") {
+                    baseline_pdf <- baseline@pdfs[[region]][idx, ]
+                } else {
+                    baseline_pdf <- baseline@pdfs[[region]]
+                }
+                
                 baseline_ci <- baselineCI(baseline_pdf)
                 df_baseline_seq_region <- 
                     data.frame(db_seq,
