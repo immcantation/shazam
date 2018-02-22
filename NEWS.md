@@ -5,8 +5,9 @@ Selection Analysis:
 
 + Fixed a bug in `plotBaselineDensity` which caused an empty plot to be
   generated if there was only a single value in the `idColumn`.
-+ Fixed a bug in `summarizeBaseline` which caused a crash when input 
-  `baseline` is based on only 1 sequence (i.e. `nrow(baseline@db)` is 1).
++ Fixed a bug in `calcBaseline` which caused a crash in `summarizeBaseline` 
+  and `groupBaseline` when input `baseline` is based on only 1 sequence 
+  (i.e. when `nrow(baseline@db)` is 1).
 
 Mutation Profiling:
 
