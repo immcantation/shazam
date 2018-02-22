@@ -1,10 +1,12 @@
-Version 0.1.8.999: February 4, 2018
+Version 0.1.8.999: February 22, 2018
 -------------------------------------------------------------------------------
 
 Selection Analysis:
 
 + Fixed a bug in `plotBaselineDensity` which caused an empty plot to be
   generated if there was only a single value in the `idColumn`.
++ Fixed a bug in `summarizeBaseline` which caused a crash when input 
+  `baseline` is based on only 1 sequence (i.e. `nrow(baseline@db)` is 1).
 
 Mutation Profiling:
 
