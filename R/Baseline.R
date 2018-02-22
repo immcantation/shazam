@@ -582,8 +582,15 @@ calcBaseline <- function(db,
                          }
                      )
             )
+        #cat(class(mat_pdfs_binom), "\n") # for debugging
+        #cat(dim(mat_pdfs_binom), "\n") # for debugging
         
-        list_pdfs[[region]] <- mat_pdfs_binom[, 1:4001]
+        # IMPORTANT: if input has a single sequence, mat_pdfs_binom (1-row) gets coerced 
+        # into a numeric vector without matrix(..., nrow=nrow(mat_pdfs_binom))
+        list_pdfs[[region]] <- matrix(mat_pdfs_binom[, 1:4001], nrow=nrow(mat_pdfs_binom))
+        #cat(class(list_pdfs[[region]]), "\n") # for debugging
+        stopifnot(class(list_pdfs[[region]])=="matrix")
+        
         list_k[[region]] <- mat_pdfs_binom[, 4002]
         list_n[[region]] <- mat_pdfs_binom[, 4003]
         list_p[[region]] <- mat_pdfs_binom[, 4004]
@@ -931,7 +938,13 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                 idx <- uniqueGroupsIdx[[i]]
                 
                 # Get a matrix (r=numb of sequences/groups * c=4001(i,e. the length of the PDFS))
+                # Care was taken to make sure that @pdfs[[region]] should be maintained
+                # as a matrix regardless of the number of input sequences (even for a
+                # single-sequence input)
+                # Thus matrix_GroupPdfs should be expected to be maintained as a matrix as
+                # opposed a numeric vector
                 matrix_GroupPdfs <- (baseline@pdfs[[region]])[idx, , drop=FALSE]
+                stopifnot(class(matrix_GroupPdfs)=="matrix")
                 
                 # A list version of 
                 list_GroupPdfs <- 
@@ -1214,13 +1227,11 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
             names(db_seq) <- names(db)
             for (region in regions) {
                 
-                # baseline@pdfs[[region]] will be a matrix if baseline@db has >1 rows
-                # if only 1 row, numeric vector
-                if (class(baseline@pdfs[[region]])=="matrix") {
-                    baseline_pdf <- baseline@pdfs[[region]][idx, ]
-                } else {
-                    baseline_pdf <- baseline@pdfs[[region]]
-                }
+                # care was taken to make sure that @pdfs[[region]] should be maintained
+                # as a matrix regardless of the number of input sequences (even for a
+                # single-sequence input)
+                stopifnot(class(baseline@pdfs[[region]])=="matrix")
+                baseline_pdf <- baseline@pdfs[[region]][idx, ]
                 
                 baseline_ci <- baselineCI(baseline_pdf)
                 df_baseline_seq_region <- 
