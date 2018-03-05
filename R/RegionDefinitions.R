@@ -136,12 +136,13 @@ makeNullRegionDefinition <- function(regionLength) {
 
 #' IMGT unique numbering schemes
 #'
-#' Definitions of the CDR and FWR, according to the IMGT unique numbering scheme.
+#' Sequence region definitions according to the IMGT unique numbering scheme.
 #'
 #' @format A \link{RegionDefinition} object containing:
 #' \itemize{
-#'   \item  \code{IMGT_V}:                     Grouped CDR and FWR V-segment regions excluding CDR3.
-#'   \item  \code{IMGT_V_BY_REGIONS}:          Individual CDR and FWR V-segment regions excluding CDR3.
+#'   \item  \code{IMGT_V}:             Grouped CDR and FWR V segment regions excluding CDR3.
+#'   \item  \code{IMGT_V_BY_REGIONS}:  Individual CDR and FWR V segment regions excluding CDR3.
+#'   \item  \code{IMGT_V_BY_CODONS}:   Individual V segment codons excluding CDR3.
 #' }
 #' 
 #' @references
@@ -159,6 +160,10 @@ NULL
 NULL
 
 #' @name    IMGT_V_BY_REGIONS
+#' @rdname  IMGT_SCHEMES
+NULL
+
+#' @name    IMGT_V_BY_CODONS
 #' @rdname  IMGT_SCHEMES
 NULL
 
