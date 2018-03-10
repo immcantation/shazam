@@ -895,6 +895,8 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
     # export all nesseary environment variables, functions and packages.  
+    baseline@db <- data.frame()
+    gc()
     if (nproc > 1){        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport( cluster, list('baseline', 'uniqueGroupsIdx',
