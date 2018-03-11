@@ -955,6 +955,8 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                                 rowVals <- matrix_GroupPdfs[rowIndex, ]
                                 if( !all(is.na(rowVals)) ) { matrix_GroupPdfs[rowIndex, ] }
                             })
+                rm(matrix_GroupPdfs)
+                gc()
                 # Determine the number of sequences that went into creating each of the PDFs
                 # If running groupBaseline for the first time after calcBaseline, then
                 # each PDF should have a numbOfSeqs=1. 
@@ -969,7 +971,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                 numbOfNonNASeqs <- length(list_GroupPdfs)
                 
                 # If all the PDFs in the group are NAs, return a PDF of NAs
-                if (length(list_GroupPdfs) == 0) { 
+                if (length(list_GroupPdfs) == 0) {
                     return(c(rep(NA, 4001), 0))
                 }
                 
@@ -987,6 +989,8 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                     # sort by number of items
                     len_numbOfSeqs_region <- length(numbOfSeqs_region)
                     sorted_numbOfSeqs_region <- sort(numbOfSeqs_region)
+                    rm(numbOfSeqs_region)
+                    gc()
                     sorted_list_GroupPdfs <- list()
                     for(newIndex in 1:len_numbOfSeqs_region){
                         sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
@@ -1006,18 +1010,24 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                         # Convolute these PDFs together
                         list_sameWeightPdfs <- sorted_list_GroupPdfs[indexesOfWeight]
                         updatedPdf <- groupPosteriors(list_sameWeightPdfs)
+                        rm(list_sameWeightPdfs)
+                        gc()
                         # The new updated weights for this convoluted PDF
                         updatedWeight <- as.numeric(pdfWeight) * length(indexesOfWeight)
                         
                         # remove these from sorted_numbOfSeqs_region & sorted_list_GroupPdfs
                         sorted_numbOfSeqs_region  <- sorted_numbOfSeqs_region[-indexesOfWeight]
                         sorted_list_GroupPdfs <- sorted_list_GroupPdfs[-indexesOfWeight]
+                        rm(indexesOfWeight)
+                        gc()
                         
                         # add the convoluted PDF and its new weight
                         newLength <- length(sorted_numbOfSeqs_region)+1
                         sorted_numbOfSeqs_region[newLength] <- updatedWeight
                         sorted_list_GroupPdfs[[newLength]] <- updatedPdf
-                        
+                        rm(updatedWeight)
+                        rm(updatedPdf)
+                        gc()
                         
                         # sort by number of items
                         len_sorted_numbOfSeqs_region <- length(sorted_numbOfSeqs_region)
@@ -1057,8 +1067,10 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                             # add the convoluted PDF and its new weight
                             newLength <- length(sorted_numbOfSeqs_region)+1
                             sorted_numbOfSeqs_region[newLength] <- updatedWeight
+                            rm(updatedWeight)
                             sorted_list_GroupPdfs[[newLength]] <- updatedPdf
-                            
+                            rm(updatedPdf)
+                            gc()
                             # sort by number of items
                             len_sorted_numbOfSeqs_region <- length(sorted_numbOfSeqs_region)
                             sorted_numbOfSeqs_region <- sort(sorted_numbOfSeqs_region)
@@ -1074,7 +1086,6 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                             }
                         }
                     }
-                    
                     return( c( list_GroupPdfs[[1]], as.numeric(sorted_numbOfSeqs_region) ) )
                 }
                 
