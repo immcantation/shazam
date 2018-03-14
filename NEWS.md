@@ -8,6 +8,10 @@ Selection Analysis:
 + Fixed a bug in `calcBaseline` which caused a crash in `summarizeBaseline` 
   and `groupBaseline` when input `baseline` is based on only 1 sequence 
   (i.e. when `nrow(baseline@db)` is 1).
++ Set default `plot` call on a `Baseline` object to `plotBaselineDensity`.
++ Removed `getBaselineStats` function.
++ Added a `summary` method for `Baseline` objects that calls 
+  `summarizeBaseline` and returns a data.frame.
 
 Mutation Profiling:
 
@@ -28,7 +32,8 @@ Targeting Models:
 + Changed the default model to silent mutations only (`model="S"`) in 
   `createSubstitutionMatrix`, `createSubstitutionMatrix` and 
   `createTargetingModel`
-  
++ Set default `plot` call on a `TargetingModel` object to `plotMutability`.
+
 
 Version 0.1.8: June 30, 2017
 -------------------------------------------------------------------------------

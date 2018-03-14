@@ -207,6 +207,17 @@ setClass("TargetingModel",
                      substitution=matrix(0, 5, 3125),
                      targeting=matrix(0, 5, 3125)))
 
+#### Methods ####
+
+#' @param    y    ignored.
+#' @param    ...  arguments to pass to \link{plotMutability}.
+#' 
+#' @rdname   TargetingModel-class
+#' @aliases  TargetingModel-method
+#' @export
+setMethod("plot", c(x="TargetingModel", y="missing"),
+          function(x, y, ...) { plotMutability(x, ...) })
+
 
 #### Model building functions #####
 
