@@ -1909,6 +1909,8 @@ writeTargetingDistance <- function(model, file) {
 #' @param    model        \link{TargetingModel} object or vector containing normalized 
 #'                        mutability rates.
 #' @param    nucleotides  vector of center nucleotide characters to plot.
+#' @param    mark         vector of 5-mer motifs to highlight in the plot. If \code{NULL}
+#'                        only highlight classical hot and cold spot motifs.
 #' @param    style        type of plot to draw. One of:
 #'                        \itemize{
 #'                          \item \code{"hedgehog"}:  circular plot showing higher mutability
@@ -1944,7 +1946,7 @@ writeTargetingDistance <- function(model, file) {
 #' plotMutability(HH_S5F, c("G", "T"), style="bar")
 #' 
 #' @export
-plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
+plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                            style=c("hedgehog", "bar"), size=1, silent=FALSE, 
                            ...) {
     # model=HH_S5F
@@ -1980,8 +1982,8 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     text_offset <- -5.6
     
     # Set guide colors
-    motif_colors <- setNames(c("#4daf4a", "#e41a1c", "#094d85", "#999999"),
-                             c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
+    motif_colors <- setNames(c("#000000", "#4daf4a", "#e41a1c", "#094d85", "#999999"),
+                             c("Marked", "WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
     dna_colors <- setNames(c("#7bce77", "#ff9b39", "#f04949", "#5796ca", "#c4c4c4"),
                            c("A", "C", "G", "T", "N"))
     
@@ -2000,7 +2002,12 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"),
     mut_df$motif[grepl("(.[AT]A..)|(..T[AT].)", mut_df$word, perl=TRUE)] <- "WA/TW"
     mut_df$motif[grepl("([AT][GA]C..)|(..G[CT][AT])", mut_df$word, perl=TRUE)] <- "WRC/GYW"
     mut_df$motif[grepl("([CG][CT]C..)|(..G[GA][CG])", mut_df$word, perl=TRUE)] <- "SYC/GRS"
-    mut_df$motif <- factor(mut_df$motif, levels=c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
+    if (is.null(mark)) {
+        mut_df$motif <- factor(mut_df$motif, levels=c("WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
+    } else {
+        mut_df$motif[mut_df$word %in% mark] <- "Marked"
+        mut_df$motif <- factor(mut_df$motif, levels=c("Marked", "WA/TW", "WRC/GYW", "SYC/GRS", "Neutral"))
+    }
     
     # Subset to nucleotides of interest
     mut_df <- mut_df[mut_df$pos3 %in% nucleotides, ]
