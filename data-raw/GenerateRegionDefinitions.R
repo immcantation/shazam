@@ -39,3 +39,12 @@ IMGT_V_BY_CODONS <- createRegionDefinition(name="IMGT_V_BY_CODONS",
                                            description="IMGT numbering scheme defining the V segment by individual codons, excluding CDR3.",
                                            citation="Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin and T cell receptor variable domains and Ig superfamily V-like domains. Developmental and comparative immunology. 2003;27:55-77.") 
 devtools::use_data(IMGT_V_BY_CODONS, overwrite=TRUE)
+
+# IMGT numbering for V segment with a single region for the entire V.
+# 
+IMGT_V_BY_SEGMENTS <- createRegionDefinition(name="IMGT_V_BY_SEGMENTS",
+                                             boundaries=factor(rep("V", 312), 
+                                                               levels="V"),
+                                             description="IMGT numbering scheme defining the V segment by individual codons, excluding CDR3.",
+                                             citation="Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin and T cell receptor variable domains and Ig superfamily V-like domains. Developmental and comparative immunology. 2003;27:55-77.") 
+devtools::use_data(IMGT_V_BY_SEGMENTS, overwrite=TRUE)
