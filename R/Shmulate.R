@@ -13,12 +13,21 @@ NULL
 #' Targeting probabilities at each position are updated after each iteration.
 #' 
 #' @param    sequence        sequence string in which mutations are to be introduced.
-#' @param    mutations       number of mutations to be introduced into \code{sequence}.
+#'                           Accepted alphabet: \code{\{A, T, G, C, N, .\}}. Note
+#'                           that \code{-} is not accepted.
+#' @param    numMutations    number of mutations to be introduced into \code{sequence}.
 #' @param    targetingModel  5-mer \link{TargetingModel} object to be used for computing 
 #'                           probabilities of mutations at each position. Defaults to
 #'                           \link{HH_S5F}.
 #'                           
 #' @return   A string defining the mutated sequence.
+#' 
+#' @details
+#' If the input \code{sequence} has a non-triplet overhang at the end, it will be trimmed
+#' to the last codon. For example, \code{ATGCATGC} will be trimmed to \code{ATGCAT}.
+#' 
+#' Mutations are not introduced to positions in the input \code{sequence} that contain 
+#' \code{.} or \code{N}.
 #' 
 #' @seealso  See \link{shmulateTree} for imposing mutations on a lineage tree. 
 #'           See \link{HH_S5F} and \link{MK_RS5NF} for predefined 
@@ -26,13 +35,13 @@ NULL
 #' 
 #' @examples
 #' # Define example input sequence
-#' sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
+#' sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATA.TTTA"
 #' 
 #' # Simulate using the default human 5-mer targeting model
-#' shmulateSeq(sequence, mutations=6)
+#' shmulateSeq(sequence, numMutations=6)
 #' 
 #' @export
-shmulateSeq <- function(sequence, mutations, targetingModel=HH_S5F) {
+shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
     #* counts on constant variables CODON_TABLE, NUCLEOTIDES (ACTGN-.)
     
     # Check targeting model
@@ -42,7 +51,8 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HH_S5F) {
 
     # Trim sequence to last codon (getCodonPos from MutationProfiling.R)
     if(getCodonPos(stri_length(sequence))[3] > stri_length(sequence)) {
-        sim_seq <- substr(sequence, 1, getCodonPos(stri_length(sequence))[1]-1)
+        sim_seq <- stri_sub(str=sequence, from=1, 
+                            to=getCodonPos(stri_length(sequence))[1]-1)
     } else {
         sim_seq <- sequence
     }
@@ -55,6 +65,10 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HH_S5F) {
     
     # Calculate probabilities of mutations at each position given targeting
     # from MutationProfiling.R; includes a N row
+    
+    # Columns corresponding to "N" and "." positions will have NA across all rows
+    # These get converted to a probability of 0, ensuring that sampleMut() will
+    # never choose these positions
     targeting <- calculateTargeting(germlineSeq = sim_seq, targetingModel = targetingModel) 
     # keep only ACGT rows
     targeting <- targeting[NUCLEOTIDES[1:4], ] 
@@ -65,9 +79,9 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HH_S5F) {
     
     # Initialize counters
     total_muts <- 0
-    positions <- numeric(mutations)
+    positions <- numeric(numMutations)
     
-    while(total_muts < mutations) {
+    while(total_muts < numMutations) {
         # Get position to mutate and update counters
         mutpos <- sampleMut(sim_leng, targeting, positions)
         total_muts <- total_muts + 1
@@ -75,37 +89,41 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HH_S5F) {
         
         # Implement mutation in simulation sequence
         mut_nuc <- 4 - (4*mutpos$pos - mutpos$mut)
-        sim_char <- s2c(sim_seq)
-        sim_char[mutpos$pos] <- NUCLEOTIDES[mut_nuc]
-        sim_seq <- c2s(sim_char)
+        stri_sub(str=sim_seq, from=mutpos$pos, to=mutpos$pos) <- NUCLEOTIDES[mut_nuc]
         
         # Update targeting
         lower <- max(mutpos$pos-4, 1)
         upper <- min(mutpos$pos+4, sim_leng)
-        targeting[, lower:upper] <- calculateTargeting(germlineSeq=substr(sim_seq, lower, upper),
+        targeting[, lower:upper] <- calculateTargeting(germlineSeq = stri_sub(str = sim_seq, 
+                                                                              from = lower, 
+                                                                              to = upper),
                                                        targetingModel = targetingModel)[NUCLEOTIDES[1:4], ]
         targeting[is.na(targeting)] <- 0
         
         # Update possible mutations
         lower <- getCodonPos(lower)[1]
         upper <- getCodonPos(upper)[3]
-        mutation_types[, lower:upper] <- computeMutationTypes(substr(sim_seq, lower, upper))
+        mutation_types[, lower:upper] <- computeMutationTypes(stri_sub(str = sim_seq, 
+                                                                       from = lower, 
+                                                                       to = upper))
         # Make probability of stop codon 0
         if(any(mutation_types[, lower:upper]=="Stop", na.rm=T)) {
             targeting[, lower:upper][mutation_types[, lower:upper]=="Stop"] <- 0
         }
     }
+    # sanity check: length of sim_seq should remain unchanged after simulation
+    stopifnot(sim_leng==stri_length(sim_seq))
     return(sim_seq)
 }
 
 
 #' Simulate mutations in a lineage tree
 #'
-#' \code{shmulateTree} returns a set of simulated sequences generated from an input sequence and an
-#' lineage tree. The input sequence is used to replace the MRCA node of the \code{igraph} object
-#' defining the lineage tree. Sequences are then simulated with mutations corresponding to edge 
-#' weights in the tree. Sequences will not be generated for groups of nodes that are specified 
-#' to be excluded.
+#' \code{shmulateTree} returns a set of simulated sequences generated from an input 
+#' sequence and a lineage tree. The input sequence is used to replace the MRCA node of the
+#' \code{igraph} object defining the lineage tree. Sequences are then simulated with 
+#' mutations corresponding to edge weights in the tree. Sequences will not be generated 
+#' for groups of nodes that are specified to be excluded.
 #'
 #' @param    sequence        string defining the MRCA sequence to seed mutations from.
 #' @param    graph           \code{igraph} object defining the seed lineage tree, with 
@@ -113,17 +131,17 @@ shmulateSeq <- function(sequence, mutations, targetingModel=HH_S5F) {
 #' @param    targetingModel  5-mer \link{TargetingModel} object to be used for computing 
 #'                           probabilities of mutations at each position. Defaults to
 #'                           \link{HH_S5F}.
-#' @param   field            annotation to use for both unweighted path length exclusion and
-#'                           consideration as the MRCA node. If \code{NULL} do not exclude 
-#'                           any nodes.
-#' @param   exclude          vector of annotation values in \code{field} to exclude from potential
-#'                           MRCA set. If \code{NULL} do not exclude any nodes. 
+#' @param    field           annotation to use for both unweighted path length exclusion 
+#'                           and consideration as the MRCA node. If \code{NULL} do not 
+#'                           exclude any nodes.
+#' @param    exclude         vector of annotation values in \code{field} to exclude from 
+#'                           potential MRCA set. If \code{NULL} do not exclude any nodes.
 #'                           Has no effect if \code{field=NULL}.
-#' @param   junctionWeight   fraction of the nucleotide sequence that is within the junction 
-#'                           region. When specified this adds a proportional number of  
-#'                           mutations to the trunk of the tree. Requires a value between 
-#'                           0 and 1. If \code{NULL} then edge weights are unmodified
-#'                           from the input \code{graph}.
+#' @param    junctionWeight  fraction of the nucleotide sequence that is within the 
+#'                           junction region. When specified this adds a proportional 
+#'                           number of mutations to the trunk of the tree. Requires a 
+#'                           value between 0 and 1. If \code{NULL} then edge weights are 
+#'                           unmodified from the input \code{graph}.
 #'
 #' @return   A \code{data.frame} of simulated sequences with columns:
 #'           \itemize{
@@ -179,17 +197,25 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
     }
     
     # Create data.frame to hold simulated sequences
-    sim_tree <- data.frame("NAME"=mrca_df$NAME[1],
-                           "SEQUENCE"=sequence, 
-                           "DISTANCE"=0,
-                           stringsAsFactors=F)
+    # this will include a row for Germline
+    sim_tree <- data.frame(matrix(NA, ncol=3, nrow=length(V(graph)),
+                           dimnames=list(NULL, c("NAME", "SEQUENCE", "DISTANCE"))))
+    sim_tree$NAME <- vertex_attr(graph, name="name")
+    
+    # remove row for Germline
+    sim_tree <- sim_tree[-which(sim_tree$NAME=="Germline"), ]
+        
     parent_nodes <- mrca_df$NAME[1]
     nchild <- sum(adj[parent_nodes, ] > 0)
+    
+    sim_tree$SEQUENCE[which(sim_tree$NAME==parent_nodes)] <- sequence
+    sim_tree$DISTANCE[which(sim_tree$NAME==parent_nodes)] <- 0
     
     # Add trunk mutations proportional to fraction of sequence in junction
     if(!is.null(junctionWeight)) {
         adj[parent_nodes, ] <- round(adj[parent_nodes, ] * (1 + junctionWeight))
     }
+    
     while(nchild > 0) {
         new_parents <- c()
         # Loop through parent-children combos
@@ -200,19 +226,23 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
                 new_parents <- union(new_parents, ch)
                 # Simulate sequence for that edge
                 seq <- shmulateSeq(sequence=sim_tree$SEQUENCE[sim_tree$NAME == p], 
-                                   mutations=adj[p, ch],
+                                   numMutations=adj[p, ch],
                                    targetingModel=targetingModel)
-                new_node <- data.frame("NAME"=ch, "SEQUENCE"=seq, "DISTANCE"=adj[p, ch], stringsAsFactors = F)
-                # Update output data.frame (bind_rows from dplyr)
-                sim_tree <- bind_rows(sim_tree, new_node)
+                # Update output data.frame
+                chRowIdx = which(sim_tree$NAME==ch)
+                sim_tree$SEQUENCE[chRowIdx] <- seq
+                sim_tree$DISTANCE[chRowIdx] <- adj[p, ch]
             }
         }
+        
         # Re-calculate number of children
         parent_nodes <- new_parents
         nchild <- sum(adj[parent_nodes, ] > 0)
     }
+    
     # Remove sequences that are to be excluded
     sim_tree <- sim_tree[!(sim_tree$NAME %in% skip_names), ]
+    
     return(sim_tree)
 }
 
