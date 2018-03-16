@@ -18,8 +18,8 @@ Usage
 ```
 plotBaselineSummary(baseline, idColumn, groupColumn = NULL,
 groupColors = NULL, subsetRegions = NULL, facetBy = c("region",
-"group"), title = NULL, style = c("mean"), size = 1, silent = FALSE,
-...)
+"group"), title = NULL, style = c("summary"), size = 1,
+silent = FALSE, ...)
 ```
 
 Arguments
@@ -65,7 +65,7 @@ title
 style
 :   type of plot to draw. One of:
 
-+  `"mean"`:     plots the mean and confidence interval for
++  `"summary"`:  plots the mean and confidence interval for
 the selection scores of each value in 
 `idColumn`. Faceting and coloring
 are determine by values in `groupColumn`

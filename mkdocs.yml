@@ -20,6 +20,7 @@ pages:
     - 'Quantification of selection pressure': vignettes/Baseline-Vignette.md
     - 'Tuning clonal assignment thresholds with nearest neighbor distances': vignettes/DistToNearest-Vignette.md
     - 'Inferring SHM targeting models': vignettes/Targeting-Vignette.md
+    - 'Simulation based on a targeting model': vignettes/Shmulate-Vignette.md
   - 'Help Topics':
     - 'Mutation Profiling':
       - topics/collapseClones.md
@@ -61,7 +62,6 @@ pages:
       - topics/groupBaseline.md
       - topics/summarizeBaseline.md
       - topics/testBaseline.md
-      - topics/getBaselineStats.md
       - topics/plotBaselineDensity.md
       - topics/plotBaselineSummary.md
       - topics/createBaseline.md

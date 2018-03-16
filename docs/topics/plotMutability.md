@@ -15,7 +15,7 @@ Description
 Usage
 --------------------
 ```
-plotMutability(model, nucleotides = c("A", "C", "G", "T"),
+plotMutability(model, nucleotides = c("A", "C", "G", "T"), mark = NULL,
 style = c("hedgehog", "bar"), size = 1, silent = FALSE, ...)
 ```
 
@@ -28,6 +28,10 @@ mutability rates.
 
 nucleotides
 :   vector of center nucleotide characters to plot.
+
+mark
+:   vector of 5-mer motifs to highlight in the plot. If `NULL`
+only highlight classical hot and cold spot motifs.
 
 style
 :   type of plot to draw. One of:

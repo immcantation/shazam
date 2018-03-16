@@ -1,21 +1,42 @@
-Version 0.1.8.999: August 10, 2017
+Version 0.1.8.999: March 16, 2018
 -------------------------------------------------------------------------------
 
 Selection Analysis:
 
 + Fixed a bug in `plotBaselineDensity` which caused an empty plot to be
   generated if there was only a single value in the `idColumn`.
++ Fixed a bug in `calcBaseline` which caused a crash in `summarizeBaseline` 
+  and `groupBaseline` when input `baseline` is based on only 1 sequence 
+  (i.e. when `nrow(baseline@db)` is 1).
++ Set default `plot` call on a `Baseline` object to `plotBaselineDensity`.
++ Removed `getBaselineStats` function.
++ Added a `summary` method for `Baseline` objects that calls 
+  `summarizeBaseline` and returns a data.frame.
 
 Mutation Profiling:
 
 + Fixed a bug in `shmulateSeq` which caused a crash when the input 
   sequence contains gaps (`.`).
++ Renamed the argument `mutations` in `shmulateSeq` to `numMutations`.
++ Improved help documentation for `shmulateSeq` and `shmulateTree`.
++ Added vignette for simulating mutated sequences.
++ `calcExpectedMutations` will now treat non-ACTG characters as Ns rather
+  than produce an error.
++ Added two new `RegionDefinition` objects for the full V segment as
+  single region (`IMGT_V_BY_SEGMENTS`) and the V segment with each
+  codon as a separate region (`IMGT_V_BY_CODONS`).
 
 Targeting Models:
 
 + Added the `calculateMutability` function which computes the aggregate 
   mutability for sequences.
-  
++ Fixed a bug that caused `createSubstitutionMatrix` to fail for data 
+  containing only a single V family.
++ Changed the default model to silent mutations only (`model="S"`) in 
+  `createSubstitutionMatrix`, `createSubstitutionMatrix` and 
+  `createTargetingModel`
++ Set default `plot` call on a `TargetingModel` object to `plotMutability`.
+
 
 Version 0.1.8: June 30, 2017
 -------------------------------------------------------------------------------

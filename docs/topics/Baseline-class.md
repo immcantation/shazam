@@ -13,6 +13,29 @@ Description
 analysis using the BASELINe method.
 
 
+Usage
+--------------------
+```
+"plot"(x, y, ...)
+```
+```
+"summary"(object, ...)
+```
+
+Arguments
+-------------------
+
+y
+:   name of the column in the `db` slot of `baseline` 
+containing primary identifiers.
+
+...
+:   arguments to pass to [plotBaselineDensity](plotBaselineDensity.md).
+
+...
+:   arguments to pass to [summarizeBaseline](summarizeBaseline.md).
+
+
 
 
 Slots

@@ -9,11 +9,11 @@
 Description
 --------------------
 
-`shmulateTree` returns a set of simulated sequences generated from an input sequence and an
-lineage tree. The input sequence is used to replace the MRCA node of the `igraph` object
-defining the lineage tree. Sequences are then simulated with mutations corresponding to edge 
-weights in the tree. Sequences will not be generated for groups of nodes that are specified 
-to be excluded.
+`shmulateTree` returns a set of simulated sequences generated from an input 
+sequence and a lineage tree. The input sequence is used to replace the most recent 
+common ancestor (MRCA) node of the `igraph` object defining the lineage tree. 
+Sequences are then simulated with mutations corresponding to edge weights in the tree. 
+Sequences will not be generated for groups of nodes that are specified to be excluded.
 
 
 Usage
@@ -39,21 +39,21 @@ probabilities of mutations at each position. Defaults to
 [HH_S5F](HH_S5F.md).
 
 field
-:   annotation to use for both unweighted path length exclusion and
-consideration as the MRCA node. If `NULL` do not exclude 
-any nodes.
+:   annotation to use for both unweighted path length exclusion 
+and consideration as the MRCA node. If `NULL` do not 
+exclude any nodes.
 
 exclude
-:   vector of annotation values in `field` to exclude from potential
-MRCA set. If `NULL` do not exclude any nodes. 
+:   vector of annotation values in `field` to exclude from 
+potential MRCA set. If `NULL` do not exclude any nodes.
 Has no effect if `field=NULL`.
 
 junctionWeight
-:   fraction of the nucleotide sequence that is within the junction 
-region. When specified this adds a proportional number of  
-mutations to the trunk of the tree. Requires a value between 
-0 and 1. If `NULL` then edge weights are unmodified
-from the input `graph`.
+:   fraction of the nucleotide sequence that is within the 
+junction region. When specified this adds a proportional 
+number of mutations to the immediate offspring nodes of the 
+MRCA. Requires a value between 0 and 1. If `NULL` then 
+edge weights are unmodified from the input `graph`.
 
 
 
@@ -90,13 +90,13 @@ shmulateTree(sequence, graph)
 ```
             NAME                                      SEQUENCE DISTANCE
 1      Inferred1 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-2 GN5SHBT07JDYW5 NGATCTGACGATACGGCCGTATATTACTGTGCGAGAGATAGTTTA        2
-3 GN5SHBT01AKANC NGATCTGGCGAAACGGCCGTGTTTTACTGTGCGAGAGATAGCTTA        4
-4 GN5SHBT03EP4KC NGATCTGACGATACGGCCGTATATTCCTGTGCGAGAGATAATTTG        3
-5 GN5SHBT01A3SFZ NGATCTGACGACACGACCGTTGATTATTGTGCGAGAGATACTTTA        6
-6 GN5SHBT04CEA6I NGATCTGACCATACGGCCGTATATTACTGTGCGAGAGATAGTTTA        1
-7 GN5SHBT06IXJIH NGATCTGACGATACGGCCGTATATTACTGTGCGCGAGATAGTTTA        1
-8 GN5SHBT08HUU7M NGATCTGGCGATACGGCCCTATATTCCTGTGCCAGAGATAATTTG        3
+2 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGGGTA        2
+3 GN5SHBT03EP4KC NGATTTGACGACACGGCCGTGTATTACTATGCGAGAGATAGGTTA        3
+5 GN5SHBT01AKANC NGATCTGCCGACACGGCCGTGTATTACTGTGCGAGTGACAGTTCA        4
+6 GN5SHBT01A3SFZ NGATTTGACGACTCGGCCGTCTGTTACTGTGCGCGAGATCGGGTA        6
+7 GN5SHBT08HUU7M NGACTTGACGACACGGCCGTGTGTTACTATGCGAGAGATAGGTTG        3
+8 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGGCTA        1
+9 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGGATA        1
 
 ```
 
@@ -105,7 +105,7 @@ shmulateTree(sequence, graph)
 
 # Simulate using the mouse 5-mer targeting model
 # Exclude nodes without a sample identifier
-# Add 20% mutation rate to the trunk
+# Add 20% mutation rate to the immediate offsprings of the MRCA
 shmulateTree(sequence, graph, targetingModel=MK_RS5NF,
 field="SAMPLE", exclude=NA, junctionWeight=0.2)
 ```
@@ -113,12 +113,12 @@ field="SAMPLE", exclude=NA, junctionWeight=0.2)
 
 ```
             NAME                                      SEQUENCE DISTANCE
-1 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-2 GN5SHBT03EP4KC NGATCTGACGACACGTCCGTGTGTTACTGTGTGAGAGATACTTTA        4
-3 GN5SHBT01A3SFZ NGATCTGATGAAACGTCCGTGTATTGTCATGCGAGAGATAGTTTA        7
-4 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTGTGTTACTGTGCGAGAGATAGTTTA        1
-5 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAATTTA        1
-6 GN5SHBT08HUU7M NGATTTGACGACTCGTCCGTGTGTTACTCTGTGAGAGATACTTTA        3
+2 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
+3 GN5SHBT03EP4KC NGATCTGACGACACGGCCGTGTATGACCGTCCGAGACATAGTTTA        4
+6 GN5SHBT01A3SFZ NGAACGGACAACACGGCCATGTATTATTGTGCGAGAGATAATTTG        7
+7 GN5SHBT08HUU7M NGATCTGACGACACAGCCGTATATGACCGTCCGAGACATAGTTTT        3
+8 GN5SHBT04CEA6I NGATCTGACGACACGGCTGTGTATTACTGTGCGAGAGATAGTTTA        1
+9 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTGCTGTGCGAGAGATAGTTTA        1
 
 ```
 

@@ -169,7 +169,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1591792
+## [1] 0.1584049
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `binwidth` parameter.

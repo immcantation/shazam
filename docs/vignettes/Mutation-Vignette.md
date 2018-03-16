@@ -130,11 +130,22 @@ plot(g1)
 
 To restrict the mutational analysis to a particular area in the sequence, the `regionDefinition`
 argument needs to be assigned a `RegionDefinition` object, which simply defines the subregion 
-boundaries of the Ig sequence. For convenience, `shazam` provides a set of such objects. 
+boundaries of the Ig sequence. For convenience, `shazam` provides a set of such objects, for which an overview is provided via `?IMGT_SCHEMES`. Each of these objects cover the IMGT numbered V segment up to nucleotide position 312. Different objects treat regions within the V segment with varying granularity:
 
-In the following example, we will explore the mutation frequency in the V-segment. 
-The `IMGT_V` `RegionDefinition` defines the limits of the CDR and FWR in the V-segment, 
-excluding the CDR3, according to the IMGT unique numbering scheme.
+* `IMGT_V_BY_CODONS`: treats each codon, from codon 1 to codon 104, as a distinct region;
+* `IMGT_V_BY_REGIONS`: defines regions to be CDR1, CDR2, FWR1, FWR2 and FWR3;
+* `IMGT_V`: defines regions to be either CDR or FWR;
+* `IMGT_V_BY_SEGMENTS`: provides no subdivisons and treats the entire V segment as a single region.
+
+When supplying one of these objects to `regionDefinition`, and with `combined=FALSE`, the resultant mutation counts/frequencies will be tabulated in a way consistent with the granularity of the object's region definition. For example, 
+
+* With `IMGT_V_BY_REGIONS`, mutation frequencies will be reported in columns `MU_FREQ_CDR1_R`, `MU_FREQ_CDR1_S`, `MU_FREQ_CDR2_R`, `MU_FREQ_CDR2_S`, `MU_FREQ_FWR1_R`, `MU_FREQ_FWR1_S`, `MU_FREQ_FWR2_R`, `MU_FREQ_FWR2_S`, `MU_FREQ_FWR3_R`, and `MU_FREQ_FWR3_S`.
+
+* With `IMGT_V`, mutation frequencies will be reported in columns `MU_FREQ_CDR_R`, `MU_FREQ_CDR_S`, `MU_FREQ_FWR_R`, and `MU_FREQ_FWR_S`.
+
+* With `IMGT_V_BY_SEGMENTS`, mutation frequencies will be reported in columns `MU_FREQ_V_R`, and `MU_FREQ_V_S`.
+
+In the following example, we will explore the mutation frequency in the V-segment using two of the region definitions.
 
 
 ```r

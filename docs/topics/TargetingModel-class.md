@@ -13,6 +13,22 @@ Description
 targeting of immunoglobulin (Ig) sequencing data in a 5-mer microsequence context.
 
 
+Usage
+--------------------
+```
+"plot"(x, y, ...)
+```
+
+Arguments
+-------------------
+
+y
+:   ignored.
+
+...
+:   arguments to pass to [plotMutability](plotMutability.md).
+
+
 
 
 Slots

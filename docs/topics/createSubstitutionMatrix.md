@@ -17,7 +17,7 @@ motifs.
 Usage
 --------------------
 ```
-createSubstitutionMatrix(db, model = c("RS", "S"),
+createSubstitutionMatrix(db, model = c("S", "RS"),
 sequenceColumn = "SEQUENCE_IMGT", germlineColumn = "GERMLINE_IMGT_D_MASK",
 vCallColumn = "V_CALL", multipleMutation = c("independent", "ignore"),
 returnModel = c("5mer", "1mer", "1mer_raw"), minNumMutations = 50,
@@ -31,10 +31,12 @@ db
 :   data.frame containing sequence data.
 
 model
-:   type of model to create. The default model, "RS", creates 
-a model by counting both replacement and silent mutations.
-The "S" specification builds a model by counting only 
-silent mutations.
+:   type of model to create. The default model, "S", 
+builds a model by counting only silent mutations. `model="S"`
+should be used for data that includes functional sequences.
+Setting `model="RS"` creates a model by counting both 
+replacement and silent mutations and may be used on fully 
+non-functional sequence data sets.
 
 sequenceColumn
 :   name of the column containing IMGT-gapped sample sequences.

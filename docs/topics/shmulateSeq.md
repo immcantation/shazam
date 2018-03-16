@@ -16,7 +16,7 @@ Targeting probabilities at each position are updated after each iteration.
 Usage
 --------------------
 ```
-shmulateSeq(sequence, mutations, targetingModel = HH_S5F)
+shmulateSeq(sequence, numMutations, targetingModel = HH_S5F)
 ```
 
 Arguments
@@ -24,8 +24,10 @@ Arguments
 
 sequence
 :   sequence string in which mutations are to be introduced.
+Accepted alphabet: `{A, T, G, C, N, .}`. Note
+that `-` is not accepted.
 
-mutations
+numMutations
 :   number of mutations to be introduced into `sequence`.
 
 targetingModel
@@ -42,21 +44,31 @@ Value
 A string defining the mutated sequence.
 
 
+Details
+-------------------
+
+If the input `sequence` has a non-triplet overhang at the end, it will be trimmed
+to the last codon. For example, `ATGCATGC` will be trimmed to `ATGCAT`.
+
+Mutations are not introduced to positions in the input `sequence` that contain 
+`.` or `N`.
+
+
 
 Examples
 -------------------
 
 ```R
 # Define example input sequence
-sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
+sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATA.TTTA"
 
 # Simulate using the default human 5-mer targeting model
-shmulateSeq(sequence, mutations=6)
+shmulateSeq(sequence, numMutations=6)
 ```
 
 
 ```
-[1] "NGATCTGACGACGCGGCCGTTTATTACTGTGCCAGAGCTACTTTC"
+[1] "NGATCTAACGGCACGGCCGTGTATTACTGTGCGAGAAATA.TCCT"
 
 ```
 
