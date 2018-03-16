@@ -145,7 +145,7 @@ makeNullRegionDefinition <- function(regionLength) {
 #'                                      and FWR1, FWR2 and FWR3 into a single FWR region. CDR3 and FWR4 are
 #'                                      excluded as they are downstream of nucleotide 312.
 #'   \item  \code{IMGT_V_BY_CODONS}:    The IMGT numbered V segment up to position nucleotide 312.
-#'                                      This definition treats each codon, from codon 1 codon 104, as a 
+#'                                      This definition treats each codon, from codon 1 to codon 104, as a 
 #'                                      distinct region.
 #'   \item  \code{IMGT_V_BY_REGIONS}:   The IMGT numbered V segment up to position nucleotide 312.
 #'                                      This defines separate regions for each of CDR1, CDR2,
