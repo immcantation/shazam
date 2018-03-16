@@ -105,6 +105,7 @@ plot(graph, layout=layout_as_tree, edge.arrow.mode=0, vertex.label.cex=0.75)
 # Exclude nodes without a sample identifier
 # The nodes "Germline" and "Inferred1" are thus excluded
 # As a corollary, "GN5SHBT01AKANC", the offspring of "Inferred1", is also excluded
+# In this case, "GN5SHBT07JDYW5" is then taken to be the MRCA
 shmulateTree(sequence, graph, field="SAMPLE", exclude=NA)
 ```
 

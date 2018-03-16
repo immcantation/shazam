@@ -248,6 +248,8 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
     # then node B will have $SEQUENCE and $DISTANCE of NAs
     sim_tree <- sim_tree[!is.na(sim_tree$SEQUENCE), ]
     
+    rownames(sim_tree) <- NULL
+    
     return(sim_tree)
 }
 
