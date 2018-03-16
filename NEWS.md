@@ -1,4 +1,4 @@
-Version 0.1.8.999: March 14, 2018
+Version 0.1.8.999: March 16, 2018
 -------------------------------------------------------------------------------
 
 Selection Analysis:
@@ -17,6 +17,9 @@ Mutation Profiling:
 
 + Fixed a bug in `shmulateSeq` which caused a crash when the input 
   sequence contains gaps (`.`).
++ Renamed the argument `mutations` in `shmulateSeq` to `numMutations`.
++ Improved help documentation for `shmulateSeq` and `shmulateTree`.
++ Added vignette for simulating mutated sequences.
 + `calcExpectedMutations` will now treat non-ACTG characters as Ns rather
   than produce an error.
 + Added two new `RegionDefinition` objects for the full V segment as

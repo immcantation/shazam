@@ -120,10 +120,10 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
 #' Simulate mutations in a lineage tree
 #'
 #' \code{shmulateTree} returns a set of simulated sequences generated from an input 
-#' sequence and a lineage tree. The input sequence is used to replace the MRCA node of the
-#' \code{igraph} object defining the lineage tree. Sequences are then simulated with 
-#' mutations corresponding to edge weights in the tree. Sequences will not be generated 
-#' for groups of nodes that are specified to be excluded.
+#' sequence and a lineage tree. The input sequence is used to replace the most recent 
+#' common ancestor (MRCA) node of the \code{igraph} object defining the lineage tree. 
+#' Sequences are then simulated with mutations corresponding to edge weights in the tree. 
+#' Sequences will not be generated for groups of nodes that are specified to be excluded.
 #'
 #' @param    sequence        string defining the MRCA sequence to seed mutations from.
 #' @param    graph           \code{igraph} object defining the seed lineage tree, with 
@@ -139,9 +139,9 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
 #'                           Has no effect if \code{field=NULL}.
 #' @param    junctionWeight  fraction of the nucleotide sequence that is within the 
 #'                           junction region. When specified this adds a proportional 
-#'                           number of mutations to the trunk of the tree. Requires a 
-#'                           value between 0 and 1. If \code{NULL} then edge weights are 
-#'                           unmodified from the input \code{graph}.
+#'                           number of mutations to the immediate offspring nodes of the 
+#'                           MRCA. Requires a value between 0 and 1. If \code{NULL} then 
+#'                           edge weights are unmodified from the input \code{graph}.
 #'
 #' @return   A \code{data.frame} of simulated sequences with columns:
 #'           \itemize{
@@ -167,7 +167,7 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
 #' 
 #' # Simulate using the mouse 5-mer targeting model
 #' # Exclude nodes without a sample identifier
-#' # Add 20% mutation rate to the trunk
+#' # Add 20% mutation rate to the immediate offsprings of the MRCA
 #' shmulateTree(sequence, graph, targetingModel=MK_RS5NF,
 #'              field="SAMPLE", exclude=NA, junctionWeight=0.2)
 #'  
@@ -211,7 +211,8 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
     sim_tree$SEQUENCE[which(sim_tree$NAME==parent_nodes)] <- sequence
     sim_tree$DISTANCE[which(sim_tree$NAME==parent_nodes)] <- 0
     
-    # Add trunk mutations proportional to fraction of sequence in junction
+    # Add mutations to the immediate offsprings of the MRCA
+    # Number of mutations added is proportional to fraction of sequence in junction
     if(!is.null(junctionWeight)) {
         adj[parent_nodes, ] <- round(adj[parent_nodes, ] * (1 + junctionWeight))
     }
@@ -242,6 +243,10 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
     
     # Remove sequences that are to be excluded
     sim_tree <- sim_tree[!(sim_tree$NAME %in% skip_names), ]
+    # Remove NAs
+    # e.g. if node B is an offspring of node A, and node A has been excluded
+    # then node B will have $SEQUENCE and $DISTANCE of NAs
+    sim_tree <- sim_tree[!is.na(sim_tree$SEQUENCE), ]
     
     return(sim_tree)
 }
