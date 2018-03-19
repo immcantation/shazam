@@ -1,5 +1,7 @@
 load(file.path("..", "data-tests", "ExampleDb.rda"))
 
+#### createSubstitutionMatrix ####
+
 test_that("createSubstitutionMatrix", {
     
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
@@ -12,6 +14,7 @@ test_that("createSubstitutionMatrix", {
     expect_equal(sub[idx], expected, tolerance=0.001)
 })
 
+#### createMutabilityMatrix ####
 
 test_that("createMutabilityMatrix", {
    
@@ -28,6 +31,8 @@ test_that("createMutabilityMatrix", {
     expect_equal(as.vector(mut_model[idx]), expected_mut, tolerance=0.001)
 })
 
+#### extendSubstitutionMatrix ####
+
 test_that("extendSubstitutionMatrix", {
     
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
@@ -41,6 +46,8 @@ test_that("extendSubstitutionMatrix", {
     expected_ext <- c(NA, NA, NA, NA, 0.621, NA, NA, 0.547, 0.547, NA)
     expect_equal(ext_model[idx], expected_ext, tolerance=0.001)
 })
+
+#### extendMutabilityMatrix ####
 
 test_that("extendMutabilityMatrix", {
     
@@ -58,6 +65,8 @@ test_that("extendMutabilityMatrix", {
     expected_ext <- c(0, 0, 0, 0, 0.002, 0.001, 0.001, 0.003, 0, 0)
     expect_equal(as.vector(ext_model[idx]), expected_ext, tolerance=0.001)
 })
+
+#### createTargetingMatrix ####
 
 test_that("createTargetingMatrix", {
     
@@ -80,7 +89,9 @@ test_that("createTargetingMatrix", {
     expected_tar <- c(NA, NA, 0, NA, NA, NA, NA, NA, NA, 0, 0, 0.001, 0, NA, NA, 0, NA, 0, NA, NA)
     expect_equal(tar_mat[idx], expected_tar, tolerance=0.001)
 })    
-    
+
+#### createTargetingModel ####
+
 test_that("createTargetingModel", {
     
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
@@ -92,7 +103,9 @@ test_that("createTargetingModel", {
     idx <- sample(length(model), 20)
     expected_model <- c(0, 0.001, 0, NA, 0, 0, 0, NA, NA, NA, 0.001, 0.003, NA, 0.001, NA, NA, NA, NA, 0, NA)
     expect_equal(model@targeting[idx], expected_model, tolerance=0.001)    
-})    
+})
+
+#### calcTargetingDistance ####
 
 test_that("calcTargetingDistance", {
     
@@ -103,6 +116,8 @@ test_that("calcTargetingDistance", {
     expected_dist <- c(0.94, 0, 0.93, 1.03, 0, 1.03, 0.96, 0, 0.94, 0, 0, 0, 0, 0.96, 0.94, 0, 0, 1.00, 0.85, 0)
     expect_equal(dist[idx], expected_dist, tolerance=0.001)
 })
+
+#### rescaleMutability ####
 
 test_that("rescaleMutability", {
     
@@ -119,6 +134,8 @@ test_that("rescaleMutability", {
     expect_equal(as.vector(mut[idx]), expected_mut, tolerance=0.001)   
 })
 
+#### removeCodonGaps ####
+
 test_that("removeCodonGaps", {
     test_db <- data.frame("A"=c("ATC","...","ATC", "ATC...", "ATC..."), "B"=c("ATC","...","...", "ATC...","...ATC"))
     obs <- shazam:::removeCodonGaps(test_db)
@@ -126,7 +143,9 @@ test_that("removeCodonGaps", {
     expect_equal(obs, exp)
 })
 
-test_that("calcOBservedMutations and listObservedMutations reproduce same results", {
+#### calcObservedMutations and listObservedMutations ####
+
+test_that("calcObservedMutations and listObservedMutations reproduce same results", {
     
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
     
@@ -146,6 +165,8 @@ test_that("calcOBservedMutations and listObservedMutations reproduce same result
     expect_equal(length(lom[[1]]), sum(om_v[1, grep("MU_COUNT_", colnames(om_v))]))
     
 })
+
+#### makeDegenerate5merSub ####
 
 test_that("makeDegenerate5merSub with extended=FALSE using HH_S1F", {
     degenerate5mer = makeDegenerate5merSub(HH_S1F, extended=FALSE)
@@ -187,6 +208,8 @@ test_that("makeDegenerate5merSub with extended=TRUE using HH_S1F", {
     }
 })
 
+#### makeAverage1merSub ####
+
 test_that("makeAverage1merSub using HH_S1F", {
     degenerate5mer = makeDegenerate5merSub(HH_S1F, extended=FALSE)
     average1mer = makeAverage1merSub(degenerate5mer)
@@ -198,6 +221,8 @@ test_that("makeAverage1merSub using HH_S1F", {
     
     expect_equal(test_HH_S1F, average1mer)
 })
+
+#### makeDegenerate5merMut ####
 
 test_that("makeDegenerate5merMut with extended=FALSE using an example", {
     example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)
@@ -232,6 +257,8 @@ test_that("makeDegenerate5merMut with extended=TRUE using an example", {
         expect_equal(NA, degenerate5mer[idx])
     }
 })
+
+#### makeAverage1merMut ####
 
 test_that("makeAverage1merMut using an example", {
     example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)

@@ -7,6 +7,8 @@ rm(e1)
 
 load(file.path("..", "data-tests", "ExampleDb.rda"))
 
+#### calculateTargeting and calculateMutationalPaths ####
+
 test_that("calculateTargeting and calculateMutationalPaths with regionDefinition==NULL", {
     
     cat("\nTest calculateTargeting and calculateMutationalPaths with regionDefinition==NULL\n")
@@ -67,9 +69,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
 })
 
 
-##--
-## Expected
-##--
+#### calcExpectedMutations ####
 
 test_that("calcExpectedMutations works with regionDefinition==NULL",{
     cat("\nTest calcExpectedMutations works with regionDefinition==NULL\n")
@@ -145,9 +145,7 @@ test_that("expectedMutations works with regionDefinition==NULL",{
     
 })
 
-##--
-## Observed
-##--
+#### calcObservedMutations ####
 
 test_that("calcObservedMutations works with regionDefinition==NULL",{
     cat("\nTest calcObservedMutations works with regionDefinition==NULL\n")
@@ -227,9 +225,7 @@ test_that("observedMutations works with regionDefinition==NULL",{
     
 })
 
-##--
-## Baseline
-##--
+#### calcBaseline - multiple sequences ####
 
 test_that("calcBaseline", {
     
@@ -411,6 +407,74 @@ test_that("calcBaseline", {
     
 })
 
+#### calcBaseline - single sequence ####
+
+test_that("BASELINe functions work for single-sequence input", {
+    # idea: output for a single-sequence input should match the corresponding output for 
+    # the sequence when inputted together with other sequences
+    
+    ### calcBaseline()
+    # with calcStats=TRUE, this also tests summarizeBaseline() 
+    singleIdx <- 3
+    testDb <- db[1:singleIdx, ]
+    testDb$SUBJ <- LETTERS[1:singleIdx]
+    
+    calcBaselineMulti <- calcBaseline(db=testDb, sequenceColumn="SEQUENCE_IMGT", 
+                                      germlineColumn="GERMLINE_IMGT_D_MASK", calcStats=TRUE)
+    calcBaselineSingle <- calcBaseline(db=testDb[singleIdx, ], sequenceColumn="SEQUENCE_IMGT", 
+                                       germlineColumn="GERMLINE_IMGT_D_MASK", calcStats=TRUE)
+    ## compare @db
+    expect_equivalent(calcBaselineMulti@db[singleIdx, ], calcBaselineSingle@db)
+    ## compare @pdfs
+    expect_true(class(calcBaselineMulti@pdfs[["SEQ"]])=="matrix")
+    expect_true(class(calcBaselineSingle@pdfs[["SEQ"]])=="matrix")
+    expect_equal(dim(calcBaselineMulti@pdfs[["SEQ"]]), c(singleIdx, 4001))
+    expect_equal(dim(calcBaselineSingle@pdfs[["SEQ"]]), c(1, 4001))
+    expect_equal(calcBaselineMulti@pdfs[["SEQ"]][singleIdx, ], 
+                 calcBaselineSingle@pdfs[["SEQ"]][1, ])
+    ## compare @stats
+    expect_equivalent(calcBaselineMulti@stats[singleIdx, ],
+                      calcBaselineSingle@stats)
+    
+    ### groupBaseline()
+    groupBaselineMulti <- groupBaseline(calcBaselineMulti, groupBy="SUBJ")
+    groupBaselineSingle <- groupBaseline(calcBaselineSingle, groupBy="SUBJ")
+    ## compare @db
+    expect_equivalent(groupBaselineMulti@db[singleIdx, ], groupBaselineSingle@db[1, ])
+    ## compare @pdfs
+    expect_true(class(groupBaselineMulti@pdfs[["SEQ"]])=="matrix")
+    expect_true(class(groupBaselineSingle@pdfs[["SEQ"]])=="matrix")
+    expect_equal(dim(groupBaselineMulti@pdfs[["SEQ"]]), c(singleIdx, 4001))
+    expect_equal(dim(groupBaselineSingle@pdfs[["SEQ"]]), c(1, 4001))
+    expect_equal(groupBaselineMulti@pdfs[["SEQ"]][singleIdx, ], 
+                 groupBaselineSingle@pdfs[["SEQ"]][1, ])
+    # @pdfs from calcBaselineSingle and groupBaselineSingle should also match since
+    # there essentially is no effective grouping (each group has 1 single only)
+    expect_equal(groupBaselineSingle@pdfs[["SEQ"]][1, ], 
+                 calcBaselineSingle@pdfs[["SEQ"]][1, ])
+    ## compare stats
+    expect_equivalent(groupBaselineMulti@stats[singleIdx, ],
+                      groupBaselineSingle@stats)
+    
+    ### testBaseline() will by design produce error for groupBaselineSingle because
+    # the SUBJ column does not contain at least two groups (hence not tested here)
+    
+    ### plotBaselineSummary() & plotBaselineDensity
+    # expect these to run without error 
+    # (further comparison would require manual inspection)
+    expect_silent(plotBaselineSummary(calcBaselineMulti@stats, idColumn="SEQUENCE_ID"))
+    expect_silent(plotBaselineSummary(calcBaselineSingle@stats, idColumn="SEQUENCE_ID"))
+    expect_silent(plotBaselineSummary(groupBaselineMulti, idColumn="SUBJ", groupColumn="SUBJ"))
+    expect_silent(plotBaselineSummary(groupBaselineSingle, idColumn="SUBJ", groupColumn="SUBJ"))
+    
+    expect_silent(plotBaselineDensity(calcBaselineMulti, idColumn="SEQUENCE_ID"))
+    expect_silent(plotBaselineDensity(calcBaselineSingle, idColumn="SEQUENCE_ID"))
+    expect_silent(plotBaselineDensity(groupBaselineMulti, idColumn="SUBJ", groupColumn="SUBJ"))
+    expect_silent(plotBaselineDensity(groupBaselineSingle, idColumn="SUBJ", groupColumn="SUBJ"))
+    
+})
+
+#### groupBaseline ####
 
 test_that("Test groupBaseline", {
     
@@ -474,70 +538,5 @@ test_that("Test groupBaseline", {
     expect_equal(range(pdf3$CDR[2,]), c(0,7.319), tolerance=0.01)    
     expect_equal(sigma3, 
                  c( -0.25, -0.72, -0.10, -0.69), tolerance=0.01)
-    
-})
-
-test_that("BASELINe functions work for single-sequence input", {
-    # idea: output for a single-sequence input should match the corresponding output for 
-    # the sequence when inputted together with other sequences
-    
-    ### calcBaseline()
-    # with calcStats=TRUE, this also tests summarizeBaseline() 
-    singleIdx <- 3
-    testDb <- db[1:singleIdx, ]
-    testDb$SUBJ <- LETTERS[1:singleIdx]
-    
-    calcBaselineMulti <- calcBaseline(db=testDb, sequenceColumn="SEQUENCE_IMGT", 
-                                      germlineColumn="GERMLINE_IMGT_D_MASK", calcStats=TRUE)
-    calcBaselineSingle <- calcBaseline(db=testDb[singleIdx, ], sequenceColumn="SEQUENCE_IMGT", 
-                                      germlineColumn="GERMLINE_IMGT_D_MASK", calcStats=TRUE)
-    ## compare @db
-    expect_equivalent(calcBaselineMulti@db[singleIdx, ], calcBaselineSingle@db)
-    ## compare @pdfs
-    expect_true(class(calcBaselineMulti@pdfs[["SEQ"]])=="matrix")
-    expect_true(class(calcBaselineSingle@pdfs[["SEQ"]])=="matrix")
-    expect_equal(dim(calcBaselineMulti@pdfs[["SEQ"]]), c(singleIdx, 4001))
-    expect_equal(dim(calcBaselineSingle@pdfs[["SEQ"]]), c(1, 4001))
-    expect_equal(calcBaselineMulti@pdfs[["SEQ"]][singleIdx, ], 
-                 calcBaselineSingle@pdfs[["SEQ"]][1, ])
-    ## compare @stats
-    expect_equivalent(calcBaselineMulti@stats[singleIdx, ],
-                      calcBaselineSingle@stats)
-    
-    ### groupBaseline()
-    groupBaselineMulti <- groupBaseline(calcBaselineMulti, groupBy="SUBJ")
-    groupBaselineSingle <- groupBaseline(calcBaselineSingle, groupBy="SUBJ")
-    ## compare @db
-    expect_equivalent(groupBaselineMulti@db[singleIdx, ], groupBaselineSingle@db[1, ])
-    ## compare @pdfs
-    expect_true(class(groupBaselineMulti@pdfs[["SEQ"]])=="matrix")
-    expect_true(class(groupBaselineSingle@pdfs[["SEQ"]])=="matrix")
-    expect_equal(dim(groupBaselineMulti@pdfs[["SEQ"]]), c(singleIdx, 4001))
-    expect_equal(dim(groupBaselineSingle@pdfs[["SEQ"]]), c(1, 4001))
-    expect_equal(groupBaselineMulti@pdfs[["SEQ"]][singleIdx, ], 
-                 groupBaselineSingle@pdfs[["SEQ"]][1, ])
-    # @pdfs from calcBaselineSingle and groupBaselineSingle should also match since
-    # there essentially is no effective grouping (each group has 1 single only)
-    expect_equal(groupBaselineSingle@pdfs[["SEQ"]][1, ], 
-                 calcBaselineSingle@pdfs[["SEQ"]][1, ])
-    ## compare stats
-    expect_equivalent(groupBaselineMulti@stats[singleIdx, ],
-                      groupBaselineSingle@stats)
-    
-    ### testBaseline() will by design produce error for groupBaselineSingle because
-    # the SUBJ column does not contain at least two groups (hence not tested here)
-    
-    ### plotBaselineSummary() & plotBaselineDensity
-    # expect these to run without error 
-    # (further comparison would require manual inspection)
-    expect_silent(plotBaselineSummary(calcBaselineMulti@stats, idColumn="SEQUENCE_ID"))
-    expect_silent(plotBaselineSummary(calcBaselineSingle@stats, idColumn="SEQUENCE_ID"))
-    expect_silent(plotBaselineSummary(groupBaselineMulti, idColumn="SUBJ", groupColumn="SUBJ"))
-    expect_silent(plotBaselineSummary(groupBaselineSingle, idColumn="SUBJ", groupColumn="SUBJ"))
-    
-    expect_silent(plotBaselineDensity(calcBaselineMulti, idColumn="SEQUENCE_ID"))
-    expect_silent(plotBaselineDensity(calcBaselineSingle, idColumn="SEQUENCE_ID"))
-    expect_silent(plotBaselineDensity(groupBaselineMulti, idColumn="SUBJ", groupColumn="SUBJ"))
-    expect_silent(plotBaselineDensity(groupBaselineSingle, idColumn="SUBJ", groupColumn="SUBJ"))
     
 })

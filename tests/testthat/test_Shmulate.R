@@ -1,5 +1,7 @@
 load(file.path("..", "data-tests", "ExampleTrees.rda"))
 
+#### shmulateSeq ####
+
 test_that("Test shmulateSeq", {
     
     cat("\nTest shmulateSeq\n")
@@ -24,6 +26,8 @@ test_that("Test shmulateSeq", {
 
     expect_equal(sum(i != o), 6)
 })
+
+#### shmulateTree ####
 
 test_that("Test shmulateTree", { 
     

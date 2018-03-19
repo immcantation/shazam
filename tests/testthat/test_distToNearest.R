@@ -5,6 +5,8 @@ load(file.path("..", "data-tests", "TestDb.rda"), envir=e1)
 db <- get("TestDb", envir=e1)
 rm(e1)
 
+#### distToNearest - cross with hh_s1f ####
+
 test_that("Test cross distToNearest with model hh_s1f", {
     ## Reproduce example
     db <- subset(db, CPRIMER %in% c("IGHA", "IGHM") & 
@@ -72,6 +74,8 @@ test_that("Test cross distToNearest with model hh_s1f", {
                              model="hh_s1f", first=FALSE, normalize="len",cross="SAMPLE")
     expect_equal(db3_1_316_630$CROSS_DIST_NEAREST,c(0.0175,0.0175,0.0175), tolerance=0.005)
 })
+
+#### distToNearest - cross with hh_s5f ####
 
 test_that("Test cross distToNearest with model hh_s5f", {
     ## Reproduce vignette
@@ -164,6 +168,8 @@ test_that("Test cross distToNearest with model hh_s5f", {
     
 })
 
+#### distToNearest - unrecognized characters ####
+
 test_that("Test distToNearest with unrecognized characters", {
     db2 <- subset(db, CPRIMER %in% c("IGHA","IGHM") &
                      BARCODE %in% c("RL016","RL018","RL019","RL021"))
@@ -186,6 +192,8 @@ test_that("Test distToNearest with unrecognized characters", {
 
 })
 
+#### distToNearest - tibbles ####
+
 test_that("Test distToNearest returns the same result with data.frame and tibble", {
     db2 <- subset(db, CPRIMER %in% c("IGHA","IGHM") &
                       BARCODE %in% c("RL016","RL018","RL019","RL021"))
@@ -194,6 +202,8 @@ test_that("Test distToNearest returns the same result with data.frame and tibble
         distToNearest(tibble::as_tibble(db2))
     )
 })
+
+#### findThreshold ####
 
 test_that("Test findThreshold", {
     
@@ -206,7 +216,8 @@ test_that("Test findThreshold", {
     expect_equal(dens_output@threshold, 0.114, tolerance=0.01)
 })
 
-
+#### calcTargetingDistance ####
+    
 test_that("Test distance, Change-O tests", {
     
     # aux function. Given a distance matrix,
