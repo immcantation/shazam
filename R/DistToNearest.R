@@ -1155,7 +1155,8 @@ gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=
     }
     
     if (valley.itr != 0) {
-        MaxLoc <- which.max(vec.lkhood)
+        # MaxLoc <- which.max(vec.lkhood)
+        MaxLoc <- which.max(abs(vec.lkhood))
         
         omega[1] <- vec.omega1[MaxLoc]; omega[2] <- vec.omega2[MaxLoc]
         mu[1] <- vec.mu1[MaxLoc];       mu[2] <- vec.mu2[MaxLoc]
@@ -1268,7 +1269,8 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
         }
         # print(paste0(func, " fit done. Loglik= ", round(MixModel$loglik, digits = 2)))
         # Invoke fit parameters
-        log_lik <- round(MixModel$loglik, digits = 2)
+        # log_lik <- round(MixModel$loglik, digits = 2)
+        log_lik <- round(abs(MixModel$loglik), digits = 2)
         if (log_lik > LOG_LIK){
             LOG_LIK <- log_lik
             
