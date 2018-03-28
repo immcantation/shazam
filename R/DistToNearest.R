@@ -813,7 +813,14 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' 
 #' @seealso  See \link{distToNearest} for generating the nearest neighbor distance vectors.
 #'           See \link{plotGmmThreshold} and \link{plotDensityThreshold} for plotting output.
-#'           
+#'      
+#' @note 
+#' We recommend users to visually inspect the resulting
+#' fits when using \code{method="gmm"}. Our empirical observations imply that, the bimodality 
+#' of the distance-to-nearest distribution is detectable for a repertoire of minimum 1k reads.
+#' The increased number of sequences will improve the fitting procedure, although it would be 
+#' at the potential expense of higher demand in computational time complexity.     
+#' 
 #' @examples
 #' \donttest{
 #' # Subset example data to one sample as a demo
