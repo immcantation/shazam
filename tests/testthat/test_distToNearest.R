@@ -192,6 +192,29 @@ test_that("Test distToNearest with unrecognized characters", {
 
 })
 
+#### distToNearest - model='aa'  ####
+test_that("Test distToNearest with stop codon model='aa' ", {
+    # Create a toy dataframe
+    juncs <- c("ACGTACGTACGTACGTACGTACGTACGTATCGT", 
+               "ACGTACGTACGTACGTACGTACGTACGTATAAT", 
+               "ACGTACGTACGTACGTACGTACGTACGTATNNN", 
+               "ACGTACGTACGTACGTACGTACGTACGTAT---",
+               "TGGAACGTACGTACGTACGTACGTACGTACGTT",
+               "---A--GTACGTACGTACGTACGTACGTAT---")
+    vcall <- "Homsap IGHV3-49*03 F"
+    jcall <- "Homsap IGHJ1*01 F"
+    df <- data.frame(SEQUENCE_ID=c(1:length(juncs)),
+                     V_CALL= rep(vcall, length(juncs)),
+                     J_CALL= rep(jcall, length(juncs)),
+                     JUNCTION=juncs)
+    # calculate the ditances with normalization
+    df <- distToNearest(df, model="aa")
+    expect_equal(df$DIST_NEAREST, c(0.0303,0.0303,0.0606,0.0606,0.0606,NA))
+    # calculate the ditances without normalization
+    df <- distToNearest(df, model="aa", normalize = "none")
+    expect_equal(df$DIST_NEAREST, c(1,1,2,2,2,NA))
+})
+
 #### distToNearest - tibbles ####
 
 test_that("Test distToNearest returns the same result with data.frame and tibble", {
