@@ -71,6 +71,7 @@ setClass("Baseline",
 
 #### Methods #####
 
+#' @param    x    \code{Baseline} object.
 #' @param    y    name of the column in the \code{db} slot of \code{baseline} 
 #'                containing primary identifiers.
 #' @param    ...  arguments to pass to \link{plotBaselineDensity}.
@@ -82,13 +83,14 @@ setMethod("plot", c(x="Baseline", y="character"),
           function(x, y, ...) { plotBaselineDensity(x, y, ...) })
 
 
-#' @param    ...  arguments to pass to \link{summarizeBaseline}.
+#' @param    object  \code{Baseline} object.
+#' @param    nproc   number of cores to distribute the operation over.
 #' 
 #' @rdname   Baseline-class
 #' @aliases  Baseline-method
 #' @export
-setMethod("summary", c(object="Baseline"),
-          function(object, ...) { summarizeBaseline(object, returnType="df", ...) })
+setMethod("summary", c(object="Baseline", nproc=integer()),
+          function(object, nproc=1) { summarizeBaseline(object, returnType="df", nproc=nproc) })
 
 
 #### Accessory functions #####

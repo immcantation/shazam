@@ -209,6 +209,7 @@ setClass("TargetingModel",
 
 #### Methods ####
 
+#' @param    x    \code{TargetingModel} object.
 #' @param    y    ignored.
 #' @param    ...  arguments to pass to \link{plotMutability}.
 #' 

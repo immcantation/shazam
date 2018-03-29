@@ -207,9 +207,11 @@ test_that("Test distToNearest with stop codon model='aa' ", {
                      V_CALL= rep(vcall, length(juncs)),
                      J_CALL= rep(jcall, length(juncs)),
                      JUNCTION=juncs)
+    
     # calculate the ditances with normalization
     df <- distToNearest(df, model="aa")
     expect_equal(df$DIST_NEAREST, c(0.0303,0.0303,0.0606,0.0606,0.0606,NA))
+    
     # calculate the ditances without normalization
     df <- distToNearest(df, model="aa", normalize = "none")
     expect_equal(df$DIST_NEAREST, c(1,1,2,2,2,NA))
@@ -220,10 +222,8 @@ test_that("Test distToNearest with stop codon model='aa' ", {
 test_that("Test distToNearest returns the same result with data.frame and tibble", {
     db2 <- subset(db, CPRIMER %in% c("IGHA","IGHM") &
                       BARCODE %in% c("RL016","RL018","RL019","RL021"))
-    expect_equivalent(
-        distToNearest(data.frame(db2)),
-        distToNearest(tibble::as_tibble(db2))
-    )
+    expect_equivalent(distToNearest(data.frame(db2)),
+                      distToNearest(tibble::as_tibble(db2)))
 })
 
 #### findThreshold ####
