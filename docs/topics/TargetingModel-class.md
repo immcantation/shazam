@@ -22,6 +22,9 @@ Usage
 Arguments
 -------------------
 
+x
+:   `TargetingModel` object.
+
 y
 :   ignored.
 

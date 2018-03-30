@@ -108,6 +108,16 @@ between the two modes of the distribution.
 
 
 
+Note
+-------------------
+
+We recommend users to visually inspect the resulting
+fits when using `method="gmm"`. Our empirical observations imply that, the bimodality 
+of the distance-to-nearest distribution is detectable for a repertoire of minimum 1k reads.
+The increased number of sequences will improve the fitting procedure, although it would be 
+at the potential expense of higher demand in computational time complexity.
+
+
 
 Examples
 -------------------

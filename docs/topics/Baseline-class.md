@@ -19,11 +19,14 @@ Usage
 "plot"(x, y, ...)
 ```
 ```
-"summary"(object, ...)
+"summary"(object, nproc = 1)
 ```
 
 Arguments
 -------------------
+
+x
+:   `Baseline` object.
 
 y
 :   name of the column in the `db` slot of `baseline` 
@@ -32,8 +35,11 @@ containing primary identifiers.
 ...
 :   arguments to pass to [plotBaselineDensity](plotBaselineDensity.md).
 
-...
-:   arguments to pass to [summarizeBaseline](summarizeBaseline.md).
+object
+:   `Baseline` object.
+
+nproc
+:   number of cores to distribute the operation over.
 
 
 
