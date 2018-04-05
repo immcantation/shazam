@@ -1,5 +1,5 @@
 ---
-title: 'Shazam: Simulate mutated sequences'
+title: 'Shazam: Simulating sequence mutations'
 author: "Julian Q. Zhou"
 date: '`r Sys.Date()`'
 output:
@@ -24,7 +24,7 @@ geometry: margin=1in
 fontsize: 11pt
 vignette: >
   %\VignetteEngine{knitr::rmarkdown} 
-  %\VignetteIndexEntry{Mutation analysis} 
+  %\VignetteIndexEntry{Simulating sequence mutations} 
   %\usepackage[utf8]{inputenc}
 ---
 
