@@ -831,12 +831,12 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' db <- distToNearest(db, model="ham", normalize="len", nproc=1)
 #'                             
 #' # Find threshold using the "gmm" method with optimal threshold
-#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="norm-norm", cutoff="opt")
+#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="gamma-gamma", cutoff="opt")
 #' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
 #' print(output)
 #'
 #' # Find threshold using the "gmm" method with user defined specificity
-#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="norm-norm", 
+#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="gamma-gamma", 
 #'                         cutoff="user", spc=0.99)
 #' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
 #' print(output)
@@ -847,8 +847,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' print(output)
 #' }
 #' @export
-findThreshold <- function (data, method=c("gmm", "density"), 
-                           edge=0.9, cross=NULL, subsample=NULL,
+findThreshold <- function (data, method=c("density", "gmm"), 
+                           edge=0.9, cross=NULL, subsample=15000,
                            model=c("gamma-gamma", "gamma-norm", "norm-gamma", "norm-norm"),
                            cutoff=c("optimal", "intersect", "user"), sen=NULL, spc=NULL, 
                            progress=FALSE){

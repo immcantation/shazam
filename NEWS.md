@@ -1,3 +1,12 @@
+Version 0.1.9.999: May 5, 2018
+-------------------------------------------------------------------------------
+
+Distance Calculation:
+
++ Changed default `findThreshold` method to `density` and set default 
+sub-sampling count to 15,000 sequences.
+
+
 Version 0.1.9: March 30, 2018
 -------------------------------------------------------------------------------
 
