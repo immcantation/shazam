@@ -1713,7 +1713,7 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     ddf <- data.frame(x=data@xdens, y=data@ydens)
     
     # Set binwidth
-    # if (is.null(binwidth)) { binwidth <- data@bandwidth }
+    if (is.null(binwidth)) { binwidth <- data@bandwidth }
     
     # ggplot workaround
     if (is.null(xmin)) { xmin <- NA }
