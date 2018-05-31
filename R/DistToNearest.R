@@ -1615,7 +1615,7 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
     
     # Plot distToNearest distribution plus Gaussian fits
     p <- ggplot(xdf, aes_string(x="x")) +
-        getBaseTheme() + 
+        baseTheme() + 
         xlab("Distance") + 
         ylab("Density") +
         geom_histogram(aes_string(y="..density.."), binwidth=binwidth, 
@@ -1721,7 +1721,7 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     
     # Plot distToNearest distribution plus Gaussian fits
     p <- ggplot(xdf, aes_string(x="x")) +
-        getBaseTheme() +
+        baseTheme() +
         xlab("Distance") + 
         ylab("Density") +
         geom_histogram(aes_string(y="..density.."), binwidth=binwidth, 

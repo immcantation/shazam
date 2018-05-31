@@ -479,7 +479,7 @@ collapseClones <- function(db,
     }
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, getnproc())
+    nproc <- min(nproc, cpuCount())
     
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
@@ -1430,7 +1430,7 @@ observedMutations <- function(db,
         nproc <- 0
     }
     # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, getnproc())
+    nproc <- min(nproc, cpuCount())
     
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
@@ -2642,7 +2642,7 @@ expectedMutations <- function(db,
     }
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, getnproc(), na.rm=T)
+    nproc <- min(nproc, cpuCount(), na.rm=T)
     
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 

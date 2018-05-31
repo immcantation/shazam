@@ -1,5 +1,11 @@
-Version 0.1.9.999: May 5, 2018
+Version 0.1.9.999: May 31, 2018
 -------------------------------------------------------------------------------
+
+General:
+
++ Removed some internal utility functions in favor of importing them from 
+  `alakazam`: `progressBar`, `getBaseTheme` and `checkColumns`.
++ Removed `clearConsole` and `getPlatform` functions. `getnproc`
 
 Distance Calculation:
 

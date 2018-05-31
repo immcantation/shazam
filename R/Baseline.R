@@ -411,7 +411,7 @@ calcBaseline <- function(db,
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, getnproc())
+    nproc <- min(nproc, cpuCount())
     # nproc_arg will be passed to any function that has the nproc argument
     # If the cluster is already being set by the parent function then 
     # this will be set to 'cluster', that way the child function does not close
@@ -844,7 +844,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
     i <- NULL
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, getnproc())
+    nproc <- min(nproc, cpuCount())
     
     # Get indices of unique combinations of field(s) specified by groupBy
     # unique groups
@@ -1181,7 +1181,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
     returnType <- match.arg(returnType)
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, getnproc())
+    nproc <- min(nproc, cpuCount())
     
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 

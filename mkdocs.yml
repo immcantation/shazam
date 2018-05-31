@@ -83,7 +83,3 @@ pages:
       - topics/createRegionDefinition.md
       - topics/MutationDefinition-class.md
       - topics/RegionDefinition-class.md
-    - 'Miscellaneous':
-      - topics/clearConsole.md
-      - topics/getnproc.md
-      - topics/getPlatform.md

@@ -105,11 +105,11 @@
 #' @import   methods
 #' @import   utils
 #' @importFrom  alakazam    getAllele getGene getFamily getSegment
-#'                          getAAMatrix getDNAMatrix
+#'                          getAAMatrix getDNAMatrix IUPAC_DNA
 #'                          pairwiseDist pairwiseEqual seqDist seqEqual
 #'                          isValidAASeq translateStrings gridPlot
 #'                          getMRCA getPathLengths tableEdges
-#'                          IUPAC_DNA
+#'                          progressBar baseTheme checkColumns cpuCount
 #' @importFrom  ape         mst
 #' @importFrom  diptest     dip.test
 #' @importFrom  doParallel  registerDoParallel
