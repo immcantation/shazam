@@ -1324,7 +1324,9 @@ calcClonalConsensus <- function(db,
 #' @details
 #' Mutation counts are determined by comparing the input sequences (in the column specified 
 #' by \code{sequenceColumn}) to the germline sequence (in the column specified by 
-#' \code{germlineColumn}). See \link{calcObservedMutations} for more technical details.
+#' \code{germlineColumn}). See \link{calcObservedMutations} for more technical details, 
+#' \strong{including criteria for which sequence differences are included in the mutation 
+#' counts and which are not}.
 #' 
 #' The mutations are binned as either replacement (R) or silent (S) across the different 
 #' regions of the sequences as defined by \code{regionDefinition}. Typically, this would 
@@ -1571,19 +1573,34 @@ observedMutations <- function(db,
 #'           with the frequencies of replacement (R) and silent (S) mutations.
 #'           
 #' @details
-#' Each mutation is considered independently in the germline context. If specified, only 
-#' the part of \code{inputSeq} defined in \code{regionDefinition} is analyzed. For example, 
-#' when using the default \link{IMGT_V} definition, then mutations in positions beyond 
-#' 312 will be ignored. Additionally, non-triplet overhang at the sequence end is ignored.
+#' \strong{Each mutation is considered independently in the germline context}. For illustration,
+#' consider the case where the germline is \code{TGG} and the observed is \code{TAC}.
+#' When determining the mutation type at position 2, which sees a change from \code{G} to 
+#' \code{A}, we compare the codon \code{TGG} (germline) to \code{TAG} (mutation at position
+#' 2 independent of other mutations in the germline context). Similarly, when determining 
+#' the mutation type at position 3, which sees a change from \code{G} to \code{C}, we 
+#' compare the codon \code{TGG} (germline) to \code{TGC} (mutation at position 3 independent 
+#' of other mutations in the germline context).
 #' 
-#' Only replacement (R) and silent (S) mutations are included in the results. Excluded are: 
+#' If specified, only the part of \code{inputSeq} defined in \code{regionDefinition} is 
+#' analyzed. For example, when using the default \link{IMGT_V} definition, then mutations 
+#' in positions beyond 312 will be ignored. Additionally, non-triplet overhang at the 
+#' sequence end is ignored.
+#' 
+#' Only replacement (R) and silent (S) mutations are included in the results. \strong{Excluded}
+#' are: 
 #' \itemize{
 #'      \item Stop mutations
+#'      
+#'            E.g.: the case where \code{TAGTGG} is observed for the germline \code{TGGTGG}.
+#'            
 #'      \item Mutations occurring in codons where one or both of the observed and the 
 #'            germline involve(s) one or more of "N", "-", or ".".
 #'            
-#'            E.g.: the case in which NNN in the germline sequence is observed as NNC in 
-#'            the input sequence.
+#'            E.g.: the case where \code{TTG} is observed for the germline being any one of 
+#'            \code{TNG}, \code{.TG}, or \code{-TG}. Similarly, the case where any one of 
+#'            \code{TTN}, \code{TT.}, or \code{TT-} is observed for the germline \code{TTG}.
+#'            
 #' }
 #' In other words, a result that is \code{NA} or zero indicates absence of R and S mutations, 
 #' not necessarily all types of mutations, such as the excluded ones mentioned above.
