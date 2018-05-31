@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **createTargetingModel** - *Creates a TargetingModel*
 
 Description

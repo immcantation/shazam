@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **observedMutations** - *Calculate observed numbers of mutations*
 
 Description
@@ -120,7 +114,9 @@ Details
 
 Mutation counts are determined by comparing the input sequences (in the column specified 
 by `sequenceColumn`) to the germline sequence (in the column specified by 
-`germlineColumn`). See [calcObservedMutations](calcObservedMutations.md) for more technical details.
+`germlineColumn`). See [calcObservedMutations](calcObservedMutations.md) for more technical details, 
+**including criteria for which sequence differences are included in the mutation 
+counts and which are not**.
 
 The mutations are binned as either replacement (R) or silent (S) across the different 
 regions of the sequences as defined by `regionDefinition`. Typically, this would 

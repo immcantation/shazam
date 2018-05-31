@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **calcBaseline** - *Calculate the BASELINe PDFs*
 
 Description

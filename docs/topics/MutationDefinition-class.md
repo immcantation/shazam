@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **MutationDefinition-class** - *S4 class defining replacement and silent mutation definitions*
 
 Description

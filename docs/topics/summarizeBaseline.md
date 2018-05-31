@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **summarizeBaseline** - *Calculate BASELINe summary statistics*
 
 Description

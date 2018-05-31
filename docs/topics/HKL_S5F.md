@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **HKL_S5F** - *Human kappa and lambda light chain, silent, 5-mer, functional targeting model.*
 
 Description

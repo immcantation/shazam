@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **HKL_S1F** - *Human kappa and lambda chain, silent, 1-mer, functional substitution model.*
 
 Description

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **slideWindowTunePlot** - *Visualize parameter tuning for sliding window approach*
 
 Description

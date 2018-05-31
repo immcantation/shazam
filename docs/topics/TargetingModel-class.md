@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **TargetingModel-class** - *S4 class defining a targeting model*
 
 Description

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **GmmThreshold-class** - *Output of the `gmm` method of findThreshold*
 
 Description

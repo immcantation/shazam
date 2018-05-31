@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **minNumMutationsTune** - *Parameter tuning for minNumMutations*
 
 Description

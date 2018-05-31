@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **writeTargetingDistance** - *Write targeting model distances to a file*
 
 Description

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **HH_S5F** - *Human heavy chain, silent, 5-mer, functional targeting model.*
 
 Description

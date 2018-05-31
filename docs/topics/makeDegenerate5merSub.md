@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **makeDegenerate5merSub** - *Make a degenerate 5-mer substitution model based on a 1-mer substitution model*
 
 Description

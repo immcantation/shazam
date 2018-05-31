@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **slideWindowDb** - *Sliding window approach towards filtering sequences in a `data.frame`*
 
 Description

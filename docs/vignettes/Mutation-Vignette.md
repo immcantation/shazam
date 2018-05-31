@@ -1,6 +1,4 @@
-Mutation analysis
-====================
-
+# Mutation analysis
 
 Basic mutational load calculations are provided by the `observedMutations` function. 
 `observedMutations` provides multiple options to control how mutations are calculated.

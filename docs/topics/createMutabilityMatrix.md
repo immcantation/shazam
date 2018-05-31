@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **createMutabilityMatrix** - *Builds a mutability model*
 
 Description

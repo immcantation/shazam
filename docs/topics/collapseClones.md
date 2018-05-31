@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **collapseClones** - *Constructs effective clonal sequences for all clones*
 
 Description

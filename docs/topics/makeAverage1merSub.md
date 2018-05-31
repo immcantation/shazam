@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **makeAverage1merSub** - *Make a 1-mer substitution model by averaging over a 5-mer substitution model*
 
 Description

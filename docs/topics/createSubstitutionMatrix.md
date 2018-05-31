@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **createSubstitutionMatrix** - *Builds a substitution model*
 
 Description

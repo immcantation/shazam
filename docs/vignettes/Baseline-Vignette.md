@@ -1,6 +1,4 @@
-Selection quantification
-====================
-
+# Selection quantification
 
 BASELINe quantifies selection pressure by calculating the posterior probability 
 density function (PDF) based on observed mutations compared to expected 

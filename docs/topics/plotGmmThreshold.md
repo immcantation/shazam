@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **plotGmmThreshold** - *Plot findThreshold results for the gmm method*
 
 Description

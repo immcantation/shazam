@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **plotTune** - *Visualize parameter tuning for minNumMutations and minNumSeqMutations*
 
 Description

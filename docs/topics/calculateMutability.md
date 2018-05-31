@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **calculateMutability** - *Calculate total mutability*
 
 Description

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **calcExpectedMutations** - *Calculate expected mutation frequencies of a sequence*
 
 Description

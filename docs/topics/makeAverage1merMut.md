@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **makeAverage1merMut** - *Make a 1-mer mutability model by averaging over a 5-mer mutability model*
 
 Description

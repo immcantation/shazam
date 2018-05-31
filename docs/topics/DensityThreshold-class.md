@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **DensityThreshold-class** - *Output of the `dens` method of findThreshold*
 
 Description

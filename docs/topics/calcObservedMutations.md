@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **calcObservedMutations** - *Count the number of observed mutations in a sequence.*
 
 Description
@@ -95,19 +89,34 @@ with the frequencies of replacement (R) and silent (S) mutations.
 Details
 -------------------
 
-Each mutation is considered independently in the germline context. If specified, only 
-the part of `inputSeq` defined in `regionDefinition` is analyzed. For example, 
-when using the default [IMGT_V](IMGT_SCHEMES.md) definition, then mutations in positions beyond 
-312 will be ignored. Additionally, non-triplet overhang at the sequence end is ignored.
+**Each mutation is considered independently in the germline context**. For illustration,
+consider the case where the germline is `TGG` and the observed is `TAC`.
+When determining the mutation type at position 2, which sees a change from `G` to 
+`A`, we compare the codon `TGG` (germline) to `TAG` (mutation at position
+2 independent of other mutations in the germline context). Similarly, when determining 
+the mutation type at position 3, which sees a change from `G` to `C`, we 
+compare the codon `TGG` (germline) to `TGC` (mutation at position 3 independent 
+of other mutations in the germline context).
 
-Only replacement (R) and silent (S) mutations are included in the results. Excluded are: 
+If specified, only the part of `inputSeq` defined in `regionDefinition` is 
+analyzed. For example, when using the default [IMGT_V](IMGT_SCHEMES.md) definition, then mutations 
+in positions beyond 312 will be ignored. Additionally, non-triplet overhang at the 
+sequence end is ignored.
+
+Only replacement (R) and silent (S) mutations are included in the results. **Excluded**
+are: 
 
 +  Stop mutations
+
+E.g.: the case where `TAGTGG` is observed for the germline `TGGTGG`.
+
 +  Mutations occurring in codons where one or both of the observed and the 
 germline involve(s) one or more of "N", "-", or ".".
 
-E.g.: the case in which NNN in the germline sequence is observed as NNC in 
-the input sequence.
+E.g.: the case where `TTG` is observed for the germline being any one of 
+`TNG`, `.TG`, or `-TG`. Similarly, the case where any one of 
+`TTN`, `TT.`, or `TT-` is observed for the germline `TTG`.
+
 
 In other words, a result that is `NA` or zero indicates absence of R and S mutations, 
 not necessarily all types of mutations, such as the excluded ones mentioned above.

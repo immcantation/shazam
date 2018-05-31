@@ -1,6 +1,4 @@
-Distance to nearest neighbor
-====================
-
+# Distance to nearest neighbor
 
 Estimating the optimal distance threshold for partitioning clonally related 
 sequences is accomplished by calculating the distance from each sequence in the 
@@ -132,6 +130,38 @@ plot(p2)
 In this example, the unnormalized `hh_s5f` model distance threshold would be 
 set to a value near 7.
 
+### Automated threshold detection via smoothed density
+
+The `density` method will look for the minimum in the valley between two modes of a smoothed 
+distribution based on the input vector (`distances`), which will generally be the 
+`DIST_NEAREST` column from the `distToNearest` output. Determining the optimal bandwidth 
+parameter for smoothing the distribution can be computationally intensive. The bandwidth 
+tuning is typically robust when subsampling down to 15,000 distances, though the ideal 
+subsampling count will depend upon the data set. The input vector can be subsampled to 
+the size specified using the `subsample` parameter.  Below is an example of using the 
+`density` method for threshold detection.
+
+
+```r
+# Find threshold using density method
+output <- findThreshold(dist_ham$DIST_NEAREST, method="density")
+threshold <- output@threshold
+
+# Plot distance histogram, density estimate and optimum threshold
+plot(output, title="Density Method")
+```
+
+![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
+
+```r
+# Print threshold
+print(output)
+```
+
+```
+## [1] 0.1226913
+```
+
 ### Automated threshold detection via a mixture model
 
 The `findThreshold` function includes approaches for automatically determining
@@ -161,43 +191,6 @@ output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", model="gamma-gamma"
 plot(output, binwidth=0.02, title="GMM Method: gamma-gamma")
 ```
 
-![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
-
-```r
-# Print threshold
-print(output)
-```
-
-```
-## [1] 0.1565017
-```
-
-**Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `binwidth` parameter.
-Meaning, any change in bin size will change the form of the distribution, while the `gmm` method is 
-completely bin size independent and only engages the real input data.
-
-
-### Automated threshold detection via smoothed density
-
-The `density` method will look for the minimum in the valley between two modes of a smoothed 
-distribution based on the input vector (`distances`), which will generally be the 
-`DIST_NEAREST` column from the `distToNearest` output. Determining the optimal bandwidth 
-parameter for smoothing the distribution can be computationally intensive. The bandwidth 
-tuning is typically robust when subsampling down to 15,000 distances, though the ideal 
-subsampling count will depend upon the data set. The input vector can be subsampled to 
-the size specified using the `subsample` parameter.  Below is an example of using the 
-`density` method for threshold detection.
-
-
-```r
-# Find threshold using density method
-output <- findThreshold(dist_ham$DIST_NEAREST, method="density")
-threshold <- output@threshold
-
-# Plot distance histogram, density estimate and optimum threshold
-plot(output, title="Density Method")
-```
-
 ![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
 
 ```r
@@ -206,8 +199,12 @@ print(output)
 ```
 
 ```
-## [1] 0.1226913
+## [1] 0.1589692
 ```
+
+**Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `binwidth` parameter.
+Meaning, any change in bin size will change the form of the distribution, while the `gmm` method is 
+completely bin size independent and only engages the real input data.
 
 ## Calculating nearest neighbor distances independently for subsets of data
 
@@ -283,5 +280,3 @@ plot(p5)
 
 This can provide a sense of overlap between samples or a way to 
 compare within-sample variation to cross-sample variation.
-
-

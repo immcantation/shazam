@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **calcTargetingDistance** - *Calculates a 5-mer distance matrix from a TargetingModel object*
 
 Description

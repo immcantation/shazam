@@ -39,15 +39,15 @@ Contact
 For help and questions please contact the [Immcantation Group](mailto:immcantation@googlegroups.com)
 or use the [issue tracker](https://bitbucket.org/kleinstein/shazam/issues?status=new&status=open).
 
-Dependencies
----------------
+
+# Dependencies
 
 **Depends:** ggplot2, stringi  
 **Imports:** alakazam, ape, diptest, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, kedd, KernSmooth, lazyeval, MASS, methods, parallel, progress, SDMTools, scales, seqinr, stats, tidyr, utils  
 **Suggests:** knitr, rmarkdown, testthat
 
-Authors
----------------
+
+# Authors
 
 [Mohamed Uduman](mailto:mohamed.uduman@yale.edu) (aut)  
 [Gur Yaari](mailto:gur.yaari@biu.ac.il) (aut)  
@@ -59,8 +59,8 @@ Authors
 [Nima Nouri](mailto:nima.nouri@yale.edu) (ctb)  
 [Steven Kleinstein](mailto:steven.kleinstein@yale.edu) (aut, cph)
 
-Citing
----------------
+
+# Citing
 
 
 To cite the SHazaM package in publications, please use:

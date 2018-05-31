@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **extendSubstitutionMatrix** - *Extends a substitution model to include Ns.*
 
 Description

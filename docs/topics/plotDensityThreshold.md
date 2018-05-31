@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **plotDensityThreshold** - *Plot findThreshold results for the density method*
 
 Description

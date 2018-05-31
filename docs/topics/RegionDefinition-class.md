@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **RegionDefinition-class** - *S4 class defining a region definition*
 
 Description

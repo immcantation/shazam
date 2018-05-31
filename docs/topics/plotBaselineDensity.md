@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **plotBaselineDensity** - *Plots BASELINe probability density functions*
 
 Description

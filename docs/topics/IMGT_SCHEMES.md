@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **IMGT_SCHEMES** - *IMGT unique numbering schemes*
 
 Description

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **createTargetingMatrix** - *Calculates a targeting rate matrix*
 
 Description

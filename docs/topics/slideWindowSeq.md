@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **slideWindowSeq** - *Sliding window approach towards filtering a single sequence*
 
 Description

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **MK_RS1NF** - *Mouse kappa chain, replacement and silent, 1-mer, non-functional substitution model.*
 
 Description

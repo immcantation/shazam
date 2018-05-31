@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **shmulateSeq** - *Simulate mutations in a single sequence*
 
 Description
@@ -68,7 +62,7 @@ shmulateSeq(sequence, numMutations=6)
 
 
 ```
-[1] "NGATCTGCCGACACGGCCTTATATTGCTGTGCGATAGATA.TTTG"
+[1] "NTATCTGACGACACGGCCGTGTATTACTATACAAGAGGTG.TTTA"
 
 ```
 

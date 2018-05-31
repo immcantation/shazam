@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **plotBaselineSummary** - *Plots BASELINe summary statistics*
 
 Description

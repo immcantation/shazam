@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **distToNearest** - *Distance to nearest neighbor*
 
 Description

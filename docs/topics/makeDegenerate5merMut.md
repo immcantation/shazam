@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **makeDegenerate5merMut** - *Make a degenerate 5-mer mutability model based on a 1-mer mutability model*
 
 Description

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **slideWindowTune** - *Parameter tuning for sliding window approach*
 
 Description

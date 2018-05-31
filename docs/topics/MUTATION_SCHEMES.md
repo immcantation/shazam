@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **MUTATION_SCHEMES** - *Amino acid mutation definitions*
 
 Description

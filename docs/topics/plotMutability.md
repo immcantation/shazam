@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **plotMutability** - *Plot mutability probabilities*
 
 Description

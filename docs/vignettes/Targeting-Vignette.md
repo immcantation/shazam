@@ -1,6 +1,4 @@
-SHM targeting models
-====================
-
+# SHM targeting models
 
 The targeting model is the background likelihood of a particular mutation, based 
 on the surrounding sequence context as well as the mutation itself. The model is 

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **extendMutabilityMatrix** - *Extends a mutability model to include Ns.*
 
 Description

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **Baseline-class** - *S4 class defining a BASELINe (selection) object*
 
 Description

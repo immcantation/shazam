@@ -1,9 +1,3 @@
-
-
-
-
-
-
 **HH_S1F** - *Human heavy chain, silent, 1-mer, functional substitution model.*
 
 Description
