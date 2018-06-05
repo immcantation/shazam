@@ -1514,7 +1514,6 @@ baseline2DistPValue <-function(base1, base2) {
 #' @param    sizeElement    one of \code{c("none", "id", "group")} specifying whether the lines in the
 #'                          plot should be all of the same size (\code{none}) or have their sizes depend on 
 #'                          the values in \code{id} or \code{code}.
-#'                          \code{idColumn} or \code{groupColumn} will be used for color coding.                          
 #' @param    size           numeric scaling factor for lines, points and text in the plot.
 #' @param    silent         if \code{TRUE} do not draw the plot and just return the ggplot2 
 #'                          object; if \code{FALSE} draw the plot.
