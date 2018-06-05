@@ -1511,6 +1511,10 @@ baseline2DistPValue <-function(base1, base2) {
 #'                                                     Faceting is determined by the 
 #'                                                     \code{facetBy} argument.
 #'                          }
+#' @param    sizeElement    one of \code{c("none", "id", "group")} specifying whether the lines in the
+#'                          plot should be all of the same size (\code{none}) or have their sizes depend on 
+#'                          the values in \code{id} or \code{code}.
+#'                          \code{idColumn} or \code{groupColumn} will be used for color coding.                          
 #' @param    size           numeric scaling factor for lines, points and text in the plot.
 #' @param    silent         if \code{TRUE} do not draw the plot and just return the ggplot2 
 #'                          object; if \code{FALSE} draw the plot.
@@ -1559,7 +1563,8 @@ baseline2DistPValue <-function(base1, base2) {
 #' @export
 plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorElement=c("id", "group"), 
                                 colorValues=NULL, title=NULL, subsetRegions=NULL, sigmaLimits=c(-5, 5), 
-                                facetBy=c("region", "group"), style=c("density"), size=1, 
+                                facetBy=c("region", "group"), style=c("density"), 
+                                sizeElement=c("none", "id", "group"), size=1, 
                                 silent=FALSE, ...) {
     ## DEBUG
     # baseline=grouped
@@ -1570,7 +1575,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
     colorElement <- match.arg(colorElement)
     style <- match.arg(style)
     facetBy <- match.arg(facetBy)
-    
+    sizeElement <- match.arg(sizeElement)
     
     # Set base plot settings
     base_theme <- theme_bw() +
@@ -1644,12 +1649,26 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
             }
         }
         
+        # Apply line width
+        dens_df[, "size"] <- factor(1)
+        
+        if (sizeElement=="id") {
+            dens_df[, "size"] <- factor(dens_df[, idColumn])
+        } else if (sizeElement == "group" ) {
+            dens_df[, "size"] <- factor(dens_df[, groupColumn])
+        }
+        
+        size_values <- 1:length(levels(dens_df[,"size"]))
+        size_names <- levels(dens_df[, "size"])        
+        size_values <- size*size_values/max(size_values)
+        names(size_values) <- size_names
+        
         # Plot probability density curve
         p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="DENSITY")) +
             base_theme + 
             xlab(expression(Sigma)) +
             ylab("Density") +
-            geom_line(size=1*size)
+            geom_line(aes(size=size))
         # Add line
         if (colorElement == "id" & is.null(secondaryColumn)) {
             p1 <- p1 + aes_string(color=idColumn)
@@ -1677,6 +1696,30 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
     }
     
     # Add additional theme elements
+    p1 <- p1 + 
+        scale_size_manual(breaks=names(size_values), values=size_values)
+    
+    if (sizeElement == "none") {
+        p1 <- p1 +
+            guides( 
+                size=FALSE, 
+                colour = guide_legend(override.aes = list(size = size_values)),
+                linetype = guide_legend(override.aes = list(size = size_values))
+                )        
+    } else if (sizeElement == colorElement) {
+        p1 <- p1 +
+            guides( 
+                size=FALSE, 
+                colour = guide_legend(override.aes = list(size = size_values)))
+    } else {
+        p1 <- p1 +
+            guides( 
+                size=FALSE, 
+                linetype = guide_legend(override.aes = list(size = size_values))
+            ) 
+    }
+    
+      
     p1 <- p1 + do.call(theme, list(...))
     
     # Plot
