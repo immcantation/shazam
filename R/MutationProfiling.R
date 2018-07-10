@@ -1521,7 +1521,7 @@ observedMutations <- function(db,
 
 #' Count the number of observed mutations in a sequence.
 #'
-#' \code{calcObservedMutations} determines all the mutations in a given input seqeunce 
+#' \code{calcObservedMutations} determines all the mutations in a given input sequence 
 #' compared to its germline sequence.
 #'
 #' @param    inputSeq            input sequence. IUPAC ambiguous characters for DNA are 
