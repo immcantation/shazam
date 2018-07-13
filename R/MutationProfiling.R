@@ -1496,11 +1496,10 @@ observedMutations <- function(db,
         labels_length <- length(makeNullRegionDefinition()@labels)
     }
     # Convert mutation vector list to a matrix
-    #observed_mutations <- do.call( rbind, lapply(observedMutations_list, function(x) { 
-    #    length(x) <- labels_length 
-    #    return(x)
-    #}))
-    observed_mutations <- t(sapply(observedMutations_list, c))
+    observed_mutations <- do.call(rbind, lapply(observedMutations_list, function(x) { 
+        length(x) <- labels_length 
+        return(x) }))
+    #observed_mutations <- t(sapply(observedMutations_list, c))
 
     sep <- "_"
     if (ncol(observed_mutations) > 1) sep <- "_"
