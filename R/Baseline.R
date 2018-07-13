@@ -1292,7 +1292,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG", "IgA"))
 #'
 #' # Collapse clones
-#' db <- collapseClones(ExampleDb,, sequenceColumn="SEQUENCE_IMGT",
+#' db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
 #'                      germlineColumn="GERMLINE_IMGT_D_MASK",
 #'                      method="thresholdedFreq", minimumFrequency=0.6,
 #'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
@@ -1306,11 +1306,14 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'                          targetingModel=HH_S5F,
 #'                          nproc=1)
 #' 
-#' # Group PDFs by the sample identifier
-#' grouped <- groupBaseline(baseline, groupBy="SAMPLE")
+#' # Group PDFs by the isotype
+#' grouped <- groupBaseline(baseline, groupBy="ISOTYPE")
 #' 
-#' # Perform test on sample PDFs
-#' testBaseline(grouped, groupBy="SAMPLE")
+#' # Visualize isotype PDFs
+#' plot(grouped, "ISOTYPE")
+#' 
+#' # Perform test on isotype PDFs
+#' testBaseline(grouped, groupBy="ISOTYPE")
 #' }
 #' @export
 testBaseline <- function(baseline, groupBy) {
