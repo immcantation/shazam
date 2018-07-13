@@ -1467,7 +1467,7 @@ observedMutations <- function(db,
                                         frequency=frequency & !combine,
                                         regionDefinition=regionDefinition,
                                         mutationDefinition=mutationDefinition,
-                                        returnRaw = combine,
+                                        returnRaw=combine,
                                         ambiguousMode=ambiguousMode)
             if (combine) {
                 num_mutations <- 0
@@ -1482,7 +1482,7 @@ observedMutations <- function(db,
                     mu_freq
                 }
             } else {
-                oM   
+                oM
             }
         }
     
@@ -1495,12 +1495,13 @@ observedMutations <- function(db,
         #labels_length=1
         labels_length <- length(makeNullRegionDefinition()@labels)
     }
-    observed_mutations <- do.call( rbind, lapply(observedMutations_list, function(x) { 
-        length(x) <- labels_length 
-        return(x)
-    }))
-    
-    
+    # Convert mutation vector list to a matrix
+    #observed_mutations <- do.call( rbind, lapply(observedMutations_list, function(x) { 
+    #    length(x) <- labels_length 
+    #    return(x)
+    #}))
+    observed_mutations <- t(sapply(observedMutations_list, c))
+
     sep <- "_"
     if (ncol(observed_mutations) > 1) sep <- "_"
     observed_mutations[is.na(observed_mutations)] <- 0
@@ -1890,7 +1891,6 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     
     # return positions of point mutations and their mutation types ("raw")
     if (returnRaw){
-        
         if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
             # if mutations_array_raw is NA, or 
             # if mutations_array_raw is empty due to all mutations being "Stop" and hence removed
@@ -1902,23 +1902,23 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
                 # this won't be a problem if ambiguousMode="eitherOr", but would for "and"
                 # set inputCodons, germCodons, and mutPos to NULL to work around that
                 nonN.denoms <- countNonNByRegion(regDef=regionDefinition, ambiMode=ambiguousMode, 
-                                                inputChars=c_inputSeq, germChars=c_germlineSeq,
-                                                inputCodons=NULL, 
-                                                germCodons=NULL, 
-                                                mutPos=NULL)
+                                                 inputChars=c_inputSeq, germChars=c_germlineSeq,
+                                                 inputCodons=NULL, 
+                                                 germCodons=NULL, 
+                                                 mutPos=NULL)
             } else {
                 nonN.denoms <- setNames(object=rep(NA, length(regionDefinition@regions)), 
-                                       nm=regionDefinition@regions)
+                                        nm=regionDefinition@regions)
             }
             
             return(list(pos=mutations_array_raw, nonN=nonN.denoms))
         } else {
             
             nonN.denoms <- countNonNByRegion(regDef=regionDefinition, ambiMode=ambiguousMode, 
-                                            inputChars=c_inputSeq, germChars=c_germlineSeq,
-                                            inputCodons=c_inputSeq_codons, 
-                                            germCodons=c_germlineSeq_codons, 
-                                            mutPos=mutations_pos)
+                                             inputChars=c_inputSeq, germChars=c_germlineSeq,
+                                             inputCodons=c_inputSeq_codons, 
+                                             germCodons=c_germlineSeq_codons, 
+                                             mutPos=mutations_pos)
             
             # df indicating position, mutation type (R or S), and region of each mutation
             rawDf <- data.frame(as.numeric(colnames(mutations_array_raw)))
