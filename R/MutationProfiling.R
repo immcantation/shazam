@@ -1445,7 +1445,7 @@ observedMutations <- function(db,
                                               'EXPANDED_AMBIGUOUS_CODONS',
                                               'makeNullRegionDefinition', 'mutationDefinition',
                                               'getCodonPos','getContextInCodon','mutationType',
-                                              'translateCodonToAminoAcid','AMINO_ACIDS',
+                                              'AMINO_ACIDS',
                                               'binMutationsByRegion', 'countNonNByRegion'), 
                                 envir=environment())
         registerDoParallel(cluster)
@@ -3111,10 +3111,6 @@ getCodonPos <- function(nucPos) {
     return ((codonNum - 2):codonNum)
 }
 
-# Translate codon to amino acid
-translateCodonToAminoAcid <- function(Codon) {
-    return (AMINO_ACIDS[Codon])
-}
 
 # Given two codons, tells you if the mutation is R or S (based on your definition)
 #
@@ -3163,9 +3159,7 @@ mutationType <- function(codonFrom, codonTo,
                          aminoAcidClasses=NULL) {
     # codonFrom="TTT"; codonTo="TTA"
     # codonFrom="TTT"; codonTo="TGA"
-    
-    ambiguousMode <- match.arg(ambiguousMode)
-    
+
     # placeholder for tabulation
     tab <- setNames(object=rep(0, 4), nm=c("R", "S", "Stop", "na"))
     
@@ -3185,8 +3179,8 @@ mutationType <- function(codonFrom, codonTo,
                     tab[4] <- tab[4] + 1
                 } else {
                     # Translate codons
-                    cur.aaFrom <- translateCodonToAminoAcid(cur.codonFrom)
-                    cur.aaTo <- translateCodonToAminoAcid(cur.codonTo)
+                    cur.aaFrom <- AMINO_ACIDS[cur.codonFrom]
+                    cur.aaTo <- AMINO_ACIDS[cur.codonTo]
                     
                     # If any codon is NA then return NA
                     if (any(is.na(c(codonFrom, codonTo, cur.aaFrom, cur.aaTo)))) { 
