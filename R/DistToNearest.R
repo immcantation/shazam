@@ -471,6 +471,7 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
     return(round(seq_dist, 4))
 }
 
+
 #' Parse V-gene and J-gene columns to get gene and find the unions
 #'
 #' Get V gene and J gene of every sequence and group those 
