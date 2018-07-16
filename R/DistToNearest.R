@@ -471,6 +471,102 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
     return(round(seq_dist, 4))
 }
 
+#' Parse V-gene and J-gene columns to get gene and find the unions
+#'
+#' Get V gene and J gene of every sequence and group those 
+#' sequences sharing same V and J gene.
+#'
+#' @param    db              data.frame containing sequence data.
+#' @param    v_call          name of the column containing the V-segment allele calls.
+#' @param    j_call          name of the column containing the J-segment allele calls.
+#' @param    first           if \code{TRUE} only the first call of the gene assignments 
+#'                           is used. if \code{FALSE} the union of ambiguous gene 
+#'                           assignments is used to group all sequences with any 
+#'                           overlapping gene calls.
+#'
+#' @return   Returns a modified \code{db} data.frame with union indexes 
+#'           in \code{VJ_GROUP} column.
+#'
+#' Note on \code{NA}s: This function passes a check over all the sequences and will remove those
+#' sequences with \code{NA} in their \code{v_call} or \code{j_call} column. It returns a message in 
+#' case \code{NA}s are found.
+#' 
+#' Note on gene ambiguities: ambiguous gene assignments are assumed to be separated by ",".
+#' 
+#' @examples
+#' # Subset example data to one sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#' db <- groupByGene(db, v_call="V_CALL", j_call="J_CALL", first=FALSE) 
+#' @export
+groupByGene <- function(db,
+                        v_call="V_CALL",
+                        j_call="J_CALL",
+                        first=FALSE) {
+    # # STEP 0: Check V_CALL and J_CALL columns
+    # chek na(s)
+    int_nrow <- nrow(db)
+    db <- db[!is.na(db[[v_call]]), ]
+    db <- db[!is.na(db[[j_call]]), ]
+    fin_nrow <- nrow(db)
+    if (int_nrow - fin_nrow > 0) cat(" NA(s) found in ", v_call, " or/and ", j_call , " columns. ", int_nrow - fin_nrow, " sequence(s) removed.", "\n")
+    # begin parsing
+    if (first) {
+        db$V <- alakazam::getGene(db[[v_call]], first=first)
+        db$J <- alakazam::getGene(db[[j_call]], first=first)
+        db$VJ_GROUP <- db %>%
+            dplyr::group_by_(.dots = c("V", "J")) %>%
+            dplyr::group_indices()
+    } else {
+        # STEP 1: make a list of unique V and J combinations
+        db$V <- alakazam::getGene(db[[v_call]], first=first)
+        db$J <- alakazam::getGene(db[[j_call]], first=first)
+        v_ls <- strsplit(db$V, split=",")
+        j_ls <- strsplit(db$J, split=",")
+        vj_ls <- lapply(1:nrow(db), function(x) c(v_ls[[x]],j_ls[[x]]))
+        vj_ls <- unique(vj_ls)
+        m <- length(vj_ls)
+        # STEP 2: make groups map key
+        gr_ls <- rep(list(NA), m)
+        for (gr_id in 1:m) {
+            vj <- vj_ls[[gr_id]]
+            v <- vj[grepl("IG[HKL]V", vj)]
+            j <- vj[grepl("IG[HKL]J", vj)]
+            n <- length(gr_ls[!is.na(gr_ls)])
+            for (x in 1:n) {
+                if (1 > n) break
+                gr_v <- gr_ls[[x]][grepl("IG[HKL]V", gr_ls[[x]])]
+                gr_j <- gr_ls[[x]][grepl("IG[HKL]J", gr_ls[[x]])]
+                if (all(any(v %in% gr_v), 
+                        any(j %in% gr_j))) {
+                    v <- union(v, gr_v)
+                    j <- union(j, gr_j)
+                    gr_ls[[x]] <- NA
+                }
+            }
+            gr_ls[[gr_id]] <- c(v, j, gr_id)
+            gr_ls <- c(gr_ls[!is.na(gr_ls)], gr_ls[is.na(gr_ls)])
+        }
+        gr_ls <- gr_ls[!is.na(gr_ls)]
+        # STEP 3: assign V and J group ids
+        db$GROUP_TEMP <- NA
+        for (x in 1:m) {
+            v <- vj_ls[[x]][grepl("IG[HKL]V", vj_ls[[x]])]
+            j <- vj_ls[[x]][grepl("IG[HKL]J", vj_ls[[x]])]
+            for (y in gr_ls) {
+                if (all(any(v %in% y), any(j %in% y))) {
+                    db$GROUP_TEMP[db$V == paste(v, collapse=",") & db$J == paste(j, collapse=",")] <- y[length(y)]
+                    break
+                }
+            }
+        }
+        # STEP 4: fix group ids
+        db$VJ_GROUP <- db %>%
+            dplyr::group_by_(.dots = "GROUP_TEMP") %>%
+            dplyr::group_indices()
+    }
+    return(db[,!(names(db) %in% c("GROUP_TEMP", "V", "J"))])
+}
 
 #' Distance to nearest neighbor
 #'
@@ -480,8 +576,8 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' @param    db              data.frame containing sequence data.
 #' @param    sequenceColumn  name of the column containing nucleotide sequences to compare. 
 #'                           Also used to determine sequence length for grouping.
-#' @param    vCallColumn     name of the column containing the V-segment allele calls.
-#' @param    jCallColumn     name of the column containing the J-segment allele calls.
+#' @param    v_call     name of the column containing the V-segment allele calls.
+#' @param    j_call     name of the column containing the J-segment allele calls.
 #' @param    model           underlying SHM model, which must be one of 
 #'                           \code{c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "hs1f_compat", "m1n_compat")}.
 #'                           See Details for further information.
@@ -563,7 +659,7 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
 #' 
 #' # Use genotyped V assignments, Hamming distance, and normalize by junction length
-#' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
+#' dist <- distToNearest(db, v_call="V_CALL_GENOTYPED", model="ham", 
 #'                       first=FALSE, normalize="len")
 #'                            
 #' # Plot histogram of non-NA distances
@@ -576,10 +672,10 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' plot(p1)
 #'
 #' # Use human 5-mer model
-#' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f")
+#' dist <- distToNearest(db, v_call="V_CALL_GENOTYPED", model="hh_s5f")
 #' 
 #' @export
-distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+distToNearest <- function(db, sequenceColumn="JUNCTION", v_call="V_CALL", j_call="J_CALL", 
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
                           normalize=c("len", "none"), symmetry=c("avg", "min"),
                           first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE,
@@ -594,7 +690,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     if (!is.data.frame(db)) { stop('Must submit a data frame') }
     
     # Check for valid columns
-    columns <- c(sequenceColumn, vCallColumn, jCallColumn, fields, cross)
+    columns <- c(sequenceColumn, v_call, j_call, fields, cross)
     columns <- columns[!is.null(columns)]
     
     check <- checkColumns(db, columns)
@@ -613,29 +709,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     }    
     
     # Parse V and J columns to get gene
-    # cat("V+J Column parsing\n")
-    if (first) {
-        db$V <- alakazam::getGene(db[[vCallColumn]])
-        db$J <- alakazam::getGene(db[[jCallColumn]])
-    } else {
-        db$V1 <- alakazam::getGene(db[[vCallColumn]], first=FALSE)
-        db$J1 <- alakazam::getGene(db[[jCallColumn]], first=FALSE)
-        db$V <- db$V1
-        db$J <- db$J1
-        # Reassign V genes to most general group of genes
-        for(ambig in unique(db$V1[grepl(',', db$V1)])) {
-            for(g in strsplit(ambig, split=',')[[1]]) {
-                db$V[grepl(g, db$V1)] = ambig
-            }
-        }
-        # Reassign J genes to most general group of genes
-        for(ambig in unique(db$J1[grepl(',',db$J1)])) {
-            for(g in strsplit(ambig, split=',')[[1]]) {
-                db$J[grepl(g, db$J1)] = ambig
-            }
-        }
-    }
-    
+    db <- groupByGene(db,
+                      v_call=v_call,
+                      j_call=j_call,
+                      first=first)
+
     # Create new column for distance to nearest neighbor
     db$TMP_DIST_NEAREST <- rep(NA, nrow(db))
     db$ROW_ID <- 1:nrow(db)
@@ -656,9 +734,9 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         stop('Nproc must be positive.')
     }
     
-    # Get indices of unique combinations of V, J, L, and any specified field(s)
+    # Get indices of unique combinations of V, J (VJ_GROUP), L, and any specified field(s)
     # groups to use
-    group_cols <- c("V","J","L")
+    group_cols <- c("VJ_GROUP","L")
     if (!is.null(fields)) {
         group_cols <- append(group_cols,fields)
     }
@@ -745,7 +823,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     } else {
         db$DIST_NEAREST <- db$TMP_DIST_NEAREST
     }
-    return(db[, !(names(db) %in% c("V", "J", "L", "ROW_ID", "V1", "J1","TMP_DIST_NEAREST"))])
+    return(db[, !(names(db) %in% c("VJ_GROUP", "L", "ROW_ID", "V1", "J1","TMP_DIST_NEAREST"))])
 }
 
 
@@ -913,7 +991,7 @@ findThreshold <- function (data, method=c("density", "gmm"),
 # db <- subset(ExampleDb, SAMPLE == "-1h")
 # 
 # # Use genotyped V assignments, HS1F model, and normalize by junction length
-# dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
+# dist_hs1f <- distToNearest(db, v_call="V_CALL_GENOTYPED", 
 #                            model="hs1f", first=FALSE, normalize="len")
 #                  
 # # using findThreshold switch

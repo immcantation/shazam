@@ -1,7 +1,10 @@
-Version 0.1.9.999: May 31, 2018
+Version 0.1.9.999: July 16, 2018
 -------------------------------------------------------------------------------
 
 General:
+
++ Added new function `groupByGene` to group sequences sharing
+ same V and J gene.
 
 + Removed some internal utility functions in favor of importing them from 
   `alakazam`: `progressBar`, `getBaseTheme` and `checkColumns`.
@@ -11,7 +14,6 @@ Distance Calculation:
 
 + Changed default `findThreshold` method to `density` and set default 
 sub-sampling count to 15,000 sequences.
-
 
 Version 0.1.9: March 30, 2018
 -------------------------------------------------------------------------------
