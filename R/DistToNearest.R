@@ -209,8 +209,12 @@ dist5Mers <- function(seq1, seq2, targetingDistance,
 #                             average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 #
 # @return  A matrix of pairwise distances between junction sequences.
-pairwise5MerDist <- function(sequences, targetingDistance, 
+pairwise5MerDist <- function(sequences, 
+                             targetingDistance, 
                              symmetry=c("avg", "min")) {
+    # get names
+    seq_names <- names(sequences)
+
     # Initial checks
     symmetry <- match.arg(symmetry)
     
@@ -245,7 +249,82 @@ pairwise5MerDist <- function(sequences, targetingDistance,
     # Make distance matrix symmetric
     dist_mat <- dist_mat + t(dist_mat)
     
+    # assign names
+    if (!is.null(seq_names)) {
+        rownames(dist_mat) <- seq_names
+        colnames(dist_mat) <- seq_names
+    }
+    
     return(dist_mat)
+}
+
+# Given an array of nucleotide sequences and a vector indices (a subset of array of nucleotide sequences), 
+# find the pairwise distances
+# 
+# @param   sequences          character vector of nucleotide sequences.
+# @paramindx                  numeric vector of subsamples indices
+# @param   targetingDistance  targeting distance obtained from a targeting model
+#                             with the function `calcTargetingDistance`
+# @param   symmetry           if model is hs5f, distance between seq1 and seq2 is either the
+#                             average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
+#
+# @return  A non-square matrix of pairwise distances between junction sequences.
+subPairwise5MerDist <- function(sequences, indx, 
+                                targetingDistance, 
+                                symmetry=c("avg", "min")) {
+    
+    # get names
+    seq_names <- names(sequences)
+    
+    # Initial checks
+    symmetry <- match.arg(symmetry)
+    
+    # Convert junctions to uppercase
+    sequences <- toupper(sequences)
+    # Convert gaps to Ns
+    sequences <- gsub('[-.]', 'N', sequences, fixed=T)
+    # Add 'NN' to front and end of each sequence for fivemers
+    sequences <- as.vector(sapply(sequences, function(x){ paste("NN", x, "NN", sep="") }))
+    
+    n_seq <- length(sequences)
+    
+    #Junctions are broken in to 5-mers based on a sliding window (of one) and placed in matrix
+    #Each column is a junction
+    #E.g. junctions 1234567, ABCDEFG, JKLMNOP becomes:
+    # 12345   ABCDE   JKLMN
+    # 23456   BCDEF   KLMNO
+    # 34567   CDEFG   LMNOP
+    .matSeqSlidingFiveMer <- sapply(sequences, function(x) { window5Mers(x) }, 
+                                    simplify="matrix")
+    
+    # Compute pairwise distance between all sequences' fivemers (by column)
+    .dist <- function(i) {
+        c(rep.int(0, i - 1), 
+          sapply(i:n_seq, function(j) { dist5Mers(.matSeqSlidingFiveMer[,i],
+                                                  .matSeqSlidingFiveMer[,j],
+                                                  targetingDistance,
+                                                  symmetry=symmetry) }))
+    }
+    dist_mat <- matrix(NA, nrow=n_seq, ncol=n_seq)
+    diag(dist_mat) <- 0
+    indx <- sort(indx)
+    for (j in 1:n_seq) {
+        if (!(j %in% indx)) next
+        for (i in 1:n_seq) {
+            if (!is.na(dist_mat[i,j])) next
+            dist_mat[i,j] = dist5Mers(.matSeqSlidingFiveMer[,i], .matSeqSlidingFiveMer[,j], 
+                                      targetingDistance, symmetry=symmetry)
+            dist_mat[j,i] = dist_mat[i,j]
+        }
+    }
+    sub_dist_mat <- dist_mat[,indx]
+    
+    # assign names
+    if (!is.null(seq_names)) {
+        rownames(sub_dist_mat) <- seq_names
+        colnames(sub_dist_mat) <- seq_names[indx]
+    }
+    return(sub_dist_mat)
 }
 
 
