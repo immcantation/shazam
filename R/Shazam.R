@@ -106,7 +106,8 @@
 #' @import   utils
 #' @importFrom  alakazam    getAllele getGene getFamily getSegment
 #'                          getAAMatrix getDNAMatrix IUPAC_DNA
-#'                          pairwiseDist pairwiseEqual seqDist seqEqual
+#'                          pairwiseDist subPairwiseDist pairwiseEqual 
+#'                          seqDist seqEqual
 #'                          isValidAASeq translateStrings gridPlot
 #'                          getMRCA getPathLengths tableEdges
 #'                          progressBar baseTheme checkColumns cpuCount

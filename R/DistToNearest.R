@@ -412,7 +412,8 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
                                           "hs1f_compat", "m1n_compat"),
                        normalize=c("none", "len", "mut"),
                        symmetry=c("avg", "min"),
-                       crossGroups=NULL, mst=FALSE) {
+                       crossGroups=NULL, mst=FALSE,
+                       subsample=NULL) {
     ## DEBUG
     # sequences <- c("ACGTACGTACGT", "ACGAACGTACGT", "AAAAAAAAAAAA", "A-AAAA---AAA")
     # model="aa"; normalize="len"; crossGroups=NULL; mst=FALSE
@@ -442,25 +443,59 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
         if (length(seq_length) > 1) {
             stop("Unexpected. Different sequence lengths found.")
         }
-        
+        # check subSampling
+        subSampling <- all(!is.null(subsample), subsample < n_uniq)
+        if (subSampling) indx <- sample(x=1:n_uniq, size=subsample, replace=FALSE, prob=NULL)
         # Get distance matrix
         if (model == "ham") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=getDNAMatrix(gap=0))
+            if (subSampling) {
+                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=getDNAMatrix(gap=0))
+            } else {
+                dist_mat <- pairwiseDist(seq_uniq, dist_mat=getDNAMatrix(gap=0))
+            }
         } else if (model == "aa") {
             seq_uniq <- setNames(alakazam::translateDNA(seq_uniq), seq_uniq)
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=getAAMatrix())
+            if (subSampling) {
+                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=getAAMatrix())
+            } else {
+                dist_mat <- pairwiseDist(seq_uniq, dist_mat=getAAMatrix())
+            }
         } else if (model == "hh_s1f") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=HH_S1F_Distance)
+            if (subSampling) {
+                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=HH_S1F_Distance)
+            } else {
+                dist_mat <- pairwiseDist(seq_uniq, dist_mat=HH_S1F_Distance)
+            }
         } else if (model == "mk_rs1nf") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=MK_RS1NF_Distance)
+            if (subSampling) {
+                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=MK_RS1NF_Distance)
+            } else {
+                dist_mat <- pairwiseDist(seq_uniq, dist_mat=MK_RS1NF_Distance)
+            }
         } else if (model == "hh_s5f") {
-            dist_mat <- pairwise5MerDist(seq_uniq, HH_S5F_Distance, symmetry=symmetry)
+            if (subSampling) {
+                dist_mat <- subPairwise5MerDist(seq_uniq, indx, HH_S5F_Distance, symmetry=symmetry)
+            } else {
+                dist_mat <- pairwise5MerDist(seq_uniq, HH_S5F_Distance, symmetry=symmetry)
+            }
         } else if (model == "mk_rs5nf") {
-            dist_mat <- pairwise5MerDist(seq_uniq, MK_RS5NF_Distance, symmetry=symmetry)
+            if (subSampling) {
+                dist_mat <- subPairwise5MerDist(seq_uniq, indx, MK_RS5NF_Distance, symmetry=symmetry)
+            } else {
+                dist_mat <- pairwise5MerDist(seq_uniq, MK_RS5NF_Distance, symmetry=symmetry)
+            }
         } else if (model == "hs1f_compat") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=HS1F_Compat)
+            if (subSampling) {
+                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=HS1F_Compat)
+            } else {
+                dist_mat <- pairwiseDist(seq_uniq, dist_mat=HS1F_Compat)
+            }
         } else if (model == "m1n_compat") {
-            dist_mat <- pairwiseDist(seq_uniq, dist_mat=M1N_Compat)
+            if (subSampling) {
+                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=M1N_Compat)
+            } else {
+                dist_mat <- pairwiseDist(seq_uniq, dist_mat=M1N_Compat)
+            }
         }                
         ## DEBUG
         # cat("\n-> seq_uniq:\n")
@@ -676,6 +711,8 @@ groupByGene <- function(db,
 #'                           (self vs others).
 #' @param    mst             if \code{TRUE}, return comma-separated branch lengths from minimum 
 #'                           spanning tree.
+#' @param    subsample       number of sequences to subsample for speeding up pairwise-distance-matrix calculation. 
+#'                           If NULL no subsampling is performed.
 #' @param    progress        if \code{TRUE} print a progress bar.
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
@@ -758,7 +795,7 @@ groupByGene <- function(db,
 distToNearest <- function(db, sequenceColumn="JUNCTION", v_call="V_CALL", j_call="J_CALL", 
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
                           normalize=c("len", "none"), symmetry=c("avg", "min"),
-                          first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE,
+                          first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE, subsample=NULL,
                           progress=FALSE) {
     # Hack for visibility of foreach index variables
     i <- NULL
@@ -848,6 +885,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", v_call="V_CALL", j_call
                                  "uniqueGroupsIdx", 
                                  "cross",
                                  "mst",
+                                 "subsample",
                                  "sequenceColumn", 
                                  "model",
                                  "normalize",
@@ -861,7 +899,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", v_call="V_CALL", j_call
                                  "M1N_Compat",
                                  "calcTargetingDistance",
                                  "findUniqSeq",
-                                 "pairwise5MerDist")
+                                 "pairwise5MerDist",
+                                 "subPairwise5MerDist")
         parallel::clusterExport(cluster, export_functions, envir=environment())
     }
     
@@ -884,7 +923,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", v_call="V_CALL", j_call
                                                  normalize=normalize,
                                                  symmetry=symmetry,
                                                  crossGroups=crossGroups,
-                                                 mst=mst)
+                                                 mst=mst,
+                                                 subsample=subsample)
         # Update progress
         if (progress) { pb$tick() }
         

@@ -1,7 +1,11 @@
-Version 0.1.9.999: July 16, 2018
+Version 0.1.9.999: July 24, 2018
 -------------------------------------------------------------------------------
 
 General:
+
++ added sampling argument to distToNearest
+
++ added subPairwise5MerDist function
 
 + Added new function `groupByGene` to group sequences sharing
  same V and J gene.
