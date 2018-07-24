@@ -308,21 +308,21 @@ subPairwise5MerDist <- function(sequences, indx,
     dist_mat <- matrix(NA, nrow=n_seq, ncol=n_seq)
     diag(dist_mat) <- 0
     indx <- sort(indx)
-    for (j in 1:n_seq) {
-        if (!(j %in% indx)) next
-        for (i in 1:n_seq) {
+    for (i in 1:n_seq) {
+        if (!(i %in% indx)) next
+        for (j in 1:n_seq) {
             if (!is.na(dist_mat[i,j])) next
             dist_mat[i,j] = dist5Mers(.matSeqSlidingFiveMer[,i], .matSeqSlidingFiveMer[,j], 
                                       targetingDistance, symmetry=symmetry)
             dist_mat[j,i] = dist_mat[i,j]
         }
     }
-    sub_dist_mat <- dist_mat[,indx]
+    sub_dist_mat <- dist_mat[indx,]
     
     # assign names
     if (!is.null(seq_names)) {
-        rownames(sub_dist_mat) <- seq_names
-        colnames(sub_dist_mat) <- seq_names[indx]
+        rownames(sub_dist_mat) <- seq_names[indx]
+        colnames(sub_dist_mat) <- seq_names
     }
     return(sub_dist_mat)
 }
