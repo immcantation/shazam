@@ -38,6 +38,7 @@ BugReports: https://bitbucket.org/kleinstein/shazam/issues
 LazyData: true
 BuildVignettes: true
 VignetteBuilder: knitr
+Encoding: UTF-8
 Depends:
     R (>= 3.1.2),
     ggplot2 (>= 2.0.0),
