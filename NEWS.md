@@ -1,14 +1,15 @@
-Version 0.1.9.999: July 24, 2018
+Version 0.1.9.999: Aug 17, 2018
 -------------------------------------------------------------------------------
 
 General:
 
 + added sampling argument to distToNearest
 
-+ added subPairwise5MerDist function
++ Added subPairwise5MerDist function to calculate non-square distance matrix 
+  of sequences
 
 + Added new function `groupByGene` to group sequences sharing
- same V and J gene.
+  same V and J gene.
 
 + Removed some internal utility functions in favor of importing them from 
   `alakazam`: `progressBar`, `getBaseTheme` and `checkColumns`.
@@ -17,7 +18,7 @@ General:
 Distance Calculation:
 
 + Changed default `findThreshold` method to `density` and set default 
-sub-sampling count to 15,000 sequences.
+  sub-sampling count to 15,000 sequences.
 
 Version 0.1.9: March 30, 2018
 -------------------------------------------------------------------------------

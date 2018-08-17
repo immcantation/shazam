@@ -449,26 +449,26 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
         # Get distance matrix
         if (model == "ham") {
             if (subSampling) {
-                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=getDNAMatrix(gap=0))
+                dist_mat <- nonsquareDist(seq_uniq, indx, dist_mat=getDNAMatrix(gap=0))
             } else {
                 dist_mat <- pairwiseDist(seq_uniq, dist_mat=getDNAMatrix(gap=0))
             }
         } else if (model == "aa") {
             seq_uniq <- setNames(alakazam::translateDNA(seq_uniq), seq_uniq)
             if (subSampling) {
-                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=getAAMatrix())
+                dist_mat <- nonsquareDist(seq_uniq, indx, dist_mat=getAAMatrix())
             } else {
                 dist_mat <- pairwiseDist(seq_uniq, dist_mat=getAAMatrix())
             }
         } else if (model == "hh_s1f") {
             if (subSampling) {
-                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=HH_S1F_Distance)
+                dist_mat <- nonsquareDist(seq_uniq, indx, dist_mat=HH_S1F_Distance)
             } else {
                 dist_mat <- pairwiseDist(seq_uniq, dist_mat=HH_S1F_Distance)
             }
         } else if (model == "mk_rs1nf") {
             if (subSampling) {
-                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=MK_RS1NF_Distance)
+                dist_mat <- nonsquareDist(seq_uniq, indx, dist_mat=MK_RS1NF_Distance)
             } else {
                 dist_mat <- pairwiseDist(seq_uniq, dist_mat=MK_RS1NF_Distance)
             }
@@ -486,13 +486,13 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
             }
         } else if (model == "hs1f_compat") {
             if (subSampling) {
-                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=HS1F_Compat)
+                dist_mat <- nonsquareDist(seq_uniq, indx, dist_mat=HS1F_Compat)
             } else {
                 dist_mat <- pairwiseDist(seq_uniq, dist_mat=HS1F_Compat)
             }
         } else if (model == "m1n_compat") {
             if (subSampling) {
-                dist_mat <- subPairwiseDist(seq_uniq, indx, dist_mat=M1N_Compat)
+                dist_mat <- nonsquareDist(seq_uniq, indx, dist_mat=M1N_Compat)
             } else {
                 dist_mat <- pairwiseDist(seq_uniq, dist_mat=M1N_Compat)
             }
