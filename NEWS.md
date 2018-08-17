@@ -3,17 +3,14 @@ Version 0.1.9.999: Aug 17, 2018
 
 General:
 
-+ added sampling argument to distToNearest
-
-+ Added subPairwise5MerDist function to calculate non-square distance matrix 
-  of sequences
-
++ Added `subsample` argument to `distToNearest` function.
++ Added `subPairwise5MerDist` function to calculate non-square distance matrix 
+  of sequences.
 + Added new function `groupByGene` to group sequences sharing
   same V and J gene.
-
 + Removed some internal utility functions in favor of importing them from 
   `alakazam`: `progressBar`, `getBaseTheme` and `checkColumns`.
-+ Removed `clearConsole` and `getPlatform` functions. `getnproc`
++ Removed `clearConsole`, `getnproc`, and `getPlatform` functions. 
 
 Distance Calculation:
 

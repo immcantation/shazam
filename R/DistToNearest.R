@@ -691,8 +691,8 @@ groupByGene <- function(db,
 #' @param    db              data.frame containing sequence data.
 #' @param    sequenceColumn  name of the column containing nucleotide sequences to compare. 
 #'                           Also used to determine sequence length for grouping.
-#' @param    v_call     name of the column containing the V-segment allele calls.
-#' @param    j_call     name of the column containing the J-segment allele calls.
+#' @param    v_call          name of the column containing the V-segment allele calls.
+#' @param    j_call          name of the column containing the J-segment allele calls.
 #' @param    model           underlying SHM model, which must be one of 
 #'                           \code{c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "hs1f_compat", "m1n_compat")}.
 #'                           See Details for further information.
@@ -712,7 +712,10 @@ groupByGene <- function(db,
 #' @param    mst             if \code{TRUE}, return comma-separated branch lengths from minimum 
 #'                           spanning tree.
 #' @param    subsample       number of sequences to subsample for speeding up pairwise-distance-matrix calculation. 
-#'                           If NULL no subsampling is performed.
+#'                           Subsampling is performed without replacement in each group of sequences with the 
+#'                           same \code{v_call}, \code{j_call}, and junction length. If \code{subsample} is larger 
+#'                           than the unique number of sequences in each group, then the subsampling process 
+#'                           is ignored. If \code{NULL} no subsampling is performed.
 #' @param    progress        if \code{TRUE} print a progress bar.
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
