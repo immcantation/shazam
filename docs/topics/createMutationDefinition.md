@@ -9,7 +9,8 @@ Description
 Usage
 --------------------
 ```
-createMutationDefinition(name, classes, description = "", citation = "")
+createMutationDefinition(name, classes, description = "",
+citation = "")
 ```
 
 Arguments

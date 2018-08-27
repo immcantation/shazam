@@ -11,9 +11,9 @@ Usage
 ```
 slideWindowTunePlot(tuneList, plotFiltered = TRUE, percentage = FALSE,
 jitter.x = FALSE, jitter.x.amt = 0.1, jitter.y = FALSE,
-jitter.y.amt = 0.1, pchs = 1, ltys = 2, cols = 1, plotLegend = TRUE,
-legendPos = "topright", legendHoriz = FALSE, legendCex = 1,
-title = NULL)
+jitter.y.amt = 0.1, pchs = 1, ltys = 2, cols = 1,
+plotLegend = TRUE, legendPos = "topright", legendHoriz = FALSE,
+legendCex = 1, title = NULL)
 ```
 
 Arguments

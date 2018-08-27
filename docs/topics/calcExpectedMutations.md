@@ -11,8 +11,9 @@ frequencies of a given sequence. This is primarily a helper function for
 Usage
 --------------------
 ```
-calcExpectedMutations(germlineSeq, inputSeq = NULL, targetingModel = HH_S5F,
-regionDefinition = NULL, mutationDefinition = NULL)
+calcExpectedMutations(germlineSeq, inputSeq = NULL,
+targetingModel = HH_S5F, regionDefinition = NULL,
+mutationDefinition = NULL)
 ```
 
 Arguments

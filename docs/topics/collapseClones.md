@@ -11,7 +11,8 @@ group and appends columns containing the consensus sequences to the input
 Usage
 --------------------
 ```
-collapseClones(db, cloneColumn = "CLONE", sequenceColumn = "SEQUENCE_IMGT",
+collapseClones(db, cloneColumn = "CLONE",
+sequenceColumn = "SEQUENCE_IMGT",
 germlineColumn = "GERMLINE_IMGT_D_MASK", muFreqColumn = NULL,
 regionDefinition = NULL, method = c("mostCommon", "thresholdedFreq",
 "catchAll", "mostMutated", "leastMutated"), minimumFrequency = NULL,

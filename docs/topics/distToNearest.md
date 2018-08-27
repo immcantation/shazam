@@ -12,9 +12,10 @@ Usage
 ```
 distToNearest(db, sequenceColumn = "JUNCTION", vCallColumn = "V_CALL",
 jCallColumn = "J_CALL", model = c("ham", "aa", "hh_s1f", "hh_s5f",
-"mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), normalize = c("len",
-"none"), symmetry = c("avg", "min"), first = TRUE, nproc = 1,
-fields = NULL, cross = NULL, mst = FALSE, progress = FALSE)
+"mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"),
+normalize = c("len", "none"), symmetry = c("avg", "min"),
+first = TRUE, nproc = 1, fields = NULL, cross = NULL,
+mst = FALSE, subsample = NULL, progress = FALSE)
 ```
 
 Arguments
@@ -66,6 +67,13 @@ cross
 mst
 :   if `TRUE`, return comma-separated branch lengths from minimum 
 spanning tree.
+
+subsample
+:   number of sequences to subsample for speeding up pairwise-distance-matrix calculation. 
+Subsampling is performed without replacement in each group of sequences with the 
+same `vCallColumn`, `jCallColumn`, and junction length. 
+If `subsample` is larger than the unique number of sequences in each group, 
+then the subsampling process is ignored. If `NULL` no subsampling is performed.
 
 progress
 :   if `TRUE` print a progress bar.

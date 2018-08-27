@@ -13,9 +13,9 @@ Usage
 --------------------
 ```
 findThreshold(data, method = c("density", "gmm"), edge = 0.9,
-cross = NULL, subsample = 15000, model = c("gamma-gamma", "gamma-norm",
-"norm-gamma", "norm-norm"), cutoff = c("optimal", "intersect", "user"),
-sen = NULL, spc = NULL, progress = FALSE)
+cross = NULL, subsample = 15000, model = c("gamma-gamma",
+"gamma-norm", "norm-gamma", "norm-norm"), cutoff = c("optimal",
+"intersect", "user"), sen = NULL, spc = NULL, progress = FALSE)
 ```
 
 Arguments
@@ -139,7 +139,7 @@ print(output)
 
 
 ```
-[1] 0.1586833
+[1] 0.1591775
 
 ```
 
@@ -162,7 +162,7 @@ print(output)
 
 
 ```
-[1] 0.1752704
+[1] 0.176337
 
 ```
 

@@ -13,7 +13,8 @@ Usage
 plotBaselineDensity(baseline, idColumn, groupColumn = NULL,
 colorElement = c("id", "group"), colorValues = NULL, title = NULL,
 subsetRegions = NULL, sigmaLimits = c(-5, 5), facetBy = c("region",
-"group"), style = c("density"), size = 1, silent = FALSE, ...)
+"group"), style = c("density"), sizeElement = c("none", "id",
+"group"), size = 1, silent = FALSE, ...)
 ```
 
 Arguments
@@ -73,6 +74,11 @@ with colors determined by values in the
 Faceting is determined by the 
 `facetBy` argument.
 
+
+sizeElement
+:   one of `c("none", "id", "group")` specifying whether the lines in the
+plot should be all of the same size (`none`) or have their sizes depend on 
+the values in `id` or `code`.
 
 size
 :   numeric scaling factor for lines, points and text in the plot.

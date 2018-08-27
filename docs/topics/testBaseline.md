@@ -33,7 +33,11 @@ Value
 A data.frame with test results containing the following columns:
 
 + `REGION`:  sequence region, such as "CDR" and "FWR".
-+ `TEST`:    string defining the two group values compared.
++ `TEST`:    string defining the groups be compared. The
+string is formated as the conclusion associated with the
+p-value in the form `GROUP1 != GROUP2`. Meaning,
+the p-value for rejection of the null hypothesis that 
+GROUP1 and GROUP2 have equivalent distributions.
 + `PVALUE`:  two-sided p-value for the comparison.
 + `FDR`:     FDR corrected `PVALUE`.
 
@@ -57,7 +61,7 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgG")
+db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG", "IgA"))
 
 # Collapse clones
 db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
@@ -86,8 +90,8 @@ Calculating BASELINe probability density functions...
 
 ```R
 
-# Group PDFs by the sample identifier
-grouped <- groupBaseline(baseline, groupBy="SAMPLE")
+# Group PDFs by the isotype
+grouped <- groupBaseline(baseline, groupBy="ISOTYPE")
 
 ```
 
@@ -101,15 +105,28 @@ Calculating BASELINe statistics...
 
 ```R
 
-# Perform test on sample PDFs
-testBaseline(grouped, groupBy="SAMPLE")
+# Visualize isotype PDFs
+plot(grouped, "ISOTYPE")
+
+```
+
+![6](testBaseline-6.png)
+
+```R
+
+# Perform test on isotype PDFs
+testBaseline(grouped, groupBy="ISOTYPE")
 ```
 
 
 ```
-  REGION       TEST    PVALUE       FDR
-1    CDR -1h != +7d 0.1786408 0.1786408
-2    FWR -1h != +7d 0.1155223 0.1786408
+  REGION       TEST      PVALUE        FDR
+1    CDR IgM != IgA 0.092438166 0.13865725
+2    CDR IgM != IgG 0.031431944 0.06286389
+3    CDR IgA != IgG 0.136833601 0.16420032
+4    FWR IgM != IgA 0.007354740 0.02206422
+5    FWR IgM != IgG 0.003282099 0.01969259
+6    FWR IgA != IgG 0.258845711 0.25884571
 
 ```
 

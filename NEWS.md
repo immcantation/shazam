@@ -1,21 +1,25 @@
-Version 0.1.9.999: Aug 17, 2018
+Version 0.1.9.999: Aug 27, 2018
 -------------------------------------------------------------------------------
 
 General:
 
 + Added `subsample` argument to `distToNearest` function.
-+ Added `subPairwise5MerDist` function to calculate non-square distance matrix 
-  of sequences.
-+ Added new function `groupByGene` to group sequences sharing
-  same V and J gene.
 + Removed some internal utility functions in favor of importing them from 
-  `alakazam`: `progressBar`, `getBaseTheme` and `checkColumns`.
+  `alakazam`. Specifically, `progressBar`, `getBaseTheme` and `checkColumns`.
 + Removed `clearConsole`, `getnproc`, and `getPlatform` functions. 
 
 Distance Calculation:
 
 + Changed default `findThreshold` method to `density` and set default 
   sub-sampling count to 15,000 sequences.
+
+Selection Analsis:
+
++ Fixed a plotting bug in `plotBaselineDensity` arising when the `groupColumn` 
+  and `idColumn` arguments were set to the same column.
++ Added the `sizeElement` argument to `plotBaselineDensity` to control 
+  line size.
+
 
 Version 0.1.9: March 30, 2018
 -------------------------------------------------------------------------------

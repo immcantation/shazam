@@ -13,8 +13,8 @@ Usage
 --------------------
 ```
 slideWindowTune(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", dbMutList = NULL, mutThreshRange,
-windowSizeRange, verbose = TRUE)
+germlineColumn = "GERMLINE_IMGT_D_MASK", dbMutList = NULL,
+mutThreshRange, windowSizeRange, verbose = TRUE)
 ```
 
 Arguments

@@ -3,7 +3,7 @@
 Description
 --------------------
 
-`calcObservedMutations` determines all the mutations in a given input seqeunce 
+`calcObservedMutations` determines all the mutations in a given input sequence 
 compared to its germline sequence.
 
 

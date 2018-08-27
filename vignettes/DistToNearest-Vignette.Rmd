@@ -88,7 +88,7 @@ dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="len",
                           nproc=1)
 
 # Use genotyped V assignments, a 5-mer model and no normalization
-dist_s5f <- distToNearest(db, v_call="V_CALL_GENOTYPED", model="hh_s5f", 
+dist_s5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f", 
                           first=FALSE, normalize="none", nproc=1)
 ```
 
