@@ -56,7 +56,6 @@ Imports:
     iterators,
     kedd,
     KernSmooth,
-    ks,
     lazyeval,
     MASS,
     methods,
