@@ -127,7 +127,6 @@
 #'                          vertex_attr set_vertex_attr
 #' @importFrom  kedd        h.ucv
 #' @importFrom  KernSmooth  bkde
-#' @importFrom  ks          hucv kde
 #' @importFrom  lazyeval    interp
 #' @importFrom  MASS        fitdistr
 #' @importFrom  progress    progress_bar
