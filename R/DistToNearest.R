@@ -1040,21 +1040,33 @@ smoothValley <- function(distances, subsample=NULL) {
         subsample <- min(length(distances), subsample)
         distances <- sample(distances, subsample, replace=FALSE)
     }
+    # Guassian distribution bandwidth scale parameter
+    #guassian_scaling <- (1/(4 * pi))^(1/10)
+    
     # Ideal bandwidth
-    h_ucv <- h.ucv(distances, 4)$h
+    bandwidth <- kedd::h.ucv(unique(distances), 4)$h
+    #bandwidth <- kedd::h.ucv(distances, 4)$h
+    #bandwidth <- ks::hucv(unique(distances), deriv.order=4)
+    
     # Density estimate
-    dens <- bkde(distances, bandwidth=h_ucv)
+    dens <- KernSmooth::bkde(distances, bandwidth=bandwidth, canonical=TRUE)
+    xdens <- dens$x
+    ydens <- dens$y
+    #dens <- ks::kde(distances, h=bandwidth*guassian_scaling, binned=TRUE)
+    #xdens <- dens$eval.points
+    #ydens <- dens$estimate
+    
     # Find threshold
-    tryCatch(threshold <- dens$x[which(diff(sign(diff(dens$y))) == 2)[1] + 1], 
+    tryCatch(threshold <- xdens[which(diff(sign(diff(ydens))) == 2)[1] + 1], 
              error = function(e) {
                  warning('No minimum was found between two modes.')
                  return(NULL) })
     
     results <- new("DensityThreshold",
                    x=distances,
-                   bandwidth=h_ucv,
-                   xdens=dens$x,
-                   ydens=dens$y,
+                   bandwidth=bandwidth,
+                   xdens=xdens,
+                   ydens=ydens,
                    threshold=threshold)
     
     return(results)
@@ -1736,13 +1748,14 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
     }
     
     # Add x limits
-    if (!is.na(xmin) | !is.na(xmax) & is.null(breaks)) {
+    if (is.null(breaks) & (!is.na(xmin) | !is.na(xmax))) {
         p <- p + xlim(xmin, xmax)
-    } else if (!is.null(breaks)) {
+    }
+    # Set breaks
+    if (!is.null(breaks)) {
         p <- p + scale_x_continuous(breaks=scales::pretty_breaks(n=breaks),
                                     limits=c(xmin, xmax))
     }
-    
     # Add Title
     if (!is.null(title)) {
         p <- p + ggtitle(title)
@@ -1842,13 +1855,14 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     }
     
     # Add x limits
-    if (!is.na(xmin) | !is.na(xmax) & is.null(breaks)) {
+    if (is.null(breaks) & (!is.na(xmin) | !is.na(xmax))) {
         p <- p + xlim(xmin, xmax)
-    } else if (!is.null(breaks)) {
+    }
+    # Set breaks
+    if (!is.null(breaks)) {
         p <- p + scale_x_continuous(breaks=scales::pretty_breaks(n=breaks),
                                     limits=c(xmin, xmax))
     }
-    
     # Add title
     if (!is.null(title)) {
         p <- p + ggtitle(title)

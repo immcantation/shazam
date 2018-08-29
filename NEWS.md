@@ -12,6 +12,8 @@ Distance Calculation:
 
 + Changed default `findThreshold` method to `density` and set default 
   sub-sampling count to 15,000 sequences.
++ Fixed a bug in `plotDensityThreshold` and `plotGmmThreshold` wherein the
+  `breaks` argument was ignored when specifying `xmax` and/or `xmin`.
 
 Selection Analsis:
 
