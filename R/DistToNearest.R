@@ -1050,6 +1050,7 @@ smoothValley <- function(distances, subsample=NULL) {
     
     # Density estimate
     dens <- KernSmooth::bkde(distances, bandwidth=bandwidth, canonical=TRUE)
+    #dens <- KernSmooth::bkde(distances, bandwidth=bandwidth)
     xdens <- dens$x
     ydens <- dens$y
     #dens <- ks::kde(distances, h=bandwidth*guassian_scaling, binned=TRUE)
