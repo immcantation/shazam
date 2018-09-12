@@ -954,35 +954,35 @@ findThreshold <- function (data, method=c("density", "gmm"),
                            model=c("gamma-gamma", "gamma-norm", "norm-gamma", "norm-norm"),
                            cutoff=c("optimal", "intersect", "user"), sen=NULL, spc=NULL, 
                            progress=FALSE){
-  # Check arguments
-  method <- match.arg(method)
-  model <- match.arg(model)
-  cutoff <- match.arg(cutoff)
-  
-  if (method == "gmm") {
-      if (cutoff == "user"){
-          if (is.null(sen) & is.null(spc)) {
-              cat("Error: one of 'sen' or 'spc' values should be specified.")
-              output <- NA
-          } else if (!is.null(sen) & !is.null(spc)) {
-              cat("Error: only one of 'sen' or 'spc' values can be specified.")
-              output <- NA
-          } else {
-              output <- gmmFit(ent=data, edge=edge, cross=cross, model=model, cutoff=cutoff, 
-                               sen=sen, spc=spc, progress=progress)
-          }
-      } else {
-          output <- gmmFit(ent=data, edge=edge, cross=cross, model=model, cutoff=cutoff, 
-                           sen=sen, spc=spc, progress=progress)
-      }
-  } else if (method == "density") {
-    output <- smoothValley(data, subsample=subsample)
-  } else {
-    cat("Error: assigned method has not been found.\n")
-    output <- NA
-  }
-  
-  return(output)
+    # Check arguments
+    method <- match.arg(method)
+    model <- match.arg(model)
+    cutoff <- match.arg(cutoff)
+    
+    if (method == "gmm") {
+        if (cutoff == "user"){
+            if (is.null(sen) & is.null(spc)) {
+                cat("Error: one of 'sen' or 'spc' values should be specified.")
+                output <- NA
+            } else if (!is.null(sen) & !is.null(spc)) {
+                cat("Error: only one of 'sen' or 'spc' values can be specified.")
+                output <- NA
+            } else {
+                output <- gmmFit(ent=data, edge=edge, cross=cross, model=model, cutoff=cutoff, 
+                                 sen=sen, spc=spc, progress=progress)
+            }
+        } else {
+            output <- gmmFit(ent=data, edge=edge, cross=cross, model=model, cutoff=cutoff, 
+                             sen=sen, spc=spc, progress=progress)
+        }
+    } else if (method == "density") {
+        output <- smoothValley(data, subsample=subsample)
+    } else {
+        cat("Error: assigned method has not been found.\n")
+        output <- NA
+    }
+    
+    return(output)
 }
 
 
