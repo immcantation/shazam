@@ -236,8 +236,8 @@ test_that("Test findThreshold", {
     gmm_output <- findThreshold(db$DIST_NEAREST, method="gmm", model="gamma-gamma", edge=0.9)
     expect_equal(gmm_output@threshold, 0.12, tolerance=0.01)
 
-    dens_output <- findThreshold(db$DIST_NEAREST, method="dens", subsample=NULL, edge=0.9)
-    expect_equal(dens_output@threshold, 0.114, tolerance=0.01)
+    dens_output <- findThreshold(db$DIST_NEAREST, method="dens")
+    expect_equal(dens_output@threshold, 0.14, tolerance=0.01)
 })
 
 #### calcTargetingDistance ####

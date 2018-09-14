@@ -1,4 +1,4 @@
-Version 0.1.10: September 7, 2018
+Version 0.1.10: September 14, 2018
 -------------------------------------------------------------------------------
 
 General:
@@ -10,8 +10,13 @@ General:
 
 Distance Calculation:
 
-+ Changed default `findThreshold` method to `density` and set default 
-  subsampling count to 15,000 sequences.
++ Changed default `findThreshold` method to `density`.
++ Significantly reduced run time of the `density` method by retuning the 
+  bandwidth detection process. The `density` method should now also yield more 
+  consistent thresholds, on average.
++ The `subsample` argument to `findThreshold` now applies to both the 
+  `density` and `gmm` methods. Subsampling of distance is not performed by 
+  default.
 + Fixed a bug in `plotDensityThreshold` and `plotGmmThreshold` wherein the
   `breaks` argument was ignored when specifying `xmax` and/or `xmin`.
 

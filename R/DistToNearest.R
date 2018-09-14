@@ -860,7 +860,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' using either a Gamma/Guassian Mixture Model fit (\code{method="gmm"}) or kernel density 
 #' fit (\code{method="density"}).
 #'
-#' @param    data       numeric vector containing nearest neighbor distances. 
+#' @param    distances  numeric vector containing nearest neighbor distances. 
 #' @param    method     string defining the method to use for determining the optimal threshold.
 #'                      One of \code{"gmm"} or \code{"density"}. See Details for methodological
 #'                      descriptions.
@@ -870,10 +870,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' @param    cross      supplementary nearest neighbor distance vector output from \link{distToNearest} 
 #'                      for initialization of the Gaussian fit parameters. 
 #'                      Applies only when \code{method="gmm"}. 
-#' @param    subsample  number of distances to subsample for speeding up bandwidth inference.
-#'                      If \code{NULL} no subsampling is performed. As bandwith inferrence 
-#'                      is computationally expensive, subsampling is recommended for large data sets.
-#'                      Applies only when \code{method="density"}. 
+#' @param    subsample  maximum number of distances to subsample to before threshold detection.
 #' @param    model      allows the user to choose among four possible combinations of fitting curves: 
 #'                      \code{"norm-norm"}, \code{"norm-gamma"}, \code{"gamma-norm"}, 
 #'                      and \code{"gamma-gamma"}. Applies only when \code{method="gmm"}.
@@ -917,11 +914,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #'           See \link{plotGmmThreshold} and \link{plotDensityThreshold} for plotting output.
 #'      
 #' @note 
-#' We recommend users to visually inspect the resulting
-#' fits when using \code{method="gmm"}. Our empirical observations imply that, the bimodality 
-#' of the distance-to-nearest distribution is detectable for a repertoire of minimum 1k reads.
-#' The increased number of sequences will improve the fitting procedure, although it would be 
-#' at the potential expense of higher demand in computational time complexity.     
+#' Visually inspecting the resulting distribution fits is strongly recommended when using 
+#' either fitting method. Empirical observations imply that the bimodality 
+#' of the distance-to-nearest distribution is detectable for a minimum of 1,000 distances.
+#' Larger numbers of distances will improve the fitting procedure, although this can come 
+#' at the expense of higher computational demands.
 #' 
 #' @examples
 #' \donttest{
@@ -949,8 +946,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' print(output)
 #' }
 #' @export
-findThreshold <- function (data, method=c("density", "gmm"), 
-                           edge=0.9, cross=NULL, subsample=15000,
+findThreshold <- function (distances, method=c("density", "gmm"), 
+                           edge=0.9, cross=NULL, subsample=NULL,
                            model=c("gamma-gamma", "gamma-norm", "norm-gamma", "norm-norm"),
                            cutoff=c("optimal", "intersect", "user"), sen=NULL, spc=NULL, 
                            progress=FALSE){
@@ -958,6 +955,12 @@ findThreshold <- function (data, method=c("density", "gmm"),
     method <- match.arg(method)
     model <- match.arg(model)
     cutoff <- match.arg(cutoff)
+    
+    # Subsample input distances
+    if(!is.null(subsample)) {
+        subsample <- min(length(distances), subsample)
+        distances <- sample(distances, subsample, replace=FALSE)
+    }
     
     if (method == "gmm") {
         if (cutoff == "user"){
@@ -968,15 +971,15 @@ findThreshold <- function (data, method=c("density", "gmm"),
                 cat("Error: only one of 'sen' or 'spc' values can be specified.")
                 output <- NA
             } else {
-                output <- gmmFit(ent=data, edge=edge, cross=cross, model=model, cutoff=cutoff, 
+                output <- gmmFit(ent=distances, edge=edge, cross=cross, model=model, cutoff=cutoff, 
                                  sen=sen, spc=spc, progress=progress)
             }
         } else {
-            output <- gmmFit(ent=data, edge=edge, cross=cross, model=model, cutoff=cutoff, 
+            output <- gmmFit(ent=distances, edge=edge, cross=cross, model=model, cutoff=cutoff, 
                              sen=sen, spc=spc, progress=progress)
         }
     } else if (method == "density") {
-        output <- smoothValley(data, subsample=subsample)
+        output <- smoothValley(distances)
     } else {
         cat("Error: assigned method has not been found.\n")
         output <- NA
@@ -991,7 +994,6 @@ findThreshold <- function (data, method=c("density", "gmm"),
 # Infer value of the minimum between the two modes in a bimodal distribution.
 #
 # @param    distances  numeric vector of distances.
-# @param    subsample  number of distances to subsample for speeding up bandwidth inference.
 # 
 # @return   Returns distance threshold that separates two modes of the input distribution.
 #
@@ -1032,14 +1034,10 @@ findThreshold <- function (data, method=c("density", "gmm"),
 # plot(p1)
 #
 # @export
-smoothValley <- function(distances, subsample=NULL) {
+ smoothValley <- function(distances) {
     # Remove NA, NaN, and infinite distances
     distances <- distances[!is.na(distances) & !is.nan(distances) & !is.infinite(distances)]
-    # Subsample input distances
-    if(!is.null(subsample)) {
-        subsample <- min(length(distances), subsample)
-        distances <- sample(distances, subsample, replace=FALSE)
-    }
+
     # Guassian distribution bandwidth scale parameter
     #guassian_scaling <- (1/(4 * pi))^(1/10)
     

@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
-Version: 0.1.9.999
-Date: 2018-09-12
+Version: 0.1.10
+Date: 2018-09-14
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
@@ -21,12 +21,11 @@ Authors@R: c(person("Mohamed", "Uduman", role=c("aut"),
              person("Steven", "Kleinstein", role=c("aut", "cph"), 
                     email="steven.kleinstein@yale.edu"))
 Title: Immunoglobulin Somatic Hypermutation Analysis
-Description: Provides a computational framework for Bayesian estimation of
-    antigen-driven selection in immunoglobulin (Ig) sequences, providing an
-    intuitive means of analyzing selection by quantifying the degree of
-    selective pressure. Also provides tools to profile mutations in Ig
-    sequences, build models of somatic hypermutation (SHM) in Ig sequences,
-    and make model-dependent distance comparisons of Ig repertoires.
+Description: Provides a computational framework for analyzing mutations
+    in immunoglobulin (Ig) sequences. Includes methods for Bayesian estimation of
+    antigen-driven selection pressure, mutational load quantification, 
+    building of somatic hypermutation (SHM) models, and model-dependent distance 
+    calculations. Also includes empirically derived models of SHM for both mice and humans.
     Citations: 
     Gupta and Vander Heiden, et al (2015) <doi:10.1093/bioinformatics/btv359>,
     Yaari, et al (2012) <doi:10.1093/nar/gks457>,
@@ -44,7 +43,7 @@ Depends:
     ggplot2 (>= 2.0.0),
     stringi (>= 1.1.3)
 Imports:
-    alakazam (>= 0.2.10.999),
+    alakazam (>= 0.2.11),
     ape,
     diptest,
     doParallel,

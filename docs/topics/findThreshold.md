@@ -12,8 +12,8 @@ fit (`method="density"`).
 Usage
 --------------------
 ```
-findThreshold(data, method = c("density", "gmm"), edge = 0.9,
-cross = NULL, subsample = 15000, model = c("gamma-gamma",
+findThreshold(distances, method = c("density", "gmm"), edge = 0.9,
+cross = NULL, subsample = NULL, model = c("gamma-gamma",
 "gamma-norm", "norm-gamma", "norm-norm"), cutoff = c("optimal",
 "intersect", "user"), sen = NULL, spc = NULL, progress = FALSE)
 ```
@@ -21,7 +21,7 @@ cross = NULL, subsample = 15000, model = c("gamma-gamma",
 Arguments
 -------------------
 
-data
+distances
 :   numeric vector containing nearest neighbor distances.
 
 method
@@ -40,10 +40,7 @@ for initialization of the Gaussian fit parameters.
 Applies only when `method="gmm"`.
 
 subsample
-:   number of distances to subsample for speeding up bandwidth inference.
-If `NULL` no subsampling is performed. As bandwith inferrence 
-is computationally expensive, subsampling is recommended for large data sets.
-Applies only when `method="density"`.
+:   maximum number of distances to subsample to before threshold detection.
 
 model
 :   allows the user to choose among four possible combinations of fitting curves: 
@@ -105,11 +102,11 @@ between the two modes of the distribution.
 Note
 -------------------
 
-We recommend users to visually inspect the resulting
-fits when using `method="gmm"`. Our empirical observations imply that, the bimodality 
-of the distance-to-nearest distribution is detectable for a repertoire of minimum 1k reads.
-The increased number of sequences will improve the fitting procedure, although it would be 
-at the potential expense of higher demand in computational time complexity.
+Visually inspecting the resulting distribution fits is strongly recommended when using 
+either fitting method. Empirical observations imply that the bimodality 
+of the distance-to-nearest distribution is detectable for a minimum of 1,000 distances.
+Larger numbers of distances will improve the fitting procedure, although this can come 
+at the expense of higher computational demands.
 
 
 
@@ -139,7 +136,7 @@ print(output)
 
 
 ```
-[1] 0.1591775
+[1] 0.1568455
 
 ```
 
@@ -162,7 +159,7 @@ print(output)
 
 
 ```
-[1] 0.176337
+[1] 0.1741973
 
 ```
 
@@ -175,7 +172,7 @@ plot(output)
 
 ```
 
-![10](findThreshold-10.png)
+*Warning*:Removed 1 rows containing missing values (geom_vline).![11](findThreshold-11.png)
 
 ```R
 print(output)
@@ -183,7 +180,7 @@ print(output)
 
 
 ```
-[1] 0.1226913
+[1] NA
 
 ```
 

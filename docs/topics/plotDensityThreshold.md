@@ -86,7 +86,7 @@ print(output)
 
 
 ```
-[1] 0.1226913
+[1] NA
 
 ```
 
@@ -97,7 +97,7 @@ print(output)
 plotDensityThreshold(output)
 ```
 
-![4](plotDensityThreshold-4.png)
+*Warning*:Removed 1 rows containing missing values (geom_vline).![5](plotDensityThreshold-5.png)
 
 
 See also

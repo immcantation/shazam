@@ -28,7 +28,6 @@ fields (columns) to be present in the Change-O database:
 # Subset example data to one sample
 library(shazam)
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, SAMPLE == "-1h")
 ```
 
 ## Calculating nearest neighbor distances
@@ -63,19 +62,19 @@ the overall distance.
 
 ```r
 # Use nucleotide Hamming distance and normalize by junction length
-dist_ham <- distToNearest(db, model="ham", first=FALSE, normalize="len", 
-                          nproc=1)
+dist_ham <- distToNearest(ExampleDb, vCallColumn="V_CALL_GENOTYPED", 
+                          model="ham", normalize="len", nproc=1)
 
 # Use genotyped V assignments, a 5-mer model and no normalization
-dist_s5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f", 
-                          first=FALSE, normalize="none", nproc=1)
+dist_s5f <- distToNearest(ExampleDb, vCallColumn="V_CALL_GENOTYPED", 
+                          model="hh_s5f", normalize="none", nproc=1)
 ```
 
 ## Using nearest neighbor distances to determine clonal assignment thresholds
 
 The primary use of the distance to nearest calculation in SHazaM is to 
 determine the optimal threshold for clonal assignment using the 
-`DefineClones-bygroup` tool in Change-O. Defining a threshold relies on 
+`DefineClones` tool in Change-O. Defining a threshold relies on 
 distinguishing clonally related sequences (represented by sequences with 
 close neighbors) from singletons (sequences without close neighbors), 
 which show up as two modes in a nearest neighbor distance histogram. 
@@ -134,11 +133,7 @@ set to a value near 7.
 
 The `density` method will look for the minimum in the valley between two modes of a smoothed 
 distribution based on the input vector (`distances`), which will generally be the 
-`DIST_NEAREST` column from the `distToNearest` output. Determining the optimal bandwidth 
-parameter for smoothing the distribution can be computationally intensive. The bandwidth 
-tuning is typically robust when subsampling down to 15,000 distances, though the ideal 
-subsampling count will depend upon the data set. The input vector can be subsampled to 
-the size specified using the `subsample` parameter.  Below is an example of using the 
+`DIST_NEAREST` column from the `distToNearest` output. Below is an example of using the 
 `density` method for threshold detection.
 
 
@@ -159,7 +154,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1226913
+## [1] 0.1738391
 ```
 
 ### Automated threshold detection via a mixture model
@@ -199,11 +194,12 @@ print(output)
 ```
 
 ```
-## [1] 0.155986
+## [1] 0.1204906
 ```
 
-**Note:** The shape of histogram plotted by `plotGmmThreshold` is governed by the `binwidth` parameter.
-Meaning, any change in bin size will change the form of the distribution, while the `gmm` method is 
+**Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
+by the `binwidth` parameter. Meaning, any change in bin size will change the 
+form of the distribution, while the `gmm` method is 
 completely bin size independent and only engages the real input data.
 
 ## Calculating nearest neighbor distances independently for subsets of data
@@ -221,9 +217,8 @@ and will set `fields="SAMPLE"`. This will reproduce previous results for sample
 
 
 ```r
-dist_fields <- distToNearest(ExampleDb, model="ham", first=FALSE, 
-                             normalize="len", fields="SAMPLE", 
-                             nproc=1)
+dist_fields <- distToNearest(ExampleDb, model="ham", normalize="len", 
+                             fields="SAMPLE", nproc=1)
 ```
 
 We can plot the nearest neighbor distances for the two samples:
