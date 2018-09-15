@@ -63,7 +63,7 @@ devtools::use_data(HH_S1F, overwrite=TRUE)
 # Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  
 # Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
 # Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
-# Immunology,197(9), 3566–3574. http://doi.org/10.4049/jimmunol.1502263
+# Immunology,197(9), 3566-3574. http://doi.org/10.4049/jimmunol.1502263
 
 HKL_S1F = matrix(data=c(0.00, 0.26, 0.50, 0.24,
                         0.25, 0.00, 0.30, 0.45,
@@ -137,7 +137,7 @@ devtools::use_data(HH_S5F, overwrite=TRUE)
 # Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  
 # Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
 # Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
-# Immunology,197(9), 3566–3574. http://doi.org/10.4049/jimmunol.1502263
+# Immunology,197(9), 3566-3574. http://doi.org/10.4049/jimmunol.1502263
 
 load("data-raw/HKL_S5F_raw.rdata")
 
@@ -146,7 +146,7 @@ HKL_S5F <- new("TargetingModel",
                 description = "5-mer targeting model based on silent (S) mutations in human kappa & lambda light-chain functional sequences",
                 species = "Homo sapiens",
                 date = "2015-12-06",
-                citation = "Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of Immunology, 197(9), 3566–3574. http://doi.org/10.4049/jimmunol.1502263",
+                citation = "Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of Immunology, 197(9), 3566-3574. http://doi.org/10.4049/jimmunol.1502263",
                 mutability = hL.mut,
                 substitution = hL.sub,
                 targeting = hL.tar)
@@ -160,7 +160,7 @@ rm(hL.sub, hL.tar, hL.char, hL.mut)
 # Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  
 # Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation 
 # Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
-# Immunology,197(9), 3566–3574. http://doi.org/10.4049/jimmunol.1502263
+# Immunology,197(9), 3566-3574. http://doi.org/10.4049/jimmunol.1502263
 
 load("data-raw/MK_RS5NF_raw.rdata")
 
@@ -169,7 +169,7 @@ MK_RS5NF <- new("TargetingModel",
                description = "5-mer targeting model based on replacement (R) and silent (S) mutations in kappa light-chain non-functional sequences from NP-immunized mice",
                species = "Mus musculus",
                date = "2015-01-06",
-               citation = "Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of Immunology, 197(9), 3566–3574. http://doi.org/10.4049/jimmunol.1502263",
+               citation = "Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of Immunology, 197(9), 3566-3574. http://doi.org/10.4049/jimmunol.1502263",
                mutability = mL.mut,
                substitution = mL.sub,
                targeting = mL.tar)
