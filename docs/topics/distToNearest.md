@@ -162,17 +162,9 @@ xlab("distance") +
 geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
 fill="steelblue", color="white")
 plot(p1)
-
 ```
 
 ![2](distToNearest-2.png)
-
-```R
-
-# Use human 5-mer model
-dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f")
-```
-
 
 
 See also

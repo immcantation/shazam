@@ -78,4 +78,4 @@ Collate:
     'MutationProfiling.R'
     'Shmulate.R'
     'TargetingModels.R'
-RoxygenNote: 5.0.1
+RoxygenNote: 6.1.0

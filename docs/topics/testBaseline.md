@@ -71,8 +71,8 @@ includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
-sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK", 
+sequenceColumn="CLONAL_SEQUENCE",
+germlineColumn="CLONAL_GERMLINE", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
 targetingModel=HH_S5F,
@@ -121,12 +121,12 @@ testBaseline(grouped, groupBy="ISOTYPE")
 
 ```
   REGION       TEST      PVALUE        FDR
-1    CDR IgM != IgA 0.092438166 0.13865725
-2    CDR IgM != IgG 0.031431944 0.06286389
-3    CDR IgA != IgG 0.136833601 0.16420032
-4    FWR IgM != IgA 0.007354740 0.02206422
-5    FWR IgM != IgG 0.003282099 0.01969259
-6    FWR IgA != IgG 0.258845711 0.25884571
+1    CDR IgM != IgA 0.126536071 0.15184329
+2    CDR IgM != IgG 0.040137450 0.08027490
+3    CDR IgA != IgG 0.101394824 0.15184329
+4    FWR IgM != IgA 0.010416292 0.03124888
+5    FWR IgM != IgG 0.006309629 0.03124888
+6    FWR IgA != IgG 0.334456382 0.33445638
 
 ```
 

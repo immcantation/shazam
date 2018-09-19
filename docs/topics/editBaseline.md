@@ -9,20 +9,20 @@ Description
 Usage
 --------------------
 ```
-editBaseline(baseline, field_name, value)
+editBaseline(baseline, field, value)
 ```
 
 Arguments
 -------------------
 
 baseline
-:   The `Baseline` S4 object to be edited.
+:   `Baseline` object to be edited.
 
-field_name
-:   Name of the field in the `Baseline` S4 object to be edited.
+field
+:   name of the field in the `Baseline` object to be edited.
 
 value
-:   The value to set the `field_name`.
+:   value to set the `field`.
 
 
 
@@ -40,15 +40,9 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
 
-# Collapse clones
-db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK",
-method="thresholdedFreq", minimumFrequency=0.6,
-includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
-
-# Calculate BASELINe
+# Make Baseline object
 baseline <- calcBaseline(db, 
 sequenceColumn="SEQUENCE_IMGT",
 germlineColumn="GERMLINE_IMGT_D_MASK", 
@@ -70,8 +64,8 @@ Calculating BASELINe probability density functions...
 ```R
 
 # Edit the field "description"
-baseline <- editBaseline(baseline, field_name="description", 
-value="+7d IgA & IgG")
+baseline <- editBaseline(baseline, field="description", 
+value="+7d IgG")
 ```
 
 
@@ -79,7 +73,7 @@ value="+7d IgA & IgG")
 See also
 -------------------
 
-See [Baseline](Baseline-class.md) for the return object.
+See [Baseline](Baseline-class.md) for the input and return object.
 
 
 
