@@ -1,4 +1,4 @@
-Version 0.1.10: September 14, 2018
+Version 0.1.10: September 19, 2018
 -------------------------------------------------------------------------------
 
 General:
@@ -25,7 +25,8 @@ Selection Analsis:
 + Fixed a plotting bug in `plotBaselineDensity` arising when the `groupColumn` 
   and `idColumn` arguments were set to the same column.
 + Added the `sizeElement` argument to `plotBaselineDensity` to control 
-  line size.
+  line size
++ Renamed the `field_name` argument to `field` in `editBaseline`.
 
 
 Version 0.1.9: March 30, 2018

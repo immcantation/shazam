@@ -226,26 +226,20 @@ createBaseline <- function(description="",
 #' 
 #' \code{editBaseline} edits a field in a \code{Baseline} object.
 #'
-#' @param   baseline     The \code{Baseline} S4 object to be edited.
-#' @param   field_name   Name of the field in the \code{Baseline} S4 object to be edited.
-#' @param   value        The value to set the \code{field_name}.
+#' @param   baseline  \code{Baseline} object to be edited.
+#' @param   field     name of the field in the \code{Baseline} object to be edited.
+#' @param   value     value to set the \code{field}.
 #' 
 #' @return   A \code{Baseline} object with the field of choice updated.
 #' 
-#' @seealso  See \link{Baseline} for the return object.
+#' @seealso  See \link{Baseline} for the input and return object.
 #'
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
 #' 
-#' # Collapse clones
-#' db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-#'                      germlineColumn="GERMLINE_IMGT_D_MASK",
-#'                      method="thresholdedFreq", minimumFrequency=0.6,
-#'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
-#'                      
-#' # Calculate BASELINe
+#' # Make Baseline object
 #' baseline <- calcBaseline(db, 
 #'                          sequenceColumn="SEQUENCE_IMGT",
 #'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
@@ -255,15 +249,15 @@ createBaseline <- function(description="",
 #'                          nproc=1)
 #'                          
 #' # Edit the field "description"
-#' baseline <- editBaseline(baseline, field_name="description", 
-#'                          value="+7d IgA & IgG")
-#'                                                   
+#' baseline <- editBaseline(baseline, field="description", 
+#'                          value="+7d IgG")
+#' 
 #' @export
-editBaseline <- function(baseline, field_name, value) {
-    if (!match(field_name, slotNames(baseline))) { 
-        stop("field_name not part of Baseline object!")
+editBaseline <- function(baseline, field, value) {
+    if (!match(field, slotNames(baseline))) { 
+        stop(field, " is not part of the Baseline object.")
     }
-    slot(baseline, field_name) <- value
+    slot(baseline, field) <- value
     
     return(baseline)
 }
