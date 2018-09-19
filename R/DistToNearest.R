@@ -691,9 +691,6 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'       geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
 #'                      fill="steelblue", color="white")
 #' plot(p1)
-#'
-#' # Use human 5-mer model
-#' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="hh_s5f")
 #' 
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 

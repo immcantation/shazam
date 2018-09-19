@@ -235,6 +235,7 @@ createBaseline <- function(description="",
 #' @seealso  See \link{Baseline} for the input and return object.
 #'
 #' @examples
+#' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
@@ -251,6 +252,7 @@ createBaseline <- function(description="",
 #' # Edit the field "description"
 #' baseline <- editBaseline(baseline, field="description", 
 #'                          value="+7d IgG")
+#' }
 #' 
 #' @export
 editBaseline <- function(baseline, field, value) {
@@ -805,8 +807,8 @@ calcBaselineBinomialPdf <- function (x=3,
 #'
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="SEQUENCE_IMGT",
-#'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                          sequenceColumn="CLONAL_SEQUENCE",
+#'                          germlineColumn="CLONAL_GERMLINE", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1153,8 +1155,8 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="SEQUENCE_IMGT",
-#'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                          sequenceColumn="CLONAL_SEQUENCE",
+#'                          germlineColumn="CLONAL_GERMLINE", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1240,7 +1242,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
         return(stats)    
     } else if (returnType == "baseline") {
         # Append stats to baseline object
-        return(editBaseline(baseline, field_name = "stats", stats))
+        return(editBaseline(baseline, field="stats", stats))
     } else {
         return(NULL)
     }
@@ -1293,8 +1295,8 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="SEQUENCE_IMGT",
-#'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                          sequenceColumn="CLONAL_SEQUENCE",
+#'                          germlineColumn="CLONAL_GERMLINE", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1538,8 +1540,8 @@ baseline2DistPValue <-function(base1, base2) {
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="SEQUENCE_IMGT",
-#'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                          sequenceColumn="CLONAL_SEQUENCE",
+#'                          germlineColumn="CLONAL_GERMLINE", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1797,8 +1799,8 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="SEQUENCE_IMGT",
-#'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                          sequenceColumn="CLONAL_SEQUENCE",
+#'                          germlineColumn="CLONAL_GERMLINE", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,

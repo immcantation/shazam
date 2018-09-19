@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 0.1.10
-Date: 2018-09-14
+Date: 2018-09-19
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
@@ -21,16 +21,14 @@ Authors@R: c(person("Mohamed", "Uduman", role=c("aut"),
              person("Steven", "Kleinstein", role=c("aut", "cph"), 
                     email="steven.kleinstein@yale.edu"))
 Title: Immunoglobulin Somatic Hypermutation Analysis
-Description: Provides a computational framework for analyzing mutations
-    in immunoglobulin (Ig) sequences. Includes methods for Bayesian estimation of
-    antigen-driven selection pressure, mutational load quantification, 
-    building of somatic hypermutation (SHM) models, and model-dependent distance 
-    calculations. Also includes empirically derived models of SHM for both mice and humans.
-    Citations: 
-    Gupta and Vander Heiden, et al (2015) <doi:10.1093/bioinformatics/btv359>,
-    Yaari, et al (2012) <doi:10.1093/nar/gks457>,
-    Yaari, et al (2013) <doi:10.3389/fimmu.2013.00358>,
-    Cui, et al (2016) <doi:10.4049/jimmunol.1502263>.
+Description: Provides a computational framework for analyzing mutations in
+    immunoglobulin (Ig) sequences. Includes methods for Bayesian estimation of
+    antigen-driven selection pressure, mutational load quantification, building of
+    somatic hypermutation (SHM) models, and model-dependent distance calculations.
+    Also includes empirically derived models of SHM for both mice and humans.
+    Citations: Gupta and Vander Heiden, et al (2015) <doi:10.1093/bioinformatics/
+    btv359>, Yaari, et al (2012) <doi:10.1093/nar/gks457>, Yaari, et al (2013) <doi:
+    10.3389/fimmu.2013.00358>, Cui, et al (2016) <doi:10.4049/jimmunol.1502263>.
 License: CC BY-SA 4.0
 URL: http://shazam.readthedocs.io
 BugReports: https://bitbucket.org/kleinstein/shazam/issues
@@ -80,4 +78,4 @@ Collate:
     'MutationProfiling.R'
     'Shmulate.R'
     'TargetingModels.R'
-RoxygenNote: 6.1.0
+RoxygenNote: 5.0.1
