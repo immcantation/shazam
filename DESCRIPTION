@@ -26,9 +26,11 @@ Description: Provides a computational framework for analyzing mutations in
     antigen-driven selection pressure, mutational load quantification, building of
     somatic hypermutation (SHM) models, and model-dependent distance calculations.
     Also includes empirically derived models of SHM for both mice and humans.
-    Citations: Gupta and Vander Heiden, et al (2015) <doi:10.1093/bioinformatics/
-    btv359>, Yaari, et al (2012) <doi:10.1093/nar/gks457>, Yaari, et al (2013) <doi:
-    10.3389/fimmu.2013.00358>, Cui, et al (2016) <doi:10.4049/jimmunol.1502263>.
+    Citations: 
+    Gupta and Vander Heiden, et al (2015) <doi:10.1093/bioinformatics/btv359>, 
+    Yaari, et al (2012) <doi:10.1093/nar/gks457>, 
+    Yaari, et al (2013) <doi:10.3389/fimmu.2013.00358>, 
+    Cui, et al (2016) <doi:10.4049/jimmunol.1502263>.
 License: CC BY-SA 4.0
 URL: http://shazam.readthedocs.io
 BugReports: https://bitbucket.org/kleinstein/shazam/issues
