@@ -608,8 +608,8 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'                           overlapping gene calls.
 #' @param    nproc           number of cores to distribute the function over.
 #' @param    fields          additional fields to use for grouping.
-#' @param    cross           columns for grouping to calculate distances across groups 
-#'                           (self vs others).
+#' @param    cross           character vector of column names to use for grouping to calculate 
+#'                           distances across groups. Meaning the columns that define self versus others.
 #' @param    mst             if \code{TRUE}, return comma-separated branch lengths from minimum 
 #'                           spanning tree.
 #' @param    subsample       number of sequences to subsample for speeding up pairwise-distance-matrix calculation. 
@@ -620,8 +620,9 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' @param    progress        if \code{TRUE} print a progress bar.
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
-#'           \code{DIST_NEAREST} column if \code{crossGroups=NULL} or in the 
-#'           \code{CROSS_DIST_NEAREST} column if \code{crossGroups} was specified.
+#'           \code{DIST_NEAREST} column if \code{cross=NULL}. 
+#'           if \code{cross} was specified, distances will be added as the 
+#'           \code{CROSS_DIST_NEAREST} column
 #'
 #' @details
 #' The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
