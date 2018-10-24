@@ -616,7 +616,9 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'                           Subsampling is performed without replacement in each group of sequences with the 
 #'                           same \code{vCallColumn}, \code{jCallColumn}, and junction length. 
 #'                           If \code{subsample} is larger than the unique number of sequences in each group, 
-#'                           then the subsampling process is ignored. If \code{NULL} no subsampling is performed.
+#'                           then the subsampling process is ignored for that group. For each sequence in \code{db},
+#'                           the reported \code{DIST_NEAREST} is the distance to the closest sequence in the
+#'                           subsampled set for the group. If \code{NULL} no subsampling is performed.
 #' @param    progress        if \code{TRUE} print a progress bar.
 #'
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
@@ -656,6 +658,15 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' group is the de facto nearest neighbor to each other, thus giving rise to distances 
 #' of 0), \code{NA}s are returned instead of zero-distances.
 #' 
+#' Note on \code{subsample}: Subsampling is performed independently in each group of sequences
+#' sharing the same \code{vCallColumn}, \code{jCallColumn}, and junction length. If \code{subsample} 
+#' is larger than number of sequences in the group, it is ignored. In other words, subsampling 
+#' is performed only on groups of sequences of size equal to or greater than \code{subsample}. 
+#' \code{DIST_NEAREST} has values calculated using all sequences in the group for groups of size
+#' smaller than \code{subsample} and values calculated using a subset of sequences for the larger 
+#' groups. To select a value of \code{subsample}, it can be useful to explore the group sizes in 
+#' \code{db}.
+#' 
 #' @references
 #' \enumerate{
 #'   \item  Smith DS, et al. Di- and trinucleotide target preferences of somatic 
@@ -692,6 +703,21 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'       geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
 #'                      fill="steelblue", color="white")
 #' plot(p1)
+#' 
+#' 
+#' # Explore V-J-junction length groups sizes to use subsample
+#' # Show the size of the largest groups
+#' db %>%
+#' group_by(JUNCTION_LENGTH) %>%
+#'     do(groupGenes(., first=TRUE)) %>%
+#'     mutate(GROUP_ID=paste(JUNCTION_LENGTH,VJ_GROUP, sep="_")) %>%
+#'     ungroup() %>%
+#'     group_by(GROUP_ID) %>%
+#'     distinct(JUNCTION) %>%
+#'     summarize(SIZE=n()) %>%
+#'     arrange(desc(SIZE)) %>%
+#'     select(SIZE) %>%
+#'     top_n(10)
 #' 
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
