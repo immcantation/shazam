@@ -708,7 +708,7 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' # Explore V-J-junction length groups sizes to use subsample
 #' # Show the size of the largest groups
 #' db %>%
-#' group_by(JUNCTION_LENGTH) %>%
+#'     group_by(JUNCTION_LENGTH) %>%
 #'     do(groupGenes(., first=TRUE)) %>%
 #'     mutate(GROUP_ID=paste(JUNCTION_LENGTH,VJ_GROUP, sep="_")) %>%
 #'     ungroup() %>%
