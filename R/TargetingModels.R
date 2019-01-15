@@ -198,14 +198,14 @@ setClass("TargetingModel",
                  mutability="numeric",
                  substitution="matrix",
                  targeting="matrix"),
-         prototype=c(name="name",
-                     description="description",
-                     species="species",
-                     date="2000-01-01",
-                     citation="citation",
-                     mutability=numeric(3125),
-                     substitution=matrix(0, 5, 3125),
-                     targeting=matrix(0, 5, 3125)))
+         prototype=list(name="name",
+                        description="description",
+                        species="species",
+                        date="2000-01-01",
+                        citation="citation",
+                        mutability=numeric(3125),
+                        substitution=matrix(0, 5, 3125),
+                        targeting=matrix(0, 5, 3125)))
 
 #### Methods ####
 
