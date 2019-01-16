@@ -704,23 +704,6 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'                      fill="steelblue", color="white")
 #' plot(p1)
 #' 
-#' 
-#' # Explore V-J-junction length groups sizes to use subsample
-#' # Show the size of the largest groups
-#' \dontrun{
-#' library(dplyr)
-#' db %>%
-#'     group_by(JUNCTION_LENGTH) %>%
-#'     do(groupGenes(., first=TRUE)) %>%
-#'     mutate(GROUP_ID=paste(JUNCTION_LENGTH,VJ_GROUP, sep="_")) %>%
-#'     ungroup() %>%
-#'     group_by(GROUP_ID) %>%
-#'     distinct(JUNCTION) %>%
-#'     summarize(SIZE=n()) %>%
-#'     arrange(desc(SIZE)) %>%
-#'     select(SIZE) %>%
-#'     top_n(10)
-#' }
 #' @export
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
