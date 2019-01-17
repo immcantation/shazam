@@ -100,8 +100,8 @@ test_that("createTargetingModel", {
                    "Insufficient number of mutations")
     
     set.seed(9)
-    idx <- sample(length(model), 20)
-    expected_model <- c(0, 0.001, 0, NA, 0, 0, 0, NA, NA, NA, 0.001, 0.003, NA, 0.001, NA, NA, NA, NA, 0, NA)
+    idx <- sample(length(model@targeting), 20)
+    expected_model <- c(NA, NA, NA, 0, 0.00125, NA, 0.000139, 0, 0.00073, 0.00009, NA, 0, 0, 0.00782, 0, NA, NA, 0.000989, NA, 0)
     expect_equal(model@targeting[idx], expected_model, tolerance=0.001)    
 })
 
