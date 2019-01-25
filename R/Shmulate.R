@@ -67,6 +67,10 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
     sim_leng <- stri_length(sim_seq)
     stopifnot((sim_leng %% 3)==0)
     
+    if (numMutations > sim_leng) {
+        stop("`numMutations` is larger than the length of the sequence.")
+    }
+    
     # Calculate possible mutations (given codon table)
     mutation_types <- computeMutationTypes(sim_seq)
     
@@ -279,6 +283,13 @@ computeMutationTypes <- function(inputSeq){
     try(if( (leng_seq %%3 !=0) ) stop("length of input sequence must be a multiple of 3"))
     
     codons <- sapply(seq(1, leng_seq, by=3), function(x) {substr(inputSeq,x,x+2)})
+    unrecognized_codons <- codons[!codons %in% colnames(CODON_TABLE)]
+    if (length(unrecognized_codons)>0) {
+        if (all(grepl("^[[:lower:]]+$", unrecognized_codons))) {
+            warning("shazam is case sensitive")
+        }
+        stop("Unrecognized codons found :\n", paste(unrecognized_codons, collapse="\n"))
+    }
     mut_types <- matrix(unlist(CODON_TABLE[, codons]), ncol=leng_seq, nrow=4, byrow=F)
     dimnames(mut_types) <-  list(NUCLEOTIDES[1:4], 1:leng_seq)
     return(mut_types)
@@ -295,8 +306,11 @@ computeMutationTypes <- function(inputSeq){
 # @param   targeting  probabilities of each position in the sequence being mutated
 # @param   positions  vector of positions which have already been mutated
 #
-# @return   A \code{list} of position being mutated and updated vector of mutated positions.
+# @return   A \code{list} of mutation and position being mutated.
 sampleMut <- function(sim_leng, targeting, positions) {
+    if (length(positions) > sim_leng ) {
+        stop("The vector of positions is longer than the length of the sequence.")
+    }
     pos <- 0
     # Sample mutations until new position is selected
     while (pos %in% positions) {

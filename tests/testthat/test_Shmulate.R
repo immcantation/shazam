@@ -1,6 +1,19 @@
 load(file.path("..", "data-tests", "ExampleTrees.rda"))
 
 #### shmulateSeq ####
+test_that("sampleMut throws error if vector of positions longer than sequence.") {
+    sim_seq <- "ATA"
+    sim_leng <- 3
+    targetingModel<-HH_S5F
+    targeting <- calculateTargeting(germlineSeq = sim_seq, targetingModel = targetingModel)
+    targeting <- targeting[NUCLEOTIDES[1:4], ]
+    targeting[is.na(targeting)] <- 0
+    mutation_types <- computeMutationTypes(sim_seq)
+    targeting[mutation_types=="Stop"] <- 0
+    positions <- numeric(4)
+    expect_error(sampleMut(sim_leng, targeting, positions), 
+                 regexp = "The vector of positions is longer than the length of the sequence")
+}
 
 test_that("Test shmulateSeq", {
     
@@ -28,7 +41,23 @@ test_that("Test shmulateSeq", {
     
     # numMutations must be a whole number
     expect_error(shmulateSeq("ATA", numMutations=1.5), regexp="whole number")
-
+    
+    # numMutations can't be larger than sequence length
+    expect_error(shmulateSeq("ATA", numMutations=4), 
+                 regexp="larger than the length of the sequence")
+    
+    # This will throw error, because G is trimmed
+    expect_error(shmulateSeq("ATCG", numMutations=4), 
+                 regexp="larger than the length of the sequence")
+    
+    # Throw error if unexpected codons found
+    expect_error(shmulateSeq("ABC", numMutations=3), 
+                 regexp="Unrecognized codons found")
+    expect_warning(
+        expect_error(shmulateSeq("atc", numMutations=3), 
+                 regexp="Unrecognized codons found"),
+        regexp = "shazam is case sensitive"
+    )
 })
 
 #### shmulateTree ####
