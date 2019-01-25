@@ -1,7 +1,7 @@
 load(file.path("..", "data-tests", "ExampleTrees.rda"))
 
 #### shmulateSeq ####
-test_that("sampleMut throws error if vector of positions longer than sequence.") {
+test_that("sampleMut throws error if vector of positions longer than sequence.", {
     sim_seq <- "ATA"
     sim_leng <- 3
     targetingModel<-HH_S5F
@@ -13,7 +13,7 @@ test_that("sampleMut throws error if vector of positions longer than sequence.")
     positions <- numeric(4)
     expect_error(sampleMut(sim_leng, targeting, positions), 
                  regexp = "The vector of positions is longer than the length of the sequence")
-}
+})
 
 test_that("Test shmulateSeq", {
     
