@@ -26,7 +26,7 @@ test_that("Test shmulateSeq", {
 
     expect_equal(sum(i != o), 6)
     
-    numMutations must be a whole number
+    # numMutations must be a whole number
     expect_error(shmulateSeq("ATA", numMutations=1.5), regexp="whole number")
 
 })
