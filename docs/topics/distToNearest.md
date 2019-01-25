@@ -61,8 +61,8 @@ fields
 :   additional fields to use for grouping.
 
 cross
-:   columns for grouping to calculate distances across groups 
-(self vs others).
+:   character vector of column names to use for grouping to calculate 
+distances across groups. Meaning the columns that define self versus others.
 
 mst
 :   if `TRUE`, return comma-separated branch lengths from minimum 
@@ -73,7 +73,9 @@ subsample
 Subsampling is performed without replacement in each group of sequences with the 
 same `vCallColumn`, `jCallColumn`, and junction length. 
 If `subsample` is larger than the unique number of sequences in each group, 
-then the subsampling process is ignored. If `NULL` no subsampling is performed.
+then the subsampling process is ignored for that group. For each sequence in `db`,
+the reported `DIST_NEAREST` is the distance to the closest sequence in the
+subsampled set for the group. If `NULL` no subsampling is performed.
 
 progress
 :   if `TRUE` print a progress bar.
@@ -85,8 +87,9 @@ Value
 -------------------
 
 Returns a modified `db` data.frame with nearest neighbor distances in the 
-`DIST_NEAREST` column if `crossGroups=NULL` or in the 
-`CROSS_DIST_NEAREST` column if `crossGroups` was specified.
+`DIST_NEAREST` column if `cross=NULL`. 
+if `cross` was specified, distances will be added as the 
+`CROSS_DIST_NEAREST` column
 
 
 Details
@@ -122,6 +125,15 @@ instead of a distance (since it has no neighbor). If for a given combination the
 multiple sequences but only 1 unique sequence, (in which case every sequence in this 
 group is the de facto nearest neighbor to each other, thus giving rise to distances 
 of 0), `NA`s are returned instead of zero-distances.
+
+Note on `subsample`: Subsampling is performed independently in each group of sequences
+sharing the same `vCallColumn`, `jCallColumn`, and junction length. If `subsample` 
+is larger than number of sequences in the group, it is ignored. In other words, subsampling 
+is performed only on groups of sequences of size equal to or greater than `subsample`. 
+`DIST_NEAREST` has values calculated using all sequences in the group for groups of size
+smaller than `subsample` and values calculated using a subset of sequences for the larger 
+groups. To select a value of `subsample`, it can be useful to explore the group sizes in 
+`db`.
 
 
 References

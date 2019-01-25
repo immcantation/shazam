@@ -42,7 +42,7 @@ Examples
 ```R
 ### Not run:
 # Write HS5F targeting model to working directory as hs5f.tab
-# writeTargetingModel(HH_S5F, "hh_s5f.tsv")
+# writeTargetingDistance(HH_S5F, "hh_s5f.tsv")
 ```
 
 

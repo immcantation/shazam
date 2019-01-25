@@ -194,7 +194,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1223411
+## [1] 0.1202797
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -275,3 +275,63 @@ plot(p5)
 
 This can provide a sense of overlap between samples or a way to 
 compare within-sample variation to cross-sample variation.
+
+## Speeding up pairwise-distance-matrix calculations with subsampling
+
+The `subsample` option in `distToNearest` allows to speed up calculations and reduce memory usage.
+
+If there are very large groups of sequences that share V call, J call and junction length, `distToNearest` will need a lot of memory and it will take a long time to calculate all the distances. Without subsampling, in a large group of n=70,000 sequences `distToNearest` calculates a n\*n distance matrix. With subsampling, e.g. to s=15,000, the distance matrix for the same group has size s\*n, and for each sequence in `db`, the distance value is calculated by comparing the sequence to the subsampled sequences from the same V-J-junction length group. 
+
+
+```r
+# Explore V-J-junction length groups sizes to use subsample
+# Show the size of the largest groups
+library(dplyr)
+library(alakazam)
+top_10_sizes <- ExampleDb %>%
+     group_by(JUNCTION_LENGTH) %>% # group by junction length
+     do(alakazam::groupGenes(., first=TRUE)) %>% # group by V and J call
+     mutate(GROUP_ID=paste(JUNCTION_LENGTH,VJ_GROUP, sep="_")) %>% # Create group ids based on junction length and VJ calls
+     ungroup() %>%
+     group_by(GROUP_ID) %>% # group by GROUP_ID
+     distinct(JUNCTION) %>% # for each group, we want to count unique junctions, so keep distinct
+     summarize(SIZE=n()) %>% # get the size of the group, the number of sequences
+     arrange(desc(SIZE)) %>% # sort by decreasing size
+     select(SIZE) %>% 
+     top_n(10) # show the top 10
+```
+
+```
+## Selecting by SIZE
+```
+
+```r
+top_10_sizes
+```
+
+```
+## # A tibble: 10 x 1
+##     SIZE
+##    <int>
+##  1    90
+##  2    37
+##  3    36
+##  4    34
+##  5    33
+##  6    33
+##  7    32
+##  8    26
+##  9    25
+## 10    25
+```
+
+```r
+# Use 30 to subsample
+# NOTE. This is a toy example. To use 30 with real data 
+# is probably not a good choice.
+dist <- distToNearest(ExampleDb, 
+                      vCallColumn="V_CALL_GENOTYPED", 
+                      model="ham", 
+                      first=FALSE, normalize="len",
+                      subsample = 30)
+```

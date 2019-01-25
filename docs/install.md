@@ -1,9 +1,8 @@
 Download
 -------------------------------------------------------------------------------
 
-The latest stable release of SHazaM can be downloaded from 
-[CRAN](http://cran.rstudio.com/web/packages/shazam) or 
-[Bitbucket](https://bitbucket.org/kleinstein/shazam/downloads).
+The latest stable release of SHazaM can be downloaded from <a href="http://cran.rstudio.com/web/packages/shazam" target="_blank">CRAN</a>
+ or <a href="https://bitbucket.org/kleinstein/shazam/downloads" target="_blank">Bitbucket</a>.
 
 Installing Released Versions
 -------------------------------------------------------------------------------
