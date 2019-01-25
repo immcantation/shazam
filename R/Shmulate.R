@@ -44,6 +44,13 @@ NULL
 shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
     #* counts on constant variables CODON_TABLE, NUCLEOTIDES (ACTGN-.)
     
+    # check if numMutations is a whole number
+    # is.wholenumber function borrowed from R's integer help
+    is.wholenumber <-
+        function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+    if (!is.wholenumber(numMutations)) {
+        stop("`numMutations` must be a whole number.")
+    } 
     # Check targeting model
     if (!is(targetingModel, "TargetingModel")) {
         stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
@@ -81,7 +88,7 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
     total_muts <- 0
     positions <- numeric(numMutations)
     
-    while(total_muts < numMutations) {
+    while (total_muts < numMutations) {
         # Get position to mutate and update counters
         mutpos <- sampleMut(sim_leng, targeting, positions)
         total_muts <- total_muts + 1
