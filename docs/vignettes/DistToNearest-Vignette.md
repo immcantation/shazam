@@ -194,7 +194,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1202797
+## [1] 0.1194418
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -287,6 +287,26 @@ If there are very large groups of sequences that share V call, J call and juncti
 # Explore V-J-junction length groups sizes to use subsample
 # Show the size of the largest groups
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(alakazam)
 top_10_sizes <- ExampleDb %>%
      group_by(JUNCTION_LENGTH) %>% # group by junction length

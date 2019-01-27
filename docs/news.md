@@ -1,3 +1,12 @@
+Version 0.1.11: January 27, 2019
+-------------------------------------------------------------------------------
+
+General:
+
++ Fixed a bug in the prototype declarations for the `TargetingModel` and 
+  `RegionDefinition` S4 classes.
+
+
 Version 0.1.10: September 19, 2018
 -------------------------------------------------------------------------------
 
@@ -6,7 +15,7 @@ General:
 + Added `subsample` argument to `distToNearest` function.
 + Removed some internal utility functions in favor of importing them from 
   `alakazam`. Specifically, `progressBar`, `getBaseTheme` and `checkColumns`.
-+ Removed `clearConsole`, `getnproc`, and `getPlatform` functions. 
++ Removed `clearConsole`, `getnproc`, and `getPlatform` functions.
 
 Distance Calculation:
 
