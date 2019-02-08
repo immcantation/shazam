@@ -3229,3 +3229,17 @@ mutationType <- function(codonFrom, codonTo,
     return(tab)
 }
 
+# returns a boolean vector indicating whether ambiguous characters
+# exist in each entry of input character vector
+# input:
+# - seqs: a character vector
+# output:
+# - a boolean vector, where a TRUE indicates presence of ambiguous 
+#   character(s)
+checkAmbiguousExist <- function(seqs) {
+    # ^ within brackets negates the character class
+    bool <- stri_detect_regex(str=seqs, pattern="[^atgcnATGCN\\-\\.]")
+    return(bool)
+}
+
+
