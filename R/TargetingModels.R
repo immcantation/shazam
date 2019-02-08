@@ -338,6 +338,14 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
+    # Check validity of input sequences 
+    # (MUST NOT CONTAIN AMBIGUOUS CHARACTERS -- not supported)
+    bool_obsv <- checkAmbiguousExist(db[[sequenceColumn]])
+    bool_germ <- checkAmbiguousExist(db[[germlineColumn]])
+    if (any(bool_obsv | bool_germ)) {
+        stop("Ambiguous characters are not supported in input sequences.")
+    }
+    
     # Setup
     nuc_chars <- NUCLEOTIDES[1:4]
     nuc_words <- seqinr::words(4, nuc_chars)
@@ -737,6 +745,14 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
     
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
+    
+    # Check validity of input sequences 
+    # (MUST NOT CONTAIN AMBIGUOUS CHARACTERS -- not supported)
+    bool_obsv <- checkAmbiguousExist(db[[sequenceColumn]])
+    bool_germ <- checkAmbiguousExist(db[[germlineColumn]])
+    if (any(bool_obsv | bool_germ)) {
+        stop("Ambiguous characters are not supported in input sequences.")
+    }
     
     # Check that the substitution model is valid
     if (any(dim(substitutionModel) != c(4, 1024))) {
@@ -1294,6 +1310,14 @@ createTargetingModel <- function(db, model=c("S", "RS"), sequenceColumn="SEQUENC
     # Check for valid columns
     check <- checkColumns(db, c(sequenceColumn, germlineColumn, vCallColumn))
     if (check != TRUE) { stop(check) }
+    
+    # Check validity of input sequences 
+    # (MUST NOT CONTAIN AMBIGUOUS CHARACTERS -- not supported)
+    bool_obsv <- checkAmbiguousExist(db[[sequenceColumn]])
+    bool_germ <- checkAmbiguousExist(db[[germlineColumn]])
+    if (any(bool_obsv | bool_germ)) {
+        stop("Ambiguous characters are not supported in input sequences.")
+    }
     
     # Set date
     if (is.null(modelDate)) { modelDate <- format(Sys.time(), "%Y-%m-%d") }
