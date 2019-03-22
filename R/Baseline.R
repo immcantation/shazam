@@ -297,7 +297,7 @@ editBaseline <- function(baseline, field, value) {
 #'                              \code{nproc=0} then the \code{cluster} has already been
 #'                              set and will not be reset.
 #' 
-#' @return  A \code{Baseline} object containing the modified \code{db} and BASELINe 
+#' @return  A \link{Baseline} object containing the modified \code{db} and BASELINe 
 #'          posterior probability density functions (PDF) for each of the sequences.
 #'           
 #' @details 
@@ -768,7 +768,7 @@ calcBaselineBinomialPdf <- function (x=3,
 #'                      \code{nproc} = 0 then the \code{cluster} has already been
 #'                      set and will not be reset.
 #' 
-#' @return   A \code{Baseline} object, containing the modified \code{db} and the BASELINe 
+#' @return   A \link{Baseline} object, containing the modified \code{db} and the BASELINe 
 #'           posterior probability density functions (PDF) for each of the groups.
 #'           
 #' @details
@@ -781,7 +781,7 @@ calcBaselineBinomialPdf <- function (x=3,
 #' from each sample may be combined together, allowing you to compare selection  across 
 #' samples. This is accomplished through a fast numerical convolution technique.
 #'               
-#' @seealso  To generate the baseline object see \link{calcBaseline}.
+#' @seealso  To generate the \link{Baseline} object see \link{calcBaseline}.
 #'           To calculate BASELINe statistics, such as the mean selection strength
 #'           and the 95\% confidence interval, see \link{summarizeBaseline}.
 #' 
