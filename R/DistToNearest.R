@@ -1978,3 +1978,214 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
         return(p)
     }
 }
+
+#### Define clones (hierarchical) ####
+
+#' Define clones via hierarchical clustering
+#'
+#' Given partitions of heavy chain-only bulk-seqs based on heavy chain VJL combination, 
+#' or of VH:VL paired single-cell BCRs based on heavy and light chain VJL combinations,
+#' perform clonal clustering with a specified distance threshold. 
+#' (VJL=V gene, J gene, junction length)
+#'
+#' @param    db              data.frame containing sequence data.
+#' @param    sequenceColumn  name of the column containing heavy chain junctions. It is the distance
+#'                           between these heavy chain junction sequences that is used for hierarchical
+#'                           clustering. Note that light chain sequences are not used at this stage.
+#' @param    VJLgroupColumn  name of the column containing information about partitioning of heavy chain
+#'                           bulk-seq based on heavy chain VJL combination, or that of single-cell VH:VL 
+#'                           paired BCRs based on heavy and light chain VJL combinations. 
+#'                           Can be obtained by calling \link{distToNearest} with \code{keepVJLgroup=TRUE}
+#'                           or \link[alakazam]{groupGenes}.
+#' @param    cloneColumn     name of the column to be generated that contains clone IDs. 
+#'                           Defaults to \code{"CLONE"}.
+#' @param    threshold       a numeric value between 0 and 1 to be used as the clonal clustering
+#'                           threshold 
+#' @param    linkage         a character value specifying the type of linkage to be used for hierarchical
+#'                           clustering. Any value accepted by \link[stats]{hclust} is fine. 
+#'                           Defaults to \code{"single"}.
+#' @param    maxmiss         The maximum number of non-ACGT characters (gaps or Ns) to permit in the 
+#'                           junction sequence before excluding the record from clonal assignment. Note, 
+#'                           under single linkage non-informative positions can create artifactual links 
+#'                           between unrelated sequences. Use with caution. Default to \code{0}.                                            
+#' @param    exportTsv       a Boolean value indicating whether to export the resultant data.frame as a
+#'                           tab-separated TSV file.
+#' @param    exportTsvName   name of TSV file to be exported. Format: \code{"*.tsv"}.
+#' @param    saveExcluded    a Boolean value indicating whether to export row of the data.frame excluded
+#'                           due to \code{maxmiss}.
+#' @param    saveExcludedName name of TSV file for excluded rows. Format: \code{"*.tsv"}.                            
+#' @param    nproc           number of processors available for parallel computing                 
+#' 
+#' @return   Returns a modified \code{db} data.frame with a new column (named after \code{cloneColumn}) 
+#'           containing clone IDs as a result of hierarchical clustering given the threshold specified by
+#'           \code{threshold}. 
+#'
+#' @details
+#' 
+#' The underlying operation can be expected to be the same as \code{DefineClones.py} as in 
+#' \code{Change-O} with the following specifications:
+#' \itemize{
+#'    \item \code{--mode gene}
+#'    \item \code{--act set}
+#'    \item \code{--model ham}
+#'    \item \code{--norm len}
+#'    \item \code{--link single}
+#' }
+#' 
+#' The advantage is that with this function in R, partitioning based on heavy chain VJL combination,
+#' or heavy and light chain VJL combinations in single-cell mode, needs to be performed only once, 
+#' provided that the partitioning column has been saved via, for instance, \code{keepVJLgroup} in
+#' \link{distToNearest}.
+#' 
+#' @examples
+#' # Subset example data to one sample as a demo
+#' data(ExampleDb, package="alakazam")
+#' 
+#' # Calculate dist-to-nearest (helps to choose a threshold) 
+#' # Keep partitioning based on VJL combinations
+#' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
+#' first=FALSE, normalize="len", keepVJLgroup=TRUE)
+#' 
+#' # Cluster with a threshold of 0.1 normalized Hamming distance
+#' clust <- defineClones(db=dist, threshold=0.1, linkage="single")
+#' 
+#' @export
+defineClones <- function(db, sequenceColumn="JUNCTION", VJLgroupColumn="VJL_GROUP", cloneColumn="CLONE", 
+                         threshold, maxmiss=0,
+                         linkage=c("single", "complete", "average", "ward.D", "ward.D2", 
+                                   "mcquitty", "median", "centroid"),
+                         exportTsv=FALSE, exportTsvName, 
+                         saveExcluded=FALSE, saveExcludedName,
+                         nproc=1) {
+    
+    # check arguments
+    linkage <- match.arg(linkage)
+    
+    missing(threshold)
+    if (!(threshold>=0 & threshold<=1)) {
+        stop("threshold must be between 0 and 1")
+    }
+    if ( !all( c(sequenceColumn, VJLgroupColumn) %in% colnames(db) ) ) {
+        stop(sequenceColumn, " and/or ", VJLgroupColumn, " not found in db")
+    }
+    
+    missing(maxmiss)
+    if (!(maxmiss>=0)) {
+        stop("maxmiss must be >=0")
+    }
+    
+    if (exportTsv) {
+        missing(exportTsvName)
+    }
+    
+    if (saveExcluded) {
+        missing(saveExcludedName)
+    }
+    
+    # filter based on number of non-ATGC characters
+    # changeo::filterMissing() uses <=
+    miss_count <- stri_count_regex(str=db[[sequenceColumn]], pattern="[^ATGC]")
+    bool_keep <- miss_count <= maxmiss
+    
+    if (saveExcluded) {
+        write.table(x=db[!bool_keep, ], file=saveExcludedName, sep="\t", 
+                    quote=FALSE, na="", row.names=FALSE, col.names=TRUE)
+        cat("Saved excluded seqs/cells to:", saveExcludedName, "\n")
+    }
+    
+    db <- db[bool_keep, ]
+    cat("Excluded due to non-ATGC characters:", sum(!bool_keep), "\n")
+    
+    # unique VJL groups
+    uniqueGroups <- sort(unique(db[[VJLgroupColumn]]))
+    nGroups <- length(uniqueGroups)
+    # indices
+    # crucial to have simplify=FALSE 
+    # (otherwise won't return a list if uniqueClones has length 1)
+    uniqueGroupsIdx <- sapply(uniqueGroups, function(curGrp){
+        idx <- which(db[[VJLgroupColumn]] == curGrp)
+        return(idx)
+    }, simplify=FALSE)
+    
+    # initiate cluster
+    # Create cluster of nproc size and export namespaces
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.
+    if( nproc==1 ) {
+        # If needed to run on a single core/cpu then, register DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    } else if( nproc > 1 ) {
+        cluster <- parallel::makeCluster(nproc, type="PSOCK")
+        registerDoParallel(cluster)
+    } else {
+        stop('Nproc must be positive.')
+    }
+    
+    # Export groups to the clusters
+    if (nproc > 1) { 
+        export_functions <- list("db", "uniqueGroups", "uniqueGroupsIdx",
+                                 "linkage", "threshold",
+                                 "VJLgroupColumn", "sequenceColumn", 
+                                 "pairwiseDist", "stri_length")
+        parallel::clusterExport(cluster, export_functions, envir=environment())
+    }
+    
+    # parallel loop
+    list_clone_IDs <- foreach(i=1:nGroups, .errorhandling='stop') %dopar% {
+        
+        curGrp <- uniqueGroups[i]
+        idx <- uniqueGroupsIdx[[i]]
+        
+        # only 1 seq: no need to cluster
+        if (length(idx)==1) {
+            curIDs <- paste0(curGrp, "_1")
+        } else {
+            db_group <- db[idx, ]
+            # heavy chain junctions
+            curJuncs <- db_group[[sequenceColumn]]
+            # pairwise hamming distance (square matrix)
+            curHam <- pairwiseDist(seq=curJuncs) / stri_length(curJuncs[1])
+            # convert to dist class (1d condensed distance vector)
+            # important not to use dist()! 
+            curDist <- as.dist(m=curHam)
+            # hclust using threshold
+            # calls stats::hclust
+            # faster altnertive: `fastcluster` package
+            curClust <- hclust(d=curDist, method=linkage)
+            #plot(curClust)
+            #abline(h=threshold, lty=2, col=2)
+            
+            # cut
+            curCut <- cutree(curClust, h=threshold)
+            #rect.hclust(curClust, h=threshold)
+            
+            # record clone assignment
+            curIDs <- paste(curGrp, curCut, sep="_")
+        }
+        
+        return(curIDs)
+    }
+    
+    # Stop the cluster
+    if (nproc > 1) { parallel::stopCluster(cluster) }
+    
+    # column for clone ID
+    db[[cloneColumn]] <- NA
+    
+    for (i in 1:nGroups) {
+        idx <- uniqueGroupsIdx[[i]]
+        db[[cloneColumn]][idx] <- list_clone_IDs[[i]]
+    }
+    
+    stopifnot(!any(is.na(db[[cloneColumn]])))
+    
+    if (exportTsv) {
+        write.table(x=db, file=exportTsvName, sep="\t", 
+                    quote=FALSE, na="", row.names=FALSE, col.names=TRUE)
+        cat("TSV file", exportTsvName, "exported\n")
+    }
+    
+    return(db)
+}
