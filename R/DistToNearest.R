@@ -2043,11 +2043,11 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
 #' 
 #' # Calculate dist-to-nearest (helps to choose a threshold) 
 #' # Keep partitioning based on VJL combinations
-#' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
-#' first=FALSE, normalize="len", keepVJLgroup=TRUE)
+#' dist <- distToNearest(ExampleDb, vCallColumn="V_CALL_GENOTYPED", model="ham", 
+#'                       first=FALSE, normalize="len", keepVJLgroup=TRUE)
 #' 
 #' # Cluster with a threshold of 0.1 normalized Hamming distance
-#' clust <- defineClones(db=dist, threshold=0.1, linkage="single")
+#' clust <- defineClones(dist, threshold=0.1, linkage="single")
 #' 
 #' @export
 defineClones <- function(db, sequenceColumn="JUNCTION", VJLgroupColumn="VJL_GROUP", cloneColumn="CLONE", 

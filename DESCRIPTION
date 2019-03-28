@@ -43,7 +43,7 @@ Depends:
     ggplot2 (>= 2.0.0),
     stringi (>= 1.1.3)
 Imports:
-    alakazam (>= 0.2.11),
+    alakazam (>= 0.2.11.999),
     ape,
     diptest,
     doParallel,
