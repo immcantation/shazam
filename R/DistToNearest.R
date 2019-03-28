@@ -586,14 +586,16 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 
 #' Distance to nearest neighbor
 #'
-#' Get non-zero distance of every sequence (as defined by \code{sequenceColumn}) to its 
-#' nearest sequence sharing same V gene, J gene, and sequence length.
+#' Get non-zero distance of every heavy chain sequence (as defined by \code{sequenceColumn}) 
+#' to its nearest sequence in a partition of heavy chains sharing the same V gene, J gene, 
+#' and junction length, or in a partition of single cells with heavy and light chains sharing 
+#' the same heavy chain VJL and light chain VJL combinations.
 #'
 #' @param    db              data.frame containing sequence data.
-#' @param    sequenceColumn  name of the column containing nucleotide sequences to compare. 
-#'                           Also used to determine sequence length for grouping.
-#' @param    vCallColumn     name of the column containing the V-segment allele calls.
-#' @param    jCallColumn     name of the column containing the J-segment allele calls.
+#' @param    sequenceColumn  name of the column containing heavy chain junction for grouping. 
+#'                           Note that the heavy chain junction is also used to calculate distances.
+#' @param    vCallColumn     name of the column containing the heavy chain V-segment allele calls.
+#' @param    jCallColumn     name of the column containing the heavy chain J-segment allele calls.
 #' @param    model           underlying SHM model, which must be one of 
 #'                           \code{c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "hs1f_compat", "m1n_compat")}.
 #'                           See Details for further information.
@@ -620,13 +622,32 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'                           the reported \code{DIST_NEAREST} is the distance to the closest sequence in the
 #'                           subsampled set for the group. If \code{NULL} no subsampling is performed.
 #' @param    progress        if \code{TRUE} print a progress bar.
-#'
+#' @param    single_cell_with_light   a Boolean value specifying whether single-cell mode with VH:VL 
+#'                                    paired BCR input is being supplied. Defaults to \code{FALSE}.
+#' @param    vCallColumnLight         name of the column containing the light chain V-segment allele calls.                                    
+#' @param    jCallColumnLight         name of the column containing the light chain J-segment allele calls.                                    
+#' @param    sequenceColumnLight      name of the column containing the light chain junction for grouping. 
+#'                                    Note that the light chain junction is not used for calculating distances.
+#' @param    separator_within_seq     a single character specifying the separator between multiple annotations 
+#'                                    for a single sequence. Defaults to \code{,}.
+#' @param    separator_between_seq    a single character specifying the separator between multiple sequences. 
+#'                                    Defaults to \code{;}.
+#' @param    keepVJLgroup             a Boolean value specifying whether to keep in the output the the column 
+#'                                    column indicating grouping based on VJL combinations. 
+#'                                    See \link[alakazam]{groupGenes}.
+#' 
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
 #'           \code{DIST_NEAREST} column if \code{cross=NULL}. 
 #'           if \code{cross} was specified, distances will be added as the 
 #'           \code{CROSS_DIST_NEAREST} column
 #'
 #' @details
+#' 
+#' For single-cell mode, the input requirement is the same as that for \link[alakazam]{groupGenes}. 
+#' Namely, each row represents a single cell with both heavy chain and light chain V, J, and junction columns.
+#'  
+#' Note that for \code{distToNearest}, a cell/row with multiple heavy chains is not allowed.
+#' 
 #' The distance to nearest neighbor can be used to estimate a threshold for assigning Ig
 #' sequences to clonal groups. A histogram of the resulting vector is often bimodal, 
 #' with the ideal threshold being a value that separates the two modes.
@@ -709,7 +730,9 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
                           normalize=c("len", "none"), symmetry=c("avg", "min"),
                           first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE, subsample=NULL,
-                          progress=FALSE) {
+                          progress=FALSE,
+                          single_cell_with_light=F, vCallColumnLight, jCallColumnLight, sequenceColumnLight, 
+                          separator_within_seq=",", separator_between_seq=";", keepVJLgroup=F) {
     # Hack for visibility of foreach index variables
     i <- NULL
     
@@ -720,34 +743,96 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     if (!is.data.frame(db)) { stop('Must submit a data frame') }
     
     # Check for valid columns
-    columns <- c(sequenceColumn, vCallColumn, jCallColumn, fields, cross)
+    if (single_cell_with_light) {
+        missing(vCallColumnLight)
+        missing(jCallColumnLight)
+        missing(sequenceColumnLight)
+        missing(separator_between_seq)
+    } else {
+        vCallColumnLight <- NULL
+        jCallColumnLight <- NULL
+        sequenceColumnLight <- NULL
+    }
+    
+    columns <- c(sequenceColumn, vCallColumn, jCallColumn, fields, cross,
+                 vCallColumnLight, jCallColumnLight, sequenceColumnLight)
     columns <- columns[!is.null(columns)]
     
     check <- checkColumns(db, columns)
     if (check != TRUE) { stop(check) }
     
     # Convert sequence columns to uppercase
-    db <- toupperColumns(db, c(sequenceColumn))
+    db <- toupperColumns(db, c(sequenceColumn, sequenceColumnLight)) 
+    
+    # Disallow multiple heavy chains per row
+    bool <- sapply(db[[sequenceColumn]], stringi::stri_detect_fixed, pattern=separator_between_seq)
+    if (any(bool)) {
+        stop("Detected multiple heavy chains in row(s). Each row must contain only 1 heavy chain.")
+    }
     
     # Check for invalid characters
-    valid_seq <- sapply(db[[sequenceColumn]], allValidChars, getCharsInModel(model))
+    # heavy
+    valid_seq <- sapply(db[[sequenceColumn]], allValidChars, getCharsInModel(model)) 
     not_valid_seq <- which(!valid_seq)
-    if (length(not_valid_seq)>0) {
-        warning("Invalid sequence characters in the ", sequenceColumn, " column.",
-                length(not_valid_seq)," sequence(s) removed")
-        db <- db[valid_seq,]
-    }    
+    if (length(not_valid_seq) > 0) {
+        warning("Invalid sequence characters in the ", sequenceColumn, 
+                " column. ", length(not_valid_seq), " sequence(s) removed")
+        db <- db[valid_seq, ]
+    }
+    
+    # light
+    if (!is.null(sequenceColumnLight)) {
+        valid_seq <- sapply(db[[sequenceColumnLight]], function(x, separator) {
+            if (stringi::stri_detect_fixed(str=x, pattern=separator)) {
+                x_split <- stringi::stri_split_fixed(str=x, pattern=separator)[[1]]
+                all(sapply(x_split, allValidChars, getCharsInModel(model)))
+            } else {
+                allValidChars(x, getCharsInModel(model))
+            }
+        }, separator_between_seq) 
+        not_valid_seq <- which(!valid_seq)
+        if (length(not_valid_seq)>0) {
+            warning("Invalid sequence characters in the ", sequenceColumnLight, " column.",
+                    length(not_valid_seq)," sequence(s) removed")
+            db <- db[valid_seq,]
+        } 
+    }
+    
+    
+    # helper function to calc junction legnth for individual junctions
+    .getJuncLen <- function(x, separator) {
+        if (stringi::stri_detect_fixed(str=x, pattern=separator)) {
+            x_split <- stringi::stri_split_fixed(str=x, pattern=separator)[[1]]
+            x_split_len <- stri_length(x_split)
+            juncLen <- paste(x_split_len, collapse=";")
+        } else {
+            juncLen <- as.character(stri_length(x))
+        }
+        return(juncLen)
+    }
+    
+    # junction length columns (prep for groupGenes)
+    junc_len <- "JUNC_LEN"
+    db[[junc_len]] <- sapply(db[[sequenceColumn]], .getJuncLen, separator=separator_between_seq)
+    if (single_cell_with_light) {
+        junc_len_light <- "JUNC_LEN_LIGHT"
+        db[[junc_len_light]] <- sapply(db[[sequenceColumnLight]], .getJuncLen, separator=separator_between_seq)
+    } else {
+        junc_len_light <- NULL
+    }
     
     # Parse V and J columns to get gene
-    db <- groupGenes(db,
-                     v_call=vCallColumn,
-                     j_call=jCallColumn,
-                     first=first)
-
+    # creates $VJ_GROUP
+    db <- groupGenes(data=db, v_call=vCallColumn, j_call=jCallColumn, first=first, 
+                      separator_within_seq=separator_within_seq, separator_between_seq=separator_between_seq, 
+                      single_cell_with_light=single_cell_with_light,
+                      v_call_light=vCallColumnLight, j_call_light=jCallColumnLight, 
+                      junc_len_heavy=junc_len, junc_len_light=junc_len_light)
+    
     # Create new column for distance to nearest neighbor
     db$TMP_DIST_NEAREST <- rep(NA, nrow(db))
     db$ROW_ID <- 1:nrow(db)
-    db$L <- stringi::stri_length(db[[sequenceColumn]])
+    
     
     # Create cluster of nproc size and export namespaces
     # If user wants to paralellize this function and specifies nproc > 1, then
@@ -766,7 +851,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     
     # Get indices of unique combinations of V, J (VJ_GROUP), L, and any specified field(s)
     # groups to use
-    group_cols <- c("VJ_GROUP","L")
+    group_cols <- c("VJ_GROUP")
     if (!is.null(fields)) {
         group_cols <- append(group_cols,fields)
     }
@@ -817,8 +902,8 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         parallel::clusterExport(cluster, export_functions, envir=environment())
     }
     
-   
-
+    
+    
     n_groups <- length(uniqueGroupsIdx)
     if (progress) { 
         pb <- progressBar(n_groups) 
@@ -831,7 +916,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
             crossGroups <- db_group %>% dplyr::group_indices_(.dots=cross)
         }
         arrSeqs <-  as.vector(unlist(db[idx, sequenceColumn]))
-        db_group$TMP_DIST_NEAREST <- nearestDist(arrSeqs,
+        db_group$TMP_DIST_NEAREST <- nearestDist(arrSeqs, 
                                                  model=model,
                                                  normalize=normalize,
                                                  symmetry=symmetry,
@@ -843,7 +928,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         
         return(db_group)
     }
-
+    
     # Convert list from foreach into a db data.frame
     db <- do.call(rbind, list_db)
     db <- db[order(db$ROW_ID), ]
@@ -856,7 +941,14 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     } else {
         db$DIST_NEAREST <- db$TMP_DIST_NEAREST
     }
-    return(db[, !(names(db) %in% c("VJ_GROUP", "L", "ROW_ID", "V1", "J1","TMP_DIST_NEAREST"))])
+    
+    # prepare db for return
+    if (keepVJLgroup) {
+        db$VJL_GROUP <- db[["VJ_GROUP"]]
+    }
+    db <- db[, !(names(db) %in% c(junc_len, junc_len_light, "VJ_GROUP", "ROW_ID", "V1", "J1","TMP_DIST_NEAREST"))]
+    
+    return(db)
 }
 
 
