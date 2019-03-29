@@ -122,6 +122,7 @@
 #'                          mutate mutate_ summarize summarize_
 #'                          mutate_at summarize_at
 #'                          rename rename_ transmute transmute_
+#' @importFrom  fastcluster hclust                         
 #' @importFrom  foreach     foreach %dopar% registerDoSEQ
 #' @importFrom  igraph      V E as_adjacency_matrix graph_from_data_frame
 #'                          vertex_attr set_vertex_attr
@@ -142,7 +143,7 @@
 #'                          approx convolve weighted.mean p.adjust
 #'                          dbeta pbeta qbeta rbeta optim optimize
 #'                          dnorm pnorm runif dgamma pgamma uniroot na.exclude
-#'                          as.dist cutree hclust
+#'                          as.dist cutree
 #' @importFrom  stringi     stri_dup stri_flatten stri_join stri_length 
 #'                          stri_sub stri_sub<- stri_detect_regex
 #'                          stri_count_boundaries stri_count_regex 

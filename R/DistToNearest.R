@@ -2008,17 +2008,14 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
 #'                           junction sequence before excluding the record from clonal assignment. Note, 
 #'                           under single linkage non-informative positions can create artifactual links 
 #'                           between unrelated sequences. Use with caution. Default to \code{0}.                                            
-#' @param    exportTsv       a Boolean value indicating whether to export the resultant data.frame as a
-#'                           tab-separated TSV file.
-#' @param    exportTsvName   name of TSV file to be exported. Format: \code{"*.tsv"}.
-#' @param    saveExcluded    a Boolean value indicating whether to export row of the data.frame excluded
-#'                           due to \code{maxmiss}.
-#' @param    saveExcludedName name of TSV file for excluded rows. Format: \code{"*.tsv"}.                            
 #' @param    nproc           number of processors available for parallel computing                 
 #' 
-#' @return   Returns a modified \code{db} data.frame with a new column (named after \code{cloneColumn}) 
-#'           containing clone IDs as a result of hierarchical clustering given the threshold specified by
-#'           \code{threshold}. 
+#' @return   Returns a list containing two components. (i) \code{CLUSTERED}: a modified \code{db} data.frame 
+#'           with a new column (named after \code{cloneColumn}) containing clone IDs as a result of hierarchical 
+#'           clustering given the threshold specified by \code{threshold}. (ii) \code{EXCLUDED}: any sequence
+#'           excluded from clustering for containing more than (strict \code{>}) \code{maxmiss} number of 
+#'           non-ACGT characters in \code{sequenceColumn} will be stored here. \code{NULL} if no sequence is
+#'           excluded.
 #'
 #' @details
 #' 
@@ -2053,10 +2050,7 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
 defineClones <- function(db, sequenceColumn="JUNCTION", VJLgroupColumn="VJL_GROUP", cloneColumn="CLONE", 
                          threshold, maxmiss=0,
                          linkage=c("single", "complete", "average", "ward.D", "ward.D2", 
-                                   "mcquitty", "median", "centroid"),
-                         exportTsv=FALSE, exportTsvName, 
-                         saveExcluded=FALSE, saveExcludedName,
-                         nproc=1) {
+                                   "mcquitty", "median", "centroid"), nproc=1) {
     
     # check arguments
     linkage <- match.arg(linkage)
@@ -2074,27 +2068,22 @@ defineClones <- function(db, sequenceColumn="JUNCTION", VJLgroupColumn="VJL_GROU
         stop("maxmiss must be >=0")
     }
     
-    if (exportTsv) {
-        missing(exportTsvName)
-    }
-    
-    if (saveExcluded) {
-        missing(saveExcludedName)
-    }
+    # return object
+    returnLst <- vector(mode="list", length=2)
+    names(returnLst) <- c("CLUSTERED", "EXCLUDED")
     
     # filter based on number of non-ATGC characters
     # changeo::filterMissing() uses <=
     miss_count <- stri_count_regex(str=db[[sequenceColumn]], pattern="[^ATGC]")
     bool_keep <- miss_count <= maxmiss
     
-    if (saveExcluded) {
-        write.table(x=db[!bool_keep, ], file=saveExcludedName, sep="\t", 
-                    quote=FALSE, na="", row.names=FALSE, col.names=TRUE)
-        cat("Saved excluded seqs/cells to:", saveExcludedName, "\n")
+    cat("Excluded due to non-ATGC character(s) in", sequenceColumn, ":", sum(!bool_keep), "\n")
+    # if nothing excluded, remains NULL
+    if (sum(!bool_keep)>0) {
+        returnLst[["EXCLUDED"]] <- db[!bool_keep, ]
     }
     
     db <- db[bool_keep, ]
-    cat("Excluded due to non-ATGC characters:", sum(!bool_keep), "\n")
     
     # unique VJL groups
     uniqueGroups <- sort(unique(db[[VJLgroupColumn]]))
@@ -2153,7 +2142,7 @@ defineClones <- function(db, sequenceColumn="JUNCTION", VJLgroupColumn="VJL_GROU
             # hclust using threshold
             # calls stats::hclust
             # faster altnertive: `fastcluster` package
-            curClust <- hclust(d=curDist, method=linkage)
+            curClust <- fastcluster::hclust(d=curDist, method=linkage)
             #plot(curClust)
             #abline(h=threshold, lty=2, col=2)
             
@@ -2181,11 +2170,7 @@ defineClones <- function(db, sequenceColumn="JUNCTION", VJLgroupColumn="VJL_GROU
     
     stopifnot(!any(is.na(db[[cloneColumn]])))
     
-    if (exportTsv) {
-        write.table(x=db, file=exportTsvName, sep="\t", 
-                    quote=FALSE, na="", row.names=FALSE, col.names=TRUE)
-        cat("TSV file", exportTsvName, "exported\n")
-    }
+    returnLst[["CLUSTERED"]] <- db
     
-    return(db)
+    return(returnLst)
 }
