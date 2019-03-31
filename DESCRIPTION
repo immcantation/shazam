@@ -48,7 +48,6 @@ Imports:
     diptest,
     doParallel,
     dplyr (>= 0.5.0),
-    fastcluster,
     foreach,
     graphics,
     grid,

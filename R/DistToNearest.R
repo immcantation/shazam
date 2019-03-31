@@ -588,7 +588,7 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'
 #' Get non-zero distance of every heavy chain sequence (as defined by \code{sequenceColumn}) 
 #' to its nearest sequence in a partition of heavy chains sharing the same V gene, J gene, 
-#' and junction length, or in a partition of single cells with heavy and light chains sharing 
+#' and junction length (VJL), or in a partition of single cells with heavy and light chains sharing 
 #' the same heavy chain VJL and light chain VJL combinations.
 #'
 #' @param    db              data.frame containing sequence data.
@@ -608,6 +608,13 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'                           is used. if \code{FALSE} the union of ambiguous gene 
 #'                           assignments is used to group all sequences with any 
 #'                           overlapping gene calls.
+#' @param    VJthenLen       a Boolean value specifying whether to perform partitioning as a 2-stage
+#'                           process. If \code{TRUE}, partitions are made first based on V and J
+#'                           annotations, and then further split based on junction lengths corresponding 
+#'                           to \code{sequenceColumn} (and \code{sequenceColumnLight} if specified). If
+#'                           \code{FALSE}, perform partition as a 1-stage process during which V annotation,
+#'                           J annotation, and junction length are used to create partitions simultaneously.
+#'                           Defaults to \code{TRUE}.
 #' @param    nproc           number of cores to distribute the function over.
 #' @param    fields          additional fields to use for grouping.
 #' @param    cross           character vector of column names to use for grouping to calculate 
@@ -622,19 +629,18 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #'                           the reported \code{DIST_NEAREST} is the distance to the closest sequence in the
 #'                           subsampled set for the group. If \code{NULL} no subsampling is performed.
 #' @param    progress        if \code{TRUE} print a progress bar.
-#' @param    single_cell_with_light   a Boolean value specifying whether single-cell mode with VH:VL 
-#'                                    paired BCR input is being supplied. Defaults to \code{FALSE}.
-#' @param    vCallColumnLight         name of the column containing the light chain V-segment allele calls.                                    
-#' @param    jCallColumnLight         name of the column containing the light chain J-segment allele calls.                                    
-#' @param    sequenceColumnLight      name of the column containing the light chain junction for grouping. 
+#' @param    vCallColumnLight         name of the column containing the light chain V-segment allele calls. Optional.
+#' @param    jCallColumnLight         name of the column containing the light chain J-segment allele calls. Optional.                                    
+#' @param    sequenceColumnLight      name of the column containing the light chain junction for grouping. Optional. 
 #'                                    Note that the light chain junction is not used for calculating distances.
 #' @param    separator_within_seq     a single character specifying the separator between multiple annotations 
 #'                                    for a single sequence. Defaults to \code{,}.
 #' @param    separator_between_seq    a single character specifying the separator between multiple sequences. 
 #'                                    Defaults to \code{;}.
 #' @param    keepVJLgroup             a Boolean value specifying whether to keep in the output the the column 
-#'                                    column indicating grouping based on VJL combinations. 
-#'                                    See \link[alakazam]{groupGenes}.
+#'                                    column indicating grouping based on VJL combinations. Only applicable for
+#'                                    1-stage partitioning (i.e. \code{VJthenLen=FALSE}). Also see 
+#'                                    \link[alakazam]{groupGenes}.
 #' 
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances in the 
 #'           \code{DIST_NEAREST} column if \code{cross=NULL}. 
@@ -713,8 +719,10 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 #' db <- subset(ExampleDb, SAMPLE == "-1h")
 #' 
 #' # Use genotyped V assignments, Hamming distance, and normalize by junction length
+#' # First partition based on V and J assignments, then by junction length
+#' # Take into consideration ambiguous V and J annotations
 #' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
-#'                       first=FALSE, normalize="len")
+#'                       first=FALSE, VJthenLen=TRUE, normalize="len")
 #'                            
 #' # Plot histogram of non-NA distances
 #' p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
@@ -729,10 +737,10 @@ nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_r
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
                           normalize=c("len", "none"), symmetry=c("avg", "min"),
-                          first=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE, subsample=NULL,
+                          first=TRUE, VJthenLen=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE, subsample=NULL,
                           progress=FALSE,
-                          single_cell_with_light=F, vCallColumnLight, jCallColumnLight, sequenceColumnLight, 
-                          separator_within_seq=",", separator_between_seq=";", keepVJLgroup=F) {
+                          vCallColumnLight=NULL, jCallColumnLight=NULL, sequenceColumnLight=NULL, 
+                          separator_within_seq=",", separator_between_seq=";", keepVJLgroup=TRUE) {
     # Hack for visibility of foreach index variables
     i <- NULL
     
@@ -742,16 +750,19 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     symmetry <- match.arg(symmetry)
     if (!is.data.frame(db)) { stop('Must submit a data frame') }
     
-    # Check for valid columns
-    if (single_cell_with_light) {
-        missing(vCallColumnLight)
-        missing(jCallColumnLight)
-        missing(sequenceColumnLight)
-        missing(separator_between_seq)
+    
+    # single-cell mode?
+    # each row represents a cell with both heavy and light chains
+    if ( !is.null(vCallColumnLight) & !is.null(jCallColumnLight) & !is.null(sequenceColumnLight) ) {
+        single_cell_with_light <- TRUE
+        # check that v/j_call_light in data
+        if (!all( c(vCallColumnLight, jCallColumnLight, sequenceColumnLight) %in% colnames(db) )) {
+            stop("One or more of vCallColumnLight, jCallColumnLight, sequenceColumnLight not found as a column in db")
+        }
+    } else if ( is.null(vCallColumnLight) & is.null(jCallColumnLight) & is.null(sequenceColumnLight) )  {
+        single_cell_with_light <- FALSE
     } else {
-        vCallColumnLight <- NULL
-        jCallColumnLight <- NULL
-        sequenceColumnLight <- NULL
+        stop("If using single-cell mode, vCallColumnLight, jCallColumnLight, sequenceColumnLight must all be set")
     }
     
     columns <- c(sequenceColumn, vCallColumn, jCallColumn, fields, cross,
@@ -781,7 +792,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     }
     
     # light
-    if (!is.null(sequenceColumnLight)) {
+    if (single_cell_with_light) {
         valid_seq <- sapply(db[[sequenceColumnLight]], function(x, separator) {
             if (stringi::stri_detect_fixed(str=x, pattern=separator)) {
                 x_split <- stringi::stri_split_fixed(str=x, pattern=separator)[[1]]
@@ -821,37 +832,30 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         junc_len_light <- NULL
     }
     
-    # Parse V and J columns to get gene
-    # creates $VJ_GROUP
-    db <- groupGenes(data=db, v_call=vCallColumn, j_call=jCallColumn, first=first, 
-                      separator_within_seq=separator_within_seq, separator_between_seq=separator_between_seq, 
-                      single_cell_with_light=single_cell_with_light,
-                      v_call_light=vCallColumnLight, j_call_light=jCallColumnLight, 
-                      junc_len_heavy=junc_len, junc_len_light=junc_len_light)
-    
-    # Create new column for distance to nearest neighbor
-    db$TMP_DIST_NEAREST <- rep(NA, nrow(db))
-    db$ROW_ID <- 1:nrow(db)
-    
-    
-    # Create cluster of nproc size and export namespaces
-    # If user wants to paralellize this function and specifies nproc > 1, then
-    # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.
-    if( nproc==1 ) {
-        # If needed to run on a single core/cpu then, register DoSEQ 
-        # (needed for 'foreach' in non-parallel mode)
-        registerDoSEQ()
-    } else if( nproc > 1 ) {
-        cluster <- parallel::makeCluster(nproc, type="PSOCK")
-        registerDoParallel(cluster)
+    # create V+J grouping, or V+J+L grouping
+    if (VJthenLen) {
+        # 2-stage partitioning using first V+J and then L
+        # V+J only first
+        # creates $VJ_GROUP
+        db <- groupGenes(data=db, v_call=vCallColumn, j_call=jCallColumn, junc_len=NULL,
+                         first=first, v_call_light=vCallColumnLight, j_call_light=jCallColumnLight, 
+                         junc_len_light=NULL,
+                         separator_within_seq=separator_within_seq, separator_between_seq=separator_between_seq)
+        # L (later)  
+        group_cols <- c("VJ_GROUP", junc_len, junc_len_light)
+        
     } else {
-        stop('Nproc must be positive.')
+        # 1-stage partitioning using V+J+L simultaneously
+        # creates $VJ_GROUP
+        # note that despite the name (VJ), this is based on V+J+L
+        db <- groupGenes(data=db, v_call=vCallColumn, j_call=jCallColumn, junc_len=junc_len,
+                         first=first, v_call_light=vCallColumnLight, j_call_light=jCallColumnLight, 
+                         junc_len_light=junc_len_light,
+                         separator_within_seq=separator_within_seq, separator_between_seq=separator_between_seq)
+        group_cols <- c("VJ_GROUP")
     }
     
-    # Get indices of unique combinations of V, J (VJ_GROUP), L, and any specified field(s)
     # groups to use
-    group_cols <- c("VJ_GROUP")
     if (!is.null(fields)) {
         group_cols <- append(group_cols,fields)
     }
@@ -876,6 +880,24 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         curIdx <- which(colSums(curIdx)==length(group_cols))
     }, simplify=FALSE)
     
+    # Create new column for distance to nearest neighbor
+    db$TMP_DIST_NEAREST <- rep(NA, nrow(db))
+    db$ROW_ID <- 1:nrow(db)
+    
+    # Create cluster of nproc size and export namespaces
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.
+    if( nproc==1 ) {
+        # If needed to run on a single core/cpu then, register DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    } else if( nproc > 1 ) {
+        cluster <- parallel::makeCluster(nproc, type="PSOCK")
+        registerDoParallel(cluster)
+    } else {
+        stop('Nproc must be positive.')
+    }
     
     # Export groups to the clusters
     if (nproc > 1) { 
@@ -943,7 +965,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     }
     
     # prepare db for return
-    if (keepVJLgroup) {
+    if ((!VJthenLen) && keepVJLgroup) {
         db$VJL_GROUP <- db[["VJ_GROUP"]]
     }
     db <- db[, !(names(db) %in% c(junc_len, junc_len_light, "VJ_GROUP", "ROW_ID", "V1", "J1","TMP_DIST_NEAREST"))]
@@ -1979,198 +2001,3 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     }
 }
 
-#### Define clones (hierarchical) ####
-
-#' Define clones via hierarchical clustering
-#'
-#' Given partitions of heavy chain-only bulk-seqs based on heavy chain VJL combination, 
-#' or of VH:VL paired single-cell BCRs based on heavy and light chain VJL combinations,
-#' perform clonal clustering with a specified distance threshold. 
-#' (VJL=V gene, J gene, junction length)
-#'
-#' @param    db              data.frame containing sequence data.
-#' @param    sequenceColumn  name of the column containing heavy chain junctions. It is the distance
-#'                           between these heavy chain junction sequences that is used for hierarchical
-#'                           clustering. Note that light chain sequences are not used at this stage.
-#' @param    VJLgroupColumn  name of the column containing information about partitioning of heavy chain
-#'                           bulk-seq based on heavy chain VJL combination, or that of single-cell VH:VL 
-#'                           paired BCRs based on heavy and light chain VJL combinations. 
-#'                           Can be obtained by calling \link{distToNearest} with \code{keepVJLgroup=TRUE}
-#'                           or \link[alakazam]{groupGenes}.
-#' @param    cloneColumn     name of the column to be generated that contains clone IDs. 
-#'                           Defaults to \code{"CLONE"}.
-#' @param    threshold       a numeric value between 0 and 1 to be used as the clonal clustering
-#'                           threshold 
-#' @param    linkage         a character value specifying the type of linkage to be used for hierarchical
-#'                           clustering. Any value accepted by \link[stats]{hclust} is fine. 
-#'                           Defaults to \code{"single"}.
-#' @param    maxmiss         The maximum number of non-ACGT characters (gaps or Ns) to permit in the 
-#'                           junction sequence before excluding the record from clonal assignment. Note, 
-#'                           under single linkage non-informative positions can create artifactual links 
-#'                           between unrelated sequences. Use with caution. Default to \code{0}.                                            
-#' @param    nproc           number of processors available for parallel computing                 
-#' 
-#' @return   Returns a list containing two components. (i) \code{CLUSTERED}: a modified \code{db} data.frame 
-#'           with a new column (named after \code{cloneColumn}) containing clone IDs as a result of hierarchical 
-#'           clustering given the threshold specified by \code{threshold}. (ii) \code{EXCLUDED}: any sequence
-#'           excluded from clustering for containing more than (strict \code{>}) \code{maxmiss} number of 
-#'           non-ACGT characters in \code{sequenceColumn} will be stored here. \code{NULL} if no sequence is
-#'           excluded.
-#'
-#' @details
-#' 
-#' The underlying operation can be expected to be the same as \code{DefineClones.py} as in 
-#' \code{Change-O} with the following specifications:
-#' \itemize{
-#'    \item \code{--mode gene}
-#'    \item \code{--act set}
-#'    \item \code{--model ham}
-#'    \item \code{--norm len}
-#'    \item \code{--link single}
-#' }
-#' 
-#' The advantage is that with this function in R, partitioning based on heavy chain VJL combination,
-#' or heavy and light chain VJL combinations in single-cell mode, needs to be performed only once, 
-#' provided that the partitioning column has been saved via, for instance, \code{keepVJLgroup} in
-#' \link{distToNearest}.
-#' 
-#' @examples
-#' # Subset example data to one sample as a demo
-#' data(ExampleDb, package="alakazam")
-#' 
-#' # Calculate dist-to-nearest (helps to choose a threshold) 
-#' # Keep partitioning based on VJL combinations
-#' dist <- distToNearest(ExampleDb, vCallColumn="V_CALL_GENOTYPED", model="ham", 
-#'                       first=FALSE, normalize="len", keepVJLgroup=TRUE)
-#' 
-#' # Cluster with a threshold of 0.1 normalized Hamming distance
-#' clust <- defineClones(dist, threshold=0.1, linkage="single")
-#' 
-#' @export
-defineClones <- function(db, sequenceColumn="JUNCTION", VJLgroupColumn="VJL_GROUP", cloneColumn="CLONE", 
-                         threshold, maxmiss=0,
-                         linkage=c("single", "complete", "average", "ward.D", "ward.D2", 
-                                   "mcquitty", "median", "centroid"), nproc=1) {
-    
-    # check arguments
-    linkage <- match.arg(linkage)
-    
-    missing(threshold)
-    if (!(threshold>=0 & threshold<=1)) {
-        stop("threshold must be between 0 and 1")
-    }
-    if ( !all( c(sequenceColumn, VJLgroupColumn) %in% colnames(db) ) ) {
-        stop(sequenceColumn, " and/or ", VJLgroupColumn, " not found in db")
-    }
-    
-    missing(maxmiss)
-    if (!(maxmiss>=0)) {
-        stop("maxmiss must be >=0")
-    }
-    
-    # return object
-    returnLst <- vector(mode="list", length=2)
-    names(returnLst) <- c("CLUSTERED", "EXCLUDED")
-    
-    # filter based on number of non-ATGC characters
-    # changeo::filterMissing() uses <=
-    miss_count <- stri_count_regex(str=db[[sequenceColumn]], pattern="[^ATGC]")
-    bool_keep <- miss_count <= maxmiss
-    
-    cat("Excluded due to non-ATGC character(s) in", sequenceColumn, ":", sum(!bool_keep), "\n")
-    # if nothing excluded, remains NULL
-    if (sum(!bool_keep)>0) {
-        returnLst[["EXCLUDED"]] <- db[!bool_keep, ]
-    }
-    
-    db <- db[bool_keep, ]
-    
-    # unique VJL groups
-    uniqueGroups <- sort(unique(db[[VJLgroupColumn]]))
-    nGroups <- length(uniqueGroups)
-    # indices
-    # crucial to have simplify=FALSE 
-    # (otherwise won't return a list if uniqueClones has length 1)
-    uniqueGroupsIdx <- sapply(uniqueGroups, function(curGrp){
-        idx <- which(db[[VJLgroupColumn]] == curGrp)
-        return(idx)
-    }, simplify=FALSE)
-    
-    # initiate cluster
-    # Create cluster of nproc size and export namespaces
-    # If user wants to paralellize this function and specifies nproc > 1, then
-    # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.
-    if( nproc==1 ) {
-        # If needed to run on a single core/cpu then, register DoSEQ 
-        # (needed for 'foreach' in non-parallel mode)
-        registerDoSEQ()
-    } else if( nproc > 1 ) {
-        cluster <- parallel::makeCluster(nproc, type="PSOCK")
-        registerDoParallel(cluster)
-    } else {
-        stop('Nproc must be positive.')
-    }
-    
-    # Export groups to the clusters
-    if (nproc > 1) { 
-        export_functions <- list("db", "uniqueGroups", "uniqueGroupsIdx",
-                                 "linkage", "threshold",
-                                 "VJLgroupColumn", "sequenceColumn", 
-                                 "pairwiseDist", "stri_length")
-        parallel::clusterExport(cluster, export_functions, envir=environment())
-    }
-    
-    # parallel loop
-    list_clone_IDs <- foreach(i=1:nGroups, .errorhandling='stop') %dopar% {
-        
-        curGrp <- uniqueGroups[i]
-        idx <- uniqueGroupsIdx[[i]]
-        
-        # only 1 seq: no need to cluster
-        if (length(idx)==1) {
-            curIDs <- paste0(curGrp, "_1")
-        } else {
-            db_group <- db[idx, ]
-            # heavy chain junctions
-            curJuncs <- db_group[[sequenceColumn]]
-            # pairwise hamming distance (square matrix)
-            curHam <- pairwiseDist(seq=curJuncs) / stri_length(curJuncs[1])
-            # convert to dist class (1d condensed distance vector)
-            # important not to use dist()! 
-            curDist <- as.dist(m=curHam)
-            # hclust using threshold
-            # calls stats::hclust
-            # faster altnertive: `fastcluster` package
-            curClust <- fastcluster::hclust(d=curDist, method=linkage)
-            #plot(curClust)
-            #abline(h=threshold, lty=2, col=2)
-            
-            # cut
-            curCut <- cutree(curClust, h=threshold)
-            #rect.hclust(curClust, h=threshold)
-            
-            # record clone assignment
-            curIDs <- paste(curGrp, curCut, sep="_")
-        }
-        
-        return(curIDs)
-    }
-    
-    # Stop the cluster
-    if (nproc > 1) { parallel::stopCluster(cluster) }
-    
-    # column for clone ID
-    db[[cloneColumn]] <- NA
-    
-    for (i in 1:nGroups) {
-        idx <- uniqueGroupsIdx[[i]]
-        db[[cloneColumn]][idx] <- list_clone_IDs[[i]]
-    }
-    
-    stopifnot(!any(is.na(db[[cloneColumn]])))
-    
-    returnLst[["CLUSTERED"]] <- db
-    
-    return(returnLst)
-}

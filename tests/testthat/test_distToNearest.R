@@ -241,30 +241,29 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
     
     # expect error with data_t1
     expect_error(distToNearest(db=data_t1, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+                               model="ham", normalize="len", symmetry="avg",
+                               vCallColumnLight=NULL, jCallColumnLight=NULL, sequenceColumnLight=NULL, 
+                               separator_within_seq=",", separator_between_seq=";",
+                               keepVJLgroup=TRUE, first=FALSE, VJthenLen=FALSE, nproc=1))
+    expect_error(distToNearest(db=data_t1, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                                 model="ham", normalize="len", symmetry="avg",
-                                single_cell_with_light=T,
                                 vCallColumnLight="V_CALL_LIGHT", jCallColumnLight="J_CALL_LIGHT", sequenceColumnLight="JUNCTION_LIGHT", 
                                 separator_within_seq=",", separator_between_seq=";",
-                                keepVJLgroup=T, first=F, nproc=1))
-    expect_error(distToNearest(db=data_t1, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
-                               model="ham", normalize="len", symmetry="avg",
-                               single_cell_with_light=F, first=F, nproc=1))
-    
+                                keepVJLgroup=TRUE, first=FALSE, VJthenLen=FALSE, nproc=1))
+
     ## with data_t2, expect smooth run
     # first=F
     dtn1 = distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                          model="ham", normalize="len", symmetry="avg",
-                         single_cell_with_light=T,
                          vCallColumnLight="V_CALL_LIGHT", jCallColumnLight="J_CALL_LIGHT", sequenceColumnLight="JUNCTION_LIGHT", 
                          separator_within_seq=",", separator_between_seq=";",
-                         keepVJLgroup=T, first=F, nproc=1)
+                         keepVJLgroup=TRUE, first=FALSE, VJthenLen=FALSE, nproc=1)
     # first=T
     dtn2 = distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                          model="ham", normalize="len", symmetry="avg",
-                         single_cell_with_light=T,
                          vCallColumnLight="V_CALL_LIGHT", jCallColumnLight="J_CALL_LIGHT", sequenceColumnLight="JUNCTION_LIGHT", 
                          separator_within_seq=",", separator_between_seq=";",
-                         keepVJLgroup=T, first=T, nproc=1)
+                         keepVJLgroup=TRUE, first=TRUE, VJthenLen=FALSE, nproc=1)
     
     # calcualte expected
     dtn1_expect = rep(NA, nrow(dtn1))
