@@ -19,7 +19,10 @@ NULL
 #' @param    targetingModel  5-mer \link{TargetingModel} object to be used for computing 
 #'                           probabilities of mutations at each position. Defaults to
 #'                           \link{HH_S5F}.
-#'                           
+#' @param   start            Initial position in \code{sequence} where mutations can 
+#'                           be introduced. Default: 1
+#' @param   end              Last position in \code{sequence} where mutations can 
+#'                           be introduced. Default: last position (sequence length).
 #' @return   A string defining the mutated sequence.
 #' 
 #' @details
@@ -41,9 +44,9 @@ NULL
 #' shmulateSeq(sequence, numMutations=6)
 #' 
 #' @export
-shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
+shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, start=1, end=nchar(sequence) ) {
     #* counts on constant variables CODON_TABLE, NUCLEOTIDES (ACTGN-.)
-    
+
     # check if numMutations is a whole number
     # is.wholenumber function borrowed from R's integer help
     is.wholenumber <-
@@ -56,10 +59,30 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
         stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
     }
 
+    # Trim sequence to consider only the interval start:end
+    head_sequence <- ""
+    tail_sequence <- ""
+    seq_len <- stri_length(sequence)
+    if (start<1 | end>seq_len ) {
+        stop("`start` must be >= 1 and `end` must be <= sequence length")
+    } else {
+        head_sequence <- stri_sub(str=sequence, from=0, to=start-1)
+        tail_sequence <-  stri_sub(str=sequence, from=end+1, to=seq_len)
+        sequence <- stri_sub(str=sequence, from=start, to=end)
+    }
+    
     # Trim sequence to last codon (getCodonPos from MutationProfiling.R)
     if(getCodonPos(stri_length(sequence))[3] > stri_length(sequence)) {
+        warning("Trimming sequence to last codon")
         sim_seq <- stri_sub(str=sequence, from=1, 
                             to=getCodonPos(stri_length(sequence))[1]-1)
+        # Add removed chars to tail_sequence
+        tail_sequence <- paste0(
+            stri_sub(str=sequence,
+                     from=getCodonPos(stri_length(sequence))[1], 
+                     to=stri_length(sequence)),
+                     tail_sequence)
+        
     } else {
         sim_seq <- sequence
     }
@@ -118,12 +141,14 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
                                                                        from = lower, 
                                                                        to = upper))
         # Make probability of stop codon 0
-        if(any(mutation_types[, lower:upper]=="Stop", na.rm=T)) {
+        if (any(mutation_types[, lower:upper]=="Stop", na.rm=T)) {
             targeting[, lower:upper][mutation_types[, lower:upper]=="Stop"] <- 0
         }
     }
     # sanity check: length of sim_seq should remain unchanged after simulation
     stopifnot(sim_leng==stri_length(sim_seq))
+    # Add back head and tail sequences
+    sim_seq <- paste0(head_sequence, sim_seq, tail_sequence)
     return(sim_seq)
 }
 
@@ -153,7 +178,10 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
 #'                           number of mutations to the immediate offspring nodes of the 
 #'                           MRCA. Requires a value between 0 and 1. If \code{NULL} then 
 #'                           edge weights are unmodified from the input \code{graph}.
-#'
+#' @param   start            Initial position in \code{sequence} where mutations can 
+#'                           be introduced. Default: 1
+#' @param   end              Last position in \code{sequence} where mutations can 
+#'                           be introduced. Default: last position (sequence length).                           
 #' @return   A \code{data.frame} of simulated sequences with columns:
 #'           \itemize{
 #'             \item \code{NAME}:      name of the corresponding node in the input 
@@ -184,7 +212,8 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F) {
 #'  
 #' @export
 shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
-                         field=NULL, exclude=NULL, junctionWeight=NULL) {
+                         field=NULL, exclude=NULL, junctionWeight=NULL,
+                         start=1, end=nchar(sequence)) {
     ## DEBUG
     # targetingModel=HH_S5F; field=NULL; exclude=NULL; junctionWeight=NULL
     
@@ -224,11 +253,11 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
     
     # Add mutations to the immediate offsprings of the MRCA
     # Number of mutations added is proportional to fraction of sequence in junction
-    if(!is.null(junctionWeight)) {
+    if (!is.null(junctionWeight)) {
         adj[parent_nodes, ] <- round(adj[parent_nodes, ] * (1 + junctionWeight))
     }
     
-    while(nchild > 0) {
+    while (nchild > 0) {
         new_parents <- c()
         # Loop through parent-children combos
         for(p in parent_nodes) {
@@ -239,7 +268,8 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
                 # Simulate sequence for that edge
                 seq <- shmulateSeq(sequence=sim_tree$SEQUENCE[sim_tree$NAME == p], 
                                    numMutations=adj[p, ch],
-                                   targetingModel=targetingModel)
+                                   targetingModel=targetingModel,
+                                   start=start, end=end)
                 # Update output data.frame
                 chRowIdx = which(sim_tree$NAME==ch)
                 sim_tree$SEQUENCE[chRowIdx] <- seq
