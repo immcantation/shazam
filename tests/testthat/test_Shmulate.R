@@ -50,6 +50,19 @@ test_that("Test shmulateSeq", {
     expect_error(shmulateSeq("ATCG", numMutations=4), 
                  regexp="larger than the length of the sequence")
     
+    # This will throw error, because only two positions used to add mutations
+    expect_error(shmulateSeq("ATCG", numMutations=2, start=1, end=2), 
+                 regexp="larger than the length of the sequence")
+    
+    # This will throw warning, because 4 positions requested to add mutations,
+    # from 1 to 4, but nt 4 will be removed when trimming sequence to the last
+    # codon
+    expect_warning(sim_seq <- shmulateSeq("ATCG", numMutations=3, start=1, end=4), 
+                 regexp="Trimming sequence to last codon")    
+    expect_true(grepl("G$", sim_seq))
+    expect_false(grepl("^ATC", sim_seq))
+    expect_equal(nchar(sim_seq), nchar("ATCG"))
+    
     # Throw error if unexpected codons found
     expect_error(shmulateSeq("ABC", numMutations=3), 
                  regexp="Unrecognized codons found")
