@@ -1414,7 +1414,6 @@ calculateMutability <- function(sequences, model=HH_S5F, progress=FALSE) {
 # Create model and rescale mutabilities
 # model <- createTargetingModel(db, model="S", multipleMutation="ignore")
 # mut <- rescaleMutability(model)
-#
 rescaleMutability <- function(model, mean=1.0) {
     if (is(model, "TargetingModel")) {
         model <- model@mutability
@@ -1502,7 +1501,6 @@ removeCodonGaps <- function(matInput) {
 #' degenerate5merSub[, c("AAAAT", "AACAT", "AAGAT", "AATAT")]
 #' 
 #' @export
-
 makeDegenerate5merSub = function(sub1mer, extended=FALSE) {
     # make sure that rownames and colnames of sub1mer are uppercase
     rownames(sub1mer) = toupper(rownames(sub1mer))
@@ -1580,7 +1578,6 @@ makeDegenerate5merSub = function(sub1mer, extended=FALSE) {
 #' sum(degenerate5merMut)
 #' 
 #' @export
-
 makeDegenerate5merMut = function(mut1mer, extended=FALSE) {
     # make sure that names of mut1mer are uppercase
     names(mut1mer) = toupper(names(mut1mer))
@@ -1648,7 +1645,6 @@ makeDegenerate5merMut = function(mut1mer, extended=FALSE) {
 #' makeAverage1merSub(sub5mer = degenerate5merSub)
 #' 
 #' @export
-
 makeAverage1merSub = function(sub5mer) {
     stopifnot(dim(sub5mer) == c(4, 1024))
     
@@ -1717,7 +1713,6 @@ makeAverage1merSub = function(sub5mer) {
 #' makeAverage1merMut(mut5mer = degenerate5merMut)
 #' 
 #' @export
-
 makeAverage1merMut = function(mut5mer) {
     stopifnot(length(mut5mer) == 1024)
     
@@ -1859,7 +1854,6 @@ calcTargetingDistance <- function(model, places=2) {
 #           are estimated by minimizing the sum of squares between this matrix and 
 #           the input matrix. The fitted matrix was normalized to ensure that each 
 #           row sums up to 1.
-#
 symmetrize <- function(sub1mer) {
   rownames(sub1mer) <- toupper(rownames(sub1mer))
   colnames(sub1mer) <- toupper(colnames(sub1mer))
