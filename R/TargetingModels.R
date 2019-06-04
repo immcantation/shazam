@@ -1414,7 +1414,6 @@ calculateMutability <- function(sequences, model=HH_S5F, progress=FALSE) {
 # Create model and rescale mutabilities
 # model <- createTargetingModel(db, model="S", multipleMutation="ignore")
 # mut <- rescaleMutability(model)
-#
 rescaleMutability <- function(model, mean=1.0) {
     if (is(model, "TargetingModel")) {
         model <- model@mutability
@@ -1855,7 +1854,6 @@ calcTargetingDistance <- function(model, places=2) {
 #           are estimated by minimizing the sum of squares between this matrix and 
 #           the input matrix. The fitted matrix was normalized to ensure that each 
 #           row sums up to 1.
-#
 symmetrize <- function(sub1mer) {
   rownames(sub1mer) <- toupper(rownames(sub1mer))
   colnames(sub1mer) <- toupper(colnames(sub1mer))
