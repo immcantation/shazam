@@ -618,7 +618,7 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
 #' minNumMutationsTune(subCount, seq(from=10, to=100, by=10))
 #'                                       
 #' @export
-minNumMutationsTune = function(subCount, minNumMutationsRange) {
+minNumMutationsTune <- function(subCount, minNumMutationsRange) {
   stopifnot( nrow(subCount)==1024 & ncol(subCount)==4 )
 
   tuneMtx = sapply(minNumMutationsRange, 
@@ -1024,7 +1024,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
 #' minNumSeqMutationsTune(mutCount, seq(from=100, to=300, by=50))
 #' }                                      
 #' @export
-minNumSeqMutationsTune = function(mutCount, minNumSeqMutationsRange) {
+minNumSeqMutationsTune <- function(mutCount, minNumSeqMutationsRange) {
   stopifnot( length(mutCount) == 1024 )
   
   tuneMtx = sapply(minNumSeqMutationsRange, 
@@ -1502,8 +1502,7 @@ removeCodonGaps <- function(matInput) {
 #' degenerate5merSub[, c("AAAAT", "AACAT", "AAGAT", "AATAT")]
 #' 
 #' @export
-
-makeDegenerate5merSub = function(sub1mer, extended=FALSE) {
+makeDegenerate5merSub <- function(sub1mer, extended=FALSE) {
     # make sure that rownames and colnames of sub1mer are uppercase
     rownames(sub1mer) = toupper(rownames(sub1mer))
     colnames(sub1mer) = toupper(colnames(sub1mer))
@@ -1580,8 +1579,7 @@ makeDegenerate5merSub = function(sub1mer, extended=FALSE) {
 #' sum(degenerate5merMut)
 #' 
 #' @export
-
-makeDegenerate5merMut = function(mut1mer, extended=FALSE) {
+makeDegenerate5merMut <- function(mut1mer, extended=FALSE) {
     # make sure that names of mut1mer are uppercase
     names(mut1mer) = toupper(names(mut1mer))
     
@@ -1648,8 +1646,7 @@ makeDegenerate5merMut = function(mut1mer, extended=FALSE) {
 #' makeAverage1merSub(sub5mer = degenerate5merSub)
 #' 
 #' @export
-
-makeAverage1merSub = function(sub5mer) {
+makeAverage1merSub <- function(sub5mer) {
     stopifnot(dim(sub5mer) == c(4, 1024))
     
     # make sure that rownames and colnames of sub5mer are uppercase
@@ -1717,8 +1714,7 @@ makeAverage1merSub = function(sub5mer) {
 #' makeAverage1merMut(mut5mer = degenerate5merMut)
 #' 
 #' @export
-
-makeAverage1merMut = function(mut5mer) {
+makeAverage1merMut <- function(mut5mer) {
     stopifnot(length(mut5mer) == 1024)
     
     # make sure that names mut5mer are uppercase
@@ -2054,10 +2050,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
         
         # Order 5-mers by positions, with reversed order if center nucleotide is G or T
         if (center_nuc %in% c("A", "C")) {
-            sub_df <- dplyr::arrange_(sub_df, .dots=c("pos1", "pos2", "pos4", "pos5"))
+            sub_df <- dplyr::arrange(sub_df, pos1, pos2, pos4, pos5)
             sub_df$x <- 1:nrow(sub_df)            
         } else if (center_nuc %in% c("G", "T")) {
-            sub_df <- dplyr::arrange_(sub_df, .dots=c("pos5", "pos4", "pos2", "pos1"))
+            sub_df <- dplyr::arrange(sub_df, pos5, pos4, pos2, pos1)
             sub_df$x <- 1:nrow(sub_df)
         } else {
             stop("Invalid nucleotide choice")
@@ -2065,8 +2061,8 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
         
         # Melt 5-mer position data
         sub_melt <- sub_df %>% 
-            tidyr::gather_("pos", "char", colnames(mut_positions)) %>% 
-            select_(.dots=c("x", "pos", "char"))
+            tidyr::gather(pos, char, colnames(mut_positions)) %>% 
+            select(x, pos, char)
         #sub_melt$pos <- factor(sub_melt$pos, levels=mut_names)
         #sub_melt$pos <- as.numeric(sub_melt$pos)
         sub_melt$pos <- as.numeric(gsub("pos", "", sub_melt$pos))
@@ -2098,11 +2094,11 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
 
         # Define text and rectangle positions for inner circle
         sub_melt$pos <- sub_melt$pos + text_offset
-        sub_text <- lapply(sub_text, function(x) { dplyr::mutate_(x, text_y=interp(~ y + text_offset, y=as.name("text_y"))) })
+        sub_text <- lapply(sub_text, function(x) { dplyr::mutate(x, text_y=text_y + text_offset) })
         sub_rect <- dplyr::bind_rows(sub_text) %>%
-            mutate_(rect_width=interp(~ y - x, x=as.name("rect_min"), y=as.name("rect_max")),
-                    ymin=interp(~ y - 0.5, y=as.name("text_y")),
-                    ymax=interp(~ y + 0.5, y=as.name("text_y")))
+            mutate(rect_width=rect_max - rect_min,
+                    ymin=text_y - 0.5,
+                    ymax=text_y + 0.5)
         
 
         # Define base plot object
@@ -2277,7 +2273,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
 #' }
 #' 
 #' @export
-plotTune = function(tuneMtx, thresh, 
+plotTune <- function(tuneMtx, thresh, 
                     criterion=c("5mer", "3mer", "1mer", "3mer+1mer", 
                                 "measured", "inferred"), 
                     pchs = 1, ltys = 2, cols = 1,

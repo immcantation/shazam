@@ -769,7 +769,7 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #                                          breakTiesStochastic=FALSE,
 #                                          breakTiesByColumns=NULL, db=clone)$cons
 # 
-calcClonalConsensusHelper = function(seqs, muFreqColumn=NULL, lenLimit=NULL,
+calcClonalConsensusHelper <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
                                      mtd=c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
                                      minFreq=NULL,
                                      includeAmbiguous=FALSE,
@@ -3159,7 +3159,9 @@ mutationType <- function(codonFrom, codonTo,
                          aminoAcidClasses=NULL) {
     # codonFrom="TTT"; codonTo="TTA"
     # codonFrom="TTT"; codonTo="TGA"
-
+    
+    ambiguousMode <- match.arg(ambiguousMode)
+    
     # placeholder for tabulation
     tab <- setNames(object=rep(0, 4), nm=c("R", "S", "Stop", "na"))
     

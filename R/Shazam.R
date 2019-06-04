@@ -115,13 +115,13 @@
 #' @importFrom  diptest     dip.test
 #' @importFrom  doParallel  registerDoParallel
 #' @importFrom  dplyr       do n desc funs %>%
-#'                          as_data_frame data_frame data_frame_
+#'                          as_data_frame data_frame 
 #'                          bind_cols bind_rows combine
-#'                          filter filter_ select select_ arrange arrange_
-#'                          group_by group_by_ ungroup
-#'                          mutate mutate_ summarize summarize_
+#'                          filter select arrange 
+#'                          group_by ungroup group_indices
+#'                          mutate summarize
 #'                          mutate_at summarize_at
-#'                          rename rename_ transmute transmute_
+#'                          rename transmute
 #' @importFrom  foreach     foreach %dopar% registerDoSEQ
 #' @importFrom  igraph      V E as_adjacency_matrix graph_from_data_frame
 #'                          vertex_attr set_vertex_attr
@@ -132,7 +132,7 @@
 #' @importFrom  progress    progress_bar
 #' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format
 #'                          math_format percent scientific
-#' @importFrom  tidyr       gather gather_ spread spread_
+#' @importFrom  tidyr       gather spread
 #' @importFrom  iterators   icount
 #' @importFrom  SDMTools    wt.sd
 #' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format

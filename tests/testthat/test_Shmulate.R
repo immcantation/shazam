@@ -47,12 +47,14 @@ test_that("Test shmulateSeq", {
                  regexp="larger than the length of the sequence")
     
     # This will throw error, because G is trimmed
-    expect_error(shmulateSeq("ATCG", numMutations=4), 
-                 regexp="larger than the length of the sequence")
+    expect_warning(expect_error(shmulateSeq("ATCG", numMutations=4), 
+                 regexp="larger than the length of the sequence"),
+                 regexp="Trimming sequence to last codon")
     
     # This will throw error, because only two positions used to add mutations
-    expect_error(shmulateSeq("ATCG", numMutations=2, start=1, end=2), 
-                 regexp="larger than the length of the sequence")
+    expect_warning(expect_error(shmulateSeq("ATCG", numMutations=2, start=1, end=2), 
+                 regexp="larger than the length of the sequence"),
+                 regexp="Trimming sequence to last codon")
     
     # This will throw warning, because 4 positions requested to add mutations,
     # from 1 to 4, but nt 4 will be removed when trimming sequence to the last

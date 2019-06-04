@@ -406,7 +406,7 @@ allValidChars <- function(seq, validChars) {
 # shazam:::nearestDist(sequences, model="aa", normalize="none")
 # shazam:::nearestDist(sequences, model="ham", normalize="len")
 # shazam:::nearestDist(sequences, model="aa", normalize="len")
-nearestDist<- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", 
+nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", 
                                           "hs1f_compat", "m1n_compat"),
                        normalize=c("none", "len", "mut"),
                        symmetry=c("avg", "min"),
