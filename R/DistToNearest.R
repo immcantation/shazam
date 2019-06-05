@@ -935,7 +935,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         db_group <- db[idx, ]
         crossGroups <- NULL
         if (!is.null(cross)) {
-            crossGroups <- db_group %>% dplyr::group_indices_(.dots=cross)
+            crossGroups <- db_group %>% dplyr::group_indices(!!!rlang::syms(cross))
         }
         arrSeqs <-  as.vector(unlist(db[idx, sequenceColumn]))
         db_group$TMP_DIST_NEAREST <- nearestDist(arrSeqs, 
