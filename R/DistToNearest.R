@@ -295,14 +295,14 @@ nonsquare5MerDist <- function(sequences, indx,  targetingDistance, symmetry=c("a
     .matSeqSlidingFiveMer <- sapply(sequences, function(x) { window5Mers(x) }, 
                                     simplify="matrix")
     
-    # Compute pairwise distance between all sequences' fivemers (by column)
-    .dist <- function(i) {
-        c(rep.int(0, i - 1), 
-          sapply(i:n_seq, function(j) { dist5Mers(.matSeqSlidingFiveMer[,i],
-                                                  .matSeqSlidingFiveMer[,j],
-                                                  targetingDistance,
-                                                  symmetry=symmetry) }))
-    }
+    # # Compute pairwise distance between all sequences' fivemers (by column)
+    # .dist <- function(i) {
+    #     d <- c(rep.int(0, i - 1), 
+    #       sapply(i:n_seq, function(j) { dist5Mers(.matSeqSlidingFiveMer[,i],
+    #                                               .matSeqSlidingFiveMer[,j],
+    #                                               targetingDistance,
+    #                                               symmetry=symmetry) }))
+    # }
     dist_mat <- matrix(NA, nrow=n_seq, ncol=n_seq)
     diag(dist_mat) <- 0
     indx <- sort(indx)

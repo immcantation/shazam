@@ -2048,10 +2048,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
         
         # Order 5-mers by positions, with reversed order if center nucleotide is G or T
         if (center_nuc %in% c("A", "C")) {
-            sub_df <- dplyr::arrange(sub_df, pos1, pos2, pos4, pos5)
+            sub_df <- dplyr::arrange(sub_df, !!! rlang::syms(c("pos1", "pos2", "pos4", "pos5")))
             sub_df$x <- 1:nrow(sub_df)            
         } else if (center_nuc %in% c("G", "T")) {
-            sub_df <- dplyr::arrange(sub_df, pos5, pos4, pos2, pos1)
+            sub_df <- dplyr::arrange(sub_df, !!! rlang::syms(c("pos5", "pos4", "pos2", "pos1")))
             sub_df$x <- 1:nrow(sub_df)
         } else {
             stop("Invalid nucleotide choice")
@@ -2059,8 +2059,8 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
         
         # Melt 5-mer position data
         sub_melt <- sub_df %>% 
-            tidyr::gather(pos, char, colnames(mut_positions)) %>% 
-            select(x, pos, char)
+            tidyr::gather("pos", "char", !!! rlang::syms(colnames(mut_positions))) %>% 
+            select("x", "pos", "char")
         #sub_melt$pos <- factor(sub_melt$pos, levels=mut_names)
         #sub_melt$pos <- as.numeric(sub_melt$pos)
         sub_melt$pos <- as.numeric(gsub("pos", "", sub_melt$pos))
@@ -2092,11 +2092,11 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
 
         # Define text and rectangle positions for inner circle
         sub_melt$pos <- sub_melt$pos + text_offset
-        sub_text <- lapply(sub_text, function(x) { dplyr::mutate(x, text_y=text_y + text_offset) })
+        sub_text <- lapply(sub_text, function(x) { dplyr::mutate(x, text_y=!!rlang::sym("text_y") + !!rlang::sym("text_offset")) })
         sub_rect <- dplyr::bind_rows(sub_text) %>%
             mutate(rect_width=rect_max - rect_min,
-                    ymin=text_y - 0.5,
-                    ymax=text_y + 0.5)
+                    ymin=!!rlang::sym("text_y") - 0.5,
+                    ymax=!!rlang::sym("text_y") + 0.5)
         
 
         # Define base plot object
