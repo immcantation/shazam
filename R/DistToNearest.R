@@ -1948,6 +1948,7 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     # Define plot data.frames
     xdf <- data.frame(x=data@x)
     ddf <- data.frame(x=data@xdens, y=data@ydens)
+    ddf <- ddf[ddf$x > 0, ]
     
     # Set binwidth
     if (is.null(binwidth)) { binwidth <- data@bandwidth }
@@ -1978,7 +1979,7 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     
     # Add x limits
     if (is.null(breaks) & (!is.na(xmin) | !is.na(xmax))) {
-        p <- p + xlim(xmin, xmax)
+        p <- p + coord_cartesian(xlim = c(xmin, xmax))
     }
     # Set breaks
     if (!is.null(breaks)) {
