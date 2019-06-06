@@ -37,8 +37,7 @@ collapseMatrixToVector <- function(mat, byrow = FALSE){
 # @return  The input data.frame with all entries in \code{columns} transformed 
 #          to uppercase.
 toupperColumns <- function(data, columns) {
-    data <- mutate_at(data, columns, funs(toupper))
-    
+    data <- mutate_at(data, columns, toupper)
     return(data)
 }
 

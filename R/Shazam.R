@@ -114,8 +114,7 @@
 #' @importFrom  ape         mst
 #' @importFrom  diptest     dip.test
 #' @importFrom  doParallel  registerDoParallel
-#' @importFrom  dplyr       do n desc funs %>%
-#'                          as_data_frame data_frame 
+#' @importFrom  dplyr       do n desc %>%
 #'                          bind_cols bind_rows combine
 #'                          filter select arrange 
 #'                          group_by ungroup group_indices
