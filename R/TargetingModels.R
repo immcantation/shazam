@@ -357,9 +357,9 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
     substitutionMatrix <- matrix(0, ncol=4, nrow=4, dimnames=list(nuc_chars, nuc_chars))
     substitutionList <- list()    
     for(v_fam in unique(v_families)) {
-        substitutionList[[v_fam]] = list()
+        substitutionList[[v_fam]] <- list()
         for(word in nuc_words){
-            substitutionList[[v_fam]][[word]] = substitutionMatrix
+            substitutionList[[v_fam]][[word]] <- substitutionMatrix
         }
     }
     
@@ -387,10 +387,10 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
             positions <- positions[!is.na(positions)]
             for( position in  positions){
                 wrd <-  c2s(c(cGL[(position-2):(position-1)],cGL[(position+1):(position+2)]))
-                codonNucs = getCodonPos(position)
-                codonGL = cGL[codonNucs]
-                codonSeq = cSeq[codonNucs]
-                muCodonPos = {position-1}%%3+1
+                codonNucs <- getCodonPos(position)
+                codonGL <- cGL[codonNucs]
+                codonSeq <- cSeq[codonNucs]
+                muCodonPos <- {position-1}%%3+1
                 seqAtMutation <- codonSeq[muCodonPos]
                 glAtMutation <- codonGL[muCodonPos]
                 if (!any(codonGL=="N") & !any(codonSeq=="N")) {
@@ -422,10 +422,10 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
             positions <- positions[!is.na(positions)]
             for( position in  positions){
                 wrd <-  c2s(c(cGL[(position-2):(position-1)],cGL[(position+1):(position+2)]))
-                codonNucs = getCodonPos(position)
-                codonGL = cGL[codonNucs]
-                codonSeq = cSeq[codonNucs]
-                muCodonPos = {position-1}%%3+1
+                codonNucs <- getCodonPos(position)
+                codonGL <- cGL[codonNucs]
+                codonSeq <- cSeq[codonNucs]
+                muCodonPos <- {position-1}%%3+1
                 seqAtMutation <- codonSeq[muCodonPos]
                 glAtMutation <- codonGL[muCodonPos]
                 if( !any(codonGL=="N") & !any(codonSeq=="N") ){
@@ -471,7 +471,7 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
     
     # Return 1-mer substitution model; this output cannot be used for createMutabilityMatrix
     if (returnModel == "1mer") {
-        subMat1merNorm = t(apply(subMat1mer, 1, function(x){x/sum(x)}))
+        subMat1merNorm <- t(apply(subMat1mer, 1, function(x){x/sum(x)}))
         return (subMat1merNorm)
     } else if (returnModel == "1mer_raw") {
         return (subMat1mer)
@@ -487,15 +487,15 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
       
       ### using 5mer
       # aggregate mutations
-      FIVE.5 = fivemer[[Nei]][Nuc,]
+      FIVE.5 <- fivemer[[Nei]][Nuc,]
       # count total number of mutations for a given 5mer
-      fivemer.total = sum(FIVE.5)
+      fivemer.total <- sum(FIVE.5)
       # are there mutations to every other base?
-      fivemer.every = ( sum(FIVE.5==0)==1 )
+      fivemer.every <- ( sum(FIVE.5==0)==1 )
       
       ### using inner 3mer
       # aggregate mutations from 5-mers with the same inner 3-mer
-      FIVE.3 = FIVE.5
+      FIVE.3 <- FIVE.5
       for(i in 1:4){
         for(j in 1:4){
           MutatedNeighbor=paste(nuc_chars[i],substring(Nei,2,3),nuc_chars[j],collapse="",sep="")
@@ -503,13 +503,13 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
         }
       }
       # count total number of mutations for inner 3mer
-      inner3.total = sum(FIVE.3)
+      inner3.total <- sum(FIVE.3)
       # are there mutations to every other base?
-      inner3.every = ( sum(FIVE.3==0)==1 )
+      inner3.every <- ( sum(FIVE.3==0)==1 )
       
       ### using 1mer
-      FIVE.1 = FIVE.5
-      MutatedNeighbors = seqinr::words(4, nuc_chars)
+      FIVE.1 <- FIVE.5
+      MutatedNeighbors <- seqinr::words(4, nuc_chars)
       for (MutatedNeighbor in MutatedNeighbors) {
         FIVE.1=FIVE.1+fivemer[[MutatedNeighbor]][Nuc,]
       }
@@ -557,8 +557,8 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
                                   function(x) { .simplifivemer(M, x, 
                                                                Thresh = minNumMutations,
                                                                count = numMutationsOnly) }, simplify=F)
-      substitutionModel = dplyr::bind_rows(substitutionModel)
-      rownames(substitutionModel) = seqinr::words(5, nuc_chars)
+      substitutionModel <- dplyr::bind_rows(substitutionModel)
+      rownames(substitutionModel) <- seqinr::words(5, nuc_chars)
     }
     
     return(substitutionModel)
@@ -621,9 +621,9 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
 minNumMutationsTune <- function(subCount, minNumMutationsRange) {
   stopifnot( nrow(subCount)==1024 & ncol(subCount)==4 )
 
-  tuneMtx = sapply(minNumMutationsRange, 
+  tuneMtx <- sapply(minNumMutationsRange, 
                      function(thresh) {
-                       method.count = c(# as 5mer
+                       method.count <- c(# as 5mer
                                         sum( subCount$fivemer.total > thresh & 
                                              subCount$fivemer.every ),
                                         # as inner 3mer
@@ -637,11 +637,11 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
                                              !(subCount$inner3.total > thresh & 
                                                subCount$inner3.every) )
                                        )
-                       names(method.count) = c("5mer", "3mer", "1mer")
+                       names(method.count) <- c("5mer", "3mer", "1mer")
                        stopifnot( sum(method.count)==1024 )
                        return(method.count)
                      })
-  colnames(tuneMtx) = minNumMutationsRange
+  colnames(tuneMtx) <- minNumMutationsRange
   return(tuneMtx)
 }
 
@@ -791,10 +791,10 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
             for (position in  positions){
                 wrd5 <- substr(db[[germlineColumn]][index], position - 2, position + 2)
                 if(!grepl("[^ACGT]", wrd5) & nchar(wrd5) == 5){
-                    codonNucs = getCodonPos(position)
-                    codonGL = cGL[codonNucs]
-                    codonSeq = cSeq[codonNucs]
-                    muCodonPos = {position - 1} %% 3 + 1
+                    codonNucs <- getCodonPos(position)
+                    codonGL <- cGL[codonNucs]
+                    codonSeq <- cSeq[codonNucs]
+                    muCodonPos <- {position - 1} %% 3 + 1
                     #seqAtMutation <- codonSeq[muCodonPos]
                     glAtMutation <- codonGL[muCodonPos]
                     if (!any(codonGL %in% c("N", "-", ".")) & !any(codonSeq %in% c("N", "-", "."))) {
@@ -884,7 +884,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
     
     # Filter out 5-mers with low number of observed mutations in the sequences
     NumSeqMutations <- sapply(1:1024,function(i)sum(MutabilityWeights[!is.na(MutabilityMatrix[i,])])) 
-    names(NumSeqMutations) = names(Mutability_Mean)
+    names(NumSeqMutations) <- names(Mutability_Mean)
     if (numSeqMutationsOnly) {return(NumSeqMutations)}
     
     Mutability_Mean[NumSeqMutations <= minNumSeqMutations] <- NA
@@ -950,7 +950,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
     # If the neighboring 5-mers still don't have enough mutations, use 0 instead. 
     if (length(is.na(Mutability_Mean_Complete)) > 0) {
         warning("Insufficient number of mutations to infer some 5-mers. Filled with 0. ")
-        Mutability_Mean_Complete[is.na(Mutability_Mean_Complete)] = 0 
+        Mutability_Mean_Complete[is.na(Mutability_Mean_Complete)] <- 0 
     }
     
     
@@ -959,11 +959,11 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
     
     # Return whether the 5-mer mutability is measured or inferred
     if (returnSource) {
-        Mutability_Mean_Complete_Source = data.frame(Fivemer = names(Mutability_Mean_Complete),
+        Mutability_Mean_Complete_Source <- data.frame(Fivemer = names(Mutability_Mean_Complete),
                                                      Mutability = Mutability_Mean_Complete)
-        Mutability_Mean_Complete_Source$Source = "Measured"
+        Mutability_Mean_Complete_Source$Source <- "Measured"
         Mutability_Mean_Complete_Source[Mutability_Mean_Complete_Source$Fivemer %in% 
-                                            names(which(is.na(Mutability_Mean))), "Source"] = "Inferred"
+                                            names(which(is.na(Mutability_Mean))), "Source"] <- "Inferred"
         return(Mutability_Mean_Complete_Source)
     }
     
@@ -1027,15 +1027,15 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
 minNumSeqMutationsTune <- function(mutCount, minNumSeqMutationsRange) {
   stopifnot( length(mutCount) == 1024 )
   
-  tuneMtx = sapply(minNumSeqMutationsRange, 
+  tuneMtx <- sapply(minNumSeqMutationsRange, 
                      function(thresh) {
-                       method.count = c( sum(mutCount > thresh),
+                       method.count <- c( sum(mutCount > thresh),
                                          sum(mutCount <= thresh) )
-                       names(method.count) = c("measured", "inferred")
+                       names(method.count) <- c("measured", "inferred")
                        stopifnot( sum(method.count)==1024 )
                        return(method.count)
                      })
-  colnames(tuneMtx) = minNumSeqMutationsRange
+  colnames(tuneMtx) <- minNumSeqMutationsRange
   return(tuneMtx)
 }
 
@@ -1503,26 +1503,26 @@ removeCodonGaps <- function(matInput) {
 #' @export
 makeDegenerate5merSub <- function(sub1mer, extended=FALSE) {
     # make sure that rownames and colnames of sub1mer are uppercase
-    rownames(sub1mer) = toupper(rownames(sub1mer))
-    colnames(sub1mer) = toupper(colnames(sub1mer))
+    rownames(sub1mer) <- toupper(rownames(sub1mer))
+    colnames(sub1mer) <- toupper(colnames(sub1mer))
     
     # create 5-mer labels using ATGC
     nuc_chars <- NUCLEOTIDES[1:4]
     nuc_words <- seqinr::words(5, nuc_chars)
     
     # get center positions of 5mers
-    nuc_centers = sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
+    nuc_centers <- sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
     
     # initiate 5-mer substitution matrix (4x1024)
-    sub5mer = matrix(NA, nrow=4, ncol=length(nuc_words),
+    sub5mer <- matrix(NA, nrow=4, ncol=length(nuc_words),
                      dimnames=list(nuc_chars, nuc_words))
     
     # assign values from 1-mer model to 5-mer model
     for (from in rownames(sub1mer)) {
         for (to in colnames(sub1mer)) {
             if (from != to) { # if statement keeps diagonals as NA
-                colIndex = which(nuc_centers == from)
-                sub5mer[to, colIndex] = sub1mer[from, to]
+                colIndex <- which(nuc_centers == from)
+                sub5mer[to, colIndex] <- sub1mer[from, to]
             }
         }
     }
@@ -1530,7 +1530,7 @@ makeDegenerate5merSub <- function(sub1mer, extended=FALSE) {
     
     # if extended=TRUE, extend
     if (extended) {
-        sub5mer = extendSubstitutionMatrix(sub5mer)
+        sub5mer <- extendSubstitutionMatrix(sub5mer)
         stopifnot(dim(sub5mer) == c(5, 3125))
     }
     
@@ -1580,32 +1580,32 @@ makeDegenerate5merSub <- function(sub1mer, extended=FALSE) {
 #' @export
 makeDegenerate5merMut <- function(mut1mer, extended=FALSE) {
     # make sure that names of mut1mer are uppercase
-    names(mut1mer) = toupper(names(mut1mer))
+    names(mut1mer) <- toupper(names(mut1mer))
     
     # create 5-mer labels using ATGCN
     nuc_chars <- NUCLEOTIDES[1:4]
     nuc_words <- seqinr::words(5, nuc_chars)
     
     # get center positions of 5mers
-    nuc_centers = sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
+    nuc_centers <- sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
     
     # initiate 5-mer mutability vector (length of 3125)
-    mut5mer = rep(NA, length=length(nuc_words))
-    names(mut5mer) = nuc_words
+    mut5mer <- rep(NA, length=length(nuc_words))
+    names(mut5mer) <- nuc_words
     
     # assign values from 1-mer model to 5-mer model
     for (center in names(mut1mer)) {
-        index = which(nuc_centers == center)
-        mut5mer[index] = mut1mer[center]
+        index <- which(nuc_centers == center)
+        mut5mer[index] <- mut1mer[center]
     } 
     stopifnot(length(mut5mer) == 1024)
     
     # normalize
-    mut5mer = mut5mer / sum(mut5mer, na.rm=T)
+    mut5mer <- mut5mer / sum(mut5mer, na.rm=T)
     
     # if extended=TRUE, extend
     if (extended) {
-        mut5mer = extendMutabilityMatrix(mut5mer)
+        mut5mer <- extendMutabilityMatrix(mut5mer)
         stopifnot(length(mut5mer) == 3125)
     }
     
@@ -1649,26 +1649,26 @@ makeAverage1merSub <- function(sub5mer) {
     stopifnot(dim(sub5mer) == c(4, 1024))
     
     # make sure that rownames and colnames of sub5mer are uppercase
-    rownames(sub5mer) = toupper(rownames(sub5mer))
-    colnames(sub5mer) = toupper(colnames(sub5mer))
+    rownames(sub5mer) <- toupper(rownames(sub5mer))
+    colnames(sub5mer) <- toupper(colnames(sub5mer))
     
     # get 5-mers and center positions of 5-mers
-    nuc_words = colnames(sub5mer)
-    nuc_centers = sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
+    nuc_words <- colnames(sub5mer)
+    nuc_centers <- sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
     
     # create 1-mer labels using ATGC
     nuc_chars <- NUCLEOTIDES[1:4]
     
     # initiate 1-mer substitution matrix (4x4)
-    sub1mer = matrix(NA, nrow=length(nuc_chars), ncol=length(nuc_chars),
+    sub1mer <- matrix(NA, nrow=length(nuc_chars), ncol=length(nuc_chars),
                      dimnames=list(nuc_chars, nuc_chars))
     
     # assign values from 5-mer model to 1-mer model
     for (from in rownames(sub1mer)) {
         for (to in colnames(sub1mer)) {
             if (from != to) { # if statement keeps diagonals as NA
-                colIndex = which(nuc_centers == from)
-                sub1mer[from, to] = mean(sub5mer[to, colIndex], na.rm=T)
+                colIndex <- which(nuc_centers == from)
+                sub1mer[from, to] <- mean(sub5mer[to, colIndex], na.rm=T)
             }
         }
     }
@@ -1676,7 +1676,7 @@ makeAverage1merSub <- function(sub5mer) {
     
     # normalize
     # tricky: apply transposes result; use t() to transpose back 
-    sub1mer = t(apply(sub1mer, 1, function(x){x/sum(x, na.rm=T)}))
+    sub1mer <- t(apply(sub1mer, 1, function(x){x/sum(x, na.rm=T)}))
     
     return(sub1mer)
 }
@@ -1717,28 +1717,28 @@ makeAverage1merMut <- function(mut5mer) {
     stopifnot(length(mut5mer) == 1024)
     
     # make sure that names mut5mer are uppercase
-    names(mut5mer) = toupper(names(mut5mer))
+    names(mut5mer) <- toupper(names(mut5mer))
     
     # get 5-mers and center positions of 5-mers
-    nuc_words = names(mut5mer)
-    nuc_centers = sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
+    nuc_words <- names(mut5mer)
+    nuc_centers <- sapply(nuc_words, function(x){seqinr::s2c(x)[3]})
     
     # create 1-mer labels using ATGC
     nuc_chars <- NUCLEOTIDES[1:4]
     
     # initiate 1-mer mutability vector (length 4)
-    mut1mer = rep(NA, length=length(nuc_chars))
-    names(mut1mer) = nuc_chars
+    mut1mer <- rep(NA, length=length(nuc_chars))
+    names(mut1mer) <- nuc_chars
     
     # assign values from 5-mer model to 1-mer model
     for (center in names(mut1mer)) {
-        index = which(nuc_centers == center)
-        mut1mer[center] = mean(mut5mer[index], na.rm=T)
+        index <- which(nuc_centers == center)
+        mut1mer[center] <- mean(mut5mer[index], na.rm=T)
     }
     stopifnot(length(mut1mer) == 4)
     
     # normalize
-    mut1mer = mut1mer / sum(mut1mer, na.rm=T)
+    mut1mer <- mut1mer / sum(mut1mer, na.rm=T)
     
     return(mut1mer)
 }
@@ -2285,51 +2285,51 @@ plotTune <- function(tuneMtx, thresh,
   # if tuneMtx is just a matrix
   if (!is.list(tuneMtx)) {
     if (criterion!="3mer+1mer") {
-      plotMtx = matrix(tuneMtx[criterion, as.character(thresh)], nrow=1)
+      plotMtx <- matrix(tuneMtx[criterion, as.character(thresh)], nrow=1)
     } else {
-      plotMtx = matrix(colSums(tuneMtx[c("3mer", "1mer"), as.character(thresh)]), nrow=1)
+      plotMtx <- matrix(colSums(tuneMtx[c("3mer", "1mer"), as.character(thresh)]), nrow=1)
     }
   } else {
   # if tuneMtx is a named list of matrices (e.g. corresponding to multiple samples)  
     if (criterion!="3mer+1mer") {
-      plotMtx = do.call(base::rbind, 
+      plotMtx <- do.call(base::rbind, 
                         lapply(tuneMtx, 
                                function(mtx){mtx[criterion, as.character(thresh)]}))
     } else {
-      plotMtx = do.call(base::rbind, 
+      plotMtx <- do.call(base::rbind, 
                         lapply(tuneMtx, 
                                function(mtx){colSums(mtx[c("3mer", "1mer"), 
                                                          as.character(thresh)])}))
     }
-    rownames(plotMtx) = names(tuneMtx)
+    rownames(plotMtx) <- names(tuneMtx)
   }
   # sanity check: there should not be any NA
   stopifnot(!any(is.na(plotMtx)))
   
   ### if number of pchs/ltys/cols provided does not match number of samples expected
   # expand into vector with repeating values (otherwise legend would break)
-  if (length(pchs)!=nrow(plotMtx)) {pchs = rep(pchs, length.out=nrow(plotMtx))}
-  if (length(ltys)!=nrow(plotMtx)) {ltys = rep(ltys, length.out=nrow(plotMtx))}
-  if (length(cols)!=nrow(plotMtx)) {cols = rep(cols, length.out=nrow(plotMtx))}
+  if (length(pchs)!=nrow(plotMtx)) {pchs <- rep(pchs, length.out=nrow(plotMtx))}
+  if (length(ltys)!=nrow(plotMtx)) {ltys <- rep(ltys, length.out=nrow(plotMtx))}
+  if (length(cols)!=nrow(plotMtx)) {cols <- rep(cols, length.out=nrow(plotMtx))}
   
   
   ### axis labels
   if (criterion %in% c("5mer", "3mer", "1mer", "3mer+1mer")) {
-    xlab.name = "Minimum # mutations per 5-mer to\ndirectly compute 5-mer substitution rates"
+    xlab.name <- "Minimum # mutations per 5-mer to\ndirectly compute 5-mer substitution rates"
     # cannot use switch because variable names cannot start with number
-    ylab.name = "# 5-mers for which substitution rates are\n"
+    ylab.name <- "# 5-mers for which substitution rates are\n"
     if (criterion=="5mer") {
-      ylab.name = paste(ylab.name, "directly computed")
+      ylab.name <- paste(ylab.name, "directly computed")
     } else if (criterion=="3mer") {
-      ylab.name = paste(ylab.name, "inferred based on inner 3-mers")
+      ylab.name <- paste(ylab.name, "inferred based on inner 3-mers")
     } else if (criterion=="1mer") {
-      ylab.name = paste(ylab.name, "inferred based on central 1-mers")
+      ylab.name <- paste(ylab.name, "inferred based on central 1-mers")
     } else if (criterion=="3mer+1mer") {
-      ylab.name = paste(ylab.name, "inferred based on 3- and 1-mers")
+      ylab.name <- paste(ylab.name, "inferred based on 3- and 1-mers")
     }
   } else if (criterion %in% c("measured", "inferred")) {
-    xlab.name = "Minimum # mutations in sequences containing each 5-mer\nto directly compute mutability"
-    ylab.name = paste("# 5-mers for which mutability is", criterion)
+    xlab.name <- "Minimum # mutations in sequences containing each 5-mer\nto directly compute mutability"
+    ylab.name <- paste("# 5-mers for which mutability is", criterion)
   }
   
   ### plot
@@ -2386,10 +2386,10 @@ canMutateTo <- function(nuc) {
 #       mutationType is non-zero/1
 mutationTypeOptimized <- function(matOfCodons) {
     # mutType: 4xn; rows: R/S/Stop/na
-    mutType = apply(matOfCodons, 1, function(x) { mutationType(x[2], x[1]) })
-    idx = apply(mutType, 2, function(y){which(y>0)[1]})
-    mutType = rownames(mutType)[idx]
-    mutType[which(mutType=="na")] = NA
+    mutType <- apply(matOfCodons, 1, function(x) { mutationType(x[2], x[1]) })
+    idx <- apply(mutType, 2, function(y){which(y>0)[1]})
+    mutType <- rownames(mutType)[idx]
+    mutType[which(mutType=="na")] <- NA
     return(mutType)
 }
 
@@ -2400,44 +2400,44 @@ mutationTypeOptimized <- function(matOfCodons) {
 # analyzeMutations2NucUri(in_matrix)
 analyzeMutations2NucUri <- function(in_matrix) {
     if(ncol(in_matrix) > VLENGTH) {
-        paramGL = in_matrix[2,1:VLENGTH]
-        paramSeq = in_matrix[1,1:VLENGTH]
+        paramGL <- in_matrix[2,1:VLENGTH]
+        paramSeq <- in_matrix[1,1:VLENGTH]
     } else {
-        paramGL = in_matrix[2,]
-        paramSeq = in_matrix[1,]
+        paramGL <- in_matrix[2,]
+        paramSeq <- in_matrix[1,]
     }
     #mutations = apply(rbind(paramGL,paramSeq), 2, function(x){!x[1]==x[2]})
-    mutations_val = paramGL != paramSeq
+    mutations_val <- paramGL != paramSeq
     if (any(mutations_val)) {
-        mutationPos = {1:length(mutations_val)}[mutations_val]
+        mutationPos <- {1:length(mutations_val)}[mutations_val]
         #mutationPos = mutationPos[sapply(mutationPos, function(x){!any(paramSeq[getCodonPos(x)]=="N")})]
         length_mutations =length(mutationPos)
-        mutationInfo = rep(NA,length_mutations)
+        mutationInfo <- rep(NA,length_mutations)
         if (any(mutationPos)) {
             pos<- mutationPos
             pos <- pos[!is.na(pos)]
             pos_array <- array(sapply(pos,getCodonPos))
             codonGL <- paramGL[pos_array]
             codonGL[is.na(codonGL)] <- "N"
-            codonSeq = sapply(pos,function(x){
-                seqP = paramGL[getCodonPos(x)]
-                muCodonPos = {x-1}%%3+1
-                seqP[muCodonPos] = paramSeq[x]
+            codonSeq <- sapply(pos,function(x){
+                seqP <- paramGL[getCodonPos(x)]
+                muCodonPos <- {x-1}%%3+1
+                seqP[muCodonPos] <- paramSeq[x]
                 return(seqP)
             })
             codonSeq[is.na(codonSeq)] <- "N"
-            GLcodons =  apply(matrix(codonGL,length_mutations,3,byrow=TRUE),1,c2s)
-            Seqcodons =   apply(codonSeq,2,c2s)
-            mutationInfo = apply(rbind(GLcodons , Seqcodons),2,function(x){
+            GLcodons <-  apply(matrix(codonGL,length_mutations,3,byrow=TRUE),1,c2s)
+            Seqcodons <-   apply(codonSeq,2,c2s)
+            mutationInfo <- apply(rbind(GLcodons , Seqcodons),2,function(x){
                 # not intended to be used where input sequences have 
                 # ambiguous characters; it assumes that only 1 entry (R/S/Stop/na) from
                 # mutationType is non-zero/1
-                mutType = mutationType(c2s(x[1]),c2s(x[2]))
-                mutType = names(mutType)[which(mutType>0)]
+                mutType <- mutationType(c2s(x[1]),c2s(x[2]))
+                mutType <- names(mutType)[which(mutType>0)]
                 if (mutType=="na") {mutType=NA}
                 return(mutType)
                 })
-            names(mutationInfo) = mutationPos
+            names(mutationInfo) <- mutationPos
         }
         if (any(!is.na(mutationInfo))) {
             return(mutationInfo[!is.na(mutationInfo)])
@@ -2457,9 +2457,9 @@ analyzeMutations2NucUri <- function(in_matrix) {
 listMutations <- function(seqInput, seqGL, multipleMutation, model) {
     #if( is.na(c(seqInput, seqGL)) ) return(array(NA,4))
     if (is.na(seqInput) | is.na(seqGL)) { return(NA) }
-    seqI = s2c(seqInput)
-    seqG = s2c(seqGL)
-    matIGL = matrix(c(seqI, seqG), ncol=length(seqI), nrow=2, byrow=T)
+    seqI <- s2c(seqInput)
+    seqG <- s2c(seqGL)
+    matIGL <- matrix(c(seqI, seqG), ncol=length(seqI), nrow=2, byrow=T)
     mutations <- analyzeMutations2NucUri(matIGL)
     mutations <- mutations[!is.na(mutations)]
     #positions <- as.numeric(names(mutations))
@@ -2467,7 +2467,7 @@ listMutations <- function(seqInput, seqGL, multipleMutation, model) {
     
     #remove the nucleotide mutations in the codons with multiple mutations
     if (multipleMutation == "ignore") {
-       mutationCodons = getCodonNumb(as.numeric(names(mutations)))
+       mutationCodons <- getCodonNumb(as.numeric(names(mutations)))
        tableMutationCodons <- table(mutationCodons)
        codonsWithMultipleMutations <- as.numeric(names(tableMutationCodons[tableMutationCodons>1]))
        mutations <- mutations[!(mutationCodons %in% codonsWithMultipleMutations)]
