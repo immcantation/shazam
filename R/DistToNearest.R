@@ -430,6 +430,13 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
     seq_uniq <- findUniqSeq(sequences)
     n_uniq <- length(seq_uniq)
     
+    # corresponding crossGroups values for seq_uniq
+    if (!is.null(crossGroups)) {
+        stopifnot( all.equal(sequences[match(seq_uniq, sequences)], 
+                             seq_uniq, check.attributes=FALSE) )
+        crossGroups_uniq <- crossGroups[match(seq_uniq, sequences)]
+    }
+    
     # Initialize return vector and computation vector
     seq_dist <- setNames(rep(NA, length(sequences)), sequences)
     seq_uniq_dist <- rep(NA, n_uniq)
@@ -444,6 +451,10 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
         # check subSampling
         subSampling <- all(!is.null(subsample), subsample < n_uniq)
         if (subSampling) indx <- sample(x=1:n_uniq, size=subsample, replace=FALSE, prob=NULL)
+        # corresponding subsampling of crossGroups_uniq
+        if (subSampling & !is.null(crossGroups)) {
+            crossGroups_uniq_sub <- crossGroups_uniq[indx]
+        }
         # Get distance matrix
         if (model == "ham") {
             if (subSampling) {
@@ -565,15 +576,53 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
         # Identify sequences to be considered when finding minimum
         # cross distance
         .dcross <- function(i) {
+            #cat(i,"\n")
             this_group <- crossGroups[i]
             other_groups <-  which(crossGroups != this_group)
             other_seq <- unique(sequences[other_groups])
             other_idx <- match(other_seq, seq_uniq)
             this_idx <- match(sequences[i], seq_uniq)
-            r <- dist_mat[this_idx, other_idx]
+            
+            stopifnot( all.equal( other_seq, seq_uniq[other_idx] , check.attributes=FALSE ) )
+            stopifnot( all.equal( sequences[i], seq_uniq[this_idx] , check.attributes=FALSE ) )
+            
+            stopifnot( all( crossGroups_uniq[other_idx] != this_group ) )
+            stopifnot( crossGroups_uniq[this_idx] == this_group )
+            
+            if (subSampling) {
+                # When there is subsampling, nonsquareDist returns a non-n-by-n matrix 
+                # This matrix has fewers than n rows, and exactly n cols
+                # For each unique sequence, look for its cross-group distances in its column, 
+                #     NOT in its row (because there will be fewer than n rows)
+                
+                # dist_mat rows correspond to seq_uniq[indx]
+                # (indx itself is wrt seq_uniq)
+                # (other_idx is also wrt seq_uni)
+                
+                # which other_seq are included in the subsampled seqs represented by
+                #       the available rows in dist_mat?
+                # wrt dist_mat
+                other_avail_wrt_dist_mat <- which(indx %in% other_idx)
+                
+                if (length(other_avail_wrt_dist_mat)>0) {
+                    stopifnot(all( crossGroups_uniq_sub[other_avail_wrt_dist_mat] != this_group ))
+                    stopifnot(all( crossGroups_uniq_sub[-other_avail_wrt_dist_mat] == this_group ))
+                    
+                    r <- dist_mat[other_avail_wrt_dist_mat, this_idx]
+                } else {
+                    stopifnot(all( crossGroups_uniq_sub == this_group ))
+                    return(NA)
+                }
+            } else {
+                # without subsampling
+                # dist_mat is a n-by-n matrix
+                stopifnot( all(other_idx <= nrow(dist_mat) ) ) 
+                r <- dist_mat[other_idx, this_idx]
+            }
+            
             gt0 <- which(r > 0)
             
-            if (length(gt0) != 0) { min(r[gt0]) } else { NA }
+            if (length(gt0) != 0) { return(min(r[gt0])) } else { return(NA) }
         }
         
         # Define return distance vector
