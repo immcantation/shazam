@@ -586,8 +586,10 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
             stopifnot( all.equal( other_seq, seq_uniq[other_idx] , check.attributes=FALSE ) )
             stopifnot( all.equal( sequences[i], seq_uniq[this_idx] , check.attributes=FALSE ) )
             
-            stopifnot( all( crossGroups_uniq[other_idx] != this_group ) )
-            stopifnot( crossGroups_uniq[this_idx] == this_group )
+            # the next two checks may not always be true
+            # this happens when all the out-group sequences are identical to the in-group sequences
+            #stopifnot( all( crossGroups_uniq[other_idx] != this_group ) )
+            #stopifnot( crossGroups_uniq[this_idx] == this_group )
             
             if (subSampling) {
                 # When there is subsampling, nonsquareDist returns a non-n-by-n matrix 
@@ -605,8 +607,10 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
                 other_avail_wrt_dist_mat <- which(indx %in% other_idx)
                 
                 if (length(other_avail_wrt_dist_mat)>0) {
-                    stopifnot(all( crossGroups_uniq_sub[other_avail_wrt_dist_mat] != this_group ))
-                    stopifnot(all( crossGroups_uniq_sub[-other_avail_wrt_dist_mat] == this_group ))
+                    # the next two checks may not always be true
+                    # this happens when all the out-group sequences are identical to the in-group sequences
+                    #stopifnot(all( crossGroups_uniq_sub[other_avail_wrt_dist_mat] != this_group ))
+                    #stopifnot(all( crossGroups_uniq_sub[-other_avail_wrt_dist_mat] == this_group ))
                     
                     r <- dist_mat[other_avail_wrt_dist_mat, this_idx]
                 } else {
