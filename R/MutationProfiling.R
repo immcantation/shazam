@@ -497,7 +497,7 @@ collapseClones <- function(db,
                                 list('db', 'cloneColumn', 'sequenceColumn', 'germlineColumn', 'muFreqColumn',
                                      'regionDefinition', 'method', 'minimumFrequency','includeAmbiguous',
                                      'breakTiesStochastic', 'breakTiesByColumns', 
-                                     'calcClonalConsensus', 'calcClonalConsensusHelper', 'breakTiesHelper',
+                                     'calcClonalConsensus', 'helperClonalConsensus', 'breakTiesHelper',
                                      'chars2Ambiguous', 'nucs2IUPAC', 'IUPAC_DNA_2',  'NUCLEOTIDES_AMBIGUOUS',
                                      'uniqueClonesIdx', 'c2s', 's2c'), 
                                 envir=environment() )
@@ -686,94 +686,94 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #' clone = rbind(clone, clone[which.max(clone$MU_FREQ), ])
 #' # Get consensus input sequence
 #' # thresholdedFreq method, resolve ties deterministically without using ambiguous characters
-#' consInput1 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#'                                         muFreqColumn=NULL, lenLimit=NULL,
-#'                                         mtd="thresholdedFreq", minFreq=0.3,
-#'                                         includeAmbiguous=FALSE, 
-#'                                         breakTiesStochastic=FALSE,
-#'                                         breakTiesByColumns=NULL, db=NULL)$cons
+#' consInput1 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#'                                     muFreqColumn=NULL, lenLimit=NULL,
+#'                                     mtd="thresholdedFreq", minFreq=0.3,
+#'                                     includeAmbiguous=FALSE, 
+#'                                     breakTiesStochastic=FALSE,
+#'                                     breakTiesByColumns=NULL, db=NULL)$cons
 #'                                         
 #' @export
 # @seealso
 # \link{calcClonalConsensus} and \link{collapseClones}.
 # thresholdedFreq method, resolve ties deterministically using ambiguous characters
-# consInput2 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                         muFreqColumn=NULL, lenLimit=NULL,
-#                                         mtd="thresholdedFreq", minFreq=0.3,
-#                                         includeAmbiguous=TRUE, 
-#                                         breakTiesStochastic=FALSE,
-#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# consInput2 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#                                     muFreqColumn=NULL, lenLimit=NULL,
+#                                     mtd="thresholdedFreq", minFreq=0.3,
+#                                     includeAmbiguous=TRUE, 
+#                                     breakTiesStochastic=FALSE,
+#                                     breakTiesByColumns=NULL, db=NULL)$cons
 # thresholdedFreq method, resolve ties stochastically
-# consInput3 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                         muFreqColumn=NULL, lenLimit=NULL,
-#                                         mtd="thresholdedFreq", minFreq=0.3,
-#                                         includeAmbiguous=FALSE, 
-#                                         breakTiesStochastic=TRUE,
-#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# consInput3 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#                                     muFreqColumn=NULL, lenLimit=NULL,
+#                                     mtd="thresholdedFreq", minFreq=0.3,
+#                                     includeAmbiguous=FALSE, 
+#                                     breakTiesStochastic=TRUE,
+#                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostCommon method, resolve ties deterministically without using ambiguous characters
-# consInput4 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                         muFreqColumn=NULL, lenLimit=NULL,
-#                                         mtd="mostCommon", minFreq=NULL,
-#                                         includeAmbiguous=FALSE, 
-#                                         breakTiesStochastic=FALSE,
-#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# consInput4 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#                                     muFreqColumn=NULL, lenLimit=NULL,
+#                                     mtd="mostCommon", minFreq=NULL,
+#                                     includeAmbiguous=FALSE, 
+#                                     breakTiesStochastic=FALSE,
+#                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostCommon method, resolve ties deterministically using ambiguous characters
-# consInput5 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                         muFreqColumn=NULL, lenLimit=NULL,
-#                                         mtd="mostCommon", minFreq=NULL,
-#                                         includeAmbiguous=TRUE, 
-#                                         breakTiesStochastic=FALSE,
-#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# consInput5 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#                                     muFreqColumn=NULL, lenLimit=NULL,
+#                                     mtd="mostCommon", minFreq=NULL,
+#                                     includeAmbiguous=TRUE, 
+#                                     breakTiesStochastic=FALSE,
+#                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostCommon method, resolve ties stochastically
-# consInput6 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                         muFreqColumn=NULL, lenLimit=NULL,
-#                                         mtd="mostCommon", minFreq=NULL,
-#                                         includeAmbiguous=FALSE, 
-#                                         breakTiesStochastic=TRUE,
-#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# consInput6 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#                                     muFreqColumn=NULL, lenLimit=NULL,
+#                                     mtd="mostCommon", minFreq=NULL,
+#                                     includeAmbiguous=FALSE, 
+#                                     breakTiesStochastic=TRUE,
+#                                     breakTiesByColumns=NULL, db=NULL)$cons
 # catchAll method
-# consInput7 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                         muFreqColumn=NULL, lenLimit=NULL,
-#                                         mtd="catchAll", minFreq=NULL,
-#                                         includeAmbiguous=FALSE, 
-#                                         breakTiesStochastic=FALSE,
-#                                         breakTiesByColumns=NULL, db=NULL)$cons
+# consInput7 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#                                     muFreqColumn=NULL, lenLimit=NULL,
+#                                     mtd="catchAll", minFreq=NULL,
+#                                     includeAmbiguous=FALSE, 
+#                                     breakTiesStochastic=FALSE,
+#                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostMutated method, resolve ties stochastically
-# consInput8 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                         muFreqColumn="MU_FREQ", lenLimit=NULL,
-#                                         mtd="mostMutated", minFreq=NULL,
-#                                         includeAmbiguous=FALSE, 
-#                                         breakTiesStochastic=TRUE,
-#                                         breakTiesByColumns=NULL, db=clone)$cons
+# consInput8 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#                                     muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                     mtd="mostMutated", minFreq=NULL,
+#                                     includeAmbiguous=FALSE, 
+#                                     breakTiesStochastic=TRUE,
+#                                     breakTiesByColumns=NULL, db=clone)$cons
 # mostMutated method, resolve ties deterministically using additional columns
-# consInput9 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                         muFreqColumn="MU_FREQ", lenLimit=NULL,
-#                                         mtd="mostMutated", minFreq=NULL,
-#                                         includeAmbiguous=FALSE, 
-#                                         breakTiesStochastic=FALSE,
-#                                         breakTiesByColumns=list(c("JUNCTION_LENGTH","DUPCOUNT"), c(max, max)), 
-#                                         db=clone)$cons
-# consInput10 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                         muFreqColumn="MU_FREQ", lenLimit=NULL,
-#                                         mtd="mostMutated", minFreq=NULL,
-#                                         includeAmbiguous=FALSE, 
-#                                         breakTiesStochastic=FALSE,
-#                                         breakTiesByColumns=list(c("DUPCOUNT"), c(max)), 
-#                                         db=clone)$cons
+# consInput9 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#                                     muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                     mtd="mostMutated", minFreq=NULL,
+#                                     includeAmbiguous=FALSE, 
+#                                     breakTiesStochastic=FALSE,
+#                                     breakTiesByColumns=list(c("JUNCTION_LENGTH","DUPCOUNT"), c(max, max)), 
+#                                     db=clone)$cons
+# consInput10 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#                                      muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                      mtd="mostMutated", minFreq=NULL,
+#                                      includeAmbiguous=FALSE, 
+#                                      breakTiesStochastic=FALSE,
+#                                      breakTiesByColumns=list(c("DUPCOUNT"), c(max)), 
+#                                      db=clone)$cons
 # mostMutated method, resolve ties deterministically withou using additional columns
-# consInput11 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                          muFreqColumn="MU_FREQ", lenLimit=NULL,
-#                                          mtd="mostMutated", minFreq=NULL,
-#                                          includeAmbiguous=FALSE, 
-#                                          breakTiesStochastic=FALSE,
-#                                          breakTiesByColumns=NULL, db=clone)$cons
+# consInput11 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+#                                      muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                      mtd="mostMutated", minFreq=NULL,
+#                                      includeAmbiguous=FALSE, 
+#                                      breakTiesStochastic=FALSE,
+#                                      breakTiesByColumns=NULL, db=clone)$cons
 # 
-calcClonalConsensusHelper <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
-                                     mtd=c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
-                                     minFreq=NULL,
-                                     includeAmbiguous=FALSE,
-                                     breakTiesStochastic=FALSE,
-                                     breakTiesByColumns=NULL, db=NULL) {
+helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
+                                  mtd=c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
+                                  minFreq=NULL,
+                                  includeAmbiguous=FALSE,
+                                  breakTiesStochastic=FALSE,
+                                  breakTiesByColumns=NULL, db=NULL) {
     mtd <- match.arg(mtd)
     
     # check muFreqColumn and get muFreq for most/leastMutated
@@ -1208,20 +1208,20 @@ calcClonalConsensus <- function(db,
     
     ##### get consensus germline sequence (most common)
     # NULL for minFreq and muFreqColumn b/c mostCommon definitely doesn't need them
-    germCons <- calcClonalConsensusHelper(seqs=germlineSeq, minFreq=NULL, lenLimit=lenRegion,
-                                         mtd="mostCommon", 
-                                         includeAmbiguous=includeAmbiguous,
-                                         breakTiesStochastic=breakTiesStochastic,
-                                         breakTiesByColumns=NULL,
-                                         muFreqColumn=NULL, db=NULL)$cons
+    germCons <- helperClonalConsensus(seqs=germlineSeq, minFreq=NULL, lenLimit=lenRegion,
+                                      mtd="mostCommon", 
+                                      includeAmbiguous=includeAmbiguous,
+                                      breakTiesStochastic=breakTiesStochastic,
+                                      breakTiesByColumns=NULL,
+                                      muFreqColumn=NULL, db=NULL)$cons
     
     ##### get consensus observed sequence
-    inputConsMuFreq <- calcClonalConsensusHelper(seqs=inputSeq, minFreq=minimumFrequency, lenLimit=lenRegion,
-                                                mtd=method, 
-                                                includeAmbiguous=includeAmbiguous,
-                                                breakTiesStochastic=breakTiesStochastic,
-                                                breakTiesByColumns=breakTiesByColumns,
-                                                muFreqColumn=muFreqColumn, db=db)
+    inputConsMuFreq <- helperClonalConsensus(seqs=inputSeq, minFreq=minimumFrequency, lenLimit=lenRegion,
+                                             mtd=method, 
+                                             includeAmbiguous=includeAmbiguous,
+                                             breakTiesStochastic=breakTiesStochastic,
+                                             breakTiesByColumns=breakTiesByColumns,
+                                             muFreqColumn=muFreqColumn, db=db)
     inputCons <- inputConsMuFreq$cons
     inputMuFreq <- inputConsMuFreq$muFreq
     
