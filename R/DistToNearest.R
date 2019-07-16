@@ -873,7 +873,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         # V+J only first
         # creates $VJ_GROUP
         db <- groupGenes(db, v_call=vCallColumn, j_call=jCallColumn, junc_len=NULL,
-                         cell_id=cellIdColumn, locus=locusColumn, useOnlyIGH=groupUsingOnlyIGH,
+                         cell_id=cellIdColumn, locus=locusColumn, only_igh=groupUsingOnlyIGH,
                          first=first)
         # L (later)  
         group_cols <- c("VJ_GROUP", junc_len)
@@ -883,7 +883,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         # creates $VJ_GROUP
         # note that despite the name (VJ), this is based on V+J+L
         db <- groupGenes(db, v_call=vCallColumn, j_call=jCallColumn, junc_len=junc_len,
-                         cell_id=cellIdColumn, locus=locusColumn, useOnlyIGH=groupUsingOnlyIGH,
+                         cell_id=cellIdColumn, locus=locusColumn, only_igh=groupUsingOnlyIGH,
                          first=first)
         group_cols <- c("VJ_GROUP")
     }
