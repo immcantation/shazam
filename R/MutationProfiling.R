@@ -627,76 +627,75 @@ breakTiesHelper <- function(idx, cols, funs, db) {
     }
 }
 
-# Helper function for calcClonalConsensus
-#
-# @param   seqs                 a character vector of sequences.
-# @param   muFreqColumn         \code{character} name of the column in db containing mutation
-#                               frequency. Applicable to and required for the \code{"mostMutated"} 
-#                               and \code{"leastmutated"} methods. Default is \code{NULL}. 
-# @param   lenLimit             limit on consensus length. 
-# @param   mtd                  method to calculate consensus sequence. One of 
-#                               \code{"thresholdedFreq"}, \code{"mostCommon"}, \code{"catchAll"},
-#                               \code{"mostMutated"}, or \code{"leastMutated"}. See "Methods" under
-#                               \link{collapseClones} for details.
-# @param   minFreq              frequency threshold for calculating input consensus sequence.
-#                               Applicable to and required for the \code{"thresholdedFreq"} method. 
-#                               A canonical choice is 0.6. Default is \code{NULL}.
-# @param   includeAmbiguous     whether to use ambiguous characters to represent positions at
-#                               which there are multiple characters with frequencies that are at least
-#                               \code{minimumFrequency} or that are maximal (i.e. ties). Applicable to 
-#                               and required for the \code{"thresholdedFreq"} and \code{"mostCommon"} 
-#                               methods. Default is \code{FALSE}. See "Choosing ambiguous characters" 
-#                               under \link{collapseClones} for rules on choosing ambiguous characters. 
-# @param   breakTiesStochastic  In case of ties, whether to randomly pick a sequence from sequences that
-#                               fulfill the criteria as consensus. Applicable to and required for all methods
-#                               except for \code{"catchAll"}. Default is \code{FALSE}. See "Methods" 
-#                               under \link{collapseClones} for details. 
-# @param   breakTiesByColumns   A list of the form \code{list(c(col_1, col_2, ...), c(fun_1, fun_2, ...))}, 
-#                               where \code{col_i} is a \code{character} name of a column in \code{db},
-#                               and \code{fun_i} is a function to be applied on that column. Currently, 
-#                               only \code{max} and \code{min} are supported. Note that the two \code{c()}'s
-#                               in \code{list()} are essential (i.e. if there is only 1 column, the list 
-#                               should be of the form \code{list(c(col_1), c(func_1))}. Applicable to and 
-#                               optional for the \code{"mostMutated"} and \code{"leastMutated"} methods. 
-#                               If supplied, \code{fun_i}'s are applied on \code{col_i}'s to help break 
-#                               ties. Default is \code{NULL}. See "Methods" under \link{collapseClones} 
-#                               for details.                                                  
-# @param   db                   \code{data.frame} containing sequence data for a single clone. 
-#                               Applicable to and required for the \code{"mostMutated"} and 
-#                               \code{"leastmutated"} methods. Default is \code{NULL}.
-#
-# @return  A list containing \code{cons}, which is a character string that is the consensus sequence 
-#          for \code{seqs}; and \code{muFreq}, which is the maximal/minimal mutation frequency of
-#          the consensus sequence for the \code{"mostMutated"} and \code{"leastMutated"} methods, or
-#          \code{NULL} for all other methods.
-#
-# @details See \link{collapseClones} for detailed documentation on methods and additional parameters.
-# 
+#' Helper function for calcClonalConsensus
+#' 
+#' @param   seqs                 a character vector of sequences.
+#' @param   muFreqColumn         \code{character} name of the column in db containing mutation
+#'                               frequency. Applicable to and required for the \code{"mostMutated"}
+#'                               and \code{"leastmutated"} methods. Default is \code{NULL}.
+#' @param   lenLimit             limit on consensus length.
+#' @param   mtd                  method to calculate consensus sequence. One of
+#'                               \code{"thresholdedFreq"}, \code{"mostCommon"}, \code{"catchAll"},
+#'                               \code{"mostMutated"}, or \code{"leastMutated"}. See "Methods" under
+#'                               \link{collapseClones} for details.
+#' @param   minFreq              frequency threshold for calculating input consensus sequence.
+#'                               Applicable to and required for the \code{"thresholdedFreq"} method.
+#'                               A canonical choice is 0.6. Default is \code{NULL}.
+#' @param   includeAmbiguous     whether to use ambiguous characters to represent positions at
+#'                               which there are multiple characters with frequencies that are at least
+#'                               \code{minimumFrequency} or that are maximal (i.e. ties). Applicable to
+#'                               and required for the \code{"thresholdedFreq"} and \code{"mostCommon"}
+#'                               methods. Default is \code{FALSE}. See "Choosing ambiguous characters"
+#'                               under \link{collapseClones} for rules on choosing ambiguous characters.
+#' @param   breakTiesStochastic  In case of ties, whether to randomly pick a sequence from sequences that
+#'                               fulfill the criteria as consensus. Applicable to and required for all methods
+#'                               except for \code{"catchAll"}. Default is \code{FALSE}. See "Methods"
+#'                               under \link{collapseClones} for details.
+#' @param   breakTiesByColumns   A list of the form \code{list(c(col_1, col_2, ...), c(fun_1, fun_2, ...))},
+#'                               where \code{col_i} is a \code{character} name of a column in \code{db},
+#'                               and \code{fun_i} is a function to be applied on that column. Currently,
+#'                               only \code{max} and \code{min} are supported. Note that the two \code{c()}'s
+#'                               in \code{list()} are essential (i.e. if there is only 1 column, the list
+#'                               should be of the form \code{list(c(col_1), c(func_1))}. Applicable to and
+#'                               optional for the \code{"mostMutated"} and \code{"leastMutated"} methods.
+#'                               If supplied, \code{fun_i}'s are applied on \code{col_i}'s to help break
+#'                               ties. Default is \code{NULL}. See "Methods" under \link{collapseClones}
+#'                               for details.
+#' @param   db                   \code{data.frame} containing sequence data for a single clone.
+#'                               Applicable to and required for the \code{"mostMutated"} and
+#'                               \code{"leastmutated"} methods. Default is \code{NULL}.
+
+#' @return  A list containing \code{cons}, which is a character string that is the consensus sequence
+#'          for \code{seqs}; and \code{muFreq}, which is the maximal/minimal mutation frequency of
+#'          the consensus sequence for the \code{"mostMutated"} and \code{"leastMutated"} methods, or
+#'          \code{NULL} for all other methods.
+#' 
+#' @details See \link{collapseClones} for detailed documentation on methods and additional parameters.
+#' 
+#' @examples
+#' # Subset example data
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' # Data corresponding to a single clone
+#' clone <- db[db$CLONE=="3192", ]
+#' # Number of sequences in this clone
+#' nrow(clone)
+#' # first compute mutation frequency for most/leastMutated methods
+#' clone = observedMutations(db=clone, frequency=TRUE, combine=TRUE)
+#' # manually create tie
+#' clone = rbind(clone, clone[which.max(clone$MU_FREQ), ])
+#' # Get consensus input sequence
+#' # thresholdedFreq method, resolve ties deterministically without using ambiguous characters
+#' consInput1 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
+#'                                         muFreqColumn=NULL, lenLimit=NULL,
+#'                                         mtd="thresholdedFreq", minFreq=0.3,
+#'                                         includeAmbiguous=FALSE, 
+#'                                         breakTiesStochastic=FALSE,
+#'                                         breakTiesByColumns=NULL, db=NULL)$cons
+#'                                         
+#' @export
 # @seealso
 # \link{calcClonalConsensus} and \link{collapseClones}.
-# 
-# @examples
-# Subset example data
-# data(ExampleDb, package="alakazam")
-# db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
-# 
-# Data corresponding to a single clone
-# clone <- db[db$CLONE=="3192", ]
-# Number of sequences in this clone
-# nrow(clone)
-# first compute mutation frequency for most/leastMutated methods
-# clone = observedMutations(db=clone, frequency=TRUE, combine=TRUE)
-# manually create tie
-# clone = rbind(clone, clone[which.max(clone$MU_FREQ), ])
-# 
-# Get consensus input sequence
-# thresholdedFreq method, resolve ties deterministically without using ambiguous characters
-# consInput1 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
-#                                         muFreqColumn=NULL, lenLimit=NULL,
-#                                         mtd="thresholdedFreq", minFreq=0.3,
-#                                         includeAmbiguous=FALSE, 
-#                                         breakTiesStochastic=FALSE,
-#                                         breakTiesByColumns=NULL, db=NULL)$cons
 # thresholdedFreq method, resolve ties deterministically using ambiguous characters
 # consInput2 <- calcClonalConsensusHelper(seqs=clone$SEQUENCE_IMGT,
 #                                         muFreqColumn=NULL, lenLimit=NULL,
