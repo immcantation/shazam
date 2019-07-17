@@ -1,3 +1,21 @@
+Version 0.1.11.999 July 16, 2019
+
+General:
+
++ Added a new helper function `helperClonalConsensus`.
+
+Distance Calculation:
+
++ Fixed a bug in `distToNearest` for performing subsampling while calculating
+  cross-group nearest neighbor distances.
++ For partitioning sequences, `distToNearest` now supports, via a new argument
+  `VJthenLen`, either a 2-stage partitioning (first by V gene and J gene, then 
+  by junction length), or a 1-stage partitioning (simultaneously by V gene, J 
+  gene, and junction length). For 1-stage partitioning, `distToNearest` supports
+  export of the partitioning information as a new column via `keepVJLgroup`.
++ `distToNearest` now supports single-cell input data with the addition of new
+  arguments `cellIdColumn`, `locusColumn`, and `groupUsingOnlyIGH`.
+
 Version 0.1.11: January 27, 2019
 -------------------------------------------------------------------------------
 

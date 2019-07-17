@@ -237,90 +237,178 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
     # data_t1: 2nd row contains 2 heavy chains within the same cell 
     #          (not allowed by distToNearest)
     # data_t2: removed multi heavy chain in 2nd row
-    load(file.path("..", "data-tests", "db_with_light.rda"))
+    load(file.path("..", "data-tests", "db_sc.rda"))
     
-    # expect error with data_t1
+    # expect error with data_t1 
+    # cell "B" has 2 HCs (disallowed, as indicated in doc)
     expect_error(distToNearest(db=data_t1, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                                model="ham", normalize="len", symmetry="avg",
-                               vCallColumnLight=NULL, jCallColumnLight=NULL, sequenceColumnLight=NULL, 
-                               separator_within_seq=",", separator_between_seq=";",
-                               keepVJLgroup=TRUE, first=FALSE, VJthenLen=FALSE, nproc=1))
+                               first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
+                               cellIdColumn="CELL_ID", locusColumn="LOCUS", groupUsingOnlyIGH=FALSE))
+    
     expect_error(distToNearest(db=data_t1, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
-                                model="ham", normalize="len", symmetry="avg",
-                                vCallColumnLight="V_CALL_LIGHT", jCallColumnLight="J_CALL_LIGHT", sequenceColumnLight="JUNCTION_LIGHT", 
-                                separator_within_seq=",", separator_between_seq=";",
-                                keepVJLgroup=TRUE, first=FALSE, VJthenLen=FALSE, nproc=1))
-
+                               model="ham", normalize="len", symmetry="avg",
+                               first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
+                               cellIdColumn="CELL_ID", locusColumn="LOCUS", groupUsingOnlyIGH=TRUE))
+    
     ## with data_t2, expect smooth run
+    # group using HC VJL & LC VJL
     # first=F
-    dtn1 = distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+    dtn1 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                          model="ham", normalize="len", symmetry="avg",
-                         vCallColumnLight="V_CALL_LIGHT", jCallColumnLight="J_CALL_LIGHT", sequenceColumnLight="JUNCTION_LIGHT", 
-                         separator_within_seq=",", separator_between_seq=";",
-                         keepVJLgroup=TRUE, first=FALSE, VJthenLen=FALSE, nproc=1)
+                         first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
+                         cellIdColumn="CELL_ID", locusColumn="LOCUS", groupUsingOnlyIGH=FALSE)
     # first=T
-    dtn2 = distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+    dtn2 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                          model="ham", normalize="len", symmetry="avg",
-                         vCallColumnLight="V_CALL_LIGHT", jCallColumnLight="J_CALL_LIGHT", sequenceColumnLight="JUNCTION_LIGHT", 
-                         separator_within_seq=",", separator_between_seq=";",
-                         keepVJLgroup=TRUE, first=TRUE, VJthenLen=FALSE, nproc=1)
+                         first=TRUE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
+                         cellIdColumn="CELL_ID", locusColumn="LOCUS", groupUsingOnlyIGH=FALSE)
+    
+    # group using HC VJL only, without LC VJL
+    # first=F
+    dtn3 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+                          model="ham", normalize="len", symmetry="avg",
+                          first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
+                          cellIdColumn="CELL_ID", locusColumn="LOCUS", groupUsingOnlyIGH=TRUE)
+    # first=T
+    dtn4 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+                          model="ham", normalize="len", symmetry="avg",
+                          first=TRUE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
+                          cellIdColumn="CELL_ID", locusColumn="LOCUS", groupUsingOnlyIGH=TRUE)
     
     # calcualte expected
-    dtn1_expect = rep(NA, nrow(dtn1))
+    
+    dtn1_expect <- rep(NA, nrow(dtn1))
     for (i in 1:nrow(dtn1)) {
-        curGrp = dtn1[["VJL_GROUP"]][i]
-        curIdx = which(dtn1[["VJL_GROUP"]]==curGrp)
-        curJunc = dtn1[["JUNCTION"]][i]
         
-        if (length(curIdx)==1) {
-            dtn1_expect[i] = NA
-        } else {
-            curJuncsAll = dtn1[["JUNCTION"]][curIdx]
-            stopifnot(length(unique(nchar(curJuncsAll)))==1)
-            # non-self, non-identical
-            bool = curIdx!=i & curJuncsAll!=curJunc
-            if (!any(bool)) {
-                dtn1_expect[i] = NA
+        if (dtn1[["LOCUS"]][i]=="IGH") {
+            curGrp <- dtn1[["VJL_GROUP"]][i]
+            curIdx <- which(dtn1[["VJL_GROUP"]]==curGrp & dtn1[["LOCUS"]]=="IGH")
+            curJunc <- dtn1[["JUNCTION"]][i]
+            
+            if (length(curIdx)==1) {
+                dtn1_expect[i] <- NA
             } else {
-                curJuncsCf = curJuncsAll[bool]
-                tmpDists = rep(NA, length(curJuncsCf))
-                for (j in 1:length(curJuncsCf)) {
-                    tmpDists[j] = alakazam::seqDist(seq1=curJunc, seq2=curJuncsCf[j])
+                curJuncsAll <- dtn1[["JUNCTION"]][curIdx]
+                stopifnot(length(unique(nchar(curJuncsAll)))==1)
+                # non-self, non-identical
+                bool <- curIdx!=i & curJuncsAll!=curJunc
+                if (!any(bool)) {
+                    dtn1_expect[i] = NA
+                } else {
+                    curJuncsCf = curJuncsAll[bool]
+                    tmpDists <- rep(NA, length(curJuncsCf))
+                    for (j in 1:length(curJuncsCf)) {
+                        tmpDists[j] <- alakazam::seqDist(seq1=curJunc, seq2=curJuncsCf[j])
+                    }
+                    dtn1_expect[i] <- min(tmpDists / nchar(curJuncsAll)[1])
                 }
-                dtn1_expect[i] = min(tmpDists / nchar(curJuncsAll)[1])
             }
         }
+        # if not IGH, left as NA
+        
     }
     
     expect_equal(dtn1_expect, dtn1[["DIST_NEAREST"]], tolerance=0.0001)
     
     dtn2_expect = rep(NA, nrow(dtn2))
+    
     for (i in 1:nrow(dtn2)) {
-        curGrp = dtn2[["VJL_GROUP"]][i]
-        curIdx = which(dtn2[["VJL_GROUP"]]==curGrp)
-        curJunc = dtn2[["JUNCTION"]][i]
         
-        if (length(curIdx)==1) {
-            dtn2_expect[i] = NA
-        } else {
-            curJuncsAll = dtn2[["JUNCTION"]][curIdx]
-            stopifnot(length(unique(nchar(curJuncsAll)))==1)
-            # non-self, non-identical
-            bool = curIdx!=i & curJuncsAll!=curJunc
-            if (!any(bool)) {
-                dtn2_expect[i] = NA
+        if (dtn2[["LOCUS"]][i]=="IGH") {
+            curGrp <- dtn2[["VJL_GROUP"]][i]
+            curIdx <- which(dtn2[["VJL_GROUP"]]==curGrp & dtn2[["LOCUS"]]=="IGH")
+            curJunc <- dtn2[["JUNCTION"]][i]
+            
+            if (length(curIdx)==1) {
+                dtn2_expect[i] <- NA
             } else {
-                curJuncsCf = curJuncsAll[bool]
-                tmpDists = rep(NA, length(curJuncsCf))
-                for (j in 1:length(curJuncsCf)) {
-                    tmpDists[j] = alakazam::seqDist(seq1=curJunc, seq2=curJuncsCf[j])
+                curJuncsAll <- dtn2[["JUNCTION"]][curIdx]
+                stopifnot(length(unique(nchar(curJuncsAll)))==1)
+                # non-self, non-identical
+                bool <- curIdx!=i & curJuncsAll!=curJunc
+                if (!any(bool)) {
+                    dtn2_expect[i] <- NA
+                } else {
+                    curJuncsCf <- curJuncsAll[bool]
+                    tmpDists <- rep(NA, length(curJuncsCf))
+                    for (j in 1:length(curJuncsCf)) {
+                        tmpDists[j] <- alakazam::seqDist(seq1=curJunc, seq2=curJuncsCf[j])
+                    }
+                    dtn2_expect[i] <- min(tmpDists / nchar(curJuncsAll)[1])
                 }
-                dtn2_expect[i] = min(tmpDists / nchar(curJuncsAll)[1])
             }
         }
+        # if not IGH, left as NA
     }
     
     expect_equal(dtn2_expect, dtn2[["DIST_NEAREST"]], tolerance=0.0001)
+    
+    dtn3_expect = rep(NA, nrow(dtn3))
+    
+    for (i in 1:nrow(dtn3)) {
+        
+        if (dtn3[["LOCUS"]][i]=="IGH") {
+            curGrp <- dtn3[["VJL_GROUP"]][i]
+            curIdx <- which(dtn3[["VJL_GROUP"]]==curGrp & dtn3[["LOCUS"]]=="IGH")
+            curJunc <- dtn3[["JUNCTION"]][i]
+            
+            if (length(curIdx)==1) {
+                dtn3_expect[i] <- NA
+            } else {
+                curJuncsAll <- dtn3[["JUNCTION"]][curIdx]
+                stopifnot(length(unique(nchar(curJuncsAll)))==1)
+                # non-self, non-identical
+                bool <- curIdx!=i & curJuncsAll!=curJunc
+                if (!any(bool)) {
+                    dtn3_expect[i] <- NA
+                } else {
+                    curJuncsCf <- curJuncsAll[bool]
+                    tmpDists <- rep(NA, length(curJuncsCf))
+                    for (j in 1:length(curJuncsCf)) {
+                        tmpDists[j] <- alakazam::seqDist(seq1=curJunc, seq2=curJuncsCf[j])
+                    }
+                    dtn3_expect[i] <- min(tmpDists / nchar(curJuncsAll)[1])
+                }
+            }
+        }
+        # if not IGH, left as NA
+    }
+    
+    expect_equal(dtn3_expect, dtn3[["DIST_NEAREST"]], tolerance=0.0001)
+    
+    dtn4_expect = rep(NA, nrow(dtn4))
+    
+    for (i in 1:nrow(dtn4)) {
+        
+        if (dtn4[["LOCUS"]][i]=="IGH") {
+            curGrp <- dtn4[["VJL_GROUP"]][i]
+            curIdx <- which(dtn4[["VJL_GROUP"]]==curGrp & dtn4[["LOCUS"]]=="IGH")
+            curJunc <- dtn4[["JUNCTION"]][i]
+            
+            if (length(curIdx)==1) {
+                dtn4_expect[i] <- NA
+            } else {
+                curJuncsAll <- dtn4[["JUNCTION"]][curIdx]
+                stopifnot(length(unique(nchar(curJuncsAll)))==1)
+                # non-self, non-identical
+                bool <- curIdx!=i & curJuncsAll!=curJunc
+                if (!any(bool)) {
+                    dtn4_expect[i] <- NA
+                } else {
+                    curJuncsCf <- curJuncsAll[bool]
+                    tmpDists <- rep(NA, length(curJuncsCf))
+                    for (j in 1:length(curJuncsCf)) {
+                        tmpDists[j] <- alakazam::seqDist(seq1=curJunc, seq2=curJuncsCf[j])
+                    }
+                    dtn4_expect[i] <- min(tmpDists / nchar(curJuncsAll)[1])
+                }
+            }
+        }
+        # if not IGH, left as NA
+    }
+    
+    expect_equal(dtn4_expect, dtn4[["DIST_NEAREST"]], tolerance=0.0001)
     
 })
 

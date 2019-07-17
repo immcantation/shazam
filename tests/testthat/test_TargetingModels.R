@@ -226,36 +226,40 @@ test_that("makeAverage1merSub using HH_S1F", {
 
 test_that("makeDegenerate5merMut with extended=FALSE using an example", {
     example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)
-    degenerate5mer = makeDegenerate5merMut(example1merMut, extended=FALSE)
-    centers = sapply(colnames(degenerate5mer), substr, start=3, stop=3)
+    degenerate5mer <- makeDegenerate5merMut(example1merMut, extended=FALSE)
+    centers <- sapply(names(degenerate5mer), substr, start=3, stop=3)
     
     for (nuc in c("A", "T", "G", "C")) {
-        idx = which(centers==nuc)
+        idx <- which(centers==nuc)
+        # 1024/4=256
+        expect_equal(length(idx), 256)
         for (i in idx) {
-            expect_equal(example1merMut[nuc], degenerate5mer[idx])
+            expect_equivalent(example1merMut[nuc]/256, degenerate5mer[i])
         }
     }
 })
 
 test_that("makeDegenerate5merMut with extended=TRUE using an example", {
     example1merMut <- c(A=0.2, T=0.1, C=0.4, G=0.3)
-    degenerate5mer = makeDegenerate5merMut(example1merMut, extended=TRUE)
-    centers = sapply(colnames(degenerate5mer), substr, start=3, stop=3)
+    degenerate5mer <- makeDegenerate5merMut(example1merMut, extended=TRUE)
+    centers <- sapply(names(degenerate5mer), substr, start=3, stop=3)
     
     # 5mers with non-N central 1mer (incl. eg. ATTTN) should have same rates as 
     # corresponding central 1mer
     for (nuc in c("A", "T", "G", "C")) {
-        idx = which(centers==nuc)
+        idx <- which(centers==nuc)
+        # 3125/5=625
+        expect_equal(length(idx), 625)
         for (i in idx) {
-            expect_equal(example1merMut[nuc], degenerate5mer[idx])
+            # 1024/4=256
+            expect_equivalent(example1merMut[nuc]/256, degenerate5mer[i])
         }
     }
     
     # 5mers with N central 1mer should have all NA rates
-    idx = which(centers=="N")
-    for (i in idx) {
-        expect_equal(NA, degenerate5mer[idx])
-    }
+    idx <- which(centers=="N")
+    expect_true( all( is.na(degenerate5mer[idx]) ) )
+    
 })
 
 #### makeAverage1merMut ####
