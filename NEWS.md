@@ -4,6 +4,9 @@ General:
 
 + Added a new helper function `helperClonalConsensus`.
 + Upgraded to alakazam >= 0.3.0 and dplyr >= 0.8.1
++ `shmulateTree` has new arguments, start and end, to specify the region
+  in the sequence where mutations can be introduced. 
+
 
 Distance Calculation:
 
