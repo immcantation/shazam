@@ -9,7 +9,7 @@ General:
 
 
 Distance Calculation:
-
++ Fixed a bug in `plotDensityThreshold` for negative densities.
 + Fixed a bug in `distToNearest` for performing subsampling while calculating
   cross-group nearest neighbor distances.
 + For partitioning sequences, `distToNearest` now supports, via a new argument
