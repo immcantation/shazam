@@ -1,3 +1,33 @@
+Version 0.2.0 July 18, 2019
+-------------------------------------------------------------------------------
+
+General:
+
++ Upgraded to alakazam >= 0.3.0 and dplyr >= 0.8.1.
+
+Distance Calculation:
++ Fixed a bug in `plotDensityThreshold` for negative densities.
++ Fixed a bug in `distToNearest` for performing subsampling while calculating
+  cross-group nearest neighbor distances.
++ For partitioning sequences, `distToNearest` now supports, via a new argument
+  `VJthenLen`, either a 2-stage partitioning (first by V gene and J gene, then 
+  by junction length), or a 1-stage partitioning (simultaneously by V gene, J 
+  gene, and junction length). For 1-stage partitioning, `distToNearest` supports
+  export of the partitioning information as a new column via `keepVJLgroup`.
++ `distToNearest` now supports single-cell input data with the addition of new
+  arguments `cellIdColumn`, `locusColumn`, and `groupUsingOnlyIGH`.
+
+Mutation Profiling:
+
++ `shmulateTree` has new arguments, `start` and `end`, to specify the region
+  in the sequence where mutations can be introduced. 
+
+Selection Analysis
+
++ Added the function `consensusSequence` which can be used to build a 
+  consensus sequence using a variety of methods.
+
+
 Version 0.1.11: January 27, 2019
 -------------------------------------------------------------------------------
 

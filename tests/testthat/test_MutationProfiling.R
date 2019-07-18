@@ -404,7 +404,7 @@ test_that("observedMutations, when no mutations found", {
 })
 
 ##### Tests 1A-1H (calcObservedMutations & observedMutations)
-##### Tests 2A-2E (helperClonalConsensus, calcClonalConsensus, collapseClones) 
+##### Tests 2A-2E (consensusSequence, calcClonalConsensus, collapseClones) 
 ##### are for changed made during commits pushed during June 2-June 12 2017
 
 #### calcObservedMutations 1A ####
@@ -1529,31 +1529,30 @@ test_that("observedMutations, 1J, using mock data from 1A through 1G, ambiguousM
 })
 
 #### calcClonalConsensus 2A ####
-test_that("helperClonalConsensus, 2A, miscellaneous", {
+test_that("consensusSequence, 2A, miscellaneous", {
     ##### only 1 seq
     seq1 = "ATGCATGCATGCA"
     # region def spanning nucleotides 1 through 12
     regDef1 = createRegionDefinition(boundaries=factor(rep(c("W", "Y"), each=6)))
     # no region def
-    expect_equal(shazam:::helperClonalConsensus(seqs=seq1),
+    expect_equal(shazam:::consensusSequence(seq1),
                  list(cons=seq1, muFreq=NULL))
     # with region def
-    expect_equal(shazam:::helperClonalConsensus(seqs=seq1, 
-                                                    lenLimit=regDef1@seqLength),
+    expect_equal(shazam:::consensusSequence(seq1, lenLimit=regDef1@seqLength),
                  list(cons=substr(seq1, 1, regDef1@seqLength), muFreq=NULL))
     
     ##### multiple identical seqs
     # no region def
-    expect_equal(shazam:::helperClonalConsensus(seqs=rep(seq1, 7)),
+    expect_equal(shazam:::consensusSequence(rep(seq1, 7)),
                  list(cons=seq1, muFreq=NULL))
     # with region def
-    expect_equal(shazam:::helperClonalConsensus(seqs=rep(seq1, 7), 
+    expect_equal(shazam:::consensusSequence(rep(seq1, 7), 
                                                     lenLimit=regDef1@seqLength),
                  list(cons=substr(seq1, 1, regDef1@seqLength), muFreq=NULL))
 })
 
 #### calcClonalConsensus 2B ####
-test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, catchAll", {
+test_that("consensusSequence, 2B, methods = thresholdedFreq, mostCommon, catchAll", {
     # seq1: A T G C A T G C A T  -  G  .  N  T  C  
     # seq2: A T G G A T C G N T  -  A  .  G  N  C  G  C
     # seq3: A C T G A C T . A T  -  T  .  T  A  .  N 
@@ -1600,24 +1599,24 @@ test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, cat
     ### ties resolved deterministically by representing ties using ambiguous chars 
     ## no region definition
     mostCommon.ambi.noRegDef = "AYGRATSBAT-A.GDCDH"
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                    mtd="mostCommon", includeAmbiguous=TRUE, 
-                                                    breakTiesStochastic=FALSE),
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                            method="mostCommon", includeAmbiguous=TRUE, 
+                                            breakTiesStochastic=FALSE),
                  list(cons=mostCommon.ambi.noRegDef, muFreq=NULL))
     # when both includeAmbiguous and breakTiesStochastic are TRUE, includeAmbiguous takes precedence
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                    mtd="mostCommon", includeAmbiguous=TRUE, 
-                                                    breakTiesStochastic=TRUE),
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                            method="mostCommon", includeAmbiguous=TRUE, 
+                                            breakTiesStochastic=TRUE),
                  list(cons=mostCommon.ambi.noRegDef, muFreq=NULL))
     
     ## with region definition
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                    mtd="mostCommon", includeAmbiguous=TRUE, 
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                     method="mostCommon", includeAmbiguous=TRUE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=substr(mostCommon.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
     # when both includeAmbiguous and breakTiesStochastic are TRUE, includeAmbiguous takes precedence
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                    mtd="mostCommon", includeAmbiguous=TRUE, 
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                     method="mostCommon", includeAmbiguous=TRUE, 
                                                     breakTiesStochastic=TRUE),
                  list(cons=substr(mostCommon.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
     
@@ -1630,8 +1629,8 @@ test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, cat
     mostCommon.sto.noRegDef = apply(mostCommon.sto.noRegDef, 1, paste, collapse="")
     ## run stochastically 100 times without region definition
     test.mostCommon.sto.noRegDef = replicate(100, 
-                                             shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                                                mtd="mostCommon", includeAmbiguous=FALSE, 
+                                             shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                                                                 method="mostCommon", includeAmbiguous=FALSE, 
                                                                                 breakTiesStochastic=TRUE)$cons)
     # for debugging: manually look at chars at each position
     #table(sapply(test.mostCommon.sto.noRegDef, function(x){substr(x,18,18)}))
@@ -1641,8 +1640,8 @@ test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, cat
     
     ## run stochastically 100 times with region definition
     test.mostCommon.sto.regDef = replicate(100, 
-                                           shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                                              mtd="mostCommon", includeAmbiguous=FALSE, 
+                                           shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                                               method="mostCommon", includeAmbiguous=FALSE, 
                                                                               breakTiesStochastic=TRUE)$cons)
     # for debugging: manually look at chars at each position
     #table(sapply(test.mostCommon.sto.regDef, function(x){substr(x,12,12)}))
@@ -1653,14 +1652,14 @@ test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, cat
     ### resolve ties deterministcally by taking first char in the order of ATGCN-.
     mostCommon.det.1st.noRegDef = "ATGAATGTAT-A.GACAA"
     # no region definition
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                    mtd="mostCommon", includeAmbiguous=FALSE, 
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                                     method="mostCommon", includeAmbiguous=FALSE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=mostCommon.det.1st.noRegDef, muFreq=NULL))
     
     # with region definitioin
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                    mtd="mostCommon", includeAmbiguous=FALSE, 
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                     method="mostCommon", includeAmbiguous=FALSE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=substr(mostCommon.det.1st.noRegDef,1,regDef1@seqLength), muFreq=NULL))
     
@@ -1669,50 +1668,50 @@ test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, cat
     thresh0.6.ambi.noRegDef = "ANGNATNNAT-N.NNNNN"
     thresh0.4.ambi.noRegDef = "AYKRAYSNAT-A.GNCNN"
     # thresh 0.6
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                    mtd="thresholdedFreq", minFreq=0.6,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                                     method="thresholdedFreq", minFreq=0.6,
                                                     includeAmbiguous=TRUE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=thresh0.6.ambi.noRegDef, muFreq=NULL))
     # thresh 0.4
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                    mtd="thresholdedFreq", minFreq=0.4,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                                     method="thresholdedFreq", minFreq=0.4,
                                                     includeAmbiguous=TRUE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=thresh0.4.ambi.noRegDef, muFreq=NULL))    
     # when both includeAmbiguous and breakTiesStochastic are TRUE, includeAmbiguous takes precedence
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                    mtd="thresholdedFreq", minFreq=0.6,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                                     method="thresholdedFreq", minFreq=0.6,
                                                     includeAmbiguous=TRUE, 
                                                     breakTiesStochastic=TRUE),
                  list(cons=thresh0.6.ambi.noRegDef, muFreq=NULL))
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                    mtd="thresholdedFreq", minFreq=0.4,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                                     method="thresholdedFreq", minFreq=0.4,
                                                     includeAmbiguous=TRUE, 
                                                     breakTiesStochastic=TRUE),
                  list(cons=thresh0.4.ambi.noRegDef, muFreq=NULL))
     
     ## with region definition
     # thresh 0.6
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                    mtd="thresholdedFreq", minFreq=0.6,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                     method="thresholdedFreq", minFreq=0.6,
                                                     includeAmbiguous=TRUE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=substr(thresh0.6.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
     # thresh 0.4
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                    mtd="thresholdedFreq", minFreq=0.4,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                     method="thresholdedFreq", minFreq=0.4,
                                                     includeAmbiguous=TRUE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=substr(thresh0.4.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
     # when both includeAmbiguous and breakTiesStochastic are TRUE, includeAmbiguous takes precedence
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                    mtd="thresholdedFreq", minFreq=0.6,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                     method="thresholdedFreq", minFreq=0.6,
                                                     includeAmbiguous=TRUE, 
                                                     breakTiesStochastic=TRUE),
                  list(cons=substr(thresh0.6.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                    mtd="thresholdedFreq", minFreq=0.4,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                     method="thresholdedFreq", minFreq=0.4,
                                                     includeAmbiguous=TRUE, 
                                                     breakTiesStochastic=TRUE),
                  list(cons=substr(thresh0.4.ambi.noRegDef, 1, regDef1@seqLength), muFreq=NULL))
@@ -1734,13 +1733,13 @@ test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, cat
     
     ## run stochastically 100 times without region definition
     test.thresh0.6.sto.noRegDef = replicate(100, 
-                                            shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                                               mtd="thresholdedFreq", minFreq=0.6,
+                                            shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                                                                method="thresholdedFreq", minFreq=0.6,
                                                                                includeAmbiguous=FALSE, 
                                                                                breakTiesStochastic=TRUE)$cons)
     test.thresh0.4.sto.noRegDef = replicate(100, 
-                                            shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                                               mtd="thresholdedFreq", minFreq=0.4,
+                                            shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                                                                method="thresholdedFreq", minFreq=0.4,
                                                                                includeAmbiguous=FALSE, 
                                                                                breakTiesStochastic=TRUE)$cons)
     # for debugging: manually look at chars at each position
@@ -1752,13 +1751,13 @@ test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, cat
     
     ## run stochastically 100 times with region definition
     test.thresh0.6.sto.regDef = replicate(100, 
-                                          shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                                             mtd="thresholdedFreq", minFreq=0.6,
+                                          shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                                              method="thresholdedFreq", minFreq=0.6,
                                                                              includeAmbiguous=FALSE, 
                                                                              breakTiesStochastic=TRUE)$cons)
     test.thresh0.4.sto.regDef = replicate(100, 
-                                          shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                                             mtd="thresholdedFreq", minFreq=0.4,
+                                          shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                                              method="thresholdedFreq", minFreq=0.4,
                                                                              includeAmbiguous=FALSE, 
                                                                              breakTiesStochastic=TRUE)$cons)
     
@@ -1774,28 +1773,28 @@ test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, cat
     thresh0.4.det.1st.noRegDef = "ATTAATGNAT-A.GNCNN"
     ## no region definition
     # thresh 0.6
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                    mtd="thresholdedFreq", minFreq=0.6,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                                     method="thresholdedFreq", minFreq=0.6,
                                                     includeAmbiguous=FALSE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=thresh0.6.det.1st.noRegDef, muFreq=NULL))
     # thresh 0.4
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, 
-                                                    mtd="thresholdedFreq", minFreq=0.4,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL, 
+                                                     method="thresholdedFreq", minFreq=0.4,
                                                     includeAmbiguous=FALSE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=thresh0.4.det.1st.noRegDef, muFreq=NULL))
     
     ## with region definitioin
     # thresh 0.6
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                    mtd="thresholdedFreq", minFreq=0.6,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                     method="thresholdedFreq", minFreq=0.6,
                                                     includeAmbiguous=FALSE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=substr(thresh0.6.det.1st.noRegDef,1,regDef1@seqLength), muFreq=NULL))
     # thresh 0.4
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, 
-                                                    mtd="thresholdedFreq", minFreq=0.4,
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength, 
+                                                     method="thresholdedFreq", minFreq=0.4,
                                                     includeAmbiguous=FALSE, 
                                                     breakTiesStochastic=FALSE),
                  list(cons=substr(thresh0.4.det.1st.noRegDef,1,regDef1@seqLength), muFreq=NULL))
@@ -1803,10 +1802,10 @@ test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, cat
     ##### catchAll
     catchAll.noRegDef = "HBKVAYBBAD-N.BDVDH"
     # no region definition
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=NULL, mtd="catchAll"),
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL,  method="catchAll"),
                  list(cons=catchAll.noRegDef, muFreq=NULL))
     # with region definition
-    expect_equal(shazam:::helperClonalConsensus(seqs=seqs1, lenLimit=regDef1@seqLength, mtd="catchAll"),
+    expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength,  method="catchAll"),
                  list(cons=substr(catchAll.noRegDef,1,regDef1@seqLength), muFreq=NULL))
     
     ##### longest possible length 
@@ -1819,12 +1818,12 @@ test_that("helperClonalConsensus, 2B, methods = thresholdedFreq, mostCommon, cat
               "AT",
               "A")
     # expect longest possible length = 2 = length of consensus
-    expect_equal(nchar(shazam:::helperClonalConsensus(seqs=seqs2, mtd="catchAll")$cons), 
+    expect_equal(nchar(shazam:::consensusSequence(seqs2,  method="catchAll")$cons), 
                  2)
 })
 
 #### calcClonalConsensus 2C ####
-test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
+test_that("consensusSequence, 2C, methods = mostMutated, leastMutated", {
     # seq1: DUPCOUNT=37; CONSCONT=25; ERR=0.3
     # obsv: [full length=15] 1 R; nonN=15; muFreq = 1/15
     # obsv: ATG CAT GCA TGC ATA 
@@ -1899,15 +1898,15 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
     ### resolve ties stochastically
     most.sto.possible = testDb$obsv[5:7]
     most.sto.1 = replicate(100, 
-                           shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                              mtd="mostMutated", 
+                           shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                               method="mostMutated", 
                                                               breakTiesStochastic=TRUE,
                                                               breakTiesByColumns=NULL,
                                                               lenLimit=NULL)$cons)
     # when both breakTiesStochastic and breakTiesByColumns TRUE, breakTiesStochastic takes precedence
     most.sto.2 = replicate(100, 
-                           shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                              mtd="mostMutated", 
+                           shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                               method="mostMutated", 
                                                               breakTiesStochastic=TRUE,
                                                               breakTiesByColumns=list(c("DUPCOUNT", "CONSCOUNT", "ERR"), 
                                                                                       c(max,max,min)),
@@ -1922,8 +1921,8 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
     ### resolve ties by columns
     # 3 columns; able to resolve
     # DUPCOUNT gives 5&6&7; CONSCOUNT gives 5&6; ERR gives 6
-    most.byCol.1 = shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                      mtd="mostMutated", 
+    most.byCol.1 = shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                       method="mostMutated", 
                                                       breakTiesStochastic=FALSE,
                                                       breakTiesByColumns=list(c("DUPCOUNT", "CONSCOUNT", "ERR"), 
                                                                               c(max,max,min)),
@@ -1932,8 +1931,8 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
     
     # 1 column; able to resolve
     # ERR gives 6
-    most.byCol.2 = shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                      mtd="mostMutated", 
+    most.byCol.2 = shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                       method="mostMutated", 
                                                       breakTiesStochastic=FALSE,
                                                       breakTiesByColumns=list(c("ERR"), 
                                                                               c(min)),
@@ -1942,8 +1941,8 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
     
     # 2 columns; unable to resolve; returns sequence that appears first
     # DUPCOUNT gives 5&6&7; CONSCOUNT gives 5&6; 5 appears before 6, returns 5
-    most.byCol.3 = shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                  mtd="mostMutated", 
+    most.byCol.3 = shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                   method="mostMutated", 
                                                   breakTiesStochastic=FALSE,
                                                   breakTiesByColumns=list(c("DUPCOUNT", "CONSCOUNT"), 
                                                                           c(max,max)),
@@ -1951,16 +1950,16 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
     expect_equal(most.byCol.3, testDb$obsv[5])
     
     ### resolve ties deterministically by returning sequence that appears first (index 5)
-    most.det.1 = shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                mtd="mostMutated", 
+    most.det.1 = shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                 method="mostMutated", 
                                                 breakTiesStochastic=FALSE,
                                                 breakTiesByColumns=NULL,
                                                 lenLimit=NULL)$cons
     expect_equal(most.det.1, testDb$obsv[5])
     
     ### check length when lenLimit is supplied
-    most.det.2 = shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                mtd="mostMutated", 
+    most.det.2 = shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                 method="mostMutated", 
                                                 breakTiesStochastic=FALSE,
                                                 breakTiesByColumns=NULL,
                                                 lenLimit=7)$cons
@@ -1971,15 +1970,15 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
     ### resolve ties stochastically
     least.sto.possible = testDb$obsv[c(1,3,4)]
     least.sto.1 = replicate(100, 
-                            shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                           mtd="leastMutated", 
+                            shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                            method="leastMutated", 
                                                            breakTiesStochastic=TRUE,
                                                            breakTiesByColumns=NULL,
                                                            lenLimit=NULL)$cons)
     # when both breakTiesStochastic and breakTiesByColumns TRUE, breakTiesStochastic takes precedence
     least.sto.2 = replicate(100, 
-                            shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                           mtd="leastMutated", 
+                            shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                            method="leastMutated", 
                                                            breakTiesStochastic=TRUE,
                                                            breakTiesByColumns=list(c("DUPCOUNT", "CONSCOUNT", "ERR"), 
                                                                                    c(max,max,min)),
@@ -1994,8 +1993,8 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
     ### resolve ties by columns
     # 3 columns; able to resolve
     # DUPCOUNT gives 1&3; CONSCOUNT gives 1&3; ERR gives 3
-    least.byCol.1 = shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                   mtd="leastMutated", 
+    least.byCol.1 = shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                    method="leastMutated", 
                                                    breakTiesStochastic=FALSE,
                                                    breakTiesByColumns=list(c("DUPCOUNT", "CONSCOUNT", "ERR"), 
                                                                            c(max,max,min)),
@@ -2004,8 +2003,8 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
     
     # 1 column; able to resolve
     # ERR gives 3
-    least.byCol.2 = shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                   mtd="leastMutated", 
+    least.byCol.2 = shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                    method="leastMutated", 
                                                    breakTiesStochastic=FALSE,
                                                    breakTiesByColumns=list(c("ERR"), 
                                                                            c(min)),
@@ -2014,8 +2013,8 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
     
     # 2 columns; unable to resolve; returns sequence that appears first
     # DUPCOUNT gives 1&3; CONSCOUNT gives 1&3; 1 appears before 3, returns 1
-    least.byCol.3 = shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                   mtd="leastMutated", 
+    least.byCol.3 = shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                    method="leastMutated", 
                                                    breakTiesStochastic=FALSE,
                                                    breakTiesByColumns=list(c("DUPCOUNT", "CONSCOUNT"), 
                                                                            c(max,max)),
@@ -2023,16 +2022,16 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
     expect_equal(least.byCol.3, testDb$obsv[1])
     
     ### resolve ties deterministically by returning sequence that appears first (index 1)
-    least.det.1 = shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                 mtd="leastMutated", 
+    least.det.1 = shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                  method="leastMutated", 
                                                  breakTiesStochastic=FALSE,
                                                  breakTiesByColumns=NULL,
                                                  lenLimit=NULL)$cons
     expect_equal(least.det.1, testDb$obsv[1])
     
     ### check length when lenLimit is supplied
-    least.det.2 = shazam:::helperClonalConsensus(seqs=testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
-                                                 mtd="leastMutated", 
+    least.det.2 = shazam:::consensusSequence(testDb$obsv, muFreqColumn="MUTFREQ", db=testDb,
+                                                  method="leastMutated", 
                                                  breakTiesStochastic=FALSE,
                                                  breakTiesByColumns=NULL,
                                                  lenLimit=7)$cons
@@ -2041,7 +2040,7 @@ test_that("helperClonalConsensus, 2C, methods = mostMutated, leastMutated", {
 
 #### calcClonalConsensus 2D ####
 test_that("calcClonalConsensus, 2D", {
-    ##### same testDb from test 2C for helperClonalConsensus
+    ##### same testDb from test 2C for consensusSequence
     testDb = data.frame(obsv=c("ATGCATGCATGCATA",      # seq1
                                "ATGCATGCGTGCATACGT",   # seq2
                                "ATGCACGCGTGCATGCC",      # seq3
@@ -2105,12 +2104,12 @@ test_that("calcClonalConsensus, 2D", {
                  c(inputCons="character", germlineCons="character", inputMuFreq="numeric"))
     
     ##### germlineCons should be generated from mostCommon method using the same additional parameter setting
-    # generate mostCommon germline using helperClonalConsensus (tested in test 2B)
-    exp.germ.noRegDef = shazam:::helperClonalConsensus(seqs=testDb$germ, mtd="mostCommon",
+    # generate mostCommon germline using consensusSequence (tested in test 2B)
+    exp.germ.noRegDef = shazam:::consensusSequence(testDb$germ,  method="mostCommon",
                                                        includeAmbiguous=FALSE,
                                                        breakTiesStochastic=FALSE,
                                                        lenLimit=NULL)
-    exp.germ.regDef = shazam:::helperClonalConsensus(seqs=testDb$germ, mtd="mostCommon",
+    exp.germ.regDef = shazam:::consensusSequence(testDb$germ,  method="mostCommon",
                                                      includeAmbiguous=FALSE,
                                                      breakTiesStochastic=FALSE,
                                                      lenLimit=test.regDef@seqLength)
@@ -2130,7 +2129,7 @@ test_that("calcClonalConsensus, 2D", {
 
 #### collapseClones ####
 test_that("collapseClones, 2E", {
-    ##### same testDb from test 2C for helperClonalConsensus
+    ##### same testDb from test 2C for consensusSequence
     testDb = data.frame(obsv=c("ATGCATGCATGCATA",      # seq1
                                "ATGCATGCGTGCATACGT",   # seq2
                                "ATGCACGCGTGCATGCC",      # seq3

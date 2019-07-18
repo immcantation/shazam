@@ -16,7 +16,8 @@
 #' models, can also be performed along with model driven simulations of SHM.
 #' 
 #' \itemize{
-#'   \item  \link{collapseClones}:           Build clonal consensus sequence.
+#'   \item  \link{collapseClones}:           Build clonal consensus sequences.
+#'   \item  \link{consensusSequence}:        Build a single consensus sequence.
 #'   \item  \link{observedMutations}:        Compute observed mutation counts and frequencies.
 #'   \item  \link{expectedMutations}:        Compute expected mutation frequencies.
 #'   \item  \link{shmulateSeq}:              Simulate mutations in a single sequence.
@@ -124,18 +125,16 @@
 #' @importFrom  foreach     foreach %dopar% registerDoSEQ
 #' @importFrom  igraph      V E as_adjacency_matrix graph_from_data_frame
 #'                          vertex_attr set_vertex_attr
+#' @importFrom  iterators   icount
 #' @importFrom  kedd        h.ucv
 #' @importFrom  KernSmooth  bkde
 #' @importFrom  lazyeval    interp
 #' @importFrom  MASS        fitdistr
 #' @importFrom  progress    progress_bar
-#' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format
-#'                          math_format percent scientific
-#' @importFrom  tidyr       gather spread
-#' @importFrom  iterators   icount
-#' @importFrom  SDMTools    wt.sd
+#' @importFrom  rlang       sym syms
 #' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format
 #'                          math_format percent scientific pretty_breaks
+#' @importFrom  SDMTools    wt.sd
 #' @importFrom  seqinr      c2s s2c words translate
 #' @importFrom  stats       na.omit setNames ecdf sd cor cov median mad
 #'                          approx convolve weighted.mean p.adjust
@@ -147,6 +146,7 @@
 #'                          stri_count_boundaries stri_count_regex 
 #'                          stri_extract_all_regex stri_extract_first_regex  
 #'                          stri_replace_all_regex stri_replace_first_regex
+#' @importFrom  tidyr       gather spread
 NULL
 
 

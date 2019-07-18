@@ -2048,10 +2048,10 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
         
         # Order 5-mers by positions, with reversed order if center nucleotide is G or T
         if (center_nuc %in% c("A", "C")) {
-            sub_df <- dplyr::arrange(sub_df, !!! rlang::syms(c("pos1", "pos2", "pos4", "pos5")))
+            sub_df <- dplyr::arrange(sub_df, !!!rlang::syms(c("pos1", "pos2", "pos4", "pos5")))
             sub_df$x <- 1:nrow(sub_df)            
         } else if (center_nuc %in% c("G", "T")) {
-            sub_df <- dplyr::arrange(sub_df, !!! rlang::syms(c("pos5", "pos4", "pos2", "pos1")))
+            sub_df <- dplyr::arrange(sub_df, !!!rlang::syms(c("pos5", "pos4", "pos2", "pos1")))
             sub_df$x <- 1:nrow(sub_df)
         } else {
             stop("Invalid nucleotide choice")
@@ -2059,7 +2059,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
         
         # Melt 5-mer position data
         sub_melt <- sub_df %>% 
-            tidyr::gather("pos", "char", !!! rlang::syms(colnames(mut_positions))) %>% 
+            tidyr::gather("pos", "char", !!!rlang::syms(colnames(mut_positions))) %>% 
             select("x", "pos", "char")
         #sub_melt$pos <- factor(sub_melt$pos, levels=mut_names)
         #sub_melt$pos <- as.numeric(sub_melt$pos)

@@ -497,7 +497,7 @@ collapseClones <- function(db,
                                 list('db', 'cloneColumn', 'sequenceColumn', 'germlineColumn', 'muFreqColumn',
                                      'regionDefinition', 'method', 'minimumFrequency','includeAmbiguous',
                                      'breakTiesStochastic', 'breakTiesByColumns', 
-                                     'calcClonalConsensus', 'helperClonalConsensus', 'breakTiesHelper',
+                                     'calcClonalConsensus', 'consensusSequence', 'breakTiesHelper',
                                      'chars2Ambiguous', 'nucs2IUPAC', 'IUPAC_DNA_2',  'NUCLEOTIDES_AMBIGUOUS',
                                      'uniqueClonesIdx', 'c2s', 's2c'), 
                                 envir=environment() )
@@ -627,20 +627,23 @@ breakTiesHelper <- function(idx, cols, funs, db) {
     }
 }
 
-#' Helper function for calcClonalConsensus
+#' Construct a consensus sequence
 #' 
-#' @param   seqs                 a character vector of sequences.
-#' @param   muFreqColumn         \code{character} name of the column in db containing mutation
-#'                               frequency. Applicable to and required for the \code{"mostMutated"}
-#'                               and \code{"leastmutated"} methods. Default is \code{NULL}.
-#' @param   lenLimit             limit on consensus length.
-#' @param   mtd                  method to calculate consensus sequence. One of
+#' @param   sequences            character vector of sequences.
+#' @param   db                   \code{data.frame} containing sequence data for a single clone.
+#'                               Applicable to and required for the \code{"mostMutated"} and
+#'                               \code{"leastMutated"} methods. Default is \code{NULL}.
+#' @param   method               method to calculate consensus sequence. One of
 #'                               \code{"thresholdedFreq"}, \code{"mostCommon"}, \code{"catchAll"},
 #'                               \code{"mostMutated"}, or \code{"leastMutated"}. See "Methods" under
 #'                               \link{collapseClones} for details.
 #' @param   minFreq              frequency threshold for calculating input consensus sequence.
 #'                               Applicable to and required for the \code{"thresholdedFreq"} method.
 #'                               A canonical choice is 0.6. Default is \code{NULL}.
+#' @param   muFreqColumn         \code{character} name of the column in db containing mutation
+#'                               frequency. Applicable to and required for the \code{"mostMutated"}
+#'                               and \code{"leastMutated"} methods. Default is \code{NULL}.
+#' @param   lenLimit             limit on consensus length. if \code{NULL} then no length limit is set.
 #' @param   includeAmbiguous     whether to use ambiguous characters to represent positions at
 #'                               which there are multiple characters with frequencies that are at least
 #'                               \code{minimumFrequency} or that are maximal (i.e. ties). Applicable to
@@ -661,12 +664,9 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #'                               If supplied, \code{fun_i}'s are applied on \code{col_i}'s to help break
 #'                               ties. Default is \code{NULL}. See "Methods" under \link{collapseClones}
 #'                               for details.
-#' @param   db                   \code{data.frame} containing sequence data for a single clone.
-#'                               Applicable to and required for the \code{"mostMutated"} and
-#'                               \code{"leastmutated"} methods. Default is \code{NULL}.
-
+#'                               
 #' @return  A list containing \code{cons}, which is a character string that is the consensus sequence
-#'          for \code{seqs}; and \code{muFreq}, which is the maximal/minimal mutation frequency of
+#'          for \code{sequences}; and \code{muFreq}, which is the maximal/minimal mutation frequency of
 #'          the consensus sequence for the \code{"mostMutated"} and \code{"leastMutated"} methods, or
 #'          \code{NULL} for all other methods.
 #' 
@@ -676,108 +676,104 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
-#' # Data corresponding to a single clone
-#' clone <- db[db$CLONE=="3192", ]
-#' # Number of sequences in this clone
-#' nrow(clone)
-#' # first compute mutation frequency for most/leastMutated methods
-#' clone = observedMutations(db=clone, frequency=TRUE, combine=TRUE)
-#' # manually create tie
-#' clone = rbind(clone, clone[which.max(clone$MU_FREQ), ])
-#' # Get consensus input sequence
-#' # thresholdedFreq method, resolve ties deterministically without using ambiguous characters
-#' consInput1 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
-#'                                     muFreqColumn=NULL, lenLimit=NULL,
-#'                                     mtd="thresholdedFreq", minFreq=0.3,
-#'                                     includeAmbiguous=FALSE, 
-#'                                     breakTiesStochastic=FALSE,
-#'                                     breakTiesByColumns=NULL, db=NULL)$cons
+#' clone <- subset(db, CLONE == "3192")
+#' 
+#' # First compute mutation frequency for most/leastMutated methods
+#' clone <- observedMutations(clone, frequency=TRUE, combine=TRUE)
+#' 
+#' # Manually create a tie
+#' clone <- rbind(clone, clone[which.max(clone$MU_FREQ), ])
+#' 
+#' # ThresholdedFreq method. 
+#' # Resolve ties deterministically without using ambiguous characters
+#' cons1 <- consensusSequence(clone$SEQUENCE_IMGT,
+#'                            method="thresholdedFreq", minFreq=0.3,
+#'                            includeAmbiguous=FALSE, 
+#'                            breakTiesStochastic=FALSE)
+#' cons1$cons
 #'                                         
 #' @export
-# @seealso
-# \link{calcClonalConsensus} and \link{collapseClones}.
+## DEBUG
 # thresholdedFreq method, resolve ties deterministically using ambiguous characters
-# consInput2 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+# consInput2 <- consensusSequence(clone$SEQUENCE_IMGT,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
-#                                     mtd="thresholdedFreq", minFreq=0.3,
+#                                     method="thresholdedFreq", minFreq=0.3,
 #                                     includeAmbiguous=TRUE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # thresholdedFreq method, resolve ties stochastically
-# consInput3 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+# consInput3 <- consensusSequence(clone$SEQUENCE_IMGT,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
-#                                     mtd="thresholdedFreq", minFreq=0.3,
+#                                     method="thresholdedFreq", minFreq=0.3,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=TRUE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostCommon method, resolve ties deterministically without using ambiguous characters
-# consInput4 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+# consInput4 <- consensusSequence(clone$SEQUENCE_IMGT,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
-#                                     mtd="mostCommon", minFreq=NULL,
+#                                     method="mostCommon", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostCommon method, resolve ties deterministically using ambiguous characters
-# consInput5 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+# consInput5 <- consensusSequence(clone$SEQUENCE_IMGT,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
-#                                     mtd="mostCommon", minFreq=NULL,
+#                                     method="mostCommon", minFreq=NULL,
 #                                     includeAmbiguous=TRUE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostCommon method, resolve ties stochastically
-# consInput6 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+# consInput6 <- consensusSequence(clone$SEQUENCE_IMGT,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
-#                                     mtd="mostCommon", minFreq=NULL,
+#                                     method="mostCommon", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=TRUE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # catchAll method
-# consInput7 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+# consInput7 <- consensusSequence(clone$SEQUENCE_IMGT,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
-#                                     mtd="catchAll", minFreq=NULL,
+#                                     method="catchAll", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostMutated method, resolve ties stochastically
-# consInput8 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+# consInput8 <- consensusSequence(clone$SEQUENCE_IMGT,
 #                                     muFreqColumn="MU_FREQ", lenLimit=NULL,
-#                                     mtd="mostMutated", minFreq=NULL,
+#                                     method="mostMutated", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=TRUE,
 #                                     breakTiesByColumns=NULL, db=clone)$cons
 # mostMutated method, resolve ties deterministically using additional columns
-# consInput9 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+# consInput9 <- consensusSequence(clone$SEQUENCE_IMGT,
 #                                     muFreqColumn="MU_FREQ", lenLimit=NULL,
-#                                     mtd="mostMutated", minFreq=NULL,
+#                                     method="mostMutated", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=list(c("JUNCTION_LENGTH","DUPCOUNT"), c(max, max)), 
 #                                     db=clone)$cons
-# consInput10 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+# consInput10 <- consensusSequence(clone$SEQUENCE_IMGT,
 #                                      muFreqColumn="MU_FREQ", lenLimit=NULL,
-#                                      mtd="mostMutated", minFreq=NULL,
+#                                      method="mostMutated", minFreq=NULL,
 #                                      includeAmbiguous=FALSE, 
 #                                      breakTiesStochastic=FALSE,
 #                                      breakTiesByColumns=list(c("DUPCOUNT"), c(max)), 
 #                                      db=clone)$cons
 # mostMutated method, resolve ties deterministically withou using additional columns
-# consInput11 <- helperClonalConsensus(seqs=clone$SEQUENCE_IMGT,
+# consInput11 <- consensusSequence(clone$SEQUENCE_IMGT,
 #                                      muFreqColumn="MU_FREQ", lenLimit=NULL,
-#                                      mtd="mostMutated", minFreq=NULL,
+#                                      method="mostMutated", minFreq=NULL,
 #                                      includeAmbiguous=FALSE, 
 #                                      breakTiesStochastic=FALSE,
 #                                      breakTiesByColumns=NULL, db=clone)$cons
-# 
-helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
-                                  mtd=c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
-                                  minFreq=NULL,
-                                  includeAmbiguous=FALSE,
-                                  breakTiesStochastic=FALSE,
-                                  breakTiesByColumns=NULL, db=NULL) {
-    mtd <- match.arg(mtd)
+consensusSequence <- function(sequences, db=NULL, 
+                              method=c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
+                              minFreq=NULL, muFreqColumn=NULL, lenLimit=NULL,includeAmbiguous=FALSE, 
+                              breakTiesStochastic=FALSE, breakTiesByColumns=NULL) {
+    # Check arguments
+    method <- match.arg(method)
     
     # check muFreqColumn and get muFreq for most/leastMutated
-    if (mtd %in% c("mostMutated", "leastMutated")) {
+    if (method %in% c("mostMutated", "leastMutated")) {
         if ( is.null(muFreqColumn) ) {
             stop ("muFreqColumn must be specified when method is most/leastMutated.")
         }
@@ -795,20 +791,20 @@ helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
     }
     
     
-    numSeqs <- length(seqs)
+    numSeqs <- length(sequences)
     
     ##### if only one sequence in clone, return it
     if (numSeqs==1) {
         # restrict length if there is a lenLimit
         if (!is.null(lenLimit)) {
-            consensus <- substr(seqs, 1, min(lenLimit, stri_length(seqs)))
+            consensus <- substr(sequences, 1, min(lenLimit, stri_length(sequences)))
         } else {
             # otherwise, return as is
-            consensus <- seqs
+            consensus <- sequences
         }
         
         # return with mutation frequency (if applicable)
-        if (mtd %in% c("mostMutated", "leastMutated")) {
+        if (method %in% c("mostMutated", "leastMutated")) {
             return(list(cons=consensus, muFreq=db[[muFreqColumn]]))
         } else {
             return(list(cons=consensus, muFreq=NULL))
@@ -816,34 +812,34 @@ helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
     }
     
     ##### if all sequences are the same, return now
-    if (length(unique(seqs))==1) {
+    if (length(unique(sequences))==1) {
         # restrict length if there is a lenLimit
         if (!is.null(lenLimit)) {
-            consensus <- substr(seqs[1], 1, min(lenLimit, stri_length(seqs)))
+            consensus <- substr(sequences[1], 1, min(lenLimit, stri_length(sequences)))
         } else {
             # otherwise, return as is
-            consensus <- seqs[1]
+            consensus <- sequences[1]
         }
         
         # return with mutation frequency (if applicable)
-        if (mtd %in% c("mostMutated", "leastMutated")) {
+        if (method %in% c("mostMutated", "leastMutated")) {
             return(list(cons=consensus, muFreq=db[[muFreqColumn]][1]))
         } else {
             return(list(cons=consensus, muFreq=NULL))
         }
     }
     
-    ##### length of longest sequence in seqs
-    lenSeqs <- stri_length(seqs)
+    ##### length of longest sequence in sequences
+    lenSeqs <- stri_length(sequences)
     lenMax <- max(lenSeqs, na.rm=T)
     
     ##### methods = thresholdedFreq, mostCommon, catchAll
-    if (mtd %in% c("thresholdedFreq", "mostCommon", "catchAll")) {
-        ##### convert seqs to a matrix
+    if (method %in% c("thresholdedFreq", "mostCommon", "catchAll")) {
+        ##### convert sequences to a matrix
         # if there's no more nucleotide when a seq ends, fill position with NA
         seqsMtx <- matrix(NA, nrow=numSeqs, ncol=lenMax)
         for (i in 1:numSeqs) {
-            seqsMtx[i, 1:lenSeqs[i]] <- s2c(seqs[i])
+            seqsMtx[i, 1:lenSeqs[i]] <- s2c(sequences[i])
         }
         
         ##### tabulation matrix
@@ -852,23 +848,23 @@ helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
         tabMtxRownames <- c("A","T","G","C","N",".","-","na")
         tabMtx <- matrix(0, ncol=lenMax, nrow=8, 
                         dimnames=list(tabMtxRownames, NULL))
-        ## across seqs, at each nuc position, how many A, T, G, C, N, ., -? 
+        ## across sequences, at each nuc position, how many A, T, G, C, N, ., -? 
         # this does not capture NA
         for (j in 1:ncol(seqsMtx)) {
             tab <- table(seqsMtx[, j])
             tabMtx[match(names(tab), tabMtxRownames), j] <- tab
         }
-        ## across seqs, at each nuc position, how many NAs?
+        ## across sequences, at each nuc position, how many NAs?
         numNAs <- colSums(is.na(seqsMtx))
         tabMtx["na", ] <- numNAs
-        # sanity check: counts at each nuc pos (colSum) should sum up to number of seqs
+        # sanity check: counts at each nuc pos (colSum) should sum up to number of sequences
         stopifnot( sum( colSums(tabMtx)==numSeqs )  == ncol(tabMtx)  )
         
-        ##### only keep positions at which majority of seqs contain information
-        ### if there are odd number of n seqs, keep position if it has > floor(n/2) non-NAs
-        # e.g. 5 input seqs, >2 non-NA; 2=floor(5/2)
-        ### if there are even number of n seqs,  keep position if it has > n/2 non-NAs
-        # e.g. 6 input seqs, >3 non-NA; 3=6/2=floor(6/2)
+        ##### only keep positions at which majority of sequences contain information
+        ### if there are odd number of n sequences, keep position if it has > floor(n/2) non-NAs
+        # e.g. 5 input sequences, >2 non-NA; 2=floor(5/2)
+        ### if there are even number of n sequences,  keep position if it has > n/2 non-NAs
+        # e.g. 6 input sequences, >3 non-NA; 3=6/2=floor(6/2)
         numNonNAs <- numSeqs - numNAs
         nonNA.keep <- numNonNAs > floor(numSeqs/2)
         # length of longest possible consensus seq
@@ -891,8 +887,8 @@ helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
         # drop=FALSE so that it works even with lenConsensus of 1
         tabMtx <- tabMtx[-which(rownames(tabMtx)=="na"), , drop=FALSE]
         
-        if (mtd=="thresholdedFreq") {
-            #print(mtd) # for testing
+        if (method=="thresholdedFreq") {
+            #print(method) # for testing
             # use as.matrix so that apply won't break with ncol(tabMtx)=1
             consensus <- apply(as.matrix(tabMtx), 2, function(x){
                 idx <- which(x >= minFreq)
@@ -920,8 +916,8 @@ helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
                     }
                 }
             })
-        } else if (mtd=="mostCommon") { 
-            #print(mtd) # for testing
+        } else if (method=="mostCommon") { 
+            #print(method) # for testing
             # use as.matrix so that apply won't break with ncol(tabMtx)=1
             consensus <- apply(as.matrix(tabMtx), 2, function(x){
                 max.freq <- max(x)
@@ -949,11 +945,11 @@ helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
                     }
                 }
             })
-        } else if (mtd=="catchAll") {
-            #print(mtd) # for testing
+        } else if (method=="catchAll") {
+            #print(method) # for testing
             # use as.matrix so that apply won't break with ncol(tabMtx)=1
             consensus <- apply(as.matrix(tabMtx), 2, function(x){
-                # all characters that appear at a position across seqs
+                # all characters that appear at a position across sequences
                 nonZeroNucs <- rownames(tabMtx)[x>0]
                 # convert characters to (ambiguous) characters
                 return(chars2Ambiguous(nonZeroNucs))
@@ -961,7 +957,7 @@ helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
         }
         
         # check there is no ambiguous characters if includeAmbiguous if F 
-        if ( (mtd=="thresholdedFreq" | mtd=="mostCommon") & !includeAmbiguous ) {
+        if ( (method=="thresholdedFreq" | method=="mostCommon") & !includeAmbiguous ) {
             ambiguous <- NUCLEOTIDES_AMBIGUOUS[!NUCLEOTIDES_AMBIGUOUS %in% 
                                                   c("A","C","G","T","N","-",".")]
             stopifnot( !any(consensus %in% ambiguous) )
@@ -974,22 +970,22 @@ helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
     }
     
     ##### methods = mostMutated, leastMutated
-    if (mtd %in% c("mostMutated", "leastMutated")) {
+    if (method %in% c("mostMutated", "leastMutated")) {
         # if there's a lenLimit
         # if a seq is longer than lenLimit, trim it; otherwise, leave it as is
         if (!is.null(lenLimit)) {
             idxLong <- which(lenSeqs > lenLimit)
-            seqs[idxLong] <- substr(seqs[idxLong], 1, lenLimit)
+            sequences[idxLong] <- substr(sequences[idxLong], 1, lenLimit)
         }
         
-        ##### get index of seqs that fulfill the criterion
+        ##### get index of sequences that fulfill the criterion
         # muFreq should have been calculated being on sequences with restricted lengths as defined by
         # regionDefinition (which gives rise to lenLimit)
-        if (mtd=="mostMutated") {
-            #print(mtd) # for testing
+        if (method=="mostMutated") {
+            #print(method) # for testing
             targetMuFreq <- max(muFreq)
-        } else if (mtd=="leastMutated") {
-            #print(mtd) # for testing
+        } else if (method=="leastMutated") {
+            #print(method) # for testing
             targetMuFreq <- min(muFreq)
         }
         tol <- 1e-5 # tolerance
@@ -997,23 +993,23 @@ helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
         
         ##### if there are no ties
         if (length(idx)==1) {
-            consensus <- seqs[idx]
+            consensus <- sequences[idx]
             ##### if there are ties
         } else if (length(idx)>1) {
             
             ### stochastic: randomly pick one from idx
             if (breakTiesStochastic) {
-                consensus <- seqs[sample(x=idx, size=1)]
+                consensus <- sequences[sample(x=idx, size=1)]
                 
                 ### deterministic: pick one from idx based on breakTiesByColumns    
             } else if (!is.null(breakTiesByColumns)) {
                 idx <- breakTiesHelper(idx=idx, cols=breakTiesByColumns[[1]], 
                                       funs=breakTiesByColumns[[2]], db=db[idx, ])
-                consensus <- seqs[idx]
+                consensus <- sequences[idx]
                 
                 ### deterministic: pick first one from idx    
             } else {
-                consensus <- seqs[idx[1]]
+                consensus <- sequences[idx[1]]
             }
         }
         
@@ -1024,7 +1020,7 @@ helperClonalConsensus <- function(seqs, muFreqColumn=NULL, lenLimit=NULL,
         stopifnot(stri_length(consensus) <= lenLimit)
     }
     
-    if (mtd %in% c("mostMutated", "leastMutated")) {
+    if (method %in% c("mostMutated", "leastMutated")) {
         return(list(cons=consensus, muFreq=targetMuFreq))
     } else {
         return(list(cons=consensus, muFreq=NULL))
@@ -1208,20 +1204,20 @@ calcClonalConsensus <- function(db,
     
     ##### get consensus germline sequence (most common)
     # NULL for minFreq and muFreqColumn b/c mostCommon definitely doesn't need them
-    germCons <- helperClonalConsensus(seqs=germlineSeq, minFreq=NULL, lenLimit=lenRegion,
-                                      mtd="mostCommon", 
-                                      includeAmbiguous=includeAmbiguous,
-                                      breakTiesStochastic=breakTiesStochastic,
-                                      breakTiesByColumns=NULL,
-                                      muFreqColumn=NULL, db=NULL)$cons
+    germCons <- consensusSequence(germlineSeq, minFreq=NULL, lenLimit=lenRegion,
+                                  method="mostCommon", 
+                                  includeAmbiguous=includeAmbiguous,
+                                  breakTiesStochastic=breakTiesStochastic,
+                                  breakTiesByColumns=NULL,
+                                  muFreqColumn=NULL, db=NULL)$cons
     
     ##### get consensus observed sequence
-    inputConsMuFreq <- helperClonalConsensus(seqs=inputSeq, minFreq=minimumFrequency, lenLimit=lenRegion,
-                                             mtd=method, 
-                                             includeAmbiguous=includeAmbiguous,
-                                             breakTiesStochastic=breakTiesStochastic,
-                                             breakTiesByColumns=breakTiesByColumns,
-                                             muFreqColumn=muFreqColumn, db=db)
+    inputConsMuFreq <- consensusSequence(inputSeq, minFreq=minimumFrequency, lenLimit=lenRegion,
+                                         method=method, 
+                                         includeAmbiguous=includeAmbiguous,
+                                         breakTiesStochastic=breakTiesStochastic,
+                                         breakTiesByColumns=breakTiesByColumns,
+                                         muFreqColumn=muFreqColumn, db=db)
     inputCons <- inputConsMuFreq$cons
     inputMuFreq <- inputConsMuFreq$muFreq
     

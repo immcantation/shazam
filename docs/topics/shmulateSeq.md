@@ -10,7 +10,8 @@ Targeting probabilities at each position are updated after each iteration.
 Usage
 --------------------
 ```
-shmulateSeq(sequence, numMutations, targetingModel = HH_S5F)
+shmulateSeq(sequence, numMutations, targetingModel = HH_S5F, start = 1,
+end = nchar(sequence))
 ```
 
 Arguments
@@ -28,6 +29,14 @@ targetingModel
 :   5-mer [TargetingModel](TargetingModel-class.md) object to be used for computing 
 probabilities of mutations at each position. Defaults to
 [HH_S5F](HH_S5F.md).
+
+start
+:   Initial position in `sequence` where mutations can 
+be introduced. Default: 1
+
+end
+:   Last position in `sequence` where mutations can 
+be introduced. Default: last position (sequence length).
 
 
 
@@ -62,7 +71,7 @@ shmulateSeq(sequence, numMutations=6)
 
 
 ```
-[1] "NGATGTGACGACGCGACCATGTATTACAGTGCGAGAGATA.CTTA"
+[1] "NGCTCTGACGACACGGCCGTGGGTCACTGTGCGAGAATTA.TTTA"
 
 ```
 

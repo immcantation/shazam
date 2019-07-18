@@ -37,7 +37,7 @@ set and will not be reset.
 Value
 -------------------
 
-A `Baseline` object, containing the modified `db` and the BASELINe 
+A [Baseline](Baseline-class.md) object, containing the modified `db` and the BASELINe 
 posterior probability density functions (PDF) for each of the groups.
 
 
@@ -176,7 +176,7 @@ sigmaLimits=c(-1, 1))
 See also
 -------------------
 
-To generate the baseline object see [calcBaseline](calcBaseline.md).
+To generate the [Baseline](Baseline-class.md) object see [calcBaseline](calcBaseline.md).
 To calculate BASELINe statistics, such as the mean selection strength
 and the 95% confidence interval, see [summarizeBaseline](summarizeBaseline.md).
 

@@ -68,7 +68,7 @@ set and will not be reset.
 Value
 -------------------
 
-A `Baseline` object containing the modified `db` and BASELINe 
+A [Baseline](Baseline-class.md) object containing the modified `db` and BASELINe 
 posterior probability density functions (PDF) for each of the sequences.
 
 

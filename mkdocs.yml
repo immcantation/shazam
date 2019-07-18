@@ -25,6 +25,7 @@ pages:
   - 'Help Topics':
     - 'Mutation Profiling':
       - topics/collapseClones.md
+      - topics/consensusSequence.md
       - topics/expectedMutations.md
       - topics/observedMutations.md
       - topics/calcExpectedMutations.md
