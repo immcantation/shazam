@@ -6,6 +6,7 @@ General:
 + Upgraded to alakazam >= 0.3.0 and dplyr >= 0.8.1.
 
 Distance Calculation:
+
 + Fixed a bug in `plotDensityThreshold` for negative densities.
 + Fixed a bug in `distToNearest` for performing subsampling while calculating
   cross-group nearest neighbor distances.
