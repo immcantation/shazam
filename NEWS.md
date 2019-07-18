@@ -3,6 +3,7 @@ Version 0.1.11.999 July 16, 2019
 General:
 
 + Added a new helper function `helperClonalConsensus`.
++ Upgraded to alakazam >= 0.3.0 and dplyr >= 0.8.1
 
 Distance Calculation:
 
