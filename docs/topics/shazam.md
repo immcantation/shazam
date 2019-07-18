@@ -23,8 +23,7 @@ Quantification of expected mutational loaded, under specific SHM targeting
 models, can also be performed along with model driven simulations of SHM.
 
 
-+ [collapseClones](collapseClones.md):           Build clonal consensus sequences.
-+ [consensusSequence](consensusSequence.md):        Build a single consensus sequence.
++ [collapseClones](collapseClones.md):           Build clonal consensus sequence.
 + [observedMutations](observedMutations.md):        Compute observed mutation counts and frequencies.
 + [expectedMutations](expectedMutations.md):        Compute expected mutation frequencies.
 + [shmulateSeq](shmulateSeq.md):              Simulate mutations in a single sequence.
