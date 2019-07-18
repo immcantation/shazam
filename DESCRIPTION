@@ -60,6 +60,7 @@ Imports:
     methods,
     parallel,
     progress,
+    rlang,
     SDMTools,
     scales,
     seqinr,
