@@ -686,7 +686,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' @param    progress        if \code{TRUE} print a progress bar.
 #' @param    cellIdColumn    name of the column containing cell IDs. Only applicable and required for 
 #'                           single-cell mode.
-#' @param    locus           name of the column containing locus information. Only applicable and 
+#' @param    locusColumn     name of the column containing locus information. Only applicable and 
 #'                           required for single-cell mode.
 #' @param    groupUsingOnlyIGH    use only heavy chain (\code{IGH}) sequences for VJL grouping, disregarding 
 #'                                light chains. Only applicable and required for single-cell mode. 
@@ -720,7 +720,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' heavy chain (\code{IGH}) and light chain (\code{IGK}, \code{IGL}) sequences. This is governed 
 #' by \code{groupUsingOnlyIGH}.
 #' 
-#' If used, values in the \code{locus} column must be one of \code{"IGH"}, \code{"IGK"}, and \code{"IGL"}.
+#' If used, values in the \code{locusColumn} column must be one of \code{"IGH"}, \code{"IGK"}, and \code{"IGL"}.
 #' 
 #' Note that for \code{distToNearest}, a cell with multiple heavy chains is not allowed.
 #' 
