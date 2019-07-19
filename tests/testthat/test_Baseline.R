@@ -22,9 +22,9 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     germlineSeq <-  db[["GERMLINE_IMGT_D_MASK"]][1]
     
     targeting <- shazam:::calculateTargeting(germlineSeq = germlineSeq, 
-                                    inputSeq = inputSeq,
-                                    targetingModel = HH_S5F,
-                                    regionDefinition = IMGT_V)
+                                             inputSeq = inputSeq,
+                                             targetingModel = HH_S5F,
+                                             regionDefinition = IMGT_V)
     expect_equal(dim(targeting),c(5,IMGT_V@seqLength))
     
     obs_targeting <- targeting[3,c(1,10,50,78,312)]
@@ -48,9 +48,9 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
     ## as used by calcExpectedMutations
     
     targeting_null <- shazam:::calculateTargeting(germlineSeq = germlineSeq, 
-                                          inputSeq = inputSeq,
-                                          targetingModel = HH_S5F,
-                                          regionDefinition = NULL)
+                                                  inputSeq = inputSeq,
+                                                  targetingModel = HH_S5F,
+                                                  regionDefinition = NULL)
     expect_equal(dim(targeting_null),c(5,406))
     
     obs_targeting_null <- targeting_null[3,c(1,10,50,78,312)]
@@ -101,10 +101,10 @@ test_that("expectedMutations works with regionDefinition==NULL",{
                              regionDefinition=IMGT_V,
                              nproc=1)
     db_mutations_df <- expectedMutations(data.frame(db_subset),
-                                      sequenceColumn="SEQUENCE_IMGT",
-                                      germlineColumn="GERMLINE_IMGT_D_MASK",
-                                      regionDefinition=IMGT_V,
-                                      nproc=1)
+                                         sequenceColumn="SEQUENCE_IMGT",
+                                         germlineColumn="GERMLINE_IMGT_D_MASK",
+                                         regionDefinition=IMGT_V,
+                                         nproc=1)
     expect_identical(db_mutations, db_mutations_df)
     
     ## Check 5 examples for each, at different positions
@@ -232,7 +232,8 @@ test_that("calcBaseline", {
     cat("\nTest calcBaseline\n")
     
     # collapse baseline
-    db_clonal <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
+    db_clonal <- collapseClones(db, cloneColumn="CLONE", 
+                                sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
                                 method="thresholdedFreq", minimumFrequency=0.6,
                                 includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
@@ -484,7 +485,8 @@ test_that("Test groupBaseline", {
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG"))
                       
     # collapse baseline
-    db_clonal <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
+    db_clonal <- collapseClones(db, cloneColumn="CLONE",
+                                sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
                                 method="thresholdedFreq", minimumFrequency=0.6,
                                 includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
@@ -540,3 +542,57 @@ test_that("Test groupBaseline", {
                  c( -0.25, -0.72, -0.10, -0.69), tolerance=0.01)
     
 })
+
+#### AIRR migration test ####
+
+test_that("calcBaseline and groupBaseline, AIRR migration", {
+    
+    # ExampleDb
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    # ExampleDb_airr
+    load(file.path("..", "data-tests", "ExampleDb_airr.rda")) 
+    
+    db_c <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
+    db_a <- subset(ExampleDb_airr, isotype == "IgG" & sample == "+7d")
+    rm(ExampleDb, ExampleDb_airr)
+    
+    # collapse clones
+    db_c <- collapseClones(db_c, cloneColumn="CLONE",
+                           sequenceColumn="SEQUENCE_IMGT",
+                           germlineColumn="GERMLINE_IMGT_D_MASK",
+                           method="thresholdedFreq", minimumFrequency=0.6,
+                           includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+    
+    db_a <- collapseClones(db_a, cloneColumn="clone_id", 
+                           sequenceColumn="sequence_alignment",
+                           germlineColumn="germline_alignment_d_mask",
+                           method="thresholdedFreq", minimumFrequency=0.6,
+                           includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+    
+    # calcBaseline
+    b1_c <- calcBaseline(db_c, 
+                        sequenceColumn="CLONAL_SEQUENCE",
+                        germlineColumn="CLONAL_GERMLINE", 
+                        testStatistic="focused",
+                        regionDefinition=IMGT_V,
+                        targetingModel=HH_S5F,
+                        nproc=1)
+    
+    b1_a <- calcBaseline(db_a, 
+                        sequenceColumn="CLONAL_SEQUENCE",
+                        germlineColumn="CLONAL_GERMLINE", 
+                        testStatistic="focused",
+                        regionDefinition=IMGT_V,
+                        targetingModel=HH_S5F,
+                        nproc=1)
+    
+    expect_equal(b1_a@pdfs, b1_c@pdfs)
+    
+    # groupBaseline
+    b2_c <- groupBaseline(b1_c, groupBy="SAMPLE")
+    b2_a <- groupBaseline(b1_a, groupBy="sample")
+    
+    expect_equal(b2_a@pdfs, b2_c@pdfs)
+    
+})
+

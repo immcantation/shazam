@@ -34,16 +34,16 @@ quantified via the following steps:
 
 ## Example data
 
-A small example Change-O database is included in the `alakazam` package. 
+A small example AIRR-format database is included in the `alakazam` package. 
 The example dataset consists of a subset of Ig sequencing data from an 
 influenza vaccination study (Laserson and Vigneault et al., PNAS, 2014). The 
 data include sequences from multiple time-points before and after the subject 
 received an influenza vaccination. Quantifying selection requires the following 
 fields (columns) to be present in the Change-O database: 
 
-* `SEQUENCE_ID`
-* `SEQUENCE_IMGT`
-* `GERMLINE_IMGT_D_MASK`
+* `sequence_id`
+* `sequence_alignment`
+* `germline_alignment_d_mask`
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 # Load example data
@@ -70,7 +70,10 @@ consensus sequences for each clone.
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Collapse clonal groups into single sequences
-clones <- collapseClones(ExampleDb, regionDefinition=IMGT_V, 
+clones <- collapseClones(ExampleDb, cloneColumn="clone_id", 
+                         sequenceColumn="sequence_alignment", 
+                         germlineColumn="germline_alignment_d_mask", 
+                         regionDefinition=IMGT_V, 
                          method="thresholdedFreq", minimumFrequency=0.6,
                          includeAmbiguous=FALSE, breakTiesStochastic=FALSE, 
                          nproc=1)
@@ -177,8 +180,8 @@ baseline <- calcBaseline(clones, testStatistic="focused",
 
 To compare the selection scores of groups of sequences, the sequences must
 be convolved into a single PDF representing each group. In the example dataset, 
-the `SAMPLE` field corresponds to samples taken at different time points 
-before and after an influenza vaccination and the `ISOTYPE` field specifies 
+the `sample` field corresponds to samples taken at different time points 
+before and after an influenza vaccination and the `isotype` field specifies 
 the isotype of the sequence. The `groupBaseline` function convolves the BASELINe 
 PDFs of individual sequences/clones to get a combined PDF. The field(s) by 
 which to group the sequences are specified with the `groupBy` parameter. 
@@ -195,11 +198,11 @@ interpreted as analagous to a t-test.
 ### Grouping by a single annotation
 
 The following example generates a single selection PDF for each unique 
-annotation in the `SAMPLE` column.
+annotation in the `sample` column.
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Combine selection scores by time-point
-grouped_1 <- groupBaseline(baseline, groupBy="SAMPLE")
+grouped_1 <- groupBaseline(baseline, groupBy="sample")
 ```
 
 ### Subsetting and grouping by multiple annotations
@@ -214,10 +217,13 @@ precedes the collapsing of clonal groups.
 
 ```{r, eval=TRUE, warning=FALSE, results="hide"}
 # Subset the original data to switched isotypes
-db_sub <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG"))
+db_sub <- subset(ExampleDb, isotype %in% c("IgM", "IgG"))
 
 # Collapse clonal groups into single sequence
-clones_sub <- collapseClones(db_sub, regionDefinition=IMGT_V, 
+clones_sub <- collapseClones(db_sub, cloneColumn="clone_id",
+                             sequenceColumn="sequence_alignment",
+                             germlineColumn="germline_alignment_d_mask",
+                             regionDefinition=IMGT_V, 
                              method="thresholdedFreq", minimumFrequency=0.6,
                              includeAmbiguous=FALSE, breakTiesStochastic=FALSE, 
                              nproc=1)
@@ -227,7 +233,7 @@ baseline_sub <- calcBaseline(clones_sub, testStatistic="focused",
                              regionDefinition=IMGT_V, nproc=1)
 
 # Combine selection scores by time-point and isotype
-grouped_2 <- groupBaseline(baseline_sub, groupBy=c("SAMPLE", "ISOTYPE"))
+grouped_2 <- groupBaseline(baseline_sub, groupBy=c("sample", "isotype"))
 ```
 
 ### Convolving variables at multiple levels
@@ -236,15 +242,15 @@ To make selection comparisons using two levels of variables, you
 would need two iterations of groupings, where the first iteration of 
 `groupBaseline` groups on both variables, and the second iteration groups
 on the "outer" variable. For example, if a data set has both case and control 
-subjects, annotated in `STATUS` and `SUBJECT` columns, then
+subjects, annotated in `status` and `subject` columns, then
 generating convolved PDFs for each status would be performed as:
 
 ```{r, eval=FALSE, warning=FALSE, results="hide"}
 # First group by subject and status
-subject_grouped <- groupBaseline(baseline, groupBy=c("STATUS", "SUBJECT"))
+subject_grouped <- groupBaseline(baseline, groupBy=c("status", "subject"))
 
 # Then group the output by status
-status_grouped <- groupBaseline(subject_grouped, groupBy="STATUS")
+status_grouped <- groupBaseline(subject_grouped, groupBy="status")
 ```
 
 ### Testing the difference in selection PDFs between groups
@@ -259,7 +265,7 @@ following information:
 * `FDR`: FDR corrected p-value.
 
 ```{r, eval=TRUE}
-testBaseline(grouped_1, groupBy="SAMPLE")
+testBaseline(grouped_1, groupBy="sample")
 ```
 
 ## Plot and compare selection scores for groups
@@ -281,14 +287,14 @@ isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick",
                     "IgG"="seagreen", "IgA"="steelblue")
 
 # Plot mean and confidence interval by time-point
-plotBaselineSummary(grouped_1, "SAMPLE")
+plotBaselineSummary(grouped_1, "sample")
 
 # Plot selection scores by time-point and isotype for only CDR
-plotBaselineSummary(grouped_2, "SAMPLE", "ISOTYPE", groupColors=isotype_colors,
+plotBaselineSummary(grouped_2, "sample", "isotype", groupColors=isotype_colors,
                     subsetRegions="CDR")
 
 # Group by CDR/FWR and facet by isotype
-plotBaselineSummary(grouped_2, "SAMPLE", "ISOTYPE", facetBy="group")
+plotBaselineSummary(grouped_2, "sample", "isotype", facetBy="group")
 ```
 
 `plotBaselineDensity` plots the full `Baseline` PDF of selection scores for the 
@@ -298,7 +304,7 @@ function is shown.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Plot selection PDFs for a subset of the data
-plotBaselineDensity(grouped_2, "ISOTYPE", groupColumn="SAMPLE", colorElement="group", 
+plotBaselineDensity(grouped_2, "isotype", groupColumn="sample", colorElement="group", 
                     colorValues=sample_colors, sigmaLimits=c(-1, 1))
 ```
 
@@ -318,7 +324,7 @@ removing that sample or isotype from the original input data.
 # These are the same indices also in the matrices in the fileds "numbOfSeqs", 
 # "binomK", "binomN", "binomP", and "pdfs"
 # In this example, there is one row of IgA for each sample
-dbIgMIndex <- which(grouped_2@db$ISOTYPE == "IgA")
+dbIgMIndex <- which(grouped_2@db[["isotype"]] == "IgA")
 
 grouped_2 <- editBaseline(grouped_2, "db", grouped_2@db[-dbIgMIndex, ])
 grouped_2 <- editBaseline(grouped_2, "numbOfSeqs", grouped_2@numbOfSeqs[-dbIgMIndex, ])
@@ -331,6 +337,6 @@ grouped_2 <- editBaseline(grouped_2, "pdfs",
 # The indices corresponding to IgA are slightly different in the field "stats"
 # In this example, there is one row of IgA for each sample and for each region
 grouped_2 <- editBaseline(grouped_2, "stats", 
-                          grouped_2@stats[grouped_2@stats$ISOTYPE!="IgA", ])
+                          grouped_2@stats[grouped_2@stats[["isotype"]]!="IgA", ])
 ```
 
