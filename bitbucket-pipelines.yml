@@ -2,12 +2,13 @@ image:
   name: kleinstein/immcantation:test
 
 pipelines:
-  default:
-    - step:
-        script:
-          - sed -i '/test/ d' .Rbuildignore
-          - Rscript tests/setup/install_dep.R
-          - R CMD build .
-          - R CMD check *.tar.gz --as-cran --run-donttest --timings
+  branches:
+      default:
+        - step:
+            script:
+              - sed -i '/test/ d' .Rbuildignore
+              - Rscript tests/setup/install_dep.R
+              - R CMD build .
+              - R CMD check *.tar.gz --as-cran --run-donttest --timings
 
 
