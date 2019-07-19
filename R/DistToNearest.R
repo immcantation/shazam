@@ -807,9 +807,10 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
                           normalize=c("len", "none"), symmetry=c("avg", "min"),
-                          first=TRUE, VJthenLen=TRUE, nproc=1, fields=NULL, cross=NULL, mst=FALSE, subsample=NULL,
-                          progress=FALSE,
-                          cellIdColumn=NULL, locusColumn=NULL, groupUsingOnlyIGH=TRUE, keepVJLgroup=TRUE) {
+                          first=TRUE, VJthenLen=TRUE, nproc=1, fields=NULL, cross=NULL, 
+                          mst=FALSE, subsample=NULL, progress=FALSE,
+                          cellIdColumn=NULL, locusColumn=NULL, 
+                          groupUsingOnlyIGH=TRUE, keepVJLgroup=TRUE) {
     
     # Hack for visibility of foreach index variables
     i <- NULL
