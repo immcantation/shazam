@@ -40,11 +40,11 @@ A small example Change-O database is included in the `alakazam` package.
 Calculating the nearest neighbor distances requires the following 
 fields (columns) to be present in the Change-O database: 
 
-* `SEQUENCE_ID`
-* `V_CALL`
-* `J_CALL`
-* `JUNCTION`
-* `JUNCTION_LENGTH`
+* `sequence_id`
+* `v_call`
+* `j_call`
+* `junction`
+* `junction_length`
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 # Subset example data to one sample
@@ -57,8 +57,8 @@ data(ExampleDb, package="alakazam")
 The function for calculating distance between every sequence and its nearest
 neighbor takes a few parameters to adjust how the distance is measured. If a 
 genotype has been inferred using the methods in the `tigger` package, and a 
-`V_CALL_GENOTYPED` field has been added to the database, then this column may be 
-used instead of the default `V_CALL` column by specifying the `vCallColumn` 
+`v_call_genotyped` field has been added to the database, then this column may be 
+used instead of the default `v_call` column by specifying the `vCallColumn` 
 argument. This will allows the more accurate V call from `tigger` to be used for 
 grouping of the sequences. Furthermore, for more leniency toward ambiguous 
 V(D)J segment calls, the parameter `first` can be set to `FALSE`. Setting 
@@ -83,11 +83,13 @@ the overall distance.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Use nucleotide Hamming distance and normalize by junction length
-dist_ham <- distToNearest(ExampleDb, vCallColumn="V_CALL_GENOTYPED", 
+dist_ham <- distToNearest(ExampleDb, sequenceColumn="junction", 
+                          vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="ham", normalize="len", nproc=1)
 
 # Use genotyped V assignments, a 5-mer model and no normalization
-dist_s5f <- distToNearest(ExampleDb, vCallColumn="V_CALL_GENOTYPED", 
+dist_s5f <- distToNearest(ExampleDb, sequenceColumn="junction", 
+                          vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="hh_s5f", normalize="none", nproc=1)
 ```
 
@@ -204,17 +206,17 @@ completely bin size independent and only engages the real input data.
 The `fields` argument to `distToNearest` will split the input `data.frame`
 into groups based on values in the specified fields (columns) and will 
 treat them independently. For example, if the input data has multiple 
-samples, then `fields="SAMPLE"` would allow each sample to be analyzed 
+samples, then `fields="sample"` would allow each sample to be analyzed 
 separately.
 
 In the previous examples we used a subset of the original example data. In the
 following example, we will use the two available samples, `-1h` and `+7d`, 
-and will set `fields="SAMPLE"`. This will reproduce previous results for sample 
+and will set `fields="sample"`. This will reproduce previous results for sample 
 `-1h` and add results for sample `+7d`.
 
 ```{r fields, eval=TRUE, warning=FALSE}
 dist_fields <- distToNearest(ExampleDb, model="ham", normalize="len", 
-                             fields="SAMPLE", nproc=1)
+                             fields="sample", nproc=1)
 ```
 
 We can plot the nearest neighbor distances for the two samples:
@@ -228,7 +230,7 @@ p4 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)),
     ylab("Count") +
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
-    facet_grid(SAMPLE ~ ., scales="free_y")
+    facet_grid(sample ~ ., scales="free_y")
 plot(p4)
 ```
 
@@ -240,13 +242,15 @@ for `+7d` as well.
 Specifying the `cross` argument to `distToNearest` forces distance calculations 
 to be performed across groups, such that the nearest neighbor of each sequence 
 will always be a sequence in a different group. In the following example 
-we set `cross="SAMPLE"`, which will group the data into `-1h` and 
+we set `cross="sample"`, which will group the data into `-1h` and 
 `+7d` sample subsets. Thus, nearest neighbor distances for sequences in sample 
 `-1h` will be restricted to the closest sequence in sample `+7d` and vice versa.
 
 ```{r cross, eval=TRUE, warning=FALSE}
-dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE, 
-                            normalize="len", cross="SAMPLE", nproc=1)
+dist_cross <- distToNearest(ExampleDb, sequenceColumn="junction", 
+                            vCallColumn="v_call_genotyped", jCallColumn="j_call",
+                            model="ham", first=FALSE, 
+                            normalize="len", cross="sample", nproc=1)
 ```
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
@@ -258,7 +262,7 @@ p5 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)),
     ylab("Count") +
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
-    facet_grid(SAMPLE ~ ., scales="free_y")
+    facet_grid(sample ~ ., scales="free_y")
 plot(p5)
 ```
 
@@ -277,12 +281,12 @@ If there are very large groups of sequences that share V call, J call and juncti
 library(dplyr)
 library(alakazam)
 top_10_sizes <- ExampleDb %>%
-     group_by(JUNCTION_LENGTH) %>% # group by junction length
+     group_by(junction_length) %>% # group by junction length
      do(alakazam::groupGenes(., first=TRUE)) %>% # group by V and J call
-     mutate(GROUP_ID=paste(JUNCTION_LENGTH,VJ_GROUP, sep="_")) %>% # Create group ids based on junction length and VJ calls
+     mutate(GROUP_ID=paste(junction_length, VJ_GROUP, sep="_")) %>% # Create group ids based on junction length and VJ calls
      ungroup() %>%
      group_by(GROUP_ID) %>% # group by GROUP_ID
-     distinct(JUNCTION) %>% # for each group, we want to count unique junctions, so keep distinct
+     distinct(junction) %>% # for each group, we want to count unique junctions, so keep distinct
      summarize(SIZE=n()) %>% # get the size of the group, the number of sequences
      arrange(desc(SIZE)) %>% # sort by decreasing size
      select(SIZE) %>% 
@@ -292,8 +296,8 @@ top_10_sizes
 # Use 30 to subsample
 # NOTE. This is a toy example. To use 30 with real data 
 # is probably not a good choice.
-dist <- distToNearest(ExampleDb, 
-                      vCallColumn="V_CALL_GENOTYPED", 
+dist <- distToNearest(ExampleDb, sequenceColumn="junction", 
+                      vCallColumn="v_call_genotyped", jCallColumn="j_call",
                       model="ham", 
                       first=FALSE, normalize="len",
                       subsample = 30)
