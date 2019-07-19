@@ -9,23 +9,26 @@ test_that("collapseClones", {
     
     # Build clonal consensus for the full sequence
     set.seed(7)
-    clones.1 <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=FALSE)
+    clones.1 <- collapseClones(db, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                               method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=FALSE)
     set.seed(7)
-    clones.1.df <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=FALSE)
+    clones.1.df <- collapseClones(db, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                  method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=FALSE)
     expect_identical(clones.1.df, clones.1)
     
     set.seed(7)
-    clones.2 <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=TRUE)
+    clones.2 <- collapseClones(db,  cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                               method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=TRUE)
     
-    for (clone in unique(db$CLONE)) {
+    for (clone in unique(db[["CLONE"]])) {
         # expect CLONAL_SEQUENCE for all seqs in the same clone to be the same
         # expect CLONAL_GERMLINE for all seqs in the same clone to be the same
         # use result from expandedDb=TRUE to test
-        expect_equal(length(unique(clones.2[clones.2$CLONE==clone, "CLONAL_SEQUENCE"])), 1)
-        expect_equal(length(unique(clones.2[clones.2$CLONE==clone, "CLONAL_GERMLINE"])), 1)
+        expect_equal(length(unique(clones.2[clones.2[["CLONE"]]==clone, "CLONAL_SEQUENCE"])), 1)
+        expect_equal(length(unique(clones.2[clones.2[["CLONE"]]==clone, "CLONAL_GERMLINE"])), 1)
         
         # expect result from expandedDb=TRUE to be the same as that from expandedDb=FALSE
-        expect_identical(clones.1[clones.1$CLONE==clone, ], clones.2[clones.2$CLONE==clone, ][1,])
+        expect_identical(clones.1[clones.1[["CLONE"]]==clone, ], clones.2[clones.2[["CLONE"]]==clone, ][1,])
     }
 }) 
 
@@ -72,8 +75,8 @@ test_that("observedMutations, charge mutations", {
 
 #### calcObservedMutations, hydropathy ####
 test_that("calcObservedMutations, hydropathy", {
-    in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
-    germ_seq <-  ExampleDb[1, "GERMLINE_IMGT_D_MASK"]
+    in_seq <- ExampleDb[["SEQUENCE_IMGT"]][1]
+    germ_seq <-  ExampleDb[["GERMLINE_IMGT_D_MASK"]][1]
     
     #' # Identify all mutations in the sequence
     expect_equivalent(calcObservedMutations(in_seq, germ_seq), c(0,2))
@@ -179,8 +182,8 @@ test_that("observedMutations, combine", {
     ## Get the number of nonN positions, the denomitator for the frequency
     db_obs_denominator <- sapply(1:dim(db)[1], 
                                  function(i) {
-                                     mu_count <- calcObservedMutations(inputSeq = db[i, "SEQUENCE_IMGT"],
-                                                                       germlineSeq = db[i,"GERMLINE_IMGT_D_MASK"],
+                                     mu_count <- calcObservedMutations(inputSeq = db[["SEQUENCE_IMGT"]][i],
+                                                                       germlineSeq = db[["GERMLINE_IMGT_D_MASK"]][i],
                                                                        regionDefinition = IMGT_V,
                                                                        returnRaw = T, freq=F)
                                      mu_den <- sum(mu_count$nonN)
@@ -344,7 +347,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
 })
 
 
-    #### expectedMutations, warning ####
+#### expectedMutations, warning ####
 test_that("expectedMutations overwrites with a warning pre-existing values", {
     db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")[1:10, ]
     
@@ -377,7 +380,7 @@ test_that("expectedMutations overwrites with a warning pre-existing values", {
 #### calcObservedMutations, no mutations ####
 test_that("calcObservedMutations, when no mutations found", {
     
-    in_seq <- ExampleDb[1, "SEQUENCE_IMGT"]
+    in_seq <- ExampleDb[["SEQUENCE_IMGT"]][1]
     germ_seq <- in_seq
     
     #' Should return c(NA,NA), not c(NA)
@@ -400,7 +403,8 @@ test_that("observedMutations, when no mutations found", {
     expect_equivalent(observedMutations(data.frame(
         "SEQUENCE_IMGT"=c(in_seq, in_seq),
         "GERMLINE_IMGT_D_MASK"=c(in_seq, in_seq)
-    ), regionDefinition = NULL)[,c("MU_COUNT_SEQ_R", "MU_COUNT_SEQ_S")], data.frame(c(0, 0), c(0, 0)))
+    ), sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+    regionDefinition = NULL)[,c("MU_COUNT_SEQ_R", "MU_COUNT_SEQ_S")], data.frame(c(0, 0), c(0, 0)))
 })
 
 ##### Tests 1A-1H (calcObservedMutations & observedMutations)
@@ -2154,48 +2158,61 @@ test_that("collapseClones, 2E", {
     
     ##### create 3 identical clones from testDb
     testDb.clone = rbind(testDb, testDb, testDb)
-    testDb.clone$CLONE = rep(c("124", "39", "5"), each=nrow(testDb))
+    testDb.clone[["CLONE"]] = rep(c("124", "39", "5"), each=nrow(testDb))
     
     ##### check input checks/warnings
     # method
-    expect_error(collapseClones(db=testDb.clone, method="nonExistingMethod"))
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="nonExistingMethod"))
     
     # minimumFrequency for thresholdedFreq
-    expect_error(collapseClones(db=testDb.clone, method="thresholdedFreq", minimumFrequency=NULL),
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="thresholdedFreq", minimumFrequency=NULL),
                  "minimumFrequency must be a numeric value.")
-    expect_error(collapseClones(db=testDb.clone, method="thresholdedFreq", minimumFrequency=1.3),
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="thresholdedFreq", minimumFrequency=1.3),
                  "minimumFrequency must be between 0 and 1.")
-    expect_error(collapseClones(db=testDb.clone, method="thresholdedFreq", minimumFrequency=(-1.3)),
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="thresholdedFreq", minimumFrequency=(-1.3)),
                  "minimumFrequency must be between 0 and 1.")
     
     # includeAmbiguous & breakTiesStochastic for methods other than catchAll
-    expect_error(collapseClones(db=testDb.clone, method="mostCommon", 
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="mostCommon", 
                                 includeAmbiguous=NULL, breakTiesStochastic=FALSE),
                  "includeAmbiguous must be TRUE or FALSE.")
-    expect_error(collapseClones(db=testDb.clone, method="mostCommon", 
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="mostCommon", 
                                 includeAmbiguous=FALSE, breakTiesStochastic=NULL),
                  "breakTiesStochastic must be TRUE or FALSE.")
     
     # breakTiesByColumns and muFreqColumn for methods most/leastMutated
-    expect_error(collapseClones(db=testDb.clone, method="mostMutated", 
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="mostMutated", 
                                 breakTiesByColumns="notList"),
                  "breakTiesByColumns must be a list.")
-    expect_error(collapseClones(db=testDb.clone, method="mostMutated", 
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="mostMutated", 
                                 breakTiesByColumns=list(1,2,3)),
                  "breakTiesByColumns must be a nested list of length 2.")
-    expect_error(collapseClones(db=testDb.clone, method="mostMutated", 
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="mostMutated", 
                                 breakTiesByColumns=list(c("col1", "col2"), c(max,max,min))),
                  "Nested vectors in breakTiesByColumns must have the same lengths.")
-    expect_error(collapseClones(db=testDb.clone, method="mostMutated", 
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="mostMutated", 
                                 breakTiesByColumns=list(c(12,22,3), c(max,max,min))),
                  "The first vector in breakTiesByColumns must contain column names.")
-    expect_error(collapseClones(db=testDb.clone, method="mostMutated", 
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="mostMutated", 
                                 breakTiesByColumns=list(c("col1", "col2"), c("max","max"))),
                  "The second vector in breakTiesByColumns must contain functions.")
-    expect_error(collapseClones(db=testDb.clone, method="mostMutated", 
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="mostMutated", 
                                 breakTiesByColumns=list(c("col1", "col2"), c(max,max))),
                  "All column named included in breakTiesByColumns must be present in db.")
-    expect_error(collapseClones(db=testDb.clone, method="mostMutated", muFreqColumn="notInDb",
+    expect_error(collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                                method="mostMutated", muFreqColumn="notInDb",
                                 breakTiesByColumns=list(c("DUPCOUNT", "CONSCOUNT"), c(max,max))),
                  "If specified, muFreqColumn must be a column present in db.")
     
@@ -2380,4 +2397,125 @@ test_that("IUPAC2nucs", {
     expect_equivalent(shazam:::IUPAC2nucs(code="N", excludeN=F), c("A", "C", "G", "T"))
     expect_equivalent(shazam:::IUPAC2nucs(code="S", excludeN=T), c("C", "G"))
     expect_equivalent(shazam:::IUPAC2nucs(code="S", excludeN=F), c("C", "G"))
+})
+
+#### AIRR migration tests ####
+
+test_that("collapseClones", {
+    
+    # ExampleDb
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    # ExampleDb_airr
+    load(file.path("..", "data-tests", "ExampleDb_airr.rda")) 
+    
+    # subset
+    db_c <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d" &
+                       CLONE %in% c("3100", "3141", "3184"))
+    db_a <- subset(ExampleDb_airr, isotype %in% c("IgA", "IgG") & sample == "+7d" &
+                       clone_id %in% c("3100", "3141", "3184"))
+    
+    rm(ExampleDb, ExampleDb_airr)
+    
+    clones_c <- collapseClones(db_c, cloneColumn="CLONE", 
+                               sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
+                               method="thresholdedFreq", minimumFrequency=0.6,
+                               includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+    clones_a <- collapseClones(db_a, cloneColumn="clone_id",
+                               sequenceColumn="sequence_alignment", germlineColumn="germline_alignment_d_mask",
+                               method="thresholdedFreq", minimumFrequency=0.6,
+                               includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+    
+    expect_identical(clones_a[["CLONAL_SEQUENCE"]], clones_c[["CLONAL_SEQUENCE"]])
+    expect_identical(clones_a[["CLONAL_GERMLINE"]], clones_c[["CLONAL_GERMLINE"]])
+    
+})
+
+test_that("observedMutations", {
+    
+    # ExampleDb
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    # ExampleDb_airr
+    load(file.path("..", "data-tests", "ExampleDb_airr.rda")) 
+    
+    # subset
+    db_c <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
+    db_a <- subset(ExampleDb_airr, isotype == "IgG" & sample == "+7d")
+    
+    rm(ExampleDb, ExampleDb_airr)
+    
+    # mutation freq
+    db_obs_c <- observedMutations(db_c, sequenceColumn="SEQUENCE_IMGT",
+                                  germlineColumn="GERMLINE_IMGT_D_MASK",
+                                  frequency=TRUE,
+                                  nproc=1)
+    
+    db_obs_a <- observedMutations(db_a, sequenceColumn="sequence_alignment",
+                                  germlineColumn="germline_alignment_d_mask",
+                                  frequency=TRUE,
+                                  nproc=1)
+    
+    expect_identical(db_obs_c[["MU_FREQ_SEQ_R"]], db_obs_a[["MU_FREQ_SEQ_R"]])
+    expect_identical(db_obs_c[["MU_FREQ_SEQ_S"]], db_obs_a[["MU_FREQ_SEQ_S"]])
+    
+    # mutation count
+    db_obs_c <- observedMutations(db_c, sequenceColumn="SEQUENCE_IMGT",
+                                  germlineColumn="GERMLINE_IMGT_D_MASK",
+                                  frequency=FALSE,
+                                  nproc=1)
+    
+    db_obs_a <- observedMutations(db_a, sequenceColumn="sequence_alignment",
+                                  germlineColumn="germline_alignment_d_mask",
+                                  frequency=FALSE,
+                                  nproc=1)
+    
+    expect_identical(db_obs_c[["MU_COUNT_SEQ_R"]], db_obs_a[["MU_COUNT_SEQ_R"]])
+    expect_identical(db_obs_c[["MU_COUNT_SEQ_S"]], db_obs_a[["MU_COUNT_SEQ_S"]])
+    
+})
+
+test_that("slideWindowDb", {
+    
+    # ExampleDb
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    # ExampleDb_airr
+    load(file.path("..", "data-tests", "ExampleDb_airr.rda")) 
+    
+    t1 <- slideWindowDb(db = ExampleDb[1:50, ], sequenceColumn="SEQUENCE_IMGT", 
+                        germlineColumn="GERMLINE_IMGT_D_MASK",
+                        mutThresh=6, windowSize=10)
+    t2 <- slideWindowDb(db = ExampleDb_airr[1:50, ], sequenceColumn="sequence_alignment",
+                        germlineColumn="germline_alignment_d_mask",
+                        mutThresh=6, windowSize=10)
+    
+    expect_identical(t1, t2)
+    
+})
+
+test_that("expectedMutations", {
+    
+    # ExampleDb
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    # ExampleDb_airr
+    load(file.path("..", "data-tests", "ExampleDb_airr.rda")) 
+    
+    db_c <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+    db_a <- subset(ExampleDb_airr, isotype %in% c("IgA", "IgG") & sample == "+7d")
+    
+    db_exp_c <- expectedMutations(db_c,
+                                  sequenceColumn="SEQUENCE_IMGT",
+                                  germlineColumn="GERMLINE_IMGT_D_MASK",
+                                  regionDefinition=IMGT_V,
+                                  nproc=1)
+    
+    db_exp_a <- expectedMutations(db_a,
+                                  sequenceColumn="sequence_alignment",
+                                  germlineColumn="germline_alignment_d_mask",
+                                  regionDefinition=IMGT_V,
+                                  nproc=1)
+
+    expect_identical(db_exp_c[["MU_EXPECTED_CDR_R"]], db_exp_a[["MU_EXPECTED_CDR_R"]])
+    expect_identical(db_exp_c[["MU_EXPECTED_CDR_S"]], db_exp_a[["MU_EXPECTED_CDR_S"]])
+    expect_identical(db_exp_c[["MU_EXPECTED_FWR_R"]], db_exp_a[["MU_EXPECTED_FWR_R"]])
+    expect_identical(db_exp_c[["MU_EXPECTED_FWR_S"]], db_exp_a[["MU_EXPECTED_FWR_S"]])
+    
 })

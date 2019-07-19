@@ -32,12 +32,12 @@ physicochemical properties of translated codons.
 
 ## Example data
 
-A small example Change-O database is included in the `alakazam` package. 
+A small example AIRR-format database is included in the `alakazam` package. 
 Analyzing mutations requires the following fields (columns) to 
 be present in the Change-O database: 
 
-* `SEQUENCE_IMGT`
-* `GERMLINE_IMGT_D_MASK`
+* `sequence_alignment`
+* `germline_alignment_d_mask`
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 # Import required packages
@@ -48,7 +48,7 @@ library(ggplot2)
 
 # Load and subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+db <- subset(ExampleDb, isotype %in% c("IgA", "IgG") & sample == "+7d")
 ```
 
 ## Calculate the counts and frequencies of mutations over the entire sequence
@@ -65,25 +65,25 @@ Mutation frequencies appear in new columns named `MU_FREQ_<Region>_<R/S>`.
 
 ```{r, eval=TRUE}
 # Calculate R and S mutation counts
-db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-                            germlineColumn="GERMLINE_IMGT_D_MASK",
+db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+                            germlineColumn="germline_alignment_d_mask",
                             regionDefinition=NULL,
                             frequency=FALSE, 
                             nproc=1)
 # Show new mutation count columns
 db_obs %>% 
-    select(SEQUENCE_ID, starts_with("MU_COUNT_")) %>%
+    select(sequence_id, starts_with("MU_COUNT_")) %>%
     head(n=4)
 
 # Calculate R and S mutation frequencies
-db_obs <- observedMutations(db_obs, sequenceColumn="SEQUENCE_IMGT",
-                            germlineColumn="GERMLINE_IMGT_D_MASK",
+db_obs <- observedMutations(db_obs, sequenceColumn="sequence_alignment",
+                            germlineColumn="germline_alignment_d_mask",
                             regionDefinition=NULL,
                             frequency=TRUE, 
                             nproc=1)
 # Show new mutation frequency columns
 db_obs %>% 
-    select(SEQUENCE_ID, starts_with("MU_FREQ_")) %>%
+    select(sequence_id, starts_with("MU_FREQ_")) %>%
     head(n=4)
 ```
 
@@ -92,22 +92,22 @@ columns into a single value.
 
 ```{r, eval=TRUE}
 # Calculate combined R and S mutation frequencies
-db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-                            germlineColumn="GERMLINE_IMGT_D_MASK",
+db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+                            germlineColumn="germline_alignment_d_mask",
                             regionDefinition=NULL,
                             frequency=TRUE, 
                             combine=TRUE,
                             nproc=1)
 # Show new mutation frequency columns
 db_obs %>% 
-    select(SEQUENCE_ID, starts_with("MU_FREQ_")) %>%
+    select(sequence_id, starts_with("MU_FREQ_")) %>%
     head(n=4)
 ```
 
 We can plot the mutation frequencies a explore differences between samples or isotypes.
 
 ```{r, eval=TRUE, warning=FALSE}
-g1 <- ggplot(db_obs, aes(x=ISOTYPE, y=MU_FREQ, fill=ISOTYPE)) +
+g1 <- ggplot(db_obs, aes(x=isotype, y=MU_FREQ, fill=isotype)) +
     theme_bw() + ggtitle("Total mutations") +
     xlab("Isotype") + ylab("Mutation frequency") +
     scale_fill_manual(name="Isotype", values=IG_COLORS) +
@@ -138,37 +138,37 @@ In the following example, we will explore the mutation frequency in the V-segmen
 
 ```{r, eval=TRUE}
 # Calculate R and S mutation counts for individual CDRs and FWRs
-db_obs_v <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-                              germlineColumn="GERMLINE_IMGT_D_MASK",
+db_obs_v <- observedMutations(db, sequenceColumn="sequence_alignment",
+                              germlineColumn="germline_alignment_d_mask",
                               regionDefinition=IMGT_V_BY_REGIONS,
                               frequency=FALSE, 
                               nproc=1)
 # Show new FWR mutation columns
 db_obs_v %>% 
-    select(SEQUENCE_ID, starts_with("MU_COUNT_FWR")) %>%
+    select(sequence_id, starts_with("MU_COUNT_FWR")) %>%
     head(n=4)
 
 # Calculate aggregate CDR and FWR V-segment R and S mutation frequencies
-db_obs_v <- observedMutations(db_obs_v, sequenceColumn="SEQUENCE_IMGT",
-                              germlineColumn="GERMLINE_IMGT_D_MASK",
+db_obs_v <- observedMutations(db_obs_v, sequenceColumn="sequence_alignment",
+                              germlineColumn="germline_alignment_d_mask",
                               regionDefinition=IMGT_V,
                               frequency=TRUE, 
                               nproc=1)
 # Show new CDR and FWR mutation frequency columns
 db_obs_v %>% 
-    select(SEQUENCE_ID, starts_with("MU_FREQ_")) %>%
+    select(sequence_id, starts_with("MU_FREQ_")) %>%
     head(n=4)
 ```
 
 Plot a comparison between CDR silent and replacement mutations.
 
 ```{r, eval=TRUE, warning=FALSE}
-g2 <- ggplot(db_obs_v, aes(x=ISOTYPE, y=MU_FREQ_CDR_S, fill=ISOTYPE)) +
+g2 <- ggplot(db_obs_v, aes(x=isotype, y=MU_FREQ_CDR_S, fill=isotype)) +
     theme_bw() + ggtitle("CDR silent mutations") +
     xlab("Isotype") + ylab("Mutation frequency") +
     scale_fill_manual(name="Isotype", values=IG_COLORS) +
     geom_boxplot()
-g3 <- ggplot(db_obs_v, aes(x=ISOTYPE, y=MU_FREQ_CDR_R, fill=ISOTYPE)) +
+g3 <- ggplot(db_obs_v, aes(x=isotype, y=MU_FREQ_CDR_R, fill=isotype)) +
     theme_bw() + ggtitle("CDR replacement mutations") +
     xlab("Isotype") + ylab("Mutation frequency") +
     scale_fill_manual(name="Isotype", values=IG_COLORS) +
@@ -190,15 +190,15 @@ the charge classification of a translated codon will be considered silent mutati
 
 ```{r, eval=TRUE}
 # Calculate charge mutation frequency for the full sequence
-db_obs_ch <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-                               germlineColumn="GERMLINE_IMGT_D_MASK",
+db_obs_ch <- observedMutations(db, sequenceColumn="sequence_alignment",
+                               germlineColumn="germline_alignment_d_mask",
                                regionDefinition=NULL,
                                mutationDefinition=CHARGE_MUTATIONS,
                                frequency=TRUE, 
                                nproc=1)
 # Show new charge mutation frequency columns
 db_obs_ch %>% 
-    select(SEQUENCE_ID, starts_with("MU_FREQ_")) %>%
+    select(sequence_id, starts_with("MU_FREQ_")) %>%
     head(n=4)
 ```
 
@@ -206,7 +206,7 @@ We can make a plot to visualize if mutations that change the sequence charge are
 frequent in one isotype.
 
 ```{r, eval=TRUE, warning=FALSE}
-g4 <- ggplot(db_obs_ch, aes(x=ISOTYPE, y=MU_FREQ_SEQ_R, fill=ISOTYPE)) +
+g4 <- ggplot(db_obs_ch, aes(x=isotype, y=MU_FREQ_SEQ_R, fill=isotype)) +
     theme_bw() + ggtitle("Charge replacement mutations") +
     xlab("Isotype") + ylab("Mutation frequency") +
     scale_fill_manual(name="Isotype", values=IG_COLORS) +
