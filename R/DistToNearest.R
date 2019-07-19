@@ -902,7 +902,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     # crucial to have simplify=FALSE 
     # (otherwise won't return a list if uniqueClones has length 1)
     uniqueGroupsIdx <- sapply(1:nrow(uniqueGroups), function(i){
-        curGroup <- data.frame(uniqueGroups[i, ])
+        curGroup <- data.frame(uniqueGroups[i, ], stringsAsFactors=FALSE)
         colnames(curGroup) <- group_cols
         # match for each field
         curIdx <- sapply(group_cols, function(coln){
@@ -916,6 +916,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         stopifnot( all(!is.na(curIdx)) )
         # index within range of db
         stopifnot( max(curIdx) <= nrow(db) )
+        return(curIdx)
     }, simplify=FALSE)
 
     # Create new column for distance to nearest neighbor
