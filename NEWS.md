@@ -1,3 +1,11 @@
+Version 0.2.0.999 July 19, 2918
+-------------------------------------------------------------------------------
+
+Distance Calculation:
+
++ Fixed a bug in `distToNearest` that could potentially cause sequences from
+  different partitions to be used for distance calculation. 
+
 Version 0.2.0 July 18, 2019
 -------------------------------------------------------------------------------
 
