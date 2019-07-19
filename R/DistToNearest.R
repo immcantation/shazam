@@ -895,7 +895,7 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     # unique groups
     # not necessary but good practice to force as df and assign colnames
     # (in case group_cols has length 1; which can happen in groupBaseline)
-    uniqueGroups <- data.frame(unique(db[, group_cols]))
+    uniqueGroups <- data.frame(unique(db[, group_cols]), stringsAsFactors=FALSE)
     colnames(uniqueGroups) <- group_cols
     rownames(uniqueGroups) <- NULL
     # indices
@@ -911,8 +911,13 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
         curIdx <- do.call(rbind, curIdx)
         # intersect to get match across fields 
         curIdx <- which(colSums(curIdx)==length(group_cols))
+        # sanity check
+        # no NA
+        stopifnot( all(!is.na(curIdx)) )
+        # index within range of db
+        stopifnot( max(curIdx) <= nrow(db) )
     }, simplify=FALSE)
-    
+
     # Create new column for distance to nearest neighbor
     db$TMP_DIST_NEAREST <- rep(NA, nrow(db))
     db$ROW_ID <- 1:nrow(db)
