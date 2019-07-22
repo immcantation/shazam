@@ -25,7 +25,7 @@ installDep <- function(this_pack_v, dep_pack_name, dep_pack_v) {
             warning(sprintf("The current version and publication date of %s could not\n                     be detected", 
                             pkg))
             versions <- dates <- NA
-        } else if (length(idx) > 1) {
+        } else if (length(idx) > 0) {
             versions <- tarballs[idx]
             versions <- gsub(sprintf("^%s_", pkg), "", versions)
             versions <- numeric_version(gsub(".tar.gz$", "", versions))
