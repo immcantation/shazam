@@ -10,5 +10,10 @@ pipelines:
               - Rscript tests/setup/install_dep.R
               - R CMD build .
               - R CMD check *.tar.gz --as-cran --run-donttest --timings
-
-
+      migration_julian:
+        - step:
+            script:
+              - sed -i '/test/ d' .Rbuildignore
+              - Rscript tests/setup/install_dep.R
+              - R CMD build .
+              - R CMD check *.tar.gz --as-cran --run-donttest --timings
