@@ -57,7 +57,7 @@ installDep <- function(this_pack_v, dep_pack_name, dep_pack_v) {
         if (!in_cran & !devel) { 
             warning(paste0(required_version," not found in CRAN.")) 
         }
-        message(paste0(dep_pack_name, " ", required_version,": installing most recent version from Bitbucket instead.")) 
+        message(paste0(dep_pack_name, " ", required_version,": installing most recent version from Bitbucket.")) 
         install_bitbucket(paste0("kleinstein/", dep_pack_name, "@default"))
     }
 }
@@ -69,7 +69,7 @@ d <- sub("^\\n", "", d)
 imports <- strsplit(d, ",\n")[[1]]
 
 # Install
-idx <- sapply(c("alakazam", "shazam"), grep, imports)
+idx <- sapply(c("alakazam"), grep, imports)
 for (i in 1:length(idx)) {
     this_package_name <-  names(idx)[[i]]
     this_package_version <-  imports[idx[[i]]]
