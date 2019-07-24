@@ -58,7 +58,7 @@ installDep <- function(this_pack_v, dep_pack_name, dep_pack_v) {
             warning(paste0(required_version," not found in CRAN.")) 
         }
         message(paste0(dep_pack_name, " ", required_version,": installing most recent version from Bitbucket.")) 
-        install_bitbucket(paste0("kleinstein/", dep_pack_name, "@default"))
+        install_bitbucket(paste0("kleinstein/", dep_pack_name, "@default"), upgrade = "never")
     }
 }
 
