@@ -843,11 +843,6 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     check <- checkColumns(db, columns)
     if (check != TRUE) { stop(check) }
     
-    # if necessary, cast V_CALL and J_CALL to character 
-    # (factor not accepted by alakazam::groupGenes)
-    if (class(vCallColumn)=="factor") { db[[vCallColumn]] <- as.character(db[[vCallColumn]]) }
-    if (class(jCallColumn)=="factor") { db[[jCallColumn]] <- as.character(db[[jCallColumn]]) }
-    
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn)) 
     
