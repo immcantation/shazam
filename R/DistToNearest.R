@@ -684,9 +684,9 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                           heavy chain sequence in the subsampled set for the VJL group. If \code{NULL} no 
 #'                           subsampling is performed.
 #' @param    progress        if \code{TRUE} print a progress bar.
-#' @param    cellIdColumn    name of the column containing cell IDs. Only applicable and required for 
+#' @param    cellIdColumn    name of the character column containing cell IDs. Only applicable and required for 
 #'                           single-cell mode.
-#' @param    locusColumn     name of the column containing locus information. Only applicable and 
+#' @param    locusColumn     name of the character column containing locus information. Only applicable and 
 #'                           required for single-cell mode.
 #' @param    groupUsingOnlyIGH    use only heavy chain (\code{IGH}) sequences for VJL grouping, disregarding 
 #'                                light chains. Only applicable and required for single-cell mode. 
@@ -703,6 +703,9 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'           Note that distances between light chain sequences are not calculated, even if light chains 
 #'           were used for VJL grouping via \code{groupUsingOnlyIGH=FALSE}. Light chain sequences, if any,
 #'           will have \code{NA} in the \code{DIST_NEAREST} field.
+#'           
+#'           Note that the output \code{vCallColumn} and \code{jCallColumn} columns will be converted to 
+#'           \code{character} if they were \code{factor} in the input \code{db}.
 #'
 #' @details
 #' 
@@ -839,6 +842,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
     
     check <- checkColumns(db, columns)
     if (check != TRUE) { stop(check) }
+    
+    # if necessary, cast V_CALL and J_CALL to character 
+    # (factor not accepted by alakazam::groupGenes)
+    if (class(vCallColumn)=="factor") { db[[vCallColumn]] <- as.character(db[[vCallColumn]]) }
+    if (class(jCallColumn)=="factor") { db[[jCallColumn]] <- as.character(db[[jCallColumn]]) }
     
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn)) 
