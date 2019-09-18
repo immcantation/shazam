@@ -86,8 +86,8 @@ It is possible to exclude certain specified nodes from being considered as the M
 Note that when excluding some nodes, additional nodes that have not been explicitly specified by the user to be excluded may also get excluded. For example, suppose that node B is an offspring of node A; and node A has been specified by the user to be excluded. As a corollary of node A being excluded, its offspring node B will also become excluded, despite not being specified explicitly.
 
 ```{r, eval=TRUE, warning=FALSE}
-# The annotation field called "SAMPLE"
-vertex_attr(graph)$SAMPLE
+# The annotation field called "sample"
+vertex_attr(graph)$sample
 
 # notice that node "GN5SHBT01AKANC" is an offspring of "Inferred1"
 par(mar=c(0, 0, 0, 0) + 0.1)
@@ -97,7 +97,7 @@ plot(graph, layout=layout_as_tree, edge.arrow.mode=0, vertex.label.cex=0.75)
 # The nodes "Germline" and "Inferred1" are thus excluded
 # As a corollary, "GN5SHBT01AKANC", the offspring of "Inferred1", is also excluded
 # In this case, "GN5SHBT07JDYW5" is then taken to be the MRCA
-shmulateTree(sequence, graph, field="SAMPLE", exclude=NA)
+shmulateTree(sequence, graph, field="sample", exclude=NA)
 ```
 
 It is also possible to add a proportional number of mutations to the immediate offsprings of the MRCA based on the fraction of the nucleotide sequence that is within the junction region. This is achieved via the optional `junctionWeight` argument, to be supplied as a numeric value between `0` and `1`. 

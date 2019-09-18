@@ -21,7 +21,8 @@ test_that("Test cross distToNearest with model hh_s1f", {
     
     ## Test hh_s1f 
     
-    dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
+    dist_hs1f <- distToNearest(db, sequenceColumn="JUNCTION",
+                               vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                model="hh_s1f", first=FALSE, normalize="len")
     ## Test if the updated function reproduces results
     expect_equal(dist_hs1f$DIST_NEAREST[test_idx],
@@ -31,20 +32,23 @@ test_that("Test cross distToNearest with model hh_s1f", {
                  tolerance=0.005)
     
     ## There's only one donor, hence cross-donor will return all NA
-    dist_hs1f_cross_donor <- distToNearest(db2, vCallColumn="V_CALL_GENOTYPED", 
+    dist_hs1f_cross_donor <- distToNearest(db2, sequenceColumn="JUNCTION",
+                                           vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                            model="hh_s1f", first=FALSE, normalize="none", nproc=1, cross="DONOR")
 
     expect_true(all(is.na(dist_hs1f_cross_donor$CROSS_DIST_NEAREST)))
     
     ## fields=NULL and fields=DONOR should give same results
-    cross_dist_hs1f <- distToNearest(db2, vCallColumn="V_CALL_GENOTYPED", 
+    cross_dist_hs1f <- distToNearest(db2, sequenceColumn="JUNCTION",
+                                     vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                      model="hh_s1f", first=FALSE, normalize="len",nproc=1,
                                      cross="SAMPLE")
     
     
-    cross_dist_hs1f_donor <- distToNearest(db2, vCallColumn="V_CALL_GENOTYPED", 
-                               model="hh_s1f", first=FALSE, normalize="len",nproc=1,
-                               cross="SAMPLE", fields="DONOR")
+    cross_dist_hs1f_donor <- distToNearest(db2, sequenceColumn="JUNCTION",
+                                           vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
+                                           model="hh_s1f", first=FALSE, normalize="len",nproc=1,
+                                           cross="SAMPLE", fields="DONOR")
     
     expect_equal(cross_dist_hs1f, cross_dist_hs1f_donor)
     expect_equal(cross_dist_hs1f$CROSS_DIST_NEAREST[test_idx],
@@ -65,14 +69,16 @@ test_that("Test cross distToNearest with model hh_s1f", {
     db3[nrow(db3),"SAMPLE"] <- "S3"
     # t(db3[c(1,316,nrow(db3)),c("JUNCTION","V_CALL","J_CALL","DONOR","SAMPLE")] )
     
-    db2_1_316_630 <- distToNearest(db2[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
-                  model="hh_s1f", first=FALSE, normalize="len",cross="SAMPLE")
+    db2_1_316_630 <- distToNearest(db2[c(1,316,630),], sequenceColumn="JUNCTION",
+                                   vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
+                                   model="hh_s1f", first=FALSE, normalize="len",cross="SAMPLE")
     ## Exactly same seq, returns NA
     expect_equal(db2_1_316_630$CROSS_DIST_NEAREST,c(NA,NA,NA))
     
     ## One seq has been edited, will return distance values
-    db3_1_316_630 <- distToNearest(db3[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
-                             model="hh_s1f", first=FALSE, normalize="len",cross="SAMPLE")
+    db3_1_316_630 <- distToNearest(db3[c(1,316,630),], sequenceColumn="JUNCTION",
+                                   vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
+                                   model="hh_s1f", first=FALSE, normalize="len",cross="SAMPLE")
     expect_equal(db3_1_316_630$CROSS_DIST_NEAREST,c(0.0175,0.0175,0.0175), tolerance=0.005)
 })
 
@@ -93,9 +99,10 @@ test_that("Test cross distToNearest with model hh_s5f", {
     
     ## Test hh_s5f 
     
-    dist_hs5f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
+    dist_hs5f <- distToNearest(db, sequenceColumn="JUNCTION",
+                               vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                model="hh_s5f", first=FALSE, normalize="none", nproc=1)
-
+    
     ## Test if the updated function reproduces results
     expect_equal(dist_hs5f$DIST_NEAREST[test_idx],
                  c( NA, NA, NA, NA, 37.2436, 35.1829, 31.5680, 27.6521, 15.0128,
@@ -104,15 +111,18 @@ test_that("Test cross distToNearest with model hh_s5f", {
                  tolerance=0.005)
     
     ## There's only one donor, hence cross-donor will return all NA
-    dist_hs5f_cross_donor <- distToNearest(db2, vCallColumn="V_CALL_GENOTYPED", 
-                               model="hh_s5f", first=FALSE, normalize="none", nproc=1, cross="DONOR")
+    dist_hs5f_cross_donor <- distToNearest(db2, sequenceColumn="JUNCTION",
+                                           vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
+                                           model="hh_s5f", first=FALSE, normalize="none", nproc=1, cross="DONOR")
     expect_true(all(is.na(dist_hs5f_cross_donor$CROSS_DIST_NEAREST)))
     
     ## fields=NULL and fields=DONOR should give same results
-    cross_dist_hs5f <- distToNearest(db2, vCallColumn="V_CALL_GENOTYPED", 
+    cross_dist_hs5f <- distToNearest(db2, sequenceColumn="JUNCTION",
+                                     vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                      model="hh_s5f", first=FALSE, normalize="none",nproc=1,
                                      cross="SAMPLE")
-    cross_dist_hs5f_donor <- distToNearest(db2, vCallColumn="V_CALL_GENOTYPED", 
+    cross_dist_hs5f_donor <- distToNearest(db2, sequenceColumn="JUNCTION",
+                                           vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                            model="hh_s5f", first=FALSE, normalize="none",nproc=1,
                                            cross="SAMPLE", fields="DONOR")
     expect_equal(cross_dist_hs5f, cross_dist_hs5f_donor)
@@ -136,14 +146,16 @@ test_that("Test cross distToNearest with model hh_s5f", {
     db3[nrow(db3),"SAMPLE"] <- "S3"
     # t(db3[c(1,316,nrow(db3)),c("JUNCTION","V_CALL","J_CALL","DONOR","SAMPLE")] )
     
-    db2_1_316_630_hs5f <- distToNearest(db2[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
-                                   model="hh_s5f", first=FALSE, normalize="none",cross="SAMPLE")
+    db2_1_316_630_hs5f <- distToNearest(db2[c(1,316,630),], sequenceColumn="JUNCTION",
+                                        vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
+                                        model="hh_s5f", first=FALSE, normalize="none",cross="SAMPLE")
     ## Exactly same seq, returns NA
     expect_equal(db2_1_316_630_hs5f$CROSS_DIST_NEAREST,c(NA,NA,NA))
     
     ## One seq has been edited, will return distance values
-    db3_1_316_630_hs5f <- distToNearest(db3[c(1,316,630),], vCallColumn="V_CALL_GENOTYPED", 
-                                   model="hh_s5f", first=FALSE, normalize="none",cross="SAMPLE")
+    db3_1_316_630_hs5f <- distToNearest(db3[c(1,316,630),], sequenceColumn="JUNCTION",
+                                        vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
+                                        model="hh_s5f", first=FALSE, normalize="none",cross="SAMPLE")
     expect_equal(db3_1_316_630_hs5f$CROSS_DIST_NEAREST,c(1.001,1.001,1.001), tolerance=0.005)
     
     seq1 <- c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", 
@@ -161,8 +173,9 @@ test_that("Test cross distToNearest with model hh_s5f", {
     expect_error(shazam:::dist5Mers(seq1, seq2, targeting_distance), "Character not found")
     
     ## Length normalized
-    dist_hs5f_len <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
-                               model="hh_s5f", first=FALSE, normalize="len", nproc=1)
+    dist_hs5f_len <- distToNearest(db, sequenceColumn="JUNCTION",
+                                   vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
+                                   model="hh_s5f", first=FALSE, normalize="len", nproc=1)
     
     expected_len_dist <- dist_hs5f$DIST_NEAREST/nchar(dist_hs5f$JUNCTION)
     expect_equal(dist_hs5f_len$DIST_NEAREST, expected_len_dist, tolerance=0.001)
@@ -179,7 +192,9 @@ test_that("Test distToNearest with unrecognized characters", {
     ## This seq belongs to clone of size 1
     db2$JUNCTION[3] <- gsub("T","Z",db2$JUNCTION[5] )
     expect_warning(
-        dist_hs1f <- distToNearest(db2, model="hh_s1f", first=FALSE, normalize="len"),
+        dist_hs1f <- distToNearest(db2, sequenceColumn="JUNCTION",
+                                   vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
+                                   model="hh_s1f", first=FALSE, normalize="len"),
         "Invalid sequence characters"
     )
     
@@ -187,7 +202,9 @@ test_that("Test distToNearest with unrecognized characters", {
     ## This seq belongs to clone of size > 1
     db2$JUNCTION[5] <- gsub("T","Z",db$JUNCTION[5] )
     expect_warning(
-        dist_hs1f <- distToNearest(db2, model="hh_s1f", first=FALSE, normalize="len"),
+        dist_hs1f <- distToNearest(db2, sequenceColumn="JUNCTION",
+                                   vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
+                                   model="hh_s1f", first=FALSE, normalize="len"),
         "Invalid sequence characters"
     )
 
@@ -211,11 +228,13 @@ test_that("Test distToNearest with stop codon model='aa' ", {
                      stringsAsFactors=F)
     
     # calculate the ditances with normalization
-    df <- distToNearest(df, model="aa")
+    df <- distToNearest(df, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
+                        jCallColumn="J_CALL", model="aa")
     expect_equal(df$DIST_NEAREST, c(0.0303,0.0303,0.0606,0.0606,0.0606,NA))
     
     # calculate the ditances without normalization
-    df <- distToNearest(df, model="aa", normalize = "none")
+    df <- distToNearest(df, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
+                        jCallColumn="J_CALL", model="aa", normalize = "none")
     expect_equal(df$DIST_NEAREST, c(1,1,2,2,2,NA))
 })
 
@@ -224,8 +243,10 @@ test_that("Test distToNearest with stop codon model='aa' ", {
 test_that("Test distToNearest returns the same result with data.frame and tibble", {
     db2 <- subset(db, CPRIMER %in% c("IGHA","IGHM") &
                       BARCODE %in% c("RL016","RL018","RL019","RL021"))
-    expect_equivalent(distToNearest(data.frame(db2)),
-                      distToNearest(tibble::as_tibble(db2)))
+    expect_equivalent(distToNearest(data.frame(db2), sequenceColumn="JUNCTION",
+                                    vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL"),
+                      distToNearest(tibble::as_tibble(db2), sequenceColumn="JUNCTION",
+                                    vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL"))
 })
 
 
@@ -416,7 +437,9 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
 
 test_that("Test findThreshold", {
     
-    db <- distToNearest(db, model="ham", first=FALSE, normalize="len", nproc=1)
+    db <- distToNearest(db, sequenceColumn="JUNCTION",
+                        vCallColumn="V_CALL", jCallColumn="J_CALL", 
+                        model="ham", first=FALSE, normalize="len", nproc=1)
     
     gmm_output <- findThreshold(db$DIST_NEAREST, method="gmm", model="gamma-gamma", edge=0.9)
     expect_equal(gmm_output@threshold, 0.12, tolerance=0.01)
@@ -650,3 +673,49 @@ test_that("Test distance, Change-O tests", {
                                       symmetry="avg", normalize = "len"),
                  tolerance=0.001, check.attributes = FALSE)
 })
+
+#### AIRR migration tests ####
+
+test_that("distToNearest & findThreshold, AIRR migration", {
+    
+    # ExampleDb
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    # ExampleDb_airr
+    load(file.path("..", "data-tests", "ExampleDb_airr.rda")) 
+    
+    db_c <- subset(ExampleDb, SAMPLE == "-1h")
+    db_a <- subset(ExampleDb_airr, sample == "-1h")
+    
+    # distToNearest
+    
+    dist_c <- distToNearest(db_c, sequenceColumn="JUNCTION",
+                            vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
+                            model="ham", first=FALSE, VJthenLen=TRUE, normalize="len")
+    
+    dist_a <- distToNearest(db_a, sequenceColumn="junction", 
+                            vCallColumn="v_call_genotyped", jCallColumn="j_call",
+                            model="ham", first=FALSE, VJthenLen=TRUE, normalize="len")
+    
+    expect_equal(dist_c[["DIST_NEAREST"]], dist_a[["DIST_NEAREST"]])
+    
+    # findThreshold, gmm
+    
+    # gmm method seems to be stochastic 
+    # using set.seed does not help
+    
+    #set.seed(2945)
+    #o_gmm_c <- findThreshold(dist_c[["DIST_NEAREST"]], method="gmm", model="gamma-gamma", cutoff="user", spc=0.99)
+    #set.seed(2945)
+    #o_gmm_a <- findThreshold(dist_a[["DIST_NEAREST"]], method="gmm", model="gamma-gamma", cutoff="user", spc=0.99)
+    
+    #expect_equal(o_gmm_c@threshold, o_gmm_a@threshold)
+    
+    # findThreshold, density
+    o_den_c <- findThreshold(dist_c[["DIST_NEAREST"]], method="density")
+    o_den_a <- findThreshold(dist_a[["DIST_NEAREST"]], method="density")
+    
+    expect_equal(o_den_c@xdens, o_den_a@xdens)
+    expect_equal(o_den_c@ydens, o_den_a@ydens)
+    expect_equal(o_den_c@threshold, o_den_a@threshold)
+})
+

@@ -789,13 +789,14 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' @examples
 #' # Subset example data to one sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#' db <- subset(ExampleDb, sample == "-1h")
 #' 
 #' # Use genotyped V assignments, Hamming distance, and normalize by junction length
 #' # First partition based on V and J assignments, then by junction length
 #' # Take into consideration ambiguous V and J annotations
-#' dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
-#'                       first=FALSE, VJthenLen=TRUE, normalize="len")
+#' dist <- distToNearest(db, sequenceColumn="junction", 
+#'                       vCallColumn="v_call_genotyped", jCallColumn="j_call",
+#'                       model="ham", first=FALSE, VJthenLen=TRUE, normalize="len")
 #'                            
 #' # Plot histogram of non-NA distances
 #' p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
@@ -807,7 +808,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' plot(p1)
 #' 
 #' @export
-distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", jCallColumn="j_call", 
                           model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"), 
                           normalize=c("len", "none"), symmetry=c("avg", "min"),
                           first=TRUE, VJthenLen=TRUE, nproc=1, fields=NULL, cross=NULL, 
@@ -1105,10 +1106,11 @@ distToNearest <- function(db, sequenceColumn="JUNCTION", vCallColumn="V_CALL", j
 #' \donttest{
 #' # Subset example data to one sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#' db <- subset(ExampleDb, sample == "-1h")
 #' 
 #' # Use nucleotide Hamming distance and normalize by junction length
-#' db <- distToNearest(db, model="ham", normalize="len", nproc=1)
+#' db <- distToNearest(db, sequenceColumn="junction", vCallColumn="v_call",
+#'                     jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 #'                             
 #' # Find threshold using the "gmm" method with optimal threshold
 #' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="gamma-gamma", cutoff="opt")
@@ -1195,10 +1197,11 @@ findThreshold <- function (distances, method=c("density", "gmm"),
 # @examples
 # # Subset example data to one sample as a demo
 # data(ExampleDb, package="alakazam")
-# db <- subset(ExampleDb, SAMPLE == "-1h")
+# db <- subset(ExampleDb, sample == "-1h")
 # 
 # # Use genotyped V assignments, HS1F model, and normalize by junction length
-# dist_hs1f <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", 
+# dist_hs1f <- distToNearest(db, sequenceColumn="junction", vCallColumn="v_call_genotyped",
+#                            jCallColumn="j_call",                
 #                            model="hs1f", first=FALSE, normalize="len")
 #                  
 # # using findThreshold switch
@@ -1288,10 +1291,11 @@ findThreshold <- function (distances, method=c("density", "gmm"),
 # @examples
 # # Subset example data to one sample as a demo
 # data(ExampleDb, package="alakazam")
-# db <- subset(ExampleDb, SAMPLE == "-1h")
+# db <- subset(ExampleDb, sample == "-1h")
 #
 # # Use nucleotide Hamming distance and normalize by junction length
-# db <- distToNearest(db, model="ham", first=FALSE, normalize="len", nproc=1)
+# db <- distToNearest(db, sequenceColumn="junction", vCallColumn="v_call_genotyped",
+#                     jCallColumn="j_call", model="ham", first=FALSE, normalize="len", nproc=1)
 #                             
 # # To find the Threshold cut use either findThreshold-switch
 # output <- findThreshold(db$DIST_NEAREST, method="gmm", edge=0.9)
@@ -1870,10 +1874,11 @@ mixFunction <- function(t, first_curve=NULL, second_curve=NULL,
 #' \donttest{
 #' # Subset example data to one sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#' db <- subset(ExampleDb, sample == "-1h")
 #'
 #' # Use nucleotide Hamming distance and normalize by junction length
-#' db <- distToNearest(db, model="ham", normalize="len", nproc=1)
+#' db <- distToNearest(db, sequenceColumn="junction", vCallColumn="v_call_genotyped",
+#'                     jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 #' 
 #' # To find the threshold cut, call findThreshold function for "gmm" method.
 #' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="norm-norm", cutoff="opt")
@@ -1988,10 +1993,11 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
 #' \donttest{
 #' # Subset example data to one sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, SAMPLE == "-1h")
+#' db <- subset(ExampleDb, sample == "-1h")
 #'
 #' # Use nucleotide Hamming distance and normalize by junction length
-#' db <- distToNearest(db, model="ham", normalize="len", nproc=1)
+#' db <- distToNearest(db, sequenceColumn="junction", vCallColumn="v_call_genotyped",
+#'                     jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 #' 
 #' # To find the threshold cut, call findThreshold function for "gmm" method.
 #' output <- findThreshold(db$DIST_NEAREST, method="density")

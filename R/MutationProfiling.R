@@ -302,41 +302,53 @@ NULL
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d" &
-#'                         CLONE %in% c("3100", "3141", "3184"))
+#' db <- subset(ExampleDb, isotype %in% c("IgA", "IgG") & sample == "+7d" &
+#'                         clone_id %in% c("3100", "3141", "3184"))
 #' 
 #' # thresholdedFreq method, resolving ties deterministically without using ambiguous characters
-#' clones <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.6,
+#' clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#'                          germlineColumn="germline_alignment_d_mask",
+#'                          method="thresholdedFreq", minimumFrequency=0.6,
 #'                          includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 #'
 #' # mostCommon method, resolving ties deterministically using ambiguous characters
-#' clones <- collapseClones(db, method="mostCommon", 
+#' clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#'                          germlineColumn="germline_alignment_d_mask",
+#'                          method="mostCommon", 
 #'                          includeAmbiguous=TRUE, breakTiesStochastic=FALSE)
 #' 
 #' # Make a copy of db that has a mutation frequency column
 #' db2 <- observedMutations(db, frequency=TRUE, combine=TRUE)
 #' 
 #' # mostMutated method, resolving ties stochastically
-#' clones <- collapseClones(db2, method="mostMutated", muFreqColumn="MU_FREQ", 
+#' clones <- collapseClones(db2, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#'                          germlineColumn="germline_alignment_d_mask",
+#'                          method="mostMutated", muFreqColumn="MU_FREQ", 
 #'                          breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
 #'                          
 #' # mostMutated method, resolving ties deterministically using additional columns
-#' clones <- collapseClones(db2, method="mostMutated", muFreqColumn="MU_FREQ", 
+#' clones <- collapseClones(db2, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#'                          germlineColumn="germline_alignment_d_mask",
+#'                          method="mostMutated", muFreqColumn="MU_FREQ", 
 #'                          breakTiesStochastic=FALSE, 
-#'                          breakTiesByColumns=list(c("DUPCOUNT"), c(max)))
+#'                          breakTiesByColumns=list(c("duplicate_count"), c(max)))
 #' 
 #' # Build consensus for V segment only
 #' # Capture all nucleotide variations using ambiguous characters 
-#' clones <- collapseClones(db, method="catchAll", regionDefinition=IMGT_V)
+#' clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#'                          germlineColumn="germline_alignment_d_mask",
+#'                          method="catchAll", regionDefinition=IMGT_V)
 #' 
 #' # Return the same number of rows as the input
-#' clones <- collapseClones(db, method="mostCommon", expandedDb=TRUE)
+#' clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#'                          germlineColumn="germline_alignment_d_mask",
+#'                          method="mostCommon", expandedDb=TRUE)
 #' 
 #' @export
 collapseClones <- function(db, 
-                           cloneColumn="CLONE", 
-                           sequenceColumn="SEQUENCE_IMGT",
-                           germlineColumn="GERMLINE_IMGT_D_MASK",
+                           cloneColumn="clone_id", 
+                           sequenceColumn="sequence_alignment",
+                           germlineColumn="germline_alignment_d_mask",
                            muFreqColumn=NULL,
                            regionDefinition=NULL,
                            method=c("mostCommon", "thresholdedFreq", "catchAll", 
@@ -351,7 +363,7 @@ collapseClones <- function(db,
     idx <- NULL
     
     ## DEBUG
-    # cloneColumn="CLONE"; sequenceColumn="SEQUENCE_IMGT"; germlineColumn="GERMLINE_IMGT_D_MASK"
+    # cloneColumn="CLONE"; sequenceColumn="sequence_alignment"; germlineColumn="germline_alignment_d_mask"
     # expandedDb=FALSE; regionDefinition=NULL; method="mostCommon"; nproc=1
     
     #### parameter checks
@@ -675,8 +687,8 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
-#' clone <- subset(db, CLONE == "3192")
+#' db <- subset(ExampleDb, isotype %in% c("IgA", "IgG") & sample == "+7d")
+#' clone <- subset(db, clone_id == "3192")
 #' 
 #' # First compute mutation frequency for most/leastMutated methods
 #' clone <- observedMutations(clone, frequency=TRUE, combine=TRUE)
@@ -686,7 +698,7 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #' 
 #' # ThresholdedFreq method. 
 #' # Resolve ties deterministically without using ambiguous characters
-#' cons1 <- consensusSequence(clone$SEQUENCE_IMGT,
+#' cons1 <- consensusSequence(clone$sequence_alignment,
 #'                            method="thresholdedFreq", minFreq=0.3,
 #'                            includeAmbiguous=FALSE, 
 #'                            breakTiesStochastic=FALSE)
@@ -695,71 +707,71 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #' @export
 ## DEBUG
 # thresholdedFreq method, resolve ties deterministically using ambiguous characters
-# consInput2 <- consensusSequence(clone$SEQUENCE_IMGT,
+# consInput2 <- consensusSequence(clone$sequence_alignment,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
 #                                     method="thresholdedFreq", minFreq=0.3,
 #                                     includeAmbiguous=TRUE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # thresholdedFreq method, resolve ties stochastically
-# consInput3 <- consensusSequence(clone$SEQUENCE_IMGT,
+# consInput3 <- consensusSequence(clone$sequence_alignment,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
 #                                     method="thresholdedFreq", minFreq=0.3,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=TRUE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostCommon method, resolve ties deterministically without using ambiguous characters
-# consInput4 <- consensusSequence(clone$SEQUENCE_IMGT,
+# consInput4 <- consensusSequence(clone$sequence_alignment,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
 #                                     method="mostCommon", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostCommon method, resolve ties deterministically using ambiguous characters
-# consInput5 <- consensusSequence(clone$SEQUENCE_IMGT,
+# consInput5 <- consensusSequence(clone$sequence_alignment,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
 #                                     method="mostCommon", minFreq=NULL,
 #                                     includeAmbiguous=TRUE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostCommon method, resolve ties stochastically
-# consInput6 <- consensusSequence(clone$SEQUENCE_IMGT,
+# consInput6 <- consensusSequence(clone$sequence_alignment,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
 #                                     method="mostCommon", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=TRUE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # catchAll method
-# consInput7 <- consensusSequence(clone$SEQUENCE_IMGT,
+# consInput7 <- consensusSequence(clone$sequence_alignment,
 #                                     muFreqColumn=NULL, lenLimit=NULL,
 #                                     method="catchAll", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostMutated method, resolve ties stochastically
-# consInput8 <- consensusSequence(clone$SEQUENCE_IMGT,
+# consInput8 <- consensusSequence(clone$sequence_alignment,
 #                                     muFreqColumn="MU_FREQ", lenLimit=NULL,
 #                                     method="mostMutated", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=TRUE,
 #                                     breakTiesByColumns=NULL, db=clone)$cons
 # mostMutated method, resolve ties deterministically using additional columns
-# consInput9 <- consensusSequence(clone$SEQUENCE_IMGT,
+# consInput9 <- consensusSequence(clone$sequence_alignment,
 #                                     muFreqColumn="MU_FREQ", lenLimit=NULL,
 #                                     method="mostMutated", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=FALSE,
-#                                     breakTiesByColumns=list(c("JUNCTION_LENGTH","DUPCOUNT"), c(max, max)), 
+#                                     breakTiesByColumns=list(c("junction_length","duplicate_count"), c(max, max)), 
 #                                     db=clone)$cons
-# consInput10 <- consensusSequence(clone$SEQUENCE_IMGT,
+# consInput10 <- consensusSequence(clone$sequence_alignment,
 #                                      muFreqColumn="MU_FREQ", lenLimit=NULL,
 #                                      method="mostMutated", minFreq=NULL,
 #                                      includeAmbiguous=FALSE, 
 #                                      breakTiesStochastic=FALSE,
-#                                      breakTiesByColumns=list(c("DUPCOUNT"), c(max)), 
+#                                      breakTiesByColumns=list(c("duplicate_count"), c(max)), 
 #                                      db=clone)$cons
 # mostMutated method, resolve ties deterministically withou using additional columns
-# consInput11 <- consensusSequence(clone$SEQUENCE_IMGT,
+# consInput11 <- consensusSequence(clone$sequence_alignment,
 #                                      muFreqColumn="MU_FREQ", lenLimit=NULL,
 #                                      method="mostMutated", minFreq=NULL,
 #                                      includeAmbiguous=FALSE, 
@@ -1092,10 +1104,10 @@ consensusSequence <- function(sequences, db=NULL,
 # @examples
 # # Subset example data
 # data(ExampleDb, package="alakazam")
-# db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+# db <- subset(ExampleDb, isotype %in% c("IgA", "IgG") & sample == "+7d")
 # 
 # # Data corresponding to a single clone
-# clone <- db[db$CLONE=="3192", ]
+# clone <- db[db[["clone_id"]]=="3192", ]
 # # Number of sequences in this clone
 # nrow(clone)
 # # compute mutation frequency for most/leastMutated methods
@@ -1158,13 +1170,13 @@ consensusSequence <- function(sequences, db=NULL,
 #                              method="mostMutated", 
 #                              minimumFrequency=NULL, includeAmbiguous=FALSE,
 #                              breakTiesStochastic=FALSE, 
-#                              breakTiesByColumns=list(c("JUNCTION_LENGTH", "DUPCOUNT"), c(max, max)))
+#                              breakTiesByColumns=list(c("junction_length", "duplicate_count"), c(max, max)))
 # cons10 <- calcClonalConsensus(db=clone,
 #                               muFreqColumn="MU_FREQ", regionDefinition=NULL,
 #                               method="mostMutated", 
 #                               minimumFrequency=NULL, includeAmbiguous=FALSE,
 #                               breakTiesStochastic=FALSE, 
-#                               breakTiesByColumns=list(c("DUPCOUNT"), c(max)))
+#                               breakTiesByColumns=list(c("duplicate_count"), c(max)))
 # # mostMutated method, resolve ties deterministically without using additional columns
 # cons11 <- calcClonalConsensus(db=clone,
 #                               muFreqColumn="MU_FREQ", regionDefinition=NULL,
@@ -1173,8 +1185,8 @@ consensusSequence <- function(sequences, db=NULL,
 #                               breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
 # @export
 calcClonalConsensus <- function(db, 
-                                sequenceColumn="SEQUENCE_IMGT", 
-                                germlineColumn="GERMLINE_IMGT_D_MASK", 
+                                sequenceColumn="sequence_alignment", 
+                                germlineColumn="germline_alignment_d_mask", 
                                 muFreqColumn=NULL,
                                 regionDefinition=NULL, 
                                 method=c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"), 
@@ -1340,26 +1352,26 @@ calcClonalConsensus <- function(db,
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, isotype == "IgG" & sample == "+7d")
 #'
 #' # Calculate mutation frequency over the entire sequence
-#' db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-#'                             germlineColumn="GERMLINE_IMGT_D_MASK",
+#' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+#'                             germlineColumn="germline_alignment_d_mask",
 #'                             frequency=TRUE,
 #'                             nproc=1)
 #'
 #' # Count of V-region mutations split by FWR and CDR
 #' # With mutations only considered replacement if charge changes
-#' db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-#'                             germlineColumn="GERMLINE_IMGT_D_MASK",
+#' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+#'                             germlineColumn="germline_alignment_d_mask",
 #'                             regionDefinition=IMGT_V,
 #'                             mutationDefinition=CHARGE_MUTATIONS,
 #'                             nproc=1)
 #'                      
 #' @export
 observedMutations <- function(db, 
-                              sequenceColumn="SEQUENCE_IMGT",
-                              germlineColumn="GERMLINE_IMGT_D_MASK",
+                              sequenceColumn="sequence_alignment",
+                              germlineColumn="germline_alignment_d_mask",
                               regionDefinition=NULL,
                               mutationDefinition=NULL,
                               ambiguousMode=c("eitherOr", "and"),
@@ -1658,8 +1670,8 @@ observedMutations <- function(db,
 #' @examples
 #' # Use an entry in the example data for input and germline sequence
 #' data(ExampleDb, package="alakazam")
-#' in_seq <- ExampleDb[["SEQUENCE_IMGT"]][100]
-#' germ_seq <-  ExampleDb[["GERMLINE_IMGT_D_MASK"]][100]
+#' in_seq <- ExampleDb[["sequence_alignment"]][100]
+#' germ_seq <-  ExampleDb[["germline_alignment_d_mask"]][100]
 #' 
 #' # Identify all mutations in the sequence
 #' ex1_raw <- calcObservedMutations(in_seq, germ_seq, returnRaw=TRUE)
@@ -2107,8 +2119,8 @@ countNonNByRegion <- function(regDef, ambiMode, inputChars, germChars,
 #' @examples
 #' # Use an entry in the example data for input and germline sequence
 #' data(ExampleDb, package="alakazam")
-#' in_seq <- ExampleDb[100, "SEQUENCE_IMGT"]
-#' germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
+#' in_seq <- ExampleDb[["sequence_alignment"]][100]
+#' germ_seq <-  ExampleDb[["germline_alignment_d_mask"]][100]
 #' 
 #' # Determine if in_seq has 6 or more mutations in 10 consecutive nucleotides
 #' slideWindowSeq(inputSeq=in_seq, germlineSeq=germ_seq, mutThresh=6, windowSize=10)
@@ -2192,11 +2204,13 @@ slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
 #' data(ExampleDb, package="alakazam")
 #' 
 #' # Apply the sliding window approach on a subset of ExampleDb
-#' slideWindowDb(db = ExampleDb[1:10, ], mutThresh=6, windowSize=10)
+#' slideWindowDb(db=ExampleDb[1:10, ], sequenceColumn="sequence_alignment", 
+#'               germlineColumn="germline_alignment_d_mask", 
+#'               mutThresh=6, windowSize=10)
 #' 
 #' @export
-slideWindowDb <- function(db, sequenceColumn="SEQUENCE_IMGT", 
-                          germlineColumn="GERMLINE_IMGT_D_MASK",
+slideWindowDb <- function(db, sequenceColumn="sequence_alignment", 
+                          germlineColumn="germline_alignment_d_mask",
                           mutThresh, windowSize){
     db_filter <- sapply(1:nrow(db), function(i) { slideWindowSeq(inputSeq = db[i, sequenceColumn],
                                                                  germlineSeq = db[i, germlineColumn],
@@ -2261,15 +2275,15 @@ slideWindowDb <- function(db, sequenceColumn="SEQUENCE_IMGT",
 #'                                                             
 #' # Run calcObservedMutations separately
 #' exDbMutList <- sapply(1:5, function(i) {
-#'     calcObservedMutations(inputSeq=db[i, "SEQUENCE_IMGT"],
-#'                           germlineSeq=db[i, "GERMLINE_IMGT_D_MASK"],
+#'     calcObservedMutations(inputSeq=db[["sequence_alignment"]][i],
+#'                           germlineSeq=db[["germline_alignment_d_mask"]][i],
 #'                           returnRaw=TRUE)$pos })
 #' slideWindowTune(db, dbMutList=exDbMutList, 
 #'                 mutThreshRange=2:4, windowSizeRange=2:4)
 #'                                                            
 #' @export
-slideWindowTune <- function(db, sequenceColumn="SEQUENCE_IMGT", 
-                            germlineColumn="GERMLINE_IMGT_D_MASK",
+slideWindowTune <- function(db, sequenceColumn="sequence_alignment", 
+                            germlineColumn="germline_alignment_d_mask",
                             dbMutList=NULL,
                             mutThreshRange, windowSizeRange, verbose=TRUE){
     # check preconditions
@@ -2560,27 +2574,27 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, isotype %in% c("IgA", "IgG") & sample == "+7d")
 #'
 #' # Calculate expected mutations over V region
 #' db_exp <- expectedMutations(db,
-#'                             sequenceColumn="SEQUENCE_IMGT",
-#'                             germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                             sequenceColumn="sequence_alignment",
+#'                             germlineColumn="germline_alignment_d_mask",
 #'                             regionDefinition=IMGT_V,
 #'                             nproc=1)
 #' 
 #' # Calculate hydropathy expected mutations over V region
 #' db_exp <- expectedMutations(db,
-#'                            sequenceColumn="SEQUENCE_IMGT",
-#'                            germlineColumn="GERMLINE_IMGT_D_MASK",
+#'                            sequenceColumn="sequence_alignment",
+#'                            germlineColumn="germline_alignment_d_mask",
 #'                            regionDefinition=IMGT_V,
 #'                            mutationDefinition=HYDROPATHY_MUTATIONS,
 #'                            nproc=1)
 #'
 #' @export
 expectedMutations <- function(db, 
-                              sequenceColumn="SEQUENCE_IMGT",
-                              germlineColumn="GERMLINE_IMGT_D_MASK",
+                              sequenceColumn="sequence_alignment",
+                              germlineColumn="germline_alignment_d_mask",
                               targetingModel=HH_S5F,
                               regionDefinition=NULL,
                               mutationDefinition=NULL,
@@ -2749,8 +2763,8 @@ expectedMutations <- function(db,
 #' data(ExampleDb, package="alakazam")
 #' 
 #' # Use first entry in the exampled data for input and germline sequence
-#' in_seq <- ExampleDb[["SEQUENCE_IMGT"]][1]
-#' germ_seq <-  ExampleDb[["GERMLINE_IMGT_D_MASK"]][1]
+#' in_seq <- ExampleDb[["sequence_alignment"]][1]
+#' germ_seq <-  ExampleDb[["germline_alignment_d_mask"]][1]
 #' 
 #' # Identify all mutations in the sequence
 #' calcExpectedMutations(in_seq, germ_seq)

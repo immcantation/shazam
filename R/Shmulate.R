@@ -19,9 +19,9 @@ NULL
 #' @param    targetingModel  5-mer \link{TargetingModel} object to be used for computing 
 #'                           probabilities of mutations at each position. Defaults to
 #'                           \link{HH_S5F}.
-#' @param   start            Initial position in \code{sequence} where mutations can 
+#' @param    start           Initial position in \code{sequence} where mutations can 
 #'                           be introduced. Default: 1
-#' @param   end              Last position in \code{sequence} where mutations can 
+#' @param    end             Last position in \code{sequence} where mutations can 
 #'                           be introduced. Default: last position (sequence length).
 #' @return   A string defining the mutated sequence.
 #' 
@@ -208,7 +208,7 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, start=1, 
 #' # Exclude nodes without a sample identifier
 #' # Add 20% mutation rate to the immediate offsprings of the MRCA
 #' shmulateTree(sequence, graph, targetingModel=MK_RS5NF,
-#'              field="SAMPLE", exclude=NA, junctionWeight=0.2)
+#'              field="sample", exclude=NA, junctionWeight=0.2)
 #'  
 #' @export
 shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,

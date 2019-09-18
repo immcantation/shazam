@@ -238,12 +238,12 @@ createBaseline <- function(description="",
 #' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, isotype == "IgG" & sample == "+7d")
 #' 
 #' # Make Baseline object
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="SEQUENCE_IMGT",
-#'                          germlineColumn="GERMLINE_IMGT_D_MASK", 
+#'                          sequenceColumn="sequence_alignment",
+#'                          germlineColumn="germline_alignment_d_mask", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -351,11 +351,12 @@ editBaseline <- function(baseline, field, value) {
 #' @examples
 #' # Load and subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
+#' db <- subset(ExampleDb, isotype == "IgG" & sample == "+7d")
 #' 
 #' # Collapse clones
-#' db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-#'                      germlineColumn="GERMLINE_IMGT_D_MASK",
+#' db <- collapseClones(db, cloneColumn="clone_id", 
+#'                      sequenceColumn="sequence_alignment",
+#'                      germlineColumn="germline_alignment_d_mask",
 #'                      method="thresholdedFreq", minimumFrequency=0.6,
 #'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 #'  
@@ -797,11 +798,12 @@ calcBaselineBinomialPdf <- function (x=3,
 #' \donttest{
 #' # Subset example data from alakazam
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG"))
+#' db <- subset(ExampleDb, isotype %in% c("IgM", "IgG"))
 #' 
 #' # Collapse clones
-#' db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-#'                      germlineColumn="GERMLINE_IMGT_D_MASK",
+#' db <- collapseClones(db, cloneColumn="clone_id",
+#'                      sequenceColumn="sequence_alignment",
+#'                      germlineColumn="germline_alignment_d_mask",
 #'                      method="thresholdedFreq", minimumFrequency=0.6,
 #'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 #'
@@ -815,23 +817,23 @@ calcBaselineBinomialPdf <- function (x=3,
 #'                          nproc=1)
 #'                          
 #' # Group PDFs by sample
-#' grouped1 <- groupBaseline(baseline, groupBy="SAMPLE")
+#' grouped1 <- groupBaseline(baseline, groupBy="sample")
 #' sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
-#' plotBaselineDensity(grouped1, idColumn="SAMPLE", colorValues=sample_colors, 
+#' plotBaselineDensity(grouped1, idColumn="sample", colorValues=sample_colors, 
 #'                     sigmaLimits=c(-1, 1))
 #'  
 #' # Group PDFs by both sample (between variable) and isotype (within variable)
-#' grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
+#' grouped2 <- groupBaseline(baseline, groupBy=c("sample", "isotype"))
 #' isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
 #'                     "IgG"="seagreen", "IgA"="steelblue")
-#' plotBaselineDensity(grouped2, idColumn="SAMPLE", groupColumn="ISOTYPE",
+#' plotBaselineDensity(grouped2, idColumn="sample", groupColumn="isotype",
 #'                     colorElement="group", colorValues=isotype_colors,
 #'                     sigmaLimits=c(-1, 1))
 #' 
 #' # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
-#' grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
+#' grouped3 <- groupBaseline(grouped2, groupBy="sample")
 #' sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
-#' plotBaselineDensity(grouped3, idColumn="SAMPLE", colorValues=sample_colors,
+#' plotBaselineDensity(grouped3, idColumn="sample", colorValues=sample_colors,
 #'                     sigmaLimits=c(-1, 1))
 #' }
 #' @export
@@ -1145,11 +1147,12 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE == "IgG")
+#' db <- subset(ExampleDb, isotype == "IgG")
 #' 
 #' # Collapse clones
-#' db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-#'                      germlineColumn="GERMLINE_IMGT_D_MASK",
+#' db <- collapseClones(db, cloneColumn="clone_id",
+#'                      sequenceColumn="sequence_alignment",
+#'                      germlineColumn="germline_alignment_d_mask",
 #'                      method="thresholdedFreq", minimumFrequency=0.6,
 #'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 #'                      
@@ -1163,7 +1166,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                          nproc = 1)
 #' 
 #' # Grouping the PDFs by the sample annotation
-#' grouped <- groupBaseline(baseline, groupBy="SAMPLE")
+#' grouped <- groupBaseline(baseline, groupBy="sample")
 #' 
 #' # Get a data.frame of the summary statistics
 #' stats <- summarizeBaseline(grouped, returnType="df")
@@ -1203,7 +1206,11 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
     numbOfTotalSeqs <- nrow(baseline@db)
     regions <- baseline@regions
     db <- baseline@db
-    if ("SEQUENCE_ID" %in% colnames(db)) { db <- subset(db, select="SEQUENCE_ID") }
+    if ("sequence_id" %in% colnames(db)) { 
+        db <- subset(db, select="sequence_id") 
+    } else if ("SEQUENCE_ID" %in% colnames(db)) {
+        db <- subset(db, select="SEQUENCE_ID") 
+    }
     list_stats <-
         foreach(idx=iterators::icount(numbOfTotalSeqs)) %dopar% {
             df_baseline_seq <- data.frame()
@@ -1285,11 +1292,12 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG", "IgA"))
+#' db <- subset(ExampleDb, isotype %in% c("IgM", "IgG", "IgA"))
 #'
 #' # Collapse clones
-#' db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-#'                      germlineColumn="GERMLINE_IMGT_D_MASK",
+#' db <- collapseClones(db, cloneColumn="clone_id",
+#'                      sequenceColumn="sequence_alignment",
+#'                      germlineColumn="germline_alignment_d_mask",
 #'                      method="thresholdedFreq", minimumFrequency=0.6,
 #'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 #'                      
@@ -1303,18 +1311,18 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'                          nproc=1)
 #' 
 #' # Group PDFs by the isotype
-#' grouped <- groupBaseline(baseline, groupBy="ISOTYPE")
+#' grouped <- groupBaseline(baseline, groupBy="isotype")
 #' 
 #' # Visualize isotype PDFs
-#' plot(grouped, "ISOTYPE")
+#' plot(grouped, "isotype")
 #' 
 #' # Perform test on isotype PDFs
-#' testBaseline(grouped, groupBy="ISOTYPE")
+#' testBaseline(grouped, groupBy="isotype")
 #' }
 #' @export
 testBaseline <- function(baseline, groupBy) {
     ## DEBUG
-    # baseline=grouped; groupBy="SAMPLE"
+    # baseline=grouped; groupBy="sample"
     
     # Get test groups
     groups <- as.character(baseline@db[[groupBy]])
@@ -1530,11 +1538,12 @@ baseline2DistPValue <-function(base1, base2) {
 #' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG"))
+#' db <- subset(ExampleDb, isotype %in% c("IgM", "IgG"))
 #' 
 #' # Collapse clones
-#' db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-#'                      germlineColumn="GERMLINE_IMGT_D_MASK",
+#' db <- collapseClones(db, cloneColumn="clone_id",
+#'                      sequenceColumn="sequence_alignment",
+#'                      germlineColumn="germline_alignment_d_mask",
 #'                      method="thresholdedFreq", minimumFrequency=0.6,
 #'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 #'                      
@@ -1548,17 +1557,17 @@ baseline2DistPValue <-function(base1, base2) {
 #'                          nproc=1)
 #'  
 #' # Grouping the PDFs by the sample and isotype annotations
-#' grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
+#' grouped <- groupBaseline(baseline, groupBy=c("sample", "isotype"))
 #' 
 #' # Plot density faceted by region with custom isotype colors
 #' isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
 #'                     "IgG"="seagreen", "IgA"="steelblue")
-#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", colorValues=isotype_colors, 
+#' plotBaselineDensity(grouped, "sample", "isotype", colorValues=isotype_colors, 
 #'                     colorElement="group", sigmaLimits=c(-1, 1))
 #'
 #' # Facet by isotype instead of region
 #' sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
-#' plotBaselineDensity(grouped, "SAMPLE", "ISOTYPE", facetBy="group",
+#' plotBaselineDensity(grouped, "sample", "isotype", facetBy="group",
 #'                     colorValues=sample_colors, sigmaLimits=c(-1, 1))
 #' }
 #' 
@@ -1570,7 +1579,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
                                 silent=FALSE, ...) {
     ## DEBUG
     # baseline=grouped
-    # idColumn="SAMPLE"; groupColumn="ISOTYPE"; subsetRegions=NULL; sigmaLimits=c(-5, 5)
+    # idColumn="sample"; groupColumn="isotype"; subsetRegions=NULL; sigmaLimits=c(-5, 5)
     # facetBy="region"; style="density"; size=1; silent=FALSE
     
     # Check input
@@ -1789,11 +1798,12 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG"))
+#' db <- subset(ExampleDb, isotype %in% c("IgM", "IgG"))
 #' 
 #' # Collapse clones
-#' db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-#'                      germlineColumn="GERMLINE_IMGT_D_MASK",
+#' db <- collapseClones(db, cloneColumn="clone_id",
+#'                      sequenceColumn="sequence_alignment",
+#'                      germlineColumn="germline_alignment_d_mask",
 #'                      method="thresholdedFreq", minimumFrequency=0.6,
 #'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 #'                      
@@ -1807,16 +1817,16 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #'                          nproc=1)
 #'  
 #' # Grouping the PDFs by sample and isotype annotations
-#' grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
+#' grouped <- groupBaseline(baseline, groupBy=c("sample", "isotype"))
 #' 
 #' # Plot mean and confidence interval by region with custom group colors
 #' isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
 #'                     "IgG"="seagreen", "IgA"="steelblue")
-#' plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", 
+#' plotBaselineSummary(grouped, "sample", "isotype", 
 #'                     groupColors=isotype_colors)
 #' 
 #' # Facet by group instead of region
-#' plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", facetBy="group")
+#' plotBaselineSummary(grouped, "sample", "isotype", facetBy="group")
 #' }
 #' 
 #' @export
