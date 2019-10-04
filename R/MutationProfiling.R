@@ -302,7 +302,7 @@ NULL
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype %in% c("IgA", "IgG") & sample == "+7d" &
+#' db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d" &
 #'                         clone_id %in% c("3100", "3141", "3184"))
 #' 
 #' # thresholdedFreq method, resolving ties deterministically without using ambiguous characters
@@ -687,7 +687,7 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype %in% c("IgA", "IgG") & sample == "+7d")
+#' db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
 #' clone <- subset(db, clone_id == "3192")
 #' 
 #' # First compute mutation frequency for most/leastMutated methods
@@ -1104,10 +1104,10 @@ consensusSequence <- function(sequences, db=NULL,
 # @examples
 # # Subset example data
 # data(ExampleDb, package="alakazam")
-# db <- subset(ExampleDb, isotype %in% c("IgA", "IgG") & sample == "+7d")
+# db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
 # 
 # # Data corresponding to a single clone
-# clone <- db[db[["clone_id"]]=="3192", ]
+# clone <- db[db[["clone_id"]] == "3192", ]
 # # Number of sequences in this clone
 # nrow(clone)
 # # compute mutation frequency for most/leastMutated methods
@@ -1352,7 +1352,7 @@ calcClonalConsensus <- function(db,
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgG" & sample == "+7d")
+#' db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
 #'
 #' # Calculate mutation frequency over the entire sequence
 #' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
@@ -2574,7 +2574,7 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype %in% c("IgA", "IgG") & sample == "+7d")
+#' db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
 #'
 #' # Calculate expected mutations over V region
 #' db_exp <- expectedMutations(db,

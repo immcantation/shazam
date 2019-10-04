@@ -305,7 +305,7 @@ setMethod("plot", c(x="TargetingModel", y="missing"),
 #' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgA" & sample == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Count the number of mutations per 5-mer
 #' subCount <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
@@ -614,7 +614,7 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgA" & sample == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Count the number of mutations per 5-mer
 #' subCount <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
@@ -719,7 +719,7 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgA" & sample == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Create model using only silent mutations
 #' sub_model <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
@@ -1025,7 +1025,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
 #' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgA" & sample == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Create model using only silent mutations
 #' sub <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
@@ -1080,7 +1080,7 @@ minNumSeqMutationsTune <- function(mutCount, minNumSeqMutationsRange) {
 #' @examples
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgA" & sample == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Create model using only silent mutations
 #' sub_model <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
@@ -1146,7 +1146,7 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgA" & sample == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", sequenceColumn="sequence_alignment",
@@ -1234,7 +1234,7 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgA" & sample == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Create 4x1024 models using only silent mutations
 #' sub_model <- createSubstitutionMatrix(db, model="S", sequenceColumn="sequence_alignment",
@@ -1324,7 +1324,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgA" & sample == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' model <- createTargetingModel(db, model="S", sequenceColumn="sequence_alignment",
@@ -1412,7 +1412,7 @@ createTargetingModel <- function(db, model=c("S", "RS"), sequenceColumn="sequenc
 #' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgA" & sample == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Calculate mutability of germline sequences using \link{HH_S5F} model
 #' mutability <- calculateMutability(sequences=db[["germline_alignment_d_mask"]], model=HH_S5F)
@@ -2278,12 +2278,12 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
 #' \donttest{
 #' # Subset example data to one isotype and sample as demos
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgA")
+#' db <- subset(ExampleDb, c_call == "IGHA")
 #' 
 #' tuneMtx = list()
-#' for (i in 1:length(unique(db$sample))) {
+#' for (i in 1:length(unique(db$sample_id))) {
 #'     # Get data corresponding to current sample
-#'     curDb = db[db[["sample"]]==unique(db[["sample"]])[i], ]
+#'     curDb = db[db[["sample_id"]] == unique(db[["sample_id"]])[i], ]
 #'     
 #'     # Count the number of mutations per 5-mer
 #'     subCount = createSubstitutionMatrix(db=curDb, model="S", 
@@ -2300,7 +2300,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
 #' }
 #'
 #' # Name tuneMtx after sample names 
-#' names(tuneMtx) = unique(db[["sample"]])
+#' names(tuneMtx) = unique(db[["sample_id"]])
 #' 
 #' # plot with legend for both samples for a subset of minNumMutations values
 #' plotTune(tuneMtx, thresh=c(5, 15, 25, 40), criterion="3mer",

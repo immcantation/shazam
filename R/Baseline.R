@@ -238,7 +238,7 @@ createBaseline <- function(description="",
 #' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgG" & sample == "+7d")
+#' db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
 #' 
 #' # Make Baseline object
 #' baseline <- calcBaseline(db, 
@@ -251,7 +251,7 @@ createBaseline <- function(description="",
 #'                          
 #' # Edit the field "description"
 #' baseline <- editBaseline(baseline, field="description", 
-#'                          value="+7d IgG")
+#'                          value="+7d IGHG")
 #' }
 #' 
 #' @export
@@ -351,7 +351,7 @@ editBaseline <- function(baseline, field, value) {
 #' @examples
 #' # Load and subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgG" & sample == "+7d")
+#' db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
 #' 
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id", 
@@ -798,7 +798,7 @@ calcBaselineBinomialPdf <- function (x=3,
 #' \donttest{
 #' # Subset example data from alakazam
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype %in% c("IgM", "IgG"))
+#' db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
 #' 
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",
@@ -817,23 +817,23 @@ calcBaselineBinomialPdf <- function (x=3,
 #'                          nproc=1)
 #'                          
 #' # Group PDFs by sample
-#' grouped1 <- groupBaseline(baseline, groupBy="sample")
+#' grouped1 <- groupBaseline(baseline, groupBy="sample_id")
 #' sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
-#' plotBaselineDensity(grouped1, idColumn="sample", colorValues=sample_colors, 
+#' plotBaselineDensity(grouped1, idColumn="sample_id", colorValues=sample_colors, 
 #'                     sigmaLimits=c(-1, 1))
 #'  
 #' # Group PDFs by both sample (between variable) and isotype (within variable)
-#' grouped2 <- groupBaseline(baseline, groupBy=c("sample", "isotype"))
-#' isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
-#'                     "IgG"="seagreen", "IgA"="steelblue")
-#' plotBaselineDensity(grouped2, idColumn="sample", groupColumn="isotype",
+#' grouped2 <- groupBaseline(baseline, groupBy=c("sample_id", "c_call"))
+#' isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
+#'                     "IGHG"="seagreen", "IGHA"="steelblue")
+#' plotBaselineDensity(grouped2, idColumn="sample_id", groupColumn="c_call",
 #'                     colorElement="group", colorValues=isotype_colors,
 #'                     sigmaLimits=c(-1, 1))
 #' 
 #' # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
-#' grouped3 <- groupBaseline(grouped2, groupBy="sample")
+#' grouped3 <- groupBaseline(grouped2, groupBy="sample_id")
 #' sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
-#' plotBaselineDensity(grouped3, idColumn="sample", colorValues=sample_colors,
+#' plotBaselineDensity(grouped3, idColumn="sample_id", colorValues=sample_colors,
 #'                     sigmaLimits=c(-1, 1))
 #' }
 #' @export
@@ -1147,7 +1147,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype == "IgG")
+#' db <- subset(ExampleDb, c_call == "IGHG")
 #' 
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",
@@ -1166,7 +1166,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                          nproc = 1)
 #' 
 #' # Grouping the PDFs by the sample annotation
-#' grouped <- groupBaseline(baseline, groupBy="sample")
+#' grouped <- groupBaseline(baseline, groupBy="sample_id")
 #' 
 #' # Get a data.frame of the summary statistics
 #' stats <- summarizeBaseline(grouped, returnType="df")
@@ -1292,7 +1292,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype %in% c("IgM", "IgG", "IgA"))
+#' db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG", "IGHA"))
 #'
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",
@@ -1311,18 +1311,18 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'                          nproc=1)
 #' 
 #' # Group PDFs by the isotype
-#' grouped <- groupBaseline(baseline, groupBy="isotype")
+#' grouped <- groupBaseline(baseline, groupBy="c_call")
 #' 
 #' # Visualize isotype PDFs
-#' plot(grouped, "isotype")
+#' plot(grouped, "c_call")
 #' 
 #' # Perform test on isotype PDFs
-#' testBaseline(grouped, groupBy="isotype")
+#' testBaseline(grouped, groupBy="c_call")
 #' }
 #' @export
 testBaseline <- function(baseline, groupBy) {
     ## DEBUG
-    # baseline=grouped; groupBy="sample"
+    # baseline=grouped; groupBy="sample_id"
     
     # Get test groups
     groups <- as.character(baseline@db[[groupBy]])
@@ -1538,7 +1538,7 @@ baseline2DistPValue <-function(base1, base2) {
 #' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype %in% c("IgM", "IgG"))
+#' db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
 #' 
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",
@@ -1557,17 +1557,17 @@ baseline2DistPValue <-function(base1, base2) {
 #'                          nproc=1)
 #'  
 #' # Grouping the PDFs by the sample and isotype annotations
-#' grouped <- groupBaseline(baseline, groupBy=c("sample", "isotype"))
+#' grouped <- groupBaseline(baseline, groupBy=c("sample_id", "c_call"))
 #' 
 #' # Plot density faceted by region with custom isotype colors
-#' isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
-#'                     "IgG"="seagreen", "IgA"="steelblue")
-#' plotBaselineDensity(grouped, "sample", "isotype", colorValues=isotype_colors, 
+#' isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
+#'                     "IGHG"="seagreen", "IGHA"="steelblue")
+#' plotBaselineDensity(grouped, "sample_id", "c_call", colorValues=isotype_colors, 
 #'                     colorElement="group", sigmaLimits=c(-1, 1))
 #'
 #' # Facet by isotype instead of region
 #' sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
-#' plotBaselineDensity(grouped, "sample", "isotype", facetBy="group",
+#' plotBaselineDensity(grouped, "sample_id", "c_call", facetBy="group",
 #'                     colorValues=sample_colors, sigmaLimits=c(-1, 1))
 #' }
 #' 
@@ -1579,7 +1579,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
                                 silent=FALSE, ...) {
     ## DEBUG
     # baseline=grouped
-    # idColumn="sample"; groupColumn="isotype"; subsetRegions=NULL; sigmaLimits=c(-5, 5)
+    # idColumn="sample_id"; groupColumn="c_call"; subsetRegions=NULL; sigmaLimits=c(-5, 5)
     # facetBy="region"; style="density"; size=1; silent=FALSE
     
     # Check input
@@ -1798,7 +1798,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #' \donttest{
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, isotype %in% c("IgM", "IgG"))
+#' db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
 #' 
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",
@@ -1817,16 +1817,16 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #'                          nproc=1)
 #'  
 #' # Grouping the PDFs by sample and isotype annotations
-#' grouped <- groupBaseline(baseline, groupBy=c("sample", "isotype"))
+#' grouped <- groupBaseline(baseline, groupBy=c("sample_id", "c_call"))
 #' 
 #' # Plot mean and confidence interval by region with custom group colors
-#' isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
-#'                     "IgG"="seagreen", "IgA"="steelblue")
-#' plotBaselineSummary(grouped, "sample", "isotype", 
+#' isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
+#'                     "IGHG"="seagreen", "IGHA"="steelblue")
+#' plotBaselineSummary(grouped, "sample_id", "c_call", 
 #'                     groupColors=isotype_colors)
 #' 
 #' # Facet by group instead of region
-#' plotBaselineSummary(grouped, "sample", "isotype", facetBy="group")
+#' plotBaselineSummary(grouped, "sample_id", "c_call", facetBy="group")
 #' }
 #' 
 #' @export

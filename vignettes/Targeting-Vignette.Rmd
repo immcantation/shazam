@@ -38,9 +38,9 @@ likelihood of the observed mutations. This is done via the following steps:
 
 ## Example data
 
-A small example AIRR-format database is included in the `shazam` package. 
+A small example AIRR Rearrangement database is included in the `alakazam` package. 
 Inferring a targeting model requires the following fields (columns) to 
-be present in the Change-O database: 
+be present in the table: 
 
 * `sequence_id`
 * `sequence_alignment`
