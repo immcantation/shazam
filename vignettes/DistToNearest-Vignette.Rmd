@@ -36,9 +36,9 @@ This is done via the following steps:
 
 ## Example data
 
-A small example Change-O database is included in the `alakazam` package. 
+A small example AIRR Rearrangement database is included in the `alakazam` package. 
 Calculating the nearest neighbor distances requires the following 
-fields (columns) to be present in the Change-O database: 
+fields (columns) to be present in the table: 
 
 * `sequence_id`
 * `v_call`
@@ -206,17 +206,17 @@ completely bin size independent and only engages the real input data.
 The `fields` argument to `distToNearest` will split the input `data.frame`
 into groups based on values in the specified fields (columns) and will 
 treat them independently. For example, if the input data has multiple 
-samples, then `fields="sample"` would allow each sample to be analyzed 
+samples, then `fields="sample_id"` would allow each sample to be analyzed 
 separately.
 
 In the previous examples we used a subset of the original example data. In the
 following example, we will use the two available samples, `-1h` and `+7d`, 
-and will set `fields="sample"`. This will reproduce previous results for sample 
+and will set `fields="sample_id"`. This will reproduce previous results for sample 
 `-1h` and add results for sample `+7d`.
 
 ```{r fields, eval=TRUE, warning=FALSE}
 dist_fields <- distToNearest(ExampleDb, model="ham", normalize="len", 
-                             fields="sample", nproc=1)
+                             fields="sample_id", nproc=1)
 ```
 
 We can plot the nearest neighbor distances for the two samples:
@@ -230,7 +230,7 @@ p4 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)),
     ylab("Count") +
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
-    facet_grid(sample ~ ., scales="free_y")
+    facet_grid(sample_id ~ ., scales="free_y")
 plot(p4)
 ```
 
@@ -250,7 +250,7 @@ we set `cross="sample"`, which will group the data into `-1h` and
 dist_cross <- distToNearest(ExampleDb, sequenceColumn="junction", 
                             vCallColumn="v_call_genotyped", jCallColumn="j_call",
                             model="ham", first=FALSE, 
-                            normalize="len", cross="sample", nproc=1)
+                            normalize="len", cross="sample_id", nproc=1)
 ```
 
 ```{r, eval=TRUE, warning=FALSE, fig.width=7}
@@ -262,7 +262,7 @@ p5 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)),
     ylab("Count") +
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
-    facet_grid(sample ~ ., scales="free_y")
+    facet_grid(sample_id ~ ., scales="free_y")
 plot(p5)
 ```
 

@@ -208,7 +208,7 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, start=1, 
 #' # Exclude nodes without a sample identifier
 #' # Add 20% mutation rate to the immediate offsprings of the MRCA
 #' shmulateTree(sequence, graph, targetingModel=MK_RS5NF,
-#'              field="sample", exclude=NA, junctionWeight=0.2)
+#'              field="sample_id", exclude=NA, junctionWeight=0.2)
 #'  
 #' @export
 shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
