@@ -105,7 +105,7 @@ which show up as two modes in a nearest neighbor distance histogram.
 Thresholds may be manually determined by inspection of the nearest neighbor histograms
 or by using one of the automated threshold detection algorithms provided by the 
 `findThreshold` function. The available methods are `density` (smoothed density) and `gmm` 
-(gamma/Guassian mixture model), and are chosen via the `method` parameter of `findThreshold`.
+(gamma/Gaussian mixture model), and are chosen via the `method` parameter of `findThreshold`.
 
 ### Threshold determination by manual inspection
 
@@ -172,8 +172,8 @@ a clonal assignment threshold. The `"gmm"` method (gamma/Gaussian mixture method
 of `findThreshold` (`method="gmm"`) performs a maximum-likelihood fitting 
 procedure over the distance-to-nearest distribution using one of four combinations of 
 univariate density distribution functions: `"norm-norm"` (two Gaussian distributions), 
-`"norm-gamma"` (lower Guassian and upper gamma distribution), 
-`"gamma-norm"` (lower gamm and upper Guassian distribution), and `"gamma-gamma"`
+`"norm-gamma"` (lower Gaussian and upper gamma distribution), 
+`"gamma-norm"` (lower gamm and upper Gaussian distribution), and `"gamma-gamma"`
 (two gamma distributions). By default, the threshold will be selected by calculating 
 the distance at which the average of sensitivity and specificity reaches its maximum 
 (`cutoff="optimal"`). Alternative threshold selection criteria are also providing, including

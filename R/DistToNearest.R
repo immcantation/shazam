@@ -1039,7 +1039,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #'
 #' \code{findThreshold} automtically determines an optimal threshold for clonal assignment of
 #' Ig sequences using a vector of nearest neighbor distances. It provides two alternative methods 
-#' using either a Gamma/Guassian Mixture Model fit (\code{method="gmm"}) or kernel density 
+#' using either a Gamma/Gaussian Mixture Model fit (\code{method="gmm"}) or kernel density 
 #' fit (\code{method="density"}).
 #'
 #' @param    distances  numeric vector containing nearest neighbor distances. 
@@ -1222,8 +1222,8 @@ findThreshold <- function (distances, method=c("density", "gmm"),
     # Remove NA, NaN, and infinite distances
     distances <- distances[!is.na(distances) & !is.nan(distances) & !is.infinite(distances)]
 
-    # Guassian distribution bandwidth scale parameter
-    #guassian_scaling <- (1/(4 * pi))^(1/10)
+    # Gaussian distribution bandwidth scale parameter
+    # gaussian_scaling <- (1/(4 * pi))^(1/10)
     
     # Ideal bandwidth
     bandwidth <- kedd::h.ucv(unique(distances), 4)$h
@@ -1235,7 +1235,7 @@ findThreshold <- function (distances, method=c("density", "gmm"),
     #dens <- KernSmooth::bkde(distances, bandwidth=bandwidth)
     xdens <- dens$x
     ydens <- dens$y
-    #dens <- ks::kde(distances, h=bandwidth*guassian_scaling, binned=TRUE)
+    #dens <- ks::kde(distances, h=bandwidth*gaussian_scaling, binned=TRUE)
     #xdens <- dens$eval.points
     #ydens <- dens$estimate
     
@@ -1843,7 +1843,7 @@ mixFunction <- function(t, first_curve=NULL, second_curve=NULL,
 #' Plot findThreshold results for the gmm method
 #' 
 #' \code{plotGmmThreshold} plots the results from \code{"gmm"} method of 
-#' \link{findThreshold}, including the Guassian distributions, input nearest neighbor 
+#' \link{findThreshold}, including the Gaussian distributions, input nearest neighbor 
 #' distance histogram, and threshold selected.
 #'
 #' @param    data      \link{GmmThreshold} object output by the \code{"gmm"} method 
