@@ -444,7 +444,7 @@ test_that("BASELINe functions work for single-sequence input", {
     expect_equivalent(groupBaselineMulti@db[singleIdx, ], groupBaselineSingle@db[1, ])
     ## compare @pdfs
     expect_true(is(groupBaselineMulti@pdfs[["SEQ"]], "matrix"))
-    expect_true(is(groupBaselineSingle@pdfs[["SEQ"]], "matrix")
+    expect_true(is(groupBaselineSingle@pdfs[["SEQ"]], "matrix"))
     expect_equal(dim(groupBaselineMulti@pdfs[["SEQ"]]), c(singleIdx, 4001))
     expect_equal(dim(groupBaselineSingle@pdfs[["SEQ"]]), c(1, 4001))
     expect_equal(groupBaselineMulti@pdfs[["SEQ"]][singleIdx, ], 
