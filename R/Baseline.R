@@ -560,7 +560,7 @@ calcBaseline <- function(db,
         # into a numeric vector without matrix(..., nrow=nrow(mat_pdfs_binom))
         list_pdfs[[region]] <- matrix(mat_pdfs_binom[, 1:4001], nrow=nrow(mat_pdfs_binom))
         #cat(class(list_pdfs[[region]]), "\n") # for debugging
-        stopifnot(class(list_pdfs[[region]])=="matrix")
+        stopifnot(is(list_pdfs[[region]], "matrix"))
         
         list_k[[region]] <- mat_pdfs_binom[, 4002]
         list_n[[region]] <- mat_pdfs_binom[, 4003]
@@ -917,8 +917,8 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                 # Thus matrix_GroupPdfs should be expected to be maintained as a matrix as
                 # opposed a numeric vector
                 matrix_GroupPdfs <- (baseline@pdfs[[region]])[idx, , drop=FALSE]
-                stopifnot(class(matrix_GroupPdfs)=="matrix")
-                
+                stopifnot(is(matrix_GroupPdfs, "matrix"))
+
                 # A list version of 
                 list_GroupPdfs <- 
                     lapply( 1:nrow(matrix_GroupPdfs), 
@@ -1214,7 +1214,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
                 # care was taken to make sure that @pdfs[[region]] should be maintained
                 # as a matrix regardless of the number of input sequences (even for a
                 # single-sequence input)
-                stopifnot(class(baseline@pdfs[[region]])=="matrix")
+                stopifnot(is(baseline@pdfs[[region]], "matrix"))
                 baseline_pdf <- baseline@pdfs[[region]][idx, ]
                 
                 baseline_ci <- baselineCI(baseline_pdf)
