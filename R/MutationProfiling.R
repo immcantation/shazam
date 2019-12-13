@@ -383,10 +383,10 @@ collapseClones <- function(db,
     
     # check includeAmbiguous & breakTiesStochastic for methods other than catchAll
     if (method %in% c("thresholdedFreq", "mostCommon", "mostMutated", "leastMutated")) {
-        if (class(includeAmbiguous) != "logical") {
+        if (!is(includeAmbiguous, "logical")) {
             stop ("includeAmbiguous must be TRUE or FALSE.")
         }
-        if (class(breakTiesStochastic) != "logical") {
+        if (!is(breakTiesStochastic, "logical")) {
             stop ("breakTiesStochastic must be TRUE or FALSE.")
         }
     }
@@ -395,22 +395,22 @@ collapseClones <- function(db,
     if (method %in% c("mostMutated", "leastMutated")) {
         
         if (!is.null(breakTiesByColumns)) {
-            if (class(breakTiesByColumns) != "list") {
+            if (!is(breakTiesByColumns, "list")) {
                 stop ("breakTiesByColumns must be a list.")
             }
             if (length(breakTiesByColumns) != 2) {
                 stop ("breakTiesByColumns must be a nested list of length 2.")
             }
-            if ( length(breakTiesByColumns[[1]]) != length(breakTiesByColumns[[2]]) ) {
+            if (length(breakTiesByColumns[[1]]) != length(breakTiesByColumns[[2]])) {
                 stop ("Nested vectors in breakTiesByColumns must have the same lengths.")
             }
-            if ( !all(is.character(breakTiesByColumns[[1]])) ) {
+            if (!all(is.character(breakTiesByColumns[[1]]))) {
                 stop ("The first vector in breakTiesByColumns must contain column names.")
             }
-            if ( !all( unlist( lapply(breakTiesByColumns[[2]], is.function) ) ) ) {
+            if (!all( unlist( lapply(breakTiesByColumns[[2]], is.function)))) {
                 stop ("The second vector in breakTiesByColumns must contain functions.")
             }
-            if ( !all(breakTiesByColumns[[1]] %in% colnames(db)) ) {
+            if (!all(breakTiesByColumns[[1]] %in% colnames(db))) {
                 stop ("All column named included in breakTiesByColumns must be present in db.")
             }
         }
@@ -463,7 +463,7 @@ collapseClones <- function(db,
         nproc <- 0
     }
     
-    if (class(expandedDb) != "logical") {
+    if (!is(expandedDb,  "logical")) {
         stop ("expandedDb must be TRUE or FALSE.")
     }
     
