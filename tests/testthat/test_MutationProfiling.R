@@ -1,6 +1,12 @@
 #load(file.path("tests", "data-tests", "ExampleDb.rda"))
 load(file.path("..", "data-tests", "ExampleDb.rda"))
 
+#ensure older version of sample() used
+R_v <- paste(version$major, version$minor,sep=".")
+if ( numeric_version(R_v) >= numeric_version("3.6.0") ) {
+    RNGkind(sample.kind="Round")   
+}
+
 #### collapseClones ####
 test_that("collapseClones", {
     # example data
