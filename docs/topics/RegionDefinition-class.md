@@ -9,6 +9,8 @@ boundaries of an Ig sequence.
 
 
 
+
+
 Slots
 -------------------
 
@@ -45,6 +47,9 @@ See also
 -------------------
 
 See [IMGT_SCHEMES](IMGT_SCHEMES.md) for a set of predefined `RegionDefinition` objects.
+
+
+
 
 
 

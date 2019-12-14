@@ -71,7 +71,7 @@ shmulateSeq(sequence, numMutations=6)
 
 
 ```
-[1] "NGATCTGACGACACGGCCGAATATTACTGGCCGAGGGATA.TTTC"
+[1] "NAACTTGACCACACGGCCGTGTATGACTGTGCGAGAGGTA.TTTA"
 
 ```
 
@@ -83,6 +83,9 @@ See also
 See [shmulateTree](shmulateTree.md) for imposing mutations on a lineage tree. 
 See [HH_S5F](HH_S5F.md) and [MK_RS5NF](MK_RS5NF.md) for predefined 
 [TargetingModel](TargetingModel-class.md) objects.
+
+
+
 
 
 

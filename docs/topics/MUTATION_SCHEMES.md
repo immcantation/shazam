@@ -9,6 +9,8 @@ physicochemical classes.
 
 
 
+
+
 Format
 -------------------
 A [MutationDefinition](MutationDefinition-class.md) object defining:
@@ -28,6 +30,10 @@ References
 
 
 1. [http://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html](http://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html) 
+
+
+
+
 
 
 

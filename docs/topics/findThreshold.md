@@ -136,7 +136,7 @@ print(output)
 
 
 ```
-[1] 0.1590107
+[1] 0.1585069
 
 ```
 
@@ -159,7 +159,7 @@ print(output)
 
 
 ```
-[1] 0.1753291
+[1] 0.1738003
 
 ```
 
@@ -191,6 +191,9 @@ See also
 
 See [distToNearest](distToNearest.md) for generating the nearest neighbor distance vectors.
 See [plotGmmThreshold](plotGmmThreshold.md) and [plotDensityThreshold](plotDensityThreshold.md) for plotting output.
+
+
+
 
 
 

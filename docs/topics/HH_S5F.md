@@ -15,6 +15,7 @@ HH_S5F
 
 
 
+
 Format
 -------------------
 A [TargetingModel](TargetingModel-class.md) object.
@@ -38,6 +39,9 @@ See [HH_S1F](HH_S1F.md) for the 1-mer substitution matrix from the same
 publication; [HKL_S5F](HKL_S5F.md) for the human light chain 5-mer targeting model; 
 [MK_RS5NF](MK_RS5NF.md) for the mouse 5-mer targeting model; and [U5N](U5N.md) for the 
 uniform 5-mer null targeting model.
+
+
+
 
 
 

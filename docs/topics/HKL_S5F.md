@@ -15,6 +15,7 @@ HKL_S5F
 
 
 
+
 Format
 -------------------
 A [TargetingModel](TargetingModel-class.md) object.
@@ -38,6 +39,9 @@ See also
 See [HH_S5F](HH_S5F.md) for the human heavy chain 5-mer targeting model; 
 [MK_RS5NF](MK_RS5NF.md) for the mouse kappa light chain 5-mer targeting model; 
 and [U5N](U5N.md) for the uniform 5-mer null targeting model.
+
+
+
 
 
 
