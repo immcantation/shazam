@@ -12,8 +12,13 @@ sequence.
 Usage
 --------------------
 ```
-slideWindowDb(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", mutThresh, windowSize)
+slideWindowDb(
+db,
+sequenceColumn = "SEQUENCE_IMGT",
+germlineColumn = "GERMLINE_IMGT_D_MASK",
+mutThresh,
+windowSize
+)
 ```
 
 Arguments

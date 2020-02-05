@@ -10,11 +10,22 @@ analysis using the BASELINe method.
 Usage
 --------------------
 ```
-plotBaselineDensity(baseline, idColumn, groupColumn = NULL,
-colorElement = c("id", "group"), colorValues = NULL, title = NULL,
-subsetRegions = NULL, sigmaLimits = c(-5, 5), facetBy = c("region",
-"group"), style = c("density"), sizeElement = c("none", "id",
-"group"), size = 1, silent = FALSE, ...)
+plotBaselineDensity(
+baseline,
+idColumn,
+groupColumn = NULL,
+colorElement = c("id", "group"),
+colorValues = NULL,
+title = NULL,
+subsetRegions = NULL,
+sigmaLimits = c(-5, 5),
+facetBy = c("region", "group"),
+style = c("density"),
+sizeElement = c("none", "id", "group"),
+size = 1,
+silent = FALSE,
+...
+)
 ```
 
 Arguments

@@ -10,8 +10,13 @@ Targeting probabilities at each position are updated after each iteration.
 Usage
 --------------------
 ```
-shmulateSeq(sequence, numMutations, targetingModel = HH_S5F, start = 1,
-end = nchar(sequence))
+shmulateSeq(
+sequence,
+numMutations,
+targetingModel = HH_S5F,
+start = 1,
+end = nchar(sequence)
+)
 ```
 
 Arguments
@@ -71,7 +76,7 @@ shmulateSeq(sequence, numMutations=6)
 
 
 ```
-[1] "NAACTTGACCACACGGCCGTGTATGACTGTGCGAGAGGTA.TTTA"
+[1] "NTATGTGACGACACGGCCGAGTATTCCTGTGCGAGAGATG.TTTC"
 
 ```
 

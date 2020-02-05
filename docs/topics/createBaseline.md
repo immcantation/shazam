@@ -9,11 +9,19 @@ Description
 Usage
 --------------------
 ```
-createBaseline(description = "", db = data.frame(),
-regionDefinition = createRegionDefinition(), testStatistic = "",
-regions = NULL, numbOfSeqs = matrix(), binomK = matrix(),
-binomN = matrix(), binomP = matrix(), pdfs = list(),
-stats = data.frame())
+createBaseline(
+description = "",
+db = data.frame(),
+regionDefinition = createRegionDefinition(),
+testStatistic = "",
+regions = NULL,
+numbOfSeqs = matrix(),
+binomK = matrix(),
+binomN = matrix(),
+binomP = matrix(),
+pdfs = list(),
+stats = data.frame()
+)
 ```
 
 Arguments

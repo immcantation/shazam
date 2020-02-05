@@ -9,10 +9,18 @@ Visualize results from [minNumMutationsTune](minNumMutationsTune.md) and [minNum
 Usage
 --------------------
 ```
-plotTune(tuneMtx, thresh, criterion = c("5mer", "3mer", "1mer",
-"3mer+1mer", "measured", "inferred"), pchs = 1, ltys = 2, cols = 1,
-plotLegend = TRUE, legendPos = "topright", legendHoriz = FALSE,
-legendCex = 1)
+plotTune(
+tuneMtx,
+thresh,
+criterion = c("5mer", "3mer", "1mer", "3mer+1mer", "measured", "inferred"),
+pchs = 1,
+ltys = 2,
+cols = 1,
+plotLegend = TRUE,
+legendPos = "topright",
+legendHoriz = FALSE,
+legendCex = 1
+)
 ```
 
 Arguments

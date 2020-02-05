@@ -10,9 +10,15 @@ sequence in the input `data.frame`.
 Usage
 --------------------
 ```
-expectedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", targetingModel = HH_S5F,
-regionDefinition = NULL, mutationDefinition = NULL, nproc = 1)
+expectedMutations(
+db,
+sequenceColumn = "SEQUENCE_IMGT",
+germlineColumn = "GERMLINE_IMGT_D_MASK",
+targetingModel = HH_S5F,
+regionDefinition = NULL,
+mutationDefinition = NULL,
+nproc = 1
+)
 ```
 
 Arguments

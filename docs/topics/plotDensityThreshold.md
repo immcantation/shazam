@@ -11,9 +11,18 @@ distance histogram, and threshold selected.
 Usage
 --------------------
 ```
-plotDensityThreshold(data, cross = NULL, xmin = NULL, xmax = NULL,
-breaks = NULL, binwidth = NULL, title = NULL, size = 1,
-silent = FALSE, ...)
+plotDensityThreshold(
+data,
+cross = NULL,
+xmin = NULL,
+xmax = NULL,
+breaks = NULL,
+binwidth = NULL,
+title = NULL,
+size = 1,
+silent = FALSE,
+...
+)
 ```
 
 Arguments

@@ -10,10 +10,17 @@ sequence in the input `data.frame`.
 Usage
 --------------------
 ```
-observedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", regionDefinition = NULL,
-mutationDefinition = NULL, ambiguousMode = c("eitherOr", "and"),
-frequency = FALSE, combine = FALSE, nproc = 1)
+observedMutations(
+db,
+sequenceColumn = "SEQUENCE_IMGT",
+germlineColumn = "GERMLINE_IMGT_D_MASK",
+regionDefinition = NULL,
+mutationDefinition = NULL,
+ambiguousMode = c("eitherOr", "and"),
+frequency = FALSE,
+combine = FALSE,
+nproc = 1
+)
 ```
 
 Arguments

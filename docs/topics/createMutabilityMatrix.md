@@ -10,12 +10,18 @@ the number of mutations occuring in the center position for all 5-mer motifs.
 Usage
 --------------------
 ```
-createMutabilityMatrix(db, substitutionModel, model = c("S", "RS"),
+createMutabilityMatrix(
+db,
+substitutionModel,
+model = c("S", "RS"),
 sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", vCallColumn = "V_CALL",
+germlineColumn = "GERMLINE_IMGT_D_MASK",
+vCallColumn = "V_CALL",
 multipleMutation = c("independent", "ignore"),
-minNumSeqMutations = 500, numSeqMutationsOnly = FALSE,
-returnSource = FALSE)
+minNumSeqMutations = 500,
+numSeqMutationsOnly = FALSE,
+returnSource = FALSE
+)
 ```
 
 Arguments

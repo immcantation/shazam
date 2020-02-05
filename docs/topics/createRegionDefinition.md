@@ -9,8 +9,12 @@ Description
 Usage
 --------------------
 ```
-createRegionDefinition(name = "", boundaries = factor(),
-description = "", citation = "")
+createRegionDefinition(
+name = "",
+boundaries = factor(),
+description = "",
+citation = ""
+)
 ```
 
 Arguments

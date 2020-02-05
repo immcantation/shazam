@@ -9,12 +9,21 @@ Description
 Usage
 --------------------
 ```
-createTargetingModel(db, model = c("S", "RS"),
+createTargetingModel(
+db,
+model = c("S", "RS"),
 sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", vCallColumn = "V_CALL",
-multipleMutation = c("independent", "ignore"), minNumMutations = 50,
-minNumSeqMutations = 500, modelName = "", modelDescription = "",
-modelSpecies = "", modelCitation = "", modelDate = NULL)
+germlineColumn = "GERMLINE_IMGT_D_MASK",
+vCallColumn = "V_CALL",
+multipleMutation = c("independent", "ignore"),
+minNumMutations = 50,
+minNumSeqMutations = 500,
+modelName = "",
+modelDescription = "",
+modelSpecies = "",
+modelCitation = "",
+modelDate = NULL
+)
 ```
 
 Arguments

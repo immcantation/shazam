@@ -10,10 +10,19 @@ using the BASELINe method.
 Usage
 --------------------
 ```
-plotBaselineSummary(baseline, idColumn, groupColumn = NULL,
-groupColors = NULL, subsetRegions = NULL, facetBy = c("region",
-"group"), title = NULL, style = c("summary"), size = 1,
-silent = FALSE, ...)
+plotBaselineSummary(
+baseline,
+idColumn,
+groupColumn = NULL,
+groupColors = NULL,
+subsetRegions = NULL,
+facetBy = c("region", "group"),
+title = NULL,
+style = c("summary"),
+size = 1,
+silent = FALSE,
+...
+)
 ```
 
 Arguments

@@ -9,8 +9,15 @@ Description
 Usage
 --------------------
 ```
-plotMutability(model, nucleotides = c("A", "C", "G", "T"), mark = NULL,
-style = c("hedgehog", "bar"), size = 1, silent = FALSE, ...)
+plotMutability(
+model,
+nucleotides = c("A", "C", "G", "T"),
+mark = NULL,
+style = c("hedgehog", "bar"),
+size = 1,
+silent = FALSE,
+...
+)
 ```
 
 Arguments

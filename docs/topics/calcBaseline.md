@@ -10,11 +10,17 @@ functions (PDFs) for sequences in the given Change-O `data.frame`.
 Usage
 --------------------
 ```
-calcBaseline(db, sequenceColumn = "CLONAL_SEQUENCE",
-germlineColumn = "CLONAL_GERMLINE", testStatistic = c("local",
-"focused", "imbalanced"), regionDefinition = NULL,
-targetingModel = HH_S5F, mutationDefinition = NULL,
-calcStats = FALSE, nproc = 1)
+calcBaseline(
+db,
+sequenceColumn = "CLONAL_SEQUENCE",
+germlineColumn = "CLONAL_GERMLINE",
+testStatistic = c("local", "focused", "imbalanced"),
+regionDefinition = NULL,
+targetingModel = HH_S5F,
+mutationDefinition = NULL,
+calcStats = FALSE,
+nproc = 1
+)
 ```
 
 Arguments

@@ -10,9 +10,15 @@ compared to its germline sequence.
 Usage
 --------------------
 ```
-calcObservedMutations(inputSeq, germlineSeq, regionDefinition = NULL,
-mutationDefinition = NULL, ambiguousMode = c("eitherOr", "and"),
-returnRaw = FALSE, frequency = FALSE)
+calcObservedMutations(
+inputSeq,
+germlineSeq,
+regionDefinition = NULL,
+mutationDefinition = NULL,
+ambiguousMode = c("eitherOr", "and"),
+returnRaw = FALSE,
+frequency = FALSE
+)
 ```
 
 Arguments

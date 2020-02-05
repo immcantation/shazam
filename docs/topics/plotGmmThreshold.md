@@ -11,9 +11,18 @@ distance histogram, and threshold selected.
 Usage
 --------------------
 ```
-plotGmmThreshold(data, cross = NULL, xmin = NULL, xmax = NULL,
-breaks = NULL, binwidth = NULL, title = NULL, size = 1,
-silent = FALSE, ...)
+plotGmmThreshold(
+data,
+cross = NULL,
+xmin = NULL,
+xmax = NULL,
+breaks = NULL,
+binwidth = NULL,
+title = NULL,
+size = 1,
+silent = FALSE,
+...
+)
 ```
 
 Arguments

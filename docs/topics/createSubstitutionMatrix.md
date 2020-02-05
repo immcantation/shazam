@@ -11,12 +11,17 @@ motifs.
 Usage
 --------------------
 ```
-createSubstitutionMatrix(db, model = c("S", "RS"),
+createSubstitutionMatrix(
+db,
+model = c("S", "RS"),
 sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", vCallColumn = "V_CALL",
+germlineColumn = "GERMLINE_IMGT_D_MASK",
+vCallColumn = "V_CALL",
 multipleMutation = c("independent", "ignore"),
-returnModel = c("5mer", "1mer", "1mer_raw"), minNumMutations = 50,
-numMutationsOnly = FALSE)
+returnModel = c("5mer", "1mer", "1mer_raw"),
+minNumMutations = 50,
+numMutationsOnly = FALSE
+)
 ```
 
 Arguments

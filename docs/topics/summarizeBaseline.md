@@ -11,8 +11,7 @@ selection.
 Usage
 --------------------
 ```
-summarizeBaseline(baseline, returnType = c("baseline", "df"),
-nproc = 1)
+summarizeBaseline(baseline, returnType = c("baseline", "df"), nproc = 1)
 ```
 
 Arguments

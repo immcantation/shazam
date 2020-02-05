@@ -12,10 +12,18 @@ fit (`method="density"`).
 Usage
 --------------------
 ```
-findThreshold(distances, method = c("density", "gmm"), edge = 0.9,
-cross = NULL, subsample = NULL, model = c("gamma-gamma",
-"gamma-norm", "norm-gamma", "norm-norm"), cutoff = c("optimal",
-"intersect", "user"), sen = NULL, spc = NULL, progress = FALSE)
+findThreshold(
+distances,
+method = c("density", "gmm"),
+edge = 0.9,
+cross = NULL,
+subsample = NULL,
+model = c("gamma-gamma", "gamma-norm", "norm-gamma", "norm-norm"),
+cutoff = c("optimal", "intersect", "user"),
+sen = NULL,
+spc = NULL,
+progress = FALSE
+)
 ```
 
 Arguments
@@ -136,7 +144,7 @@ print(output)
 
 
 ```
-[1] 0.1585069
+[1] 0.155052
 
 ```
 
@@ -159,7 +167,7 @@ print(output)
 
 
 ```
-[1] 0.1738003
+[1] 0.1731731
 
 ```
 

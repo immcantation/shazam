@@ -9,11 +9,17 @@ Construct a consensus sequence
 Usage
 --------------------
 ```
-consensusSequence(sequences, db = NULL, method = c("mostCommon",
-"thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
-minFreq = NULL, muFreqColumn = NULL, lenLimit = NULL,
-includeAmbiguous = FALSE, breakTiesStochastic = FALSE,
-breakTiesByColumns = NULL)
+consensusSequence(
+sequences,
+db = NULL,
+method = c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
+minFreq = NULL,
+muFreqColumn = NULL,
+lenLimit = NULL,
+includeAmbiguous = FALSE,
+breakTiesStochastic = FALSE,
+breakTiesByColumns = NULL
+)
 ```
 
 Arguments
