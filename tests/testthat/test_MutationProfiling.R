@@ -72,10 +72,10 @@ test_that("observedMutations, charge mutations", {
                                 mutationDefinition=CHARGE_MUTATIONS,
                                 nproc=1)
     
-    expect_equal(db_obs$MU_COUNT_CDR_R, c(0, 0, 0, 0, 0, 0, 2, 2, 2, 0))
-    expect_equal(db_obs$MU_COUNT_CDR_S, c(0, 0, 0, 0, 0, 0, 3, 3, 3, 16))
-    expect_equal(db_obs$MU_COUNT_FWR_R, c(0, 1, 1, 0, 0, 0, 0, 0, 0, 3))
-    expect_equal(db_obs$MU_COUNT_FWR_S, c(0, 6, 6, 0, 0, 0, 10, 10, 10, 14))
+    expect_equal(db_obs$mu_count_CDR_R, c(0, 0, 0, 0, 0, 0, 2, 2, 2, 0))
+    expect_equal(db_obs$mu_count_CDR_S, c(0, 0, 0, 0, 0, 0, 3, 3, 3, 16))
+    expect_equal(db_obs$mu_count_FWR_R, c(0, 1, 1, 0, 0, 0, 0, 0, 0, 3))
+    expect_equal(db_obs$mu_count_FWR_S, c(0, 6, 6, 0, 0, 0, 10, 10, 10, 14))
     
 })
 
@@ -150,13 +150,13 @@ test_that("observedMutations, combine", {
     
     ## When using the whole sequence, the sum of MU_COUNT_SEQ_S and MU_COUNT_SEQ_R
     ## should match MU_COUNT 
-    expect_equal(rowSums(db_obs[,grep("MU_COUNT",colnames(db_obs))]),
-                 db_obs_combined$MU_COUNT)
+    expect_equal(rowSums(db_obs[,grep("mu_count",colnames(db_obs))]),
+                 db_obs_combined$mu_count)
     
-    ## When using the whole sequence, the sum of MU_FREQ_SEQ_S and MU_FREQ_SEQ_R
-    ## should match MU_FREQ 
-    expect_equal(rowSums(db_freq[,grep("MU_FREQ",colnames(db_freq))]),
-                 db_freq_combined$MU_FREQ)
+    ## When using the whole sequence, the sum of mu_freq_SEQ_S and mu_freq_SEQ_R
+    ## should match mu_freq 
+    expect_equal(rowSums(db_freq[,grep("mu_freq",colnames(db_freq))]),
+                 db_freq_combined$mu_freq)
     
     ##
     ## With regionDefinition==IMGT_V
@@ -205,14 +205,14 @@ test_that("observedMutations, combine", {
     
     ## When using IMGT_V, the sum of MU_COUNT_SEQ_S and MU_COUNT_SEQ_R
     ## should match MU_COUNT. There is only one denominator, nonN-SEQ
-    expect_equal(rowSums(db_obs[,grep("MU_COUNT",colnames(db_obs))]),
-                 db_obs_combined$MU_COUNT)
+    expect_equal(rowSums(db_obs[,grep("mu_count",colnames(db_obs))]),
+                 db_obs_combined$mu_count)
     
     ## When not using the whole sequence, the sum of the mutation frequencies
-    ## may not match MU_FREQ, because CDR mutations and FWR mutations use their own
+    ## may not match mu_freq, because CDR mutations and FWR mutations use their own
     ## denominators (nonN-CDR and nonN-FWR)
-    expect_equal(db_obs_combined$MU_COUNT/db_obs_denominator,
-                 db_freq_combined$MU_FREQ)
+    expect_equal(db_obs_combined$mu_count/db_obs_denominator,
+                 db_freq_combined$mu_freq)
     
 })
 
@@ -265,7 +265,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                      regionDefinition=NULL,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns MU_COUNT_SEQ_R, MU_COUNT_SEQ_S exist and will be overwritten")
+                   "Columns mu_count_SEQ_R, mu_count_SEQ_S exist and will be overwritten")
     ## Counts Combine
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
@@ -281,7 +281,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                      regionDefinition=NULL,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns MU_COUNT exist and will be overwritten")    
+                   "Columns mu_count exist and will be overwritten")    
     
     ## Counts  regionDefinition
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
@@ -298,7 +298,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                      regionDefinition=IMGT_V,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns MU_COUNT_CDR_R, MU_COUNT_CDR_S, MU_COUNT_FWR_R, MU_COUNT_FWR_S exist and will be overwritten")  
+                   "Columns mu_count_CDR_R, mu_count_CDR_S, mu_count_FWR_R, mu_count_FWR_S exist and will be overwritten")  
     ## Counts combine regionDefinition
     db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
@@ -314,7 +314,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                      regionDefinition=IMGT_V,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns MU_COUNT exist and will be overwritten")    
+                   "Columns mu_count exist and will be overwritten")    
     
     
     ## Freq
@@ -332,7 +332,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                      regionDefinition=NULL,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns MU_FREQ_SEQ_R, MU_FREQ_SEQ_S exist and will be overwritten")
+                   "Columns mu_freq_SEQ_R, mu_freq_SEQ_S exist and will be overwritten")
     
     ## Freq Combine
     db_freq <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
@@ -349,7 +349,7 @@ test_that("observedMutations overwrites with a warning pre-existing mutation cou
                                      regionDefinition=NULL,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns MU_FREQ exist and will be overwritten")
+                   "Columns mu_freq exist and will be overwritten")
 })
 
 
@@ -410,7 +410,7 @@ test_that("observedMutations, when no mutations found", {
         "SEQUENCE_IMGT"=c(in_seq, in_seq),
         "GERMLINE_IMGT_D_MASK"=c(in_seq, in_seq)
     ), sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
-    regionDefinition = NULL)[,c("MU_COUNT_SEQ_R", "MU_COUNT_SEQ_S")], data.frame(c(0, 0), c(0, 0)))
+    regionDefinition = NULL)[,c("mu_count_SEQ_R", "mu_count_SEQ_S")], data.frame(c(0, 0), c(0, 0)))
 })
 
 ##### Tests 1A-1H (calcObservedMutations & observedMutations)
@@ -1413,8 +1413,8 @@ test_that("observedMutations, 1I, using mock data from 1A through 1G, ambiguousM
                                              regionDefinition=NULL, 
                                              frequency=F, combine=F, ambiguousMode="and")
     
-    expect_equal(freqF.combF.noRegDef$MU_COUNT_SEQ_R, exp.noRegDef.R)
-    expect_equal(freqF.combF.noRegDef$MU_COUNT_SEQ_S, exp.noRegDef.S)
+    expect_equal(freqF.combF.noRegDef$mu_count_SEQ_R, exp.noRegDef.R)
+    expect_equal(freqF.combF.noRegDef$mu_count_SEQ_S, exp.noRegDef.S)
     
     # frequency=F, combine=T, no regDef
     freqF.combT.noRegDef = observedMutations(db=testDb, sequenceColumn="obsv", 
@@ -1422,7 +1422,7 @@ test_that("observedMutations, 1I, using mock data from 1A through 1G, ambiguousM
                                              regionDefinition=NULL, 
                                              frequency=F, combine=T, ambiguousMode="and")
     
-    expect_equal(freqF.combT.noRegDef$MU_COUNT, 
+    expect_equal(freqF.combT.noRegDef$mu_count, 
                  exp.noRegDef.R+exp.noRegDef.S)
     
     # frequency=T, combine=F, no regDef
@@ -1438,9 +1438,9 @@ test_that("observedMutations, 1I, using mock data from 1A through 1G, ambiguousM
     exp.noRegDef.S.freq = exp.noRegDef.S/exp.noRegDef.nonN
     exp.noRegDef.S.freq[is.na(exp.noRegDef.S.freq)] = 0
     
-    expect_equal(freqT.combF.noRegDef$MU_FREQ_SEQ_R, 
+    expect_equal(freqT.combF.noRegDef$mu_freq_SEQ_R, 
                  exp.noRegDef.R.freq)
-    expect_equal(freqT.combF.noRegDef$MU_FREQ_SEQ_S, 
+    expect_equal(freqT.combF.noRegDef$mu_freq_SEQ_S, 
                  exp.noRegDef.S.freq)
     
     # frequency=T, combine=T, no regDef
@@ -1453,7 +1453,7 @@ test_that("observedMutations, 1I, using mock data from 1A through 1G, ambiguousM
     exp.noRegDef.comb.freq = (exp.noRegDef.R+exp.noRegDef.S)/exp.noRegDef.nonN
     exp.noRegDef.comb.freq[is.na(exp.noRegDef.comb.freq)] = 0
     
-    expect_equal(freqT.combT.noRegDef$MU_FREQ, 
+    expect_equal(freqT.combT.noRegDef$mu_freq, 
                  exp.noRegDef.comb.freq)
     
 })
@@ -1493,8 +1493,8 @@ test_that("observedMutations, 1J, using mock data from 1A through 1G, ambiguousM
                                              regionDefinition=NULL, 
                                              frequency=F, combine=F, ambiguousMode="eitherOr")
     
-    expect_equal(freqF.combF.noRegDef$MU_COUNT_SEQ_R, exp.noRegDef.R)
-    expect_equal(freqF.combF.noRegDef$MU_COUNT_SEQ_S, exp.noRegDef.S)
+    expect_equal(freqF.combF.noRegDef$mu_count_SEQ_R, exp.noRegDef.R)
+    expect_equal(freqF.combF.noRegDef$mu_count_SEQ_S, exp.noRegDef.S)
     
     # frequency=F, combine=T, no regDef
     freqF.combT.noRegDef = observedMutations(db=testDb, sequenceColumn="obsv", 
@@ -1502,7 +1502,7 @@ test_that("observedMutations, 1J, using mock data from 1A through 1G, ambiguousM
                                              regionDefinition=NULL, 
                                              frequency=F, combine=T, ambiguousMode="eitherOr")
     
-    expect_equal(freqF.combT.noRegDef$MU_COUNT, 
+    expect_equal(freqF.combT.noRegDef$mu_count, 
                  exp.noRegDef.R+exp.noRegDef.S)
     
     # frequency=T, combine=F, no regDef
@@ -1518,9 +1518,9 @@ test_that("observedMutations, 1J, using mock data from 1A through 1G, ambiguousM
     exp.noRegDef.S.freq = exp.noRegDef.S/exp.noRegDef.nonN
     exp.noRegDef.S.freq[is.na(exp.noRegDef.S.freq)] = 0
     
-    expect_equal(freqT.combF.noRegDef$MU_FREQ_SEQ_R, 
+    expect_equal(freqT.combF.noRegDef$mu_freq_SEQ_R, 
                  exp.noRegDef.R.freq)
-    expect_equal(freqT.combF.noRegDef$MU_FREQ_SEQ_S, 
+    expect_equal(freqT.combF.noRegDef$mu_freq_SEQ_S, 
                  exp.noRegDef.S.freq)
     
     # frequency=T, combine=T, no regDef
@@ -1533,7 +1533,7 @@ test_that("observedMutations, 1J, using mock data from 1A through 1G, ambiguousM
     exp.noRegDef.comb.freq = (exp.noRegDef.R+exp.noRegDef.S)/exp.noRegDef.nonN
     exp.noRegDef.comb.freq[is.na(exp.noRegDef.comb.freq)] = 0
     
-    expect_equal(freqT.combT.noRegDef$MU_FREQ, 
+    expect_equal(freqT.combT.noRegDef$mu_freq, 
                  exp.noRegDef.comb.freq)
     
 })
@@ -1900,7 +1900,7 @@ test_that("consensusSequence, 2C, methods = mostMutated, leastMutated", {
     #calcObservedMutations(inputSeq = testDb$obsv[4], germlineSeq = testDb$germ[4], frequency=F, returnRaw=T)
     
     # check mutation frequency
-    expect_true(all(observedMutations(testDb, "obsv", "germ", frequency=T, combine=T)$MU_FREQ ==
+    expect_true(all(observedMutations(testDb, "obsv", "germ", frequency=T, combine=T)$mu_freq ==
                         testDb$MUTFREQ))
     
     
@@ -2255,14 +2255,14 @@ test_that("collapseClones, 2E", {
                                    muFreqColumn=NULL,
                                    method="mostMutated", breakTiesStochastic=FALSE,
                                    breakTiesByColumns=NULL, expandedDb=FALSE)
-    expect_equal(test.mut.most[["CLONAL_SEQUENCE_MUFREQ"]],
+    expect_equal(test.mut.most[["clonal_sequence_mufreq"]],
                  rep(testDb$MUTFREQ[5], 3)) # from test 2D
     
     test.mut.least = collapseClones(db=testDb.clone, cloneColumn="CLONE", sequenceColumn="obsv", germlineColumn="germ",
                                     muFreqColumn=NULL,
                                     method="leastMutated", breakTiesStochastic=FALSE,
                                     breakTiesByColumns=NULL, expandedDb=FALSE)
-    expect_equal(test.mut.least[["CLONAL_SEQUENCE_MUFREQ"]],
+    expect_equal(test.mut.least[["clonal_sequence_mufreq"]],
                  rep(testDb$MUTFREQ[1], 3)) # from test 2D
     
     ##### check expandedDb
@@ -2294,15 +2294,15 @@ test_that("collapseClones, 2E", {
     # when unexpended, sequenceColumn and corresponding MUTFREQ retained for each clone may
     # not necessarily be the most mutated; so nothing to test here
     
-    ### CLONAL_SEQUENCE_MUFREQ
-    # $CLONAL_SEQUENCE_MUFREQ is the mut freq of most mutated consensus for a given clone
+    ### clonal_sequence_mufreq
+    # $clonal_sequence_mufreq is the mut freq of most mutated consensus for a given clone
     # since all 3 clones here are artifically made the same, this number should be the same for all clones
-    expect_equal(length(unique(test.expF[["CLONAL_SEQUENCE_MUFREQ"]])), 1)
+    expect_equal(length(unique(test.expF[["clonal_sequence_mufreq"]])), 1)
     
-    # $CLONAL_SEQUENCE_MUFREQ is the mut freq of most mutated consensus for a given clone
+    # $clonal_sequence_mufreq is the mut freq of most mutated consensus for a given clone
     # this number should be the same for all seqs in the same clone
     # since all 3 clones here are artifically made the same, this number should be the same for all seqs
-    expect_equal(length(unique(test.expT[["CLONAL_SEQUENCE_MUFREQ"]])), 1)
+    expect_equal(length(unique(test.expT[["clonal_sequence_mufreq"]])), 1)
     
 })
 
@@ -2460,8 +2460,8 @@ test_that("observedMutations", {
                                   frequency=TRUE,
                                   nproc=1)
     
-    expect_identical(db_obs_c[["MU_FREQ_SEQ_R"]], db_obs_a[["MU_FREQ_SEQ_R"]])
-    expect_identical(db_obs_c[["MU_FREQ_SEQ_S"]], db_obs_a[["MU_FREQ_SEQ_S"]])
+    expect_identical(db_obs_c[["mu_freq_SEQ_R"]], db_obs_a[["mu_freq_SEQ_R"]])
+    expect_identical(db_obs_c[["mu_freq_SEQ_S"]], db_obs_a[["mu_freq_SEQ_S"]])
     
     # mutation count
     db_obs_c <- observedMutations(db_c, sequenceColumn="SEQUENCE_IMGT",
@@ -2474,8 +2474,8 @@ test_that("observedMutations", {
                                   frequency=FALSE,
                                   nproc=1)
     
-    expect_identical(db_obs_c[["MU_COUNT_SEQ_R"]], db_obs_a[["MU_COUNT_SEQ_R"]])
-    expect_identical(db_obs_c[["MU_COUNT_SEQ_S"]], db_obs_a[["MU_COUNT_SEQ_S"]])
+    expect_identical(db_obs_c[["mu_count_SEQ_R"]], db_obs_a[["mu_count_SEQ_R"]])
+    expect_identical(db_obs_c[["mu_count_SEQ_S"]], db_obs_a[["mu_count_SEQ_S"]])
     
 })
 

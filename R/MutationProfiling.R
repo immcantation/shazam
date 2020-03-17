@@ -70,7 +70,7 @@ NULL
 #'           \itemize{
 #'             \item \code{clonal_sequence}:  effective sequence for the clone.
 #'             \item \code{clonal_germline}:  germline sequence for the clone.
-#'             \item \code{CLONAL_SEQUENCE_MUFREQ}:  mutation frequency of 
+#'             \item \code{clonal_sequence_mufreq}:  mutation frequency of 
 #'                   \code{clonal_sequence}; only added for the \code{"mostMutated"}
 #'                   and \code{"leastMutated"} methods.
 #'           }
@@ -323,13 +323,13 @@ NULL
 #' # mostMutated method, resolving ties stochastically
 #' clones <- collapseClones(db2, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
 #'                          germlineColumn="germline_alignment_d_mask",
-#'                          method="mostMutated", muFreqColumn="MU_FREQ", 
+#'                          method="mostMutated", muFreqColumn="mu_freq", 
 #'                          breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
 #'                          
 #' # mostMutated method, resolving ties deterministically using additional columns
 #' clones <- collapseClones(db2, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
 #'                          germlineColumn="germline_alignment_d_mask",
-#'                          method="mostMutated", muFreqColumn="MU_FREQ", 
+#'                          method="mostMutated", muFreqColumn="mu_freq", 
 #'                          breakTiesStochastic=FALSE, 
 #'                          breakTiesByColumns=list(c("duplicate_count"), c(max)))
 #' 
@@ -476,7 +476,7 @@ collapseClones <- function(db,
     uniqueClonesIdx <- sapply(uniqueClones, function(i){which(db[[cloneColumn]]==i)}, simplify=FALSE)
     
     # if method is most/leastMutated and muFreqColumn not specified,
-    # first calculate mutation frequency ($MU_FREQ)
+    # first calculate mutation frequency ($mu_freq)
     # IMPORTANT: do this OUTSIDE foreach loop for calcClonalConsensus
     # otherwise will get an error saying muFreqColumn not found in db
     # (something to do with parallelization/foreach)
@@ -487,7 +487,7 @@ collapseClones <- function(db,
                                 regionDefinition=regionDefinition,
                                 frequency=TRUE, combine=TRUE, 
                                 mutationDefinition=NULL, nproc=nproc)
-        muFreqColumn <- "MU_FREQ"
+        muFreqColumn <- "mu_freq"
     }
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
@@ -557,9 +557,9 @@ collapseClones <- function(db,
         cons_db$clonal_sequence <- unlist(cons_mat[, 1])[clone_index]
         cons_db$clonal_germline <- unlist(cons_mat[, 2])[clone_index]
         
-        # assign mutation frequency corresponding to consensus into CLONAL_SEQUENCE_MUFREQ
+        # assign mutation frequency corresponding to consensus into clonal_sequence_mufreq
         if (method %in% c("mostMutated", "leastMutated")) {
-            cons_db$CLONAL_SEQUENCE_MUFREQ <- unlist(cons_mat[, 3])[clone_index]
+            cons_db$clonal_sequence_mufreq <- unlist(cons_mat[, 3])[clone_index]
         }
     } else {
         # Return only the first row of each clone
@@ -568,9 +568,9 @@ collapseClones <- function(db,
         cons_db$clonal_sequence <- unlist(cons_mat[, 1])
         cons_db$clonal_germline <- unlist(cons_mat[, 2])
         
-        # assign mutation frequency corresponding to consensus into CLONAL_SEQUENCE_MUFREQ
+        # assign mutation frequency corresponding to consensus into clonal_sequence_mufreq
         if (method %in% c("mostMutated", "leastMutated")) {
-            cons_db$CLONAL_SEQUENCE_MUFREQ <- unlist(cons_mat[, 3])
+            cons_db$clonal_sequence_mufreq <- unlist(cons_mat[, 3])
         }
     }
     
@@ -694,7 +694,7 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #' clone <- observedMutations(clone, frequency=TRUE, combine=TRUE)
 #' 
 #' # Manually create a tie
-#' clone <- rbind(clone, clone[which.max(clone$MU_FREQ), ])
+#' clone <- rbind(clone, clone[which.max(clone$mu_freq), ])
 #' 
 #' # ThresholdedFreq method. 
 #' # Resolve ties deterministically without using ambiguous characters
@@ -750,21 +750,21 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostMutated method, resolve ties stochastically
 # consInput8 <- consensusSequence(clone$sequence_alignment,
-#                                     muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                     muFreqColumn="mu_freq", lenLimit=NULL,
 #                                     method="mostMutated", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=TRUE,
 #                                     breakTiesByColumns=NULL, db=clone)$cons
 # mostMutated method, resolve ties deterministically using additional columns
 # consInput9 <- consensusSequence(clone$sequence_alignment,
-#                                     muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                     muFreqColumn="mu_freq", lenLimit=NULL,
 #                                     method="mostMutated", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=list(c("junction_length","duplicate_count"), c(max, max)), 
 #                                     db=clone)$cons
 # consInput10 <- consensusSequence(clone$sequence_alignment,
-#                                      muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                      muFreqColumn="mu_freq", lenLimit=NULL,
 #                                      method="mostMutated", minFreq=NULL,
 #                                      includeAmbiguous=FALSE, 
 #                                      breakTiesStochastic=FALSE,
@@ -772,7 +772,7 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #                                      db=clone)$cons
 # mostMutated method, resolve ties deterministically withou using additional columns
 # consInput11 <- consensusSequence(clone$sequence_alignment,
-#                                      muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                      muFreqColumn="mu_freq", lenLimit=NULL,
 #                                      method="mostMutated", minFreq=NULL,
 #                                      includeAmbiguous=FALSE, 
 #                                      breakTiesStochastic=FALSE,
@@ -1113,7 +1113,7 @@ consensusSequence <- function(sequences, db=NULL,
 # # compute mutation frequency for most/leastMutated methods
 # clone <- observedMutations(db=clone, frequency=TRUE, combine=TRUE)
 # # manually create a tie
-# clone <- rbind(clone, clone[which.max(clone$MU_FREQ), ])
+# clone <- rbind(clone, clone[which.max(clone$mu_freq), ])
 # 
 # # Get consensus input and germline sequences
 # # thresholdedFreq method, resolve ties deterministically without using ambiguous characters
@@ -1160,26 +1160,26 @@ consensusSequence <- function(sequences, db=NULL,
 #                              breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
 # # mostMutated method, resolve ties stochastically
 # cons8 <- calcClonalConsensus(db=clone,
-#                              muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                              muFreqColumn="mu_freq", regionDefinition=NULL,
 #                              method="mostMutated", 
 #                              minimumFrequency=NULL, includeAmbiguous=FALSE,
 #                              breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
 # # mostMutated method, resolve ties deterministically using additional columns
 # cons9 <- calcClonalConsensus(db=clone,
-#                              muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                              muFreqColumn="mu_freq", regionDefinition=NULL,
 #                              method="mostMutated", 
 #                              minimumFrequency=NULL, includeAmbiguous=FALSE,
 #                              breakTiesStochastic=FALSE, 
 #                              breakTiesByColumns=list(c("junction_length", "duplicate_count"), c(max, max)))
 # cons10 <- calcClonalConsensus(db=clone,
-#                               muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                               muFreqColumn="mu_freq", regionDefinition=NULL,
 #                               method="mostMutated", 
 #                               minimumFrequency=NULL, includeAmbiguous=FALSE,
 #                               breakTiesStochastic=FALSE, 
 #                               breakTiesByColumns=list(c("duplicate_count"), c(max)))
 # # mostMutated method, resolve ties deterministically without using additional columns
 # cons11 <- calcClonalConsensus(db=clone,
-#                               muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                               muFreqColumn="mu_freq", regionDefinition=NULL,
 #                               method="mostMutated", 
 #                               minimumFrequency=NULL, includeAmbiguous=FALSE,
 #                               breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
@@ -1300,31 +1300,31 @@ calcClonalConsensus <- function(db,
 #'           \link{IMGT_V} definition, which defines positions for CDR and
 #'           FWR, the following columns are added:
 #'           \itemize{
-#'             \item  \code{MU_COUNT_CDR_R}:  number of replacement mutations in CDR1 and 
+#'             \item  \code{mu_count_CDR_R}:  number of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{MU_COUNT_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'             \item  \code{mu_count_CDR_S}:  number of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{MU_COUNT_FWR_R}:  number of replacement mutations in FWR1, 
+#'             \item  \code{mu_count_FWR_R}:  number of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{MU_COUNT_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'             \item  \code{mu_count_FWR_S}:  number of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           }
 #'           If \code{frequency=TRUE}, R and S mutation frequencies are
 #'           calculated over the number of non-N positions in the speficied regions.
 #'           \itemize{
-#'             \item  \code{MU_FREQ_CDR_R}:  frequency of replacement mutations in CDR1 and 
+#'             \item  \code{mu_freq_CDR_R}:  frequency of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{MU_FREQ_CDR_S}:  frequency of silent mutations in CDR1 and CDR2 
+#'             \item  \code{mu_freq_CDR_S}:  frequency of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{MU_FREQ_FWR_R}:  frequency of replacement mutations in FWR1, 
+#'             \item  \code{mu_freq_FWR_R}:  frequency of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{MU_FREQ_FWR_S}:  frequency of silent mutations in FWR1, FWR2 and
+#'             \item  \code{mu_freq_FWR_S}:  frequency of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           } 
 #'           If \code{frequency=TRUE} and \code{combine=TRUE}, the mutations and non-N positions
-#'           are aggregated and a single \code{MU_FREQ} value is returned
+#'           are aggregated and a single \code{mu_freq} value is returned
 #'           \itemize{
-#'             \item  \code{MU_FREQ}:  frequency of replacement and silent mutations in the 
+#'             \item  \code{mu_freq}:  frequency of replacement and silent mutations in the 
 #'                                      specified region
 #'           }     
 #'                                  
@@ -1401,15 +1401,15 @@ observedMutations <- function(db,
     }
     if (frequency == TRUE) {
         if (combine) {
-            labels <- "MU_FREQ"
+            labels <- "mu_freq"
         } else {
-            labels <- paste("MU_FREQ_", labels, sep="")
+            labels <- paste("mu_freq_", labels, sep="")
         }
     } else {
         if (combine) {
-            labels <- "MU_COUNT"
+            labels <- "mu_count"
         } else {
-            labels <- paste("MU_COUNT_", labels, sep="")
+            labels <- paste("mu_count_", labels, sep="")
         }
     }
     
@@ -1512,9 +1512,9 @@ observedMutations <- function(db,
     if (ncol(observed_mutations) > 1) sep <- "_"
     observed_mutations[is.na(observed_mutations)] <- 0
     if (frequency == TRUE) {
-        colnames(observed_mutations) <- gsub("_$","",paste("MU_FREQ", colnames(observed_mutations), sep=sep))
+        colnames(observed_mutations) <- gsub("_$","",paste("mu_freq", colnames(observed_mutations), sep=sep))
     } else {
-        colnames(observed_mutations) <- gsub("_$","",paste("MU_COUNT", colnames(observed_mutations), sep=sep))
+        colnames(observed_mutations) <- gsub("_$","",paste("mu_count", colnames(observed_mutations), sep=sep))
     }
     
     # Properly shutting down the cluster

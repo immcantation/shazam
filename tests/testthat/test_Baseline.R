@@ -189,22 +189,22 @@ test_that("observedMutations works with regionDefinition==NULL",{
     
     ## Check 5 examples for each
     ## CDR_R, first 5
-    obs_cdr_r <- db_mutations$MU_COUNT_CDR_R[1:5]
+    obs_cdr_r <- db_mutations$mu_count_CDR_R[1:5]
     exp_cdr_r <- c(2, 0, 0, 0, 0)
     expect_equal(obs_cdr_r, exp_cdr_r)
     
     ## CDR_S 311:315
-    obs_cdr_s <- db_mutations$MU_COUNT_CDR_S[311:315]
+    obs_cdr_s <- db_mutations$mu_count_CDR_S[311:315]
     exp_cdr_s <- c(0, 0, 0, 0, 0)
     expect_equal(obs_cdr_r, exp_cdr_r)
     
     ## FWR_R, 120:124
-    obs_fwr_r <- db_mutations$MU_COUNT_FWR_R[120:124]
+    obs_fwr_r <- db_mutations$mu_count_FWR_R[120:124]
     exp_fwr_r<- c(0, 0, 0, 0, 0)
     expect_equal(obs_fwr_r, exp_fwr_r)
     
     ## FWR_S, 40:44
-    obs_fwr_s <- db_mutations$MU_COUNT_FWR_S[40:44]
+    obs_fwr_s <- db_mutations$mu_count_FWR_S[40:44]
     exp_fwr_s<- c(0, 0, 0, 1, 0)
     expect_equal(obs_fwr_s, exp_fwr_s)
      
@@ -214,12 +214,12 @@ test_that("observedMutations works with regionDefinition==NULL",{
                                            regionDefinition=NULL,
                                            nproc=1)
     ## SEQ_R, first 5
-    obs_seq_r <- db_mutations_null$MU_COUNT_SEQ_R[1:5]
+    obs_seq_r <- db_mutations_null$mu_count_SEQ_R[1:5]
     exp_seq_r <- c(12, 0, 0, 0, 0)
     expect_equal(obs_seq_r, exp_seq_r)
     
     ## SEQ_S 38:42
-    obs_seq_s <- db_mutations_null$MU_COUNT_SEQ_S[38:42]
+    obs_seq_s <- db_mutations_null$mu_count_SEQ_S[38:42]
     exp_seq_s <- c(0, 2, 2, 0, 0)
     expect_equal(obs_seq_s, exp_seq_s)
     
@@ -255,7 +255,7 @@ test_that("calcBaseline", {
     expect_gt(nrow(slot(db_baseline,"stats")),0)
     
     db_baseline_rowSums <- rowSums(
-        slot(db_baseline,"db")[1:5,grep("MU_COUNT",colnames(slot(db_baseline,"db")))])
+        slot(db_baseline,"db")[1:5,grep("mu_count",colnames(slot(db_baseline,"db")))])
 
 # Commented because working on the code, when clones collapsed.
     expect_equivalent(
@@ -264,22 +264,22 @@ test_that("calcBaseline", {
     
 #     ## Check 5 examples for each, at different positions
 #     ## CDR_R, first 5
-#     obs_cdr_r <- slot(db_baseline,"db")$MU_COUNT_CDR_R[1:5]
+#     obs_cdr_r <- slot(db_baseline,"db")$mu_count_CDR_R[1:5]
 #     exp_cdr_r<- c(2, 6, 17, 18, 0)
 #     expect_equal(obs_cdr_r, exp_cdr_r)
 #     
 #     ## CDR_S, 673:677
-#     obs_cdr_s <- slot(db_baseline,"db")$MU_COUNT_CDR_S[673:677]
+#     obs_cdr_s <- slot(db_baseline,"db")$mu_count_CDR_S[673:677]
 #     exp_cdr_s <- c(3, 5, 5, 5, 0)
 #     expect_equal(obs_cdr_s, exp_cdr_s)
 #     
 #     ## FWR_R, 937:941
-#     obs_fwr_r <- slot(db_baseline,"db")$MU_COUNT_FWR_R[937:941]
+#     obs_fwr_r <- slot(db_baseline,"db")$mu_count_FWR_R[937:941]
 #     exp_fwr_r<- c(0, 7, 14, 7, 0)
 #     expect_equal(obs_fwr_r, exp_fwr_r)
 #     
 #     ## FWR_S, 993:997
-#     obs_fwr_s <- slot(db_baseline,"db")$MU_COUNT_FWR_S[993:997]
+#     obs_fwr_s <- slot(db_baseline,"db")$mu_count_FWR_S[993:997]
 #     exp_fwr_s<- c(10, 0, 0, 0, 0)
 #     expect_equal(obs_fwr_s, exp_fwr_s)
 
@@ -359,10 +359,10 @@ test_that("calcBaseline", {
                                           nproc = 1, 
                                           calcStats=T)
  
-    total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$MU_COUNT_SEQ_S,
-        slot(db_baseline_trim_null,"db")$MU_COUNT_SEQ_R))
+    total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$mu_count_SEQ_S,
+        slot(db_baseline_trim_null,"db")$mu_count_SEQ_R))
     
-    total_baseline <- rowSums(slot(db_baseline,"db")[,grep("MU_COUNT.*", colnames(slot(db_baseline,"db")))])
+    total_baseline <- rowSums(slot(db_baseline,"db")[,grep("mu_count.*", colnames(slot(db_baseline,"db")))])
     
     expect_equivalent(total_trim_null, total_baseline)
     
@@ -374,7 +374,7 @@ test_that("calcBaseline", {
                                 regionDefinition=IMGT_V,
                                 nproc=1)
     expect_equivalent(
-        rowSums(obs_mu[,grep("MU_COUNT", colnames(obs_mu))]), 
+        rowSums(obs_mu[,grep("mu_count", colnames(obs_mu))]), 
         total_baseline
         )
     
@@ -384,7 +384,7 @@ test_that("calcBaseline", {
                                 regionDefinition=NULL,
                                 nproc=1)
     expect_equivalent(
-        rowSums(obs_mu[,grep("MU_COUNT", colnames(obs_mu))]), 
+        rowSums(obs_mu[,grep("mu_count", colnames(obs_mu))]), 
         total_baseline
     )
     
@@ -397,11 +397,11 @@ test_that("calcBaseline", {
     #                             nproc = 1)
     # ## Check 5 examples for each, at different positions
     # ## CDR_R, first 5
-    # obs_seq_r <- slot(db_baseline_null,"db")$MU_COUNT_SEQ_R[1:5]
+    # obs_seq_r <- slot(db_baseline_null,"db")$mu_count_SEQ_R[1:5]
     # exp_seq_r<- c(12, 18, 74, 73)
     # expect_equal(obs_seq_r, exp_seq_r)
     # 
-    # obs_seq_s <- slot(db_baseline_null,"db")$MU_COUNT_SEQ_S[1:5]
+    # obs_seq_s <- slot(db_baseline_null,"db")$mu_count_SEQ_S[1:5]
     # exp_seq_s<- c(5, 6, 34, 46, 1)
     # expect_equal(obs_seq_r, exp_seq_r)
 
