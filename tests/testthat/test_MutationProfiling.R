@@ -27,11 +27,11 @@ test_that("collapseClones", {
                                method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=TRUE)
     
     for (clone in unique(db[["CLONE"]])) {
-        # expect CLONAL_SEQUENCE for all seqs in the same clone to be the same
-        # expect CLONAL_GERMLINE for all seqs in the same clone to be the same
+        # expect clonal_sequence for all seqs in the same clone to be the same
+        # expect clonal_germline for all seqs in the same clone to be the same
         # use result from expandedDb=TRUE to test
-        expect_equal(length(unique(clones.2[clones.2[["CLONE"]]==clone, "CLONAL_SEQUENCE"])), 1)
-        expect_equal(length(unique(clones.2[clones.2[["CLONE"]]==clone, "CLONAL_GERMLINE"])), 1)
+        expect_equal(length(unique(clones.2[clones.2[["CLONE"]]==clone, "clonal_sequence"])), 1)
+        expect_equal(length(unique(clones.2[clones.2[["CLONE"]]==clone, "clonal_germline"])), 1)
         
         # expect result from expandedDb=TRUE to be the same as that from expandedDb=FALSE
         expect_identical(clones.1[clones.1[["CLONE"]]==clone, ], clones.2[clones.2[["CLONE"]]==clone, ][1,])
@@ -2431,8 +2431,8 @@ test_that("collapseClones", {
                                method="thresholdedFreq", minimumFrequency=0.6,
                                includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
     
-    expect_identical(clones_a[["CLONAL_SEQUENCE"]], clones_c[["CLONAL_SEQUENCE"]])
-    expect_identical(clones_a[["CLONAL_GERMLINE"]], clones_c[["CLONAL_GERMLINE"]])
+    expect_identical(clones_a[["clonal_sequence"]], clones_c[["clonal_sequence"]])
+    expect_identical(clones_a[["clonal_germline"]], clones_c[["clonal_germline"]])
     
 })
 

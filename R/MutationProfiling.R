@@ -68,22 +68,22 @@ NULL
 #' 
 #' @return   A modified \code{db} with the following additional columns: 
 #'           \itemize{
-#'             \item \code{CLONAL_SEQUENCE}:  effective sequence for the clone.
-#'             \item \code{CLONAL_GERMLINE}:  germline sequence for the clone.
+#'             \item \code{clonal_sequence}:  effective sequence for the clone.
+#'             \item \code{clonal_germline}:  germline sequence for the clone.
 #'             \item \code{CLONAL_SEQUENCE_MUFREQ}:  mutation frequency of 
-#'                   \code{CLONAL_SEQUENCE}; only added for the \code{"mostMutated"}
+#'                   \code{clonal_sequence}; only added for the \code{"mostMutated"}
 #'                   and \code{"leastMutated"} methods.
 #'           }
 #'                      
-#'           \code{CLONAL_SEQUENCE} is generated with the method of choice indicated 
-#'           by \code{method}, and \code{CLONAL_GERMLINE} is generated with the 
+#'           \code{clonal_sequence} is generated with the method of choice indicated 
+#'           by \code{method}, and \code{clonal_germline} is generated with the 
 #'           \code{"mostCommon"} method, along with, where applicable, user-defined 
 #'           parameters such as \code{minimumFrequency}, \code{includeAmbiguous}, 
 #'           \code{breakTiesStochastic}, and \code{breakTiesByColumns}.
 #'           
 #'
-#' @section Consensus lengths: For each clone, \code{CLONAL_SEQUENCE} and 
-#'          \code{CLONAL_GERMLINE} have the same length. 
+#' @section Consensus lengths: For each clone, \code{clonal_sequence} and 
+#'          \code{clonal_germline} have the same length. 
 #'          
 #'          \itemize{
 #'                \item For the \code{"thresholdedFreq"}, \code{"mostCommon"}, and 
@@ -522,7 +522,7 @@ collapseClones <- function(db,
     # avoid .combine="cbind"!
     # if there is only 1 unique clone, .combind="cbind" will result in a vector (as opposed to
     # a matrix) being returned, which will subsequently result a failure in
-    # cons_db$CLONAL_SEQUENCE <- cons_mat[, 1]
+    # cons_db$clonal_sequence <- cons_mat[, 1]
     cons_mat <- foreach(idx=1:length(uniqueClonesIdx),
                         .verbose=FALSE, .errorhandling='stop') %dopar% {
                             
@@ -554,8 +554,8 @@ collapseClones <- function(db,
         # Fill all rows with the consensus sequence
         clone_index <- match(db[[cloneColumn]], uniqueClones)
         cons_db <- db
-        cons_db$CLONAL_SEQUENCE <- unlist(cons_mat[, 1])[clone_index]
-        cons_db$CLONAL_GERMLINE <- unlist(cons_mat[, 2])[clone_index]
+        cons_db$clonal_sequence <- unlist(cons_mat[, 1])[clone_index]
+        cons_db$clonal_germline <- unlist(cons_mat[, 2])[clone_index]
         
         # assign mutation frequency corresponding to consensus into CLONAL_SEQUENCE_MUFREQ
         if (method %in% c("mostMutated", "leastMutated")) {
@@ -565,8 +565,8 @@ collapseClones <- function(db,
         # Return only the first row of each clone
         clone_index <- match(uniqueClones, db[[cloneColumn]])
         cons_db <- db[clone_index, ]
-        cons_db$CLONAL_SEQUENCE <- unlist(cons_mat[, 1])
-        cons_db$CLONAL_GERMLINE <- unlist(cons_mat[, 2])
+        cons_db$clonal_sequence <- unlist(cons_mat[, 1])
+        cons_db$clonal_germline <- unlist(cons_mat[, 2])
         
         # assign mutation frequency corresponding to consensus into CLONAL_SEQUENCE_MUFREQ
         if (method %in% c("mostMutated", "leastMutated")) {

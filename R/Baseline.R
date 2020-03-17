@@ -362,8 +362,8 @@ editBaseline <- function(baseline, field, value) {
 #'  
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -371,8 +371,8 @@ editBaseline <- function(baseline, field, value) {
 #'                          
 #' @export
 calcBaseline <- function(db,
-                         sequenceColumn="CLONAL_SEQUENCE",
-                         germlineColumn="CLONAL_GERMLINE",
+                         sequenceColumn="clonal_sequence",
+                         germlineColumn="clonal_germline",
                          testStatistic=c("local", "focused", "imbalanced"),
                          regionDefinition=NULL,
                          targetingModel=HH_S5F,
@@ -809,8 +809,8 @@ calcBaselineBinomialPdf <- function (x=3,
 #'
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1158,8 +1158,8 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1303,8 +1303,8 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1549,8 +1549,8 @@ baseline2DistPValue <-function(base1, base2) {
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1809,8 +1809,8 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,

@@ -240,11 +240,11 @@ test_that("calcBaseline", {
     
     
     ## With the full db, and CLONE field
-    ## Mutations calculated CLONAL_SEQUENCE vs GERMLINE_IMGT_D_MASK    
+    ## Mutations calculated clonal_sequence vs GERMLINE_IMGT_D_MASK    
     #set.seed(723)
     db_baseline <- calcBaseline(db=db_clonal, 
-                                sequenceColumn="CLONAL_SEQUENCE",
-                                germlineColumn="CLONAL_GERMLINE", 
+                                sequenceColumn="clonal_sequence",
+                                germlineColumn="clonal_germline", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
                                 targetingModel = HH_S5F,
@@ -332,18 +332,18 @@ test_that("calcBaseline", {
     db_clonal_trim <- db_clonal[1:5, ]
     
     for (i in 1:nrow(db_clonal_trim)) {
-        trim_seqs <- trimToLength(db_clonal_trim$CLONAL_SEQUENCE[i], 
-                                  db_clonal_trim$CLONAL_GERMLINE[i], 312)
-        db_clonal_trim$CLONAL_SEQUENCE[i] <- trim_seqs$inputSeq
-        db_clonal_trim$CLONAL_GERMLINE[i] <- trim_seqs$germlineSeq
+        trim_seqs <- trimToLength(db_clonal_trim$clonal_sequence[i], 
+                                  db_clonal_trim$clonal_germline[i], 312)
+        db_clonal_trim$clonal_sequence[i] <- trim_seqs$inputSeq
+        db_clonal_trim$clonal_germline[i] <- trim_seqs$germlineSeq
     }
     
     db_1_to_5 <- db_clonal[1:5,]
     
     #set.seed(283)
     db_baseline <- calcBaseline(db_1_to_5, 
-                                sequenceColumn="CLONAL_SEQUENCE",
-                                germlineColumn="CLONAL_GERMLINE", 
+                                sequenceColumn="clonal_sequence",
+                                germlineColumn="clonal_germline", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
                                 targetingModel = HH_S5F,
@@ -351,8 +351,8 @@ test_that("calcBaseline", {
                                 calcStats = T)
     
     #set.seed(2935)
-    db_baseline_trim_null <- calcBaseline(db_clonal_trim, sequenceColumn="CLONAL_SEQUENCE",
-                                          germlineColumn="CLONAL_GERMLINE",
+    db_baseline_trim_null <- calcBaseline(db_clonal_trim, sequenceColumn="clonal_sequence",
+                                          germlineColumn="clonal_germline",
                                           testStatistic="focused",
                                           regionDefinition=NULL,
                                           targetingModel = HH_S5F,
@@ -369,8 +369,8 @@ test_that("calcBaseline", {
     ## Should match observedMutations, with the full seqs and region 
     ## IMGT_V and the trimmed seqs and region NULL
     obs_mu <- observedMutations(db_1_to_5,
-                                sequenceColumn="CLONAL_SEQUENCE",
-                                germlineColumn="CLONAL_GERMLINE",
+                                sequenceColumn="clonal_sequence",
+                                germlineColumn="clonal_germline",
                                 regionDefinition=IMGT_V,
                                 nproc=1)
     expect_equivalent(
@@ -379,8 +379,8 @@ test_that("calcBaseline", {
         )
     
     obs_mu <- observedMutations(db_clonal_trim,
-                                sequenceColumn="CLONAL_SEQUENCE",
-                                germlineColumn="CLONAL_GERMLINE",
+                                sequenceColumn="clonal_sequence",
+                                germlineColumn="clonal_germline",
                                 regionDefinition=NULL,
                                 nproc=1)
     expect_equivalent(
@@ -389,8 +389,8 @@ test_that("calcBaseline", {
     )
     
     # db_baseline_null <- calcBaseline(db_clonal,
-    #                             sequenceColumn="CLONAL_SEQUENCE",
-    #                             germlineColumn="CLONAL_GERMLINE",
+    #                             sequenceColumn="clonal_sequence",
+    #                             germlineColumn="clonal_germline",
     #                             testStatistic="focused",
     #                             regionDefinition=NULL,
     #                             targetingModel = HH_S5F,
@@ -494,16 +494,16 @@ test_that("Test groupBaseline", {
     
     # Calculate BASELINe
     baseline <- calcBaseline(db=db_clonal, 
-                             sequenceColumn="CLONAL_SEQUENCE",
-                             germlineColumn="CLONAL_GERMLINE",
+                             sequenceColumn="clonal_sequence",
+                             germlineColumn="clonal_germline",
                              testStatistic="focused",
                              regionDefinition=IMGT_V,
                              targetingModel=HH_S5F,
                              nproc=1)
     
     baseline_df <- calcBaseline(data.frame(db_clonal), 
-                             sequenceColumn="CLONAL_SEQUENCE",
-                             germlineColumn="CLONAL_GERMLINE",
+                             sequenceColumn="clonal_sequence",
+                             germlineColumn="clonal_germline",
                              testStatistic="focused",
                              regionDefinition=IMGT_V,
                              targetingModel=HH_S5F,
@@ -571,16 +571,16 @@ test_that("calcBaseline and groupBaseline, AIRR migration", {
     
     # calcBaseline
     b1_c <- calcBaseline(db_c, 
-                        sequenceColumn="CLONAL_SEQUENCE",
-                        germlineColumn="CLONAL_GERMLINE", 
+                        sequenceColumn="clonal_sequence",
+                        germlineColumn="clonal_germline", 
                         testStatistic="focused",
                         regionDefinition=IMGT_V,
                         targetingModel=HH_S5F,
                         nproc=1)
     
     b1_a <- calcBaseline(db_a, 
-                        sequenceColumn="CLONAL_SEQUENCE",
-                        germlineColumn="CLONAL_GERMLINE", 
+                        sequenceColumn="clonal_sequence",
+                        germlineColumn="clonal_germline", 
                         testStatistic="focused",
                         regionDefinition=IMGT_V,
                         targetingModel=HH_S5F,
