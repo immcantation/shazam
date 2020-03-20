@@ -1,8 +1,24 @@
-Version 0.2.3.999 February 5, 2020
+Version 0.2.3.999 March 20, 2020
 -------------------------------------------------------------------------------
+
+General:
 
 + AIRR
 
+Targeting Models:
+
++ `createMutabilityMatrix`, `extendMutabilityMatrix`, `createTargetingMatrix`,
+  and `createTargetingModel` now also returns the numbers of silent and
+  replacement mutations used for estimating the 5-mer mutabilities. These 
+  numbers are recorded in the `numMutS` and `numMutR` slots in these newly
+  defined `MutabilityModel`, `MutabilityModelWithSource`, and `TargetingMatrix` 
+  classes, and in the exisitng `TargetingModel` class.
+  
+
+Mutation Profiling:
+
++ `shmulateSeq` now also supports specifying the frequency of mutations to be 
+   introduced. (Previously, only the number of mutations was supported.)
 
 Version 0.2.3 February 5, 2020
 -------------------------------------------------------------------------------
