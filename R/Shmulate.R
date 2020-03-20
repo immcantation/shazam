@@ -15,7 +15,10 @@ NULL
 #' @param    sequence        sequence string in which mutations are to be introduced.
 #'                           Accepted alphabet: \code{\{A, T, G, C, N, .\}}. Note
 #'                           that \code{-} is not accepted.
-#' @param    numMutations    number of mutations to be introduced into \code{sequence}.
+#' @param    numMutations    a whole number indicating the number of mutations to be 
+#'                           introduced into \code{sequence}, if \code{frequency=FALSE}.
+#'                           A fraction bewteen 0 and 1 indicating the mutation frequency
+#'                           if \code{frequency=TRUE}.
 #' @param    targetingModel  5-mer \link{TargetingModel} object to be used for computing 
 #'                           probabilities of mutations at each position. Defaults to
 #'                           \link{HH_S5F}.
@@ -23,6 +26,8 @@ NULL
 #'                           be introduced. Default: 1
 #' @param    end             Last position in \code{sequence} where mutations can 
 #'                           be introduced. Default: last position (sequence length).
+#' @param    frequency       If \code{TRUE}, treat \code{numMutations} as a frequency.                           
+#' 
 #' @return   A string defining the mutated sequence.
 #' 
 #' @details
@@ -31,6 +36,10 @@ NULL
 #' 
 #' Mutations are not introduced to positions in the input \code{sequence} that contain 
 #' \code{.} or \code{N}.
+#' 
+#' With \code{frequency=TRUE}, the number of mutations introduced is the \code{floor} of 
+#' the length of the sequence multiplied by the mutation frequency specified via
+#' \code{numMutations}.
 #' 
 #' @seealso  See \link{shmulateTree} for imposing mutations on a lineage tree. 
 #'           See \link{HH_S5F} and \link{MK_RS5NF} for predefined 
@@ -41,19 +50,32 @@ NULL
 #' sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATA.TTTA"
 #' 
 #' # Simulate using the default human 5-mer targeting model
-#' shmulateSeq(sequence, numMutations=6)
+#' # Introduce 6 mutations
+#' shmulateSeq(sequence, numMutations=6, frequency=FALSE)
+#' 
+#' # Introduction 5% mutations
+#' shmulateSeq(sequence, numMutations=0.05, frequency=TRUE)
 #' 
 #' @export
-shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, start=1, end=nchar(sequence) ) {
+shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, 
+                        start=1, end=nchar(sequence), frequency=FALSE) {
     #* counts on constant variables CODON_TABLE, NUCLEOTIDES (ACTGN-.)
 
-    # check if numMutations is a whole number
-    # is.wholenumber function borrowed from R's integer help
-    is.wholenumber <-
-        function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
-    if (!is.wholenumber(numMutations)) {
-        stop("`numMutations` must be a whole number.")
-    } 
+    if (!frequency) {
+        # check if numMutations is a whole number
+        # is.wholenumber function borrowed from R's integer help
+        is.wholenumber <-
+            function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+        if (!is.wholenumber(numMutations)) {
+            stop("`numMutations` must be a whole number for frequency=FALSE.")
+        }
+    } else {
+        # check if numMutations if between 0 and 1
+        if (!(numMutations>=0 & numMutations<=1)) {
+            stop("`numMutations` must be a fraction between 0 and 1 for frequency=TRUE.")
+        }
+    }
+    
     # Check targeting model
     if (!is(targetingModel, "TargetingModel")) {
         stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
@@ -90,8 +112,14 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, start=1, 
     sim_leng <- stri_length(sim_seq)
     stopifnot((sim_leng %% 3)==0)
     
+    # if specifying mutation frequency instead of count, 
+    # get corresponding mutation count based on sequence length
+    if (frequency) {
+        numMutations <- floor(sim_leng*numMutations)
+    }
+    
     if (numMutations > sim_leng) {
-        stop("`numMutations` is larger than the length of the sequence.")
+        stop("Number of mutations specified is larger than the length of the sequence.")
     }
     
     # Calculate possible mutations (given codon table)
