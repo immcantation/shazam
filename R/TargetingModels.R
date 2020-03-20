@@ -241,10 +241,6 @@ TargetingMatrix <- setClass("TargetingMatrix",
 #'                         means that the mutability rates for the 1024 5-mers that 
 #'                         contain no "N" at any position sums up to 1 (as opposed to 
 #'                         the entire vector summing up to 1).
-#' @slot     numMutS       a number indicating the number of silent mutations used for 
-#'                         estimating mutability
-#' @slot     numMutR       a number indicating the number of replacement mutations used 
-#'                         for estimating mutability 
 #' @slot     targeting     Rate matrix of a given mutation ocurring, defined as 
 #'                         \eqn{mutability * substitution}. The targeting model 
 #'                         is stored as a 5x3125 matrix. Rows define
@@ -1515,9 +1511,7 @@ createTargetingModel <- function(db, model=c("S", "RS"), sequenceColumn="sequenc
                      date=modelDate,
                      citation=modelCitation,
                      substitution=sub_mat,
-                     mutability=mut_mat@.Data,
-                     numMutS=mut_mat@numMutS,
-                     numMutR=mut_mat@numMutR,
+                     mutability=mut_mat,
                      targeting=tar_mat@.Data)
 
     return(model_obj)
