@@ -279,6 +279,15 @@ setClass("TargetingModel",
 
 #### Methods ####
 
+#' @param    x    \code{MutabilityModel} object.
+#' 
+#' @rdname   MutabilityModel-class
+#' @aliases  MutabilityModel-method
+#' @export
+setMethod("print", c(x="MutabilityModel"),
+          function(x) { vec <- x@.Data; names(vec) <- names(x); print(vec) })
+
+
 #' @param    x    \code{TargetingModel} object.
 #' @param    y    ignored.
 #' @param    ...  arguments to pass to \link{plotMutability}.
@@ -803,6 +812,11 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #'                                     vCallColumn="v_call",
 #'                                     minNumSeqMutations=200,
 #'                                     numSeqMutationsOnly=FALSE)
+#' # View mutability esimates (not run)
+#' # print(mut_model)
+#' 
+#' # View the number of S mutations used for estimating mutabilities
+#' mut_model@numMutS
 #' 
 #' # Count the number of mutations in sequences containing each 5-mer
 #' mut_count <- createMutabilityMatrix(db, sub_model, model="S", 
@@ -1452,6 +1466,12 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #'                               germlineColumn="germline_alignment_d_mask",
 #'                               vCallColumn="v_call", multipleMutation="ignore")
 #' }
+#' 
+#' # Access and view mutability estimates (not run)
+#' # print(model@mutability)
+#' 
+#' # View the number of S mutations used for estimating mutabilities
+#' model@mutability@numMutS
 #' 
 #' @export
 createTargetingModel <- function(db, model=c("S", "RS"), sequenceColumn="sequence_alignment",
