@@ -212,10 +212,10 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F,
 #'                           be introduced. Default: last position (sequence length).                           
 #' @return   A \code{data.frame} of simulated sequences with columns:
 #'           \itemize{
-#'             \item \code{NAME}:      name of the corresponding node in the input 
+#'             \item \code{name}:      name of the corresponding node in the input 
 #'                                     \code{graph}.  
-#'             \item \code{SEQUENCE}:  mutated sequence.
-#'             \item \code{DISTANCE}:  Hamming distance of the mutated sequence from 
+#'             \item \code{sequence}:  mutated sequence.
+#'             \item \code{distance}:  Hamming distance of the mutated sequence from 
 #'                                     the seed \code{sequence}.
 #'           }
 #' 
@@ -267,17 +267,17 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
     # Create data.frame to hold simulated sequences
     # this will include a row for Germline
     sim_tree <- data.frame(matrix(NA, ncol=3, nrow=length(V(graph)),
-                           dimnames=list(NULL, c("NAME", "SEQUENCE", "DISTANCE"))))
-    sim_tree$NAME <- vertex_attr(graph, name="name")
+                           dimnames=list(NULL, c("name", "sequence", "distance"))))
+    sim_tree$name <- vertex_attr(graph, name="name")
     
     # remove row for Germline
-    sim_tree <- sim_tree[-which(sim_tree$NAME=="Germline"), ]
+    sim_tree <- sim_tree[-which(sim_tree$name=="Germline"), ]
         
-    parent_nodes <- mrca_df$NAME[1]
+    parent_nodes <- mrca_df$name[1]
     nchild <- sum(adj[parent_nodes, ] > 0)
     
-    sim_tree$SEQUENCE[which(sim_tree$NAME==parent_nodes)] <- sequence
-    sim_tree$DISTANCE[which(sim_tree$NAME==parent_nodes)] <- 0
+    sim_tree$sequence[which(sim_tree$name==parent_nodes)] <- sequence
+    sim_tree$distance[which(sim_tree$name==parent_nodes)] <- 0
     
     # Add mutations to the immediate offsprings of the MRCA
     # Number of mutations added is proportional to fraction of sequence in junction
@@ -294,14 +294,14 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
                 # Add child to new parents
                 new_parents <- union(new_parents, ch)
                 # Simulate sequence for that edge
-                seq <- shmulateSeq(sequence=sim_tree$SEQUENCE[sim_tree$NAME == p], 
+                seq <- shmulateSeq(sequence=sim_tree$sequence[sim_tree$name == p], 
                                    numMutations=adj[p, ch],
                                    targetingModel=targetingModel,
                                    start=start, end=end)
                 # Update output data.frame
-                chRowIdx = which(sim_tree$NAME==ch)
-                sim_tree$SEQUENCE[chRowIdx] <- seq
-                sim_tree$DISTANCE[chRowIdx] <- adj[p, ch]
+                chRowIdx = which(sim_tree$name==ch)
+                sim_tree$sequence[chRowIdx] <- seq
+                sim_tree$distance[chRowIdx] <- adj[p, ch]
             }
         }
         
@@ -311,11 +311,11 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
     }
     
     # Remove sequences that are to be excluded
-    sim_tree <- sim_tree[!(sim_tree$NAME %in% skip_names), ]
+    sim_tree <- sim_tree[!(sim_tree$name %in% skip_names), ]
     # Remove NAs
     # e.g. if node B is an offspring of node A, and node A has been excluded
-    # then node B will have $SEQUENCE and $DISTANCE of NAs
-    sim_tree <- sim_tree[!is.na(sim_tree$SEQUENCE), ]
+    # then node B will have $sequence and $distance of NAs
+    sim_tree <- sim_tree[!is.na(sim_tree$sequence), ]
     
     rownames(sim_tree) <- NULL
     
