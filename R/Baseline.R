@@ -1630,7 +1630,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
             tmp_df <- as.data.frame(dens_list[[n]])
             tmp_df$GROUP_COLLAPSE <- rownames(dens_list[[n]])
             gather_cols <- names(tmp_df)[names(tmp_df) != "GROUP_COLLAPSE"]
-            melt_list[[n]] <- tidyr::gather(tmp_df, "SIGMA", "DENSITY", all_of(gather_cols), convert=TRUE)
+            melt_list[[n]] <- tidyr::gather(tmp_df, "SIGMA", "DENSITY", tidyselect::all_of(gather_cols), convert=TRUE)
         }
         dens_df <- dplyr::bind_rows(melt_list, .id="REGION")
         
