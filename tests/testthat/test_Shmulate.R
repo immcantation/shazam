@@ -85,11 +85,11 @@ test_that("Test shmulateTree", {
     graph <- ExampleTrees[[17]]
     set.seed(7)
     tree <- shmulateTree(input_seq, graph, targetingModel = MK_RS5NF)
-    expect_equal(tree$NAME, c("Inferred1", "GN5SHBT07JDYW5", "GN5SHBT03EP4KC",
+    expect_equal(tree$name, c("Inferred1", "GN5SHBT07JDYW5", "GN5SHBT03EP4KC",
                               "GN5SHBT01AKANC", "GN5SHBT01A3SFZ", "GN5SHBT08HUU7M",
                               "GN5SHBT04CEA6I", "GN5SHBT06IXJIH"))
-    expect_equal(tree$DISTANCE, c(0, 2, 3, 4, 6, 3, 1, 1))
-    expect_equal(tree$SEQUENCE, 
+    expect_equal(tree$distance, c(0, 2, 3, 4, 6, 3, 1, 1))
+    expect_equal(tree$sequence, 
                  c( "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA", 
                     "NGATCTGACGACAGGGCCGTGTTTTACTGTGCGAGAGATAGTTTA", 
                     "NGATCTGACGACAGGGCCGTGTTATATTGTGCGAGAGATAATTTA", 
