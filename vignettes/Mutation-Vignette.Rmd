@@ -72,7 +72,7 @@ db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
                             nproc=1)
 # Show new mutation count columns
 db_obs %>% 
-    select(sequence_id, starts_with("MU_COUNT_")) %>%
+    select(sequence_id, starts_with("mu_count_")) %>%
     head(n=4)
 
 # Calculate R and S mutation frequencies
