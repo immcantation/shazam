@@ -1189,8 +1189,8 @@ findThreshold <- function (distances, method=c("density", "gmm"),
 # @seealso  
 # \itemize{
 # \item     See \link{distToNearest} for details on generating the input distance vector.
-# \item         See \link{gmmFit} for a different threshold inference methodology.
-# \item           See \link{findThreshold} to switch between available methods.
+# \item     See \link{gmmFit} for a different threshold inference methodology.
+# \item     See \link{findThreshold} to switch between available methods.
 #}
 # 
 # 
