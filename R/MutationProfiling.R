@@ -2736,13 +2736,13 @@ expectedMutations <- function(db,
 #'           \link{IMGT_V} definition, which defines positions for CDR and 
 #'           FWR, the following columns are calculated:
 #'           \itemize{
-#'              \item  \code{MU_EXPECTED_CDR_R}:  number of replacement mutations in CDR1 and 
+#'              \item  \code{mu_expected_CDR_R}:  number of replacement mutations in CDR1 and 
 #'                                             CDR2 of the V-segment.
-#'              \item  \code{MU_EXPECTED_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'              \item  \code{mu_expected_CDR_S}:  number of silent mutations in CDR1 and CDR2 
 #'                                             of the V-segment.
-#'              \item  \code{MU_EXPECTED_FWR_R}:  number of replacement mutations in FWR1, 
+#'              \item  \code{mu_expected_FWR_R}:  number of replacement mutations in FWR1, 
 #'                                             FWR2 and FWR3 of the V-segment.
-#'              \item  \code{MU_EXPECTED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'              \item  \code{mu_expected_FWR_S}:  number of silent mutations in FWR1, FWR2 and
 #'                                             FWR3 of the V-segment.
 #'            }
 #'           
