@@ -1,4 +1,4 @@
-Version 0.2.3.999 March 20, 2020
+Version 0.2.3.999 March 22, 2020
 -------------------------------------------------------------------------------
 
 General:
@@ -10,9 +10,9 @@ Targeting Models:
 + `createMutabilityMatrix`, `extendMutabilityMatrix`, `createTargetingMatrix`,
   and `createTargetingModel` now also returns the numbers of silent and
   replacement mutations used for estimating the 5-mer mutabilities. These 
-  numbers are recorded in the `numMutS` and `numMutR` slots in these newly
+  numbers are recorded in the `numMutS` and `numMutR` slots in the newly
   defined `MutabilityModel`, `MutabilityModelWithSource`, and `TargetingMatrix` 
-  classes, and in the exisitng `TargetingModel` class.
+  classes.
   
 
 Mutation Profiling:
