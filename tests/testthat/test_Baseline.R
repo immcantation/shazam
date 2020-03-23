@@ -109,22 +109,22 @@ test_that("expectedMutations works with regionDefinition==NULL",{
     
     ## Check 5 examples for each, at different positions
     ## CDR_R, first 5
-    obs_cdr_r <- db_mutations$MU_EXPECTED_CDR_R[1:5]
+    obs_cdr_r <- db_mutations$mu_expected_CDR_R[1:5]
     exp_cdr_r <- c(0.2072431, 0.2054472, 0.1870927, 0.1507470, 0.2200854)
     expect_equal(obs_cdr_r, exp_cdr_r, tolerance=0.001)
     
     ## CDR_S 311:315
-    obs_cdr_s <- db_mutations$MU_EXPECTED_CDR_S[311:315]
+    obs_cdr_s <- db_mutations$mu_expected_CDR_S[311:315]
     exp_cdr_s <- c(0.03682467, 0.03682467, 0.03682467, 0.03682467, 0.03682467)
     expect_equal(obs_cdr_r, exp_cdr_r, tolerance=0.001)
     
     ## FWR_R, 120:124
-    obs_fwr_r <- db_mutations$MU_EXPECTED_FWR_R[120:124]
+    obs_fwr_r <- db_mutations$mu_expected_FWR_R[120:124]
     exp_fwr_r<- c(0.5883452, 0.5883452, 0.5883452, 0.5883452, 0.5883452)
     expect_equal(obs_fwr_r, exp_fwr_r, tolerance=0.001)
     
     ## FWR_S, 993:997
-    obs_fwr_s <- db_mutations$MU_EXPECTED_FWR_S[207:211]
+    obs_fwr_s <- db_mutations$mu_expected_FWR_S[207:211]
     exp_fwr_s<- c(0.1950189, 0.1950189, 0.1928329, 0.1928329, 0.1950189)
     expect_equal(obs_fwr_s, exp_fwr_s, tolerance=0.001)
     
@@ -134,12 +134,12 @@ test_that("expectedMutations works with regionDefinition==NULL",{
                                            regionDefinition=NULL,
                                            nproc=1)
     ## SEQ_R, first 5
-    obs_seq_r <- db_mutations_null$MU_EXPECTED_SEQ_R[1:5]
+    obs_seq_r <- db_mutations_null$mu_expected_SEQ_R[1:5]
     exp_seq_r <- c(0.7590282, 0.7635794, 0.7611897, 0.7585786, 0.7761334)
     expect_equal(obs_seq_r, exp_seq_r, tolerance=0.001)
     
     ## SEQ_S 311:315
-    obs_seq_s <- db_mutations_null$MU_EXPECTED_SEQ_S[311:315]
+    obs_seq_s <- db_mutations_null$mu_expected_SEQ_S[311:315]
     exp_seq_s <- c(0.2383252, 0.2361719, 0.2361354, 0.2400638, 0.2389921)
     expect_equal(obs_seq_s, exp_seq_s, tolerance=0.001)
     

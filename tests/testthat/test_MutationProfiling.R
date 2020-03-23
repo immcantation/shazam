@@ -228,19 +228,19 @@ test_that("expectedMutations, hydropathy", {
                                 regionDefinition=IMGT_V,
                                 mutationDefinition=HYDROPATHY_MUTATIONS,
                                 nproc=1)    
-    expect_equal(db_exp$MU_EXPECTED_CDR_R[1:10],
+    expect_equal(db_exp$mu_expected_CDR_R[1:10],
                  c(0.123, 0.114, 0.114, 0.131, 0.131, 0.131, 0.118, 0.118, 0.118, 0.139),
                  tolerance=0.001
     )
-    expect_equal(db_exp$MU_EXPECTED_CDR_S[10:20],
+    expect_equal(db_exp$mu_expected_CDR_S[10:20],
                  c(0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.116, 0.150),
                  tolerance=0.001
     )
-    expect_equal(db_exp$MU_EXPECTED_FWR_R[20:30],
+    expect_equal(db_exp$mu_expected_FWR_R[20:30],
                  c(0.318, 0.318, 0.318, 0.318, 0.332, 0.332, 0.323, 0.323, 0.323, 0.323, 0.315),
                  tolerance=0.001
     )
-    expect_equal(db_exp$MU_EXPECTED_FWR_S[30:40],
+    expect_equal(db_exp$mu_expected_FWR_S[30:40],
                  c(0.436, 0.436, 0.437, 0.436, 0.439, 0.462, 0.429, 0.484, 0.462, 0.462, 0.433),
                  tolerance=0.001
     )
@@ -367,7 +367,7 @@ test_that("expectedMutations overwrites with a warning pre-existing values", {
                                      regionDefinition=NULL,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns MU_EXPECTED_SEQ_R, MU_EXPECTED_SEQ_S exist and will be overwritten")
+                   "Columns mu_expected_SEQ_R, mu_expected_SEQ_S exist and will be overwritten")
     
     db_exp <- expectedMutations(db, sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
@@ -379,7 +379,7 @@ test_that("expectedMutations overwrites with a warning pre-existing values", {
                                      regionDefinition=IMGT_V,
                                      mutationDefinition=NULL,
                                      nproc=1),
-                   "Columns MU_EXPECTED_CDR_R, MU_EXPECTED_CDR_S, MU_EXPECTED_FWR_R, MU_EXPECTED_FWR_S exist and will be overwritten")
+                   "Columns mu_expected_CDR_R, mu_expected_CDR_S, mu_expected_FWR_R, mu_expected_FWR_S exist and will be overwritten")
     
 })
 
@@ -2519,9 +2519,9 @@ test_that("expectedMutations", {
                                   regionDefinition=IMGT_V,
                                   nproc=1)
 
-    expect_identical(db_exp_c[["MU_EXPECTED_CDR_R"]], db_exp_a[["MU_EXPECTED_CDR_R"]])
-    expect_identical(db_exp_c[["MU_EXPECTED_CDR_S"]], db_exp_a[["MU_EXPECTED_CDR_S"]])
-    expect_identical(db_exp_c[["MU_EXPECTED_FWR_R"]], db_exp_a[["MU_EXPECTED_FWR_R"]])
-    expect_identical(db_exp_c[["MU_EXPECTED_FWR_S"]], db_exp_a[["MU_EXPECTED_FWR_S"]])
+    expect_identical(db_exp_c[["mu_expected_CDR_R"]], db_exp_a[["mu_expected_CDR_R"]])
+    expect_identical(db_exp_c[["mu_expected_CDR_S"]], db_exp_a[["mu_expected_CDR_S"]])
+    expect_identical(db_exp_c[["mu_expected_FWR_R"]], db_exp_a[["mu_expected_FWR_R"]])
+    expect_identical(db_exp_c[["mu_expected_FWR_S"]], db_exp_a[["mu_expected_FWR_S"]])
     
 })

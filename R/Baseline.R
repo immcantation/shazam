@@ -312,7 +312,7 @@ editBaseline <- function(baseline, field, value) {
 #' the \link{collapseClones} function.
 #'                   
 #' If the \code{db} does not contain the 
-#' required columns to calculate the PDFs (namely mu_count & MU_EXPECTED)
+#' required columns to calculate the PDFs (namely mu_count & mu_expected)
 #' then the function will:
 #'   \enumerate{
 #'   \item  Calculate the numbers of observed mutations.
@@ -453,17 +453,17 @@ calcBaseline <- function(db,
     }
     
     # If db does not contain the required columns to calculate the PDFs (namely mu_count 
-    # & MU_EXPECTED mutations), then the function will:
+    # & mu_expected mutations), then the function will:
     #          1. Calculate the numbers of observed mutations
     #          2. Calculate the expected frequencies of mutations    
     # After that BASELINe prob. densities can be calcualted per sequence. 
     if (is.null(regionDefinition)) {
         rd_labels <- makeNullRegionDefinition()@labels
         observedColumns <- paste0("mu_count", rd_labels)
-        expectedColumns <- paste0("MU_EXPECTED_", rd_labels)
+        expectedColumns <- paste0("mu_expected_", rd_labels)
     } else {
         observedColumns <- paste0("mu_count", regionDefinition@labels)
-        expectedColumns <- paste0("MU_EXPECTED_", regionDefinition@labels)
+        expectedColumns <- paste0("mu_expected_", regionDefinition@labels)
     }
     
     if (!all(c(observedColumns, expectedColumns) %in% colnames(db))) {
@@ -499,9 +499,9 @@ calcBaseline <- function(db,
     
     # Number of sequences (used in foreach)
     totalNumbOfSequences <- nrow(db)
-    # The column indexes of the mu_count_ and MU_EXPECTED_
+    # The column indexes of the mu_count_ and mu_expected_
     cols_observed <- grep( paste0("mu_count_"),  colnames(db) ) 
-    cols_expected <- grep( paste0("MU_EXPECTED_"),  colnames(db) ) 
+    cols_expected <- grep( paste0("mu_expected_"),  colnames(db) ) 
     
     # Exporting additional environment variables and functions needed to run foreach 
     if( nproc!=1 ) {
@@ -676,9 +676,9 @@ calcBaselineHelper  <- function(observed,
         # in fact, however, codon_10_S, codon_10_R, codon_101_S, codon_101_R are matched
         obsN_Index <- grep( paste0("mu_count_", region, "_"),  names(observed) )
         
-        expX_Index <- grep( paste0("MU_EXPECTED_", region,"_R"),  names(expected) )
+        expX_Index <- grep( paste0("mu_expected_", region,"_R"),  names(expected) )
         # important to have "_" after region
-        expN_Index <- grep( paste0("MU_EXPECTED_", region, "_"),  names(expected) )       
+        expN_Index <- grep( paste0("mu_expected_", region, "_"),  names(expected) )       
     }
     
     # focused test statistic
@@ -693,12 +693,12 @@ calcBaselineHelper  <- function(observed,
                 names(observed) 
             )
         
-        expX_Index <- grep( paste0("MU_EXPECTED_", region,"_R"),  names(expected) )
+        expX_Index <- grep( paste0("mu_expected_", region,"_R"),  names(expected) )
         expN_Index <- 
             grep( 
                 paste0( 
-                    "MU_EXPECTED_", region, "|", 
-                    "MU_EXPECTED_",  regions[regions!=region], "_S"
+                    "mu_expected_", region, "|", 
+                    "mu_expected_",  regions[regions!=region], "_S"
                 ),
                 names(expected) 
             )        
@@ -709,8 +709,8 @@ calcBaselineHelper  <- function(observed,
         obsX_Index <- grep( paste0("mu_count_", region),  names(observed) )
         obsN_Index <- grep( "mu_count_",names(observed))  
         
-        expX_Index <- grep( paste0("MU_EXPECTED_", region),  names(expected) )
-        expN_Index <-   grep( "MU_EXPECTED_",names(expected)) 
+        expX_Index <- grep( paste0("mu_expected_", region),  names(expected) )
+        expN_Index <-   grep( "mu_expected_",names(expected)) 
         
     }
     

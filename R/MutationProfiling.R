@@ -2550,13 +2550,13 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
 #'           definition, which defines positions for CDR and FWR, the following columns are
 #'           added:  
 #'           \itemize{
-#'             \item  \code{MU_EXPECTED_CDR_R}:  number of replacement mutations in CDR1 and 
+#'             \item  \code{mu_expected_CDR_R}:  number of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{MU_EXPECTED_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'             \item  \code{mu_expected_CDR_S}:  number of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{MU_EXPECTED_FWR_R}:  number of replacement mutations in FWR1, 
+#'             \item  \code{mu_expected_FWR_R}:  number of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{MU_EXPECTED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'             \item  \code{mu_expected_FWR_S}:  number of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           }
 #'           
@@ -2624,7 +2624,7 @@ expectedMutations <- function(db,
         labels <- makeNullRegionDefinition()@labels
     }
     
-    labels <- paste("MU_EXPECTED_", labels, sep="")
+    labels <- paste("mu_expected_", labels, sep="")
     
     label_exists <- labels[labels %in% colnames(db)]
     if (length(label_exists)>0) {
@@ -2699,7 +2699,7 @@ expectedMutations <- function(db,
         return(x) })) 
     
     expectedMutationFrequencies[is.na(expectedMutationFrequencies)] <- 0
-    colnames(expectedMutationFrequencies) <- paste0("MU_EXPECTED_", colnames(expectedMutationFrequencies))
+    colnames(expectedMutationFrequencies) <- paste0("mu_expected_", colnames(expectedMutationFrequencies))
     
     # Properly shutting down the cluster
     if(nproc>1){ parallel::stopCluster(cluster) }
