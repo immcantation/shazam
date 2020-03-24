@@ -488,7 +488,7 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
                     # mutationType is non-zero/1
                     muType <- mutationTypeOptimized(codonPermutate)
                     if (!length(grep("N",wrd))) {
-                        if (sum(muType=="S") == length(muType) ){
+                        if (sum(muType=="s") == length(muType) ){
                             substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] <- (substitutionList[[v_fam]][[wrd]][glAtMutation,seqAtMutation] + 1)
                         }
                     }
@@ -2655,7 +2655,7 @@ listMutations <- function(seqInput, seqGL, multipleMutation, model) {
        mutations <- mutations[!(mutationCodons %in% codonsWithMultipleMutations)]
     }
     if (model == "S") {
-       mutations <- mutations[mutations == "S"]
+       mutations <- mutations[mutations == "s"]
     }
     if (length(mutations) > 0) {
         return(mutations)
