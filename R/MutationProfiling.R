@@ -1479,7 +1479,7 @@ observedMutations <- function(db,
             if (combine) {
                 num_mutations <- 0
                 if (!all(is.na(oM$pos))) {
-                    num_mutations <- sum(oM$pos$R, oM$pos$S)
+                    num_mutations <- sum(oM$pos$r, oM$pos$s)
                 }
                 if (!frequency) {
                     num_mutations
@@ -1679,11 +1679,11 @@ observedMutations <- function(db,
 #' ex1_count <- calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE)
 #' ex1_freq <- calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE, frequency=TRUE)
 #' # Compare this with ex1_count
-#' table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"]
-#' table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"]
+#' table(ex1_raw$pos$region, ex1_raw$pos$r)[, "1"]
+#' table(ex1_raw$pos$region, ex1_raw$pos$s)[, "1"]
 #' # Compare this with ex1_freq
-#' table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"]/ex1_raw$nonN
-#' table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"]/ex1_raw$nonN
+#' table(ex1_raw$pos$region, ex1_raw$pos$r)[, "1"]/ex1_raw$nonN
+#' table(ex1_raw$pos$region, ex1_raw$pos$s)[, "1"]/ex1_raw$nonN
 #' 
 #' # Identify only mutations the V segment minus CDR3
 #' ex2_raw <- calcObservedMutations(in_seq, germ_seq, 
@@ -1695,11 +1695,11 @@ observedMutations <- function(db,
 #'                                  regionDefinition=IMGT_V, returnRaw=FALSE,
 #'                                  frequency=TRUE)
 #' # Compare this with ex2_count
-#' table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"]
-#' table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"]                              
+#' table(ex2_raw$pos$region, ex2_raw$pos$r)[, "1"]
+#' table(ex2_raw$pos$region, ex2_raw$pos$s)[, "1"]                              
 #' # Compare this with ex2_freq
-#' table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"]/ex2_raw$nonN     
-#' table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"]/ex2_raw$nonN                                       
+#' table(ex2_raw$pos$region, ex2_raw$pos$r)[, "1"]/ex2_raw$nonN     
+#' table(ex2_raw$pos$region, ex2_raw$pos$s)[, "1"]/ex2_raw$nonN                                       
 #' 
 #' # Identify mutations by change in hydropathy class
 #' ex3_raw <- calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
@@ -1713,11 +1713,11 @@ observedMutations <- function(db,
 #'                                  mutationDefinition=HYDROPATHY_MUTATIONS, 
 #'                                  returnRaw=FALSE, frequency=TRUE)
 #' # Compre this with ex3_count
-#' table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"]
-#' table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"]
+#' table(ex3_raw$pos$region, ex3_raw$pos$r)[, "1"]
+#' table(ex3_raw$pos$region, ex3_raw$pos$s)[, "1"]
 #' # Compare this with ex3_freq
-#' table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"]/ex3_raw$nonN                                        
-#' table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"]/ex3_raw$nonN                                        
+#' table(ex3_raw$pos$region, ex3_raw$pos$r)[, "1"]/ex3_raw$nonN                                        
+#' table(ex3_raw$pos$region, ex3_raw$pos$s)[, "1"]/ex3_raw$nonN                                        
 #'                                 
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq,
@@ -1841,7 +1841,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             c_inputSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
             
             # Determine whether the mutations are R or S
-            # a table where rows are R/S/Stop/na, cols are codon positions
+            # a table where rows are r/s/stop/na, cols are codon positions
             # Count ambiguous characters as "eithe-or" or "and" based on user setting 
             
             # Makes use of the fact that c_germlineSeq_codons and c_inputSeqCodons have
@@ -1860,9 +1860,9 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             
             # keep only columns in which there are R or S mutations; and keep only R and S rows
             # use drop=FALSE so that matrix won't be collapsed into a vector if there is only 1 TRUE in keep.idx
-            keep.idx <- apply(mutations_array_raw, 2, function(x) { any(x[c("R", "S")]>0) } )
+            keep.idx <- apply(mutations_array_raw, 2, function(x) { any(x[c("r", "s")]>0) } )
             keep.pos <- colnames(mutations_array_raw)[keep.idx]
-            mutations_array_raw <- mutations_array_raw[c("R", "S"), keep.idx, drop=FALSE]
+            mutations_array_raw <- mutations_array_raw[c("r", "s"), keep.idx, drop=FALSE]
             colnames(mutations_array_raw) <- keep.pos
             
             # if none of columns have R or S > 1, dim will be 2x0
@@ -1899,7 +1899,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     if (returnRaw){
         if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
             # if mutations_array_raw is NA, or 
-            # if mutations_array_raw is empty due to all mutations being "Stop" and hence removed
+            # if mutations_array_raw is empty due to all mutations being "stop" and hence removed
             # avoid is.na(mutations_array_raw) to avoid warning in case mutations_array_raw is a vector
             
             if (!tooShort) {
@@ -1929,11 +1929,11 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             # df indicating position, mutation type (R or S), and region of each mutation
             rawDf <- data.frame(as.numeric(colnames(mutations_array_raw)))
             rawDf <- cbind(rawDf,
-                          mutations_array_raw["R", ],
-                          mutations_array_raw["S", ],
+                          mutations_array_raw["r", ],
+                          mutations_array_raw["s", ],
                           as.character(regionDefinition@boundaries[as.numeric(colnames(mutations_array_raw))]),
                           stringsAsFactors=F)
-            colnames(rawDf) <- c("position", "R", "S", "region")
+            colnames(rawDf) <- c("position", "r", "s", "region")
             return(list(pos=rawDf, nonN=nonN.denoms))
         }
     } else {
@@ -1972,8 +1972,8 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
 # numbOfMutPos <- sample(3:10, 1)
 # posOfMutations <- sort(sample(330, numbOfMutPos))
 # mutations_array <- matrix(0, nrow=2, ncol=numbOfMutPos, dimnames=list(c("R", "S"), posOfMutations))
-# mutations_array["R", ] = sample(x=0:10, size=numbOfMutPos, replace=TRUE)
-# mutations_array["S", ] = sample(x=0:10, size=numbOfMutPos, replace=TRUE)
+# mutations_array["r", ] = sample(x=0:10, size=numbOfMutPos, replace=TRUE)
+# mutations_array["s", ] = sample(x=0:10, size=numbOfMutPos, replace=TRUE)
 
 # # Random mutations
 # binMutationsByRegion(mutations_array, regionDefinition=NULL)
@@ -1997,8 +1997,8 @@ binMutationsByRegion <- function(mutationsArray,
     
     mutations_R <- array(NA,  dim=regionDefinition@seqLength)
     mutations_S <- array(NA,  dim=regionDefinition@seqLength)
-    mutations_R[mutatedPositions] <- mutationsArray["R", ]
-    mutations_S[mutatedPositions] <- mutationsArray["S", ]
+    mutations_R[mutatedPositions] <- mutationsArray["r", ]
+    mutations_S[mutatedPositions] <- mutationsArray["s", ]
     mutations_R <- mutations_R[1:regionDefinition@seqLength]
     mutations_S <- mutations_S[1:regionDefinition@seqLength]
     
@@ -2006,8 +2006,8 @@ binMutationsByRegion <- function(mutationsArray,
     mutations_region_counts <- rep(0, length(regionDefinition@labels))
     names(mutations_region_counts) <- regionDefinition@labels
     for (reg in regionDefinition@regions) {
-        mutations_region_counts[paste0(reg, "_R")] <- sum(mutations_R[regionDefinition@boundaries==reg], na.rm=T)
-        mutations_region_counts[paste0(reg, "_S")] <- sum(mutations_S[regionDefinition@boundaries==reg], na.rm=T)
+        mutations_region_counts[paste0(reg, "_r")] <- sum(mutations_R[regionDefinition@boundaries==reg], na.rm=T)
+        mutations_region_counts[paste0(reg, "_s")] <- sum(mutations_S[regionDefinition@boundaries==reg], na.rm=T)
     }
     
     return(mutations_region_counts)
@@ -2078,7 +2078,7 @@ countNonNByRegion <- function(regDef, ambiMode, inputChars, germChars,
                                          })
             totalNumExpanded <- inputNumExpanded * germlineNumExpanded
             
-            # use mutations_pos to capture positions at which R/S is absent (Stop or na instead)
+            # use mutations_pos to capture positions at which r/s is absent (stop or na instead)
             # such positions would have been omitted from mutations_array_raw or mutations_array
             boundaries.2 <- regDef@boundaries[mutPos]
             # makes use of the fact that inputCodons, germCodons, and 
@@ -2167,7 +2167,7 @@ slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
             lower <- mutPos$position[i]
             upper <- lower + windowSize - 1
             # how many mutations fall within current window
-            windowCount <- sum(mutPos[mutPos$position>=lower & mutPos$position<=upper, c("R","S")])
+            windowCount <- sum(mutPos[mutPos$position>=lower & mutPos$position<=upper, c("r","s")])
             # return as soon as a window has >= mutThresh mutations
             if (windowCount >= mutThresh) { return(TRUE) }
         }
@@ -2550,13 +2550,13 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
 #'           definition, which defines positions for CDR and FWR, the following columns are
 #'           added:  
 #'           \itemize{
-#'             \item  \code{mu_expected_CDR_R}:  number of replacement mutations in CDR1 and 
+#'             \item  \code{mu_expected_cdr_r}:  number of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{mu_expected_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'             \item  \code{mu_expected_cdr_s}:  number of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{mu_expected_FWR_R}:  number of replacement mutations in FWR1, 
+#'             \item  \code{mu_expected_fwr_r}:  number of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{mu_expected_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'             \item  \code{mu_expected_fwr_s}:  number of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           }
 #'           
@@ -2736,13 +2736,13 @@ expectedMutations <- function(db,
 #'           \link{IMGT_V} definition, which defines positions for CDR and 
 #'           FWR, the following columns are calculated:
 #'           \itemize{
-#'              \item  \code{mu_expected_CDR_R}:  number of replacement mutations in CDR1 and 
+#'              \item  \code{mu_expected_cdr_r}:  number of replacement mutations in CDR1 and 
 #'                                             CDR2 of the V-segment.
-#'              \item  \code{mu_expected_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'              \item  \code{mu_expected_cdr_s}:  number of silent mutations in CDR1 and CDR2 
 #'                                             of the V-segment.
-#'              \item  \code{mu_expected_FWR_R}:  number of replacement mutations in FWR1, 
+#'              \item  \code{mu_expected_fwr_r}:  number of replacement mutations in FWR1, 
 #'                                             FWR2 and FWR3 of the V-segment.
-#'              \item  \code{mu_expected_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'              \item  \code{mu_expected_fwr_s}:  number of silent mutations in FWR1, FWR2 and
 #'                                             FWR3 of the V-segment.
 #'            }
 #'           
@@ -2767,13 +2767,13 @@ expectedMutations <- function(db,
 #' germ_seq <-  ExampleDb[["germline_alignment_d_mask"]][1]
 #' 
 #' # Identify all mutations in the sequence
-#' calcExpectedMutations(in_seq, germ_seq)
+#' calcExpectedMutations(germ_seq,in_seq)
 #' 
 #' # Identify only mutations the V segment minus CDR3
-#' calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V)
+#' calcExpectedMutations(germ_seq, in_seq, regionDefinition=IMGT_V)
 #' 
 #' # Define mutations based on hydropathy
-#' calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
+#' calcExpectedMutations(germ_seq, in_seq, regionDefinition=IMGT_V,
 #'                       mutationDefinition=HYDROPATHY_MUTATIONS)
 #' 
 #' @export
@@ -2814,7 +2814,7 @@ calcExpectedMutations <- function(germlineSeq,
                                                 regionDefinition=regionDefinition,
                                                 codonTable=codonTable)
     
-    typesOfMutations <- c("R", "S")
+    typesOfMutations <- c("r", "s")
     mutationalPaths[!(mutationalPaths %in% typesOfMutations)] <- NA
     
     if (is.null(regionDefinition)) {
@@ -3132,8 +3132,8 @@ getCodonPos <- function(nucPos) {
 #                            \code{c("eitherOr", "and")}. Default is \code{"eitherOr"}.
 # @param   aminoAcidClasses  vector of amino acid trait classes.
 #                            if NULL then R or S is determined by amino acid identity
-# @return  A vector with entries named by mutation type, including "R" (replacement), 
-#          "S" (silent), "Stop" (stop) or "na" (input codons are identical or include NA).
+# @return  A vector with entries named by mutation type, including "r" (replacement), 
+#          "s" (silent), "stop" (stop) or "na" (input codons are identical or include NA).
 #          Each entry indicates the count of its corresponding type of mutation.
 #
 # @details When there are ambiguous characters in \code{codonFrom} and/or \code{codonTo}:
@@ -3141,7 +3141,7 @@ getCodonPos <- function(nucPos) {
 #               \item  If \code{ambiguousMode="eitherOr"}, ambiguous characters will each 
 #                      be expanded but only 1 mutation will be recorded. The priority for 
 #                      different types of mutations, in decreasing order, is as follows:
-#                      no mutation ("na"), replacement mutation ("R"), silent mutation ("S"),
+#                      no mutation ("na"), replacement mutation ("r"), silent mutation ("s"),
 #                      and stop mutation ("Stop"). The returned vector will have exactly one
 #                      entry with a count of 1 and 0 in all other entries.
 #               \item  If \code{ambiguousMode="and"}, ambiguous characters will each be 
@@ -3172,7 +3172,7 @@ mutationType <- function(codonFrom, codonTo,
     ambiguousMode <- match.arg(ambiguousMode)
     
     # placeholder for tabulation
-    tab <- setNames(object=rep(0, 4), nm=c("R", "S", "Stop", "na"))
+    tab <- setNames(object=rep(0, 4), nm=c("r", "s", "stop", "na"))
     
     if (grepl(pattern="[-.]", x=codonFrom) | grepl(pattern="[-.]", x=codonTo)) {
         # "na"
@@ -3198,16 +3198,16 @@ mutationType <- function(codonFrom, codonTo,
                         # "na"
                         tab[4] <- tab[4] + 1
                     } else if (any(c(cur.aaFrom, cur.aaTo) == "*")) {
-                        # If any amino acid is Stop then return "Stop"
+                        # If any amino acid is Stop then return "stop"
                         tab[3] <- tab[3] + 1
                     } else if (is.null(aminoAcidClasses)) {
                         # Check for exact identity if no amino acid classes are specified
-                        mutation <- if (cur.aaFrom == cur.aaTo) { "S" } else { "R" }
+                        mutation <- if (cur.aaFrom == cur.aaTo) { "s" } else { "r" }
                         tab[mutation] <- tab[mutation]+1
                     } else {
                         # Check for amino acid class identity if classes are specified
                         mutation <- if (aminoAcidClasses[cur.aaFrom] == 
-                                        aminoAcidClasses[cur.aaTo]) { "S" } else { "R" }
+                                        aminoAcidClasses[cur.aaTo]) { "s" } else { "r" }
                         tab[mutation] <- tab[mutation]+1
                     }
                 }
@@ -3218,13 +3218,13 @@ mutationType <- function(codonFrom, codonTo,
         if ((length(codonFrom.all) > 1) | (length(codonTo.all) > 1)) {
             if (ambiguousMode=="eitherOr") {
                 if (tab[4] > 0) { # "na"
-                    tab <- setNames(object=c(0, 0, 0, 1), nm=c("R", "S", "Stop", "na"))
+                    tab <- setNames(object=c(0, 0, 0, 1), nm=c("r", "s", "stop", "na"))
                 } else if (tab[2] > 0) { # "S"
-                    tab <- setNames(object=c(0, 1, 0, 0), nm=c("R", "S", "Stop", "na"))
+                    tab <- setNames(object=c(0, 1, 0, 0), nm=c("r", "s", "stop", "na"))
                 } else if (tab[1] > 0) { # "R"
-                    tab <- setNames(object=c(1, 0, 0, 0), nm=c("R", "S", "Stop", "na"))
+                    tab <- setNames(object=c(1, 0, 0, 0), nm=c("r", "s", "stop", "na"))
                 } else {
-                    tab <- setNames(object=c(0, 0, 1, 0), nm=c("R", "S", "Stop", "na"))
+                    tab <- setNames(object=c(0, 0, 1, 0), nm=c("r", "s", "stop", "na"))
                 }
                 stopifnot(sum(tab) == 1)
             } else {

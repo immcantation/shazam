@@ -484,7 +484,7 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
                     codonPermutate <- apply(codonPermutate,1,paste,collapse="")
                     codonPermutate <- matrix( c( codonPermutate, rep(c2s(codonGL),3) ), ncol=2, byrow=F)
                     # not intended to be used where input sequences have 
-                    # ambiguous characters; it assumes that only 1 entry (R/S/Stop/na) from
+                    # ambiguous characters; it assumes that only 1 entry (r/s/stop/na) from
                     # mutationType is non-zero/1
                     muType <- mutationTypeOptimized(codonPermutate)
                     if (!length(grep("N",wrd))) {
@@ -2564,10 +2564,10 @@ canMutateTo <- function(nuc) {
 # Compute the mutations types
 # matOfCodons: nx2; n=pairs of codons; 1st col=codonTo, 2nd col=codonFrom
 # NOTE: this function is not intended to be used where input sequences have 
-#       ambiguous characters; it assumes that only 1 entry (R/S/Stop/na) from
+#       ambiguous characters; it assumes that only 1 entry (r/s/stop/na) from
 #       mutationType is non-zero/1
 mutationTypeOptimized <- function(matOfCodons) {
-    # mutType: 4xn; rows: R/S/Stop/na
+    # mutType: 4xn; rows: r/s/stop/na
     mutType <- apply(matOfCodons, 1, function(x) { mutationType(x[2], x[1]) })
     idx <- apply(mutType, 2, function(y){which(y>0)[1]})
     mutType <- rownames(mutType)[idx]
@@ -2612,7 +2612,7 @@ analyzeMutations2NucUri <- function(in_matrix) {
             Seqcodons <-   apply(codonSeq,2,c2s)
             mutationInfo <- apply(rbind(GLcodons , Seqcodons),2,function(x){
                 # not intended to be used where input sequences have 
-                # ambiguous characters; it assumes that only 1 entry (R/S/Stop/na) from
+                # ambiguous characters; it assumes that only 1 entry (r/s/stop/na) from
                 # mutationType is non-zero/1
                 mutType <- mutationType(c2s(x[1]),c2s(x[2]))
                 mutType <- names(mutType)[which(mutType>0)]

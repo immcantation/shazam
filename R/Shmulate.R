@@ -137,7 +137,7 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F,
     # set NA to 0
     targeting[is.na(targeting)] <- 0 
     # Make probability of stop codon 0
-    targeting[mutation_types=="Stop"] <- 0
+    targeting[mutation_types=="stop"] <- 0
     
     # Initialize counters
     total_muts <- 0
@@ -169,8 +169,8 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F,
                                                                        from = lower, 
                                                                        to = upper))
         # Make probability of stop codon 0
-        if (any(mutation_types[, lower:upper]=="Stop", na.rm=T)) {
-            targeting[, lower:upper][mutation_types[, lower:upper]=="Stop"] <- 0
+        if (any(mutation_types[, lower:upper]=="stop", na.rm=T)) {
+            targeting[, lower:upper][mutation_types[, lower:upper]=="stop"] <- 0
         }
     }
     # sanity check: length of sim_seq should remain unchanged after simulation

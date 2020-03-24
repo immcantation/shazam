@@ -9,7 +9,7 @@ test_that("sampleMut throws error if vector of positions longer than sequence.",
     targeting <- targeting[NUCLEOTIDES[1:4], ]
     targeting[is.na(targeting)] <- 0
     mutation_types <- computeMutationTypes(sim_seq)
-    targeting[mutation_types=="Stop"] <- 0
+    targeting[mutation_types=="stop"] <- 0
     positions <- numeric(4)
     expect_error(sampleMut(sim_leng, targeting, positions), 
                  regexp = "The vector of positions is longer than the length of the sequence")

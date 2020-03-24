@@ -88,7 +88,7 @@ computeCodonTable <- function(aminoAcidClasses=NULL) {
                     mutType = mutationType(x, codon, aminoAcidClasses=aminoAcidClasses) 
                     mutType = names(mutType)[which(mutType>0)]
                     # does not support ambiguous characters
-                    # assumes that only 1 entry (R/S/Stop/na) from mutationType is non-zero/1
+                    # assumes that only 1 entry (r/s/stop/na) from mutationType is non-zero/1
                     stopifnot(length(mutType)==1)
                     if (mutType=="na") {mutType=NA}
                     return(mutType)

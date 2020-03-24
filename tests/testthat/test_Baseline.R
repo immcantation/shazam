@@ -37,7 +37,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
                             regionDefinition = IMGT_V)
     
     obs_mpath <- mutationalPaths[3,c(1,10,50,78,312)]
-    exp_mpath <- c(NA, "R", NA, "S", "R" )
+    exp_mpath <- c(NA, "r", NA, "s", "r" )
     names(exp_mpath) <- c("G", "C", "G", "T", "T")
     expect_equal(obs_mpath, exp_mpath)
     
@@ -63,7 +63,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
         regionDefinition = NULL)
     
     obs_mpath_null <- mutationalPaths_null[3,c(1,10,50,78,312)]
-    exp_mpath_null <- c(NA, "R", NA, "S", "R" )
+    exp_mpath_null <- c(NA, "r", NA, "s", "r" )
     names(exp_mpath_null) <- c("G", "C", "G", "T", "T")
     expect_equal(obs_mpath_null, exp_mpath_null)
 })
@@ -80,13 +80,13 @@ test_that("calcExpectedMutations works with regionDefinition==NULL",{
     obs_mutations <- calcExpectedMutations(inputSeq, germlineSeq, targetingModel = HH_S5F, 
                           regionDefinition = IMGT_V)
     exp_mutations <- c(0.16184071, 0.04872069, 0.57766105, 0.21177756)
-    names(exp_mutations) <- c("CDR_R", "CDR_S", "FWR_R", "FWR_S")
+    names(exp_mutations) <- c("cdr_r", "cdr_s", "fwr_r", "fwr_s")
     expect_equal(obs_mutations, exp_mutations, tolerance=0.001)
     
     obs_mutations_null <- calcExpectedMutations(inputSeq, germlineSeq, targetingModel = HH_S5F, 
                                            regionDefinition = NULL)
     exp_mutations_null <- c(0.7379522, 0.2620478)
-    names(exp_mutations_null) <- c("SEQ_R", "SEQ_S")
+    names(exp_mutations_null) <- c("seq_r", "seq_s")
     expect_equal(obs_mutations_null, exp_mutations_null, tolerance=0.001)
 })
 
@@ -108,23 +108,23 @@ test_that("expectedMutations works with regionDefinition==NULL",{
     expect_identical(db_mutations, db_mutations_df)
     
     ## Check 5 examples for each, at different positions
-    ## CDR_R, first 5
-    obs_cdr_r <- db_mutations$mu_expected_CDR_R[1:5]
+    ## cdr_r, first 5
+    obs_cdr_r <- db_mutations$mu_expected_cdr_r[1:5]
     exp_cdr_r <- c(0.2072431, 0.2054472, 0.1870927, 0.1507470, 0.2200854)
     expect_equal(obs_cdr_r, exp_cdr_r, tolerance=0.001)
     
-    ## CDR_S 311:315
-    obs_cdr_s <- db_mutations$mu_expected_CDR_S[311:315]
+    ## cdr_s 311:315
+    obs_cdr_s <- db_mutations$mu_expected_cdr_s[311:315]
     exp_cdr_s <- c(0.03682467, 0.03682467, 0.03682467, 0.03682467, 0.03682467)
     expect_equal(obs_cdr_r, exp_cdr_r, tolerance=0.001)
     
-    ## FWR_R, 120:124
-    obs_fwr_r <- db_mutations$mu_expected_FWR_R[120:124]
+    ## fwr_r, 120:124
+    obs_fwr_r <- db_mutations$mu_expected_fwr_r[120:124]
     exp_fwr_r<- c(0.5883452, 0.5883452, 0.5883452, 0.5883452, 0.5883452)
     expect_equal(obs_fwr_r, exp_fwr_r, tolerance=0.001)
     
-    ## FWR_S, 993:997
-    obs_fwr_s <- db_mutations$mu_expected_FWR_S[207:211]
+    ## fwr_s, 993:997
+    obs_fwr_s <- db_mutations$mu_expected_fwr_s[207:211]
     exp_fwr_s<- c(0.1950189, 0.1950189, 0.1928329, 0.1928329, 0.1950189)
     expect_equal(obs_fwr_s, exp_fwr_s, tolerance=0.001)
     
@@ -133,13 +133,13 @@ test_that("expectedMutations works with regionDefinition==NULL",{
                                            germlineColumn="GERMLINE_IMGT_D_MASK",
                                            regionDefinition=NULL,
                                            nproc=1)
-    ## SEQ_R, first 5
-    obs_seq_r <- db_mutations_null$mu_expected_SEQ_R[1:5]
+    ## seq_r, first 5
+    obs_seq_r <- db_mutations_null$mu_expected_seq_r[1:5]
     exp_seq_r <- c(0.7590282, 0.7635794, 0.7611897, 0.7585786, 0.7761334)
     expect_equal(obs_seq_r, exp_seq_r, tolerance=0.001)
     
-    ## SEQ_S 311:315
-    obs_seq_s <- db_mutations_null$mu_expected_SEQ_S[311:315]
+    ## seq_s 311:315
+    obs_seq_s <- db_mutations_null$mu_expected_seq_s[311:315]
     exp_seq_s <- c(0.2383252, 0.2361719, 0.2361354, 0.2400638, 0.2389921)
     expect_equal(obs_seq_s, exp_seq_s, tolerance=0.001)
     
@@ -159,13 +159,13 @@ test_that("calcObservedMutations works with regionDefinition==NULL",{
     
     ## TODO: should sum(exp_mutations) and sum(exp_mutations_null) match?
     exp_mutations <- c(2, 2, 8, 1)
-    names(exp_mutations) <- c("CDR_R", "CDR_S", "FWR_R", "FWR_S")
+    names(exp_mutations) <- c("cdr_r", "cdr_s", "fwr_r", "fwr_s")
     expect_equal(obs_mutations, exp_mutations, tolerance=0.001)
     
     obs_mutations_null <- calcObservedMutations(inputSeq, germlineSeq, 
                             regionDefinition=NULL, frequency=F)
     exp_mutations_null <- c(12, 5)
-    names(exp_mutations_null) <- c("SEQ_R", "SEQ_S")
+    names(exp_mutations_null) <- c("seq_r", "seq_s")
     expect_equal(obs_mutations_null, exp_mutations_null, tolerance=0.001)
 })
 
@@ -188,23 +188,23 @@ test_that("observedMutations works with regionDefinition==NULL",{
     expect_identical(db_mutations, db_mutations_df)
     
     ## Check 5 examples for each
-    ## CDR_R, first 5
-    obs_cdr_r <- db_mutations$mu_count_CDR_R[1:5]
+    ## cdr_r, first 5
+    obs_cdr_r <- db_mutations$mu_count_cdr_r[1:5]
     exp_cdr_r <- c(2, 0, 0, 0, 0)
     expect_equal(obs_cdr_r, exp_cdr_r)
     
-    ## CDR_S 311:315
-    obs_cdr_s <- db_mutations$mu_count_CDR_S[311:315]
+    ## cdr_s 311:315
+    obs_cdr_s <- db_mutations$mu_count_cdr_s[311:315]
     exp_cdr_s <- c(0, 0, 0, 0, 0)
     expect_equal(obs_cdr_r, exp_cdr_r)
     
-    ## FWR_R, 120:124
-    obs_fwr_r <- db_mutations$mu_count_FWR_R[120:124]
+    ## fwr_r, 120:124
+    obs_fwr_r <- db_mutations$mu_count_fwr_r[120:124]
     exp_fwr_r<- c(0, 0, 0, 0, 0)
     expect_equal(obs_fwr_r, exp_fwr_r)
     
-    ## FWR_S, 40:44
-    obs_fwr_s <- db_mutations$mu_count_FWR_S[40:44]
+    ## fwr_s, 40:44
+    obs_fwr_s <- db_mutations$mu_count_fwr_s[40:44]
     exp_fwr_s<- c(0, 0, 0, 1, 0)
     expect_equal(obs_fwr_s, exp_fwr_s)
      
@@ -213,13 +213,13 @@ test_that("observedMutations works with regionDefinition==NULL",{
                                            germlineColumn="GERMLINE_IMGT_D_MASK",
                                            regionDefinition=NULL,
                                            nproc=1)
-    ## SEQ_R, first 5
-    obs_seq_r <- db_mutations_null$mu_count_SEQ_R[1:5]
+    ## seq_r, first 5
+    obs_seq_r <- db_mutations_null$mu_count_seq_r[1:5]
     exp_seq_r <- c(12, 0, 0, 0, 0)
     expect_equal(obs_seq_r, exp_seq_r)
     
-    ## SEQ_S 38:42
-    obs_seq_s <- db_mutations_null$mu_count_SEQ_S[38:42]
+    ## seq_s 38:42
+    obs_seq_s <- db_mutations_null$mu_count_seq_s[38:42]
     exp_seq_s <- c(0, 2, 2, 0, 0)
     expect_equal(obs_seq_s, exp_seq_s)
     
@@ -263,23 +263,23 @@ test_that("calcBaseline", {
         c(13, 19, 55, 0, 0))
     
 #     ## Check 5 examples for each, at different positions
-#     ## CDR_R, first 5
-#     obs_cdr_r <- slot(db_baseline,"db")$mu_count_CDR_R[1:5]
+#     ## cdr_r, first 5
+#     obs_cdr_r <- slot(db_baseline,"db")$mu_count_cdr_r[1:5]
 #     exp_cdr_r<- c(2, 6, 17, 18, 0)
 #     expect_equal(obs_cdr_r, exp_cdr_r)
 #     
-#     ## CDR_S, 673:677
-#     obs_cdr_s <- slot(db_baseline,"db")$mu_count_CDR_S[673:677]
+#     ## cdr_s, 673:677
+#     obs_cdr_s <- slot(db_baseline,"db")$mu_count_cdr_s[673:677]
 #     exp_cdr_s <- c(3, 5, 5, 5, 0)
 #     expect_equal(obs_cdr_s, exp_cdr_s)
 #     
-#     ## FWR_R, 937:941
-#     obs_fwr_r <- slot(db_baseline,"db")$mu_count_FWR_R[937:941]
+#     ## fwr_r, 937:941
+#     obs_fwr_r <- slot(db_baseline,"db")$mu_count_fwr_r[937:941]
 #     exp_fwr_r<- c(0, 7, 14, 7, 0)
 #     expect_equal(obs_fwr_r, exp_fwr_r)
 #     
-#     ## FWR_S, 993:997
-#     obs_fwr_s <- slot(db_baseline,"db")$mu_count_FWR_S[993:997]
+#     ## fwr_s, 993:997
+#     obs_fwr_s <- slot(db_baseline,"db")$mu_count_fwr_s[993:997]
 #     exp_fwr_s<- c(10, 0, 0, 0, 0)
 #     expect_equal(obs_fwr_s, exp_fwr_s)
 
@@ -359,8 +359,8 @@ test_that("calcBaseline", {
                                           nproc = 1, 
                                           calcStats=T)
  
-    total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$mu_count_SEQ_S,
-        slot(db_baseline_trim_null,"db")$mu_count_SEQ_R))
+    total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$mu_count_seq_s,
+        slot(db_baseline_trim_null,"db")$mu_count_seq_r))
     
     total_baseline <- rowSums(slot(db_baseline,"db")[,grep("mu_count.*", colnames(slot(db_baseline,"db")))])
     
@@ -396,12 +396,12 @@ test_that("calcBaseline", {
     #                             targetingModel = HH_S5F,
     #                             nproc = 1)
     # ## Check 5 examples for each, at different positions
-    # ## CDR_R, first 5
-    # obs_seq_r <- slot(db_baseline_null,"db")$mu_count_SEQ_R[1:5]
+    # ## cdr_r, first 5
+    # obs_seq_r <- slot(db_baseline_null,"db")$mu_count_seq_r[1:5]
     # exp_seq_r<- c(12, 18, 74, 73)
     # expect_equal(obs_seq_r, exp_seq_r)
     # 
-    # obs_seq_s <- slot(db_baseline_null,"db")$mu_count_SEQ_S[1:5]
+    # obs_seq_s <- slot(db_baseline_null,"db")$mu_count_seq_s[1:5]
     # exp_seq_s<- c(5, 6, 34, 46, 1)
     # expect_equal(obs_seq_r, exp_seq_r)
 
