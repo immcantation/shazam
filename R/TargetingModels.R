@@ -951,7 +951,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
 
                     # Set characters that meet mutation criteria
                     if (model == "S") {
-                        muChars <- nuc_chars[1:4][nuc_chars[1:4] != glAtMutation & muType == "S"]
+                        muChars <- nuc_chars[1:4][nuc_chars[1:4] != glAtMutation & muType == "s"]
                     } else { 
                         muChars <- nuc_chars[1:4][nuc_chars[1:4] != glAtMutation]
                     }
