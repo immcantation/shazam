@@ -1300,25 +1300,25 @@ calcClonalConsensus <- function(db,
 #'           \link{IMGT_V} definition, which defines positions for CDR and
 #'           FWR, the following columns are added:
 #'           \itemize{
-#'             \item  \code{mu_count_CDR_R}:  number of replacement mutations in CDR1 and 
+#'             \item  \code{mu_count_cdr_r}:  number of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{mu_count_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'             \item  \code{mu_count_cdr_s}:  number of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{mu_count_FWR_R}:  number of replacement mutations in FWR1, 
+#'             \item  \code{mu_count_fwr_r}:  number of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{mu_count_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'             \item  \code{mu_count_fwr_s}:  number of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           }
 #'           If \code{frequency=TRUE}, R and S mutation frequencies are
 #'           calculated over the number of non-N positions in the speficied regions.
 #'           \itemize{
-#'             \item  \code{mu_freq_CDR_R}:  frequency of replacement mutations in CDR1 and 
+#'             \item  \code{mu_freq_cdr_r}:  frequency of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{mu_freq_CDR_S}:  frequency of silent mutations in CDR1 and CDR2 
+#'             \item  \code{mu_freq_cdr_s}:  frequency of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{mu_freq_FWR_R}:  frequency of replacement mutations in FWR1, 
+#'             \item  \code{mu_freq_fwr_r}:  frequency of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{mu_freq_FWR_S}:  frequency of silent mutations in FWR1, FWR2 and
+#'             \item  \code{mu_freq_fwr_s}:  frequency of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           } 
 #'           If \code{frequency=TRUE} and \code{combine=TRUE}, the mutations and non-N positions
