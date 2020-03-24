@@ -459,10 +459,10 @@ calcBaseline <- function(db,
     # After that BASELINe prob. densities can be calcualted per sequence. 
     if (is.null(regionDefinition)) {
         rd_labels <- makeNullRegionDefinition()@labels
-        observedColumns <- paste0("mu_count", rd_labels)
+        observedColumns <- paste0("mu_count_", rd_labels)
         expectedColumns <- paste0("mu_expected_", rd_labels)
     } else {
-        observedColumns <- paste0("mu_count", regionDefinition@labels)
+        observedColumns <- paste0("mu_count_", regionDefinition@labels)
         expectedColumns <- paste0("mu_expected_", regionDefinition@labels)
     }
     
@@ -504,7 +504,7 @@ calcBaseline <- function(db,
     cols_expected <- grep( paste0("mu_expected_"),  colnames(db) ) 
     
     # Exporting additional environment variables and functions needed to run foreach 
-    if( nproc!=1 ) {
+    if ( nproc!=1 ) {
         parallel::clusterExport( 
             cluster, list('cols_observed', 'cols_expected'), 
             envir=environment() 
@@ -642,7 +642,7 @@ calcBaseline <- function(db,
 # 
 # @return  A modified \link{Baseline} object with the BASELINe probability 
 #          density function calculated for the regions defined in the \code{regionDefinition}.
-calcBaselineHelper  <- function(observed,
+calcBaselineHelper <- function(observed,
                                 expected,
                                 region,
                                 testStatistic="local",
@@ -661,14 +661,14 @@ calcBaselineHelper  <- function(observed,
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused", "imbalanced"))
     
-    #If there are more than two regions (e.g. CDR and FWR then you cannot perform the focused test)
+    # If there are more than two regions (e.g. CDR and FWR then you cannot perform the focused test)
     if (testStatistic=="focused" & length(regions)!=2) {
         testStatistic="local"    
     }    
     
     # local test statistic
     if (testStatistic == "local") { 
-        obsX_Index <- grep( paste0("mu_count_", region,"_R"),  names(observed) )
+        obsX_Index <- grep( paste0("mu_count_", region,"_r"),  names(observed) )
         # important to have "_" after region
         # otherwise this might happen (leading to bugs in results):
         # region = codon_1
@@ -676,29 +676,29 @@ calcBaselineHelper  <- function(observed,
         # in fact, however, codon_10_S, codon_10_R, codon_101_S, codon_101_R are matched
         obsN_Index <- grep( paste0("mu_count_", region, "_"),  names(observed) )
         
-        expX_Index <- grep( paste0("mu_expected_", region,"_R"),  names(expected) )
+        expX_Index <- grep( paste0("mu_expected_", region,"_r"),  names(expected) )
         # important to have "_" after region
         expN_Index <- grep( paste0("mu_expected_", region, "_"),  names(expected) )       
     }
     
     # focused test statistic
     if (testStatistic == "focused") { 
-        obsX_Index <- grep( paste0("mu_count_", region,"_R"),  names(observed) )
+        obsX_Index <- grep( paste0("mu_count_", region,"_r"),  names(observed) )
         obsN_Index <- 
             grep( 
                 paste0( 
                     "mu_count_", region, "|", 
-                    "mu_count_", regions[regions!=region], "_S"
+                    "mu_count_", regions[regions!=region], "_s"
                 ),
                 names(observed) 
             )
         
-        expX_Index <- grep( paste0("mu_expected_", region,"_R"),  names(expected) )
+        expX_Index <- grep( paste0("mu_expected_", region,"_r"),  names(expected) )
         expN_Index <- 
             grep( 
                 paste0( 
                     "mu_expected_", region, "|", 
-                    "mu_expected_",  regions[regions!=region], "_S"
+                    "mu_expected_",  regions[regions!=region], "_s"
                 ),
                 names(expected) 
             )        

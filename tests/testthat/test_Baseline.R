@@ -427,12 +427,12 @@ test_that("BASELINe functions work for single-sequence input", {
     ## compare @db
     expect_equivalent(calcBaselineMulti@db[singleIdx, ], calcBaselineSingle@db)
     ## compare @pdfs
-    expect_true(is(calcBaselineMulti@pdfs[["SEQ"]], "matrix"))
-    expect_true(is(calcBaselineSingle@pdfs[["SEQ"]], "matrix"))
-    expect_equal(dim(calcBaselineMulti@pdfs[["SEQ"]]), c(singleIdx, 4001))
-    expect_equal(dim(calcBaselineSingle@pdfs[["SEQ"]]), c(1, 4001))
-    expect_equal(calcBaselineMulti@pdfs[["SEQ"]][singleIdx, ], 
-                 calcBaselineSingle@pdfs[["SEQ"]][1, ])
+    expect_true(is(calcBaselineMulti@pdfs[["seq"]], "matrix"))
+    expect_true(is(calcBaselineSingle@pdfs[["seq"]], "matrix"))
+    expect_equal(dim(calcBaselineMulti@pdfs[["seq"]]), c(singleIdx, 4001))
+    expect_equal(dim(calcBaselineSingle@pdfs[["seq"]]), c(1, 4001))
+    expect_equal(calcBaselineMulti@pdfs[["seq"]][singleIdx, ], 
+                 calcBaselineSingle@pdfs[["seq"]][1, ])
     ## compare @stats
     expect_equivalent(calcBaselineMulti@stats[singleIdx, ],
                       calcBaselineSingle@stats)
@@ -443,16 +443,16 @@ test_that("BASELINe functions work for single-sequence input", {
     ## compare @db
     expect_equivalent(groupBaselineMulti@db[singleIdx, ], groupBaselineSingle@db[1, ])
     ## compare @pdfs
-    expect_true(is(groupBaselineMulti@pdfs[["SEQ"]], "matrix"))
-    expect_true(is(groupBaselineSingle@pdfs[["SEQ"]], "matrix"))
-    expect_equal(dim(groupBaselineMulti@pdfs[["SEQ"]]), c(singleIdx, 4001))
-    expect_equal(dim(groupBaselineSingle@pdfs[["SEQ"]]), c(1, 4001))
-    expect_equal(groupBaselineMulti@pdfs[["SEQ"]][singleIdx, ], 
-                 groupBaselineSingle@pdfs[["SEQ"]][1, ])
+    expect_true(is(groupBaselineMulti@pdfs[["seq"]], "matrix"))
+    expect_true(is(groupBaselineSingle@pdfs[["seq"]], "matrix"))
+    expect_equal(dim(groupBaselineMulti@pdfs[["seq"]]), c(singleIdx, 4001))
+    expect_equal(dim(groupBaselineSingle@pdfs[["seq"]]), c(1, 4001))
+    expect_equal(groupBaselineMulti@pdfs[["seq"]][singleIdx, ], 
+                 groupBaselineSingle@pdfs[["seq"]][1, ])
     # @pdfs from calcBaselineSingle and groupBaselineSingle should also match since
     # there essentially is no effective grouping (each group has 1 single only)
-    expect_equal(groupBaselineSingle@pdfs[["SEQ"]][1, ], 
-                 calcBaselineSingle@pdfs[["SEQ"]][1, ])
+    expect_equal(groupBaselineSingle@pdfs[["seq"]][1, ], 
+                 calcBaselineSingle@pdfs[["seq"]][1, ])
     ## compare stats
     expect_equivalent(groupBaselineMulti@stats[singleIdx, ],
                       groupBaselineSingle@stats)
@@ -517,8 +517,8 @@ test_that("Test groupBaseline", {
     pdf1 <- slot(grouped1, "pdfs")
     sigma1 <- slot(grouped1,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf1$CDR[1,]), c(0,5.018), tolerance=0.01)
-    expect_equal(range(pdf1$CDR[2,]), c(0,7.333), tolerance=0.01)
+    expect_equal(range(pdf1$cdr[1,]), c(0,5.018), tolerance=0.01)
+    expect_equal(range(pdf1$cdr[2,]), c(0,7.333), tolerance=0.01)
     expect_equal(sigma1, c(-0.263, -0.693, -0.100, -0.694), tolerance=0.01)
     
     # Group PDFs by both sample (between variable) and isotype (within variable)
@@ -526,8 +526,8 @@ test_that("Test groupBaseline", {
     pdf2 <- slot(grouped2, "pdfs")
     sigma2 <- slot(grouped2,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf2$CDR[1,]), c(0,3.643), tolerance=0.01)
-    expect_equal(range(pdf2$CDR[2,]), c(0,3.539), tolerance=0.01)    
+    expect_equal(range(pdf2$cdr[1,]), c(0,3.643), tolerance=0.01)
+    expect_equal(range(pdf2$cdr[2,]), c(0,3.539), tolerance=0.01)    
     expect_equal(sigma2, 
                  c(-0.31, -0.59, -0.20, -0.82, -0.15, -0.78, -0.08, -0.65), tolerance=0.01)
     
@@ -536,8 +536,8 @@ test_that("Test groupBaseline", {
     pdf3 <- slot(grouped3, "pdfs")
     sigma3 <- slot(grouped3,"stats")$BASELINE_SIGMA
     
-    expect_equal(range(pdf3$CDR[1,]), c(0,4.975), tolerance=0.01)
-    expect_equal(range(pdf3$CDR[2,]), c(0,7.319), tolerance=0.01)    
+    expect_equal(range(pdf3$cdr[1,]), c(0,4.975), tolerance=0.01)
+    expect_equal(range(pdf3$cdr[2,]), c(0,7.319), tolerance=0.01)    
     expect_equal(sigma3, 
                  c( -0.25, -0.72, -0.10, -0.69), tolerance=0.01)
     
