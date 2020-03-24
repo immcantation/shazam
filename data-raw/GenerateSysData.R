@@ -95,7 +95,7 @@ load("data-raw/BAYESIAN_FITTED.RData")
 load("data-raw/CONST_I.RData")
 
 #### Save to R/sysdata.rda ####
-devtools::use_data(NUCLEOTIDES,
+usethis::use_data(NUCLEOTIDES,
                    VLENGTH,
                    CDR_Nuc_Mat, 
                    FWR_Nuc_Mat, 
