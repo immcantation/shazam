@@ -291,7 +291,7 @@ plotBaselineSummary(grouped_1, "sample_id")
 
 # Plot selection scores by time-point and isotype for only CDR
 plotBaselineSummary(grouped_2, "sample_id", "c_call", groupColors=isotype_colors,
-                    subsetRegions="CDR")
+                    subsetRegions="cdr")
 
 # Group by CDR/FWR and facet by isotype
 plotBaselineSummary(grouped_2, "sample_id", "c_call", facetBy="group")
