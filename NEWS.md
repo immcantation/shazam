@@ -1,5 +1,30 @@
-Version 0.2.3.999 March 22, 2020
+Version 0.2.3.999 March 25, 2020
 -------------------------------------------------------------------------------
+
+Backwards Incompatible Changes:
+
++ Changed default expected data format from the Change-O data format to the
+  AIRR Rearrangement standard. For example: where functions used the column 
+  name `V_CALL` (Change-O) as the default to identify the field that stored 
+  the V gene calls, they now use `v_call` (AIRR). That means, scripts that 
+  relied on default values (previously, `v_call="V_CALL"`), will now fail if 
+  calls to the functions are not updated to reflect the correct value for the 
+  data. If data are in the Change-O format, the current default value 
+  `v_call="v_call"` will fail to identify the column with the V gene calls
+  as the column `v_call` doesn't exist. In this case, `v_call="V_CALL"` needs 
+  to be specified in the function call.
++ `ExampleDb` converted to the AIRR Rearrangement standard and examples updated 
+  accordingly. The legacy Change-O version is available as `ExampleDbChangeo`.
++ For consistency with the style of the new data format default, other field 
+  names have been updated to use the same capitalization. This change affects:
+     - region definitions (e.g `IMGT_V@labels` change from `CDR_R`, `CDR_S`,
+       `FWR_R`, `FWR_S` to `cdr_r`, `cdr_s`, `fwr_r`, `fwr_s`)
+     - mutations in `CODON_TABLE` and the different `MUTATION_SCHEMES` change
+       from `R`, `S`, `Stop` to `r`, `s`, `stop`. 
+     - mutation functions (e.g from `MU_COUNT_SEQ` to `mu_count_seq`)
+     - `calcBaseline` and related functions and objects. e.g. from `PVALUE`, 
+       `REGION`, `BASELINE_CI_PVALUE` to `pvalue`, `region`, `baseline_ci_pvalue`.
+
 
 General:
 
