@@ -1847,12 +1847,10 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     }
     
     # Check for required columns
-    baseline_cols <- c("REGION", 
-                       "BASELINE_SIGMA", 
-                       "BASELINE_CI_LOWER", 
-                       "BASELINE_CI_LOWER", 
-                       "BASELINE_CI_LOWER", 
-                       "BASELINE_CI_PVALUE")
+    baseline_cols <- c("region", 
+                       "baseline_sigma", 
+                       "baseline_ci_lower", 
+                       "baseline_ci_pvalue")
     if (!(all(baseline_cols %in% names(stats_df)))) {
         stop("Input must contain columns defined by summarizeBaseline.")
     }
