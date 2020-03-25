@@ -515,7 +515,7 @@ test_that("Test groupBaseline", {
     # Group PDFs by sample
     grouped1 <- groupBaseline(baseline, groupBy="SAMPLE")
     pdf1 <- slot(grouped1, "pdfs")
-    sigma1 <- slot(grouped1,"stats")$BASELINE_SIGMA
+    sigma1 <- slot(grouped1,"stats")$baseline_sigma
     
     expect_equal(range(pdf1$cdr[1,]), c(0,5.018), tolerance=0.01)
     expect_equal(range(pdf1$cdr[2,]), c(0,7.333), tolerance=0.01)
@@ -524,7 +524,7 @@ test_that("Test groupBaseline", {
     # Group PDFs by both sample (between variable) and isotype (within variable)
     grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
     pdf2 <- slot(grouped2, "pdfs")
-    sigma2 <- slot(grouped2,"stats")$BASELINE_SIGMA
+    sigma2 <- slot(grouped2,"stats")$baseline_sigma
     
     expect_equal(range(pdf2$cdr[1,]), c(0,3.643), tolerance=0.01)
     expect_equal(range(pdf2$cdr[2,]), c(0,3.539), tolerance=0.01)    
@@ -534,7 +534,7 @@ test_that("Test groupBaseline", {
     # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
     grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
     pdf3 <- slot(grouped3, "pdfs")
-    sigma3 <- slot(grouped3,"stats")$BASELINE_SIGMA
+    sigma3 <- slot(grouped3,"stats")$baseline_sigma
     
     expect_equal(range(pdf3$cdr[1,]), c(0,4.975), tolerance=0.01)
     expect_equal(range(pdf3$cdr[2,]), c(0,7.319), tolerance=0.01)    

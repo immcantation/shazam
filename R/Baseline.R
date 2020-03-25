@@ -195,12 +195,12 @@ createBaseline <- function(description="",
     }
     # Define empty stats data.frame if not passed in
     if (nrow(stats) == 0) {
-        stats <- data.frame(GROUP=character(),
-                            REGION=character(),
-                            BASELINE_SIGMA=character(),
-                            BASELINE_CI_LOWER=character(),
-                            BASELINE_CI_UPPER=character(),
-                            BASELINE_CI_PVALUE=character(),
+        stats <- data.frame(group=character(),
+                            region=character(),
+                            baseline_sigma=character(),
+                            baseline_ci_lower=character(),
+                            baseline_ci_upper=character(),
+                            baseline_ci_pvalue=character(),
                             stringsAsFactors=FALSE) 
     }
     
@@ -1227,11 +1227,11 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
                 baseline_ci <- baselineCI(baseline_pdf)
                 df_baseline_seq_region <- 
                     data.frame(db_seq,
-                               REGION=factor(region, levels=regions),
-                               BASELINE_SIGMA=baselineSigma(baseline_pdf),
-                               BASELINE_CI_LOWER=baseline_ci[1],
-                               BASELINE_CI_UPPER=baseline_ci[2],
-                               BASELINE_CI_PVALUE=baselinePValue(baseline_pdf))
+                               region=factor(region, levels=regions),
+                               baseline_sigma=baselineSigma(baseline_pdf),
+                               baseline_ci_lower=baseline_ci[1],
+                               baseline_ci_upper=baseline_ci[2],
+                               baseline_ci_pvalue=baselinePValue(baseline_pdf))
                 df_baseline_seq <- dplyr::bind_rows(df_baseline_seq, df_baseline_seq_region)
             }
             df_baseline_seq[,1] <- as.vector(unlist(df_baseline_seq[,1]))
@@ -1268,14 +1268,14 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' 
 #' @return   A data.frame with test results containing the following columns:
 #'           \itemize{
-#'             \item  \code{REGION}:  sequence region, such as "CDR" and "FWR".
-#'             \item  \code{TEST}:    string defining the groups be compared. The
+#'             \item  \code{region}:  sequence region, such as "CDR" and "FWR".
+#'             \item  \code{test}:    string defining the groups be compared. The
 #'                                    string is formated as the conclusion associated with the
 #'                                    p-value in the form \code{GROUP1 != GROUP2}. Meaning,
 #'                                    the p-value for rejection of the null hypothesis that 
 #'                                    GROUP1 and GROUP2 have equivalent distributions.
-#'             \item  \code{PVALUE}:  two-sided p-value for the comparison.
-#'             \item  \code{FDR}:     FDR corrected \code{PVALUE}.
+#'             \item  \code{pvalue}:  two-sided p-value for the comparison.
+#'             \item  \code{fdr}:     FDR corrected \code{pvalue}.
 #'           }
 #'           
 #' @seealso  To generate the \link{Baseline} input object see \link{groupBaseline}.
@@ -1338,10 +1338,10 @@ testBaseline <- function(baseline, groupBy) {
     for (n in baseline@regions) {
         d <- baseline@pdfs[[n]]
         p <- sapply(pair_indices, function(x) { baseline2DistPValue(d[x[1], ], d[x[2], ])})
-        test_list[[n]] <- data.frame(TEST=test_names, PVALUE=p)
+        test_list[[n]] <- data.frame(test=test_names, pvalue=p)
     }
-    test_df <- bind_rows(test_list, .id="REGION")
-    test_df$FDR <- p.adjust(test_df$PVALUE, method="fdr")
+    test_df <- bind_rows(test_list, .id="region")
+    test_df$fdr <- p.adjust(test_df$pvalue, method="fdr")
     
     return(test_df)
 }
@@ -1632,7 +1632,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
             gather_cols <- names(tmp_df)[names(tmp_df) != "GROUP_COLLAPSE"]
             melt_list[[n]] <- tidyr::gather(tmp_df, "SIGMA", "DENSITY", tidyselect::all_of(gather_cols), convert=TRUE)
         }
-        dens_df <- dplyr::bind_rows(melt_list, .id="REGION")
+        dens_df <- dplyr::bind_rows(melt_list, .id="region")
         
         # Assign id and group columns to density data.frame
         dens_df[, idColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
@@ -1644,11 +1644,11 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
         
         # Set secondary grouping and faceting columns
         if (facetBy == "group") { 
-            secondaryColumn <- "REGION"
+            secondaryColumn <- "region"
             facetColumn <- groupColumn
         } else if (facetBy == "region") {
             secondaryColumn <- groupColumn
-            facetColumn <- "REGION" 
+            facetColumn <- "region" 
         }
         
         # Apply color order
@@ -1856,13 +1856,13 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     }
     
     # Check for proper grouping
-    if (any(duplicated(stats_df[, c(idColumn, groupColumn, "REGION")]))) {
+    if (any(duplicated(stats_df[, c(idColumn, groupColumn, "region")]))) {
         stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
     }
     
     # Subset to regions of interest
     if (!is.null(subsetRegions)) {
-        stats_df <- stats_df[stats_df$REGION %in% subsetRegions, ]
+        stats_df <- stats_df[stats_df$region %in% subsetRegions, ]
     }
     
     # Set base plot settings
@@ -1880,32 +1880,32 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     
     if (style == "summary") { 
         # Plot mean and confidence intervals
-        stats_df <- stats_df[!is.na(stats_df$BASELINE_SIGMA), ]
+        stats_df <- stats_df[!is.na(stats_df$baseline_sigma), ]
         if (!is.null(groupColumn) & !is.null(groupColors)) {
             stats_df[,groupColumn] <- factor(stats_df[,groupColumn], levels=names(groupColors))
         }
-        p1 <- ggplot(stats_df, aes_string(x=idColumn, y="BASELINE_SIGMA", ymax=max("BASELINE_SIGMA"))) +
+        p1 <- ggplot(stats_df, aes_string(x=idColumn, y="baseline_sigma", ymax=max("baseline_sigma"))) +
             base_theme + 
             xlab("") +
             ylab(expression(Sigma)) +
             geom_hline(yintercept=0, size=1*size, linetype=2, color="grey") +
             geom_point(size=3*size, position=position_dodge(0.6)) +
-            geom_errorbar(aes_string(ymin="BASELINE_CI_LOWER", ymax="BASELINE_CI_UPPER"), 
+            geom_errorbar(aes_string(ymin="baseline_ci_lower", ymax="baseline_ci_upper"), 
                           width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.6))
         if (!is.null(title)) {
             p1 <- p1 + ggtitle(title)
         }    
         if (is.null(groupColumn) & facetBy == "region") {
-            p1 <- p1 + facet_grid(REGION ~ .)
+            p1 <- p1 + facet_grid(region ~ .)
         } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
             #groupColors <- factor(groupColors, levels=groupColors)
             p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
-                aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+                aes_string(color=groupColumn) + facet_grid(region ~ .)
         } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
-            p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+            p1 <- p1 + aes_string(color=groupColumn) + facet_grid(region ~ .)
         } else if (!is.null(groupColumn) & facetBy == "group") {
             p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
-                aes_string(color="REGION") + facet_grid(paste(groupColumn, "~ ."))
+                aes_string(color="region") + facet_grid(paste(groupColumn, "~ ."))
         } else {
             stop("Cannot facet by group if groupColumn=NULL")
         }
