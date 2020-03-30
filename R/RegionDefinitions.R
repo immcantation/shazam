@@ -6,13 +6,15 @@ NULL
 #### Constants ####
 
 # Region color palette
-REGION_PALETTE <-  c("CDR"="#377eb8",
-                     "FWR"="#e41a1c",
-                     "CDR1"="#ff7f00",
-                     "CDR2"="#a65628",
-                     "FWR1"="#4daf4a",
-                     "FWR2"="#984ea3",
-                     "FWR3"="#e41a1c")
+REGION_PALETTE <-  c("cdr"="#377eb8",
+                     "fwr"="#e41a1c",
+                     "cdr1"="#ff7f00",
+                     "cdr2"="#a65628",
+                     "cdr3"="#a62828",
+                     "fwr1"="#4daf4a",
+                     "fwr2"="#984ea3",
+                     "fwr3"="#e41a1c",
+                     "fwr4"="#908cff")
 
 
 #### Classes ####
@@ -28,9 +30,9 @@ REGION_PALETTE <-  c("CDR"="#377eb8",
 #'                          sequence. The levels and values of \code{boundaries} 
 #'                          determine the number of regions.
 #' @slot    seqLength       length of the sequence.
-#' @slot    regions         levels of the boundaries; e.g, \code{c("CDR", "FWR")}.
+#' @slot    regions         levels of the boundaries; e.g, \code{c("cdr", "fwr")}.
 #' @slot    labels          labels for the boundary and mutations combinations;
-#'                          e.g., \code{c("CDR_R", "CDR_S", "FWR_R", "FWR_S")}.
+#'                          e.g., \code{c("cdr_r", "cdr_s", "fwr_r", "fwr_s")}.
 #' @slot    citation        publication source.
 #' 
 #' @seealso
@@ -50,15 +52,15 @@ setClass("RegionDefinition",
                  citation="character"),
          prototype=list(name="IMGT_V",
                         description="IMGT_Numbering scheme defining the V gene up to, but not including, CDR3.",
-                        boundaries=factor(c(rep("FWR", 78), 
-                                            rep("CDR", 36),  
-                                            rep("FWR", 51), 
-                                            rep("CDR", 30), 
-                                            rep("FWR", 117)),
-                                          levels=c("CDR","FWR")),
+                        boundaries=factor(c(rep("fwr", 78), 
+                                            rep("cdr", 36),  
+                                            rep("fwr", 51), 
+                                            rep("cdr", 30), 
+                                            rep("fwr", 117)),
+                                          levels=c("cdr","fwr")),
                         seqLength=312,
-                        regions=c("CDR", "FWR"),
-                        labels=c("CDR_R", "CDR_S", "FWR_R", "FWR_S"),
+                        regions=c("cdr", "fwr"),
+                        labels=c("cdr_r", "cdr_s", "fwr_r", "fwr_s"),
                         citation="Lefranc MP et al. (2003)"))
 
 
@@ -89,15 +91,15 @@ createRegionDefinition <- function(name="",
                                    description="",
                                    citation="") {
     #Extract information from 'boundaries'
-    # Determine the number of levels (e.g. CDR, FWR)
+    # Determine the number of levels (e.g. cdr, fwr)
     regions <- levels(boundaries)
     # Determine the length of the boundaries
     seqLength <- length(boundaries)
     
     # Determine the combinations of levels_regionDefinition and R/S
-    # e.g. CDR_R CDR_S FWR_R, FWR_S
+    # e.g. cdr_r, cdr_s, fwr_r, fwr_s
     labels <- paste(rep(regions, each=2), 
-                    rep(c("R", "S"), length(regions)), 
+                    rep(c("r", "s"), length(regions)), 
                     sep="_")
     
     # Define RegionDefinition object
@@ -124,8 +126,8 @@ createRegionDefinition <- function(name="",
 # @return A \code{RegionDefinition} object
 makeNullRegionDefinition <- function(regionLength) {
     rd <- createRegionDefinition(name="",
-                                 boundaries=factor(c(rep("SEQ", regionLength)),
-                                                    levels = c("SEQ")),
+                                 boundaries=factor(c(rep("seq", regionLength)),
+                                                    levels = c("seq")),
                                  description="",
                                  citation="") 
     return(rd)

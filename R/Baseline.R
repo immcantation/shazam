@@ -195,12 +195,12 @@ createBaseline <- function(description="",
     }
     # Define empty stats data.frame if not passed in
     if (nrow(stats) == 0) {
-        stats <- data.frame(GROUP=character(),
-                            REGION=character(),
-                            BASELINE_SIGMA=character(),
-                            BASELINE_CI_LOWER=character(),
-                            BASELINE_CI_UPPER=character(),
-                            BASELINE_CI_PVALUE=character(),
+        stats <- data.frame(group=character(),
+                            region=character(),
+                            baseline_sigma=character(),
+                            baseline_ci_lower=character(),
+                            baseline_ci_upper=character(),
+                            baseline_ci_pvalue=character(),
                             stringsAsFactors=FALSE) 
     }
     
@@ -312,7 +312,7 @@ editBaseline <- function(baseline, field, value) {
 #' the \link{collapseClones} function.
 #'                   
 #' If the \code{db} does not contain the 
-#' required columns to calculate the PDFs (namely MU_COUNT & MU_EXPECTED)
+#' required columns to calculate the PDFs (namely mu_count & mu_expected)
 #' then the function will:
 #'   \enumerate{
 #'   \item  Calculate the numbers of observed mutations.
@@ -362,8 +362,8 @@ editBaseline <- function(baseline, field, value) {
 #'  
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -371,8 +371,8 @@ editBaseline <- function(baseline, field, value) {
 #'                          
 #' @export
 calcBaseline <- function(db,
-                         sequenceColumn="CLONAL_SEQUENCE",
-                         germlineColumn="CLONAL_GERMLINE",
+                         sequenceColumn="clonal_sequence",
+                         germlineColumn="clonal_germline",
                          testStatistic=c("local", "focused", "imbalanced"),
                          regionDefinition=NULL,
                          targetingModel=HH_S5F,
@@ -452,18 +452,18 @@ calcBaseline <- function(db,
         registerDoSEQ()
     }
     
-    # If db does not contain the required columns to calculate the PDFs (namely MU_COUNT 
-    # & MU_EXPECTED mutations), then the function will:
+    # If db does not contain the required columns to calculate the PDFs (namely mu_count 
+    # & mu_expected mutations), then the function will:
     #          1. Calculate the numbers of observed mutations
     #          2. Calculate the expected frequencies of mutations    
     # After that BASELINe prob. densities can be calcualted per sequence. 
     if (is.null(regionDefinition)) {
         rd_labels <- makeNullRegionDefinition()@labels
-        observedColumns <- paste0("MU_COUNT_", rd_labels)
-        expectedColumns <- paste0("MU_EXPECTED_", rd_labels)
+        observedColumns <- paste0("mu_count_", rd_labels)
+        expectedColumns <- paste0("mu_expected_", rd_labels)
     } else {
-        observedColumns <- paste0("MU_COUNT_", regionDefinition@labels)
-        expectedColumns <- paste0("MU_EXPECTED_", regionDefinition@labels)
+        observedColumns <- paste0("mu_count_", regionDefinition@labels)
+        expectedColumns <- paste0("mu_expected_", regionDefinition@labels)
     }
     
     if (!all(c(observedColumns, expectedColumns) %in% colnames(db))) {
@@ -499,12 +499,12 @@ calcBaseline <- function(db,
     
     # Number of sequences (used in foreach)
     totalNumbOfSequences <- nrow(db)
-    # The column indexes of the MU_COUNT_ and MU_EXPECTED_
-    cols_observed <- grep( paste0("MU_COUNT_"),  colnames(db) ) 
-    cols_expected <- grep( paste0("MU_EXPECTED_"),  colnames(db) ) 
+    # The column indexes of the mu_count_ and mu_expected_
+    cols_observed <- grep( paste0("mu_count_"),  colnames(db) ) 
+    cols_expected <- grep( paste0("mu_expected_"),  colnames(db) ) 
     
     # Exporting additional environment variables and functions needed to run foreach 
-    if( nproc!=1 ) {
+    if ( nproc!=1 ) {
         parallel::clusterExport( 
             cluster, list('cols_observed', 'cols_expected'), 
             envir=environment() 
@@ -642,7 +642,7 @@ calcBaseline <- function(db,
 # 
 # @return  A modified \link{Baseline} object with the BASELINe probability 
 #          density function calculated for the regions defined in the \code{regionDefinition}.
-calcBaselineHelper  <- function(observed,
+calcBaselineHelper <- function(observed,
                                 expected,
                                 region,
                                 testStatistic="local",
@@ -661,44 +661,44 @@ calcBaselineHelper  <- function(observed,
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic, c("local", "focused", "imbalanced"))
     
-    #If there are more than two regions (e.g. CDR and FWR then you cannot perform the focused test)
+    # If there are more than two regions (e.g. CDR and FWR then you cannot perform the focused test)
     if (testStatistic=="focused" & length(regions)!=2) {
         testStatistic="local"    
     }    
     
     # local test statistic
     if (testStatistic == "local") { 
-        obsX_Index <- grep( paste0("MU_COUNT_", region,"_R"),  names(observed) )
+        obsX_Index <- grep( paste0("mu_count_", region,"_r"),  names(observed) )
         # important to have "_" after region
         # otherwise this might happen (leading to bugs in results):
         # region = codon_1
         # expect grep to find only codon_1_S and codon_1_R
         # in fact, however, codon_10_S, codon_10_R, codon_101_S, codon_101_R are matched
-        obsN_Index <- grep( paste0("MU_COUNT_", region, "_"),  names(observed) )
+        obsN_Index <- grep( paste0("mu_count_", region, "_"),  names(observed) )
         
-        expX_Index <- grep( paste0("MU_EXPECTED_", region,"_R"),  names(expected) )
+        expX_Index <- grep( paste0("mu_expected_", region,"_r"),  names(expected) )
         # important to have "_" after region
-        expN_Index <- grep( paste0("MU_EXPECTED_", region, "_"),  names(expected) )       
+        expN_Index <- grep( paste0("mu_expected_", region, "_"),  names(expected) )       
     }
     
     # focused test statistic
     if (testStatistic == "focused") { 
-        obsX_Index <- grep( paste0("MU_COUNT_", region,"_R"),  names(observed) )
+        obsX_Index <- grep( paste0("mu_count_", region,"_r"),  names(observed) )
         obsN_Index <- 
             grep( 
                 paste0( 
-                    "MU_COUNT_", region, "|", 
-                    "MU_COUNT_", regions[regions!=region], "_S"
+                    "mu_count_", region, "|", 
+                    "mu_count_", regions[regions!=region], "_s"
                 ),
                 names(observed) 
             )
         
-        expX_Index <- grep( paste0("MU_EXPECTED_", region,"_R"),  names(expected) )
+        expX_Index <- grep( paste0("mu_expected_", region,"_r"),  names(expected) )
         expN_Index <- 
             grep( 
                 paste0( 
-                    "MU_EXPECTED_", region, "|", 
-                    "MU_EXPECTED_",  regions[regions!=region], "_S"
+                    "mu_expected_", region, "|", 
+                    "mu_expected_",  regions[regions!=region], "_s"
                 ),
                 names(expected) 
             )        
@@ -706,11 +706,11 @@ calcBaselineHelper  <- function(observed,
     
     # imbalanced test statistic
     if (testStatistic == "imbalanced") { 
-        obsX_Index <- grep( paste0("MU_COUNT_", region),  names(observed) )
-        obsN_Index <- grep( "MU_COUNT_",names(observed))  
+        obsX_Index <- grep( paste0("mu_count_", region),  names(observed) )
+        obsN_Index <- grep( "mu_count_",names(observed))  
         
-        expX_Index <- grep( paste0("MU_EXPECTED_", region),  names(expected) )
-        expN_Index <-   grep( "MU_EXPECTED_",names(expected)) 
+        expX_Index <- grep( paste0("mu_expected_", region),  names(expected) )
+        expN_Index <-   grep( "mu_expected_",names(expected)) 
         
     }
     
@@ -809,8 +809,8 @@ calcBaselineBinomialPdf <- function (x=3,
 #'
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1158,8 +1158,8 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1227,11 +1227,11 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
                 baseline_ci <- baselineCI(baseline_pdf)
                 df_baseline_seq_region <- 
                     data.frame(db_seq,
-                               REGION=factor(region, levels=regions),
-                               BASELINE_SIGMA=baselineSigma(baseline_pdf),
-                               BASELINE_CI_LOWER=baseline_ci[1],
-                               BASELINE_CI_UPPER=baseline_ci[2],
-                               BASELINE_CI_PVALUE=baselinePValue(baseline_pdf))
+                               region=factor(region, levels=regions),
+                               baseline_sigma=baselineSigma(baseline_pdf),
+                               baseline_ci_lower=baseline_ci[1],
+                               baseline_ci_upper=baseline_ci[2],
+                               baseline_ci_pvalue=baselinePValue(baseline_pdf))
                 df_baseline_seq <- dplyr::bind_rows(df_baseline_seq, df_baseline_seq_region)
             }
             df_baseline_seq[,1] <- as.vector(unlist(df_baseline_seq[,1]))
@@ -1268,14 +1268,14 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' 
 #' @return   A data.frame with test results containing the following columns:
 #'           \itemize{
-#'             \item  \code{REGION}:  sequence region, such as "CDR" and "FWR".
-#'             \item  \code{TEST}:    string defining the groups be compared. The
+#'             \item  \code{region}:  sequence region, such as "CDR" and "FWR".
+#'             \item  \code{test}:    string defining the groups be compared. The
 #'                                    string is formated as the conclusion associated with the
 #'                                    p-value in the form \code{GROUP1 != GROUP2}. Meaning,
 #'                                    the p-value for rejection of the null hypothesis that 
 #'                                    GROUP1 and GROUP2 have equivalent distributions.
-#'             \item  \code{PVALUE}:  two-sided p-value for the comparison.
-#'             \item  \code{FDR}:     FDR corrected \code{PVALUE}.
+#'             \item  \code{pvalue}:  two-sided p-value for the comparison.
+#'             \item  \code{fdr}:     FDR corrected \code{pvalue}.
 #'           }
 #'           
 #' @seealso  To generate the \link{Baseline} input object see \link{groupBaseline}.
@@ -1303,8 +1303,8 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1338,10 +1338,10 @@ testBaseline <- function(baseline, groupBy) {
     for (n in baseline@regions) {
         d <- baseline@pdfs[[n]]
         p <- sapply(pair_indices, function(x) { baseline2DistPValue(d[x[1], ], d[x[2], ])})
-        test_list[[n]] <- data.frame(TEST=test_names, PVALUE=p)
+        test_list[[n]] <- data.frame(test=test_names, pvalue=p)
     }
-    test_df <- bind_rows(test_list, .id="REGION")
-    test_df$FDR <- p.adjust(test_df$PVALUE, method="fdr")
+    test_df <- bind_rows(test_list, .id="region")
+    test_df$fdr <- p.adjust(test_df$pvalue, method="fdr")
     
     return(test_df)
 }
@@ -1549,8 +1549,8 @@ baseline2DistPValue <-function(base1, base2) {
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1630,9 +1630,9 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
             tmp_df <- as.data.frame(dens_list[[n]])
             tmp_df$GROUP_COLLAPSE <- rownames(dens_list[[n]])
             gather_cols <- names(tmp_df)[names(tmp_df) != "GROUP_COLLAPSE"]
-            melt_list[[n]] <- tidyr::gather(tmp_df, "SIGMA", "DENSITY", all_of(gather_cols), convert=TRUE)
+            melt_list[[n]] <- tidyr::gather(tmp_df, "SIGMA", "DENSITY", tidyselect::all_of(gather_cols), convert=TRUE)
         }
-        dens_df <- dplyr::bind_rows(melt_list, .id="REGION")
+        dens_df <- dplyr::bind_rows(melt_list, .id="region")
         
         # Assign id and group columns to density data.frame
         dens_df[, idColumn] <- group_df[match(dens_df$GROUP_COLLAPSE, group_df$GROUP_COLLAPSE), 
@@ -1644,11 +1644,11 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
         
         # Set secondary grouping and faceting columns
         if (facetBy == "group") { 
-            secondaryColumn <- "REGION"
+            secondaryColumn <- "region"
             facetColumn <- groupColumn
         } else if (facetBy == "region") {
             secondaryColumn <- groupColumn
-            facetColumn <- "REGION" 
+            facetColumn <- "region" 
         }
         
         # Apply color order
@@ -1809,8 +1809,8 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #'                      
 #' # Calculate BASELINe
 #' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="CLONAL_SEQUENCE",
-#'                          germlineColumn="CLONAL_GERMLINE", 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
 #'                          testStatistic="focused",
 #'                          regionDefinition=IMGT_V,
 #'                          targetingModel=HH_S5F,
@@ -1847,24 +1847,22 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     }
     
     # Check for required columns
-    baseline_cols <- c("REGION", 
-                       "BASELINE_SIGMA", 
-                       "BASELINE_CI_LOWER", 
-                       "BASELINE_CI_LOWER", 
-                       "BASELINE_CI_LOWER", 
-                       "BASELINE_CI_PVALUE")
+    baseline_cols <- c("region", 
+                       "baseline_sigma", 
+                       "baseline_ci_lower", 
+                       "baseline_ci_pvalue")
     if (!(all(baseline_cols %in% names(stats_df)))) {
         stop("Input must contain columns defined by summarizeBaseline.")
     }
     
     # Check for proper grouping
-    if (any(duplicated(stats_df[, c(idColumn, groupColumn, "REGION")]))) {
+    if (any(duplicated(stats_df[, c(idColumn, groupColumn, "region")]))) {
         stop("More than one unique annotation set per summary statistic. Rerun groupBaseline to combine data.")
     }
     
     # Subset to regions of interest
     if (!is.null(subsetRegions)) {
-        stats_df <- stats_df[stats_df$REGION %in% subsetRegions, ]
+        stats_df <- stats_df[stats_df$region %in% subsetRegions, ]
     }
     
     # Set base plot settings
@@ -1882,32 +1880,32 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
     
     if (style == "summary") { 
         # Plot mean and confidence intervals
-        stats_df <- stats_df[!is.na(stats_df$BASELINE_SIGMA), ]
+        stats_df <- stats_df[!is.na(stats_df$baseline_sigma), ]
         if (!is.null(groupColumn) & !is.null(groupColors)) {
             stats_df[,groupColumn] <- factor(stats_df[,groupColumn], levels=names(groupColors))
         }
-        p1 <- ggplot(stats_df, aes_string(x=idColumn, y="BASELINE_SIGMA", ymax=max("BASELINE_SIGMA"))) +
+        p1 <- ggplot(stats_df, aes_string(x=idColumn, y="baseline_sigma", ymax=max("baseline_sigma"))) +
             base_theme + 
             xlab("") +
             ylab(expression(Sigma)) +
             geom_hline(yintercept=0, size=1*size, linetype=2, color="grey") +
             geom_point(size=3*size, position=position_dodge(0.6)) +
-            geom_errorbar(aes_string(ymin="BASELINE_CI_LOWER", ymax="BASELINE_CI_UPPER"), 
+            geom_errorbar(aes_string(ymin="baseline_ci_lower", ymax="baseline_ci_upper"), 
                           width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.6))
         if (!is.null(title)) {
             p1 <- p1 + ggtitle(title)
         }    
         if (is.null(groupColumn) & facetBy == "region") {
-            p1 <- p1 + facet_grid(REGION ~ .)
+            p1 <- p1 + facet_grid(region ~ .)
         } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
             #groupColors <- factor(groupColors, levels=groupColors)
             p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
-                aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+                aes_string(color=groupColumn) + facet_grid(region ~ .)
         } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
-            p1 <- p1 + aes_string(color=groupColumn) + facet_grid(REGION ~ .)
+            p1 <- p1 + aes_string(color=groupColumn) + facet_grid(region ~ .)
         } else if (!is.null(groupColumn) & facetBy == "group") {
             p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
-                aes_string(color="REGION") + facet_grid(paste(groupColumn, "~ ."))
+                aes_string(color="region") + facet_grid(paste(groupColumn, "~ ."))
         } else {
             stop("Cannot facet by group if groupColumn=NULL")
         }

@@ -68,22 +68,22 @@ NULL
 #' 
 #' @return   A modified \code{db} with the following additional columns: 
 #'           \itemize{
-#'             \item \code{CLONAL_SEQUENCE}:  effective sequence for the clone.
-#'             \item \code{CLONAL_GERMLINE}:  germline sequence for the clone.
-#'             \item \code{CLONAL_SEQUENCE_MUFREQ}:  mutation frequency of 
-#'                   \code{CLONAL_SEQUENCE}; only added for the \code{"mostMutated"}
+#'             \item \code{clonal_sequence}:  effective sequence for the clone.
+#'             \item \code{clonal_germline}:  germline sequence for the clone.
+#'             \item \code{clonal_sequence_mufreq}:  mutation frequency of 
+#'                   \code{clonal_sequence}; only added for the \code{"mostMutated"}
 #'                   and \code{"leastMutated"} methods.
 #'           }
 #'                      
-#'           \code{CLONAL_SEQUENCE} is generated with the method of choice indicated 
-#'           by \code{method}, and \code{CLONAL_GERMLINE} is generated with the 
+#'           \code{clonal_sequence} is generated with the method of choice indicated 
+#'           by \code{method}, and \code{clonal_germline} is generated with the 
 #'           \code{"mostCommon"} method, along with, where applicable, user-defined 
 #'           parameters such as \code{minimumFrequency}, \code{includeAmbiguous}, 
 #'           \code{breakTiesStochastic}, and \code{breakTiesByColumns}.
 #'           
 #'
-#' @section Consensus lengths: For each clone, \code{CLONAL_SEQUENCE} and 
-#'          \code{CLONAL_GERMLINE} have the same length. 
+#' @section Consensus lengths: For each clone, \code{clonal_sequence} and 
+#'          \code{clonal_germline} have the same length. 
 #'          
 #'          \itemize{
 #'                \item For the \code{"thresholdedFreq"}, \code{"mostCommon"}, and 
@@ -323,13 +323,13 @@ NULL
 #' # mostMutated method, resolving ties stochastically
 #' clones <- collapseClones(db2, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
 #'                          germlineColumn="germline_alignment_d_mask",
-#'                          method="mostMutated", muFreqColumn="MU_FREQ", 
+#'                          method="mostMutated", muFreqColumn="mu_freq", 
 #'                          breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
 #'                          
 #' # mostMutated method, resolving ties deterministically using additional columns
 #' clones <- collapseClones(db2, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
 #'                          germlineColumn="germline_alignment_d_mask",
-#'                          method="mostMutated", muFreqColumn="MU_FREQ", 
+#'                          method="mostMutated", muFreqColumn="mu_freq", 
 #'                          breakTiesStochastic=FALSE, 
 #'                          breakTiesByColumns=list(c("duplicate_count"), c(max)))
 #' 
@@ -476,7 +476,7 @@ collapseClones <- function(db,
     uniqueClonesIdx <- sapply(uniqueClones, function(i){which(db[[cloneColumn]]==i)}, simplify=FALSE)
     
     # if method is most/leastMutated and muFreqColumn not specified,
-    # first calculate mutation frequency ($MU_FREQ)
+    # first calculate mutation frequency ($mu_freq)
     # IMPORTANT: do this OUTSIDE foreach loop for calcClonalConsensus
     # otherwise will get an error saying muFreqColumn not found in db
     # (something to do with parallelization/foreach)
@@ -487,7 +487,7 @@ collapseClones <- function(db,
                                 regionDefinition=regionDefinition,
                                 frequency=TRUE, combine=TRUE, 
                                 mutationDefinition=NULL, nproc=nproc)
-        muFreqColumn <- "MU_FREQ"
+        muFreqColumn <- "mu_freq"
     }
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
@@ -522,7 +522,7 @@ collapseClones <- function(db,
     # avoid .combine="cbind"!
     # if there is only 1 unique clone, .combind="cbind" will result in a vector (as opposed to
     # a matrix) being returned, which will subsequently result a failure in
-    # cons_db$CLONAL_SEQUENCE <- cons_mat[, 1]
+    # cons_db$clonal_sequence <- cons_mat[, 1]
     cons_mat <- foreach(idx=1:length(uniqueClonesIdx),
                         .verbose=FALSE, .errorhandling='stop') %dopar% {
                             
@@ -554,23 +554,23 @@ collapseClones <- function(db,
         # Fill all rows with the consensus sequence
         clone_index <- match(db[[cloneColumn]], uniqueClones)
         cons_db <- db
-        cons_db$CLONAL_SEQUENCE <- unlist(cons_mat[, 1])[clone_index]
-        cons_db$CLONAL_GERMLINE <- unlist(cons_mat[, 2])[clone_index]
+        cons_db$clonal_sequence <- unlist(cons_mat[, 1])[clone_index]
+        cons_db$clonal_germline <- unlist(cons_mat[, 2])[clone_index]
         
-        # assign mutation frequency corresponding to consensus into CLONAL_SEQUENCE_MUFREQ
+        # assign mutation frequency corresponding to consensus into clonal_sequence_mufreq
         if (method %in% c("mostMutated", "leastMutated")) {
-            cons_db$CLONAL_SEQUENCE_MUFREQ <- unlist(cons_mat[, 3])[clone_index]
+            cons_db$clonal_sequence_mufreq <- unlist(cons_mat[, 3])[clone_index]
         }
     } else {
         # Return only the first row of each clone
         clone_index <- match(uniqueClones, db[[cloneColumn]])
         cons_db <- db[clone_index, ]
-        cons_db$CLONAL_SEQUENCE <- unlist(cons_mat[, 1])
-        cons_db$CLONAL_GERMLINE <- unlist(cons_mat[, 2])
+        cons_db$clonal_sequence <- unlist(cons_mat[, 1])
+        cons_db$clonal_germline <- unlist(cons_mat[, 2])
         
-        # assign mutation frequency corresponding to consensus into CLONAL_SEQUENCE_MUFREQ
+        # assign mutation frequency corresponding to consensus into clonal_sequence_mufreq
         if (method %in% c("mostMutated", "leastMutated")) {
-            cons_db$CLONAL_SEQUENCE_MUFREQ <- unlist(cons_mat[, 3])
+            cons_db$clonal_sequence_mufreq <- unlist(cons_mat[, 3])
         }
     }
     
@@ -694,7 +694,7 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #' clone <- observedMutations(clone, frequency=TRUE, combine=TRUE)
 #' 
 #' # Manually create a tie
-#' clone <- rbind(clone, clone[which.max(clone$MU_FREQ), ])
+#' clone <- rbind(clone, clone[which.max(clone$mu_freq), ])
 #' 
 #' # ThresholdedFreq method. 
 #' # Resolve ties deterministically without using ambiguous characters
@@ -750,21 +750,21 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #                                     breakTiesByColumns=NULL, db=NULL)$cons
 # mostMutated method, resolve ties stochastically
 # consInput8 <- consensusSequence(clone$sequence_alignment,
-#                                     muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                     muFreqColumn="mu_freq", lenLimit=NULL,
 #                                     method="mostMutated", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=TRUE,
 #                                     breakTiesByColumns=NULL, db=clone)$cons
 # mostMutated method, resolve ties deterministically using additional columns
 # consInput9 <- consensusSequence(clone$sequence_alignment,
-#                                     muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                     muFreqColumn="mu_freq", lenLimit=NULL,
 #                                     method="mostMutated", minFreq=NULL,
 #                                     includeAmbiguous=FALSE, 
 #                                     breakTiesStochastic=FALSE,
 #                                     breakTiesByColumns=list(c("junction_length","duplicate_count"), c(max, max)), 
 #                                     db=clone)$cons
 # consInput10 <- consensusSequence(clone$sequence_alignment,
-#                                      muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                      muFreqColumn="mu_freq", lenLimit=NULL,
 #                                      method="mostMutated", minFreq=NULL,
 #                                      includeAmbiguous=FALSE, 
 #                                      breakTiesStochastic=FALSE,
@@ -772,7 +772,7 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #                                      db=clone)$cons
 # mostMutated method, resolve ties deterministically withou using additional columns
 # consInput11 <- consensusSequence(clone$sequence_alignment,
-#                                      muFreqColumn="MU_FREQ", lenLimit=NULL,
+#                                      muFreqColumn="mu_freq", lenLimit=NULL,
 #                                      method="mostMutated", minFreq=NULL,
 #                                      includeAmbiguous=FALSE, 
 #                                      breakTiesStochastic=FALSE,
@@ -1113,7 +1113,7 @@ consensusSequence <- function(sequences, db=NULL,
 # # compute mutation frequency for most/leastMutated methods
 # clone <- observedMutations(db=clone, frequency=TRUE, combine=TRUE)
 # # manually create a tie
-# clone <- rbind(clone, clone[which.max(clone$MU_FREQ), ])
+# clone <- rbind(clone, clone[which.max(clone$mu_freq), ])
 # 
 # # Get consensus input and germline sequences
 # # thresholdedFreq method, resolve ties deterministically without using ambiguous characters
@@ -1160,26 +1160,26 @@ consensusSequence <- function(sequences, db=NULL,
 #                              breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
 # # mostMutated method, resolve ties stochastically
 # cons8 <- calcClonalConsensus(db=clone,
-#                              muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                              muFreqColumn="mu_freq", regionDefinition=NULL,
 #                              method="mostMutated", 
 #                              minimumFrequency=NULL, includeAmbiguous=FALSE,
 #                              breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
 # # mostMutated method, resolve ties deterministically using additional columns
 # cons9 <- calcClonalConsensus(db=clone,
-#                              muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                              muFreqColumn="mu_freq", regionDefinition=NULL,
 #                              method="mostMutated", 
 #                              minimumFrequency=NULL, includeAmbiguous=FALSE,
 #                              breakTiesStochastic=FALSE, 
 #                              breakTiesByColumns=list(c("junction_length", "duplicate_count"), c(max, max)))
 # cons10 <- calcClonalConsensus(db=clone,
-#                               muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                               muFreqColumn="mu_freq", regionDefinition=NULL,
 #                               method="mostMutated", 
 #                               minimumFrequency=NULL, includeAmbiguous=FALSE,
 #                               breakTiesStochastic=FALSE, 
 #                               breakTiesByColumns=list(c("duplicate_count"), c(max)))
 # # mostMutated method, resolve ties deterministically without using additional columns
 # cons11 <- calcClonalConsensus(db=clone,
-#                               muFreqColumn="MU_FREQ", regionDefinition=NULL,
+#                               muFreqColumn="mu_freq", regionDefinition=NULL,
 #                               method="mostMutated", 
 #                               minimumFrequency=NULL, includeAmbiguous=FALSE,
 #                               breakTiesStochastic=FALSE, breakTiesByColumns=NULL)
@@ -1300,31 +1300,31 @@ calcClonalConsensus <- function(db,
 #'           \link{IMGT_V} definition, which defines positions for CDR and
 #'           FWR, the following columns are added:
 #'           \itemize{
-#'             \item  \code{MU_COUNT_CDR_R}:  number of replacement mutations in CDR1 and 
+#'             \item  \code{mu_count_cdr_r}:  number of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{MU_COUNT_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'             \item  \code{mu_count_cdr_s}:  number of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{MU_COUNT_FWR_R}:  number of replacement mutations in FWR1, 
+#'             \item  \code{mu_count_fwr_r}:  number of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{MU_COUNT_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'             \item  \code{mu_count_fwr_s}:  number of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           }
 #'           If \code{frequency=TRUE}, R and S mutation frequencies are
 #'           calculated over the number of non-N positions in the speficied regions.
 #'           \itemize{
-#'             \item  \code{MU_FREQ_CDR_R}:  frequency of replacement mutations in CDR1 and 
+#'             \item  \code{mu_freq_cdr_r}:  frequency of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{MU_FREQ_CDR_S}:  frequency of silent mutations in CDR1 and CDR2 
+#'             \item  \code{mu_freq_cdr_s}:  frequency of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{MU_FREQ_FWR_R}:  frequency of replacement mutations in FWR1, 
+#'             \item  \code{mu_freq_fwr_r}:  frequency of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{MU_FREQ_FWR_S}:  frequency of silent mutations in FWR1, FWR2 and
+#'             \item  \code{mu_freq_fwr_s}:  frequency of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           } 
 #'           If \code{frequency=TRUE} and \code{combine=TRUE}, the mutations and non-N positions
-#'           are aggregated and a single \code{MU_FREQ} value is returned
+#'           are aggregated and a single \code{mu_freq} value is returned
 #'           \itemize{
-#'             \item  \code{MU_FREQ}:  frequency of replacement and silent mutations in the 
+#'             \item  \code{mu_freq}:  frequency of replacement and silent mutations in the 
 #'                                      specified region
 #'           }     
 #'                                  
@@ -1401,15 +1401,15 @@ observedMutations <- function(db,
     }
     if (frequency == TRUE) {
         if (combine) {
-            labels <- "MU_FREQ"
+            labels <- "mu_freq"
         } else {
-            labels <- paste("MU_FREQ_", labels, sep="")
+            labels <- paste("mu_freq_", labels, sep="")
         }
     } else {
         if (combine) {
-            labels <- "MU_COUNT"
+            labels <- "mu_count"
         } else {
-            labels <- paste("MU_COUNT_", labels, sep="")
+            labels <- paste("mu_count_", labels, sep="")
         }
     }
     
@@ -1479,7 +1479,7 @@ observedMutations <- function(db,
             if (combine) {
                 num_mutations <- 0
                 if (!all(is.na(oM$pos))) {
-                    num_mutations <- sum(oM$pos$R, oM$pos$S)
+                    num_mutations <- sum(oM$pos$r, oM$pos$s)
                 }
                 if (!frequency) {
                     num_mutations
@@ -1512,9 +1512,9 @@ observedMutations <- function(db,
     if (ncol(observed_mutations) > 1) sep <- "_"
     observed_mutations[is.na(observed_mutations)] <- 0
     if (frequency == TRUE) {
-        colnames(observed_mutations) <- gsub("_$","",paste("MU_FREQ", colnames(observed_mutations), sep=sep))
+        colnames(observed_mutations) <- gsub("_$","",paste("mu_freq", colnames(observed_mutations), sep=sep))
     } else {
-        colnames(observed_mutations) <- gsub("_$","",paste("MU_COUNT", colnames(observed_mutations), sep=sep))
+        colnames(observed_mutations) <- gsub("_$","",paste("mu_count", colnames(observed_mutations), sep=sep))
     }
     
     # Properly shutting down the cluster
@@ -1679,11 +1679,11 @@ observedMutations <- function(db,
 #' ex1_count <- calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE)
 #' ex1_freq <- calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE, frequency=TRUE)
 #' # Compare this with ex1_count
-#' table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"]
-#' table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"]
+#' table(ex1_raw$pos$region, ex1_raw$pos$r)[, "1"]
+#' table(ex1_raw$pos$region, ex1_raw$pos$s)[, "1"]
 #' # Compare this with ex1_freq
-#' table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"]/ex1_raw$nonN
-#' table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"]/ex1_raw$nonN
+#' table(ex1_raw$pos$region, ex1_raw$pos$r)[, "1"]/ex1_raw$nonN
+#' table(ex1_raw$pos$region, ex1_raw$pos$s)[, "1"]/ex1_raw$nonN
 #' 
 #' # Identify only mutations the V segment minus CDR3
 #' ex2_raw <- calcObservedMutations(in_seq, germ_seq, 
@@ -1695,11 +1695,11 @@ observedMutations <- function(db,
 #'                                  regionDefinition=IMGT_V, returnRaw=FALSE,
 #'                                  frequency=TRUE)
 #' # Compare this with ex2_count
-#' table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"]
-#' table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"]                              
+#' table(ex2_raw$pos$region, ex2_raw$pos$r)[, "1"]
+#' table(ex2_raw$pos$region, ex2_raw$pos$s)[, "1"]                              
 #' # Compare this with ex2_freq
-#' table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"]/ex2_raw$nonN     
-#' table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"]/ex2_raw$nonN                                       
+#' table(ex2_raw$pos$region, ex2_raw$pos$r)[, "1"]/ex2_raw$nonN     
+#' table(ex2_raw$pos$region, ex2_raw$pos$s)[, "1"]/ex2_raw$nonN                                       
 #' 
 #' # Identify mutations by change in hydropathy class
 #' ex3_raw <- calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
@@ -1713,11 +1713,11 @@ observedMutations <- function(db,
 #'                                  mutationDefinition=HYDROPATHY_MUTATIONS, 
 #'                                  returnRaw=FALSE, frequency=TRUE)
 #' # Compre this with ex3_count
-#' table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"]
-#' table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"]
+#' table(ex3_raw$pos$region, ex3_raw$pos$r)[, "1"]
+#' table(ex3_raw$pos$region, ex3_raw$pos$s)[, "1"]
 #' # Compare this with ex3_freq
-#' table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"]/ex3_raw$nonN                                        
-#' table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"]/ex3_raw$nonN                                        
+#' table(ex3_raw$pos$region, ex3_raw$pos$r)[, "1"]/ex3_raw$nonN                                        
+#' table(ex3_raw$pos$region, ex3_raw$pos$s)[, "1"]/ex3_raw$nonN                                        
 #'                                 
 #' @export
 calcObservedMutations <- function(inputSeq, germlineSeq,
@@ -1841,7 +1841,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             c_inputSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
             
             # Determine whether the mutations are R or S
-            # a table where rows are R/S/Stop/na, cols are codon positions
+            # a table where rows are r/s/stop/na, cols are codon positions
             # Count ambiguous characters as "eithe-or" or "and" based on user setting 
             
             # Makes use of the fact that c_germlineSeq_codons and c_inputSeqCodons have
@@ -1860,9 +1860,9 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             
             # keep only columns in which there are R or S mutations; and keep only R and S rows
             # use drop=FALSE so that matrix won't be collapsed into a vector if there is only 1 TRUE in keep.idx
-            keep.idx <- apply(mutations_array_raw, 2, function(x) { any(x[c("R", "S")]>0) } )
+            keep.idx <- apply(mutations_array_raw, 2, function(x) { any(x[c("r", "s")]>0) } )
             keep.pos <- colnames(mutations_array_raw)[keep.idx]
-            mutations_array_raw <- mutations_array_raw[c("R", "S"), keep.idx, drop=FALSE]
+            mutations_array_raw <- mutations_array_raw[c("r", "s"), keep.idx, drop=FALSE]
             colnames(mutations_array_raw) <- keep.pos
             
             # if none of columns have R or S > 1, dim will be 2x0
@@ -1899,7 +1899,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     if (returnRaw){
         if (length(mutations_array_raw) == sum(is.na(mutations_array_raw))) {
             # if mutations_array_raw is NA, or 
-            # if mutations_array_raw is empty due to all mutations being "Stop" and hence removed
+            # if mutations_array_raw is empty due to all mutations being "stop" and hence removed
             # avoid is.na(mutations_array_raw) to avoid warning in case mutations_array_raw is a vector
             
             if (!tooShort) {
@@ -1929,11 +1929,11 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             # df indicating position, mutation type (R or S), and region of each mutation
             rawDf <- data.frame(as.numeric(colnames(mutations_array_raw)))
             rawDf <- cbind(rawDf,
-                          mutations_array_raw["R", ],
-                          mutations_array_raw["S", ],
+                          mutations_array_raw["r", ],
+                          mutations_array_raw["s", ],
                           as.character(regionDefinition@boundaries[as.numeric(colnames(mutations_array_raw))]),
                           stringsAsFactors=F)
-            colnames(rawDf) <- c("position", "R", "S", "region")
+            colnames(rawDf) <- c("position", "r", "s", "region")
             return(list(pos=rawDf, nonN=nonN.denoms))
         }
     } else {
@@ -1972,8 +1972,8 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
 # numbOfMutPos <- sample(3:10, 1)
 # posOfMutations <- sort(sample(330, numbOfMutPos))
 # mutations_array <- matrix(0, nrow=2, ncol=numbOfMutPos, dimnames=list(c("R", "S"), posOfMutations))
-# mutations_array["R", ] = sample(x=0:10, size=numbOfMutPos, replace=TRUE)
-# mutations_array["S", ] = sample(x=0:10, size=numbOfMutPos, replace=TRUE)
+# mutations_array["r", ] = sample(x=0:10, size=numbOfMutPos, replace=TRUE)
+# mutations_array["s", ] = sample(x=0:10, size=numbOfMutPos, replace=TRUE)
 
 # # Random mutations
 # binMutationsByRegion(mutations_array, regionDefinition=NULL)
@@ -1997,8 +1997,8 @@ binMutationsByRegion <- function(mutationsArray,
     
     mutations_R <- array(NA,  dim=regionDefinition@seqLength)
     mutations_S <- array(NA,  dim=regionDefinition@seqLength)
-    mutations_R[mutatedPositions] <- mutationsArray["R", ]
-    mutations_S[mutatedPositions] <- mutationsArray["S", ]
+    mutations_R[mutatedPositions] <- mutationsArray["r", ]
+    mutations_S[mutatedPositions] <- mutationsArray["s", ]
     mutations_R <- mutations_R[1:regionDefinition@seqLength]
     mutations_S <- mutations_S[1:regionDefinition@seqLength]
     
@@ -2006,8 +2006,8 @@ binMutationsByRegion <- function(mutationsArray,
     mutations_region_counts <- rep(0, length(regionDefinition@labels))
     names(mutations_region_counts) <- regionDefinition@labels
     for (reg in regionDefinition@regions) {
-        mutations_region_counts[paste0(reg, "_R")] <- sum(mutations_R[regionDefinition@boundaries==reg], na.rm=T)
-        mutations_region_counts[paste0(reg, "_S")] <- sum(mutations_S[regionDefinition@boundaries==reg], na.rm=T)
+        mutations_region_counts[paste0(reg, "_r")] <- sum(mutations_R[regionDefinition@boundaries==reg], na.rm=T)
+        mutations_region_counts[paste0(reg, "_s")] <- sum(mutations_S[regionDefinition@boundaries==reg], na.rm=T)
     }
     
     return(mutations_region_counts)
@@ -2078,7 +2078,7 @@ countNonNByRegion <- function(regDef, ambiMode, inputChars, germChars,
                                          })
             totalNumExpanded <- inputNumExpanded * germlineNumExpanded
             
-            # use mutations_pos to capture positions at which R/S is absent (Stop or na instead)
+            # use mutations_pos to capture positions at which r/s is absent (stop or na instead)
             # such positions would have been omitted from mutations_array_raw or mutations_array
             boundaries.2 <- regDef@boundaries[mutPos]
             # makes use of the fact that inputCodons, germCodons, and 
@@ -2167,7 +2167,7 @@ slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
             lower <- mutPos$position[i]
             upper <- lower + windowSize - 1
             # how many mutations fall within current window
-            windowCount <- sum(mutPos[mutPos$position>=lower & mutPos$position<=upper, c("R","S")])
+            windowCount <- sum(mutPos[mutPos$position>=lower & mutPos$position<=upper, c("r","s")])
             # return as soon as a window has >= mutThresh mutations
             if (windowCount >= mutThresh) { return(TRUE) }
         }
@@ -2550,13 +2550,13 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
 #'           definition, which defines positions for CDR and FWR, the following columns are
 #'           added:  
 #'           \itemize{
-#'             \item  \code{MU_EXPECTED_CDR_R}:  number of replacement mutations in CDR1 and 
+#'             \item  \code{mu_expected_cdr_r}:  number of replacement mutations in CDR1 and 
 #'                                            CDR2 of the V-segment.
-#'             \item  \code{MU_EXPECTED_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'             \item  \code{mu_expected_cdr_s}:  number of silent mutations in CDR1 and CDR2 
 #'                                            of the V-segment.
-#'             \item  \code{MU_EXPECTED_FWR_R}:  number of replacement mutations in FWR1, 
+#'             \item  \code{mu_expected_fwr_r}:  number of replacement mutations in FWR1, 
 #'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{MU_EXPECTED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'             \item  \code{mu_expected_fwr_s}:  number of silent mutations in FWR1, FWR2 and
 #'                                            FWR3 of the V-segment.
 #'           }
 #'           
@@ -2624,7 +2624,7 @@ expectedMutations <- function(db,
         labels <- makeNullRegionDefinition()@labels
     }
     
-    labels <- paste("MU_EXPECTED_", labels, sep="")
+    labels <- paste("mu_expected_", labels, sep="")
     
     label_exists <- labels[labels %in% colnames(db)]
     if (length(label_exists)>0) {
@@ -2699,7 +2699,7 @@ expectedMutations <- function(db,
         return(x) })) 
     
     expectedMutationFrequencies[is.na(expectedMutationFrequencies)] <- 0
-    colnames(expectedMutationFrequencies) <- paste0("MU_EXPECTED_", colnames(expectedMutationFrequencies))
+    colnames(expectedMutationFrequencies) <- paste0("mu_expected_", colnames(expectedMutationFrequencies))
     
     # Properly shutting down the cluster
     if(nproc>1){ parallel::stopCluster(cluster) }
@@ -2736,13 +2736,13 @@ expectedMutations <- function(db,
 #'           \link{IMGT_V} definition, which defines positions for CDR and 
 #'           FWR, the following columns are calculated:
 #'           \itemize{
-#'              \item  \code{MU_EXPECTED_CDR_R}:  number of replacement mutations in CDR1 and 
+#'              \item  \code{mu_expected_cdr_r}:  number of replacement mutations in CDR1 and 
 #'                                             CDR2 of the V-segment.
-#'              \item  \code{MU_EXPECTED_CDR_S}:  number of silent mutations in CDR1 and CDR2 
+#'              \item  \code{mu_expected_cdr_s}:  number of silent mutations in CDR1 and CDR2 
 #'                                             of the V-segment.
-#'              \item  \code{MU_EXPECTED_FWR_R}:  number of replacement mutations in FWR1, 
+#'              \item  \code{mu_expected_fwr_r}:  number of replacement mutations in FWR1, 
 #'                                             FWR2 and FWR3 of the V-segment.
-#'              \item  \code{MU_EXPECTED_FWR_S}:  number of silent mutations in FWR1, FWR2 and
+#'              \item  \code{mu_expected_fwr_s}:  number of silent mutations in FWR1, FWR2 and
 #'                                             FWR3 of the V-segment.
 #'            }
 #'           
@@ -2767,13 +2767,13 @@ expectedMutations <- function(db,
 #' germ_seq <-  ExampleDb[["germline_alignment_d_mask"]][1]
 #' 
 #' # Identify all mutations in the sequence
-#' calcExpectedMutations(in_seq, germ_seq)
+#' calcExpectedMutations(germ_seq,in_seq)
 #' 
 #' # Identify only mutations the V segment minus CDR3
-#' calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V)
+#' calcExpectedMutations(germ_seq, in_seq, regionDefinition=IMGT_V)
 #' 
 #' # Define mutations based on hydropathy
-#' calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
+#' calcExpectedMutations(germ_seq, in_seq, regionDefinition=IMGT_V,
 #'                       mutationDefinition=HYDROPATHY_MUTATIONS)
 #' 
 #' @export
@@ -2814,7 +2814,7 @@ calcExpectedMutations <- function(germlineSeq,
                                                 regionDefinition=regionDefinition,
                                                 codonTable=codonTable)
     
-    typesOfMutations <- c("R", "S")
+    typesOfMutations <- c("r", "s")
     mutationalPaths[!(mutationalPaths %in% typesOfMutations)] <- NA
     
     if (is.null(regionDefinition)) {
@@ -3132,8 +3132,8 @@ getCodonPos <- function(nucPos) {
 #                            \code{c("eitherOr", "and")}. Default is \code{"eitherOr"}.
 # @param   aminoAcidClasses  vector of amino acid trait classes.
 #                            if NULL then R or S is determined by amino acid identity
-# @return  A vector with entries named by mutation type, including "R" (replacement), 
-#          "S" (silent), "Stop" (stop) or "na" (input codons are identical or include NA).
+# @return  A vector with entries named by mutation type, including "r" (replacement), 
+#          "s" (silent), "stop" (stop) or "na" (input codons are identical or include NA).
 #          Each entry indicates the count of its corresponding type of mutation.
 #
 # @details When there are ambiguous characters in \code{codonFrom} and/or \code{codonTo}:
@@ -3141,7 +3141,7 @@ getCodonPos <- function(nucPos) {
 #               \item  If \code{ambiguousMode="eitherOr"}, ambiguous characters will each 
 #                      be expanded but only 1 mutation will be recorded. The priority for 
 #                      different types of mutations, in decreasing order, is as follows:
-#                      no mutation ("na"), replacement mutation ("R"), silent mutation ("S"),
+#                      no mutation ("na"), replacement mutation ("r"), silent mutation ("s"),
 #                      and stop mutation ("Stop"). The returned vector will have exactly one
 #                      entry with a count of 1 and 0 in all other entries.
 #               \item  If \code{ambiguousMode="and"}, ambiguous characters will each be 
@@ -3172,7 +3172,7 @@ mutationType <- function(codonFrom, codonTo,
     ambiguousMode <- match.arg(ambiguousMode)
     
     # placeholder for tabulation
-    tab <- setNames(object=rep(0, 4), nm=c("R", "S", "Stop", "na"))
+    tab <- setNames(object=rep(0, 4), nm=c("r", "s", "stop", "na"))
     
     if (grepl(pattern="[-.]", x=codonFrom) | grepl(pattern="[-.]", x=codonTo)) {
         # "na"
@@ -3198,16 +3198,16 @@ mutationType <- function(codonFrom, codonTo,
                         # "na"
                         tab[4] <- tab[4] + 1
                     } else if (any(c(cur.aaFrom, cur.aaTo) == "*")) {
-                        # If any amino acid is Stop then return "Stop"
+                        # If any amino acid is Stop then return "stop"
                         tab[3] <- tab[3] + 1
                     } else if (is.null(aminoAcidClasses)) {
                         # Check for exact identity if no amino acid classes are specified
-                        mutation <- if (cur.aaFrom == cur.aaTo) { "S" } else { "R" }
+                        mutation <- if (cur.aaFrom == cur.aaTo) { "s" } else { "r" }
                         tab[mutation] <- tab[mutation]+1
                     } else {
                         # Check for amino acid class identity if classes are specified
                         mutation <- if (aminoAcidClasses[cur.aaFrom] == 
-                                        aminoAcidClasses[cur.aaTo]) { "S" } else { "R" }
+                                        aminoAcidClasses[cur.aaTo]) { "s" } else { "r" }
                         tab[mutation] <- tab[mutation]+1
                     }
                 }
@@ -3218,13 +3218,13 @@ mutationType <- function(codonFrom, codonTo,
         if ((length(codonFrom.all) > 1) | (length(codonTo.all) > 1)) {
             if (ambiguousMode=="eitherOr") {
                 if (tab[4] > 0) { # "na"
-                    tab <- setNames(object=c(0, 0, 0, 1), nm=c("R", "S", "Stop", "na"))
+                    tab <- setNames(object=c(0, 0, 0, 1), nm=c("r", "s", "stop", "na"))
                 } else if (tab[2] > 0) { # "S"
-                    tab <- setNames(object=c(0, 1, 0, 0), nm=c("R", "S", "Stop", "na"))
+                    tab <- setNames(object=c(0, 1, 0, 0), nm=c("r", "s", "stop", "na"))
                 } else if (tab[1] > 0) { # "R"
-                    tab <- setNames(object=c(1, 0, 0, 0), nm=c("R", "S", "Stop", "na"))
+                    tab <- setNames(object=c(1, 0, 0, 0), nm=c("r", "s", "stop", "na"))
                 } else {
-                    tab <- setNames(object=c(0, 0, 1, 0), nm=c("R", "S", "Stop", "na"))
+                    tab <- setNames(object=c(0, 0, 1, 0), nm=c("r", "s", "stop", "na"))
                 }
                 stopifnot(sum(tab) == 1)
             } else {

@@ -15,7 +15,10 @@ NULL
 #' @param    sequence        sequence string in which mutations are to be introduced.
 #'                           Accepted alphabet: \code{\{A, T, G, C, N, .\}}. Note
 #'                           that \code{-} is not accepted.
-#' @param    numMutations    number of mutations to be introduced into \code{sequence}.
+#' @param    numMutations    a whole number indicating the number of mutations to be 
+#'                           introduced into \code{sequence}, if \code{frequency=FALSE}.
+#'                           A fraction bewteen 0 and 1 indicating the mutation frequency
+#'                           if \code{frequency=TRUE}.
 #' @param    targetingModel  5-mer \link{TargetingModel} object to be used for computing 
 #'                           probabilities of mutations at each position. Defaults to
 #'                           \link{HH_S5F}.
@@ -23,6 +26,8 @@ NULL
 #'                           be introduced. Default: 1
 #' @param    end             Last position in \code{sequence} where mutations can 
 #'                           be introduced. Default: last position (sequence length).
+#' @param    frequency       If \code{TRUE}, treat \code{numMutations} as a frequency.                           
+#' 
 #' @return   A string defining the mutated sequence.
 #' 
 #' @details
@@ -31,6 +36,10 @@ NULL
 #' 
 #' Mutations are not introduced to positions in the input \code{sequence} that contain 
 #' \code{.} or \code{N}.
+#' 
+#' With \code{frequency=TRUE}, the number of mutations introduced is the \code{floor} of 
+#' the length of the sequence multiplied by the mutation frequency specified via
+#' \code{numMutations}.
 #' 
 #' @seealso  See \link{shmulateTree} for imposing mutations on a lineage tree. 
 #'           See \link{HH_S5F} and \link{MK_RS5NF} for predefined 
@@ -41,19 +50,32 @@ NULL
 #' sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATA.TTTA"
 #' 
 #' # Simulate using the default human 5-mer targeting model
-#' shmulateSeq(sequence, numMutations=6)
+#' # Introduce 6 mutations
+#' shmulateSeq(sequence, numMutations=6, frequency=FALSE)
+#' 
+#' # Introduction 5% mutations
+#' shmulateSeq(sequence, numMutations=0.05, frequency=TRUE)
 #' 
 #' @export
-shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, start=1, end=nchar(sequence) ) {
+shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, 
+                        start=1, end=nchar(sequence), frequency=FALSE) {
     #* counts on constant variables CODON_TABLE, NUCLEOTIDES (ACTGN-.)
 
-    # check if numMutations is a whole number
-    # is.wholenumber function borrowed from R's integer help
-    is.wholenumber <-
-        function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
-    if (!is.wholenumber(numMutations)) {
-        stop("`numMutations` must be a whole number.")
-    } 
+    if (!frequency) {
+        # check if numMutations is a whole number
+        # is.wholenumber function borrowed from R's integer help
+        is.wholenumber <-
+            function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+        if (!is.wholenumber(numMutations)) {
+            stop("`numMutations` must be a whole number for frequency=FALSE.")
+        }
+    } else {
+        # check if numMutations if between 0 and 1
+        if (!(numMutations>=0 & numMutations<=1)) {
+            stop("`numMutations` must be a fraction between 0 and 1 for frequency=TRUE.")
+        }
+    }
+    
     # Check targeting model
     if (!is(targetingModel, "TargetingModel")) {
         stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
@@ -90,8 +112,14 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, start=1, 
     sim_leng <- stri_length(sim_seq)
     stopifnot((sim_leng %% 3)==0)
     
+    # if specifying mutation frequency instead of count, 
+    # get corresponding mutation count based on sequence length
+    if (frequency) {
+        numMutations <- floor(sim_leng*numMutations)
+    }
+    
     if (numMutations > sim_leng) {
-        stop("`numMutations` is larger than the length of the sequence.")
+        stop("Number of mutations specified is larger than the length of the sequence.")
     }
     
     # Calculate possible mutations (given codon table)
@@ -109,7 +137,7 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, start=1, 
     # set NA to 0
     targeting[is.na(targeting)] <- 0 
     # Make probability of stop codon 0
-    targeting[mutation_types=="Stop"] <- 0
+    targeting[mutation_types=="stop"] <- 0
     
     # Initialize counters
     total_muts <- 0
@@ -141,8 +169,8 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, start=1, 
                                                                        from = lower, 
                                                                        to = upper))
         # Make probability of stop codon 0
-        if (any(mutation_types[, lower:upper]=="Stop", na.rm=T)) {
-            targeting[, lower:upper][mutation_types[, lower:upper]=="Stop"] <- 0
+        if (any(mutation_types[, lower:upper]=="stop", na.rm=T)) {
+            targeting[, lower:upper][mutation_types[, lower:upper]=="stop"] <- 0
         }
     }
     # sanity check: length of sim_seq should remain unchanged after simulation
@@ -184,10 +212,10 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F, start=1, 
 #'                           be introduced. Default: last position (sequence length).                           
 #' @return   A \code{data.frame} of simulated sequences with columns:
 #'           \itemize{
-#'             \item \code{NAME}:      name of the corresponding node in the input 
+#'             \item \code{name}:      name of the corresponding node in the input 
 #'                                     \code{graph}.  
-#'             \item \code{SEQUENCE}:  mutated sequence.
-#'             \item \code{DISTANCE}:  Hamming distance of the mutated sequence from 
+#'             \item \code{sequence}:  mutated sequence.
+#'             \item \code{distance}:  Hamming distance of the mutated sequence from 
 #'                                     the seed \code{sequence}.
 #'           }
 #' 
@@ -239,17 +267,17 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
     # Create data.frame to hold simulated sequences
     # this will include a row for Germline
     sim_tree <- data.frame(matrix(NA, ncol=3, nrow=length(V(graph)),
-                           dimnames=list(NULL, c("NAME", "SEQUENCE", "DISTANCE"))))
-    sim_tree$NAME <- vertex_attr(graph, name="name")
+                           dimnames=list(NULL, c("name", "sequence", "distance"))))
+    sim_tree$name <- vertex_attr(graph, name="name")
     
     # remove row for Germline
-    sim_tree <- sim_tree[-which(sim_tree$NAME=="Germline"), ]
+    sim_tree <- sim_tree[-which(sim_tree$name=="Germline"), ]
         
-    parent_nodes <- mrca_df$NAME[1]
+    parent_nodes <- mrca_df$name[1]
     nchild <- sum(adj[parent_nodes, ] > 0)
     
-    sim_tree$SEQUENCE[which(sim_tree$NAME==parent_nodes)] <- sequence
-    sim_tree$DISTANCE[which(sim_tree$NAME==parent_nodes)] <- 0
+    sim_tree$sequence[which(sim_tree$name==parent_nodes)] <- sequence
+    sim_tree$distance[which(sim_tree$name==parent_nodes)] <- 0
     
     # Add mutations to the immediate offsprings of the MRCA
     # Number of mutations added is proportional to fraction of sequence in junction
@@ -266,14 +294,14 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
                 # Add child to new parents
                 new_parents <- union(new_parents, ch)
                 # Simulate sequence for that edge
-                seq <- shmulateSeq(sequence=sim_tree$SEQUENCE[sim_tree$NAME == p], 
+                seq <- shmulateSeq(sequence=sim_tree$sequence[sim_tree$name == p], 
                                    numMutations=adj[p, ch],
                                    targetingModel=targetingModel,
                                    start=start, end=end)
                 # Update output data.frame
-                chRowIdx = which(sim_tree$NAME==ch)
-                sim_tree$SEQUENCE[chRowIdx] <- seq
-                sim_tree$DISTANCE[chRowIdx] <- adj[p, ch]
+                chRowIdx = which(sim_tree$name==ch)
+                sim_tree$sequence[chRowIdx] <- seq
+                sim_tree$distance[chRowIdx] <- adj[p, ch]
             }
         }
         
@@ -283,11 +311,11 @@ shmulateTree <- function(sequence, graph, targetingModel=HH_S5F,
     }
     
     # Remove sequences that are to be excluded
-    sim_tree <- sim_tree[!(sim_tree$NAME %in% skip_names), ]
+    sim_tree <- sim_tree[!(sim_tree$name %in% skip_names), ]
     # Remove NAs
     # e.g. if node B is an offspring of node A, and node A has been excluded
-    # then node B will have $SEQUENCE and $DISTANCE of NAs
-    sim_tree <- sim_tree[!is.na(sim_tree$SEQUENCE), ]
+    # then node B will have $sequence and $distance of NAs
+    sim_tree <- sim_tree[!is.na(sim_tree$sequence), ]
     
     rownames(sim_tree) <- NULL
     

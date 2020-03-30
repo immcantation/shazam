@@ -63,7 +63,7 @@ VOLUME_MUTATIONS <- createMutationDefinition(name="Volume",
                                              classes=aa_volume,
                                              citation=imgt_cite)
 # Save data
-devtools::use_data(HYDROPATHY_MUTATIONS,
+usethis::use_data(HYDROPATHY_MUTATIONS,
                    POLARITY_MUTATIONS,
                    CHARGE_MUTATIONS,
                    VOLUME_MUTATIONS,

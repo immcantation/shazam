@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 0.2.3.999
-Date: 2020-04-05
+Date: 2020-03-23
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Gur", "Yaari", role=c("aut"), 
@@ -80,4 +80,4 @@ Collate:
     'MutationProfiling.R'
     'Shmulate.R'
     'TargetingModels.R'
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0

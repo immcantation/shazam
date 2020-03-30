@@ -25,7 +25,7 @@ test_that("Test cross distToNearest with model hh_s1f", {
                                vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                model="hh_s1f", first=FALSE, normalize="len")
     ## Test if the updated function reproduces results
-    expect_equal(dist_hs1f$DIST_NEAREST[test_idx],
+    expect_equal(dist_hs1f$dist_nearest[test_idx],
                  c(NA, NA, NA, NA, 
                    0.4060, 0.4465, 0.3976, 0.3482, 0.3064, 0.3064, 0.4295, 
                    0.0436, 0.1216, 0.3786, 0.3875, 0.1216, 0.3700),
@@ -36,7 +36,7 @@ test_that("Test cross distToNearest with model hh_s1f", {
                                            vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                            model="hh_s1f", first=FALSE, normalize="none", nproc=1, cross="DONOR")
 
-    expect_true(all(is.na(dist_hs1f_cross_donor$CROSS_DIST_NEAREST)))
+    expect_true(all(is.na(dist_hs1f_cross_donor$cross_dist_nearest)))
     
     ## fields=NULL and fields=DONOR should give same results
     cross_dist_hs1f <- distToNearest(db2, sequenceColumn="JUNCTION",
@@ -51,15 +51,15 @@ test_that("Test cross distToNearest with model hh_s1f", {
                                            cross="SAMPLE", fields="DONOR")
     
     expect_equal(cross_dist_hs1f, cross_dist_hs1f_donor)
-    expect_equal(cross_dist_hs1f$CROSS_DIST_NEAREST[test_idx],
+    expect_equal(cross_dist_hs1f$cross_dist_nearest[test_idx],
                  c(NA,NA,NA,NA,0.4040, 0.4447, 0.3963, 0.3469, 0.3050, 0.3050,
                    0.4284, 0.0435, 0.1212, 0.3771, 0.3862, 0.1212, 0.3687),
                  tolerance=0.005)
     ## Check cross
     ## Crossing shoud reproduce the same results as not crossed
     ## because both donors have the same db
-    expect_equal(cross_dist_hs1f$CROSS_DIST_NEAREST[1:nrow(dist_hs1f)],
-                 dist_hs1f$DIST_NEAREST, tolerance=0.005)
+    expect_equal(cross_dist_hs1f$cross_dist_nearest[1:nrow(dist_hs1f)],
+                 dist_hs1f$dist_nearest, tolerance=0.005)
     
     ## Inroduce row as Sample 3, very similar to rows 1 and 316
     ## This will be the best
@@ -73,13 +73,13 @@ test_that("Test cross distToNearest with model hh_s1f", {
                                    vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                    model="hh_s1f", first=FALSE, normalize="len",cross="SAMPLE")
     ## Exactly same seq, returns NA
-    expect_equal(db2_1_316_630$CROSS_DIST_NEAREST,c(NA,NA,NA))
+    expect_equal(db2_1_316_630$cross_dist_nearest,c(NA,NA,NA))
     
     ## One seq has been edited, will return distance values
     db3_1_316_630 <- distToNearest(db3[c(1,316,630),], sequenceColumn="JUNCTION",
                                    vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                    model="hh_s1f", first=FALSE, normalize="len",cross="SAMPLE")
-    expect_equal(db3_1_316_630$CROSS_DIST_NEAREST,c(0.0175,0.0175,0.0175), tolerance=0.005)
+    expect_equal(db3_1_316_630$cross_dist_nearest,c(0.0175,0.0175,0.0175), tolerance=0.005)
 })
 
 #### distToNearest - cross with hh_s5f ####
@@ -104,7 +104,7 @@ test_that("Test cross distToNearest with model hh_s5f", {
                                model="hh_s5f", first=FALSE, normalize="none", nproc=1)
     
     ## Test if the updated function reproduces results
-    expect_equal(dist_hs5f$DIST_NEAREST[test_idx],
+    expect_equal(dist_hs5f$dist_nearest[test_idx],
                  c( NA, NA, NA, NA, 37.2436, 35.1829, 31.5680, 27.6521, 15.0128,
                     15.0128, 16.8262, 2.9351, 8.2891, 27.9191, 27.2217, 8.2891, 27.0871
                  ),
@@ -114,7 +114,7 @@ test_that("Test cross distToNearest with model hh_s5f", {
     dist_hs5f_cross_donor <- distToNearest(db2, sequenceColumn="JUNCTION",
                                            vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                            model="hh_s5f", first=FALSE, normalize="none", nproc=1, cross="DONOR")
-    expect_true(all(is.na(dist_hs5f_cross_donor$CROSS_DIST_NEAREST)))
+    expect_true(all(is.na(dist_hs5f_cross_donor$cross_dist_nearest)))
     
     ## fields=NULL and fields=DONOR should give same results
     cross_dist_hs5f <- distToNearest(db2, sequenceColumn="JUNCTION",
@@ -127,7 +127,7 @@ test_that("Test cross distToNearest with model hh_s5f", {
                                            cross="SAMPLE", fields="DONOR")
     expect_equal(cross_dist_hs5f, cross_dist_hs5f_donor)
     
-    expect_equal(cross_dist_hs5f$CROSS_DIST_NEAREST[test_idx],
+    expect_equal(cross_dist_hs5f$cross_dist_nearest[test_idx],
                  c( NA, NA, NA, NA, 37.2436, 35.1829, 31.5680, 27.6521, 15.0128,
                     15.0128, 16.8262, 2.9351, 8.2891, 27.9191, 27.2217, 8.2891, 27.0871
                  ),
@@ -135,8 +135,8 @@ test_that("Test cross distToNearest with model hh_s5f", {
     ## Check cross
     ## Crossing shoud reproduce the same results as not crossed
     ## because both donors have the same db
-    expect_equal(cross_dist_hs5f$CROSS_DIST_NEAREST[1:nrow(dist_hs5f)],
-                 dist_hs5f$DIST_NEAREST, tolerance=0.005)
+    expect_equal(cross_dist_hs5f$cross_dist_nearest[1:nrow(dist_hs5f)],
+                 dist_hs5f$dist_nearest, tolerance=0.005)
     
     ## Inroduce row as Sample 3, very similar to rows 1 and 316
     ## This will be the best
@@ -150,13 +150,13 @@ test_that("Test cross distToNearest with model hh_s5f", {
                                         vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                         model="hh_s5f", first=FALSE, normalize="none",cross="SAMPLE")
     ## Exactly same seq, returns NA
-    expect_equal(db2_1_316_630_hs5f$CROSS_DIST_NEAREST,c(NA,NA,NA))
+    expect_equal(db2_1_316_630_hs5f$cross_dist_nearest,c(NA,NA,NA))
     
     ## One seq has been edited, will return distance values
     db3_1_316_630_hs5f <- distToNearest(db3[c(1,316,630),], sequenceColumn="JUNCTION",
                                         vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                         model="hh_s5f", first=FALSE, normalize="none",cross="SAMPLE")
-    expect_equal(db3_1_316_630_hs5f$CROSS_DIST_NEAREST,c(1.001,1.001,1.001), tolerance=0.005)
+    expect_equal(db3_1_316_630_hs5f$cross_dist_nearest,c(1.001,1.001,1.001), tolerance=0.005)
     
     seq1 <- c("NNACG", "NACGT", "ACGTA", "CGTAC", "GTACG", "TACGT", "ACGTA", 
               "CGTAC", "GTACG", "TACGT", "ACGTN", "CGTNN")
@@ -177,8 +177,8 @@ test_that("Test cross distToNearest with model hh_s5f", {
                                    vCallColumn="V_CALL_GENOTYPED", jCallColumn="J_CALL",
                                    model="hh_s5f", first=FALSE, normalize="len", nproc=1)
     
-    expected_len_dist <- dist_hs5f$DIST_NEAREST/nchar(dist_hs5f$JUNCTION)
-    expect_equal(dist_hs5f_len$DIST_NEAREST, expected_len_dist, tolerance=0.001)
+    expected_len_dist <- dist_hs5f$dist_nearest/nchar(dist_hs5f$JUNCTION)
+    expect_equal(dist_hs5f_len$dist_nearest, expected_len_dist, tolerance=0.001)
     
 })
 
@@ -230,12 +230,12 @@ test_that("Test distToNearest with stop codon model='aa' ", {
     # calculate the ditances with normalization
     df <- distToNearest(df, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
                         jCallColumn="J_CALL", model="aa")
-    expect_equal(df$DIST_NEAREST, c(0.0303,0.0303,0.0606,0.0606,0.0606,NA))
+    expect_equal(df$dist_nearest, c(0.0303,0.0303,0.0606,0.0606,0.0606,NA))
     
     # calculate the ditances without normalization
     df <- distToNearest(df, sequenceColumn="JUNCTION", vCallColumn="V_CALL", 
                         jCallColumn="J_CALL", model="aa", normalize = "none")
-    expect_equal(df$DIST_NEAREST, c(1,1,2,2,2,NA))
+    expect_equal(df$dist_nearest, c(1,1,2,2,2,NA))
 })
 
 #### distToNearest - tibbles ####
@@ -303,8 +303,8 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
     for (i in 1:nrow(dtn1)) {
         
         if (dtn1[["LOCUS"]][i]=="IGH") {
-            curGrp <- dtn1[["VJL_GROUP"]][i]
-            curIdx <- which(dtn1[["VJL_GROUP"]]==curGrp & dtn1[["LOCUS"]]=="IGH")
+            curGrp <- dtn1[["vjl_group"]][i]
+            curIdx <- which(dtn1[["vjl_group"]]==curGrp & dtn1[["LOCUS"]]=="IGH")
             curJunc <- dtn1[["JUNCTION"]][i]
             
             if (length(curIdx)==1) {
@@ -330,15 +330,15 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
         
     }
     
-    expect_equal(dtn1_expect, dtn1[["DIST_NEAREST"]], tolerance=0.0001)
+    expect_equal(dtn1_expect, dtn1[["dist_nearest"]], tolerance=0.0001)
     
     dtn2_expect = rep(NA, nrow(dtn2))
     
     for (i in 1:nrow(dtn2)) {
         
         if (dtn2[["LOCUS"]][i]=="IGH") {
-            curGrp <- dtn2[["VJL_GROUP"]][i]
-            curIdx <- which(dtn2[["VJL_GROUP"]]==curGrp & dtn2[["LOCUS"]]=="IGH")
+            curGrp <- dtn2[["vjl_group"]][i]
+            curIdx <- which(dtn2[["vjl_group"]]==curGrp & dtn2[["LOCUS"]]=="IGH")
             curJunc <- dtn2[["JUNCTION"]][i]
             
             if (length(curIdx)==1) {
@@ -363,15 +363,15 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
         # if not IGH, left as NA
     }
     
-    expect_equal(dtn2_expect, dtn2[["DIST_NEAREST"]], tolerance=0.0001)
+    expect_equal(dtn2_expect, dtn2[["dist_nearest"]], tolerance=0.0001)
     
     dtn3_expect = rep(NA, nrow(dtn3))
     
     for (i in 1:nrow(dtn3)) {
         
         if (dtn3[["LOCUS"]][i]=="IGH") {
-            curGrp <- dtn3[["VJL_GROUP"]][i]
-            curIdx <- which(dtn3[["VJL_GROUP"]]==curGrp & dtn3[["LOCUS"]]=="IGH")
+            curGrp <- dtn3[["vjl_group"]][i]
+            curIdx <- which(dtn3[["vjl_group"]]==curGrp & dtn3[["LOCUS"]]=="IGH")
             curJunc <- dtn3[["JUNCTION"]][i]
             
             if (length(curIdx)==1) {
@@ -396,15 +396,15 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
         # if not IGH, left as NA
     }
     
-    expect_equal(dtn3_expect, dtn3[["DIST_NEAREST"]], tolerance=0.0001)
+    expect_equal(dtn3_expect, dtn3[["dist_nearest"]], tolerance=0.0001)
     
     dtn4_expect = rep(NA, nrow(dtn4))
     
     for (i in 1:nrow(dtn4)) {
         
         if (dtn4[["LOCUS"]][i]=="IGH") {
-            curGrp <- dtn4[["VJL_GROUP"]][i]
-            curIdx <- which(dtn4[["VJL_GROUP"]]==curGrp & dtn4[["LOCUS"]]=="IGH")
+            curGrp <- dtn4[["vjl_group"]][i]
+            curIdx <- which(dtn4[["vjl_group"]]==curGrp & dtn4[["LOCUS"]]=="IGH")
             curJunc <- dtn4[["JUNCTION"]][i]
             
             if (length(curIdx)==1) {
@@ -429,7 +429,7 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
         # if not IGH, left as NA
     }
     
-    expect_equal(dtn4_expect, dtn4[["DIST_NEAREST"]], tolerance=0.0001)
+    expect_equal(dtn4_expect, dtn4[["dist_nearest"]], tolerance=0.0001)
     
 })
 
@@ -441,10 +441,10 @@ test_that("Test findThreshold", {
                         vCallColumn="V_CALL", jCallColumn="J_CALL", 
                         model="ham", first=FALSE, normalize="len", nproc=1)
     
-    gmm_output <- findThreshold(db$DIST_NEAREST, method="gmm", model="gamma-gamma", edge=0.9)
+    gmm_output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", edge=0.9)
     expect_equal(gmm_output@threshold, 0.12, tolerance=0.01)
 
-    dens_output <- findThreshold(db$DIST_NEAREST, method="dens")
+    dens_output <- findThreshold(db$dist_nearest, method="dens")
     expect_equal(dens_output@threshold, 0.14, tolerance=0.01)
 })
 
@@ -696,7 +696,7 @@ test_that("distToNearest & findThreshold, AIRR migration", {
                             vCallColumn="v_call_genotyped", jCallColumn="j_call",
                             model="ham", first=FALSE, VJthenLen=TRUE, normalize="len")
     
-    expect_equal(dist_c[["DIST_NEAREST"]], dist_a[["DIST_NEAREST"]])
+    expect_equal(dist_c[["dist_nearest"]], dist_a[["dist_nearest"]])
     
     # findThreshold, gmm
     
@@ -704,15 +704,15 @@ test_that("distToNearest & findThreshold, AIRR migration", {
     # using set.seed does not help
     
     #set.seed(2945)
-    #o_gmm_c <- findThreshold(dist_c[["DIST_NEAREST"]], method="gmm", model="gamma-gamma", cutoff="user", spc=0.99)
+    #o_gmm_c <- findThreshold(dist_c[["dist_nearest"]], method="gmm", model="gamma-gamma", cutoff="user", spc=0.99)
     #set.seed(2945)
-    #o_gmm_a <- findThreshold(dist_a[["DIST_NEAREST"]], method="gmm", model="gamma-gamma", cutoff="user", spc=0.99)
+    #o_gmm_a <- findThreshold(dist_a[["dist_nearest"]], method="gmm", model="gamma-gamma", cutoff="user", spc=0.99)
     
     #expect_equal(o_gmm_c@threshold, o_gmm_a@threshold)
     
     # findThreshold, density
-    o_den_c <- findThreshold(dist_c[["DIST_NEAREST"]], method="density")
-    o_den_a <- findThreshold(dist_a[["DIST_NEAREST"]], method="density")
+    o_den_c <- findThreshold(dist_c[["dist_nearest"]], method="density")
+    o_den_a <- findThreshold(dist_a[["dist_nearest"]], method="density")
     
     expect_equal(o_den_c@xdens, o_den_a@xdens)
     expect_equal(o_den_c@ydens, o_den_a@ydens)

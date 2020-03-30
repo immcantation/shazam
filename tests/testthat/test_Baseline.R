@@ -37,7 +37,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
                             regionDefinition = IMGT_V)
     
     obs_mpath <- mutationalPaths[3,c(1,10,50,78,312)]
-    exp_mpath <- c(NA, "R", NA, "S", "R" )
+    exp_mpath <- c(NA, "r", NA, "s", "r" )
     names(exp_mpath) <- c("G", "C", "G", "T", "T")
     expect_equal(obs_mpath, exp_mpath)
     
@@ -63,7 +63,7 @@ test_that("calculateTargeting and calculateMutationalPaths with regionDefinition
         regionDefinition = NULL)
     
     obs_mpath_null <- mutationalPaths_null[3,c(1,10,50,78,312)]
-    exp_mpath_null <- c(NA, "R", NA, "S", "R" )
+    exp_mpath_null <- c(NA, "r", NA, "s", "r" )
     names(exp_mpath_null) <- c("G", "C", "G", "T", "T")
     expect_equal(obs_mpath_null, exp_mpath_null)
 })
@@ -80,13 +80,13 @@ test_that("calcExpectedMutations works with regionDefinition==NULL",{
     obs_mutations <- calcExpectedMutations(inputSeq, germlineSeq, targetingModel = HH_S5F, 
                           regionDefinition = IMGT_V)
     exp_mutations <- c(0.16184071, 0.04872069, 0.57766105, 0.21177756)
-    names(exp_mutations) <- c("CDR_R", "CDR_S", "FWR_R", "FWR_S")
+    names(exp_mutations) <- c("cdr_r", "cdr_s", "fwr_r", "fwr_s")
     expect_equal(obs_mutations, exp_mutations, tolerance=0.001)
     
     obs_mutations_null <- calcExpectedMutations(inputSeq, germlineSeq, targetingModel = HH_S5F, 
                                            regionDefinition = NULL)
     exp_mutations_null <- c(0.7379522, 0.2620478)
-    names(exp_mutations_null) <- c("SEQ_R", "SEQ_S")
+    names(exp_mutations_null) <- c("seq_r", "seq_s")
     expect_equal(obs_mutations_null, exp_mutations_null, tolerance=0.001)
 })
 
@@ -108,23 +108,23 @@ test_that("expectedMutations works with regionDefinition==NULL",{
     expect_identical(db_mutations, db_mutations_df)
     
     ## Check 5 examples for each, at different positions
-    ## CDR_R, first 5
-    obs_cdr_r <- db_mutations$MU_EXPECTED_CDR_R[1:5]
+    ## cdr_r, first 5
+    obs_cdr_r <- db_mutations$mu_expected_cdr_r[1:5]
     exp_cdr_r <- c(0.2072431, 0.2054472, 0.1870927, 0.1507470, 0.2200854)
     expect_equal(obs_cdr_r, exp_cdr_r, tolerance=0.001)
     
-    ## CDR_S 311:315
-    obs_cdr_s <- db_mutations$MU_EXPECTED_CDR_S[311:315]
+    ## cdr_s 311:315
+    obs_cdr_s <- db_mutations$mu_expected_cdr_s[311:315]
     exp_cdr_s <- c(0.03682467, 0.03682467, 0.03682467, 0.03682467, 0.03682467)
     expect_equal(obs_cdr_r, exp_cdr_r, tolerance=0.001)
     
-    ## FWR_R, 120:124
-    obs_fwr_r <- db_mutations$MU_EXPECTED_FWR_R[120:124]
+    ## fwr_r, 120:124
+    obs_fwr_r <- db_mutations$mu_expected_fwr_r[120:124]
     exp_fwr_r<- c(0.5883452, 0.5883452, 0.5883452, 0.5883452, 0.5883452)
     expect_equal(obs_fwr_r, exp_fwr_r, tolerance=0.001)
     
-    ## FWR_S, 993:997
-    obs_fwr_s <- db_mutations$MU_EXPECTED_FWR_S[207:211]
+    ## fwr_s, 993:997
+    obs_fwr_s <- db_mutations$mu_expected_fwr_s[207:211]
     exp_fwr_s<- c(0.1950189, 0.1950189, 0.1928329, 0.1928329, 0.1950189)
     expect_equal(obs_fwr_s, exp_fwr_s, tolerance=0.001)
     
@@ -133,13 +133,13 @@ test_that("expectedMutations works with regionDefinition==NULL",{
                                            germlineColumn="GERMLINE_IMGT_D_MASK",
                                            regionDefinition=NULL,
                                            nproc=1)
-    ## SEQ_R, first 5
-    obs_seq_r <- db_mutations_null$MU_EXPECTED_SEQ_R[1:5]
+    ## seq_r, first 5
+    obs_seq_r <- db_mutations_null$mu_expected_seq_r[1:5]
     exp_seq_r <- c(0.7590282, 0.7635794, 0.7611897, 0.7585786, 0.7761334)
     expect_equal(obs_seq_r, exp_seq_r, tolerance=0.001)
     
-    ## SEQ_S 311:315
-    obs_seq_s <- db_mutations_null$MU_EXPECTED_SEQ_S[311:315]
+    ## seq_s 311:315
+    obs_seq_s <- db_mutations_null$mu_expected_seq_s[311:315]
     exp_seq_s <- c(0.2383252, 0.2361719, 0.2361354, 0.2400638, 0.2389921)
     expect_equal(obs_seq_s, exp_seq_s, tolerance=0.001)
     
@@ -159,13 +159,13 @@ test_that("calcObservedMutations works with regionDefinition==NULL",{
     
     ## TODO: should sum(exp_mutations) and sum(exp_mutations_null) match?
     exp_mutations <- c(2, 2, 8, 1)
-    names(exp_mutations) <- c("CDR_R", "CDR_S", "FWR_R", "FWR_S")
+    names(exp_mutations) <- c("cdr_r", "cdr_s", "fwr_r", "fwr_s")
     expect_equal(obs_mutations, exp_mutations, tolerance=0.001)
     
     obs_mutations_null <- calcObservedMutations(inputSeq, germlineSeq, 
                             regionDefinition=NULL, frequency=F)
     exp_mutations_null <- c(12, 5)
-    names(exp_mutations_null) <- c("SEQ_R", "SEQ_S")
+    names(exp_mutations_null) <- c("seq_r", "seq_s")
     expect_equal(obs_mutations_null, exp_mutations_null, tolerance=0.001)
 })
 
@@ -188,23 +188,23 @@ test_that("observedMutations works with regionDefinition==NULL",{
     expect_identical(db_mutations, db_mutations_df)
     
     ## Check 5 examples for each
-    ## CDR_R, first 5
-    obs_cdr_r <- db_mutations$MU_COUNT_CDR_R[1:5]
+    ## cdr_r, first 5
+    obs_cdr_r <- db_mutations$mu_count_cdr_r[1:5]
     exp_cdr_r <- c(2, 0, 0, 0, 0)
     expect_equal(obs_cdr_r, exp_cdr_r)
     
-    ## CDR_S 311:315
-    obs_cdr_s <- db_mutations$MU_COUNT_CDR_S[311:315]
+    ## cdr_s 311:315
+    obs_cdr_s <- db_mutations$mu_count_cdr_s[311:315]
     exp_cdr_s <- c(0, 0, 0, 0, 0)
     expect_equal(obs_cdr_r, exp_cdr_r)
     
-    ## FWR_R, 120:124
-    obs_fwr_r <- db_mutations$MU_COUNT_FWR_R[120:124]
+    ## fwr_r, 120:124
+    obs_fwr_r <- db_mutations$mu_count_fwr_r[120:124]
     exp_fwr_r<- c(0, 0, 0, 0, 0)
     expect_equal(obs_fwr_r, exp_fwr_r)
     
-    ## FWR_S, 40:44
-    obs_fwr_s <- db_mutations$MU_COUNT_FWR_S[40:44]
+    ## fwr_s, 40:44
+    obs_fwr_s <- db_mutations$mu_count_fwr_s[40:44]
     exp_fwr_s<- c(0, 0, 0, 1, 0)
     expect_equal(obs_fwr_s, exp_fwr_s)
      
@@ -213,13 +213,13 @@ test_that("observedMutations works with regionDefinition==NULL",{
                                            germlineColumn="GERMLINE_IMGT_D_MASK",
                                            regionDefinition=NULL,
                                            nproc=1)
-    ## SEQ_R, first 5
-    obs_seq_r <- db_mutations_null$MU_COUNT_SEQ_R[1:5]
+    ## seq_r, first 5
+    obs_seq_r <- db_mutations_null$mu_count_seq_r[1:5]
     exp_seq_r <- c(12, 0, 0, 0, 0)
     expect_equal(obs_seq_r, exp_seq_r)
     
-    ## SEQ_S 38:42
-    obs_seq_s <- db_mutations_null$MU_COUNT_SEQ_S[38:42]
+    ## seq_s 38:42
+    obs_seq_s <- db_mutations_null$mu_count_seq_s[38:42]
     exp_seq_s <- c(0, 2, 2, 0, 0)
     expect_equal(obs_seq_s, exp_seq_s)
     
@@ -240,11 +240,11 @@ test_that("calcBaseline", {
     
     
     ## With the full db, and CLONE field
-    ## Mutations calculated CLONAL_SEQUENCE vs GERMLINE_IMGT_D_MASK    
+    ## Mutations calculated clonal_sequence vs GERMLINE_IMGT_D_MASK    
     #set.seed(723)
     db_baseline <- calcBaseline(db=db_clonal, 
-                                sequenceColumn="CLONAL_SEQUENCE",
-                                germlineColumn="CLONAL_GERMLINE", 
+                                sequenceColumn="clonal_sequence",
+                                germlineColumn="clonal_germline", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
                                 targetingModel = HH_S5F,
@@ -255,7 +255,7 @@ test_that("calcBaseline", {
     expect_gt(nrow(slot(db_baseline,"stats")),0)
     
     db_baseline_rowSums <- rowSums(
-        slot(db_baseline,"db")[1:5,grep("MU_COUNT",colnames(slot(db_baseline,"db")))])
+        slot(db_baseline,"db")[1:5,grep("mu_count",colnames(slot(db_baseline,"db")))])
 
 # Commented because working on the code, when clones collapsed.
     expect_equivalent(
@@ -263,23 +263,23 @@ test_that("calcBaseline", {
         c(13, 19, 55, 0, 0))
     
 #     ## Check 5 examples for each, at different positions
-#     ## CDR_R, first 5
-#     obs_cdr_r <- slot(db_baseline,"db")$MU_COUNT_CDR_R[1:5]
+#     ## cdr_r, first 5
+#     obs_cdr_r <- slot(db_baseline,"db")$mu_count_cdr_r[1:5]
 #     exp_cdr_r<- c(2, 6, 17, 18, 0)
 #     expect_equal(obs_cdr_r, exp_cdr_r)
 #     
-#     ## CDR_S, 673:677
-#     obs_cdr_s <- slot(db_baseline,"db")$MU_COUNT_CDR_S[673:677]
+#     ## cdr_s, 673:677
+#     obs_cdr_s <- slot(db_baseline,"db")$mu_count_cdr_s[673:677]
 #     exp_cdr_s <- c(3, 5, 5, 5, 0)
 #     expect_equal(obs_cdr_s, exp_cdr_s)
 #     
-#     ## FWR_R, 937:941
-#     obs_fwr_r <- slot(db_baseline,"db")$MU_COUNT_FWR_R[937:941]
+#     ## fwr_r, 937:941
+#     obs_fwr_r <- slot(db_baseline,"db")$mu_count_fwr_r[937:941]
 #     exp_fwr_r<- c(0, 7, 14, 7, 0)
 #     expect_equal(obs_fwr_r, exp_fwr_r)
 #     
-#     ## FWR_S, 993:997
-#     obs_fwr_s <- slot(db_baseline,"db")$MU_COUNT_FWR_S[993:997]
+#     ## fwr_s, 993:997
+#     obs_fwr_s <- slot(db_baseline,"db")$mu_count_fwr_s[993:997]
 #     exp_fwr_s<- c(10, 0, 0, 0, 0)
 #     expect_equal(obs_fwr_s, exp_fwr_s)
 
@@ -332,18 +332,18 @@ test_that("calcBaseline", {
     db_clonal_trim <- db_clonal[1:5, ]
     
     for (i in 1:nrow(db_clonal_trim)) {
-        trim_seqs <- trimToLength(db_clonal_trim$CLONAL_SEQUENCE[i], 
-                                  db_clonal_trim$CLONAL_GERMLINE[i], 312)
-        db_clonal_trim$CLONAL_SEQUENCE[i] <- trim_seqs$inputSeq
-        db_clonal_trim$CLONAL_GERMLINE[i] <- trim_seqs$germlineSeq
+        trim_seqs <- trimToLength(db_clonal_trim$clonal_sequence[i], 
+                                  db_clonal_trim$clonal_germline[i], 312)
+        db_clonal_trim$clonal_sequence[i] <- trim_seqs$inputSeq
+        db_clonal_trim$clonal_germline[i] <- trim_seqs$germlineSeq
     }
     
     db_1_to_5 <- db_clonal[1:5,]
     
     #set.seed(283)
     db_baseline <- calcBaseline(db_1_to_5, 
-                                sequenceColumn="CLONAL_SEQUENCE",
-                                germlineColumn="CLONAL_GERMLINE", 
+                                sequenceColumn="clonal_sequence",
+                                germlineColumn="clonal_germline", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
                                 targetingModel = HH_S5F,
@@ -351,57 +351,57 @@ test_that("calcBaseline", {
                                 calcStats = T)
     
     #set.seed(2935)
-    db_baseline_trim_null <- calcBaseline(db_clonal_trim, sequenceColumn="CLONAL_SEQUENCE",
-                                          germlineColumn="CLONAL_GERMLINE",
+    db_baseline_trim_null <- calcBaseline(db_clonal_trim, sequenceColumn="clonal_sequence",
+                                          germlineColumn="clonal_germline",
                                           testStatistic="focused",
                                           regionDefinition=NULL,
                                           targetingModel = HH_S5F,
                                           nproc = 1, 
                                           calcStats=T)
  
-    total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$MU_COUNT_SEQ_S,
-        slot(db_baseline_trim_null,"db")$MU_COUNT_SEQ_R))
+    total_trim_null <- rowSums(cbind(slot(db_baseline_trim_null,"db")$mu_count_seq_s,
+        slot(db_baseline_trim_null,"db")$mu_count_seq_r))
     
-    total_baseline <- rowSums(slot(db_baseline,"db")[,grep("MU_COUNT.*", colnames(slot(db_baseline,"db")))])
+    total_baseline <- rowSums(slot(db_baseline,"db")[,grep("mu_count.*", colnames(slot(db_baseline,"db")))])
     
     expect_equivalent(total_trim_null, total_baseline)
     
     ## Should match observedMutations, with the full seqs and region 
     ## IMGT_V and the trimmed seqs and region NULL
     obs_mu <- observedMutations(db_1_to_5,
-                                sequenceColumn="CLONAL_SEQUENCE",
-                                germlineColumn="CLONAL_GERMLINE",
+                                sequenceColumn="clonal_sequence",
+                                germlineColumn="clonal_germline",
                                 regionDefinition=IMGT_V,
                                 nproc=1)
     expect_equivalent(
-        rowSums(obs_mu[,grep("MU_COUNT", colnames(obs_mu))]), 
+        rowSums(obs_mu[,grep("mu_count", colnames(obs_mu))]), 
         total_baseline
         )
     
     obs_mu <- observedMutations(db_clonal_trim,
-                                sequenceColumn="CLONAL_SEQUENCE",
-                                germlineColumn="CLONAL_GERMLINE",
+                                sequenceColumn="clonal_sequence",
+                                germlineColumn="clonal_germline",
                                 regionDefinition=NULL,
                                 nproc=1)
     expect_equivalent(
-        rowSums(obs_mu[,grep("MU_COUNT", colnames(obs_mu))]), 
+        rowSums(obs_mu[,grep("mu_count", colnames(obs_mu))]), 
         total_baseline
     )
     
     # db_baseline_null <- calcBaseline(db_clonal,
-    #                             sequenceColumn="CLONAL_SEQUENCE",
-    #                             germlineColumn="CLONAL_GERMLINE",
+    #                             sequenceColumn="clonal_sequence",
+    #                             germlineColumn="clonal_germline",
     #                             testStatistic="focused",
     #                             regionDefinition=NULL,
     #                             targetingModel = HH_S5F,
     #                             nproc = 1)
     # ## Check 5 examples for each, at different positions
-    # ## CDR_R, first 5
-    # obs_seq_r <- slot(db_baseline_null,"db")$MU_COUNT_SEQ_R[1:5]
+    # ## cdr_r, first 5
+    # obs_seq_r <- slot(db_baseline_null,"db")$mu_count_seq_r[1:5]
     # exp_seq_r<- c(12, 18, 74, 73)
     # expect_equal(obs_seq_r, exp_seq_r)
     # 
-    # obs_seq_s <- slot(db_baseline_null,"db")$MU_COUNT_SEQ_S[1:5]
+    # obs_seq_s <- slot(db_baseline_null,"db")$mu_count_seq_s[1:5]
     # exp_seq_s<- c(5, 6, 34, 46, 1)
     # expect_equal(obs_seq_r, exp_seq_r)
 
@@ -427,12 +427,12 @@ test_that("BASELINe functions work for single-sequence input", {
     ## compare @db
     expect_equivalent(calcBaselineMulti@db[singleIdx, ], calcBaselineSingle@db)
     ## compare @pdfs
-    expect_true(is(calcBaselineMulti@pdfs[["SEQ"]], "matrix"))
-    expect_true(is(calcBaselineSingle@pdfs[["SEQ"]], "matrix"))
-    expect_equal(dim(calcBaselineMulti@pdfs[["SEQ"]]), c(singleIdx, 4001))
-    expect_equal(dim(calcBaselineSingle@pdfs[["SEQ"]]), c(1, 4001))
-    expect_equal(calcBaselineMulti@pdfs[["SEQ"]][singleIdx, ], 
-                 calcBaselineSingle@pdfs[["SEQ"]][1, ])
+    expect_true(is(calcBaselineMulti@pdfs[["seq"]], "matrix"))
+    expect_true(is(calcBaselineSingle@pdfs[["seq"]], "matrix"))
+    expect_equal(dim(calcBaselineMulti@pdfs[["seq"]]), c(singleIdx, 4001))
+    expect_equal(dim(calcBaselineSingle@pdfs[["seq"]]), c(1, 4001))
+    expect_equal(calcBaselineMulti@pdfs[["seq"]][singleIdx, ], 
+                 calcBaselineSingle@pdfs[["seq"]][1, ])
     ## compare @stats
     expect_equivalent(calcBaselineMulti@stats[singleIdx, ],
                       calcBaselineSingle@stats)
@@ -443,16 +443,16 @@ test_that("BASELINe functions work for single-sequence input", {
     ## compare @db
     expect_equivalent(groupBaselineMulti@db[singleIdx, ], groupBaselineSingle@db[1, ])
     ## compare @pdfs
-    expect_true(is(groupBaselineMulti@pdfs[["SEQ"]], "matrix"))
-    expect_true(is(groupBaselineSingle@pdfs[["SEQ"]], "matrix"))
-    expect_equal(dim(groupBaselineMulti@pdfs[["SEQ"]]), c(singleIdx, 4001))
-    expect_equal(dim(groupBaselineSingle@pdfs[["SEQ"]]), c(1, 4001))
-    expect_equal(groupBaselineMulti@pdfs[["SEQ"]][singleIdx, ], 
-                 groupBaselineSingle@pdfs[["SEQ"]][1, ])
+    expect_true(is(groupBaselineMulti@pdfs[["seq"]], "matrix"))
+    expect_true(is(groupBaselineSingle@pdfs[["seq"]], "matrix"))
+    expect_equal(dim(groupBaselineMulti@pdfs[["seq"]]), c(singleIdx, 4001))
+    expect_equal(dim(groupBaselineSingle@pdfs[["seq"]]), c(1, 4001))
+    expect_equal(groupBaselineMulti@pdfs[["seq"]][singleIdx, ], 
+                 groupBaselineSingle@pdfs[["seq"]][1, ])
     # @pdfs from calcBaselineSingle and groupBaselineSingle should also match since
     # there essentially is no effective grouping (each group has 1 single only)
-    expect_equal(groupBaselineSingle@pdfs[["SEQ"]][1, ], 
-                 calcBaselineSingle@pdfs[["SEQ"]][1, ])
+    expect_equal(groupBaselineSingle@pdfs[["seq"]][1, ], 
+                 calcBaselineSingle@pdfs[["seq"]][1, ])
     ## compare stats
     expect_equivalent(groupBaselineMulti@stats[singleIdx, ],
                       groupBaselineSingle@stats)
@@ -494,16 +494,16 @@ test_that("Test groupBaseline", {
     
     # Calculate BASELINe
     baseline <- calcBaseline(db=db_clonal, 
-                             sequenceColumn="CLONAL_SEQUENCE",
-                             germlineColumn="CLONAL_GERMLINE",
+                             sequenceColumn="clonal_sequence",
+                             germlineColumn="clonal_germline",
                              testStatistic="focused",
                              regionDefinition=IMGT_V,
                              targetingModel=HH_S5F,
                              nproc=1)
     
     baseline_df <- calcBaseline(data.frame(db_clonal), 
-                             sequenceColumn="CLONAL_SEQUENCE",
-                             germlineColumn="CLONAL_GERMLINE",
+                             sequenceColumn="clonal_sequence",
+                             germlineColumn="clonal_germline",
                              testStatistic="focused",
                              regionDefinition=IMGT_V,
                              targetingModel=HH_S5F,
@@ -515,29 +515,29 @@ test_that("Test groupBaseline", {
     # Group PDFs by sample
     grouped1 <- groupBaseline(baseline, groupBy="SAMPLE")
     pdf1 <- slot(grouped1, "pdfs")
-    sigma1 <- slot(grouped1,"stats")$BASELINE_SIGMA
+    sigma1 <- slot(grouped1,"stats")$baseline_sigma
     
-    expect_equal(range(pdf1$CDR[1,]), c(0,5.018), tolerance=0.01)
-    expect_equal(range(pdf1$CDR[2,]), c(0,7.333), tolerance=0.01)
+    expect_equal(range(pdf1$cdr[1,]), c(0,5.018), tolerance=0.01)
+    expect_equal(range(pdf1$cdr[2,]), c(0,7.333), tolerance=0.01)
     expect_equal(sigma1, c(-0.263, -0.693, -0.100, -0.694), tolerance=0.01)
     
     # Group PDFs by both sample (between variable) and isotype (within variable)
     grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
     pdf2 <- slot(grouped2, "pdfs")
-    sigma2 <- slot(grouped2,"stats")$BASELINE_SIGMA
+    sigma2 <- slot(grouped2,"stats")$baseline_sigma
     
-    expect_equal(range(pdf2$CDR[1,]), c(0,3.643), tolerance=0.01)
-    expect_equal(range(pdf2$CDR[2,]), c(0,3.539), tolerance=0.01)    
+    expect_equal(range(pdf2$cdr[1,]), c(0,3.643), tolerance=0.01)
+    expect_equal(range(pdf2$cdr[2,]), c(0,3.539), tolerance=0.01)    
     expect_equal(sigma2, 
                  c(-0.31, -0.59, -0.20, -0.82, -0.15, -0.78, -0.08, -0.65), tolerance=0.01)
     
     # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
     grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
     pdf3 <- slot(grouped3, "pdfs")
-    sigma3 <- slot(grouped3,"stats")$BASELINE_SIGMA
+    sigma3 <- slot(grouped3,"stats")$baseline_sigma
     
-    expect_equal(range(pdf3$CDR[1,]), c(0,4.975), tolerance=0.01)
-    expect_equal(range(pdf3$CDR[2,]), c(0,7.319), tolerance=0.01)    
+    expect_equal(range(pdf3$cdr[1,]), c(0,4.975), tolerance=0.01)
+    expect_equal(range(pdf3$cdr[2,]), c(0,7.319), tolerance=0.01)    
     expect_equal(sigma3, 
                  c( -0.25, -0.72, -0.10, -0.69), tolerance=0.01)
     
@@ -571,16 +571,16 @@ test_that("calcBaseline and groupBaseline, AIRR migration", {
     
     # calcBaseline
     b1_c <- calcBaseline(db_c, 
-                        sequenceColumn="CLONAL_SEQUENCE",
-                        germlineColumn="CLONAL_GERMLINE", 
+                        sequenceColumn="clonal_sequence",
+                        germlineColumn="clonal_germline", 
                         testStatistic="focused",
                         regionDefinition=IMGT_V,
                         targetingModel=HH_S5F,
                         nproc=1)
     
     b1_a <- calcBaseline(db_a, 
-                        sequenceColumn="CLONAL_SEQUENCE",
-                        germlineColumn="CLONAL_GERMLINE", 
+                        sequenceColumn="clonal_sequence",
+                        germlineColumn="clonal_germline", 
                         testStatistic="focused",
                         regionDefinition=IMGT_V,
                         targetingModel=HH_S5F,

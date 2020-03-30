@@ -680,7 +680,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                           Subsampling is performed without replacement in each VJL group of heavy chain sequences. 
 #'                           If \code{subsample} is larger than the unique number of heavy chain sequences in each 
 #'                           VJL group, then the subsampling process is ignored for that group. For each heavy chain
-#'                           sequence in \code{db}, the reported \code{DIST_NEAREST} is the distance to the closest
+#'                           sequence in \code{db}, the reported \code{dist_nearest} is the distance to the closest
 #'                           heavy chain sequence in the subsampled set for the VJL group. If \code{NULL} no 
 #'                           subsampling is performed.
 #' @param    progress        if \code{TRUE} print a progress bar.
@@ -697,12 +697,12 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                                \link[alakazam]{groupGenes}.
 #' 
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances between heavy chain
-#'           sequences in the \code{DIST_NEAREST} column if \code{cross=NULL}. If \code{cross} was 
-#'           specified, distances will be added as the \code{CROSS_DIST_NEAREST} column. 
+#'           sequences in the \code{dist_nearest} column if \code{cross=NULL}. If \code{cross} was 
+#'           specified, distances will be added as the \code{cross_dist_nearest} column. 
 #'           
 #'           Note that distances between light chain sequences are not calculated, even if light chains 
 #'           were used for VJL grouping via \code{groupUsingOnlyIGH=FALSE}. Light chain sequences, if any,
-#'           will have \code{NA} in the \code{DIST_NEAREST} field.
+#'           will have \code{NA} in the \code{dist_nearest} field.
 #'           
 #'           Note that the output \code{vCallColumn} and \code{jCallColumn} columns will be converted to 
 #'           \code{character} if they were \code{factor} in the input \code{db}.
@@ -761,7 +761,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' Note on \code{subsample}: Subsampling is performed independently in each VJL group for heavy chain
 #' sequences. If \code{subsample} is larger than number of heavy chain sequences in the group, it is 
 #' ignored. In other words, subsampling is performed only on groups in which the number of heavy chain 
-#' sequences is equal to or greater than \code{subsample}. \code{DIST_NEAREST} has values calculated 
+#' sequences is equal to or greater than \code{subsample}. \code{dist_nearest} has values calculated 
 #' using all heavy chain sequences in the group for groups with fewer than \code{subsample} heavy chain
 #' sequences, and values calculated using a subset of heavy chain sequences for the larger groups. 
 #' To select a value of \code{subsample}, it can be useful to explore the group sizes in \code{db} 
@@ -799,11 +799,11 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                       model="ham", first=FALSE, VJthenLen=TRUE, normalize="len")
 #'                            
 #' # Plot histogram of non-NA distances
-#' p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
+#' p1 <- ggplot(data=subset(dist, !is.na(dist_nearest))) + 
 #'       theme_bw() + 
 #'       ggtitle("Distance to nearest: Hamming") + 
 #'       xlab("distance") +
-#'       geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
+#'       geom_histogram(aes(x=dist_nearest), binwidth=0.025, 
 #'                      fill="steelblue", color="white")
 #' plot(p1)
 #' 
@@ -876,21 +876,21 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if (VJthenLen) {
         # 2-stage partitioning using first V+J and then L
         # V+J only first
-        # creates $VJ_GROUP
+        # creates $vj_group
         db <- groupGenes(db, v_call=vCallColumn, j_call=jCallColumn, junc_len=NULL,
                          cell_id=cellIdColumn, locus=locusColumn, only_igh=groupUsingOnlyIGH,
                          first=first)
         # L (later)  
-        group_cols <- c("VJ_GROUP", junc_len)
+        group_cols <- c("vj_group", junc_len)
         
     } else {
         # 1-stage partitioning using V+J+L simultaneously
-        # creates $VJ_GROUP
+        # creates $vj_group
         # note that despite the name (VJ), this is based on V+J+L
         db <- groupGenes(db, v_call=vCallColumn, j_call=jCallColumn, junc_len=junc_len,
                          cell_id=cellIdColumn, locus=locusColumn, only_igh=groupUsingOnlyIGH,
                          first=first)
-        group_cols <- c("VJ_GROUP")
+        group_cols <- c("vj_group")
     }
     
     # groups to use
@@ -1018,16 +1018,16 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if (nproc > 1) { parallel::stopCluster(cluster) }
     
     if (!is.null(cross)) {
-        db$CROSS_DIST_NEAREST <- db$TMP_DIST_NEAREST
+        db$cross_dist_nearest <- db$TMP_DIST_NEAREST
     } else {
-        db$DIST_NEAREST <- db$TMP_DIST_NEAREST
+        db$dist_nearest <- db$TMP_DIST_NEAREST
     }
     
     # prepare db for return
     if ((!VJthenLen) && keepVJLgroup) {
-        db$VJL_GROUP <- db[["VJ_GROUP"]]
+        db$vjl_group <- db[["vj_group"]]
     }
-    db <- db[, !(names(db) %in% c(junc_len, "VJ_GROUP", "ROW_ID", "V1", "J1","TMP_DIST_NEAREST"))]
+    db <- db[, !(names(db) %in% c(junc_len, "vj_group", "ROW_ID", "V1", "J1","TMP_DIST_NEAREST"))]
     
     return(db)
 }
@@ -1113,18 +1113,18 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #'                     jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 #'                             
 #' # Find threshold using the "gmm" method with optimal threshold
-#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="gamma-gamma", cutoff="opt")
+#' output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", cutoff="opt")
 #' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
 #' print(output)
 #'
 #' # Find threshold using the "gmm" method with user defined specificity
-#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="gamma-gamma", 
+#' output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", 
 #'                         cutoff="user", spc=0.99)
 #' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
 #' print(output)
 #'
 #' # Find threshold using the "density" method and plot the results
-#' output <- findThreshold(db$DIST_NEAREST, method="density")
+#' output <- findThreshold(db$dist_nearest, method="density")
 #' plot(output)
 #' print(output)
 #' }
@@ -1189,8 +1189,8 @@ findThreshold <- function (distances, method=c("density", "gmm"),
 # @seealso  
 # \itemize{
 # \item     See \link{distToNearest} for details on generating the input distance vector.
-# \item         See \link{gmmFit} for a different threshold inference methodology.
-# \item           See \link{findThreshold} to switch between available methods.
+# \item     See \link{gmmFit} for a different threshold inference methodology.
+# \item     See \link{findThreshold} to switch between available methods.
 #}
 # 
 # 
@@ -1205,14 +1205,14 @@ findThreshold <- function (distances, method=c("density", "gmm"),
 #                            model="hs1f", first=FALSE, normalize="len")
 #                  
 # # using findThreshold switch
-# threshold <- findThreshold(dist_hs1f$DIST_NEAREST, method="density")
+# threshold <- findThreshold(dist_hs1f$dist_nearest, method="density")
 # # or
-# threshold <- smoothValley(dist_hs1f$DIST_NEAREST)
+# threshold <- smoothValley(dist_hs1f$dist_nearest)
 #                            
 # # Plot histogram of non-NA distances
-# p1 <- ggplot(data=subset(dist_hs1f, !is.na(DIST_NEAREST))) + theme_bw() + 
+# p1 <- ggplot(data=subset(dist_hs1f, !is.na(dist_nearest))) + theme_bw() + 
 #     ggtitle("Distance to nearest: hs1f") + xlab("distance") +
-#     geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
+#     geom_histogram(aes(x=dist_nearest), binwidth=0.025, 
 #                    fill="steelblue", color="white") + 
 #     geom_vline(xintercept=threshold, linetype="dashed")
 # plot(p1)
@@ -1298,9 +1298,9 @@ findThreshold <- function (distances, method=c("density", "gmm"),
 #                     jCallColumn="j_call", model="ham", first=FALSE, normalize="len", nproc=1)
 #                             
 # # To find the Threshold cut use either findThreshold-switch
-# output <- findThreshold(db$DIST_NEAREST, method="gmm", edge=0.9)
+# output <- findThreshold(db$dist_nearest, method="gmm", edge=0.9)
 # # or 
-# output <- gmmFit(db$DIST_NEAREST, edge=0.9) 
+# output <- gmmFit(db$dist_nearest, edge=0.9) 
 gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=FALSE) {
     
     #************* Filter Unknown Data *************#
@@ -1881,7 +1881,7 @@ mixFunction <- function(t, first_curve=NULL, second_curve=NULL,
 #'                     jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 #' 
 #' # To find the threshold cut, call findThreshold function for "gmm" method.
-#' output <- findThreshold(db$DIST_NEAREST, method="gmm", model="norm-norm", cutoff="opt")
+#' output <- findThreshold(db$dist_nearest, method="gmm", model="norm-norm", cutoff="opt")
 #' print(output)
 #' 
 #' # Plot results
@@ -2000,7 +2000,7 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
 #'                     jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 #' 
 #' # To find the threshold cut, call findThreshold function for "gmm" method.
-#' output <- findThreshold(db$DIST_NEAREST, method="density")
+#' output <- findThreshold(db$dist_nearest, method="density")
 #' print(output)
 #' 
 #' # Plot

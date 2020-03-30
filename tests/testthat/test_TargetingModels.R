@@ -186,13 +186,13 @@ test_that("calcObservedMutations and listObservedMutations reproduce same result
 #     om <- observedMutations(db, "SEQUENCE_IMGT", "GERMLINE_IMGT_D_MASK")
 #     
 #     expect_equal(length(lom[[1]]), sum(cob[,1]))
-#     expect_equal(length(lom[[1]]), sum(om[1, c("MU_COUNT_SEQ_R", "MU_COUNT_SEQ_S")]))
+#     expect_equal(length(lom[[1]]), sum(om[1, c("mu_count_SEQ_R", "MU_COUNT_SEQ_S")]))
 #     
     ## Use only V
     om_v <- observedMutations(db, "SEQUENCE_IMGT", "GERMLINE_IMGT_D_MASK", 
                               regionDefinition=IMGT_V)
     ## TODO check more seqs
-    expect_equal(length(lom[[1]]), sum(om_v[1, grep("MU_COUNT_", colnames(om_v))]))
+    expect_equal(length(lom[[1]]), sum(om_v[1, grep("mu_count_", colnames(om_v))]))
     
 })
 
