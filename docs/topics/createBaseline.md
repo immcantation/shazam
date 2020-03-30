@@ -9,11 +9,19 @@ Description
 Usage
 --------------------
 ```
-createBaseline(description = "", db = data.frame(),
-regionDefinition = createRegionDefinition(), testStatistic = "",
-regions = NULL, numbOfSeqs = matrix(), binomK = matrix(),
-binomN = matrix(), binomP = matrix(), pdfs = list(),
-stats = data.frame())
+createBaseline(
+description = "",
+db = data.frame(),
+regionDefinition = createRegionDefinition(),
+testStatistic = "",
+regions = NULL,
+numbOfSeqs = matrix(),
+binomK = matrix(),
+binomN = matrix(),
+binomP = matrix(),
+pdfs = list(),
+stats = data.frame()
+)
 ```
 
 Arguments
@@ -190,7 +198,8 @@ Slot "pdfs":
 list()
 
 Slot "stats":
-[1] GROUP              REGION             BASELINE_SIGMA     BASELINE_CI_LOWER  BASELINE_CI_UPPER  BASELINE_CI_PVALUE
+[1] group              region             baseline_sigma     baseline_ci_lower 
+[5] baseline_ci_upper  baseline_ci_pvalue
 <0 rows> (or 0-length row.names)
 
 
@@ -202,6 +211,9 @@ See also
 -------------------
 
 See [Baseline](Baseline-class.md) for the return object.
+
+
+
 
 
 

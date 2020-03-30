@@ -41,11 +41,15 @@ Examples
 ```R
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
+db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 
 # Calculate mutability of germline sequences using \link{HH_S5F} model
-mutability <- calculateMutability(sequences=db$GERMLINE_IMGT_D_MASK, model=HH_S5F)
+mutability <- calculateMutability(sequences=db[["germline_alignment_d_mask"]], model=HH_S5F)
 ```
+
+
+
+
 
 
 

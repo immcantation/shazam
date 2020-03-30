@@ -9,11 +9,18 @@ Construct a consensus sequence
 Usage
 --------------------
 ```
-consensusSequence(sequences, db = NULL, method = c("mostCommon",
-"thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
-minFreq = NULL, muFreqColumn = NULL, lenLimit = NULL,
-includeAmbiguous = FALSE, breakTiesStochastic = FALSE,
-breakTiesByColumns = NULL)
+consensusSequence(
+sequences,
+db = NULL,
+method = c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated",
+"leastMutated"),
+minFreq = NULL,
+muFreqColumn = NULL,
+lenLimit = NULL,
+includeAmbiguous = FALSE,
+breakTiesStochastic = FALSE,
+breakTiesByColumns = NULL
+)
 ```
 
 Arguments
@@ -97,18 +104,18 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
-clone <- subset(db, CLONE == "3192")
+db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
+clone <- subset(db, clone_id == "3192")
 
 # First compute mutation frequency for most/leastMutated methods
 clone <- observedMutations(clone, frequency=TRUE, combine=TRUE)
 
 # Manually create a tie
-clone <- rbind(clone, clone[which.max(clone$MU_FREQ), ])
+clone <- rbind(clone, clone[which.max(clone$mu_freq), ])
 
 # ThresholdedFreq method. 
 # Resolve ties deterministically without using ambiguous characters
-cons1 <- consensusSequence(clone$SEQUENCE_IMGT,
+cons1 <- consensusSequence(clone$sequence_alignment,
 method="thresholdedFreq", minFreq=0.3,
 includeAmbiguous=FALSE, 
 breakTiesStochastic=FALSE)
@@ -120,6 +127,10 @@ cons1$cons
 [1] "GAGGTGCAGCTGGTGGTCTCTGGGGGA...GGCTTGGTACAGCCAGGGCGGTCCCTAAGACTCTCCTGTACAGTTTCTGGATTCACCTTT............GGTGATTATGCTATGACGTGGATCCGCCAGGCTCCTGGGAAGGGGCTGGAGTGGGTCGGTTTCATTAGAAGCAAAACTTTTGGTGGGACAGCAGATTACGCCGCGTTTGTGAGA...GGCAGATTCACCATCTCAAGAGATGATTCCAAAAACATCGCCTATCTGCAATTGAACAGCCTGAAAACCGAGGACACAGGCGTCTATTACTGTGGTAGAGATCTCGCCGTAACTGACACAATAGGTGGTACTAACTGGTTCGACCCCTGGGGCCAGGGGACCCCGGTCACCGTCTCCTCAG"
 
 ```
+
+
+
+
 
 
 

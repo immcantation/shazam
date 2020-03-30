@@ -72,18 +72,19 @@ Examples
 ```R
 # Subset example data from alakazam
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG"))
+db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
 
 # Collapse clones
-db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK",
+db <- collapseClones(db, cloneColumn="clone_id",
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
 method="thresholdedFreq", minimumFrequency=0.6,
 includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
-sequenceColumn="CLONAL_SEQUENCE",
-germlineColumn="CLONAL_GERMLINE", 
+sequenceColumn="clonal_sequence",
+germlineColumn="clonal_germline", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
 targetingModel=HH_S5F,
@@ -102,7 +103,7 @@ Calculating BASELINe probability density functions...
 ```R
 
 # Group PDFs by sample
-grouped1 <- groupBaseline(baseline, groupBy="SAMPLE")
+grouped1 <- groupBaseline(baseline, groupBy="sample_id")
 
 ```
 
@@ -116,7 +117,7 @@ Calculating BASELINe statistics...
 
 ```R
 sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
-plotBaselineDensity(grouped1, idColumn="SAMPLE", colorValues=sample_colors, 
+plotBaselineDensity(grouped1, idColumn="sample_id", colorValues=sample_colors, 
 sigmaLimits=c(-1, 1))
 
 ```
@@ -126,7 +127,7 @@ sigmaLimits=c(-1, 1))
 ```R
  
 # Group PDFs by both sample (between variable) and isotype (within variable)
-grouped2 <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
+grouped2 <- groupBaseline(baseline, groupBy=c("sample_id", "c_call"))
 
 ```
 
@@ -139,9 +140,9 @@ Calculating BASELINe statistics...
 
 
 ```R
-isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
-"IgG"="seagreen", "IgA"="steelblue")
-plotBaselineDensity(grouped2, idColumn="SAMPLE", groupColumn="ISOTYPE",
+isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
+"IGHG"="seagreen", "IGHA"="steelblue")
+plotBaselineDensity(grouped2, idColumn="sample_id", groupColumn="c_call",
 colorElement="group", colorValues=isotype_colors,
 sigmaLimits=c(-1, 1))
 
@@ -152,7 +153,7 @@ sigmaLimits=c(-1, 1))
 ```R
 
 # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
-grouped3 <- groupBaseline(grouped2, groupBy="SAMPLE")
+grouped3 <- groupBaseline(grouped2, groupBy="sample_id")
 
 ```
 
@@ -166,7 +167,7 @@ Calculating BASELINe statistics...
 
 ```R
 sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
-plotBaselineDensity(grouped3, idColumn="SAMPLE", colorValues=sample_colors,
+plotBaselineDensity(grouped3, idColumn="sample_id", colorValues=sample_colors,
 sigmaLimits=c(-1, 1))
 ```
 
@@ -179,6 +180,9 @@ See also
 To generate the [Baseline](Baseline-class.md) object see [calcBaseline](calcBaseline.md).
 To calculate BASELINe statistics, such as the mean selection strength
 and the 95% confidence interval, see [summarizeBaseline](summarizeBaseline.md).
+
+
+
 
 
 

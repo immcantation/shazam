@@ -15,10 +15,13 @@ HH_S1F
 
 
 
+
 Format
 -------------------
+
 A 4x4 matrix of nucleotide substitution rates. The rates are normalized,
 therefore each row sums up to 1.
+
 
 Note
 -------------------
@@ -43,6 +46,9 @@ See also
 
 See [HKL_S1F](HKL_S1F.md) for the human light chain 1-mer substitution model and 
 [MK_RS1NF](MK_RS1NF.md) for the mouse light chain 1-mer substitution model.
+
+
+
 
 
 

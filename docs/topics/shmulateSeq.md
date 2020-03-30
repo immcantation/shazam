@@ -10,8 +10,14 @@ Targeting probabilities at each position are updated after each iteration.
 Usage
 --------------------
 ```
-shmulateSeq(sequence, numMutations, targetingModel = HH_S5F, start = 1,
-end = nchar(sequence))
+shmulateSeq(
+sequence,
+numMutations,
+targetingModel = HH_S5F,
+start = 1,
+end = nchar(sequence),
+frequency = FALSE
+)
 ```
 
 Arguments
@@ -23,7 +29,10 @@ Accepted alphabet: `{A, T, G, C, N, .}`. Note
 that `-` is not accepted.
 
 numMutations
-:   number of mutations to be introduced into `sequence`.
+:   a whole number indicating the number of mutations to be 
+introduced into `sequence`, if `frequency=FALSE`.
+A fraction bewteen 0 and 1 indicating the mutation frequency
+if `frequency=TRUE`.
 
 targetingModel
 :   5-mer [TargetingModel](TargetingModel-class.md) object to be used for computing 
@@ -37,6 +46,9 @@ be introduced. Default: 1
 end
 :   Last position in `sequence` where mutations can 
 be introduced. Default: last position (sequence length).
+
+frequency
+:   If `TRUE`, treat `numMutations` as a frequency.
 
 
 
@@ -56,6 +68,10 @@ to the last codon. For example, `ATGCATGC` will be trimmed to `ATGCAT`.
 Mutations are not introduced to positions in the input `sequence` that contain 
 `.` or `N`.
 
+With `frequency=TRUE`, the number of mutations introduced is the `floor` of 
+the length of the sequence multiplied by the mutation frequency specified via
+`numMutations`.
+
 
 
 Examples
@@ -66,12 +82,27 @@ Examples
 sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATA.TTTA"
 
 # Simulate using the default human 5-mer targeting model
-shmulateSeq(sequence, numMutations=6)
+# Introduce 6 mutations
+shmulateSeq(sequence, numMutations=6, frequency=FALSE)
+
 ```
 
 
 ```
-[1] "NGATCTGACGACACGGCCGAATATTACTGGCCGAGGGATA.TTTC"
+[1] "NGATCTGACGACACGTCCGTGTGTTACCGTGCGAGAATTG.TTTA"
+
+```
+
+
+```R
+
+# Introduction 5% mutations
+shmulateSeq(sequence, numMutations=0.05, frequency=TRUE)
+```
+
+
+```
+[1] "NGATTTGACGACACGGCCGTGTATTACTGTGCGAGAGATA.TTTC"
 
 ```
 
@@ -83,6 +114,9 @@ See also
 See [shmulateTree](shmulateTree.md) for imposing mutations on a lineage tree. 
 See [HH_S5F](HH_S5F.md) and [MK_RS5NF](MK_RS5NF.md) for predefined 
 [TargetingModel](TargetingModel-class.md) objects.
+
+
+
 
 
 

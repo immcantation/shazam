@@ -11,16 +11,16 @@ quantified via the following steps:
 
 ## Example data
 
-A small example Change-O database is included in the `alakazam` package. 
+A small example AIRR Rearrangement database is included in the `alakazam` package. 
 The example dataset consists of a subset of Ig sequencing data from an 
 influenza vaccination study (Laserson and Vigneault et al., PNAS, 2014). The 
 data include sequences from multiple time-points before and after the subject 
 received an influenza vaccination. Quantifying selection requires the following 
-fields (columns) to be present in the Change-O database: 
+fields (columns) to be present in the table: 
 
-* `SEQUENCE_ID`
-* `SEQUENCE_IMGT`
-* `GERMLINE_IMGT_D_MASK`
+* `sequence_id`
+* `sequence_alignment`
+* `germline_alignment_d_mask`
 
 
 ```r
@@ -43,13 +43,16 @@ independent events and it is generally appropriate to only analyze selection
 pressures on an effective sequence for each clonal group. The `collapseClones`
 function provides one strategy for generating an effective sequences for 
 each clone. It reduces the input database to one row per clone and appends 
-`CLONAL_SEQUENCE` and `CLONAL_GERMLINE` columns which contain the 
+`clonal_sequence` and `clonal_germline` columns which contain the 
 consensus sequences for each clone.
 
 
 ```r
 # Collapse clonal groups into single sequences
-clones <- collapseClones(ExampleDb, regionDefinition=IMGT_V, 
+clones <- collapseClones(ExampleDb, cloneColumn="clone_id", 
+                         sequenceColumn="sequence_alignment", 
+                         germlineColumn="germline_alignment_d_mask", 
+                         regionDefinition=IMGT_V, 
                          method="thresholdedFreq", minimumFrequency=0.6,
                          includeAmbiguous=FALSE, breakTiesStochastic=FALSE, 
                          nproc=1)
@@ -59,7 +62,7 @@ clones <- collapseClones(ExampleDb, regionDefinition=IMGT_V,
 
 Following construction of an effective sequence for each clone, the observed
 and expected mutation counts are calculated for each sequence in the 
-`CLONAL_SEQUENCE` column relative to the `CLONAL_GERMLINE`. `observedMutations` 
+`clonal_sequence` column relative to the `clonal_germline`. `observedMutations` 
 is used to calculate the number of observed mutations and 
 `expectedMutations` calculates the expected frequency of mutations. 
 The underlying targeting model for calculating expectations can be specified 
@@ -84,15 +87,15 @@ Users may define other region sets and boundaries by creating a custom
 
 
 ```r
-# Count observed mutations and append MU_COUNT columns to the output
+# Count observed mutations and append mu_count columns to the output
 observed <- observedMutations(clones, 
-                              sequenceColumn="CLONAL_SEQUENCE",
-                              germlineColumn="CLONAL_GERMLINE",
+                              sequenceColumn="clonal_sequence",
+                              germlineColumn="clonal_germline",
                               regionDefinition=IMGT_V, nproc=1)
-# Count expected mutations and append MU_EXPECTED columns to the output
+# Count expected mutations and append mu_exptected columns to the output
 expected <- expectedMutations(observed, 
-                              sequenceColumn="CLONAL_SEQUENCE",
-                              germlineColumn="CLONAL_GERMLINE",
+                              sequenceColumn="clonal_sequence",
+                              germlineColumn="clonal_germline",
                               targetingModel=HH_S5F,
                               regionDefinition=IMGT_V, nproc=1)
 ```
@@ -160,8 +163,8 @@ baseline <- calcBaseline(clones, testStatistic="focused",
 
 To compare the selection scores of groups of sequences, the sequences must
 be convolved into a single PDF representing each group. In the example dataset, 
-the `SAMPLE` field corresponds to samples taken at different time points 
-before and after an influenza vaccination and the `ISOTYPE` field specifies 
+the `sample_id` field corresponds to samples taken at different time points 
+before and after an influenza vaccination and the `c_call` field specifies 
 the isotype of the sequence. The `groupBaseline` function convolves the BASELINe 
 PDFs of individual sequences/clones to get a combined PDF. The field(s) by 
 which to group the sequences are specified with the `groupBy` parameter. 
@@ -178,12 +181,12 @@ interpreted as analagous to a t-test.
 ### Grouping by a single annotation
 
 The following example generates a single selection PDF for each unique 
-annotation in the `SAMPLE` column.
+annotation in the `sample_id` column.
 
 
 ```r
 # Combine selection scores by time-point
-grouped_1 <- groupBaseline(baseline, groupBy="SAMPLE")
+grouped_1 <- groupBaseline(baseline, groupBy="sample_id")
 ```
 
 ### Subsetting and grouping by multiple annotations
@@ -199,10 +202,13 @@ precedes the collapsing of clonal groups.
 
 ```r
 # Subset the original data to switched isotypes
-db_sub <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG"))
+db_sub <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
 
 # Collapse clonal groups into single sequence
-clones_sub <- collapseClones(db_sub, regionDefinition=IMGT_V, 
+clones_sub <- collapseClones(db_sub, cloneColumn="clone_id",
+                             sequenceColumn="sequence_alignment",
+                             germlineColumn="germline_alignment_d_mask",
+                             regionDefinition=IMGT_V, 
                              method="thresholdedFreq", minimumFrequency=0.6,
                              includeAmbiguous=FALSE, breakTiesStochastic=FALSE, 
                              nproc=1)
@@ -212,7 +218,7 @@ baseline_sub <- calcBaseline(clones_sub, testStatistic="focused",
                              regionDefinition=IMGT_V, nproc=1)
 
 # Combine selection scores by time-point and isotype
-grouped_2 <- groupBaseline(baseline_sub, groupBy=c("SAMPLE", "ISOTYPE"))
+grouped_2 <- groupBaseline(baseline_sub, groupBy=c("sample_id", "c_call"))
 ```
 
 ### Convolving variables at multiple levels
@@ -221,16 +227,16 @@ To make selection comparisons using two levels of variables, you
 would need two iterations of groupings, where the first iteration of 
 `groupBaseline` groups on both variables, and the second iteration groups
 on the "outer" variable. For example, if a data set has both case and control 
-subjects, annotated in `STATUS` and `SUBJECT` columns, then
+subjects, annotated in `status` and `subject` columns, then
 generating convolved PDFs for each status would be performed as:
 
 
 ```r
 # First group by subject and status
-subject_grouped <- groupBaseline(baseline, groupBy=c("STATUS", "SUBJECT"))
+subject_grouped <- groupBaseline(baseline, groupBy=c("status", "subject"))
 
 # Then group the output by status
-status_grouped <- groupBaseline(subject_grouped, groupBy="STATUS")
+status_grouped <- groupBaseline(subject_grouped, groupBy="status")
 ```
 
 ### Testing the difference in selection PDFs between groups
@@ -239,20 +245,20 @@ The `testBaseline` function will perform signifance testing between two
 grouped BASELINe PDFs, by region, and return a data.frame with the 
 following information:
 
-* `REGION`: The sequence region, such as "CDR" and "FWR".
-* `TEST`: The name of the two groups compared.
-* `PVALUE`: Two-sided p-value for the comparison.
-* `FDR`: FDR corrected p-value.
+* `region`: The sequence region, such as "CDR" and "FWR".
+* `test`: The name of the two groups compared.
+* `pvalue`: Two-sided p-value for the comparison.
+* `fdr`: FDR corrected p-value.
 
 
 ```r
-testBaseline(grouped_1, groupBy="SAMPLE")
+testBaseline(grouped_1, groupBy="sample_id")
 ```
 
 ```
-##   REGION       TEST     PVALUE        FDR
-## 1    CDR -1h != +7d 0.05019208 0.08610636
-## 2    FWR -1h != +7d 0.08610636 0.08610636
+##   region       test     pvalue        fdr
+## 1    cdr -1h != +7d 0.05019208 0.08610636
+## 2    fwr -1h != +7d 0.08610636 0.08610636
 ```
 
 ## Plot and compare selection scores for groups
@@ -271,26 +277,26 @@ below.
 ```r
 # Set sample and isotype colors
 sample_colors <- c("-1h"="seagreen", "+7d"="steelblue")
-isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
-                    "IgG"="seagreen", "IgA"="steelblue")
+isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
+                    "IGHG"="seagreen", "IGHA"="steelblue")
 
 # Plot mean and confidence interval by time-point
-plotBaselineSummary(grouped_1, "SAMPLE")
+plotBaselineSummary(grouped_1, "sample_id")
 ```
 
 ![plot of chunk Baseline-Vignette-11](figure/Baseline-Vignette-11-1.png)
 
 ```r
 # Plot selection scores by time-point and isotype for only CDR
-plotBaselineSummary(grouped_2, "SAMPLE", "ISOTYPE", groupColors=isotype_colors,
-                    subsetRegions="CDR")
+plotBaselineSummary(grouped_2, "sample_id", "c_call", groupColors=isotype_colors,
+                    subsetRegions="cdr")
 ```
 
 ![plot of chunk Baseline-Vignette-11](figure/Baseline-Vignette-11-2.png)
 
 ```r
 # Group by CDR/FWR and facet by isotype
-plotBaselineSummary(grouped_2, "SAMPLE", "ISOTYPE", facetBy="group")
+plotBaselineSummary(grouped_2, "sample_id", "c_call", facetBy="group")
 ```
 
 ![plot of chunk Baseline-Vignette-11](figure/Baseline-Vignette-11-3.png)
@@ -303,7 +309,7 @@ function is shown.
 
 ```r
 # Plot selection PDFs for a subset of the data
-plotBaselineDensity(grouped_2, "ISOTYPE", groupColumn="SAMPLE", colorElement="group", 
+plotBaselineDensity(grouped_2, "c_call", groupColumn="sample_id", colorElement="group", 
                     colorValues=sample_colors, sigmaLimits=c(-1, 1))
 ```
 
@@ -314,7 +320,7 @@ plotBaselineDensity(grouped_2, "ISOTYPE", groupColumn="SAMPLE", colorElement="gr
 
 If, for any reason, one needs to edit the existing values in a field in a 
 `Baseline` object, one can do so via `editBaseline`. In the following example,
-we remove results related to IgA in the relevant fields from `grouped_2`. 
+we remove results related to IGHA in the relevant fields from `grouped_2`. 
 When the input data is large and it takes a long time for `calcBaseline` to run,
 `editBaseline` could become useful when, for instance, one would like to exclude
 a certain sample or isotype, but would rather not re-run `calcBaseline` after 
@@ -322,11 +328,11 @@ removing that sample or isotype from the original input data.
 
 
 ```r
-# Get indices of rows corresponding to IgA in the field "db"
+# Get indices of rows corresponding to IGHA in the field "db"
 # These are the same indices also in the matrices in the fileds "numbOfSeqs", 
 # "binomK", "binomN", "binomP", and "pdfs"
-# In this example, there is one row of IgA for each sample
-dbIgMIndex <- which(grouped_2@db$ISOTYPE == "IgA")
+# In this example, there is one row of IGHA for each sample
+dbIgMIndex <- which(grouped_2@db[["c_call"]] == "IGHA")
 
 grouped_2 <- editBaseline(grouped_2, "db", grouped_2@db[-dbIgMIndex, ])
 grouped_2 <- editBaseline(grouped_2, "numbOfSeqs", grouped_2@numbOfSeqs[-dbIgMIndex, ])
@@ -336,9 +342,9 @@ grouped_2 <- editBaseline(grouped_2, "binomP", grouped_2@binomP[-dbIgMIndex, ])
 grouped_2 <- editBaseline(grouped_2, "pdfs", 
                           lapply(grouped_2@pdfs, function(pdfs) {pdfs[-dbIgMIndex, ]} ))
 
-# The indices corresponding to IgA are slightly different in the field "stats"
-# In this example, there is one row of IgA for each sample and for each region
+# The indices corresponding to IGHA are slightly different in the field "stats"
+# In this example, there is one row of IGHA for each sample and for each region
 grouped_2 <- editBaseline(grouped_2, "stats", 
-                          grouped_2@stats[grouped_2@stats$ISOTYPE!="IgA", ])
+                          grouped_2@stats[grouped_2@stats[["c_call"]] != "IGHA", ])
 ```
 

@@ -8,8 +8,11 @@ Sequence region definitions according to the IMGT unique numbering scheme.
 
 
 
+
+
 Format
 -------------------
+
 A [RegionDefinition](RegionDefinition-class.md) object defining:
 
 + `IMGT_V`:              The IMGT numbered V segment up to position nucleotide 312.
@@ -28,6 +31,7 @@ This definition has no subdivisons and treats the entire V segment
 as a single region.
 
 
+
 References
 -------------------
 
@@ -35,6 +39,10 @@ References
 1. Lefranc MP, et al. IMGT unique numbering for immunoglobulin and T cell 
 receptor variable domains and Ig superfamily V-like domains. 
 Developmental and comparative immunology. 2003 27:55-77.
+
+
+
+
 
 
 

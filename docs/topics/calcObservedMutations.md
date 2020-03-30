@@ -10,9 +10,15 @@ compared to its germline sequence.
 Usage
 --------------------
 ```
-calcObservedMutations(inputSeq, germlineSeq, regionDefinition = NULL,
-mutationDefinition = NULL, ambiguousMode = c("eitherOr", "and"),
-returnRaw = FALSE, frequency = FALSE)
+calcObservedMutations(
+inputSeq,
+germlineSeq,
+regionDefinition = NULL,
+mutationDefinition = NULL,
+ambiguousMode = c("eitherOr", "and"),
+returnRaw = FALSE,
+frequency = FALSE
+)
 ```
 
 Arguments
@@ -185,8 +191,8 @@ Examples
 ```R
 # Use an entry in the example data for input and germline sequence
 data(ExampleDb, package="alakazam")
-in_seq <- ExampleDb[["SEQUENCE_IMGT"]][100]
-germ_seq <-  ExampleDb[["GERMLINE_IMGT_D_MASK"]][100]
+in_seq <- ExampleDb[["sequence_alignment"]][100]
+germ_seq <-  ExampleDb[["germline_alignment_d_mask"]][100]
 
 # Identify all mutations in the sequence
 ex1_raw <- calcObservedMutations(in_seq, germ_seq, returnRaw=TRUE)
@@ -194,7 +200,7 @@ ex1_raw <- calcObservedMutations(in_seq, germ_seq, returnRaw=TRUE)
 ex1_count <- calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE)
 ex1_freq <- calcObservedMutations(in_seq, germ_seq, returnRaw=FALSE, frequency=TRUE)
 # Compare this with ex1_count
-table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"]
+table(ex1_raw$pos$region, ex1_raw$pos$r)[, "1"]
 
 ```
 
@@ -206,7 +212,7 @@ table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"]
 
 
 ```R
-table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"]
+table(ex1_raw$pos$region, ex1_raw$pos$s)[, "1"]
 
 ```
 
@@ -219,26 +225,26 @@ table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"]
 
 ```R
 # Compare this with ex1_freq
-table(ex1_raw$pos$region, ex1_raw$pos$R)[, "1"]/ex1_raw$nonN
+table(ex1_raw$pos$region, ex1_raw$pos$r)[, "1"]/ex1_raw$nonN
 
 ```
 
 
 ```
-       SEQ 
+       seq 
 0.03363914 
 
 ```
 
 
 ```R
-table(ex1_raw$pos$region, ex1_raw$pos$S)[, "1"]/ex1_raw$nonN
+table(ex1_raw$pos$region, ex1_raw$pos$s)[, "1"]/ex1_raw$nonN
 
 ```
 
 
 ```
-       SEQ 
+       seq 
 0.02140673 
 
 ```
@@ -256,26 +262,26 @@ ex2_freq <- calcObservedMutations(in_seq, germ_seq,
 regionDefinition=IMGT_V, returnRaw=FALSE,
 frequency=TRUE)
 # Compare this with ex2_count
-table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"]
+table(ex2_raw$pos$region, ex2_raw$pos$r)[, "1"]
 
 ```
 
 
 ```
-CDR FWR 
+cdr fwr 
   4   7 
 
 ```
 
 
 ```R
-table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"]                              
+table(ex2_raw$pos$region, ex2_raw$pos$s)[, "1"]                              
 
 ```
 
 
 ```
-CDR FWR 
+cdr fwr 
   1   4 
 
 ```
@@ -283,26 +289,26 @@ CDR FWR
 
 ```R
 # Compare this with ex2_freq
-table(ex2_raw$pos$region, ex2_raw$pos$R)[, "1"]/ex2_raw$nonN     
+table(ex2_raw$pos$region, ex2_raw$pos$r)[, "1"]/ex2_raw$nonN     
 
 ```
 
 
 ```
-       CDR        FWR 
+       cdr        fwr 
 0.08333333 0.02916667 
 
 ```
 
 
 ```R
-table(ex2_raw$pos$region, ex2_raw$pos$S)[, "1"]/ex2_raw$nonN                                       
+table(ex2_raw$pos$region, ex2_raw$pos$s)[, "1"]/ex2_raw$nonN                                       
 
 ```
 
 
 ```
-       CDR        FWR 
+       cdr        fwr 
 0.02083333 0.01666667 
 
 ```
@@ -322,26 +328,26 @@ ex3_freq <- calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS, 
 returnRaw=FALSE, frequency=TRUE)
 # Compre this with ex3_count
-table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"]
+table(ex3_raw$pos$region, ex3_raw$pos$r)[, "1"]
 
 ```
 
 
 ```
-CDR FWR 
+cdr fwr 
   3   4 
 
 ```
 
 
 ```R
-table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"]
+table(ex3_raw$pos$region, ex3_raw$pos$s)[, "1"]
 
 ```
 
 
 ```
-CDR FWR 
+cdr fwr 
   2   7 
 
 ```
@@ -349,25 +355,25 @@ CDR FWR
 
 ```R
 # Compare this with ex3_freq
-table(ex3_raw$pos$region, ex3_raw$pos$R)[, "1"]/ex3_raw$nonN                                        
+table(ex3_raw$pos$region, ex3_raw$pos$r)[, "1"]/ex3_raw$nonN                                        
 
 ```
 
 
 ```
-       CDR        FWR 
+       cdr        fwr 
 0.06250000 0.01666667 
 
 ```
 
 
 ```R
-table(ex3_raw$pos$region, ex3_raw$pos$S)[, "1"]/ex3_raw$nonN
+table(ex3_raw$pos$region, ex3_raw$pos$s)[, "1"]/ex3_raw$nonN
 ```
 
 
 ```
-       CDR        FWR 
+       cdr        fwr 
 0.04166667 0.02916667 
 
 ```
@@ -379,6 +385,9 @@ See also
 
 See [observedMutations](observedMutations.md) for counting the number of observed mutations 
 in a `data.frame`.
+
+
+
 
 
 

@@ -9,8 +9,7 @@ Description
 Usage
 --------------------
 ```
-createMutationDefinition(name, classes, description = "",
-citation = "")
+createMutationDefinition(name, classes, description = "", citation = "")
 ```
 
 Arguments
@@ -64,6 +63,9 @@ See also
 -------------------
 
 See [MutationDefinition](MutationDefinition-class.md) for the return object.
+
+
+
 
 
 

@@ -12,9 +12,15 @@ filtered/remaining sequences.
 Usage
 --------------------
 ```
-slideWindowTune(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", dbMutList = NULL,
-mutThreshRange, windowSizeRange, verbose = TRUE)
+slideWindowTune(
+db,
+sequenceColumn = "sequence_alignment",
+germlineColumn = "germline_alignment_d_mask",
+dbMutList = NULL,
+mutThreshRange,
+windowSizeRange,
+verbose = TRUE
+)
 ```
 
 Arguments
@@ -178,8 +184,8 @@ $`4`
 
 # Run calcObservedMutations separately
 exDbMutList <- sapply(1:5, function(i) {
-calcObservedMutations(inputSeq=db[i, "SEQUENCE_IMGT"],
-germlineSeq=db[i, "GERMLINE_IMGT_D_MASK"],
+calcObservedMutations(inputSeq=db[["sequence_alignment"]][i],
+germlineSeq=db[["germline_alignment_d_mask"]][i],
 returnRaw=TRUE)$pos })
 slideWindowTune(db, dbMutList=exDbMutList, 
 mutThreshRange=2:4, windowSizeRange=2:4)
@@ -239,6 +245,9 @@ See also
 
 [slideWindowDb](slideWindowDb.md) is called on `db` for tuning. See [slideWindowTunePlot](slideWindowTunePlot.md) 
 for visualization. See [calcObservedMutations](calcObservedMutations.md) for generating `dbMutList`.
+
+
+
 
 
 

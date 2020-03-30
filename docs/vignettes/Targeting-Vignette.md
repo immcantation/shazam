@@ -15,14 +15,14 @@ likelihood of the observed mutations. This is done via the following steps:
 
 ## Example data
 
-A small example Change-O database is included in the `shazam` package. 
+A small example AIRR Rearrangement database is included in the `alakazam` package. 
 Inferring a targeting model requires the following fields (columns) to 
-be present in the Change-O database: 
+be present in the table: 
 
-* `SEQUENCE_ID`
-* `SEQUENCE_IMGT`
-* `GERMLINE_IMGT_D_MASK`
-* `V_CALL`
+* `sequence_id`
+* `sequence_alignment`
+* `germline_alignment_d_mask`
+* `v_call`
 
 
 ```r
@@ -63,9 +63,15 @@ probability of mutability and substitution.
 
 ```r
 # Create substitution model using silent mutations
-sub_matrix <- createSubstitutionMatrix(ExampleDb, model="S")
+sub_matrix <- createSubstitutionMatrix(ExampleDb, model="S", 
+                                       sequenceColumn="sequence_alignment",
+                                       germlineColumn="germline_alignment_d_mask",
+                                       vCallColumn="v_call")
 # Create mutability model using silent mutations
-mut_matrix <- createMutabilityMatrix(ExampleDb, sub_matrix, model="S")
+mut_matrix <- createMutabilityMatrix(ExampleDb, sub_matrix, model="S",
+                                     sequenceColumn="sequence_alignment",
+                                     germlineColumn="germline_alignment_d_mask",
+                                     vCallColumn="v_call")
 
 # Extend models to include ambiguous 5-mers
 sub_matrix <- extendSubstitutionMatrix(sub_matrix)
@@ -84,11 +90,14 @@ using the `collapseClones` function.
 
 ```r
 # Collapse sequences into clonal consensus
-clone_db <- collapseClones(ExampleDb, nproc=1)
+clone_db <- collapseClones(ExampleDb, cloneColumn="clone_id", 
+                           sequenceColumn="sequence_alignment",
+                           germlineColumn="germline_alignment_d_mask",
+                           nproc=1)
 # Create targeting model in one step using only silent mutations
 # Use consensus sequence input and germline columns
-model <- createTargetingModel(clone_db, model="S", sequenceColumn="CLONAL_SEQUENCE", 
-                              germlineColumn="CLONAL_GERMLINE")
+model <- createTargetingModel(clone_db, model="S", sequenceColumn="clonal_sequence", 
+                              germlineColumn="clonal_germline", vCallColumn="v_call")
 ```
 
 ## Visualize targeting model

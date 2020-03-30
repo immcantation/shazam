@@ -13,9 +13,16 @@ Sequences will not be generated for groups of nodes that are specified to be exc
 Usage
 --------------------
 ```
-shmulateTree(sequence, graph, targetingModel = HH_S5F, field = NULL,
-exclude = NULL, junctionWeight = NULL, start = 1,
-end = nchar(sequence))
+shmulateTree(
+sequence,
+graph,
+targetingModel = HH_S5F,
+field = NULL,
+exclude = NULL,
+junctionWeight = NULL,
+start = 1,
+end = nchar(sequence)
+)
 ```
 
 Arguments
@@ -66,10 +73,10 @@ Value
 
 A `data.frame` of simulated sequences with columns:
 
-+  `NAME`:      name of the corresponding node in the input 
++  `name`:      name of the corresponding node in the input 
 `graph`.  
-+  `SEQUENCE`:  mutated sequence.
-+  `DISTANCE`:  Hamming distance of the mutated sequence from 
++  `sequence`:  mutated sequence.
++  `distance`:  Hamming distance of the mutated sequence from 
 the seed `sequence`.
 
 
@@ -91,15 +98,15 @@ shmulateTree(sequence, graph)
 
 
 ```
-            NAME                                      SEQUENCE DISTANCE
+            name                                      sequence distance
 1      Inferred1 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-2 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATCACTGTGCGAGAGATAGTTCA        2
-3 GN5SHBT03EP4KC NAATCCGACGACACGGCCGTTTATCACTGTGCGAGAGATAGTTCA        3
-4 GN5SHBT01AKANC NGATCTGACGACACGGCCGAGTGTTACTGTGCGAGAGAAAGTTTG        4
-5 GN5SHBT01A3SFZ NGATCTGACGACACGACCGTGAATCACCATGCGAGGGATCGTTCA        6
-6 GN5SHBT08HUU7M NAATACGACGACACGGCCATTTATCACTGTGCGAGAGATAGATCA        3
-7 GN5SHBT04CEA6I NGATCTGAAGACACGGCCGTGTATCACTGTGCGAGAGATAGTTCA        1
-8 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATCACTGTGCGAGAGATAGCTCA        1
+2 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAAATAGTTTG        2
+3 GN5SHBT03EP4KC NGATCAGACGACACGACCGTGTATTACTGTGCGACAAATAGTTTG        3
+4 GN5SHBT01AKANC NGATCTGACGACACGGCCTTGCTTCACTGTGCGAGAGATAGTTTA        4
+5 GN5SHBT01A3SFZ NTATCTGACGCCACGGCCGTGGATCACTGTGCGCGAAATAGTCTG        6
+6 GN5SHBT08HUU7M NGATCAGACGACACGACCGTCTATTACTCTGCGACAATTAGTTTG        3
+7 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTGTATTACCGTGCGAGAAATAGTTTG        1
+8 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAAAGAGTTTG        1
 
 ```
 
@@ -110,18 +117,18 @@ shmulateTree(sequence, graph)
 # Exclude nodes without a sample identifier
 # Add 20% mutation rate to the immediate offsprings of the MRCA
 shmulateTree(sequence, graph, targetingModel=MK_RS5NF,
-field="SAMPLE", exclude=NA, junctionWeight=0.2)
+field="sample_id", exclude=NA, junctionWeight=0.2)
 ```
 
 
 ```
-            NAME                                      SEQUENCE DISTANCE
+            name                                      sequence distance
 1 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-2 GN5SHBT03EP4KC NGCTCTGACGACACGGCCGTGTATTATTGTGTTAGAGATAGTTTA        4
-3 GN5SHBT01A3SFZ NGATCTGACGACACGGCCGTATATTTTTGTGCGAGAATTAATTTC        7
-4 GN5SHBT08HUU7M NGCTCTGACGACACGGCCGTGTTTTATTATATTAGAGATAGTTTA        3
-5 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTATATTACTGTGCGAGAGATAGTTTA        1
-6 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTACTGTGAGAGAGATAGTTTA        1
+2 GN5SHBT03EP4KC NGATCTGACGACACGGCCGTTTATTATTGTGTGAGAAATAGTTTA        4
+3 GN5SHBT01A3SFZ NCATCTGACGACGTGGCCATGTCTTACTGTGCGAAAGATAATTTA        7
+4 GN5SHBT08HUU7M NGATTTGACGATACGGCCGTTTATTATTGTATGAGAAATAGTTTA        3
+5 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAATTTA        1
+6 GN5SHBT06IXJIH NGGTCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        1
 
 ```
 
@@ -133,6 +140,9 @@ See also
 See [shmulateSeq](shmulateSeq.md) for imposing mutations on a single sequence. 
 See [HH_S5F](HH_S5F.md) and [MK_RS5NF](MK_RS5NF.md) for predefined 
 [TargetingModel](TargetingModel-class.md) objects.
+
+
+
 
 
 

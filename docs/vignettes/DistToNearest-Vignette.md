@@ -13,15 +13,15 @@ This is done via the following steps:
 
 ## Example data
 
-A small example Change-O database is included in the `alakazam` package. 
+A small example AIRR Rearrangement database is included in the `alakazam` package. 
 Calculating the nearest neighbor distances requires the following 
-fields (columns) to be present in the Change-O database: 
+fields (columns) to be present in the table: 
 
-* `SEQUENCE_ID`
-* `V_CALL`
-* `J_CALL`
-* `JUNCTION`
-* `JUNCTION_LENGTH`
+* `sequence_id`
+* `v_call`
+* `j_call`
+* `junction`
+* `junction_length`
 
 
 ```r
@@ -35,8 +35,8 @@ data(ExampleDb, package="alakazam")
 The function for calculating distance between every sequence and its nearest
 neighbor takes a few parameters to adjust how the distance is measured. If a 
 genotype has been inferred using the methods in the `tigger` package, and a 
-`V_CALL_GENOTYPED` field has been added to the database, then this column may be 
-used instead of the default `V_CALL` column by specifying the `vCallColumn` 
+`v_call_genotyped` field has been added to the database, then this column may be 
+used instead of the default `v_call` column by specifying the `vCallColumn` 
 argument. This will allows the more accurate V call from `tigger` to be used for 
 grouping of the sequences. Furthermore, for more leniency toward ambiguous 
 V(D)J segment calls, the parameter `first` can be set to `FALSE`. Setting 
@@ -62,11 +62,13 @@ the overall distance.
 
 ```r
 # Use nucleotide Hamming distance and normalize by junction length
-dist_ham <- distToNearest(ExampleDb, vCallColumn="V_CALL_GENOTYPED", 
+dist_ham <- distToNearest(ExampleDb, sequenceColumn="junction", 
+                          vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="ham", normalize="len", nproc=1)
 
 # Use genotyped V assignments, a 5-mer model and no normalization
-dist_s5f <- distToNearest(ExampleDb, vCallColumn="V_CALL_GENOTYPED", 
+dist_s5f <- distToNearest(ExampleDb, sequenceColumn="junction", 
+                          vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="hh_s5f", normalize="none", nproc=1)
 ```
 
@@ -82,20 +84,20 @@ which show up as two modes in a nearest neighbor distance histogram.
 Thresholds may be manually determined by inspection of the nearest neighbor histograms
 or by using one of the automated threshold detection algorithms provided by the 
 `findThreshold` function. The available methods are `density` (smoothed density) and `gmm` 
-(gamma/Guassian mixture model), and are chosen via the `method` parameter of `findThreshold`.
+(gamma/Gaussian mixture model), and are chosen via the `method` parameter of `findThreshold`.
 
 ### Threshold determination by manual inspection
 
 Manual threshold detection simply involves generating a histrogram for the 
-values in the `DIST_NEAREST` column of the `distToNearest` output and 
+values in the `dist_nearest` column of the `distToNearest` output and 
 selecting a suitable value within the valley between the two modes.
 
 
 ```r
 # Generate Hamming distance histogram
 library(ggplot2)
-p1 <- ggplot(subset(dist_ham, !is.na(DIST_NEAREST)),
-             aes(x=DIST_NEAREST)) + 
+p1 <- ggplot(subset(dist_ham, !is.na(dist_nearest)),
+             aes(x=dist_nearest)) + 
     theme_bw() + 
     xlab("Hamming distance") + 
     ylab("Count") +
@@ -113,8 +115,8 @@ set to a value near 0.12 in the above example.
 
 ```r
 # Generate HH_S5F distance histogram
-p2 <- ggplot(subset(dist_s5f, !is.na(DIST_NEAREST)),
-             aes(x=DIST_NEAREST)) + 
+p2 <- ggplot(subset(dist_s5f, !is.na(dist_nearest)),
+             aes(x=dist_nearest)) + 
     theme_bw() + 
     xlab("HH_S5F distance") + 
     ylab("Count") +
@@ -133,13 +135,13 @@ set to a value near 7.
 
 The `density` method will look for the minimum in the valley between two modes of a smoothed 
 distribution based on the input vector (`distances`), which will generally be the 
-`DIST_NEAREST` column from the `distToNearest` output. Below is an example of using the 
+`dist_nearest` column from the `distToNearest` output. Below is an example of using the 
 `density` method for threshold detection.
 
 
 ```r
 # Find threshold using density method
-output <- findThreshold(dist_ham$DIST_NEAREST, method="density")
+output <- findThreshold(dist_ham$dist_nearest, method="density")
 threshold <- output@threshold
 
 # Plot distance histogram, density estimate and optimum threshold
@@ -164,8 +166,8 @@ a clonal assignment threshold. The `"gmm"` method (gamma/Gaussian mixture method
 of `findThreshold` (`method="gmm"`) performs a maximum-likelihood fitting 
 procedure over the distance-to-nearest distribution using one of four combinations of 
 univariate density distribution functions: `"norm-norm"` (two Gaussian distributions), 
-`"norm-gamma"` (lower Guassian and upper gamma distribution), 
-`"gamma-norm"` (lower gamm and upper Guassian distribution), and `"gamma-gamma"`
+`"norm-gamma"` (lower Gaussian and upper gamma distribution), 
+`"gamma-norm"` (lower gamm and upper Gaussian distribution), and `"gamma-gamma"`
 (two gamma distributions). By default, the threshold will be selected by calculating 
 the distance at which the average of sensitivity and specificity reaches its maximum 
 (`cutoff="optimal"`). Alternative threshold selection criteria are also providing, including
@@ -180,7 +182,7 @@ where the average of the sensitivity and specificity reaches its maximum.
 
 ```r
 # Find threshold using gmm method
-output <- findThreshold(dist_ham$DIST_NEAREST, method="gmm", model="gamma-gamma")
+output <- findThreshold(dist_ham$dist_nearest, method="gmm", model="gamma-gamma")
 
 # Plot distance histogram, Gaussian fits, and optimum threshold
 plot(output, binwidth=0.02, title="GMM Method: gamma-gamma")
@@ -194,7 +196,7 @@ print(output)
 ```
 
 ```
-## [1] 0.120999
+## [1] 0.1208666
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -207,18 +209,18 @@ completely bin size independent and only engages the real input data.
 The `fields` argument to `distToNearest` will split the input `data.frame`
 into groups based on values in the specified fields (columns) and will 
 treat them independently. For example, if the input data has multiple 
-samples, then `fields="SAMPLE"` would allow each sample to be analyzed 
+samples, then `fields="sample_id"` would allow each sample to be analyzed 
 separately.
 
 In the previous examples we used a subset of the original example data. In the
 following example, we will use the two available samples, `-1h` and `+7d`, 
-and will set `fields="SAMPLE"`. This will reproduce previous results for sample 
+and will set `fields="sample_id"`. This will reproduce previous results for sample 
 `-1h` and add results for sample `+7d`.
 
 
 ```r
 dist_fields <- distToNearest(ExampleDb, model="ham", normalize="len", 
-                             fields="SAMPLE", nproc=1)
+                             fields="sample_id", nproc=1)
 ```
 
 We can plot the nearest neighbor distances for the two samples:
@@ -226,14 +228,14 @@ We can plot the nearest neighbor distances for the two samples:
 
 ```r
 # Generate grouped histograms
-p4 <- ggplot(subset(dist_fields, !is.na(DIST_NEAREST)), 
-             aes(x=DIST_NEAREST)) + 
+p4 <- ggplot(subset(dist_fields, !is.na(dist_nearest)), 
+             aes(x=dist_nearest)) + 
     theme_bw() + 
     xlab("Grouped Hamming distance") + 
     ylab("Count") +
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
-    facet_grid(SAMPLE ~ ., scales="free_y")
+    facet_grid(sample_id ~ ., scales="free_y")
 plot(p4)
 ```
 
@@ -247,27 +249,29 @@ for `+7d` as well.
 Specifying the `cross` argument to `distToNearest` forces distance calculations 
 to be performed across groups, such that the nearest neighbor of each sequence 
 will always be a sequence in a different group. In the following example 
-we set `cross="SAMPLE"`, which will group the data into `-1h` and 
+we set `cross="sample"`, which will group the data into `-1h` and 
 `+7d` sample subsets. Thus, nearest neighbor distances for sequences in sample 
 `-1h` will be restricted to the closest sequence in sample `+7d` and vice versa.
 
 
 ```r
-dist_cross <- distToNearest(ExampleDb, model="ham", first=FALSE, 
-                            normalize="len", cross="SAMPLE", nproc=1)
+dist_cross <- distToNearest(ExampleDb, sequenceColumn="junction", 
+                            vCallColumn="v_call_genotyped", jCallColumn="j_call",
+                            model="ham", first=FALSE, 
+                            normalize="len", cross="sample_id", nproc=1)
 ```
 
 
 ```r
 # Generate cross sample histograms
-p5 <- ggplot(subset(dist_cross, !is.na(CROSS_DIST_NEAREST)), 
-             aes(x=CROSS_DIST_NEAREST)) + 
+p5 <- ggplot(subset(dist_cross, !is.na(cross_dist_nearest)), 
+             aes(x=cross_dist_nearest)) + 
     theme_bw() + 
     xlab("Cross-sample Hamming distance") + 
     ylab("Count") +
     geom_histogram(color="white", binwidth=0.02) +
     geom_vline(xintercept=0.12, color="firebrick", linetype=2) +
-    facet_grid(SAMPLE ~ ., scales="free_y")
+    facet_grid(sample_id ~ ., scales="free_y")
 plot(p5)
 ```
 
@@ -309,12 +313,12 @@ library(dplyr)
 ```r
 library(alakazam)
 top_10_sizes <- ExampleDb %>%
-     group_by(JUNCTION_LENGTH) %>% # group by junction length
+     group_by(junction_length) %>% # group by junction length
      do(alakazam::groupGenes(., first=TRUE)) %>% # group by V and J call
-     mutate(GROUP_ID=paste(JUNCTION_LENGTH,VJ_GROUP, sep="_")) %>% # Create group ids based on junction length and VJ calls
+     mutate(GROUP_ID=paste(junction_length, vj_group, sep="_")) %>% # Create group ids based on junction length and VJ calls
      ungroup() %>%
      group_by(GROUP_ID) %>% # group by GROUP_ID
-     distinct(JUNCTION) %>% # for each group, we want to count unique junctions, so keep distinct
+     distinct(junction) %>% # for each group, we want to count unique junctions, so keep distinct
      summarize(SIZE=n()) %>% # get the size of the group, the number of sequences
      arrange(desc(SIZE)) %>% # sort by decreasing size
      select(SIZE) %>% 
@@ -349,8 +353,8 @@ top_10_sizes
 # Use 30 to subsample
 # NOTE. This is a toy example. To use 30 with real data 
 # is probably not a good choice.
-dist <- distToNearest(ExampleDb, 
-                      vCallColumn="V_CALL_GENOTYPED", 
+dist <- distToNearest(ExampleDb, sequenceColumn="junction", 
+                      vCallColumn="v_call_genotyped", jCallColumn="j_call",
                       model="ham", 
                       first=FALSE, normalize="len",
                       subsample = 30)

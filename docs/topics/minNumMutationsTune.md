@@ -71,10 +71,13 @@ Examples
 ```R
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
+db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 
 # Count the number of mutations per 5-mer
-subCount <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
+subCount <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+vCallColumn="v_call",
+model="S", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=TRUE)
 
 # Tune minNumMutations
@@ -99,6 +102,9 @@ See argument `numMutationsOnly` in [createSubstitutionMatrix](createSubstitution
 for generating the required input `data.frame` `subCount`. 
 See argument `minNumMutations` in [createSubstitutionMatrix](createSubstitutionMatrix.md)
 for what it does.
+
+
+
 
 
 

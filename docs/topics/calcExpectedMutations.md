@@ -11,9 +11,13 @@ frequencies of a given sequence. This is primarily a helper function for
 Usage
 --------------------
 ```
-calcExpectedMutations(germlineSeq, inputSeq = NULL,
-targetingModel = HH_S5F, regionDefinition = NULL,
-mutationDefinition = NULL)
+calcExpectedMutations(
+germlineSeq,
+inputSeq = NULL,
+targetingModel = HH_S5F,
+regionDefinition = NULL,
+mutationDefinition = NULL
+)
 ```
 
 Arguments
@@ -53,13 +57,13 @@ regions in the `regionDefinition`. For example, when using the default
 [IMGT_V](IMGT_SCHEMES.md) definition, which defines positions for CDR and 
 FWR, the following columns are calculated:
 
-+ `MU_EXPECTED_CDR_R`:  number of replacement mutations in CDR1 and 
++ `mu_expected_cdr_r`:  number of replacement mutations in CDR1 and 
 CDR2 of the V-segment.
-+ `MU_EXPECTED_CDR_S`:  number of silent mutations in CDR1 and CDR2 
++ `mu_expected_cdr_s`:  number of silent mutations in CDR1 and CDR2 
 of the V-segment.
-+ `MU_EXPECTED_FWR_R`:  number of replacement mutations in FWR1, 
++ `mu_expected_fwr_r`:  number of replacement mutations in FWR1, 
 FWR2 and FWR3 of the V-segment.
-+ `MU_EXPECTED_FWR_S`:  number of silent mutations in FWR1, FWR2 and
++ `mu_expected_fwr_s`:  number of silent mutations in FWR1, FWR2 and
 FWR3 of the V-segment.
 
 
@@ -84,18 +88,18 @@ Examples
 data(ExampleDb, package="alakazam")
 
 # Use first entry in the exampled data for input and germline sequence
-in_seq <- ExampleDb[["SEQUENCE_IMGT"]][1]
-germ_seq <-  ExampleDb[["GERMLINE_IMGT_D_MASK"]][1]
+in_seq <- ExampleDb[["sequence_alignment"]][1]
+germ_seq <-  ExampleDb[["germline_alignment_d_mask"]][1]
 
 # Identify all mutations in the sequence
-calcExpectedMutations(in_seq, germ_seq)
+calcExpectedMutations(germ_seq,in_seq)
 
 ```
 
 
 ```
-    SEQ_R     SEQ_S 
-0.7668156 0.2331844 
+    seq_r     seq_s 
+0.7636446 0.2363554 
 
 ```
 
@@ -103,13 +107,13 @@ calcExpectedMutations(in_seq, germ_seq)
 ```R
 
 # Identify only mutations the V segment minus CDR3
-calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V)
+calcExpectedMutations(germ_seq, in_seq, regionDefinition=IMGT_V)
 
 ```
 
 
 ```
-     CDR_R      CDR_S      FWR_R      FWR_S 
+     cdr_r      cdr_s      fwr_r      fwr_s 
 0.20544721 0.04081758 0.56090228 0.19283293 
 
 ```
@@ -118,13 +122,13 @@ calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V)
 ```R
 
 # Define mutations based on hydropathy
-calcExpectedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
+calcExpectedMutations(germ_seq, in_seq, regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS)
 ```
 
 
 ```
-    CDR_R     CDR_S     FWR_R     FWR_S 
+    cdr_r     cdr_s     fwr_r     fwr_s 
 0.1209459 0.1253189 0.3169116 0.4368236 
 
 ```
@@ -137,6 +141,9 @@ See also
 [expectedMutations](expectedMutations.md) calls this function.
 To create a custom `targetingModel` see [createTargetingModel](createTargetingModel.md).
 See [calcObservedMutations](calcObservedMutations.md) for getting observed mutation counts.
+
+
+
 
 
 

@@ -16,9 +16,12 @@ MK_RS5NF
 
 
 
+
 Format
 -------------------
+
 [TargetingModel](TargetingModel-class.md) object.
+
 
 References
 -------------------
@@ -41,6 +44,9 @@ publication; [HH_S5F](HH_S5F.md) for the human heavy chain silent 5-mer
 functional targeting model; [HKL_S5F](HKL_S5F.md) for the human light chain 
 silent 5-mer functional targeting model; and [U5N](U5N.md) for the 
 uniform 5-mer null targeting model.
+
+
+
 
 
 

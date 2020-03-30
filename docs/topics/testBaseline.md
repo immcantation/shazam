@@ -32,14 +32,14 @@ Value
 
 A data.frame with test results containing the following columns:
 
-+ `REGION`:  sequence region, such as "CDR" and "FWR".
-+ `TEST`:    string defining the groups be compared. The
++ `region`:  sequence region, such as "CDR" and "FWR".
++ `test`:    string defining the groups be compared. The
 string is formated as the conclusion associated with the
 p-value in the form `GROUP1 != GROUP2`. Meaning,
 the p-value for rejection of the null hypothesis that 
 GROUP1 and GROUP2 have equivalent distributions.
-+ `PVALUE`:  two-sided p-value for the comparison.
-+ `FDR`:     FDR corrected `PVALUE`.
++ `pvalue`:  two-sided p-value for the comparison.
++ `fdr`:     FDR corrected `pvalue`.
 
 
 
@@ -61,18 +61,19 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG", "IgA"))
+db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG", "IGHA"))
 
 # Collapse clones
-db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK",
+db <- collapseClones(db, cloneColumn="clone_id",
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
 method="thresholdedFreq", minimumFrequency=0.6,
 includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
-sequenceColumn="CLONAL_SEQUENCE",
-germlineColumn="CLONAL_GERMLINE", 
+sequenceColumn="clonal_sequence",
+germlineColumn="clonal_germline", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
 targetingModel=HH_S5F,
@@ -91,7 +92,7 @@ Calculating BASELINe probability density functions...
 ```R
 
 # Group PDFs by the isotype
-grouped <- groupBaseline(baseline, groupBy="ISOTYPE")
+grouped <- groupBaseline(baseline, groupBy="c_call")
 
 ```
 
@@ -106,7 +107,7 @@ Calculating BASELINe statistics...
 ```R
 
 # Visualize isotype PDFs
-plot(grouped, "ISOTYPE")
+plot(grouped, "c_call")
 
 ```
 
@@ -115,18 +116,18 @@ plot(grouped, "ISOTYPE")
 ```R
 
 # Perform test on isotype PDFs
-testBaseline(grouped, groupBy="ISOTYPE")
+testBaseline(grouped, groupBy="c_call")
 ```
 
 
 ```
-  REGION       TEST      PVALUE        FDR
-1    CDR IgM != IgA 0.126536071 0.15184329
-2    CDR IgM != IgG 0.040137450 0.08027490
-3    CDR IgA != IgG 0.101394824 0.15184329
-4    FWR IgM != IgA 0.010416292 0.03124888
-5    FWR IgM != IgG 0.006309629 0.03124888
-6    FWR IgA != IgG 0.334456382 0.33445638
+  region         test      pvalue        fdr
+1    cdr IGHM != IGHA 0.126536071 0.15184329
+2    cdr IGHM != IGHG 0.040137450 0.08027490
+3    cdr IGHA != IGHG 0.101394824 0.15184329
+4    fwr IGHM != IGHA 0.010416292 0.03124888
+5    fwr IGHM != IGHG 0.006309629 0.03124888
+6    fwr IGHA != IGHG 0.334456382 0.33445638
 
 ```
 
@@ -136,6 +137,9 @@ See also
 -------------------
 
 To generate the [Baseline](Baseline-class.md) input object see [groupBaseline](groupBaseline.md).
+
+
+
 
 
 

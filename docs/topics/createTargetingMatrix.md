@@ -32,10 +32,13 @@ mutabilityModel
 Value
 -------------------
 
-A matrix with the same dimensions as the input `substitutionModel` 
+A `TargetingMatrix` with the same dimensions as the input `substitutionModel` 
 containing normalized targeting probabilities for each 5-mer motif with 
 row names defining the center nucleotide and column names defining the 
-5-mer nucleotide sequence.
+5-mer nucleotide sequence. 
+
+If the input `mutabilityModel` is of class `MutabilityModel`, then the output 
+`TargetingMatrix` will carry over the input `numMutS` and `numMutR` slots.
 
 
 Details
@@ -62,11 +65,16 @@ Examples
 ```R
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
+db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 
 # Create 4x1024 models using only silent mutations
-sub_model <- createSubstitutionMatrix(db, model="S")
-mut_model <- createMutabilityMatrix(db, sub_model, model="S")
+sub_model <- createSubstitutionMatrix(db, model="S", sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+vCallColumn="v_call")
+mut_model <- createMutabilityMatrix(db, sub_model, model="S",
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+vCallColumn="v_call")
 
 ```
 
@@ -88,7 +96,10 @@ See also
 
 [createSubstitutionMatrix](createSubstitutionMatrix.md), [extendSubstitutionMatrix](extendSubstitutionMatrix.md), 
 [createMutabilityMatrix](createMutabilityMatrix.md), [extendMutabilityMatrix](extendMutabilityMatrix.md), 
-[createTargetingModel](createTargetingModel.md)
+[TargetingMatrix](TargetingMatrix-class.md), [createTargetingModel](createTargetingModel.md)
+
+
+
 
 
 
