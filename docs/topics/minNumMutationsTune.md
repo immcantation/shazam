@@ -77,7 +77,7 @@ db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 subCount <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 vCallColumn="v_call",
-model="S", multipleMutation="independent",
+model="s", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=TRUE)
 
 # Tune minNumMutations

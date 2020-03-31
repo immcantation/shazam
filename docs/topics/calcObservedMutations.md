@@ -77,8 +77,8 @@ and silent (S) mutations.
 
 For `returnRaw=TRUE`, a list containing 
 
-+  `$pos`: A data frame whose columns (`position`, `R`, 
-`S`, and `region`) indicate, respecitively, the nucleotide 
++  `$pos`: A data frame whose columns (`position`, `r`, 
+`s`, and `region`) indicate, respecitively, the nucleotide 
 position, the number of R mutations at that position, the number of S 
 mutations at that position, and the region in which that nucleotide
 is in.

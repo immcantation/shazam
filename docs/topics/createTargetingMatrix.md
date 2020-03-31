@@ -68,10 +68,10 @@ data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 
 # Create 4x1024 models using only silent mutations
-sub_model <- createSubstitutionMatrix(db, model="S", sequenceColumn="sequence_alignment",
+sub_model <- createSubstitutionMatrix(db, model="s", sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 vCallColumn="v_call")
-mut_model <- createMutabilityMatrix(db, sub_model, model="S",
+mut_model <- createMutabilityMatrix(db, sub_model, model="s",
 sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 vCallColumn="v_call")

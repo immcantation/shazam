@@ -13,7 +13,7 @@ Usage
 ```
 createSubstitutionMatrix(
 db,
-model = c("S", "RS"),
+model = c("s", "rs"),
 sequenceColumn = "sequence_alignment",
 germlineColumn = "germline_alignment_d_mask",
 vCallColumn = "v_call",
@@ -31,10 +31,10 @@ db
 :   data.frame containing sequence data.
 
 model
-:   type of model to create. The default model, "S", 
-builds a model by counting only silent mutations. `model="S"`
+:   type of model to create. The default model, "s", 
+builds a model by counting only silent mutations. `model="s"`
 should be used for data that includes functional sequences.
-Setting `model="RS"` creates a model by counting both 
+Setting `model="rs"` creates a model by counting both 
 replacement and silent mutations and may be used on fully 
 non-functional sequence data sets.
 
@@ -140,14 +140,14 @@ db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 subCount <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 vCallColumn="v_call",
-model="S", multipleMutation="independent",
+model="s", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=TRUE)
 
 # Create model using only silent mutations
 sub <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 vCallColumn="v_call",
-model="S", multipleMutation="independent",
+model="s", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=FALSE,
 minNumMutations=20)
 ```

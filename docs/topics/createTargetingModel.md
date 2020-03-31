@@ -11,7 +11,7 @@ Usage
 ```
 createTargetingModel(
 db,
-model = c("S", "RS"),
+model = c("s", "rs"),
 sequenceColumn = "sequence_alignment",
 germlineColumn = "germline_alignment_d_mask",
 vCallColumn = "v_call",
@@ -33,10 +33,10 @@ db
 :   data.frame containing sequence data.
 
 model
-:   type of model to create. The default model, "S", 
-builds a model by counting only silent mutations. `model="S"`
+:   type of model to create. The default model, "s", 
+builds a model by counting only silent mutations. `model="s"`
 should be used for data that includes functional sequences.
-Setting `model="RS"` creates a model by counting both 
+Setting `model="rs"` creates a model by counting both 
 replacement and silent mutations and may be used on fully 
 non-functional sequence data sets.
 
@@ -122,7 +122,7 @@ data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 
 # Create model using only silent mutations and ignore multiple mutations
-model <- createTargetingModel(db, model="S", sequenceColumn="sequence_alignment",
+model <- createTargetingModel(db, model="s", sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 vCallColumn="v_call", multipleMutation="ignore")
 
@@ -141,7 +141,7 @@ model@mutability@numMutS
 
 
 ```
-[1] 0
+[1] 723
 
 ```
 

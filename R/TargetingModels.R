@@ -312,10 +312,10 @@ setMethod("plot", c(x="TargetingModel", y="missing"),
 #' motifs.
 #'
 #' @param    db                data.frame containing sequence data.
-#' @param    model             type of model to create. The default model, "S", 
-#'                             builds a model by counting only silent mutations. \code{model="S"}
+#' @param    model             type of model to create. The default model, "s", 
+#'                             builds a model by counting only silent mutations. \code{model="s"}
 #'                             should be used for data that includes functional sequences.
-#'                             Setting \code{model="RS"} creates a model by counting both 
+#'                             Setting \code{model="rs"} creates a model by counting both 
 #'                             replacement and silent mutations and may be used on fully 
 #'                             non-functional sequence data sets.
 #' @param    sequenceColumn    name of the column containing IMGT-gapped sample sequences.
@@ -394,20 +394,20 @@ setMethod("plot", c(x="TargetingModel", y="missing"),
 #' subCount <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 #'                                      germlineColumn="germline_alignment_d_mask",
 #'                                      vCallColumn="v_call",
-#'                                      model="S", multipleMutation="independent",
+#'                                      model="s", multipleMutation="independent",
 #'                                      returnModel="5mer", numMutationsOnly=TRUE)
 #'
 #' # Create model using only silent mutations
 #' sub <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 #'                                 germlineColumn="germline_alignment_d_mask",
 #'                                 vCallColumn="v_call",
-#'                                 model="S", multipleMutation="independent",
+#'                                 model="s", multipleMutation="independent",
 #'                                 returnModel="5mer", numMutationsOnly=FALSE,
 #'                                 minNumMutations=20)
 #' }
 #' 
 #' @export
-createSubstitutionMatrix <- function(db, model=c("S", "RS"), 
+createSubstitutionMatrix <- function(db, model=c("s", "rs"), 
                                      sequenceColumn="sequence_alignment",
                                      germlineColumn="germline_alignment_d_mask",
                                      vCallColumn="v_call",
@@ -464,7 +464,7 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
                                        multipleMutation=multipleMutation,
                                        model=model)
     
-    if (model == "S") { # Silent model
+    if (model == "s") { # Silent model
         for(index in 1:length(mutations)) {
             cSeq <-  s2c(db[[sequenceColumn]][index])
             cGL  <-  s2c(db[[germlineColumn]][index])
@@ -499,7 +499,7 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
                 }
             }
         }
-    } else if (model == "RS") { # RS model (All mutations)
+    } else if (model == "rs") { # RS model (All mutations)
         for (index in 1:length(mutations)) {
             cSeq <-  s2c(db[[sequenceColumn]][index])
             cGL  <-  s2c(db[[germlineColumn]][index])
@@ -703,7 +703,7 @@ createSubstitutionMatrix <- function(db, model=c("S", "RS"),
 #' subCount <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 #'                                      germlineColumn="germline_alignment_d_mask",
 #'                                      vCallColumn="v_call",
-#'                                      model="S", multipleMutation="independent",
+#'                                      model="s", multipleMutation="independent",
 #'                                      returnModel="5mer", numMutationsOnly=TRUE)
 #' 
 #' # Tune minNumMutations
@@ -745,12 +745,12 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #' @param    db                  data.frame containing sequence data.
 #' @param    substitutionModel   matrix of 5-mer substitution rates built by 
 #'                               \link{createSubstitutionMatrix}. Note, this model will
-#'                               only impact mutability scores when \code{model="S"}
+#'                               only impact mutability scores when \code{model="s"}
 #'                               (using only silent mutations).
-#' @param    model               type of model to create. The default model, "S", 
-#'                               builds a model by counting only silent mutations. \code{model="S"}
+#' @param    model               type of model to create. The default model, "s", 
+#'                               builds a model by counting only silent mutations. \code{model="s"}
 #'                               should be used for data that includes functional sequences.
-#'                               Setting \code{model="RS"} creates a model by counting both 
+#'                               Setting \code{model="rs"} creates a model by counting both 
 #'                               replacement and silent mutations and may be used on fully 
 #'                               non-functional sequence data sets.
 #' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
@@ -809,8 +809,8 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #' # Create model using only silent mutations
 #' sub_model <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 #'                                       germlineColumn="germline_alignment_d_mask",
-#'                                       vCallColumn="v_call",model="S")
-#' mut_model <- createMutabilityMatrix(db, sub_model, model="S", 
+#'                                       vCallColumn="v_call",model="s")
+#' mut_model <- createMutabilityMatrix(db, sub_model, model="s", 
 #'                                     sequenceColumn="sequence_alignment",
 #'                                     germlineColumn="germline_alignment_d_mask",
 #'                                     vCallColumn="v_call",
@@ -823,7 +823,7 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #' mut_model@numMutS
 #' 
 #' # Count the number of mutations in sequences containing each 5-mer
-#' mut_count <- createMutabilityMatrix(db, sub_model, model="S", 
+#' mut_count <- createMutabilityMatrix(db, sub_model, model="s", 
 #'                                     sequenceColumn="sequence_alignment",
 #'                                     germlineColumn="germline_alignment_d_mask",
 #'                                     vCallColumn="v_call",
@@ -831,7 +831,7 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #' }
 #' 
 #' @export
-createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
+createMutabilityMatrix <- function(db, substitutionModel, model=c("s", "rs"),
                                    sequenceColumn="sequence_alignment", 
                                    germlineColumn="germline_alignment_d_mask",
                                    vCallColumn="v_call",
@@ -839,7 +839,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
                                    minNumSeqMutations=500, 
                                    numSeqMutationsOnly=FALSE,
                                    returnSource=FALSE) {
-    # substitutionModel=sub_model; model="S"; sequenceColumn="sequence_alignment"; germlineColumn="germline_alignment_d_mask"
+    # substitutionModel=sub_model; model="s"; sequenceColumn="sequence_alignment"; germlineColumn="germline_alignment_d_mask"
     # vCallColumn="v_call"; multipleMutation="ignore"; minNumSeqMutations=10; returnSource=FALSE
     
     # Evaluate argument choices
@@ -954,7 +954,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
                     muType <- CODON_TABLE[1:4 + 4*(muCodonPos - 1), stri_flatten(codonGL)]
 
                     # Set characters that meet mutation criteria
-                    if (model == "S") {
+                    if (model == "s") {
                         muChars <- nuc_chars[1:4][nuc_chars[1:4] != glAtMutation & muType == "s"]
                     } else { 
                         muChars <- nuc_chars[1:4][nuc_chars[1:4] != glAtMutation]
@@ -984,7 +984,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
     # total counts of mutations
     # each list item is the total S and R mutation counts in a seq
     mutationsTotalLst <- lapply(mutations, function(m){ 
-        return( c(S=sum(m=="S", na.rm=T), R=sum(m=="R", na.rm=T)) ) 
+        return( c(S=sum(m=="s", na.rm=T), R=sum(m=="r", na.rm=T)) ) 
     })
     # total S and R mutation counts across seqs
     mutationsTotalRS <- Reduce("+", mutationsTotalLst)
@@ -1137,7 +1137,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
 #' sub <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 #'                                 germlineColumn="germline_alignment_d_mask",
 #'                                 vCallColumn="v_call", 
-#'                                 model="S", multipleMutation="independent",
+#'                                 model="s", multipleMutation="independent",
 #'                                 returnModel="5mer", numMutationsOnly=FALSE,
 #'                                 minNumMutations=20)
 #'
@@ -1146,7 +1146,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("S", "RS"),
 #'                                    sequenceColumn="sequence_alignment",
 #'                                    germlineColumn="germline_alignment_d_mask",
 #'                                    vCallColumn="v_call",
-#'                                    model="S", multipleMutation="independent",
+#'                                    model="s", multipleMutation="independent",
 #'                                    numSeqMutationsOnly=TRUE)
 #' 
 #' # Tune minNumSeqMutations
@@ -1191,7 +1191,7 @@ minNumSeqMutationsTune <- function(mutCount, minNumSeqMutationsRange) {
 #' # Create model using only silent mutations
 #' sub_model <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 #'                                       germlineColumn="germline_alignment_d_mask",
-#'                                       vCallColumn="v_call",model="S")
+#'                                       vCallColumn="v_call",model="s")
 #' ext_model <- extendSubstitutionMatrix(sub_model)
 #' 
 #' @export
@@ -1261,10 +1261,10 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
-#' sub_model <- createSubstitutionMatrix(db, model="S", sequenceColumn="sequence_alignment",
+#' sub_model <- createSubstitutionMatrix(db, model="s", sequenceColumn="sequence_alignment",
 #'                                       germlineColumn="germline_alignment_d_mask",
 #'                                       vCallColumn="v_call")
-#' mut_model <- createMutabilityMatrix(db, sub_model, model="S", 
+#' mut_model <- createMutabilityMatrix(db, sub_model, model="s", 
 #'                                     sequenceColumn="sequence_alignment",
 #'                                     germlineColumn="germline_alignment_d_mask",
 #'                                     vCallColumn="v_call")
@@ -1364,10 +1364,10 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Create 4x1024 models using only silent mutations
-#' sub_model <- createSubstitutionMatrix(db, model="S", sequenceColumn="sequence_alignment",
+#' sub_model <- createSubstitutionMatrix(db, model="s", sequenceColumn="sequence_alignment",
 #'                                       germlineColumn="germline_alignment_d_mask",
 #'                                       vCallColumn="v_call")
-#' mut_model <- createMutabilityMatrix(db, sub_model, model="S",
+#' mut_model <- createMutabilityMatrix(db, sub_model, model="s",
 #'                                     sequenceColumn="sequence_alignment",
 #'                                     germlineColumn="germline_alignment_d_mask",
 #'                                     vCallColumn="v_call")
@@ -1410,10 +1410,10 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' \code{createTargetingModel} creates a 5-mer \code{TargetingModel}.
 #'
 #' @param    db                  data.frame containing sequence data.
-#' @param    model               type of model to create. The default model, "S", 
-#'                               builds a model by counting only silent mutations. \code{model="S"}
+#' @param    model               type of model to create. The default model, "s", 
+#'                               builds a model by counting only silent mutations. \code{model="s"}
 #'                               should be used for data that includes functional sequences.
-#'                               Setting \code{model="RS"} creates a model by counting both 
+#'                               Setting \code{model="rs"} creates a model by counting both 
 #'                               replacement and silent mutations and may be used on fully 
 #'                               non-functional sequence data sets.
 #' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
@@ -1466,7 +1466,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
-#' model <- createTargetingModel(db, model="S", sequenceColumn="sequence_alignment",
+#' model <- createTargetingModel(db, model="s", sequenceColumn="sequence_alignment",
 #'                               germlineColumn="germline_alignment_d_mask",
 #'                               vCallColumn="v_call", multipleMutation="ignore")
 #' }
@@ -1478,7 +1478,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' model@mutability@numMutS
 #' 
 #' @export
-createTargetingModel <- function(db, model=c("S", "RS"), sequenceColumn="sequence_alignment",
+createTargetingModel <- function(db, model=c("s", "rs"), sequenceColumn="sequence_alignment",
                                  germlineColumn="germline_alignment_d_mask",
                                  vCallColumn="v_call",
                                  multipleMutation=c("independent", "ignore"),
@@ -1594,7 +1594,7 @@ calculateMutability <- function(sequences, model=HH_S5F, progress=FALSE) {
 
 
 # Create model and rescale mutabilities
-# model <- createTargetingModel(db, model="S", multipleMutation="ignore")
+# model <- createTargetingModel(db, model="s", multipleMutation="ignore")
 # mut <- rescaleMutability(model)
 rescaleMutability <- function(model, mean=1.0) {
     if (is(model, "TargetingModel")) {
@@ -2431,7 +2431,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
 #'     curDb = db[db[["sample_id"]] == unique(db[["sample_id"]])[i], ]
 #'     
 #'     # Count the number of mutations per 5-mer
-#'     subCount = createSubstitutionMatrix(db=curDb, model="S", 
+#'     subCount = createSubstitutionMatrix(db=curDb, model="s", 
 #'                                         sequenceColumn="sequence_alignment",
 #'                                         germlineColumn="germline_alignment_d_mask",
 #'                                         vCallColumn="v_call",
@@ -2658,7 +2658,7 @@ listMutations <- function(seqInput, seqGL, multipleMutation, model) {
        codonsWithMultipleMutations <- as.numeric(names(tableMutationCodons[tableMutationCodons>1]))
        mutations <- mutations[!(mutationCodons %in% codonsWithMultipleMutations)]
     }
-    if (model == "S") {
+    if (model == "s") {
        mutations <- mutations[mutations == "s"]
     }
     if (length(mutations) > 0) {
@@ -2681,7 +2681,7 @@ listMutations <- function(seqInput, seqGL, multipleMutation, model) {
 listObservedMutations <- function(db, sequenceColumn="sequence_alignment", 
                                   germlineColumn="germline_alignment_d_mask",
                                   multipleMutation=c("independent", "ignore"),
-                                  model = c("RS", "S"))  {
+                                  model = c("rs", "s"))  {
     
     # Make sure the columns specified exist 
     if (!(sequenceColumn %in% names(db))) {

@@ -13,7 +13,7 @@ Usage
 createMutabilityMatrix(
 db,
 substitutionModel,
-model = c("S", "RS"),
+model = c("s", "rs"),
 sequenceColumn = "sequence_alignment",
 germlineColumn = "germline_alignment_d_mask",
 vCallColumn = "v_call",
@@ -33,14 +33,14 @@ db
 substitutionModel
 :   matrix of 5-mer substitution rates built by 
 [createSubstitutionMatrix](createSubstitutionMatrix.md). Note, this model will
-only impact mutability scores when `model="S"`
+only impact mutability scores when `model="s"`
 (using only silent mutations).
 
 model
-:   type of model to create. The default model, "S", 
-builds a model by counting only silent mutations. `model="S"`
+:   type of model to create. The default model, "s", 
+builds a model by counting only silent mutations. `model="s"`
 should be used for data that includes functional sequences.
-Setting `model="RS"` creates a model by counting both 
+Setting `model="rs"` creates a model by counting both 
 replacement and silent mutations and may be used on fully 
 non-functional sequence data sets.
 
@@ -126,8 +126,8 @@ db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 # Create model using only silent mutations
 sub_model <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
-vCallColumn="v_call",model="S")
-mut_model <- createMutabilityMatrix(db, sub_model, model="S", 
+vCallColumn="v_call",model="s")
+mut_model <- createMutabilityMatrix(db, sub_model, model="s", 
 sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 vCallColumn="v_call",
@@ -148,7 +148,7 @@ mut_model@numMutS
 
 
 ```
-[1] 0
+[1] 897
 
 ```
 
@@ -156,7 +156,7 @@ mut_model@numMutS
 ```R
 
 # Count the number of mutations in sequences containing each 5-mer
-mut_count <- createMutabilityMatrix(db, sub_model, model="S", 
+mut_count <- createMutabilityMatrix(db, sub_model, model="s", 
 sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 vCallColumn="v_call",

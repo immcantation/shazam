@@ -108,7 +108,7 @@ for (i in 1:length(unique(db$sample_id))) {
 curDb = db[db[["sample_id"]] == unique(db[["sample_id"]])[i], ]
 
 # Count the number of mutations per 5-mer
-subCount = createSubstitutionMatrix(db=curDb, model="S", 
+subCount = createSubstitutionMatrix(db=curDb, model="s", 
 sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 vCallColumn="v_call",

@@ -17,15 +17,15 @@ Slots
 
 
 `.Data`
-:   a matrix
+:   matrix.
 
 `numMutS`
-:   a number indicating the number of silent mutations used for 
-estimating mutability
+:   number indicating the number of silent mutations used for 
+estimating mutability.
 
 `numMutR`
-:   a number indicating the number of replacement mutations used 
-for estimating mutability
+:   number indicating the number of replacement mutations used 
+for estimating mutability.
 
 
 

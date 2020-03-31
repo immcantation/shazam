@@ -32,7 +32,7 @@ Value
 
 A data.frame with test results containing the following columns:
 
-+ `region`:  sequence region, such as "CDR" and "FWR".
++ `region`:  sequence region, such as `cdr` and `fwr`.
 + `test`:    string defining the groups be compared. The
 string is formated as the conclusion associated with the
 p-value in the form `GROUP1 != GROUP2`. Meaning,

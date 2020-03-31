@@ -11,14 +11,14 @@ db <- subset(ExampleDb, ISOTYPE %in% c("IGHA","IGHG") & SAMPLE == "+7d")
 #### createSubstitutionMatrix ####
 
 profvis({
-    sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
+    sub_model <- createSubstitutionMatrix(db, model="s", multipleMutation="ignore")
 })
 
 #### createMutabilityMatrix ####
 
-sub_model <- createSubstitutionMatrix(db, model="S", multipleMutation="ignore")
+sub_model <- createSubstitutionMatrix(db, model="s", multipleMutation="ignore")
 profvis({
-    mut_model <- createMutabilityMatrix(db, sub_model, model="S", multipleMutation="ignore",
+    mut_model <- createMutabilityMatrix(db, sub_model, model="s", multipleMutation="ignore",
                                         minNumSeqMutations=10)
 })
 

@@ -6,7 +6,7 @@
 # 
 # @examples
 # # Generate a sampel mutations_array 
-# sample_matrix <- matrix(sample(20,4),nrow=2, dimnames=list( c("CDR","FWR"), c("R","S") ))
+# sample_matrix <- matrix(sample(20,4),nrow=2, dimnames=list( c("cdr","fwr"), c("r","s") ))
 # collapseMatrixToVector(sample_matrix)
 #
 collapseMatrixToVector <- function(mat, byrow = FALSE){    

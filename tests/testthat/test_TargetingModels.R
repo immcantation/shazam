@@ -7,7 +7,7 @@ test_that("createSubstitutionMatrix", {
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
     # Create model using only silent mutations
     
-    sub <- createSubstitutionMatrix(db, model="S", 
+    sub <- createSubstitutionMatrix(db, model="s", 
                                     sequenceColumn="SEQUENCE_IMGT", 
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     vCallColumn="V_CALL")
@@ -24,11 +24,11 @@ test_that("createMutabilityMatrix", {
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
     
     # Create model using only silent mutations
-    sub_model <- createSubstitutionMatrix(db, model="S",
+    sub_model <- createSubstitutionMatrix(db, model="s",
                                           sequenceColumn="SEQUENCE_IMGT", 
                                           germlineColumn="GERMLINE_IMGT_D_MASK",
                                           vCallColumn="V_CALL")
-    expect_warning(mut_model <- createMutabilityMatrix(db, sub_model, model="S",
+    expect_warning(mut_model <- createMutabilityMatrix(db, sub_model, model="s",
                                                        sequenceColumn="SEQUENCE_IMGT", 
                                                        germlineColumn="GERMLINE_IMGT_D_MASK",
                                                        vCallColumn="V_CALL"),
@@ -47,7 +47,7 @@ test_that("extendSubstitutionMatrix", {
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
     
     # Create model using only silent mutations
-    sub_model <- createSubstitutionMatrix(db, model="S",
+    sub_model <- createSubstitutionMatrix(db, model="s",
                                           sequenceColumn="SEQUENCE_IMGT", 
                                           germlineColumn="GERMLINE_IMGT_D_MASK",
                                           vCallColumn="V_CALL")
@@ -66,11 +66,11 @@ test_that("extendMutabilityMatrix", {
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
     
     # Create model using only silent mutations
-    sub_model <- createSubstitutionMatrix(db, model="S",
+    sub_model <- createSubstitutionMatrix(db, model="s",
                                           sequenceColumn="SEQUENCE_IMGT", 
                                           germlineColumn="GERMLINE_IMGT_D_MASK",
                                           vCallColumn="V_CALL")
-    expect_warning(mut_model <- createMutabilityMatrix(db, sub_model, model="S",
+    expect_warning(mut_model <- createMutabilityMatrix(db, sub_model, model="s",
                                                        sequenceColumn="SEQUENCE_IMGT", 
                                                        germlineColumn="GERMLINE_IMGT_D_MASK",
                                                        vCallColumn="V_CALL"),
@@ -91,11 +91,11 @@ test_that("createTargetingMatrix", {
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
     
     # Create 4x1024 models using only silent mutations
-    sub_model <- createSubstitutionMatrix(db, model="S",
+    sub_model <- createSubstitutionMatrix(db, model="s",
                                           sequenceColumn="SEQUENCE_IMGT", 
                                           germlineColumn="GERMLINE_IMGT_D_MASK",
                                           vCallColumn="V_CALL")
-    expect_warning(mut_model <- createMutabilityMatrix(db, sub_model, model="S",
+    expect_warning(mut_model <- createMutabilityMatrix(db, sub_model, model="s",
                                                        sequenceColumn="SEQUENCE_IMGT", 
                                                        germlineColumn="GERMLINE_IMGT_D_MASK",
                                                        vCallColumn="V_CALL"),
@@ -120,7 +120,7 @@ test_that("createTargetingModel", {
     
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
 
-    expect_warning(model <- createTargetingModel(db, model="S", multipleMutation="ignore",
+    expect_warning(model <- createTargetingModel(db, model="s", multipleMutation="ignore",
                                                  sequenceColumn="SEQUENCE_IMGT", 
                                                  germlineColumn="GERMLINE_IMGT_D_MASK",
                                                  vCallColumn="V_CALL"),
@@ -151,7 +151,7 @@ test_that("rescaleMutability", {
     db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
     
     # Create model and rescale mutabilities
-    expect_warning(model <- createTargetingModel(db, model="S", multipleMutation="ignore",
+    expect_warning(model <- createTargetingModel(db, model="s", multipleMutation="ignore",
                                                  sequenceColumn="SEQUENCE_IMGT", 
                                                  germlineColumn="GERMLINE_IMGT_D_MASK",
                                                  vCallColumn="V_CALL"),
@@ -320,25 +320,25 @@ test_that("createSubstitutionMatrix & createMutabilityMatrix, AIRR migration", {
     sub_c <- createSubstitutionMatrix(db_c, sequenceColumn="SEQUENCE_IMGT",
                                       germlineColumn="GERMLINE_IMGT_D_MASK",
                                       vCallColumn="V_CALL",
-                                      model="S", multipleMutation="independent",
+                                      model="s", multipleMutation="independent",
                                       returnModel="5mer", numMutationsOnly=FALSE)
     
     sub_a <- createSubstitutionMatrix(db_a, sequenceColumn="sequence_alignment",
                                       germlineColumn="germline_alignment_d_mask",
                                       vCallColumn="v_call",
-                                      model="S", multipleMutation="independent",
+                                      model="s", multipleMutation="independent",
                                       returnModel="5mer", numMutationsOnly=FALSE)
     
     expect_identical(sub_c, sub_a)
     
-    mut_c <- createMutabilityMatrix(db_c, sub_c, model="S", 
+    mut_c <- createMutabilityMatrix(db_c, sub_c, model="s", 
                                     sequenceColumn="SEQUENCE_IMGT",
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     vCallColumn="V_CALL",
                                     minNumSeqMutations=200,
                                     numSeqMutationsOnly=FALSE)
     
-    mut_a <- createMutabilityMatrix(db_a, sub_a, model="S", 
+    mut_a <- createMutabilityMatrix(db_a, sub_a, model="s", 
                                     sequenceColumn="sequence_alignment",
                                     germlineColumn="germline_alignment_d_mask",
                                     vCallColumn="v_call",
@@ -347,13 +347,13 @@ test_that("createSubstitutionMatrix & createMutabilityMatrix, AIRR migration", {
     
     expect_identical(mut_c, mut_a)
     
-    mutCount_c <- createMutabilityMatrix(db_c, sub_c, model="S", 
+    mutCount_c <- createMutabilityMatrix(db_c, sub_c, model="s", 
                                          sequenceColumn="SEQUENCE_IMGT",
                                          germlineColumn="GERMLINE_IMGT_D_MASK",
                                          vCallColumn="V_CALL",
                                          numSeqMutationsOnly=TRUE)
     
-    mutCount_a <- createMutabilityMatrix(db_a, sub_a, model="S", 
+    mutCount_a <- createMutabilityMatrix(db_a, sub_a, model="s", 
                                          sequenceColumn="sequence_alignment",
                                          germlineColumn="germline_alignment_d_mask",
                                          vCallColumn="v_call",
@@ -373,11 +373,11 @@ test_that("createTargetingModel, AIRR migration", {
     db_c <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
     db_a <- subset(ExampleDb_airr, isotype == "IgA" & sample == "-1h")
     
-    mod_c <- createTargetingModel(db_c, model="S", sequenceColumn="SEQUENCE_IMGT",
+    mod_c <- createTargetingModel(db_c, model="s", sequenceColumn="SEQUENCE_IMGT",
                                   germlineColumn="GERMLINE_IMGT_D_MASK",
                                   vCallColumn="V_CALL", multipleMutation="ignore")
     
-    mod_a <- createTargetingModel(db_a, model="S", sequenceColumn="sequence_alignment",
+    mod_a <- createTargetingModel(db_a, model="s", sequenceColumn="sequence_alignment",
                                   germlineColumn="germline_alignment_d_mask",
                                   vCallColumn="v_call", multipleMutation="ignore")
     

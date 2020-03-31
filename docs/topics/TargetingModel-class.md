@@ -72,6 +72,14 @@ the mutated nucleotide at the center of each 5-mer, one of
 `c("A", "C", "G", "T", "N")`, and columns define the complete 5-mer 
 of the unmutated nucleotide sequence.
 
+`numMutS`
+:   number indicating the number of silent mutations used for 
+estimating mutability.
+
+`numMutR`
+:   number indicating the number of replacement mutations used 
+for estimating mutability.
+
 
 
 

@@ -84,12 +84,12 @@ probability of mutability and substitution.
 
 ```{r, eval=FALSE}
 # Create substitution model using silent mutations
-sub_matrix <- createSubstitutionMatrix(ExampleDb, model="S", 
+sub_matrix <- createSubstitutionMatrix(ExampleDb, model="s", 
                                        sequenceColumn="sequence_alignment",
                                        germlineColumn="germline_alignment_d_mask",
                                        vCallColumn="v_call")
 # Create mutability model using silent mutations
-mut_matrix <- createMutabilityMatrix(ExampleDb, sub_matrix, model="S",
+mut_matrix <- createMutabilityMatrix(ExampleDb, sub_matrix, model="s",
                                      sequenceColumn="sequence_alignment",
                                      germlineColumn="germline_alignment_d_mask",
                                      vCallColumn="v_call")
@@ -116,7 +116,7 @@ clone_db <- collapseClones(ExampleDb, cloneColumn="clone_id",
                            nproc=1)
 # Create targeting model in one step using only silent mutations
 # Use consensus sequence input and germline columns
-model <- createTargetingModel(clone_db, model="S", sequenceColumn="clonal_sequence", 
+model <- createTargetingModel(clone_db, model="s", sequenceColumn="clonal_sequence", 
                               germlineColumn="clonal_germline", vCallColumn="v_call")
 ```
 
