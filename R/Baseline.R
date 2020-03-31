@@ -21,8 +21,8 @@ NULL
 #'                              used to test for selection. For example, \code{"local"} or 
 #'                              \code{"focused"}.                           
 #' @slot    regions             \code{character} vector defining the regions the BASELINe 
-#'                              analysis was carried out on. For \code{"CDR"} and \code{"FWR"} 
-#'                              or \code{"CDR1"}, \code{"CDR2"}, \code{"CDR3"}, etc.
+#'                              analysis was carried out on. For \code{"cdr"} and \code{"fwr"} 
+#'                              or \code{"cdr1"}, \code{"cdr2"}, \code{"cdr3"}, etc.
 #' @slot    numbOfSeqs          \code{matrix} of dimensions \code{r x c} containing the number of 
 #'                              sequences or PDFs in each region, where:\cr
 #'                              \code{r} = number of rows = number of groups or sequences.\cr
@@ -40,7 +40,7 @@ NULL
 #'                              \code{r} = number of rows = number of groups or sequences.\cr
 #'                              \code{c} = number of columns = number of regions.
 #' @slot    pdfs                \code{list} of matrices containing PDFs with one item for each 
-#'                              defined region (e.g. "CDR" and "FWR"). Matrices have dimensions
+#'                              defined region (e.g. \code{cdr} and \code{fwr}). Matrices have dimensions
 #'                              \code{r x c} dementions, where:\cr
 #'                              \code{r} = number of rows = number of sequences or groups. \cr
 #'                              \code{c} = number of columns = length of the PDF (default 4001).
@@ -109,8 +109,8 @@ setMethod("summary", c(object="Baseline", nproc=integer()),
 #'                              used to test for selection. For example, \code{"local"} or 
 #'                              \code{"focused"} or \code{"imbalanced"}.                           
 #' @param   regions             \code{character} vector defining the regions the BASELINe 
-#'                              analysis was carried out on. For \code{"CDR"} and \code{"FWR"} 
-#'                              or \code{"CDR1"}, \code{"CDR2"}, \code{"CDR3"}, etc. If \code{NULL}
+#'                              analysis was carried out on. For \code{"cdr"} and \code{"fwr"} 
+#'                              or \code{"cdr1"}, \code{"cdr2"}, \code{"cdr3"}, etc. If \code{NULL}
 #'                              then regions will be determined automatically from \code{regionDefinition}.
 #' @param   numbOfSeqs          \code{matrix} of dimensions \code{r x c} containing the number of 
 #'                              sequences or PDFs in each region, where:\cr
@@ -129,7 +129,7 @@ setMethod("summary", c(object="Baseline", nproc=integer()),
 #'                              \code{r} = number of rows = number of groups or sequences.\cr
 #'                              \code{c} = number of columns = number of regions.
 #' @param   pdfs                \code{list} of matrices containing PDFs with one item for each 
-#'                              defined region (e.g. "CDR" and "FWR"). Matrices have dimensions
+#'                              defined region (e.g. \code{cdr} and \code{fwr}). Matrices have dimensions
 #'                              \code{r x c} dementions, where:\cr
 #'                              \code{r} = number of rows = number of sequences or groups. \cr
 #'                              \code{c} = number of columns = length of the PDF (default 4001).

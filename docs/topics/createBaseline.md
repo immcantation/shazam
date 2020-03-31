@@ -46,8 +46,8 @@ used to test for selection. For example, `"local"` or
 
 regions
 :   `character` vector defining the regions the BASELINe 
-analysis was carried out on. For `"CDR"` and `"FWR"` 
-or `"CDR1"`, `"CDR2"`, `"CDR3"`, etc. If `NULL`
+analysis was carried out on. For `"cdr"` and `"fwr"` 
+or `"cdr1"`, `"cdr2"`, `"cdr3"`, etc. If `NULL`
 then regions will be determined automatically from `regionDefinition`.
 
 numbOfSeqs
@@ -76,7 +76,7 @@ of success in one binomial trial in each region, where:
 
 pdfs
 :   `list` of matrices containing PDFs with one item for each 
-defined region (e.g. "CDR" and "FWR"). Matrices have dimensions
+defined region (e.g. `cdr` and `fwr`). Matrices have dimensions
 `r x c` dementions, where:
 `r` = number of rows = number of sequences or groups. 
 `c` = number of columns = length of the PDF (default 4001).

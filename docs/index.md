@@ -43,7 +43,7 @@ or use the [issue tracker](https://bitbucket.org/kleinstein/shazam/issues?status
 # Dependencies
 
 **Depends:** ggplot2, stringi  
-**Imports:** alakazam, ape, diptest, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, kedd, KernSmooth, lazyeval, MASS, methods, parallel, progress, rlang, scales, seqinr, stats, tidyr, utils  
+**Imports:** alakazam, ape, diptest, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, kedd, KernSmooth, lazyeval, MASS, methods, parallel, progress, rlang, scales, seqinr, stats, tidyr, tidyselect, utils  
 **Suggests:** knitr, rmarkdown, testthat  
 **Extends:** FALSE
 

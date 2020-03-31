@@ -1,4 +1,4 @@
-Version 0.2.3.999 March 25, 2020
+Version 0.2.3.999 March 31, 2020
 -------------------------------------------------------------------------------
 
 Backwards Incompatible Changes:
@@ -24,6 +24,9 @@ Backwards Incompatible Changes:
      - mutation functions (e.g from `MU_COUNT_SEQ` to `mu_count_seq`)
      - `calcBaseline` and related functions and objects. e.g. from `PVALUE`, 
        `REGION`, `BASELINE_CI_PVALUE` to `pvalue`, `region`, `baseline_ci_pvalue`.
+ + Model names used by `createSubstitutionMatrix`, `createMutabilityMatrix` and 
+       `createTargetingModel`, changed from `model=c("S","RS")` to 
+       model=c("s","rs").
 
 General:
 
