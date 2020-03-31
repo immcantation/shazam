@@ -145,7 +145,7 @@ db_obs_v <- observedMutations(db, sequenceColumn="sequence_alignment",
                               nproc=1)
 # Show new FWR mutation columns
 db_obs_v %>% 
-    select(sequence_id, starts_with("mu_count_FWR")) %>%
+    select(sequence_id, starts_with("mu_count_fwr")) %>%
     head(n=4)
 
 # Calculate aggregate CDR and FWR V-segment R and S mutation frequencies

@@ -1268,7 +1268,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' 
 #' @return   A data.frame with test results containing the following columns:
 #'           \itemize{
-#'             \item  \code{region}:  sequence region, such as "CDR" and "FWR".
+#'             \item  \code{region}:  sequence region, such as \code{cdr} and \code{fwr}.
 #'             \item  \code{test}:    string defining the groups be compared. The
 #'                                    string is formated as the conclusion associated with the
 #'                                    p-value in the form \code{GROUP1 != GROUP2}. Meaning,

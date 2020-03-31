@@ -1565,8 +1565,8 @@ observedMutations <- function(db,
 #'           
 #'           For \code{returnRaw=TRUE}, a list containing 
 #'           \itemize{
-#'                \item \code{$pos}: A data frame whose columns (\code{position}, \code{R}, 
-#'                      \code{S}, and \code{region}) indicate, respecitively, the nucleotide 
+#'                \item \code{$pos}: A data frame whose columns (\code{position}, \code{r}, 
+#'                      \code{s}, and \code{region}) indicate, respecitively, the nucleotide 
 #'                      position, the number of R mutations at that position, the number of S 
 #'                      mutations at that position, and the region in which that nucleotide
 #'                      is in.

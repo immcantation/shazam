@@ -73,7 +73,7 @@ mouse specific models from Cui et al, 2016 (`mk_rs1nf` and `mk_rs5nf`), and
 amino acid Hamming distance (`aa`). 
 
 **Note:** Human and mouse distance measures that are backward compatible with 
-SHazaM v0.1.4 and Change-O v0.3.3 are also provide as `hs1f_compat` and
+SHazaM v0.1.4 and Change-O v0.3.3 are also provided as `hs1f_compat` and
 `m1n_compat`, respectively.
 
 For models that are not symmetric (e.g., distance from A to B is not equal to the

@@ -259,7 +259,7 @@ The `testBaseline` function will perform signifance testing between two
 grouped BASELINe PDFs, by region, and return a data.frame with the 
 following information:
 
-* `region`: The sequence region, such as "CDR" and "FWR".
+* `region`: The sequence region, such as `cdr` and `fwr`.
 * `test`: The name of the two groups compared.
 * `pvalue`: Two-sided p-value for the comparison.
 * `fdr`: FDR corrected p-value.
