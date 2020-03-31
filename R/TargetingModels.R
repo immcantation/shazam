@@ -1469,14 +1469,14 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' model <- createTargetingModel(db, model="s", sequenceColumn="sequence_alignment",
 #'                               germlineColumn="germline_alignment_d_mask",
 #'                               vCallColumn="v_call", multipleMutation="ignore")
-#' }
+#' 
 #' 
 #' # Access and view mutability estimates (not run)
-#' # print(model@mutability)
+#' print(model@mutability)
 #' 
 #' # View the number of S mutations used for estimating mutabilities
 #' model@mutability@numMutS
-#' 
+#' }
 #' @export
 createTargetingModel <- function(db, model=c("s", "rs"), sequenceColumn="sequence_alignment",
                                  germlineColumn="germline_alignment_d_mask",
