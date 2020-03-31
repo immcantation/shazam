@@ -128,7 +128,7 @@ boundaries of the Ig sequence. For convenience, `shazam` provides a set of such 
 
 When supplying one of these objects to `regionDefinition`, and with `combined=FALSE`, the resultant mutation counts/frequencies will be tabulated in a way consistent with the granularity of the object's region definition. For example, 
 
-* With `IMGT_V_BY_REGIONS`, mutation frequencies will be reported in columns `mu_freq_cdr1_R`, `mu_freq_cdr1_S`, `mu_freq_cdr2_R`, `mu_freq_cdr2_S`, `mu_freq_fwr1_R`, `mu_freq_fwr1_S`, `mu_freq_fwr2_R`, `mu_freq_fwr2_S`, `mu_freq_fwr3_R`, and `mu_freq_fwr3_S`.
+* With `IMGT_V_BY_REGIONS`, mutation frequencies will be reported in columns `mu_freq_cdr1_r`, `mu_freq_cdr1_s`, `mu_freq_cdr2_r`, `mu_freq_cdr2_s`, `mu_freq_fwr1_r`, `mu_freq_fwr1_s`, `mu_freq_fwr2_r`, `mu_freq_fwr2_s`, `mu_freq_fwr3_r`, and `mu_freq_fwr3_s`.
 
 * With `IMGT_V`, mutation frequencies will be reported in columns `mu_freq_cdr_r`, `mu_freq_cdr_s`, `mu_freq_fwr_r`, and `mu_freq_fwr_s`.
 
