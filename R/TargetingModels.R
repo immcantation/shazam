@@ -203,11 +203,11 @@ MutabilityModelWithSource <- setClass("MutabilityModelWithSource",
 #' \code{TargetingMatrix} defines a data structure for just the targeting matrix 
 #' (as opposed to the entire \code{TargetingModel})
 #' 
-#' @slot    .Data          a matrix
-#' @slot    numMutS        a number indicating the number of silent mutations used for 
-#'                         estimating mutability
-#' @slot    numMutR        a number indicating the number of replacement mutations used 
-#'                         for estimating mutability  
+#' @slot    .Data          matrix.
+#' @slot    numMutS        number indicating the number of silent mutations used for 
+#'                         estimating mutability.
+#' @slot    numMutR        number indicating the number of replacement mutations used 
+#'                         for estimating mutability. 
 #'                         
 #' @name         TargetingMatrix-class
 #' @rdname       TargetingMatrix-class
@@ -247,6 +247,10 @@ TargetingMatrix <- setClass("TargetingMatrix",
 #'                         the mutated nucleotide at the center of each 5-mer, one of 
 #'                         \code{c("A", "C", "G", "T", "N")}, and columns define the complete 5-mer 
 #'                         of the unmutated nucleotide sequence.
+#' @slot    numMutS        number indicating the number of silent mutations used for 
+#'                         estimating mutability.
+#' @slot    numMutR        number indicating the number of replacement mutations used 
+#'                         for estimating mutability.
 #' 
 #' @seealso  See \link{createTargetingModel} building models from sequencing data.
 #'           
@@ -260,21 +264,21 @@ setClass("TargetingModel",
                  species="character",
                  date="character",
                  citation="character",
-                 substitution="matrix",
                  mutability="numeric",
+                 substitution="matrix",
+                 targeting="matrix",
                  numMutS="numeric",
-                 numMutR="numeric",
-                 targeting="matrix"),
+                 numMutR="numeric"),
          prototype=list(name="name",
                         description="description",
                         species="species",
                         date="2000-01-01",
                         citation="citation",
                         mutability=numeric(3125),
-                        numMutS=as.numeric(NA),
-                        numMutR=as.numeric(NA),
                         substitution=matrix(0, 5, 3125),
-                        targeting=matrix(0, 5, 3125)))
+                        targeting=matrix(0, 5, 3125),
+                        numMutS=as.numeric(NA),
+                        numMutR=as.numeric(NA)))
 
 
 #### Methods ####

@@ -65,6 +65,7 @@ Imports:
     seqinr,
     stats,
     tidyr,
+    tidyselect,
     utils
 Suggests:
     knitr,
