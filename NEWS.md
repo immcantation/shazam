@@ -26,7 +26,7 @@ Backwards Incompatible Changes:
        `REGION`, `BASELINE_CI_PVALUE` to `pvalue`, `region`, `baseline_ci_pvalue`.
  + Model names used by `createSubstitutionMatrix`, `createMutabilityMatrix` and 
        `createTargetingModel`, changed from `model=c("S","RS")` to 
-       model=c("s","rs").
+       `model=c("s","rs")`.
 
 General:
 
