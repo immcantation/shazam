@@ -12,8 +12,13 @@ sequence.
 Usage
 --------------------
 ```
-slideWindowDb(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", mutThresh, windowSize)
+slideWindowDb(
+db,
+sequenceColumn = "sequence_alignment",
+germlineColumn = "germline_alignment_d_mask",
+mutThresh,
+windowSize
+)
 ```
 
 Arguments
@@ -56,7 +61,9 @@ Examples
 data(ExampleDb, package="alakazam")
 
 # Apply the sliding window approach on a subset of ExampleDb
-slideWindowDb(db = ExampleDb[1:10, ], mutThresh=6, windowSize=10)
+slideWindowDb(db=ExampleDb[1:10, ], sequenceColumn="sequence_alignment", 
+germlineColumn="germline_alignment_d_mask", 
+mutThresh=6, windowSize=10)
 ```
 
 
@@ -72,6 +79,9 @@ See also
 
 See [slideWindowSeq](slideWindowSeq.md) for applying the sliding window approach on a single sequence. 
 See [slideWindowTune](slideWindowTune.md) for parameter tuning for `mutThresh` and `windowSize`.
+
+
+
 
 
 

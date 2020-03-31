@@ -9,12 +9,21 @@ Description
 Usage
 --------------------
 ```
-createTargetingModel(db, model = c("S", "RS"),
-sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", vCallColumn = "V_CALL",
-multipleMutation = c("independent", "ignore"), minNumMutations = 50,
-minNumSeqMutations = 500, modelName = "", modelDescription = "",
-modelSpecies = "", modelCitation = "", modelDate = NULL)
+createTargetingModel(
+db,
+model = c("S", "RS"),
+sequenceColumn = "sequence_alignment",
+germlineColumn = "germline_alignment_d_mask",
+vCallColumn = "v_call",
+multipleMutation = c("independent", "ignore"),
+minNumMutations = 50,
+minNumSeqMutations = 500,
+modelName = "",
+modelDescription = "",
+modelSpecies = "",
+modelCitation = "",
+modelDate = NULL
+)
 ```
 
 Arguments
@@ -110,13 +119,33 @@ Examples
 ```R
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
+db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 
 # Create model using only silent mutations and ignore multiple mutations
-model <- createTargetingModel(db, model="S", multipleMutation="ignore")
+model <- createTargetingModel(db, model="S", sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+vCallColumn="v_call", multipleMutation="ignore")
+
 ```
 
 *Warning*:Insufficient number of mutations to infer some 5-mers. Filled with 0. 
+```R
+
+
+# Access and view mutability estimates (not run)
+# print(model@mutability)
+
+# View the number of S mutations used for estimating mutabilities
+model@mutability@numMutS
+```
+
+
+```
+[1] 0
+
+```
+
+
 
 See also
 -------------------
@@ -126,6 +155,9 @@ See [plotMutability](plotMutability.md) plotting a mutability model.
 See [createSubstitutionMatrix](createSubstitutionMatrix.md), [extendSubstitutionMatrix](extendSubstitutionMatrix.md), 
 [createMutabilityMatrix](createMutabilityMatrix.md), [extendMutabilityMatrix](extendMutabilityMatrix.md) and 
 [createTargetingMatrix](createTargetingMatrix.md) for component steps in building a model.
+
+
+
 
 
 

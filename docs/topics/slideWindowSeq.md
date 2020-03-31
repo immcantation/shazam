@@ -49,8 +49,8 @@ Examples
 ```R
 # Use an entry in the example data for input and germline sequence
 data(ExampleDb, package="alakazam")
-in_seq <- ExampleDb[100, "SEQUENCE_IMGT"]
-germ_seq <-  ExampleDb[100, "GERMLINE_IMGT_D_MASK"]
+in_seq <- ExampleDb[["sequence_alignment"]][100]
+germ_seq <-  ExampleDb[["germline_alignment_d_mask"]][100]
 
 # Determine if in_seq has 6 or more mutations in 10 consecutive nucleotides
 slideWindowSeq(inputSeq=in_seq, germlineSeq=germ_seq, mutThresh=6, windowSize=10)
@@ -71,6 +71,9 @@ See also
 mutations. See [slideWindowDb](slideWindowDb.md) for applying the sliding window approach on a 
 `data.frame`. See [slideWindowTune](slideWindowTune.md) for parameter tuning for `mutThresh`
 and `windowSize`.
+
+
+
 
 
 

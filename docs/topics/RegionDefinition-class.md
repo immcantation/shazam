@@ -9,6 +9,8 @@ boundaries of an Ig sequence.
 
 
 
+
+
 Slots
 -------------------
 
@@ -29,11 +31,11 @@ determine the number of regions.
 :   length of the sequence.
 
 `regions`
-:   levels of the boundaries; e.g, `c("CDR", "FWR")`.
+:   levels of the boundaries; e.g, `c("cdr", "fwr")`.
 
 `labels`
 :   labels for the boundary and mutations combinations;
-e.g., `c("CDR_R", "CDR_S", "FWR_R", "FWR_S")`.
+e.g., `c("cdr_r", "cdr_s", "fwr_r", "fwr_s")`.
 
 `citation`
 :   publication source.
@@ -45,6 +47,9 @@ See also
 -------------------
 
 See [IMGT_SCHEMES](IMGT_SCHEMES.md) for a set of predefined `RegionDefinition` objects.
+
+
+
 
 
 

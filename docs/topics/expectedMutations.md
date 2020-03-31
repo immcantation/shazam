@@ -10,9 +10,15 @@ sequence in the input `data.frame`.
 Usage
 --------------------
 ```
-expectedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", targetingModel = HH_S5F,
-regionDefinition = NULL, mutationDefinition = NULL, nproc = 1)
+expectedMutations(
+db,
+sequenceColumn = "sequence_alignment",
+germlineColumn = "germline_alignment_d_mask",
+targetingModel = HH_S5F,
+regionDefinition = NULL,
+mutationDefinition = NULL,
+nproc = 1
+)
 ```
 
 Arguments
@@ -62,13 +68,13 @@ The columns names are dynamically created based on the regions in
 definition, which defines positions for CDR and FWR, the following columns are
 added:  
 
-+ `MU_EXPECTED_CDR_R`:  number of replacement mutations in CDR1 and 
++ `mu_expected_cdr_r`:  number of replacement mutations in CDR1 and 
 CDR2 of the V-segment.
-+ `MU_EXPECTED_CDR_S`:  number of silent mutations in CDR1 and CDR2 
++ `mu_expected_cdr_s`:  number of silent mutations in CDR1 and CDR2 
 of the V-segment.
-+ `MU_EXPECTED_FWR_R`:  number of replacement mutations in FWR1, 
++ `mu_expected_fwr_r`:  number of replacement mutations in FWR1, 
 FWR2 and FWR3 of the V-segment.
-+ `MU_EXPECTED_FWR_S`:  number of silent mutations in FWR1, FWR2 and
++ `mu_expected_fwr_s`:  number of silent mutations in FWR1, FWR2 and
 FWR3 of the V-segment.
 
 
@@ -88,12 +94,12 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d")
+db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
 
 # Calculate expected mutations over V region
 db_exp <- expectedMutations(db,
-sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK",
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
 regionDefinition=IMGT_V,
 nproc=1)
 
@@ -110,8 +116,8 @@ Calculating the expected frequencies of mutations...
 
 # Calculate hydropathy expected mutations over V region
 db_exp <- expectedMutations(db,
-sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK",
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
 regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS,
 nproc=1)
@@ -132,6 +138,9 @@ See also
 mutation frequencies. See [observedMutations](observedMutations.md) for getting observed 
 mutation counts. See [IMGT_SCHEMES](IMGT_SCHEMES.md) for a set of predefined 
 [RegionDefinition](RegionDefinition-class.md) objects.
+
+
+
 
 
 

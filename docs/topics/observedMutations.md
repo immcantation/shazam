@@ -10,10 +10,17 @@ sequence in the input `data.frame`.
 Usage
 --------------------
 ```
-observedMutations(db, sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", regionDefinition = NULL,
-mutationDefinition = NULL, ambiguousMode = c("eitherOr", "and"),
-frequency = FALSE, combine = FALSE, nproc = 1)
+observedMutations(
+db,
+sequenceColumn = "sequence_alignment",
+germlineColumn = "germline_alignment_d_mask",
+regionDefinition = NULL,
+mutationDefinition = NULL,
+ambiguousMode = c("eitherOr", "and"),
+frequency = FALSE,
+combine = FALSE,
+nproc = 1
+)
 ```
 
 Arguments
@@ -80,31 +87,31 @@ regions in the `regionDefinition`. For example, when using the
 [IMGT_V](IMGT_SCHEMES.md) definition, which defines positions for CDR and
 FWR, the following columns are added:
 
-+ `MU_COUNT_CDR_R`:  number of replacement mutations in CDR1 and 
++ `mu_count_cdr_r`:  number of replacement mutations in CDR1 and 
 CDR2 of the V-segment.
-+ `MU_COUNT_CDR_S`:  number of silent mutations in CDR1 and CDR2 
++ `mu_count_cdr_s`:  number of silent mutations in CDR1 and CDR2 
 of the V-segment.
-+ `MU_COUNT_FWR_R`:  number of replacement mutations in FWR1, 
++ `mu_count_fwr_r`:  number of replacement mutations in FWR1, 
 FWR2 and FWR3 of the V-segment.
-+ `MU_COUNT_FWR_S`:  number of silent mutations in FWR1, FWR2 and
++ `mu_count_fwr_s`:  number of silent mutations in FWR1, FWR2 and
 FWR3 of the V-segment.
 
 If `frequency=TRUE`, R and S mutation frequencies are
 calculated over the number of non-N positions in the speficied regions.
 
-+ `MU_FREQ_CDR_R`:  frequency of replacement mutations in CDR1 and 
++ `mu_freq_cdr_r`:  frequency of replacement mutations in CDR1 and 
 CDR2 of the V-segment.
-+ `MU_FREQ_CDR_S`:  frequency of silent mutations in CDR1 and CDR2 
++ `mu_freq_cdr_s`:  frequency of silent mutations in CDR1 and CDR2 
 of the V-segment.
-+ `MU_FREQ_FWR_R`:  frequency of replacement mutations in FWR1, 
++ `mu_freq_fwr_r`:  frequency of replacement mutations in FWR1, 
 FWR2 and FWR3 of the V-segment.
-+ `MU_FREQ_FWR_S`:  frequency of silent mutations in FWR1, FWR2 and
++ `mu_freq_fwr_s`:  frequency of silent mutations in FWR1, FWR2 and
 FWR3 of the V-segment.
  
 If `frequency=TRUE` and `combine=TRUE`, the mutations and non-N positions
-are aggregated and a single `MU_FREQ` value is returned
+are aggregated and a single `mu_freq` value is returned
 
-+ `MU_FREQ`:  frequency of replacement and silent mutations in the 
++ `mu_freq`:  frequency of replacement and silent mutations in the 
 specified region
 
 
@@ -132,18 +139,18 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
+db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
 
 # Calculate mutation frequency over the entire sequence
-db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK",
+db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
 frequency=TRUE,
 nproc=1)
 
 # Count of V-region mutations split by FWR and CDR
 # With mutations only considered replacement if charge changes
-db_obs <- observedMutations(db, sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK",
+db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
 regionDefinition=IMGT_V,
 mutationDefinition=CHARGE_MUTATIONS,
 nproc=1)
@@ -158,6 +165,9 @@ See also
 in each sequence grouped by the [RegionDefinition](RegionDefinition-class.md). 
 See [IMGT_SCHEMES](IMGT_SCHEMES.md) for a set of predefined [RegionDefinition](RegionDefinition-class.md) objects.
 See [expectedMutations](expectedMutations.md) for calculating expected mutation frequencies.
+
+
+
 
 
 

@@ -9,10 +9,18 @@ Visualize results from [minNumMutationsTune](minNumMutationsTune.md) and [minNum
 Usage
 --------------------
 ```
-plotTune(tuneMtx, thresh, criterion = c("5mer", "3mer", "1mer",
-"3mer+1mer", "measured", "inferred"), pchs = 1, ltys = 2, cols = 1,
-plotLegend = TRUE, legendPos = "topright", legendHoriz = FALSE,
-legendCex = 1)
+plotTune(
+tuneMtx,
+thresh,
+criterion = c("5mer", "3mer", "1mer", "3mer+1mer", "measured", "inferred"),
+pchs = 1,
+ltys = 2,
+cols = 1,
+plotLegend = TRUE,
+legendPos = "topright",
+legendHoriz = FALSE,
+legendCex = 1
+)
 ```
 
 Arguments
@@ -92,15 +100,19 @@ Examples
 ```R
 # Subset example data to one isotype and sample as demos
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgA")
+db <- subset(ExampleDb, c_call == "IGHA")
 
 tuneMtx = list()
-for (i in 1:length(unique(db$SAMPLE))) {
+for (i in 1:length(unique(db$sample_id))) {
 # Get data corresponding to current sample
-curDb = db[db$SAMPLE==unique(db$SAMPLE)[i], ]
+curDb = db[db[["sample_id"]] == unique(db[["sample_id"]])[i], ]
 
 # Count the number of mutations per 5-mer
-subCount = createSubstitutionMatrix(db=curDb, model="S", multipleMutation="independent",
+subCount = createSubstitutionMatrix(db=curDb, model="S", 
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+vCallColumn="v_call",
+multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=TRUE)
 
 # Tune over minNumMutations = 5..50
@@ -110,7 +122,7 @@ tuneMtx = c(tuneMtx, list(subTune))
 }
 
 # Name tuneMtx after sample names 
-names(tuneMtx) = unique(db$SAMPLE)
+names(tuneMtx) = unique(db[["sample_id"]])
 
 # plot with legend for both samples for a subset of minNumMutations values
 plotTune(tuneMtx, thresh=c(5, 15, 25, 40), criterion="3mer",
@@ -135,6 +147,9 @@ See also
 
 See [minNumMutationsTune](minNumMutationsTune.md) and [minNumSeqMutationsTune](minNumSeqMutationsTune.md) for generating 
 `tuneMtx`.
+
+
+
 
 
 

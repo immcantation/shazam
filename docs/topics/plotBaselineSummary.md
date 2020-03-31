@@ -10,10 +10,19 @@ using the BASELINe method.
 Usage
 --------------------
 ```
-plotBaselineSummary(baseline, idColumn, groupColumn = NULL,
-groupColors = NULL, subsetRegions = NULL, facetBy = c("region",
-"group"), title = NULL, style = c("summary"), size = 1,
-silent = FALSE, ...)
+plotBaselineSummary(
+baseline,
+idColumn,
+groupColumn = NULL,
+groupColors = NULL,
+subsetRegions = NULL,
+facetBy = c("region", "group"),
+title = NULL,
+style = c("summary"),
+size = 1,
+silent = FALSE,
+...
+)
 ```
 
 Arguments
@@ -93,18 +102,19 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgM", "IgG"))
+db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
 
 # Collapse clones
-db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK",
+db <- collapseClones(db, cloneColumn="clone_id",
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
 method="thresholdedFreq", minimumFrequency=0.6,
 includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
-sequenceColumn="CLONAL_SEQUENCE",
-germlineColumn="CLONAL_GERMLINE", 
+sequenceColumn="clonal_sequence",
+germlineColumn="clonal_germline", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
 targetingModel=HH_S5F,
@@ -123,7 +133,7 @@ Calculating BASELINe probability density functions...
 ```R
  
 # Grouping the PDFs by sample and isotype annotations
-grouped <- groupBaseline(baseline, groupBy=c("SAMPLE", "ISOTYPE"))
+grouped <- groupBaseline(baseline, groupBy=c("sample_id", "c_call"))
 
 ```
 
@@ -138,9 +148,9 @@ Calculating BASELINe statistics...
 ```R
 
 # Plot mean and confidence interval by region with custom group colors
-isotype_colors <- c("IgM"="darkorchid", "IgD"="firebrick", 
-"IgG"="seagreen", "IgA"="steelblue")
-plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", 
+isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
+"IGHG"="seagreen", "IGHA"="steelblue")
+plotBaselineSummary(grouped, "sample_id", "c_call", 
 groupColors=isotype_colors)
 
 ```
@@ -150,7 +160,7 @@ groupColors=isotype_colors)
 ```R
 
 # Facet by group instead of region
-plotBaselineSummary(grouped, "SAMPLE", "ISOTYPE", facetBy="group")
+plotBaselineSummary(grouped, "sample_id", "c_call", facetBy="group")
 ```
 
 ![8](plotBaselineSummary-8.png)
@@ -161,6 +171,9 @@ See also
 
 Takes as input either a [Baseline](Baseline-class.md) object returned by [groupBaseline](groupBaseline.md) 
 or a data.frame returned from [summarizeBaseline](summarizeBaseline.md).
+
+
+
 
 
 

@@ -40,12 +40,12 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
+db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
 
 # Make Baseline object
 baseline <- calcBaseline(db, 
-sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK", 
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
 targetingModel=HH_S5F,
@@ -65,7 +65,7 @@ Calculating BASELINe probability density functions...
 
 # Edit the field "description"
 baseline <- editBaseline(baseline, field="description", 
-value="+7d IgG")
+value="+7d IGHG")
 ```
 
 
@@ -74,6 +74,9 @@ See also
 -------------------
 
 See [Baseline](Baseline-class.md) for the input and return object.
+
+
+
 
 
 

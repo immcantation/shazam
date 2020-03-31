@@ -11,12 +11,17 @@ motifs.
 Usage
 --------------------
 ```
-createSubstitutionMatrix(db, model = c("S", "RS"),
-sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", vCallColumn = "V_CALL",
+createSubstitutionMatrix(
+db,
+model = c("S", "RS"),
+sequenceColumn = "sequence_alignment",
+germlineColumn = "germline_alignment_d_mask",
+vCallColumn = "v_call",
 multipleMutation = c("independent", "ignore"),
-returnModel = c("5mer", "1mer", "1mer_raw"), minNumMutations = 50,
-numMutationsOnly = FALSE)
+returnModel = c("5mer", "1mer", "1mer_raw"),
+minNumMutations = 50,
+numMutationsOnly = FALSE
+)
 ```
 
 Arguments
@@ -129,14 +134,20 @@ Examples
 ```R
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
+db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 
 # Count the number of mutations per 5-mer
-subCount <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
+subCount <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+vCallColumn="v_call",
+model="S", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=TRUE)
 
 # Create model using only silent mutations
-sub <- createSubstitutionMatrix(db, model="S", multipleMutation="independent",
+sub <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+vCallColumn="v_call",
+model="S", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=FALSE,
 minNumMutations=20)
 ```
@@ -149,6 +160,9 @@ See also
 [extendSubstitutionMatrix](extendSubstitutionMatrix.md), [createMutabilityMatrix](createMutabilityMatrix.md), 
 [createTargetingMatrix](createTargetingMatrix.md), [createTargetingModel](createTargetingModel.md),
 [minNumMutationsTune](minNumMutationsTune.md).
+
+
+
 
 
 

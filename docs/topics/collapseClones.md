@@ -11,13 +11,22 @@ group and appends columns containing the consensus sequences to the input
 Usage
 --------------------
 ```
-collapseClones(db, cloneColumn = "CLONE",
-sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", muFreqColumn = NULL,
-regionDefinition = NULL, method = c("mostCommon", "thresholdedFreq",
-"catchAll", "mostMutated", "leastMutated"), minimumFrequency = NULL,
-includeAmbiguous = FALSE, breakTiesStochastic = FALSE,
-breakTiesByColumns = NULL, expandedDb = FALSE, nproc = 1)
+collapseClones(
+db,
+cloneColumn = "clone_id",
+sequenceColumn = "sequence_alignment",
+germlineColumn = "germline_alignment_d_mask",
+muFreqColumn = NULL,
+regionDefinition = NULL,
+method = c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated",
+"leastMutated"),
+minimumFrequency = NULL,
+includeAmbiguous = FALSE,
+breakTiesStochastic = FALSE,
+breakTiesByColumns = NULL,
+expandedDb = FALSE,
+nproc = 1
+)
 ```
 
 Arguments
@@ -110,15 +119,15 @@ Value
 
 A modified `db` with the following additional columns: 
 
-+  `CLONAL_SEQUENCE`:  effective sequence for the clone.
-+  `CLONAL_GERMLINE`:  germline sequence for the clone.
-+  `CLONAL_SEQUENCE_MUFREQ`:  mutation frequency of 
-`CLONAL_SEQUENCE`; only added for the `"mostMutated"`
++  `clonal_sequence`:  effective sequence for the clone.
++  `clonal_germline`:  germline sequence for the clone.
++  `clonal_sequence_mufreq`:  mutation frequency of 
+`clonal_sequence`; only added for the `"mostMutated"`
 and `"leastMutated"` methods.
 
 
-`CLONAL_SEQUENCE` is generated with the method of choice indicated 
-by `method`, and `CLONAL_GERMLINE` is generated with the 
+`clonal_sequence` is generated with the method of choice indicated 
+by `method`, and `clonal_germline` is generated with the 
 `"mostCommon"` method, along with, where applicable, user-defined 
 parameters such as `minimumFrequency`, `includeAmbiguous`, 
 `breakTiesStochastic`, and `breakTiesByColumns`.
@@ -127,8 +136,8 @@ parameters such as `minimumFrequency`, `includeAmbiguous`,
 Consensus lengths
 -------------------
 
- For each clone, `CLONAL_SEQUENCE` and 
-`CLONAL_GERMLINE` have the same length. 
+ For each clone, `clonal_sequence` and 
+`clonal_germline` have the same length. 
 
 
 +  For the `"thresholdedFreq"`, `"mostCommon"`, and 
@@ -359,35 +368,47 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE %in% c("IgA", "IgG") & SAMPLE == "+7d" &
-CLONE %in% c("3100", "3141", "3184"))
+db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d" &
+clone_id %in% c("3100", "3141", "3184"))
 
 # thresholdedFreq method, resolving ties deterministically without using ambiguous characters
-clones <- collapseClones(db, method="thresholdedFreq", minimumFrequency=0.6,
+clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+germlineColumn="germline_alignment_d_mask",
+method="thresholdedFreq", minimumFrequency=0.6,
 includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 
 # mostCommon method, resolving ties deterministically using ambiguous characters
-clones <- collapseClones(db, method="mostCommon", 
+clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+germlineColumn="germline_alignment_d_mask",
+method="mostCommon", 
 includeAmbiguous=TRUE, breakTiesStochastic=FALSE)
 
 # Make a copy of db that has a mutation frequency column
 db2 <- observedMutations(db, frequency=TRUE, combine=TRUE)
 
 # mostMutated method, resolving ties stochastically
-clones <- collapseClones(db2, method="mostMutated", muFreqColumn="MU_FREQ", 
+clones <- collapseClones(db2, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+germlineColumn="germline_alignment_d_mask",
+method="mostMutated", muFreqColumn="mu_freq", 
 breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
 
 # mostMutated method, resolving ties deterministically using additional columns
-clones <- collapseClones(db2, method="mostMutated", muFreqColumn="MU_FREQ", 
+clones <- collapseClones(db2, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+germlineColumn="germline_alignment_d_mask",
+method="mostMutated", muFreqColumn="mu_freq", 
 breakTiesStochastic=FALSE, 
-breakTiesByColumns=list(c("DUPCOUNT"), c(max)))
+breakTiesByColumns=list(c("duplicate_count"), c(max)))
 
 # Build consensus for V segment only
 # Capture all nucleotide variations using ambiguous characters 
-clones <- collapseClones(db, method="catchAll", regionDefinition=IMGT_V)
+clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+germlineColumn="germline_alignment_d_mask",
+method="catchAll", regionDefinition=IMGT_V)
 
 # Return the same number of rows as the input
-clones <- collapseClones(db, method="mostCommon", expandedDb=TRUE)
+clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+germlineColumn="germline_alignment_d_mask",
+method="mostCommon", expandedDb=TRUE)
 ```
 
 
@@ -396,6 +417,9 @@ See also
 -------------------
 
 See [IMGT_SCHEMES](IMGT_SCHEMES.md) for a set of predefined [RegionDefinition](RegionDefinition-class.md) objects.
+
+
+
 
 
 

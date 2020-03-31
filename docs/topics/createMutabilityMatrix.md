@@ -10,12 +10,18 @@ the number of mutations occuring in the center position for all 5-mer motifs.
 Usage
 --------------------
 ```
-createMutabilityMatrix(db, substitutionModel, model = c("S", "RS"),
-sequenceColumn = "SEQUENCE_IMGT",
-germlineColumn = "GERMLINE_IMGT_D_MASK", vCallColumn = "V_CALL",
+createMutabilityMatrix(
+db,
+substitutionModel,
+model = c("S", "RS"),
+sequenceColumn = "sequence_alignment",
+germlineColumn = "germline_alignment_d_mask",
+vCallColumn = "v_call",
 multipleMutation = c("independent", "ignore"),
-minNumSeqMutations = 500, numSeqMutationsOnly = FALSE,
-returnSource = FALSE)
+minNumSeqMutations = 500,
+numSeqMutationsOnly = FALSE,
+returnSource = FALSE
+)
 ```
 
 Arguments
@@ -78,9 +84,11 @@ inferred). Default is `FALSE`.
 Value
 -------------------
 
-When `numSeqMutationsOnly` is `FALSE`, a named numeric vector of 1024 
-normalized mutability rates for each 5-mer motif with names defining the 5-mer 
-nucleotide sequence. 
+When `numSeqMutationsOnly` is `FALSE`, a `MutabilityModel` containing a
+named numeric vector of 1024 normalized mutability rates for each 5-mer motif with names 
+defining the 5-mer nucleotide sequence. With `returnSource=TRUE`, a 
+`MutabilityModelWithSource` containing a `data.frame` with a column indicating 
+whether each 5-mer mutability was inferred or measured.
 
 When `numSeqMutationsOnly` is `TRUE`, a named numeric
 vector of length 1024 counting the number of observed mutations in sequences containing 
@@ -113,11 +121,16 @@ Examples
 ```R
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
+db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 
 # Create model using only silent mutations
-sub_model <- createSubstitutionMatrix(db, model="S")
+sub_model <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+vCallColumn="v_call",model="S")
 mut_model <- createMutabilityMatrix(db, sub_model, model="S", 
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+vCallColumn="v_call",
 minNumSeqMutations=200,
 numSeqMutationsOnly=FALSE)
 
@@ -125,9 +138,28 @@ numSeqMutationsOnly=FALSE)
 
 *Warning*:Insufficient number of mutations to infer some 5-mers. Filled with 0. 
 ```R
+# View mutability esimates (not run)
+# print(mut_model)
+
+# View the number of S mutations used for estimating mutabilities
+mut_model@numMutS
+
+```
+
+
+```
+[1] 0
+
+```
+
+
+```R
 
 # Count the number of mutations in sequences containing each 5-mer
 mut_count <- createMutabilityMatrix(db, sub_model, model="S", 
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+vCallColumn="v_call",
 numSeqMutationsOnly=TRUE)
 ```
 
@@ -136,9 +168,12 @@ numSeqMutationsOnly=TRUE)
 See also
 -------------------
 
-[extendMutabilityMatrix](extendMutabilityMatrix.md), [createSubstitutionMatrix](createSubstitutionMatrix.md), 
+[MutabilityModel](MutabilityModel-class.md), [extendMutabilityMatrix](extendMutabilityMatrix.md), [createSubstitutionMatrix](createSubstitutionMatrix.md), 
 [createTargetingMatrix](createTargetingMatrix.md), [createTargetingModel](createTargetingModel.md),
 [minNumSeqMutationsTune](minNumSeqMutationsTune.md)
+
+
+
 
 
 

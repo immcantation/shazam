@@ -11,8 +11,7 @@ selection.
 Usage
 --------------------
 ```
-summarizeBaseline(baseline, returnType = c("baseline", "df"),
-nproc = 1)
+summarizeBaseline(baseline, returnType = c("baseline", "df"), nproc = 1)
 ```
 
 Arguments
@@ -69,18 +68,19 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, ISOTYPE == "IgG")
+db <- subset(ExampleDb, c_call == "IGHG")
 
 # Collapse clones
-db <- collapseClones(db, sequenceColumn="SEQUENCE_IMGT",
-germlineColumn="GERMLINE_IMGT_D_MASK",
+db <- collapseClones(db, cloneColumn="clone_id",
+sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
 method="thresholdedFreq", minimumFrequency=0.6,
 includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
 
 # Calculate BASELINe
 baseline <- calcBaseline(db, 
-sequenceColumn="CLONAL_SEQUENCE",
-germlineColumn="CLONAL_GERMLINE", 
+sequenceColumn="clonal_sequence",
+germlineColumn="clonal_germline", 
 testStatistic="focused",
 regionDefinition=IMGT_V,
 targetingModel=HH_S5F,
@@ -99,7 +99,7 @@ Calculating BASELINe probability density functions...
 ```R
 
 # Grouping the PDFs by the sample annotation
-grouped <- groupBaseline(baseline, groupBy="SAMPLE")
+grouped <- groupBaseline(baseline, groupBy="sample_id")
 
 ```
 
@@ -130,6 +130,9 @@ See also
 
 See [calcBaseline](calcBaseline.md) for generating `Baseline` objects and
 [groupBaseline](groupBaseline.md) for convolving groups of BASELINe PDFs.
+
+
+
 
 
 

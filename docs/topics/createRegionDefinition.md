@@ -9,8 +9,12 @@ Description
 Usage
 --------------------
 ```
-createRegionDefinition(name = "", boundaries = factor(),
-description = "", citation = "")
+createRegionDefinition(
+name = "",
+boundaries = factor(),
+description = "",
+citation = ""
+)
 ```
 
 Arguments
@@ -82,6 +86,9 @@ See also
 -------------------
 
 See [RegionDefinition](RegionDefinition-class.md) for the return object.
+
+
+
 
 
 

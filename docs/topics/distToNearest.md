@@ -13,14 +13,28 @@ sharing the same heavy chain VJL and light chain VJL combinations.
 Usage
 --------------------
 ```
-distToNearest(db, sequenceColumn = "JUNCTION", vCallColumn = "V_CALL",
-jCallColumn = "J_CALL", model = c("ham", "aa", "hh_s1f", "hh_s5f",
-"mk_rs1nf", "mk_rs5nf", "m1n_compat", "hs1f_compat"),
-normalize = c("len", "none"), symmetry = c("avg", "min"),
-first = TRUE, VJthenLen = TRUE, nproc = 1, fields = NULL,
-cross = NULL, mst = FALSE, subsample = NULL, progress = FALSE,
-cellIdColumn = NULL, locusColumn = NULL, groupUsingOnlyIGH = TRUE,
-keepVJLgroup = TRUE)
+distToNearest(
+db,
+sequenceColumn = "junction",
+vCallColumn = "v_call",
+jCallColumn = "j_call",
+model = c("ham", "aa", "hh_s1f", "hh_s5f", "mk_rs1nf", "mk_rs5nf", "m1n_compat",
+"hs1f_compat"),
+normalize = c("len", "none"),
+symmetry = c("avg", "min"),
+first = TRUE,
+VJthenLen = TRUE,
+nproc = 1,
+fields = NULL,
+cross = NULL,
+mst = FALSE,
+subsample = NULL,
+progress = FALSE,
+cellIdColumn = NULL,
+locusColumn = NULL,
+groupUsingOnlyIGH = TRUE,
+keepVJLgroup = TRUE
+)
 ```
 
 Arguments
@@ -88,7 +102,7 @@ subsample
 Subsampling is performed without replacement in each VJL group of heavy chain sequences. 
 If `subsample` is larger than the unique number of heavy chain sequences in each 
 VJL group, then the subsampling process is ignored for that group. For each heavy chain
-sequence in `db`, the reported `DIST_NEAREST` is the distance to the closest
+sequence in `db`, the reported `dist_nearest` is the distance to the closest
 heavy chain sequence in the subsampled set for the VJL group. If `NULL` no 
 subsampling is performed.
 
@@ -96,11 +110,11 @@ progress
 :   if `TRUE` print a progress bar.
 
 cellIdColumn
-:   name of the column containing cell IDs. Only applicable and required for 
+:   name of the character column containing cell IDs. Only applicable and required for 
 single-cell mode.
 
 locusColumn
-:   name of the column containing locus information. Only applicable and 
+:   name of the character column containing locus information. Only applicable and 
 required for single-cell mode.
 
 groupUsingOnlyIGH
@@ -121,12 +135,15 @@ Value
 -------------------
 
 Returns a modified `db` data.frame with nearest neighbor distances between heavy chain
-sequences in the `DIST_NEAREST` column if `cross=NULL`. If `cross` was 
-specified, distances will be added as the `CROSS_DIST_NEAREST` column. 
+sequences in the `dist_nearest` column if `cross=NULL`. If `cross` was 
+specified, distances will be added as the `cross_dist_nearest` column. 
 
 Note that distances between light chain sequences are not calculated, even if light chains 
 were used for VJL grouping via `groupUsingOnlyIGH=FALSE`. Light chain sequences, if any,
-will have `NA` in the `DIST_NEAREST` field.
+will have `NA` in the `dist_nearest` field.
+
+Note that the output `vCallColumn` and `jCallColumn` columns will be converted to 
+`character` if they were `factor` in the input `db`.
 
 
 Details
@@ -184,7 +201,7 @@ of 0), `NA`s are returned instead of zero-distances.
 Note on `subsample`: Subsampling is performed independently in each VJL group for heavy chain
 sequences. If `subsample` is larger than number of heavy chain sequences in the group, it is 
 ignored. In other words, subsampling is performed only on groups in which the number of heavy chain 
-sequences is equal to or greater than `subsample`. `DIST_NEAREST` has values calculated 
+sequences is equal to or greater than `subsample`. `dist_nearest` has values calculated 
 using all heavy chain sequences in the group for groups with fewer than `subsample` heavy chain
 sequences, and values calculated using a subset of heavy chain sequences for the larger groups. 
 To select a value of `subsample`, it can be useful to explore the group sizes in `db` 
@@ -215,20 +232,21 @@ Examples
 ```R
 # Subset example data to one sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, SAMPLE == "-1h")
+db <- subset(ExampleDb, sample_id == "-1h")
 
 # Use genotyped V assignments, Hamming distance, and normalize by junction length
 # First partition based on V and J assignments, then by junction length
 # Take into consideration ambiguous V and J annotations
-dist <- distToNearest(db, vCallColumn="V_CALL_GENOTYPED", model="ham", 
-first=FALSE, VJthenLen=TRUE, normalize="len")
+dist <- distToNearest(db, sequenceColumn="junction", 
+vCallColumn="v_call_genotyped", jCallColumn="j_call",
+model="ham", first=FALSE, VJthenLen=TRUE, normalize="len")
 
 # Plot histogram of non-NA distances
-p1 <- ggplot(data=subset(dist, !is.na(DIST_NEAREST))) + 
+p1 <- ggplot(data=subset(dist, !is.na(dist_nearest))) + 
 theme_bw() + 
 ggtitle("Distance to nearest: Hamming") + 
 xlab("distance") +
-geom_histogram(aes(x=DIST_NEAREST), binwidth=0.025, 
+geom_histogram(aes(x=dist_nearest), binwidth=0.025, 
 fill="steelblue", color="white")
 plot(p1)
 ```
@@ -243,6 +261,9 @@ See [calcTargetingDistance](calcTargetingDistance.md) for generating nucleotide 
 from a [TargetingModel](TargetingModel-class.md) object. See [HH_S5F](HH_S5F.md), [HH_S1F](HH_S1F.md), 
 [MK_RS1NF](MK_RS1NF.md), [getDNAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getDNAMatrix), and [getAAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getAAMatrix)
 for individual model details.
+
+
+
 
 
 

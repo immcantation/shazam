@@ -5,17 +5,25 @@ Description
 
 `findThreshold` automtically determines an optimal threshold for clonal assignment of
 Ig sequences using a vector of nearest neighbor distances. It provides two alternative methods 
-using either a Gamma/Guassian Mixture Model fit (`method="gmm"`) or kernel density 
+using either a Gamma/Gaussian Mixture Model fit (`method="gmm"`) or kernel density 
 fit (`method="density"`).
 
 
 Usage
 --------------------
 ```
-findThreshold(distances, method = c("density", "gmm"), edge = 0.9,
-cross = NULL, subsample = NULL, model = c("gamma-gamma",
-"gamma-norm", "norm-gamma", "norm-norm"), cutoff = c("optimal",
-"intersect", "user"), sen = NULL, spc = NULL, progress = FALSE)
+findThreshold(
+distances,
+method = c("density", "gmm"),
+edge = 0.9,
+cross = NULL,
+subsample = NULL,
+model = c("gamma-gamma", "gamma-norm", "norm-gamma", "norm-norm"),
+cutoff = c("optimal", "intersect", "user"),
+sen = NULL,
+spc = NULL,
+progress = FALSE
+)
 ```
 
 Arguments
@@ -116,13 +124,14 @@ Examples
 ```R
 # Subset example data to one sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, SAMPLE == "-1h")
+db <- subset(ExampleDb, sample_id == "-1h")
 
 # Use nucleotide Hamming distance and normalize by junction length
-db <- distToNearest(db, model="ham", normalize="len", nproc=1)
+db <- distToNearest(db, sequenceColumn="junction", vCallColumn="v_call",
+jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 
 # Find threshold using the "gmm" method with optimal threshold
-output <- findThreshold(db$DIST_NEAREST, method="gmm", model="gamma-gamma", cutoff="opt")
+output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", cutoff="opt")
 plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
 
 ```
@@ -136,7 +145,7 @@ print(output)
 
 
 ```
-[1] 0.1590107
+[1] 0.1591523
 
 ```
 
@@ -144,7 +153,7 @@ print(output)
 ```R
 
 # Find threshold using the "gmm" method with user defined specificity
-output <- findThreshold(db$DIST_NEAREST, method="gmm", model="gamma-gamma", 
+output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", 
 cutoff="user", spc=0.99)
 plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
 
@@ -159,7 +168,7 @@ print(output)
 
 
 ```
-[1] 0.1753291
+[1] 0.1757216
 
 ```
 
@@ -167,7 +176,7 @@ print(output)
 ```R
 
 # Find threshold using the "density" method and plot the results
-output <- findThreshold(db$DIST_NEAREST, method="density")
+output <- findThreshold(db$dist_nearest, method="density")
 plot(output)
 
 ```
@@ -191,6 +200,9 @@ See also
 
 See [distToNearest](distToNearest.md) for generating the nearest neighbor distance vectors.
 See [plotGmmThreshold](plotGmmThreshold.md) and [plotDensityThreshold](plotDensityThreshold.md) for plotting output.
+
+
+
 
 
 
