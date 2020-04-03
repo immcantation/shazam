@@ -976,7 +976,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if (progress) { 
         pb <- progressBar(n_groups) 
     }
-    list_db <- foreach(i=1:n_groups, .errorhandling='stop') %dopar% {
+    tryCatch(list_db <- foreach(i=1:n_groups, .errorhandling='stop') %dopar% {
         # wrt db
         idx <- uniqueGroupsIdx[[i]]
         
@@ -1008,7 +1008,14 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         if (progress) { pb$tick() }
         
         return(db_group)
+    }, 
+    error = function(e) {
+      if ( nproc>1 & grepl("Error in unserialize(socklist[[n]]) : error reading from connection", e, fixed=TRUE)) {
+        warning("There is an error running the code in parallel. Try with nproc=1.")
+      }
+      stop(e)
     }
+    )
     
     # Convert list from foreach into a db data.frame
     db <- do.call(rbind, list_db)
