@@ -111,7 +111,7 @@ column indicates whether each sequence is from the heavy or the light chain. The
 in the `locusColumn` column must be one of `IGH`, `IGK`, and `IGL`. To invoke the 
 single-cell mode, both the `cellIdColumn` and `locusColumn` arguments must be specified. 
 
-There is also a choice of whether grouping should be done as a one-stage process or a 
+There is a choice of whether grouping should be done as a one-stage process or a 
 two-stage process. This can be specified via `VJthenLen`. In the one-stage process 
 (`VJthenLen=FALSE`), cells are divided into partitions containing same heavy chain V 
 gene, J gene, and junction length (VJL combination), and the same light chain VJL 
