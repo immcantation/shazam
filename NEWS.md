@@ -1,4 +1,4 @@
-Version 0.2.3.999 March 31, 2020
+Version 0.2.3.999 April 9, 2020
 -------------------------------------------------------------------------------
 
 Backwards Incompatible Changes:
@@ -30,7 +30,8 @@ Backwards Incompatible Changes:
 
 General:
 
-+ AIRR
++ Updated vignettes for calculating nearest neighbor distances, estimating 
+  targeting models, and simulating mutated sequences. 
 
 Targeting Models:
 

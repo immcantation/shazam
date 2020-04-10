@@ -42,7 +42,7 @@ Both functions rely on a 5-mer targeting model for computing the probabilities o
 
 `shmulateSeq` generates random mutations in an input sequence. This sequence is provided by the user as a string, with the acceptable alphabet being `{A, T, G, C, N, .}`. Note that `-` is not accepted as part of the input sequence. If the input sequence has a non-triplet overhang at the end, it will be trimmed to the last codon. For example, `ATGCATGC` will be trimmed to `ATGCAT` before mutations are introduced.
 
-The total number of mutations to be introduced is user-specified. Mutations are not introduced to positions in the input sequence that contain `.` or `N`. 
+The total number or frequency of mutations to be introduced is user-specified via `numMutations` with `frequency` set to `FALSE` (default) or `TRUE` respectively. For `frequency=TRUE`, the number of mutations to be introduced is calculated as the length of the sequence multiplied by the specified mutation frequency and rounded down to the nearest whole number (`floor`). Mutations are not introduced to positions in the input sequence that contain `.` or `N`. 
 
 Mutations are introduced iteratively using a targeting model. Targeting probabilities at each position are updated after each iteration. 
 
@@ -54,6 +54,9 @@ sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATA.TTTA"
 
 # Simulate introduction of 6 mutations using the default HH_S5F targeting model
 shmulateSeq(sequence, numMutations=6)
+
+# Simulate introduction of mutations at frequency 0.2 using the default HH_S5F targeting model
+shmulateSeq(sequence, numMutations=0.2, frequency=TRUE)
 
 # Simulate introduction of 4 mutations using the MK_RS5NF targeting model
 shmulateSeq(sequence, numMutations=4, targetingModel=MK_RS5NF)

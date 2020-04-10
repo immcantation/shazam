@@ -719,7 +719,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' For single-cell mode, the input format is the same as that for \link[alakazam]{groupGenes}. 
 #' Namely, each row represents a sequence/chain. Sequences/chains from the same cell are linked
 #' by a cell ID in the \code{cellIdColumn} field. Under this mode, there is a choice of whether 
-#' grouping should be done using only heavy chain (\code{IGH}) sequences only, or using both 
+#' grouping should be done using heavy chain (\code{IGH}) sequences only, or using both 
 #' heavy chain (\code{IGH}) and light chain (\code{IGK}, \code{IGL}) sequences. This is governed 
 #' by \code{groupUsingOnlyIGH}.
 #' 
