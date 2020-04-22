@@ -838,11 +838,15 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         singleCell <- FALSE
     } 
     
-    columns <- c(sequenceColumn, vCallColumn, jCallColumn, fields, cross)
+    columns <- c(sequenceColumn, vCallColumn, jCallColumn, fields, cross,
+                 cellIdColumn, locusColumn)
     columns <- columns[!is.null(columns)]
     
     check <- checkColumns(db, columns)
     if (check != TRUE) { stop(check) }
+    
+    # cast all columns to character
+    for (cl in columns) { db[[cl]] <- as.character(db[[cl]]) }
     
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn)) 
