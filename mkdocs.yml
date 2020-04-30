@@ -1,5 +1,5 @@
 site_name: shazam
-site_favicon: img/immcantation.ico
+site_favicon: img/favicon.ico
 repo_url: https://bitbucket.org/kleinstein/shazam
 theme: readthedocs
 markdown_extensions:
