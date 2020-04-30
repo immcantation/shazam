@@ -1,4 +1,4 @@
-Version 0.2.3.999 April 9, 2020
+Version 0.2.3.999 April 30, 2020
 -------------------------------------------------------------------------------
 
 Backwards Incompatible Changes:
@@ -42,11 +42,11 @@ Targeting Models:
   defined `MutabilityModel`, `MutabilityModelWithSource`, and `TargetingMatrix` 
   classes.
   
-
 Mutation Profiling:
 
 + `shmulateSeq` now also supports specifying the frequency of mutations to be 
    introduced. (Previously, only the number of mutations was supported.)
+
 
 Version 0.2.3 February 5, 2020
 -------------------------------------------------------------------------------
