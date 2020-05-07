@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
-Version: 0.2.3.999
-Date: 2020-04-30
+Version: 1.0.0
+Date: 2020-05-07
 Authors@R: c(person("Immcantation", "", role=c("cre"), 
              email="immcantation@gmail.com"),
              person("Mohamed", "Uduman", role=c("aut"), 
@@ -33,7 +33,7 @@ Description: Provides a computational framework for analyzing mutations in
     Yaari, et al (2012) <doi:10.1093/nar/gks457>, 
     Yaari, et al (2013) <doi:10.3389/fimmu.2013.00358>, 
     Cui, et al (2016) <doi:10.4049/jimmunol.1502263>.
-License: CC BY-SA 4.0
+License: AGPL-3
 URL: http://shazam.readthedocs.io
 BugReports: https://bitbucket.org/kleinstein/shazam/issues
 LazyData: true
@@ -45,7 +45,7 @@ Depends:
     ggplot2 (>= 2.0.0),
     stringi (>= 1.1.3)
 Imports:
-    alakazam (>= 0.3.0.999),
+    alakazam (>= 1.0.0),
     ape,
     diptest,
     doParallel,

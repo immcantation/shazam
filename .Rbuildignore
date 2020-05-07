@@ -6,6 +6,7 @@
 ^data-raw
 ^profil
 ^doc
+LICENSE
 mkdocs.yml
 bitbucket-pipelines.yml
 install_alakazam.R
