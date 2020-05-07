@@ -141,7 +141,7 @@
 #'                          dnorm pnorm runif dgamma pgamma uniroot na.exclude
 #'                          as.dist cutree
 #' @importFrom  stringi     stri_dup stri_flatten stri_join stri_length 
-#'                          stri_sub stri_sub<- stri_detect_regex
+#'                          stri_sub stri_sub_replace stri_detect_regex
 #'                          stri_count_boundaries stri_count_regex 
 #'                          stri_extract_all_regex stri_extract_first_regex  
 #'                          stri_replace_all_regex stri_replace_first_regex

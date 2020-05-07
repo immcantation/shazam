@@ -14,7 +14,7 @@ Both functions rely on a 5-mer targeting model for computing the probabilities o
 
 `shmulateSeq` generates random mutations in an input sequence. This sequence is provided by the user as a string, with the acceptable alphabet being `{A, T, G, C, N, .}`. Note that `-` is not accepted as part of the input sequence. If the input sequence has a non-triplet overhang at the end, it will be trimmed to the last codon. For example, `ATGCATGC` will be trimmed to `ATGCAT` before mutations are introduced.
 
-The total number of mutations to be introduced is user-specified. Mutations are not introduced to positions in the input sequence that contain `.` or `N`. 
+The total number or frequency of mutations to be introduced is user-specified via `numMutations` with `frequency` set to `FALSE` (default) or `TRUE` respectively. For `frequency=TRUE`, the number of mutations to be introduced is calculated as the length of the sequence multiplied by the specified mutation frequency and rounded down to the nearest whole number (`floor`). Mutations are not introduced to positions in the input sequence that contain `.` or `N`. 
 
 Mutations are introduced iteratively using a targeting model. Targeting probabilities at each position are updated after each iteration. 
 
@@ -30,7 +30,16 @@ shmulateSeq(sequence, numMutations=6)
 ```
 
 ```
-## [1] "NGAGCTGCCGAAATGGCCGAGCATTACTGTGCGAGAGATA.TTTA"
+## [1] "NGATCTGACGGCACGGCCGTGTTTTACTGTGCGCGCGAAA.TTCA"
+```
+
+```r
+# Simulate introduction of mutations at frequency 0.2 using the default HH_S5F targeting model
+shmulateSeq(sequence, numMutations=0.2, frequency=TRUE)
+```
+
+```
+## [1] "NGATCCGACTACACGGCCGTTTATTATTGTGCGAGGCATG.CCTA"
 ```
 
 ```r
@@ -39,7 +48,7 @@ shmulateSeq(sequence, numMutations=4, targetingModel=MK_RS5NF)
 ```
 
 ```
-## [1] "NAATCTGACGACAGGGCCGTGTGTTACTGTGCGAGAAATA.TTTA"
+## [1] "NGATCTGACGACACGGTCGTGTATTCCTATGTGAGAGATA.TTTA"
 ```
 
 ## Simulate mutations in a lineage tree
@@ -68,13 +77,13 @@ shmulateTree(sequence, graph)
 ```
 ##             name                                      sequence distance
 ## 1      Inferred1 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-## 2 GN5SHBT07JDYW5 NGAACTGACGGCACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        2
-## 3 GN5SHBT03EP4KC NGAACCGACGGCACGGCCGTGTATTACTGTGCGAGACATATTTTA        3
-## 4 GN5SHBT01AKANC NGATCTGACGACACGGCCTTATATTACTTTGCGAGAGATAGTCTA        4
-## 5 GN5SHBT01A3SFZ NGAACTGACGGAGCGGCCGTGTATTACTGTGCGACAGATACTCCA        6
-## 6 GN5SHBT08HUU7M NGAACCGACGGCACGGCCGTGTTTTACTCTGCGAAACATATTTTA        3
-## 7 GN5SHBT04CEA6I NGAACTGACGGCACGGCCGTGTATTACTGTGCGAGAGATAATTTA        1
-## 8 GN5SHBT06IXJIH NGAACTGACGGCCCGGCCGTGTATTACTGTGCGAGAGATAGTTTA        1
+## 2 GN5SHBT07JDYW5 NGATCTGACCACACGGCCGTGTATTACTGTGCGAAAGATAGTTTA        2
+## 3 GN5SHBT03EP4KC NTCTCTGACCACACGGCCGTGTATTACTGTGCGAAAGAAAGTTTA        3
+## 4 GN5SHBT01AKANC NGATCAGACGACACGGCCGTGTATAACTGTGAGGGAGATAGTTTA        4
+## 5 GN5SHBT01A3SFZ NCATCTGACCACCCGGCCGTGTATTTTTGTGCAAAAGATAGTTTC        6
+## 6 GN5SHBT08HUU7M NTCTGTGACCACACGGTCGTGTATTACTGTGCGGAAGAAAGTTTA        3
+## 7 GN5SHBT04CEA6I NGATCTGACCACACGGCCGTCTATTACTGTGCGAAAGATAGTTTA        1
+## 8 GN5SHBT06IXJIH NGATCTGACCACACGTCCGTGTATTACTGTGCGAAAGATAGTTTA        1
 ```
 
 It is possible to exclude certain specified nodes from being considered as the MRCA and from being included as part of the simulation. To specify such nodes, use the `field` argument to indicate which annotation field in `vertex_attr(graph)` contains information relevant to deciding which nodes to exclude, and the `exclude` argument to indicate the value in the annotation field that nodes to be excluded carry. 
@@ -110,11 +119,11 @@ shmulateTree(sequence, graph, field="sample_id", exclude=NA)
 ```
 ##             name                                      sequence distance
 ## 1 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-## 2 GN5SHBT03EP4KC NGATCTGACGACACGGCCGTGTTTTACTGTGCGAGATATAGTTCA        3
-## 3 GN5SHBT01A3SFZ NGAAGTGACGAAACAGACCTGTATTACTGTGCGAGAGATAGTTTA        6
-## 4 GN5SHBT08HUU7M NAATCTGACGACACGGCCGTGTTTTACTGTGCGAGACGTAGTTCA        3
-## 5 GN5SHBT04CEA6I NGACCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        1
-## 6 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTCCTGTGCGAGAGATAGTTTA        1
+## 2 GN5SHBT03EP4KC NGATATGACGACACGGCCGTGTATTCCTATGCGAGAGATAGTTTA        3
+## 3 GN5SHBT01A3SFZ NGAGTTGACGCCACGGGCGTGTATTACTGTGCCAGAGATAGTTTC        6
+## 4 GN5SHBT08HUU7M NAATATGACGACACGGCCGTTTATTCCTATGCGAGAGAGAGTTTA        3
+## 5 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTGTTTTACTGTGCGAGAGATAGTTTA        1
+## 6 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTATATTACTGTGCGAGAGATAGTTTA        1
 ```
 
 It is also possible to add a proportional number of mutations to the immediate offsprings of the MRCA based on the fraction of the nucleotide sequence that is within the junction region. This is achieved via the optional `junctionWeight` argument, to be supplied as a numeric value between `0` and `1`. 
@@ -138,11 +147,11 @@ shmulateTree(sequence, graph, junctionWeight=0.2)
 ```
 ##             name                                      sequence distance
 ## 1      Inferred1 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-## 2 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTCTATTACTGTGCGAGAGAAAGTTTA        2
-## 3 GN5SHBT03EP4KC NGATGTGACGACACGGCCGTGTATTACTGTGCGAGAGAATGTTTA        3
-## 4 GN5SHBT01AKANC NAATCTGCCGACCCGGCCGTATATTACTGTGCGAGAGATAGTTTG        5
-## 5 GN5SHBT01A3SFZ NGGTCTGACGACGCGACCGTCGACTACTGTGCGAGAGAAAGTCTA        6
-## 6 GN5SHBT08HUU7M NGATGTGACGACACGGCCGTGTATTTCTTTGCGAGAGAATTTTTA        3
-## 7 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTCTTTTACTGTGCGAGAGAAAGTTTA        1
-## 8 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTCTATTACTCTGCGAGAGAAAGTTTA        1
+## 2 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGCGTATTACTGTGCGAGAGATAGTTCA        2
+## 3 GN5SHBT03EP4KC NGATCTGACGACACGGCCGCGTCTTGCTGTGCGAGAGAAAGTTCA        3
+## 4 GN5SHBT01AKANC NGATCTGACGACACGGCCGTGTATTCTTATGCGGGAGATAGTCTA        5
+## 5 GN5SHBT01A3SFZ NGATCTGACGACACCGCCGCGTCTAAATGTGCGAGAGATTTTTCA        6
+## 6 GN5SHBT08HUU7M NGATCTGACGACACGGCCGCGTCTCGCTGTGCGAGAAAAAGTTCC        3
+## 7 GN5SHBT04CEA6I NGATCTGACGACACGGCCGCGTATTTCTGTGCGAGAGATAGTTCA        1
+## 8 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTCA        1
 ```

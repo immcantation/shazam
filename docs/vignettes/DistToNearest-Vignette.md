@@ -30,10 +30,12 @@ library(shazam)
 data(ExampleDb, package="alakazam")
 ```
 
-## Calculating nearest neighbor distances
+## Calculating nearest neighbor distances (heavy chain sequences)
 
-The function for calculating distance between every sequence and its nearest
-neighbor takes a few parameters to adjust how the distance is measured. If a 
+By default, `distToNearest`, the function for calculating distance between every 
+sequence and its nearest neighbor, assumes that it is running under non-single-cell
+mode and that every input seuqnece is a heavy chain sequence and will be used for 
+calculation. It takes a few parameters to adjust how the distance is measured. If a 
 genotype has been inferred using the methods in the `tigger` package, and a 
 `v_call_genotyped` field has been added to the database, then this column may be 
 used instead of the default `v_call` column by specifying the `vCallColumn` 
@@ -72,6 +74,49 @@ dist_s5f <- distToNearest(ExampleDb, sequenceColumn="junction",
                           model="hh_s5f", normalize="none", nproc=1)
 ```
 
+## Calculating nearest neighbor distances (single-cell paired heavy and light chain sequences)
+
+The `distToNearest` function also supports running under single-cell mode where an input 
+`db` containing single-cell paired heavy and light chain sequences is supplied. In this 
+case, by default, cells are first divided into partitions containing the same heavy chain 
+V gene and J gene (and if specified, junction length), and the same light chain V gene 
+and J gene (and if specified, junction length). Then, only the heavy chain sequences are 
+used for calculating the nearest neighbor distances.
+
+Under the single-cell mode, each row of the input `db` should represent a sequence/chain. 
+Sequences/chains from the same cell are linked by a cell ID in a `cellIdColumn` column. 
+Note that a cell should have exactly one heavy chain sequence in `db`. A `locusColumn` 
+column indicates whether each sequence is from the heavy or the light chain. The values 
+in the `locusColumn` column must be one of `IGH`, `IGK`, and `IGL`. To invoke the 
+single-cell mode, both the `cellIdColumn` and `locusColumn` arguments must be specified. 
+
+There is a choice of whether grouping should be done as a one-stage process or a 
+two-stage process. This can be specified via `VJthenLen`. In the one-stage process 
+(`VJthenLen=FALSE`), cells are divided into partitions containing same heavy chain V 
+gene, J gene, and junction length (VJL combination), and the same light chain VJL 
+combination. In the two-stage process (`VJthenLen=TRUE`), cells are first divided by heavy 
+chain V gene and J gene (VJ combination), and light chain VJ combination; and then by
+heavy and light chain junction lengths. 
+
+There is also a choice of whether grouping should be done using heavy chain (`IGH`) sequences 
+only, or using both heavy chain (`IGH`) and light chain (`IGK`, `IGL`) sequences. This can be 
+specified via `groupUsingOnlyIGH`. 
+
+
+
+```r
+# Single-cell mode 
+# Group cells in a one-stage process (VJthenLen=FALSE) and using
+# both heavy and light chain sequences (groupUsingOnlyIGH=FALSE)
+dist_sc <- distToNearest(db, cellIdColumn="cell", locusColumn="locus", 
+                         VJthenLen=FALSE, groupUsingOnlyIGH=FALSE)
+```
+
+Regardless of whether grouping was done using only the heavy chain sequences, or both heavy 
+and light chain sequences, only heavy chain sequences will be used for calculating the 
+nearest neighbor distances. Hence, under the single-cell mode, rows in the returned 
+`data.frame` corresponding to light chain sequences will have `NA` in the `dist_nearest` field.
+
 ## Using nearest neighbor distances to determine clonal assignment thresholds
 
 The primary use of the distance to nearest calculation in SHazaM is to 
@@ -107,7 +152,7 @@ p1 <- ggplot(subset(dist_ham, !is.na(dist_nearest)),
 plot(p1)
 ```
 
-![plot of chunk DistToNearest-Vignette-3](figure/DistToNearest-Vignette-3-1.png)
+![plot of chunk DistToNearest-Vignette-4](figure/DistToNearest-Vignette-4-1.png)
 
 By manual inspection, the length normalized `ham` model distance threshold would be 
 set to a value near 0.12 in the above example.
@@ -126,7 +171,7 @@ p2 <- ggplot(subset(dist_s5f, !is.na(dist_nearest)),
 plot(p2)
 ```
 
-![plot of chunk DistToNearest-Vignette-4](figure/DistToNearest-Vignette-4-1.png)
+![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
 
 In this example, the unnormalized `hh_s5f` model distance threshold would be 
 set to a value near 7.
@@ -148,7 +193,7 @@ threshold <- output@threshold
 plot(output, title="Density Method")
 ```
 
-![plot of chunk DistToNearest-Vignette-5](figure/DistToNearest-Vignette-5-1.png)
+![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
 
 ```r
 # Print threshold
@@ -188,7 +233,7 @@ output <- findThreshold(dist_ham$dist_nearest, method="gmm", model="gamma-gamma"
 plot(output, binwidth=0.02, title="GMM Method: gamma-gamma")
 ```
 
-![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
+![plot of chunk DistToNearest-Vignette-7](figure/DistToNearest-Vignette-7-1.png)
 
 ```r
 # Print threshold
@@ -196,7 +241,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1218098
+## [1] 0.1223892
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -239,7 +284,7 @@ p4 <- ggplot(subset(dist_fields, !is.na(dist_nearest)),
 plot(p4)
 ```
 
-![plot of chunk DistToNearest-Vignette-7](figure/DistToNearest-Vignette-7-1.png)
+![plot of chunk DistToNearest-Vignette-8](figure/DistToNearest-Vignette-8-1.png)
 
 In this case, the threshold selected for `-1h` seems to work well 
 for `+7d` as well.
@@ -275,7 +320,7 @@ p5 <- ggplot(subset(dist_cross, !is.na(cross_dist_nearest)),
 plot(p5)
 ```
 
-![plot of chunk DistToNearest-Vignette-8](figure/DistToNearest-Vignette-8-1.png)
+![plot of chunk DistToNearest-Vignette-9](figure/DistToNearest-Vignette-9-1.png)
 
 This can provide a sense of overlap between samples or a way to 
 compare within-sample variation to cross-sample variation.

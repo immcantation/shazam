@@ -151,7 +151,8 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F,
         
         # Implement mutation in simulation sequence
         mut_nuc <- 4 - (4*mutpos$pos - mutpos$mut)
-        stri_sub(str=sim_seq, from=mutpos$pos, to=mutpos$pos) <- NUCLEOTIDES[mut_nuc]
+        # stri_sub(str=sim_seq, from=mutpos$pos, to=mutpos$pos) <- NUCLEOTIDES[mut_nuc]
+        sim_seq <- stri_sub_replace(str=sim_seq, from=mutpos$pos, to=mutpos$pos, value=NUCLEOTIDES[mut_nuc]) 
         
         # Update targeting
         lower <- max(mutpos$pos-4, 1)

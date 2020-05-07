@@ -159,7 +159,7 @@ neighbor distances, regardless of the values in the `locusColumn` field (if pres
 For single-cell mode, the input format is the same as that for [groupGenes](http://www.rdocumentation.org/packages/alakazam/topics/groupGenes). 
 Namely, each row represents a sequence/chain. Sequences/chains from the same cell are linked
 by a cell ID in the `cellIdColumn` field. Under this mode, there is a choice of whether 
-grouping should be done using only heavy chain (`IGH`) sequences only, or using both 
+grouping should be done using heavy chain (`IGH`) sequences only, or using both 
 heavy chain (`IGH`) and light chain (`IGK`, `IGL`) sequences. This is governed 
 by `groupUsingOnlyIGH`.
 

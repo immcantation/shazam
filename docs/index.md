@@ -42,10 +42,9 @@ or use the [issue tracker](https://bitbucket.org/kleinstein/shazam/issues?status
 
 # Dependencies
 
-**Depends:** ggplot2, stringi  
-**Imports:** alakazam, ape, diptest, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, kedd, KernSmooth, lazyeval, MASS, methods, parallel, progress, rlang, scales, seqinr, stats, tidyr, tidyselect, utils  
-**Suggests:** knitr, rmarkdown, testthat  
-**Extends:** FALSE
+**Depends:** ggplot2  
+**Imports:** alakazam, ape, diptest, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, kedd, KernSmooth, lazyeval, MASS, methods, parallel, progress, rlang, scales, seqinr, stats, stringi, tidyr, tidyselect, utils  
+**Suggests:** knitr, rmarkdown, testthat
 
 
 # Authors
@@ -67,38 +66,31 @@ or use the [issue tracker](https://bitbucket.org/kleinstein/shazam/issues?status
 
 To cite the SHazaM package in publications, please use:
 
-Gupta N, Vander Heiden J, Uduman M, Gadala-Maria D, Yaari G, Kleinstein
-S (2015). “Change-O: a toolkit for analyzing large-scale B cell
-immunoglobulin repertoire sequencing data.” _Bioinformatics_, 1-3. doi:
-10.1093/bioinformatics/btv359 (URL:
+Gupta N, Vander Heiden J, Uduman M, Gadala-Maria D, Yaari G, Kleinstein S (2015). “Change-O: a toolkit for analyzing large-scale B
+cell immunoglobulin repertoire sequencing data.” _Bioinformatics_, 1-3. doi: 10.1093/bioinformatics/btv359 (URL:
 https://doi.org/10.1093/bioinformatics/btv359).
 
 To cite the selection analysis methods, please use:
 
-Yaari G, Uduman M, Kleinstein S (2012). “Quantifying selection in
-high-throughput Immunoglobulin sequencing data sets.” _Nucleic acids
-research_, *40*(17), e134. doi: 10.1093/nar/gks457 (URL:
-https://doi.org/10.1093/nar/gks457).
+Yaari G, Uduman M, Kleinstein S (2012). “Quantifying selection in high-throughput Immunoglobulin sequencing data sets.” _Nucleic
+acids research_, *40*(17), e134. doi: 10.1093/nar/gks457 (URL: https://doi.org/10.1093/nar/gks457).
 
-To cite the HH_S5F model and the targeting model generation methods,
-please use:
+To cite the HH_S5F model and the targeting model generation methods, please use:
 
-Yaari G, Vander Heiden J, Uduman M, Gadala-Maria D, Gupta N, Stern J,
-O'Connor K, Hafler D, Lasserson U, Vigneault F, Kleinstein S (2013).
-“Models of somatic hypermutation targeting and substitution based on
-synonymous mutations from high-throughput immunoglobulin sequencing
-data.” _Frontiers in Immunology_, *4*(358), 1-11. doi:
-10.3389/fimmu.2013.00358 (URL:
+Yaari G, Vander Heiden J, Uduman M, Gadala-Maria D, Gupta N, Stern J, O'Connor K, Hafler D, Lasserson U, Vigneault F, Kleinstein S
+(2013). “Models of somatic hypermutation targeting and substitution based on synonymous mutations from high-throughput
+immunoglobulin sequencing data.” _Frontiers in Immunology_, *4*(358), 1-11. doi: 10.3389/fimmu.2013.00358 (URL:
 https://doi.org/10.3389/fimmu.2013.00358).
 
-To cite the HKL_S1F, HKL_S5F, MK_RS1NF, and MK_RS5NF models, please
-use:
+To cite the HKL_S1F, HKL_S5F, MK_RS1NF, and MK_RS5NF models, please use:
 
-Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T,
-O'Connor K, Vigneault F, Shlomchik M, Kleinstein S (2016). “A Model of
-Somatic Hypermutation Targeting in Mice Based on High-Throughput Ig
-Sequencing Data.” _The Journal of Immunology_, *197*(9), 3566-3574.
-doi: 10.4049/jimmunol.1502263 (URL:
-https://doi.org/10.4049/jimmunol.1502263).
+Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K, Vigneault F, Shlomchik M, Kleinstein S (2016). “A Model
+of Somatic Hypermutation Targeting in Mice Based on High-Throughput Ig Sequencing Data.” _The Journal of Immunology_, *197*(9),
+3566-3574. doi: 10.4049/jimmunol.1502263 (URL: https://doi.org/10.4049/jimmunol.1502263).
 
 
+
+
+# License
+
+AGPL-3

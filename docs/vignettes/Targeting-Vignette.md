@@ -44,48 +44,79 @@ parameters if they differ from Change-O defaults. Additionally, the
 single 5-mer: `independent` treats each mutation independently and `ignore` 
 entirely disregards 5-mers with multiple mutations.
 
+
+```r
+# Create substitution model using silent mutations
+sub_model <- createSubstitutionMatrix(ExampleDb, model="S", 
+                                       sequenceColumn="sequence_alignment",
+                                       germlineColumn="germline_alignment_d_mask",
+                                       vCallColumn="v_call")
+```
+
 The function for inferring a mutability model (`createMutabilityMatrix`) counts 
 the number of mutations in all 5-mer motifs of the dataset, and depends upon the
-inferred substitution rates. Furthermore, the same parameters available for 
-inferring the substitution rates are also available to adjust this function.
+inferred substitution rates. Similar parameters as those available for 
+inferring the substitution rates are available to adjust this function.
 
-The inferred substitution and mutability matrices returned by the above functions
+
+```r
+# Create mutability model using silent mutations
+mut_model <- createMutabilityMatrix(ExampleDb, sub_model, model="S",
+                                     sequenceColumn="sequence_alignment",
+                                     germlineColumn="germline_alignment_d_mask",
+                                     vCallColumn="v_call", returnSource=FALSE)
+```
+
+`createMutabilityMatrix` with `returnSource=FALSE` creates an object of class 
+`mutabilityModel` that contains a named numeric vector of 1024 normalized mutability
+rates. With `returnSource=TRUE`, the function creates an object of class 
+`MutabilityModelWithSource` that contains a `data.frame` with a column indicating 
+whether each 5-mer mutability was inferred or measured. In both cases, the numbers 
+of silent and replacement mutations used for estimating the 5-mer mutabilities are 
+recorded in the `numMutS` and `numMutR` slots respectively.
+
+
+```r
+# number of silent mutations used for estimating 5-mer mutabilities
+mut_model@numMutS
+# number of replacement mutations used for estimating 5-mer mutabilities
+mut_model@numMutR
+```
+
+The inferred substitution and mutability models returned by the above functions
 only account for unambiguous 5-mers. However, there may be cases in which the 
 user may need the likelihood of a mutation in a 5-mer with ambiguous characters. 
 Each of the above functions has a corresponding function (`extendSubstitutionMatrix` 
-and `extendMutabilityMatrix`) to extend the matrix to infer 5-mers with Ns by 
+and `extendMutabilityMatrix`) to extend the models to infer 5-mers with Ns by 
 averaging over all corresponding unambiguous 5-mers.
 
-These extended substitution and mutability matrices can be used to create an 
+
+```r
+# Extend models to include ambiguous 5-mers
+sub_model <- extendSubstitutionMatrix(sub_model)
+mut_model <- extendMutabilityMatrix(mut_model)
+```
+
+These extended substitution and mutability models can be used to create an 
 overall SHM targeting matrix (`createTargetingMatrix`), which is the combined 
 probability of mutability and substitution. 
 
 
 ```r
-# Create substitution model using silent mutations
-sub_matrix <- createSubstitutionMatrix(ExampleDb, model="s", 
-                                       sequenceColumn="sequence_alignment",
-                                       germlineColumn="germline_alignment_d_mask",
-                                       vCallColumn="v_call")
-# Create mutability model using silent mutations
-mut_matrix <- createMutabilityMatrix(ExampleDb, sub_matrix, model="s",
-                                     sequenceColumn="sequence_alignment",
-                                     germlineColumn="germline_alignment_d_mask",
-                                     vCallColumn="v_call")
-
-# Extend models to include ambiguous 5-mers
-sub_matrix <- extendSubstitutionMatrix(sub_matrix)
-mut_matrix <- extendMutabilityMatrix(mut_matrix)
-
-# Create targeting model matrix from substitution and mutability matrices
-tar_matrix <- createTargetingMatrix(sub_matrix, mut_matrix)
+# Create targeting model matrix from substitution and mutability models
+tar_matrix <- createTargetingMatrix(sub_model, mut_model)
 ```
 
 All of the above steps can be combined by using the single function 
 `createTargetingModel` to infer a `TargetingModel` object directly from 
-the dataset. Additionally, it is generally appropriate to consider the mutations
+the dataset. Again, the numbers of silent and replacement mutations used 
+for estimating the 5-mer mutabilities are also recorded in the `numMutS` and 
+`numMutR` slots respectively.
+
+Additionally, it is generally appropriate to consider the mutations
 within a clone only once. Consensus sequences for each clone can be generated
 using the `collapseClones` function.
+
 
 
 ```r
@@ -116,13 +147,13 @@ this can be specified via the `nucleotides` argument.
 plotMutability(model, nucleotides="A", style="hedgehog")
 ```
 
-![plot of chunk Targeting-Vignette-4](figure/Targeting-Vignette-4-1.png)
+![plot of chunk Targeting-Vignette-8](figure/Targeting-Vignette-8-1.png)
 
 ```r
 plotMutability(model, nucleotides="C", style="hedgehog")
 ```
 
-![plot of chunk Targeting-Vignette-4](figure/Targeting-Vignette-4-2.png)
+![plot of chunk Targeting-Vignette-8](figure/Targeting-Vignette-8-2.png)
 
 
 ```r
@@ -130,13 +161,13 @@ plotMutability(model, nucleotides="C", style="hedgehog")
 plotMutability(model, nucleotides="G", style="bar")
 ```
 
-![plot of chunk Targeting-Vignette-5](figure/Targeting-Vignette-5-1.png)
+![plot of chunk Targeting-Vignette-9](figure/Targeting-Vignette-9-1.png)
 
 ```r
 plotMutability(model, nucleotides="T", style="bar")
 ```
 
-![plot of chunk Targeting-Vignette-5](figure/Targeting-Vignette-5-2.png)
+![plot of chunk Targeting-Vignette-9](figure/Targeting-Vignette-9-2.png)
 
 ## Calculate targeting distance matrix
 
