@@ -51,6 +51,7 @@ pages:
       - topics/minNumMutationsTune.md
       - topics/minNumSeqMutationsTune.md
       - topics/plotMutability.md
+      - topics/plotTune.md
       - topics/HH_S1F.md
       - topics/HH_S5F.md
       - topics/HKL_S1F.md
@@ -58,6 +59,8 @@ pages:
       - topics/MK_RS1NF.md
       - topics/MK_RS5NF.md
       - topics/U5N.md
+      - topics/MutabilityModel-class.md
+      - topics/TargetingMatrix-class.md
       - topics/TargetingModel-class.md
     - 'Selection Analysis':
       - topics/calcBaseline.md
