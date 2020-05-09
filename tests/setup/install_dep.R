@@ -47,7 +47,7 @@ installDep <- function(this_pack_v, dep_pack_name, dep_pack_v) {
     in_cran <- numeric_version(required_version) %in% cran_versions
     
     if (!this_pack_devel & !devel & in_cran) {
-        tryCatch({ devtools::install_version(dep_pack_name, required_version, repos="https://cran.cnr.berkeley.edu") },
+        tryCatch({ devtools::install_version(dep_pack_name, required_version, repos="http://lib.stat.cmu.edu/R/CRAN/") },
                  error=function(e) { 
                      cat(e, "\n")
                      message("Installing from Bitbucket...\n ")
