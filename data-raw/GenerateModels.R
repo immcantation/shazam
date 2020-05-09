@@ -121,6 +121,8 @@ hs5f_mut <- extendMutabilityMatrix(hs5f_mut)
 hs5f_tar <- createTargetingMatrix(hs5f_sub, hs5f_mut)
 
 # Build and save TargetingModel object
+# # Yaari et al 2013, JI
+# The resulting “S5F” models are based on 806,860 Synony- mous mutations in 5-mer motifs
 HH_S5F <- new("TargetingModel",
                  name="HH_S5F",
                  description="5-mer targeting model based on silent (S) mutations in human heavy-chain functional sequences.",
@@ -129,7 +131,9 @@ HH_S5F <- new("TargetingModel",
                  citation="Yaari G, et al. Front Immunol. 2013 4(November):358",
                  substitution=hs5f_sub,
                  mutability=hs5f_mut,
-                 targeting=hs5f_tar)
+                 targeting=hs5f_tar,
+              numMutS=806860,
+              numMutR=0)
 devtools::use_data(HH_S5F, overwrite=TRUE)
 
 #### HKL_S5F ####
@@ -141,6 +145,11 @@ devtools::use_data(HH_S5F, overwrite=TRUE)
 
 load("data-raw/HKL_S5F_raw.rdata")
 
+# Cui et al., 2016, JI
+# HKL_S5F:
+# Table II
+# Total, L chain, Functional silent: 117,788
+
 HKL_S5F <- new("TargetingModel",
                 name = "HKL_S5F",
                 description = "5-mer targeting model based on silent (S) mutations in human kappa & lambda light-chain functional sequences",
@@ -149,7 +158,9 @@ HKL_S5F <- new("TargetingModel",
                 citation = "Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of Immunology, 197(9), 3566-3574. http://doi.org/10.4049/jimmunol.1502263",
                 mutability = hL.mut,
                 substitution = hL.sub,
-                targeting = hL.tar)
+                targeting = hL.tar,
+               numMutS=117788,
+               numMutR=0)
 
 devtools::use_data(HKL_S5F, overwrite=TRUE)
 
@@ -164,6 +175,14 @@ rm(hL.sub, hL.tar, hL.char, hL.mut)
 
 load("data-raw/MK_RS5NF_raw.rdata")
 
+# In total, we obtained 39,173 independent and unselected mutations from NP-binding nonfunctional k-chain sequences.
+# Table I
+# Total (first "Total", not second), kappa, 
+# Nonfunctional: 39,173
+# Nonfunctional silent: 10,150
+# R 39173-10150=29023
+# S 10150
+
 MK_RS5NF <- new("TargetingModel",
                name = "MK_RS5NF",
                description = "5-mer targeting model based on replacement (R) and silent (S) mutations in kappa light-chain non-functional sequences from NP-immunized mice",
@@ -172,7 +191,9 @@ MK_RS5NF <- new("TargetingModel",
                citation = "Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T, O'Connor K,  Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutation Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of Immunology, 197(9), 3566-3574. http://doi.org/10.4049/jimmunol.1502263",
                mutability = mL.mut,
                substitution = mL.sub,
-               targeting = mL.tar)
+               targeting = mL.tar,
+               numMutS=10150,
+               numMutR=29023)
 
 devtools::use_data(MK_RS5NF, overwrite=TRUE)
 
