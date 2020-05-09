@@ -64,23 +64,24 @@ inferring the substitution rates are available to adjust this function.
 mut_model <- createMutabilityMatrix(ExampleDb, sub_model, model="S",
                                      sequenceColumn="sequence_alignment",
                                      germlineColumn="germline_alignment_d_mask",
-                                     vCallColumn="v_call", returnSource=FALSE)
+                                     vCallColumn="v_call")
 ```
 
-`createMutabilityMatrix` with `returnSource=FALSE` creates an object of class 
-`mutabilityModel` that contains a named numeric vector of 1024 normalized mutability
-rates. With `returnSource=TRUE`, the function creates an object of class 
-`MutabilityModelWithSource` that contains a `data.frame` with a column indicating 
-whether each 5-mer mutability was inferred or measured. In both cases, the numbers 
-of silent and replacement mutations used for estimating the 5-mer mutabilities are 
-recorded in the `numMutS` and `numMutR` slots respectively.
+`createMutabilityMatrix` creates an object of class `MutabilityModel` that contains 
+a named numeric vector of 1024 normalized mutability. The numbers of silent and 
+replacement mutations used for estimating the 5-mer mutabilities are recorded in 
+the `numMutS` and `numMutR` slots, respectively. rates. The `source` slot contains
+a named vector indicating whether each 5-mer mutability was inferred or measured.
+A data.frame with both the mutability values and derivation source.
 
 
 ```r
-# number of silent mutations used for estimating 5-mer mutabilities
+# Number of silent mutations used for estimating 5-mer mutabilities
 mut_model@numMutS
-# number of replacement mutations used for estimating 5-mer mutabilities
+# Number of replacement mutations used for estimating 5-mer mutabilities
 mut_model@numMutR
+# Mutability and source as a data.frame
+head(as.data.frame(mut_model))
 ```
 
 The inferred substitution and mutability models returned by the above functions

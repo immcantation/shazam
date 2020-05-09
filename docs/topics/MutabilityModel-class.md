@@ -12,6 +12,9 @@ Usage
 ```
 "print"(x)
 ```
+```
+"as.data.frame"(x)
+```
 
 Arguments
 -------------------
@@ -28,7 +31,11 @@ Slots
 
 
 `.Data`
-:   a numeric vector containing 5-mer mutability estimates
+:   numeric vector containing 5-mer mutability estimates
+
+`source`
+:   character vector annotating whether the mutability was
+inferred or directly measured.
 
 `numMutS`
 :   a number indicating the number of silent mutations used for 

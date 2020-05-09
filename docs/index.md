@@ -49,15 +49,14 @@ or use the [issue tracker](https://bitbucket.org/kleinstein/shazam/issues?status
 
 # Authors
 
-[Immcantation](mailto:immcantation@gmail.com) (cre)  
 [Mohamed Uduman](mailto:mohamed.uduman@yale.edu) (aut)  
-[Gur Yaari](mailto:gur.yaari@biu.ac.il) (aut)  
 [Namita Gupta](mailto:namita.gupta@yale.edu) (aut)  
-[Jason Vander Heiden](mailto:jason.vanderheiden@yale.edu) (aut)  
+[Susanna Marquez](mailto:susanna.marquez@yale.edu) (aut)  
+[Julian Zhou](mailto:julian.zhou@yale.edu) (aut)  
+[Nima Nouri](mailto:nima.nouri@yale.edu) (aut)  
 [Ang Cui](mailto:angcui@mit.edu) (ctb)  
-[Susanna Marquez](mailto:susanna.marquez@yale.edu) (ctb)  
-[Julian Zhou](mailto:julian.zhou@yale.edu) (ctb)  
-[Nima Nouri](mailto:nima.nouri@yale.edu) (ctb)  
+[Jason Vander Heiden](mailto:vanderheiden.jason@gene.com) (aut, cre)  
+[Gur Yaari](mailto:gur.yaari@biu.ac.il) (aut)  
 [Steven Kleinstein](mailto:steven.kleinstein@yale.edu) (aut, cph)
 
 

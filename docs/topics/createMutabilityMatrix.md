@@ -19,8 +19,7 @@ germlineColumn = "germline_alignment_d_mask",
 vCallColumn = "v_call",
 multipleMutation = c("independent", "ignore"),
 minNumSeqMutations = 500,
-numSeqMutationsOnly = FALSE,
-returnSource = FALSE
+numSeqMutationsOnly = FALSE
 )
 ```
 
@@ -74,10 +73,6 @@ option can be used for parameter tuning for `minNumSeqMutations`
 during preliminary analysis using [minNumSeqMutationsTune](minNumSeqMutationsTune.md). 
 Default is `FALSE`.
 
-returnSource
-:   return the sources of 5-mer mutabilities (measured vs.
-inferred). Default is `FALSE`.
-
 
 
 
@@ -86,9 +81,7 @@ Value
 
 When `numSeqMutationsOnly` is `FALSE`, a `MutabilityModel` containing a
 named numeric vector of 1024 normalized mutability rates for each 5-mer motif with names 
-defining the 5-mer nucleotide sequence. With `returnSource=TRUE`, a 
-`MutabilityModelWithSource` containing a `data.frame` with a column indicating 
-whether each 5-mer mutability was inferred or measured.
+defining the 5-mer nucleotide sequence.
 
 When `numSeqMutationsOnly` is `TRUE`, a named numeric
 vector of length 1024 counting the number of observed mutations in sequences containing 

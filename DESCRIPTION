@@ -1,25 +1,23 @@
 Package: shazam
 Type: Package
 Version: 1.0.0
-Date: 2020-05-07
-Authors@R: c(person("Immcantation", "", role=c("cre"), 
-             email="immcantation@gmail.com"),
-             person("Mohamed", "Uduman", role=c("aut"), 
+Date: 2020-05-09
+Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
-             person("Gur", "Yaari", role=c("aut"), 
-                    email="gur.yaari@biu.ac.il"),
              person("Namita", "Gupta", role=c("aut"), 
                     email="namita.gupta@yale.edu"),
-             person("Jason", "Vander Heiden", role=c("aut"), 
-                    email="jason.vanderheiden@yale.edu"),
+             person("Susanna", "Marquez", role=c("aut"), 
+                    email="susanna.marquez@yale.edu"),
+             person("Julian", "Zhou", role=c("aut"), 
+                    email="julian.zhou@yale.edu"),
+             person("Nima", "Nouri", role=c("aut"), 
+                    email="nima.nouri@yale.edu"),
              person("Ang", "Cui", role=c("ctb"), 
                     email="angcui@mit.edu"),
-             person("Susanna", "Marquez", role=c("ctb"), 
-                    email="susanna.marquez@yale.edu"),
-             person("Julian", "Zhou", role=c("ctb"), 
-                    email="julian.zhou@yale.edu"),
-             person("Nima", "Nouri", role=c("ctb"), 
-                    email="nima.nouri@yale.edu"),
+             person("Jason", "Vander Heiden", role=c("aut", "cre"), 
+                    email="vanderheiden.jason@gene.com"),
+             person("Gur", "Yaari", role=c("aut"), 
+                    email="gur.yaari@biu.ac.il"),
              person("Steven", "Kleinstein", role=c("aut", "cph"), 
                     email="steven.kleinstein@yale.edu"))
 Title: Immunoglobulin Somatic Hypermutation Analysis

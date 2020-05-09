@@ -159,7 +159,9 @@ NULL
 #' \code{MutabilityModel} defines a data structure for the 5-mer motif-based SHM targeting
 #' mutability model. 
 #' 
-#' @slot    .Data          a numeric vector containing 5-mer mutability estimates
+#' @slot    .Data          numeric vector containing 5-mer mutability estimates
+#' @slot    source         character vector annotating whether the mutability was
+#'                         inferred or directly measured.
 #' @slot    numMutS        a number indicating the number of silent mutations used for 
 #'                         estimating mutability
 #' @slot    numMutR        a number indicating the number of replacement mutations used 
@@ -170,32 +172,10 @@ NULL
 #' @aliases      MutabilityModel
 #' @exportClass  MutabilityModel
 MutabilityModel <- setClass("MutabilityModel", 
-                            slots=c(numMutS="numeric",
+                            slots=c(source="character",
+                                    numMutS="numeric",
                                     numMutR="numeric"),
                             contains="numeric")
-
-
-#' S4 class defining a mutability model with source
-#' 
-#' \code{MutabilityModelWithSource} defines a data structure for the 5-mer motif-based 
-#' SHM targeting mutability model along with the source. 
-#' 
-#' @slot    .Data          a data.frame containing 5-mer mutability estimates and a 
-#'                         \code{Source} column indicating whether the mutability was
-#'                         inferred or directly measured
-#' @slot    numMutS        a number indicating the number of silent mutations used for 
-#'                         estimating mutability
-#' @slot    numMutR        a number indicating the number of replacement mutations used 
-#'                         for estimating mutability  
-#'                         
-#' @name         MutabilityModelWithSource-class
-#' @rdname       MutabilityModelWithSource-class
-#' @aliases      MutabilityModelWithSource
-#' @exportClass  MutabilityModelWithSource
-MutabilityModelWithSource <- setClass("MutabilityModelWithSource", 
-                                      slots=c(numMutS="numeric",
-                                              numMutR="numeric"),
-                                      contains="data.frame")
 
 
 #' S4 class defining a targeting matrix
@@ -213,7 +193,7 @@ MutabilityModelWithSource <- setClass("MutabilityModelWithSource",
 #' @rdname       TargetingMatrix-class
 #' @aliases      TargetingMatrix
 #' @exportClass  TargetingMatrix
-TargetingMatrix <- setClass("TargetingMatrix", 
+TargetingMatrix <- setClass("TargetingMatrix",
                             slots=c(numMutS="numeric",
                                     numMutR="numeric"),
                             contains="matrix")
@@ -291,6 +271,13 @@ setClass("TargetingModel",
 setMethod("print", c(x="MutabilityModel"),
           function(x) { vec <- x@.Data; names(vec) <- names(x); print(vec) })
 
+#' @param    x    \code{MutabilityModel} object.
+#' 
+#' @rdname   MutabilityModel-class
+#' @aliases  MutabilityModel-method
+#' @export
+setMethod("as.data.frame", c(x="MutabilityModel"),
+          function(x) { data.frame(motif=names(x), mutability=x, source=x@source[names(x)]) })
 
 #' @param    x    \code{TargetingModel} object.
 #' @param    y    ignored.
@@ -771,14 +758,10 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #'                               option can be used for parameter tuning for \code{minNumSeqMutations} 
 #'                               during preliminary analysis using \link{minNumSeqMutationsTune}. 
 #'                               Default is \code{FALSE}.                              
-#' @param    returnSource        return the sources of 5-mer mutabilities (measured vs.
-#'                               inferred). Default is \code{FALSE}.                          
 #'
 #' @return   When \code{numSeqMutationsOnly} is \code{FALSE}, a \code{MutabilityModel} containing a
 #'           named numeric vector of 1024 normalized mutability rates for each 5-mer motif with names 
-#'           defining the 5-mer nucleotide sequence. With \code{returnSource=TRUE}, a 
-#'           \code{MutabilityModelWithSource} containing a \code{data.frame} with a column indicating 
-#'           whether each 5-mer mutability was inferred or measured.
+#'           defining the 5-mer nucleotide sequence.
 #'           
 #'           When \code{numSeqMutationsOnly} is \code{TRUE}, a named numeric
 #'           vector of length 1024 counting the number of observed mutations in sequences containing 
@@ -837,10 +820,9 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("s", "rs"),
                                    vCallColumn="v_call",
                                    multipleMutation=c("independent", "ignore"),
                                    minNumSeqMutations=500, 
-                                   numSeqMutationsOnly=FALSE,
-                                   returnSource=FALSE) {
+                                   numSeqMutationsOnly=FALSE) {
     # substitutionModel=sub_model; model="s"; sequenceColumn="sequence_alignment"; germlineColumn="germline_alignment_d_mask"
-    # vCallColumn="v_call"; multipleMutation="ignore"; minNumSeqMutations=10; returnSource=FALSE
+    # vCallColumn="v_call"; multipleMutation="ignore"; minNumSeqMutations=10
     
     # Evaluate argument choices
     model <- match.arg(model)
@@ -1070,27 +1052,18 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("s", "rs"),
     
     # Normalize
     Mutability_Mean_Complete <- Mutability_Mean_Complete / sum(Mutability_Mean_Complete, na.rm=TRUE)
-    
-    # Return whether the 5-mer mutability is measured or inferred
-    if (returnSource) {
-        Mutability_Mean_Complete_Source <- data.frame(Fivemer = names(Mutability_Mean_Complete),
-                                                      Mutability = Mutability_Mean_Complete)
-        Mutability_Mean_Complete_Source$Source <- "Measured"
-        Mutability_Mean_Complete_Source[Mutability_Mean_Complete_Source$Fivemer %in% 
-                                            names(which(is.na(Mutability_Mean))), "Source"] <- "Inferred"
-        
-        Mutability_Mean_Complete_Source <- MutabilityModelWithSource(Mutability_Mean_Complete_Source,
-                                                                     numMutS = mutationsTotalRS[["S"]],
-                                                                     numMutR = mutationsTotalRS[["R"]])
-        return(Mutability_Mean_Complete_Source)
-        
-    } else {
-        Mutability_Mean_Complete <- MutabilityModel(Mutability_Mean_Complete,
-                                                    numMutS = mutationsTotalRS[["S"]],
-                                                    numMutR = mutationsTotalRS[["R"]])
-        return(Mutability_Mean_Complete)
-    }
-    
+
+    # Define whether the 5-mer mutability is measured or inferred
+    mut_names <- names(Mutability_Mean_Complete)
+    mut_source <- setNames(rep("Measured", length(mut_names)), mut_names)
+    mut_source[mut_names %in% names(which(is.na(Mutability_Mean)))] <- "Inferred"
+  
+    # Return MutabilityModel
+    mut_model <- MutabilityModel(Mutability_Mean_Complete,
+                                 source=mut_source,
+                                 numMutS=mutationsTotalRS[["S"]],
+                                 numMutR=mutationsTotalRS[["R"]])
+    return(mut_model)
 }
 
 
@@ -1306,19 +1279,31 @@ extendMutabilityMatrix <- function(mutabilityModel) {
     #extend_mat <- extend_mat / sum(extend_mat, na.rm=TRUE)
     extend_mat[!is.finite(extend_mat)] <- NA
     
-    # carry over @numMutS and @numMutR, if any
+    # Carry over @numMutS and @numMutR, if any
     if (all(c("numMutS", "numMutR") %in% slotNames(mutabilityModel))) {
-        extend_mat <- MutabilityModel(extend_mat,
-                                      numMutS=mutabilityModel@numMutS,
-                                      numMutR=mutabilityModel@numMutR)
+        mut_s <- mutabilityModel@numMutS
+        mut_r <- mutabilityModel@numMutR
     } else {
-        extend_mat <- MutabilityModel(extend_mat,
-                                      # NA is of class logical by default
-                                      numMutS=as.numeric(NA), 
-                                      numMutR=as.numeric(NA))
+        mut_s <- as.numeric(NA) 
+        mut_r <- as.numeric(NA)
     }
     
-    return(extend_mat)
+    # Carry over @source
+    if ("source" %in% slotNames(mutabilityModel)) {
+        mut_names <- names(extend_mat)
+        mut_source <- setNames(rep("Extended", length(mut_names)), mut_names)
+        mut_source[names(mutabilityModel@source)] <- mutabilityModel@source
+    } else {
+        mut_source <- as.character(NA)  
+    }
+    
+    # Return extended MutabilityModel
+    extend_model <- MutabilityModel(extend_mat,
+                                    source=mut_source,
+                                    numMutS=mut_s,
+                                    numMutR=mut_r)
+
+    return(extend_model)
 }
  
 
@@ -1517,8 +1502,7 @@ createTargetingModel <- function(db, model=c("s", "rs"), sequenceColumn="sequenc
                                       germlineColumn=germlineColumn,
                                       vCallColumn=vCallColumn,
                                       multipleMutation=multipleMutation,
-                                      minNumSeqMutations=minNumSeqMutations,
-                                      returnSource=FALSE)
+                                      minNumSeqMutations=minNumSeqMutations)
 
     # Extend 5-mers with Ns
     sub_mat <- extendSubstitutionMatrix(sub_mat)
