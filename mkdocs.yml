@@ -36,7 +36,7 @@ pages:
       - topics/slideWindowTunePlot.md
       - topics/shmulateSeq.md
       - topics/shmulateTree.md
-    - 'Targeting Models':
+    - 'Targeting Inference':
       - topics/calculateMutability.md
       - topics/createMutabilityMatrix.md
       - topics/createSubstitutionMatrix.md
@@ -52,6 +52,10 @@ pages:
       - topics/minNumSeqMutationsTune.md
       - topics/plotMutability.md
       - topics/plotTune.md
+      - topics/MutabilityModel-class.md
+      - topics/TargetingMatrix-class.md
+      - topics/TargetingModel-class.md
+    - 'Empirical Models':
       - topics/HH_S1F.md
       - topics/HH_S5F.md
       - topics/HKL_S1F.md
@@ -59,9 +63,6 @@ pages:
       - topics/MK_RS1NF.md
       - topics/MK_RS5NF.md
       - topics/U5N.md
-      - topics/MutabilityModel-class.md
-      - topics/TargetingMatrix-class.md
-      - topics/TargetingModel-class.md
     - 'Selection Analysis':
       - topics/calcBaseline.md
       - topics/groupBaseline.md
