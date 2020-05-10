@@ -38,8 +38,8 @@
 #' \itemize{
 #'   \item  \link{createTargetingModel}:     Build a 5-mer targeting model.
 #'   \item  \link{plotMutability}:           Plot 5-mer mutability rates.
-#'   \item  \link{HH_S5F}:                Human 5-mer SHM targeting model.
-#'   \item  \link{MK_RS5NF}:              Mouse 5-mer SHM targeting model.
+#'   \item  \link{HH_S5F}:                   Human 5-mer SHM targeting model.
+#'   \item  \link{MK_RS5NF}:                 Mouse 5-mer SHM targeting model.
 #' }
 #'
 #' @section  Quantification of selection pressure:
