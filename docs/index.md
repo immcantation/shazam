@@ -55,7 +55,7 @@ or use the [issue tracker](https://bitbucket.org/kleinstein/shazam/issues?status
 [Julian Zhou](mailto:julian.zhou@yale.edu) (aut)  
 [Nima Nouri](mailto:nima.nouri@yale.edu) (aut)  
 [Ang Cui](mailto:angcui@mit.edu) (ctb)  
-[Jason Vander Heiden](mailto:vanderheiden.jason@gene.com) (aut, cre)  
+[Jason Vander Heiden](mailto:jason.vanderheiden@gmail.com) (aut, cre)  
 [Gur Yaari](mailto:gur.yaari@biu.ac.il) (aut)  
 [Steven Kleinstein](mailto:steven.kleinstein@yale.edu) (aut, cph)
 
