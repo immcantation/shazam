@@ -3,7 +3,7 @@ image:
 
 pipelines:
   branches:
-      default:
+      master:
         - step:
             script:
               - sed -i '/test/ d' .Rbuildignore
