@@ -51,14 +51,14 @@ installDep <- function(this_pack_v, dep_pack_name, dep_pack_v) {
                  error=function(e) { 
                      cat(e, "\n")
                      message("Installing from Bitbucket...\n ")
-                     install_bitbucket(paste0("kleinstein/", dep_pack_name, "@default"))
+                     install_bitbucket(paste0("kleinstein/", dep_pack_name, "@master"))
                  })
     } else {
         if (!in_cran & !devel) { 
             warning(paste0(required_version," not found in CRAN.")) 
         }
         message(paste0(dep_pack_name, " ", required_version,": installing most recent version from Bitbucket.")) 
-        install_bitbucket(paste0("kleinstein/", dep_pack_name, "@default"), upgrade = "never")
+        install_bitbucket(paste0("kleinstein/", dep_pack_name, "@master"), upgrade = "never")
     }
 }
 
