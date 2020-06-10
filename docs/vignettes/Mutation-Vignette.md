@@ -160,11 +160,16 @@ db_obs_v %>%
 ```
 
 ```
-##      sequence_id mu_count_fwr1_r mu_count_fwr1_s mu_count_fwr2_r mu_count_fwr2_s mu_count_fwr3_r mu_count_fwr3_s
-## 1 GN5SHBT07FUXY8               0               0               0               0               0               0
-## 2 GN5SHBT05JMPI5               1               0               0               0               5               1
-## 3 GN5SHBT08H4LPP               1               0               0               0               5               1
-## 4 GN5SHBT05JGND3               0               0               0               0               0               0
+##      sequence_id mu_count_fwr1_r mu_count_fwr1_s mu_count_fwr2_r
+## 1 GN5SHBT07FUXY8               0               0               0
+## 2 GN5SHBT05JMPI5               1               0               0
+## 3 GN5SHBT08H4LPP               1               0               0
+## 4 GN5SHBT05JGND3               0               0               0
+##   mu_count_fwr2_s mu_count_fwr3_r mu_count_fwr3_s
+## 1               0               0               0
+## 2               0               5               1
+## 3               0               5               1
+## 4               0               0               0
 ```
 
 ```r
