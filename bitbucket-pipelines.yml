@@ -1,5 +1,5 @@
 image: 
-  name: kleinstein/immcantation:test
+  name: immcantation/test:devel
 
 pipelines:
   branches:
@@ -10,11 +10,4 @@ pipelines:
               - Rscript tests/setup/install_dep.R
               - R CMD build .
               - R CMD check *.tar.gz --as-cran --run-donttest --timings
-      lower-case:
-        - step:
-            script:
-              - sed -i '/test/ d' .Rbuildignore
-              - Rscript tests/setup/install_dep.R
-              - Rscript -e "devtools::install_bitbucket('kleinstein/alakazam@IMM-29-lower-case-alakazam', upgrade = 'never')"
-              - R CMD build .
-              - R CMD check *.tar.gz --as-cran --run-donttest --timings
+
