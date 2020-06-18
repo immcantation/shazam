@@ -267,110 +267,110 @@ editBaseline <- function(baseline, field, value) {
 
 #### Calculation functions ####
 
-#' Calculate the BASELINe PDFs
-#' 
-#' \code{calcBaseline} calculates the BASELINe posterior probability density 
-#' functions (PDFs) for sequences in the given Change-O \code{data.frame}.
-#'
-#' @param   db                  \code{data.frame} containing sequence data and annotations.
-#' @param   sequenceColumn      \code{character} name of the column in \code{db} 
-#'                              containing input sequences.
-#' @param   germlineColumn      \code{character} name of the column in \code{db} 
-#'                              containing germline sequences.
-#' @param   testStatistic       \code{character} indicating the statistical framework 
-#'                              used to test for selection. One of 
-#'                              \code{c("local", "focused", "imbalanced")}.
-#' @param   regionDefinition    \link{RegionDefinition} object defining the regions
-#'                              and boundaries of the Ig sequences.
-#' @param   targetingModel      \link{TargetingModel} object. Default is  \link{HH_S5F}.
-#' @param   mutationDefinition  \link{MutationDefinition} object defining replacement
-#'                              and silent mutation criteria. If \code{NULL} then 
-#'                              replacement and silent are determined by exact 
-#'                              amino acid identity. Note, if the input data.frame 
-#'                              already contains observed and expected mutation frequency 
-#'                              columns then mutations will not be recalculated and this
-#'                              argument will be ignored.
-#' @param   calcStats           \code{logical} indicating whether or not to calculate the 
-#'                              summary statistics \code{data.frame} stored in the 
-#'                              \code{stats} slot of a \link{Baseline} object.
-#' @param   nproc               number of cores to distribute the operation over. If 
-#'                              \code{nproc=0} then the \code{cluster} has already been
-#'                              set and will not be reset.
-#' 
-#' @return  A \link{Baseline} object containing the modified \code{db} and BASELINe 
-#'          posterior probability density functions (PDF) for each of the sequences.
-#'           
-#' @details 
-#' Calculates the BASELINe posterior probability density function (PDF) for 
-#' sequences in the provided \code{db}. 
-#'          
-#' \strong{Note}: Individual sequences within clonal groups are not, strictly speaking, 
-#' independent events and it is generally appropriate to only analyze selection 
-#' pressures on an effective sequence for each clonal group. For this reason,
-#' it is strongly recommended that the input \code{db} contains one effective 
-#' sequence per clone. Effective clonal sequences can be obtained by calling 
-#' the \link{collapseClones} function.
-#'                   
-#' If the \code{db} does not contain the 
-#' required columns to calculate the PDFs (namely mu_count & mu_expected)
-#' then the function will:
-#'   \enumerate{
-#'   \item  Calculate the numbers of observed mutations.
-#'   \item  Calculate the expected frequencies of mutations and modify the provided 
-#'          \code{db}. The modified \code{db} will be included as part of the 
-#'          returned \code{Baseline} object.
-#' }
-#'          
-#' The \code{testStatistic} indicates the statistical framework used to test for selection. 
-#' E.g.
-#' \itemize{
-#'   \item   \code{local} = CDR_R / (CDR_R + CDR_S).
-#'   \item   \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
-#'   \item   \code{imbalanced} = CDR_R + CDR_S / (CDR_R + CDR_S + FWR_S + FRW_R).
-#' }
-#' For \code{focused} the \code{regionDefinition} must only contain two regions. If more 
-#' than two regions are defined the \code{local} test statistic will be used.
-#' For further information on the frame of these tests see Uduman et al. (2011).
-#'                              
-#' @references
-#' \enumerate{
-#'   \item  Hershberg U, et al. Improved methods for detecting selection by mutation 
-#'            analysis of Ig V region sequences. 
-#'            Int Immunol. 2008 20(5):683-94.
-#'   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
-#'            Nucleic Acids Res. 2011 39(Web Server issue):W499-504.
-#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based
-#'            on synonymous mutations from high-throughput immunoglobulin sequencing data.
-#'            Front Immunol. 2013 4(November):358.
-#'  }
-#' 
-#' @seealso See \link{Baseline} for the return object.
-#'          See \link{groupBaseline} and \link{summarizeBaseline} for further processing.
-#'          See \link{plotBaselineSummary} and \link{plotBaselineDensity} for plotting results.
-#' 
-#' @examples
-#' # Load and subset example data
-#' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
-#' 
-#' # Collapse clones
-#' db <- collapseClones(db, cloneColumn="clone_id", 
-#'                      sequenceColumn="sequence_alignment",
-#'                      germlineColumn="germline_alignment_d_mask",
-#'                      method="thresholdedFreq", minimumFrequency=0.6,
-#'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
-#'  
-#' # Calculate BASELINe
-#' baseline <- calcBaseline(db, 
-#'                          sequenceColumn="clonal_sequence",
-#'                          germlineColumn="clonal_germline", 
-#'                          testStatistic="focused",
-#'                          regionDefinition=IMGT_V,
-#'                          targetingModel=HH_S5F,
-#'                          nproc=1)
-#'                          
-#' @export
-calcBaseline <- function(db,
+# Calculate the BASELINe PDFs (excluding CDR3 and FWR4 regions)
+# 
+# \code{calcBaselineL} calculates the BASELINe posterior probability density 
+# functions (PDFs) for sequences in the given Change-O \code{data.frame}.
+#
+# @param   db                  \code{data.frame} containing sequence data and annotations.
+# @param   sequenceColumn      \code{character} name of the column in \code{db} 
+#                              containing input sequences.
+# @param   germlineColumn      \code{character} name of the column in \code{db} 
+#                              containing germline sequences.
+# @param   testStatistic       \code{character} indicating the statistical framework 
+#                              used to test for selection. One of 
+#                              \code{c("local", "focused", "imbalanced")}.
+# @param   regionDefinition    \link{RegionDefinition} object defining the regions
+#                              and boundaries of the Ig sequences.
+# @param   targetingModel      \link{TargetingModel} object. Default is  \link{HH_S5F}.
+# @param   mutationDefinition  \link{MutationDefinition} object defining replacement
+#                              and silent mutation criteria. If \code{NULL} then 
+#                              replacement and silent are determined by exact 
+#                              amino acid identity. Note, if the input data.frame 
+#                              already contains observed and expected mutation frequency 
+#                              columns then mutations will not be recalculated and this
+#                              argument will be ignored.
+# @param   calcStats           \code{logical} indicating whether or not to calculate the 
+#                              summary statistics \code{data.frame} stored in the 
+#                              \code{stats} slot of a \link{Baseline} object.
+# @param   nproc               number of cores to distribute the operation over. If 
+#                              \code{nproc=0} then the \code{cluster} has already been
+#                              set and will not be reset.
+# 
+# @return  A \link{Baseline} object containing the modified \code{db} and BASELINe 
+#          posterior probability density functions (PDF) for each of the sequences.
+#           
+# @details 
+# Calculates the BASELINe posterior probability density function (PDF) for 
+# sequences in the provided \code{db}. 
+#          
+# \strong{Note}: Individual sequences within clonal groups are not, strictly speaking, 
+# independent events and it is generally appropriate to only analyze selection 
+# pressures on an effective sequence for each clonal group. For this reason,
+# it is strongly recommended that the input \code{db} contains one effective 
+# sequence per clone. Effective clonal sequences can be obtained by calling 
+# the \link{collapseClones} function.
+#                   
+# If the \code{db} does not contain the 
+# required columns to calculate the PDFs (namely mu_count & mu_expected)
+# then the function will:
+#   \enumerate{
+#   \item  Calculate the numbers of observed mutations.
+#   \item  Calculate the expected frequencies of mutations and modify the provided 
+#          \code{db}. The modified \code{db} will be included as part of the 
+#          returned \code{Baseline} object.
+# }
+#          
+# The \code{testStatistic} indicates the statistical framework used to test for selection. 
+# E.g.
+# \itemize{
+#   \item   \code{local} = CDR_R / (CDR_R + CDR_S).
+#   \item   \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
+#   \item   \code{imbalanced} = CDR_R + CDR_S / (CDR_R + CDR_S + FWR_S + FRW_R).
+# }
+# For \code{focused} the \code{regionDefinition} must only contain two regions. If more 
+# than two regions are defined the \code{local} test statistic will be used.
+# For further information on the frame of these tests see Uduman et al. (2011).
+#                              
+# @references
+# \enumerate{
+#   \item  Hershberg U, et al. Improved methods for detecting selection by mutation 
+#            analysis of Ig V region sequences. 
+#            Int Immunol. 2008 20(5):683-94.
+#   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
+#            Nucleic Acids Res. 2011 39(Web Server issue):W499-504.
+#   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based
+#            on synonymous mutations from high-throughput immunoglobulin sequencing data.
+#            Front Immunol. 2013 4(November):358.
+#  }
+# 
+# @seealso See \link{Baseline} for the return object.
+#          See \link{groupBaseline} and \link{summarizeBaseline} for further processing.
+#          See \link{plotBaselineSummary} and \link{plotBaselineDensity} for plotting results.
+# 
+# @examples
+# # Load and subset example data
+# data(ExampleDb, package="alakazam")
+# db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
+# 
+# # Collapse clones
+# db <- collapseClones(db, cloneColumn="clone_id", 
+#                      sequenceColumn="sequence_alignment",
+#                      germlineColumn="germline_alignment_d_mask",
+#                      method="thresholdedFreq", minimumFrequency=0.6,
+#                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+#  
+# # Calculate BASELINe
+# baseline <- calcBaselineL(db, 
+#                           sequenceColumn="clonal_sequence",
+#                           germlineColumn="clonal_germline", 
+#                           testStatistic="focused",
+#                           regionDefinition=IMGT_V,
+#                           targetingModel=HH_S5F,
+#                           nproc=1)
+#                          
+# @export
+calcBaselineL <- function(db,
                          sequenceColumn="clonal_sequence",
                          germlineColumn="clonal_germline",
                          testStatistic=c("local", "focused", "imbalanced"),
@@ -2079,3 +2079,291 @@ fastConv<-function(cons, max_sigma=20, length_sigma=4001){
     }
     return(as.vector(result))
 }
+
+
+
+
+#' Calculate the BASELINe PDFs (including for regions that include CDR3 and FWR4)
+#' 
+#' \code{calcBaseline} calculates the BASELINe posterior probability density 
+#' functions (PDFs) for sequences in the given Change-O \code{data.frame}.
+#'
+#' @param   db                  \code{data.frame} containing sequence data and annotations.
+#' @param   sequenceColumn      \code{character} name of the column in \code{db} 
+#'                              containing input sequences.
+#' @param   germlineColumn      \code{character} name of the column in \code{db} 
+#'                              containing germline sequences.
+#' @param   testStatistic       \code{character} indicating the statistical framework 
+#'                              used to test for selection. One of 
+#'                              \code{c("local", "focused", "imbalanced")}.
+#' @param   regionDefinition    \link{RegionDefinition} object defining the regions
+#'                              and boundaries of the Ig sequences.
+#' @param   targetingModel      \link{TargetingModel} object. Default is  \link{HH_S5F}.
+#' @param   mutationDefinition  \link{MutationDefinition} object defining replacement
+#'                              and silent mutation criteria. If \code{NULL} then 
+#'                              replacement and silent are determined by exact 
+#'                              amino acid identity. Note, if the input data.frame 
+#'                              already contains observed and expected mutation frequency 
+#'                              columns then mutations will not be recalculated and this
+#'                              argument will be ignored.
+#' @param   calcStats           \code{logical} indicating whether or not to calculate the 
+#'                              summary statistics \code{data.frame} stored in the 
+#'                              \code{stats} slot of a \link{Baseline} object.
+#' @param   nproc               number of cores to distribute the operation over. If 
+#'                              \code{nproc=0} then the \code{cluster} has already been
+#'                              set and will not be reset.
+#' @param   cloneColumn         \code{character} name of the column in \code{db} 
+#'                              containing clonal identifiers. Relevant only for 
+#'                              when regionDefinition includes CDR and FWR4 (else
+#'                              this value can be \code{NULL})
+#' @param   juncLenCol          \code{character} name of the column in \code{db} 
+#'                              containing the junction length. Relevant only for 
+#'                              when regionDefinition includes CDR and FWR4 (else
+#'                              this value can be \code{NULL})  
+#' @param   muFreqColumn        \code{character} name of the column containing mutation
+#'                              frequency. Optional. Applicable to the \code{"mostMutated"}
+#'                              and \code{"leastMutated"} methods. If not supplied, mutation
+#'                              frequency is computed by calling \code{observedMutations}.
+#'                              Default is \code{NULL}. See Cautions for note on usage.
+#' @param   method              method for calculating input consensus sequence. Required. 
+#'                              One of \code{"thresholdedFreq"}, \code{"mostCommon"}, 
+#'                              \code{"catchAll"}, \code{"mostMutated"}, or 
+#'                              \code{"leastMutated"}. See "Methods" for details.
+#' @param   minimumFrequency    frequency threshold for calculating input consensus sequence.
+#'                              Applicable to and required for the \code{"thresholdedFreq"} 
+#'                              method. A canonical choice is 0.6. Default is \code{NULL}. 
+#' @param   includeAmbiguous    whether to use ambiguous characters to represent positions 
+#'                              at which there are multiple characters with frequencies that 
+#'                              are at least \code{minimumFrequency} or that are maximal 
+#'                              (i.e. ties). Applicable to and required for the 
+#'                              \code{"thresholdedFreq"} and \code{"mostCommon"} methods. 
+#'                              Default is \code{FALSE}. See "Choosing ambiguous characters" 
+#'                              for rules on choosing ambiguous characters.
+#' @param   breakTiesStochastic In case of ties, whether to randomly pick a sequence from 
+#'                              sequences that fulfill the criteria as consensus. Applicable 
+#'                              to and required for all methods except for \code{"catchAll"}. 
+#'                              Default is \code{FALSE}. See "Methods" for details. 
+#' @param   breakTiesByColumns  A list of the form 
+#'                              \code{list(c(col_1, col_2, ...), c(fun_1, fun_2, ...))}, 
+#'                              where \code{col_i} is a \code{character} name of a column 
+#'                              in \code{db}, and \code{fun_i} is a function to be applied 
+#'                              on that column. Currently, only \code{max} and \code{min} 
+#'                              are supported. Note that the two \code{c()}'s in \code{list()} 
+#'                              are essential (i.e. if there is only 1 column, the list should 
+#'                              be of the form \code{list(c(col_1), c(func_1))}. Applicable 
+#'                              to and optional for the \code{"mostMutated"} and 
+#'                              \code{"leastMutated"} methods. If supplied, \code{fun_i}'s 
+#'                              are applied on \code{col_i}'s to help break ties. Default 
+#'                              is \code{NULL}. See "Methods" for details. 
+#' @param   expandedDb          \code{logical} indicating whether or not to return the 
+#'                              expanded \code{db}, containing all the sequences (as opposed
+#'                              to returning just one sequence per clone).'
+#' 
+#' @return  A \link{Baseline} object containing the modified \code{db} and BASELINe 
+#'          posterior probability density functions (PDF) for each of the sequences.
+#'           
+#' @details 
+#' Calculates the BASELINe posterior probability density function (PDF) for 
+#' sequences in the provided \code{db}. 
+#'          
+#' \strong{Note}: Individual sequences within clonal groups are not, strictly speaking, 
+#' independent events and it is generally appropriate to only analyze selection 
+#' pressures on an effective sequence for each clonal group. For this reason,
+#' it is strongly recommended that the input \code{db} contains one effective 
+#' sequence per clone. Effective clonal sequences can be obtained by calling 
+#' the \link{collapseClones} function.
+#'                   
+#' If the \code{db} does not contain the 
+#' required columns to calculate the PDFs (namely mu_count & mu_expected)
+#' then the function will:
+#'   \enumerate{
+#'   \item  Calculate the numbers of observed mutations.
+#'   \item  Calculate the expected frequencies of mutations and modify the provided 
+#'          \code{db}. The modified \code{db} will be included as part of the 
+#'          returned \code{Baseline} object.
+#' }
+#'          
+#' The \code{testStatistic} indicates the statistical framework used to test for selection. 
+#' E.g.
+#' \itemize{
+#'   \item   \code{local} = CDR_R / (CDR_R + CDR_S).
+#'   \item   \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
+#'   \item   \code{imbalanced} = CDR_R + CDR_S / (CDR_R + CDR_S + FWR_S + FRW_R).
+#' }
+#' For \code{focused} the \code{regionDefinition} must only contain two regions. If more 
+#' than two regions are defined the \code{local} test statistic will be used.
+#' For further information on the frame of these tests see Uduman et al. (2011).
+#'                              
+#' @references
+#' \enumerate{
+#'   \item  Hershberg U, et al. Improved methods for detecting selection by mutation 
+#'            analysis of Ig V region sequences. 
+#'            Int Immunol. 2008 20(5):683-94.
+#'   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
+#'            Nucleic Acids Res. 2011 39(Web Server issue):W499-504.
+#'   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based
+#'            on synonymous mutations from high-throughput immunoglobulin sequencing data.
+#'            Front Immunol. 2013 4(November):358.
+#'  }
+#' 
+#' @seealso See \link{Baseline} for the return object.
+#'          See \link{groupBaseline} and \link{summarizeBaseline} for further processing.
+#'          See \link{plotBaselineSummary} and \link{plotBaselineDensity} for plotting results.
+#' 
+#' @examples
+#' # Load and subset example data
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
+#' 
+#' # Collapse clones
+#' db <- collapseClones(db, cloneColumn="clone_id", 
+#'                      sequenceColumn="sequence_alignment",
+#'                      germlineColumn="germline_alignment_d_mask",
+#'                      method="thresholdedFreq", minimumFrequency=0.6,
+#'                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+#'  
+#' # Calculate BASELINe
+#' baseline <- calcBaseline(db, 
+#'                          sequenceColumn="clonal_sequence",
+#'                          germlineColumn="clonal_germline", 
+#'                          testStatistic="focused",
+#'                          regionDefinition=IMGT_V,
+#'                          targetingModel=HH_S5F,
+#'                          nproc=1)
+#'                          
+#' @export
+calcBaseline <- function(db, 
+                         sequenceColumn = "clonal_sequence", 
+                         germlineColumn = "clonal_germline", 
+                         testStatistic = c("local","focused", "imbalanced"), 
+                         regionDefinition = NULL, 
+                         targetingModel = HH_S5F, 
+                         mutationDefinition = NULL,
+                         calcStats = FALSE, 
+                         nproc = 1,
+                         # following are relevant only when regioDefinition includes CDR3 and FWR4:
+                         cloneColumn = NULL,
+                         juncLenCol = NULL) {
+                         
+    
+    # Case 1:
+    if (is.null(regionDefinition))  {
+        ret_baseline <- calcBaselineL(db=db, sequenceColumn = sequenceColumn,
+                                      germlineColumn = germlineColumn,
+                                      testStatistic = testStatistic, 
+                                      targetingModel = targetingModel, 
+                                      regionDefinition = regionDefinition, 
+                                      mutationDefinition = mutationDefinition, 
+                                      calcStats= calcStats,
+                                      nproc = nproc)
+    }
+    
+    # Case 2:
+    else if ((regionDefinition@name != "IMGT_ALL_REGIONS") & (regionDefinition@name != "IMGT_ALL")) {
+        ret_baseline <- calcBaselineL(db=db, sequenceColumn = sequenceColumn,
+                                      germlineColumn = germlineColumn,
+                                      testStatistic = testStatistic, 
+                                      targetingModel = targetingModel, 
+                                      regionDefinition = regionDefinition, 
+                                      mutationDefinition = mutationDefinition, 
+                                      calcStats= calcStats,
+                                      nproc = nproc)
+    }
+    
+    # Case 3:
+    else if ((regionDefinition@name == "IMGT_ALL_REGIONS") | (regionDefinition@name == "IMGT_ALL")) {
+        
+        clones_list <- makeClonesList(db=db, clone_col=cloneColumn)
+        
+        # bellow 2 lines are for running faster in parallel cores:
+        cl <- makeCluster(detectCores(), type='PSOCK')
+        registerDoParallel(cl)
+        clones_baseline_list <- sapply(X=clones_list, FUN=calcBaselineOneClone, db=db, 
+                                       juncLenCol=juncLenCol,
+                                       sequenceColumn = sequenceColumn, cloneColumn=cloneColumn, 
+                                       germlineColumn = germlineColumn, 
+                                       testStatistic = testStatistic, 
+                                       regionDefinition = regionDefinition, 
+                                       targetingModel = targetingModel, 
+                                       mutationDefinition = mutationDefinition,
+                                       calcStats = calcStats, nproc = nproc)
+        
+        # now setting the different slots of the result baseline class:
+        # description:
+        baseline_description <- ""
+    
+        #testStatistic:
+        baseline_testStatistic <- clones_baseline_list[[1]]@testStatistic
+    
+        #regions:
+        baseline_regions <- clones_baseline_list[[1]]@regions
+
+        # to be used for all following:
+        clones_list_length <- length(clones_list)
+        x__ <- 1:clones_list_length
+        
+        # db:
+        db_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@db,
+                          USE.NAMES = FALSE,simplify = FALSE)
+    
+        baseline_db <- do.call("rbind",db_list)
+    
+        #numbOfSeqs:
+        numbOfSeqs_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@numbOfSeqs,
+                                  USE.NAMES = FALSE,simplify = FALSE)
+        baseline_numbOfSeqs <- do.call("rbind",numbOfSeqs_list)
+        rownames(baseline_numbOfSeqs) <- as.character(c(1:dim(baseline_numbOfSeqs)[1]))
+    
+        #binomK:
+        binomK_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@binomK,
+                          USE.NAMES = FALSE, simplify = FALSE)
+        baseline_binomK <- do.call("rbind",binomK_list)
+        rownames(baseline_binomK) <- as.character(c(1:dim(baseline_binomK)[1]))
+    
+        #binomN:
+        binomN_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@binomN,
+                              USE.NAMES = FALSE, simplify = FALSE)
+        baseline_binomN <- do.call("rbind",binomN_list)
+        rownames(baseline_binomN) <- as.character(c(1:dim(baseline_binomN)[1]))
+    
+        #binomP:
+        binomP_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@binomP,
+                              USE.NAMES = FALSE, simplify = FALSE)
+        baseline_binomP <- do.call("rbind",binomP_list)
+        rownames(baseline_binomP) <- as.character(c(1:dim(baseline_binomP)[1]))
+    
+        #pdfs:
+        # First - setting an empty list with proper length and names:
+        baseline_pdfs.names <-names(clones_baseline_list[[1]]@pdfs)
+        baseline_pdfs  <-  vector("list", length(baseline_pdfs.names))
+        names(baseline_pdfs) <- baseline_pdfs.names
+        # now each list element is a matrix:
+        for (pdf in names(clones_baseline_list[[1]]@pdfs)) {
+           pdf_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@pdfs[[pdf]],
+                              USE.NAMES = FALSE, simplify = FALSE)
+           baseline_pdfs[[pdf]] <- do.call("rbind",pdf_list)
+        }  
+    
+        #stats:
+        stats_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@stats,
+                             USE.NAMES = FALSE, simplify = FALSE)
+        baseline_stats <- do.call("rbind",stats_list)
+    
+        # If regionDefinition include CDR3 and FWR4 - then the regionDefinition is different for each clone,
+        # In this case - regionDefinition will be NULL.
+        baseline_regionDefinition <- regionDefinition
+    
+    
+        ret_baseline <- new("Baseline",description=baseline_description, db=baseline_db, 
+                            regionDefinition=baseline_regionDefinition, testStatistic=baseline_testStatistic,
+                            regions=baseline_regions, numbOfSeqs=baseline_numbOfSeqs, 
+                            binomK=baseline_binomK, binomN=baseline_binomN, binomP=baseline_binomP,
+                            pdfs=baseline_pdfs, stats=baseline_stats)  
+        # going back to none paralel mode:
+        registerDoSEQ()
+    }
+    
+    return(ret_baseline)
+}
+
+

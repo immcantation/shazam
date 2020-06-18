@@ -2525,3 +2525,413 @@ test_that("expectedMutations", {
     expect_identical(db_exp_c[["mu_expected_fwr_s"]], db_exp_a[["mu_expected_fwr_s"]])
     
 })
+
+test_that("observedMutations, extended regions single sequence", {
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    db1 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT08IVG4Z") #clone 3509
+    db2 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT03AVKX3") #clone 197
+    db3 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT07IQGK2") #clone 3090
+    db_obs1_ALL_REGIONS <- observedMutations(db=db1, sequenceColumn="SEQUENCE_IMGT", 
+                                cloneColumn="CLONE", 
+                                germlineColumn="GERMLINE_IMGT_D_MASK",
+                                juncLengthColumn="JUNCTION_LENGTH",
+                                refOption = "germline", 
+                                regionDefinition=IMGT_ALL_REGIONS)
+    db_obs2_ALL_REGIONS <- observedMutations(db=db2, sequenceColumn="SEQUENCE_IMGT", 
+                                 cloneColumn="CLONE", 
+                                 germlineColumn="GERMLINE_IMGT_D_MASK",
+                                 juncLengthColumn="JUNCTION_LENGTH",
+                                 refOption = "germline", 
+                                 regionDefinition=IMGT_ALL_REGIONS)
+    db_obs3_ALL_REGIONS <- observedMutations(db=db3, sequenceColumn="SEQUENCE_IMGT", 
+                                 cloneColumn="CLONE", 
+                                 germlineColumn="GERMLINE_IMGT_D_MASK",
+                                 juncLengthColumn="JUNCTION_LENGTH",
+                                 refOption = "germline", 
+                                 regionDefinition=IMGT_ALL_REGIONS)
+    
+    db_obs1_ALL <- observedMutations(db=db1, sequenceColumn="SEQUENCE_IMGT", 
+                                             cloneColumn="CLONE", 
+                                             germlineColumn="GERMLINE_IMGT_D_MASK",
+                                             juncLengthColumn="JUNCTION_LENGTH",
+                                             refOption = "germline", 
+                                             regionDefinition=IMGT_ALL)
+    db_obs2_ALL <- observedMutations(db=db2, sequenceColumn="SEQUENCE_IMGT", 
+                                             cloneColumn="CLONE", 
+                                             germlineColumn="GERMLINE_IMGT_D_MASK",
+                                             juncLengthColumn="JUNCTION_LENGTH",
+                                             refOption = "germline", 
+                                             regionDefinition=IMGT_ALL)
+    db_obs3_ALL <- observedMutations(db=db3, sequenceColumn="SEQUENCE_IMGT", 
+                                             cloneColumn="CLONE", 
+                                             germlineColumn="GERMLINE_IMGT_D_MASK",
+                                             juncLengthColumn="JUNCTION_LENGTH",
+                                             refOption = "germline", 
+                                             regionDefinition=IMGT_ALL)
+    
+    db_obs1_V <- observedMutations(db=db1, sequenceColumn="SEQUENCE_IMGT", 
+                                     cloneColumn="CLONE", 
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     juncLengthColumn="JUNCTION_LENGTH",
+                                     refOption = "germline", 
+                                     regionDefinition=IMGT_V)
+    db_obs2_V <- observedMutations(db=db2, sequenceColumn="SEQUENCE_IMGT", 
+                                     cloneColumn="CLONE", 
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     juncLengthColumn="JUNCTION_LENGTH",
+                                     refOption = "germline", 
+                                     regionDefinition=IMGT_V)
+    db_obs3_V <- observedMutations(db=db3, sequenceColumn="SEQUENCE_IMGT", 
+                                     cloneColumn="CLONE", 
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     juncLengthColumn="JUNCTION_LENGTH",
+                                     refOption = "germline", 
+                                     regionDefinition=IMGT_V)
+    
+    
+    expect_equal(db_obs1_ALL_REGIONS$mu_count_cdr3_r, 0)
+    expect_equal(db_obs1_ALL_REGIONS$mu_count_cdr3_s, 0)
+    expect_equal(db_obs1_ALL_REGIONS$mu_count_fwr4_r, 1)
+    expect_equal(db_obs1_ALL_REGIONS$mu_count_fwr4_s, 0)
+    
+    expect_equal(db_obs2_ALL_REGIONS$mu_count_cdr3_r, 0)
+    expect_equal(db_obs2_ALL_REGIONS$mu_count_cdr3_s, 1)
+    expect_equal(db_obs2_ALL_REGIONS$mu_count_fwr4_r, 1)
+    expect_equal(db_obs2_ALL_REGIONS$mu_count_fwr4_s, 5)
+    
+    expect_equal(db_obs3_ALL_REGIONS$mu_count_cdr3_r, 2)
+    expect_equal(db_obs3_ALL_REGIONS$mu_count_cdr3_s, 0)
+    expect_equal(db_obs3_ALL_REGIONS$mu_count_fwr4_r, 1)
+    expect_equal(db_obs3_ALL_REGIONS$mu_count_fwr4_s, 1)
+    
+    
+    expect_equal(db_obs1_ALL$mu_count_cdr_r, 
+                 db_obs1_V$mu_count_cdr_r + db_obs1_ALL_REGIONS$mu_count_cdr3_r)
+    expect_equal(db_obs1_ALL$mu_count_cdr_s, 
+                 db_obs1_V$mu_count_cdr_s + db_obs1_ALL_REGIONS$mu_count_cdr3_s)
+    expect_equal(db_obs1_ALL$mu_count_fwr_r, 
+                 db_obs1_V$mu_count_fwr_r + db_obs1_ALL_REGIONS$mu_count_fwr4_r)
+    expect_equal(db_obs1_ALL$mu_count_fwr_s, 
+                 db_obs1_V$mu_count_fwr_s + db_obs1_ALL_REGIONS$mu_count_fwr4_s)
+})
+
+test_that("observedMutations, extended regions multi sequences", {
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    db1 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT08IVG4Z") #clone 3509
+    db2 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT03AVKX3") #clone 197
+    db3 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT07IQGK2") #clone 3090
+    db_all <- rbind(db1,db2,db3)
+    db_obs_ALL_REGIONS <- observedMutations(db=db_all, sequenceColumn="SEQUENCE_IMGT", 
+                                             cloneColumn="CLONE", 
+                                             germlineColumn="GERMLINE_IMGT_D_MASK",
+                                             juncLengthColumn="JUNCTION_LENGTH",
+                                             refOption = "germline", 
+                                             regionDefinition=IMGT_ALL_REGIONS)
+    # sort by clone id - since observedMutations may reorder lines of original db
+    db_obs_ALL_REGIONS <- db_obs_ALL_REGIONS[order(db_obs_ALL_REGIONS$CLONE),]
+    expect_equal(db_obs_ALL_REGIONS$mu_count_cdr3_r, c(0, 2, 0))
+    expect_equal(db_obs_ALL_REGIONS$mu_count_cdr3_s, c(1, 0, 0))
+    expect_equal(db_obs_ALL_REGIONS$mu_count_fwr4_r, c(1, 1, 1))
+    expect_equal(db_obs_ALL_REGIONS$mu_count_fwr4_s, c(5, 1, 0))
+})
+
+test_that("observedMutations, parents as ref", {
+    library("alakazam")
+    library("igraph")
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    #dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
+    dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
+    clone_3177_obj <- makeChaneoCloneCurClone(db=ExampleDb, cur_clone_num=3177, seq="SEQUENCE_IMGT", 
+                                              germ="GERMLINE_IMGT_D_MASK", clone="CLONE", id="SEQUENCE_ID",
+                                              vcall="V_CALL", jcall="J_CALL", junc_len="JUNCTION_LENGTH") 
+    print(names(clone_3177_obj))
+    if (file.access(dnapars_exec, mode=1) == -1) {
+        expect_error(
+            clone_3177_graph <- makeGraphCurClone(clone_3177_obj,dnapars_exec),
+            "The file ~/dummy/phylip-3.69/dnapars cannot be executed"
+        )
+    } else {
+       clone_3177_graph <- makeGraphCurClone(clone_3177_obj,dnapars_exec)
+       clone_3177_graphDF <- makeGraphDf(curCloneGraph=clone_3177_graph,  
+                                         curCloneObj=clone_3177_obj, 
+                                         objSeqId ="sequence_id", objSeq ="sequence")
+       expect_equal(dim(clone_3177_graphDF), c(16,22))
+       clone_3177_graphDF_ALL_REGIONS_parent1 <- observedMutations(db=clone_3177_graphDF, 
+                                                           sequenceColumn="sequence", 
+                                                           cloneColumn="clone", 
+                                                           germlineColumn="germline_alignment",
+                                                           juncLengthColumn="junction_length",
+                                                           refOption = "parent",
+                                                           parentColumn = "parent_sequence",
+                                                           regionDefinition=IMGT_ALL_REGIONS)
+       # since germline as reference columns for observed mutations - was checked in last section,
+       # here we check that when "parent_sequnece" is defined as the germline sequence - then we get same 
+       # results as if we define the refernece sequence as the "parent".
+       clone_3177_graphDF_ALL_REGIONS_parent2 <- observedMutations(db=clone_3177_graphDF, 
+                                                                  sequenceColumn="sequence", 
+                                                                  cloneColumn="clone", 
+                                                                  germlineColumn="parent_sequence",
+                                                                  juncLengthColumn="junction_length",
+                                                                  refOption = "germline",
+                                                                  regionDefinition=IMGT_ALL_REGIONS)
+       clone_3177_graphDF_ALL_parent1 <- observedMutations(db=clone_3177_graphDF, 
+                                                                   sequenceColumn="sequence", 
+                                                                   cloneColumn="clone", 
+                                                                   germlineColumn="germline_alignment",
+                                                                   juncLengthColumn="junction_length",
+                                                                   refOption = "parent",
+                                                                   parentColumn = "parent_sequence",
+                                                                   regionDefinition=IMGT_ALL)
+       
+       clone_3177_graphDF_ALL_parent2 <- observedMutations(db=clone_3177_graphDF, 
+                                                                   sequenceColumn="sequence", 
+                                                                   cloneColumn="clone", 
+                                                                   germlineColumn="parent_sequence",
+                                                                   juncLengthColumn="junction_length",
+                                                                   refOption = "germline",
+                                                                   regionDefinition=IMGT_ALL)
+       
+       expect_equal(clone_3177_graphDF_ALL_REGIONS_parent1, 
+                    clone_3177_graphDF_ALL_REGIONS_parent2)
+       expect_equal(clone_3177_graphDF_ALL_parent1, 
+                    clone_3177_graphDF_ALL_parent2)
+       }
+})
+
+
+test_that("expectedMutations, extended with regard to germline", {
+    library("alakazam")
+    library("igraph")
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    db1 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT08IVG4Z") #clone 3509
+    db2 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT03AVKX3") #clone 197
+    db3 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT07IQGK2") #clone 3090
+    db_all <- rbind(db1,db2,db3)
+    db_exp_ALL_REGIONS <- expectedMutations(db=db_all, sequenceColumn="SEQUENCE_IMGT", 
+                                            cloneColumn="CLONE", 
+                                            germlineColumn="GERMLINE_IMGT_D_MASK",
+                                            juncLengthColumn="JUNCTION_LENGTH",
+                                            refOption = "germline", 
+                                            regionDefinition=IMGT_ALL_REGIONS)
+    db_exp_ALL <- expectedMutations(db=db_all, sequenceColumn="SEQUENCE_IMGT", 
+                                    cloneColumn="CLONE", 
+                                    germlineColumn="GERMLINE_IMGT_D_MASK",
+                                    juncLengthColumn="JUNCTION_LENGTH",
+                                    refOption = "germline", 
+                                    regionDefinition=IMGT_ALL)
+    db_exp_V_BY_REGIONS <- expectedMutations(db=db_all, sequenceColumn="SEQUENCE_IMGT", 
+                                             cloneColumn="CLONE", 
+                                             germlineColumn="GERMLINE_IMGT_D_MASK",
+                                             juncLengthColumn="JUNCTION_LENGTH",
+                                             refOption = "germline", 
+                                             regionDefinition=IMGT_V_BY_REGIONS)
+    columns_ALL_REGIONS <- c("mu_expected_cdr1_r",
+                             "mu_expected_cdr1_s",
+                             "mu_expected_cdr2_r",
+                             "mu_expected_cdr2_s",
+                             "mu_expected_cdr3_r",
+                             "mu_expected_cdr3_s",
+                             "mu_expected_fwr1_r",
+                             "mu_expected_fwr1_s",
+                             "mu_expected_fwr2_r",
+                             "mu_expected_fwr2_s",
+                             "mu_expected_fwr3_r",
+                             "mu_expected_fwr3_s",
+                             "mu_expected_fwr4_r",
+                             "mu_expected_fwr4_s")
+    columns_ALL <- c("mu_expected_cdr_r",
+                     "mu_expected_cdr_s",
+                     "mu_expected_fwr_r",
+                     "mu_expected_fwr_s")
+    columns_V_REGIONS <- c("mu_expected_cdr1_r",
+                           "mu_expected_cdr1_s",
+                           "mu_expected_cdr2_r",
+                           "mu_expected_cdr2_s",
+                           "mu_expected_fwr1_r",
+                           "mu_expected_fwr1_s",
+                           "mu_expected_fwr2_r",
+                           "mu_expected_fwr2_s",
+                           "mu_expected_fwr3_r",
+                           "mu_expected_fwr3_s")
+    columns_cdr123 <-                         c("mu_expected_cdr1_r",
+                                                "mu_expected_cdr1_s",
+                                                "mu_expected_cdr2_r",
+                                                "mu_expected_cdr2_s",
+                                                "mu_expected_cdr3_r",
+                                                "mu_expected_cdr3_s")
+    columns_cdr12 <-                          c("mu_expected_cdr1_r",
+                                                "mu_expected_cdr1_s",
+                                                "mu_expected_cdr2_r",
+                                                "mu_expected_cdr2_s")
+    columns_cdr <-                            c("mu_expected_cdr_r",
+                                                "mu_expected_cdr_s")
+    columns_fwr1234 <-   c("mu_expected_fwr1_r",
+                           "mu_expected_fwr1_s",
+                           "mu_expected_fwr2_r",
+                           "mu_expected_fwr2_s",
+                           "mu_expected_fwr3_r",
+                           "mu_expected_fwr3_s",
+                           "mu_expected_fwr4_r",
+                           "mu_expected_fwr4_s")
+    columns_fwr123 <-   c("mu_expected_fwr1_r",
+                           "mu_expected_fwr1_s",
+                           "mu_expected_fwr2_r",
+                           "mu_expected_fwr2_s",
+                           "mu_expected_fwr3_r",
+                           "mu_expected_fwr3_s")
+    columns_fwr <-                             c("mu_expected_fwr_r",
+                                                 "mu_expected_fwr_s")
+    sum_db_exp_ALL_REGIONS  <- rowSums(db_exp_ALL_REGIONS[,columns_ALL_REGIONS])
+    sum_db_exp_ALL          <- rowSums(db_exp_ALL[,columns_ALL])
+    sum_db_exp_ALL_REGIONS_CDR123<-rowSums(db_exp_ALL_REGIONS[,columns_cdr123])
+    sum_db_exp_ALL_REGIONS_CDR12<-rowSums(db_exp_ALL_REGIONS[,columns_cdr12])
+    sum_db_exp_ALL_CDR<-rowSums(db_exp_ALL[,columns_cdr])
+    sum_db_exp_ALL_REGIONS_FWR1234<-rowSums(db_exp_ALL_REGIONS[,columns_fwr1234])
+    sum_db_exp_ALL_REGIONS_FWR123<-rowSums(db_exp_ALL_REGIONS[,columns_fwr123])
+    sum_db_exp_ALL_FWR<-rowSums(db_exp_ALL[,columns_fwr])
+    
+    expect_equal(sum_db_exp_ALL_REGIONS,c(1,1,1))
+    expect_equal(sum_db_exp_ALL,c(1,1,1))
+    expect_equal(sum_db_exp_ALL_REGIONS_CDR123,sum_db_exp_ALL_CDR,tolerance=0.001)
+    expect_equal(sum_db_exp_ALL_REGIONS_FWR1234,sum_db_exp_ALL_FWR,tolerance=0.001)
+    expect_equal(db_exp_ALL_REGIONS[,columns_V_REGIONS]/(sum_db_exp_ALL_REGIONS_FWR123 + sum_db_exp_ALL_REGIONS_CDR12),
+                 db_exp_V_BY_REGIONS[,columns_V_REGIONS], tolerance=001)
+})
+
+test_that("expectedMutations, extended with regard to parent", {
+    library("alakazam")
+    library("igraph")
+    #dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
+    dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
+    load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    clone_3163_db <- subset(ExampleDb,CLONE == 3163) 
+    clone_3163_obj <- makeChangeoClone(clone_3163_db, seq="SEQUENCE_IMGT",
+                                       id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
+                                       germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
+                                       vcall = "V_CALL", jcall = "J_CALL")
+    clone_3163_graph <- buildPhylipLineage(clone_3163_obj, dnapars_exec, rm_temp = TRUE)  
+    clone_3163_GraphDf <- makeGraphDf(clone_3163_graph, clone_3163_obj)
+    
+    clone_3100_db <- subset(ExampleDb,CLONE == 3100) 
+    clone_3100_obj <- makeChangeoClone(clone_3100_db, seq="SEQUENCE_IMGT",
+                                       id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
+                                       germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
+                                       vcall = "V_CALL", jcall = "J_CALL")
+    clone_3100_graph <- buildPhylipLineage(clone_3100_obj, dnapars_exec, rm_temp = TRUE)  
+    clone_3100_GraphDf <- makeGraphDf(clone_3100_graph, clone_3100_obj)
+    
+    clone_3115_db <- subset(ExampleDb,CLONE == 3115) 
+    clone_3115_obj <- makeChangeoClone(clone_3115_db, seq="SEQUENCE_IMGT",
+                                       id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
+                                       germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
+                                       vcall = "V_CALL", jcall = "J_CALL")
+    clone_3115_graph <- buildPhylipLineage(clone_3115_obj, dnapars_exec, rm_temp = TRUE)  
+    clone_3115_GraphDf <- makeGraphDf(clone_3115_graph, clone_3115_obj)
+    
+    GraphDf_all <- rbind(clone_3163_GraphDf,clone_3100_GraphDf,clone_3115_GraphDf)
+    
+    db_exp_ALL_REGIONS <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                            cloneColumn="clone", 
+                                            germlineColumn="germline_imgt",
+                                            juncLengthColumn="junction_length",
+                                            refOption = "parent", parentColumn = "parent_sequence",  
+                                            regionDefinition=IMGT_ALL_REGIONS)
+    db_exp_ALL_REGIONS_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                            cloneColumn="clone", 
+                                            germlineColumn="parent_sequence",
+                                            juncLengthColumn="junction_length",
+                                            regionDefinition=IMGT_ALL_REGIONS)
+    db_exp_ALL <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                    cloneColumn="clone", 
+                                    germlineColumn="germline_imgt",
+                                    juncLengthColumn="junction_length",
+                                    refOption = "parent", parentColumn = "parent_sequence",  
+                                    regionDefinition=IMGT_ALL)
+    db_exp_ALL_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                      cloneColumn="clone", 
+                                      germlineColumn="parent_sequence",
+                                      juncLengthColumn="junction_length",
+                                      regionDefinition=IMGT_ALL)
+    db_exp_V_REGIONS <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                          cloneColumn="clone", 
+                                          germlineColumn="germline_imgt",
+                                          juncLengthColumn="junction_length",
+                                          refOption = "parent", parentColumn = "parent_sequence",  
+                                          regionDefinition=IMGT_V_BY_REGIONS)
+    db_exp_V_REGIONS_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                            germlineColumn="parent_sequence",
+                                            regionDefinition=IMGT_V_BY_REGIONS)
+   # checking that expected mutations with regard to parent seuqnece,
+   # is the same as expected mutations with regard to germline when germline 
+   # sequence column was set as parent sequence column. 
+   expect_equal(db_exp_ALL_REGIONS,db_exp_ALL_REGIONS_g)
+   expect_equal(db_exp_ALL,db_exp_ALL_g) 
+   expect_equal(db_exp_V_REGIONS,db_exp_V_REGIONS_g) 
+})
+
+test_that("collapseClones, extended regions", {
+    load(file.path("..", "data-tests", "ExampleDb.rda"))
+    db_clone_4035 <- subset(ExampleDb, CLONE %in% c("4035"))
+    clone_4035_colapsed <- collapseClones(db_clone_4035, cloneColumn="CLONE", 
+                                      sequenceColumn="SEQUENCE_IMGT", 
+                                      germlineColumn="GERMLINE_IMGT_D_MASK",
+                                      regionDefinition = IMGT_ALL,
+                                      juncLenCol = "JUNCTION_LENGTH")
+    db_clone_942 <- subset(ExampleDb, CLONE %in% c("942"))
+    clone_942_colapsed <- collapseClones(db_clone_942, cloneColumn="CLONE", 
+                                          sequenceColumn="SEQUENCE_IMGT", 
+                                          germlineColumn="GERMLINE_IMGT_D_MASK",
+                                          regionDefinition = IMGT_ALL_REGIONS,
+                                          juncLenCol = "JUNCTION_LENGTH")
+    # check values for clones of size 1:
+    expect_equal(db_clone_4035,clone_4035_colapsed[,1:15])
+    expect_equal(as.character(clone_4035_colapsed[,"GERMLINE_IMGT_D_MASK"]),
+                 as.character(clone_4035_colapsed[,"clonal_germline"]))
+    expect_equal(as.character(clone_4035_colapsed[,"SEQUENCE_IMGT"]),
+                 as.character(clone_4035_colapsed[,"clonal_sequence"]))
+    expect_equal(db_clone_942,clone_942_colapsed[,1:15])
+    expect_equal(as.character(clone_942_colapsed[,"GERMLINE_IMGT_D_MASK"]),
+                 as.character(clone_942_colapsed[,"clonal_germline"]))
+    expect_equal(as.character(clone_942_colapsed[,"SEQUENCE_IMGT"]),
+                 as.character(clone_942_colapsed[,"clonal_sequence"]))
+    
+    
+    db_clones <- subset(ExampleDb, CLONE %in% c("5677", "3140", "5060"))
+    clones_colapsed_N <- collapseClones(db_clones, cloneColumn="CLONE", 
+                                      sequenceColumn="SEQUENCE_IMGT", 
+                                      germlineColumn="GERMLINE_IMGT_D_MASK",
+                                      regionDefinition = IMGT_V_BY_REGIONS)
+    clones_colapsed_IMGT_ALL_REGIONS <- collapseClones(db_clones, cloneColumn="CLONE", 
+                                                       sequenceColumn="SEQUENCE_IMGT", 
+                                                       germlineColumn="GERMLINE_IMGT_D_MASK",
+                                                       regionDefinition = IMGT_ALL_REGIONS,
+                                                       juncLenCol = "JUNCTION_LENGTH")
+    # check that for first 312 bp - the collapsed is the same for both region type 
+    # IMGT_V_BY_REGIONS and IMGT_ALL_REGIONS
+    expect_equal(as.character(clones_colapsed_N[1,"clonal_sequence"]),
+                substr(as.character(clones_colapsed_IMGT_ALL_REGIONS[1,"clonal_sequence"]),
+                       start=1, stop=312)) 
+    expect_equal(as.character(clones_colapsed_N[2,"clonal_sequence"]),
+                 substr(as.character(clones_colapsed_IMGT_ALL_REGIONS[2,"clonal_sequence"]),
+                        start=1, stop=312)) 
+    expect_equal(as.character(clones_colapsed_N[3,"clonal_sequence"]),
+                 substr(as.character(clones_colapsed_IMGT_ALL_REGIONS[3,"clonal_sequence"]),
+                        start=1, stop=312))
+    
+    # check that after nucleotide 312 - the consensus sequence is same as SEQUENCE_IMGT
+    # (this is specific for those 3 clones - I checked manualy in sequences...)
+    expect_equal(substr(as.character(clones_colapsed_IMGT_ALL_REGIONS[1,"SEQUENCE_IMGT"]),
+                        start=313, stop=394),
+                 substr(as.character(clones_colapsed_IMGT_ALL_REGIONS[1,"clonal_sequence"]),
+                        start=313, stop=394)) 
+    expect_equal(substr(as.character(clones_colapsed_IMGT_ALL_REGIONS[2,"SEQUENCE_IMGT"]),
+                        start=313, stop=403),
+                 substr(as.character(clones_colapsed_IMGT_ALL_REGIONS[2,"clonal_sequence"]),
+                        start=313, stop=403)) 
+    expect_equal(substr(as.character(clones_colapsed_IMGT_ALL_REGIONS[3,"SEQUENCE_IMGT"]),
+                        start=313, stop=400),
+                 substr(as.character(clones_colapsed_IMGT_ALL_REGIONS[3,"clonal_sequence"]),
+                        start=313, stop=400))
+    
+    
+})

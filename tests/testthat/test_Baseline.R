@@ -596,3 +596,121 @@ test_that("calcBaseline and groupBaseline, AIRR migration", {
     
 })
 
+test_that("calcBaseline Extended regions", {
+    library("parallel")
+    load(file.path("..", "data-tests", "ExampleDb.rda"))
+    db_clone_3146 <- subset(ExampleDb, CLONE %in% c("3146"))
+    clone_3146_colapsed <- collapseClones(db_clone_3146, cloneColumn = "CLONE", 
+                                          sequenceColumn = "SEQUENCE_IMGT", 
+                                          germlineColumn = "GERMLINE_IMGT_D_MASK",
+                                          regionDefinition = IMGT_ALL,
+                                          juncLenCol = "JUNCTION_LENGTH")
+    db_clone_3822 <- subset(ExampleDb, CLONE %in% c("3822"))
+    clone_3822_colapsed <- collapseClones(db_clone_3822, cloneColumn = "CLONE", 
+                                          sequenceColumn = "SEQUENCE_IMGT", 
+                                          germlineColumn = "GERMLINE_IMGT_D_MASK",
+                                          regionDefinition = IMGT_ALL,
+                                          juncLenCol = "JUNCTION_LENGTH")
+    db_clone_467 <- subset(ExampleDb, CLONE %in% c("467"))
+    clone_467_colapsed <- collapseClones(db_clone_467, cloneColumn = "CLONE", 
+                                          sequenceColumn = "SEQUENCE_IMGT", 
+                                          germlineColumn = "GERMLINE_IMGT_D_MASK",
+                                          regionDefinition = IMGT_ALL,
+                                          juncLenCol = "JUNCTION_LENGTH")
+   db_3_clones <- rbind(db_clone_3146, db_clone_3822, db_clone_467) 
+   collapseClones_db_3_clones <- collapseClones(db = db_3_clones, cloneColumn = "CLONE", 
+                                                sequenceColumn = "SEQUENCE_IMGT",
+                                                germlineColumn = "GERMLINE_IMGT_D_MASK",
+                                                method = "thresholdedFreq", minimumFrequency = 0.6,
+                                                includeAmbiguous = FALSE, breakTiesStochastic = FALSE)
+   baseline_clone_3146 <- calcBaseline(db=clone_3146_colapsed, 
+                                     sequenceColumn = "SEQUENCE_IMGT",
+                                     germlineColumn = "GERMLINE_IMGT_D_MASK", 
+                                     testStatistic = "focused",
+                                     regionDefinition = IMGT_ALL,
+                                     targetingModel = HH_S5F,
+                                     cloneColumn = "CLONE",
+                                     juncLenCol = "JUNCTION_LENGTH",
+                                     nproc=1)
+   baseline_clone_3822 <- calcBaseline(db=clone_3822_colapsed, 
+                                       sequenceColumn = "SEQUENCE_IMGT",
+                                       germlineColumn = "GERMLINE_IMGT_D_MASK", 
+                                       testStatistic = "focused",
+                                       regionDefinition = IMGT_ALL,
+                                       targetingModel = HH_S5F,
+                                       cloneColumn = "CLONE",
+                                       juncLenCol = "JUNCTION_LENGTH",
+                                       nproc=1)
+   baseline_clone_467 <- calcBaseline(db=clone_467_colapsed, 
+                                       sequenceColumn = "SEQUENCE_IMGT",
+                                       germlineColumn = "GERMLINE_IMGT_D_MASK", 
+                                       testStatistic = "focused",
+                                       regionDefinition = IMGT_ALL,
+                                       targetingModel = HH_S5F,
+                                       cloneColumn = "CLONE",
+                                       juncLenCol = "JUNCTION_LENGTH",
+                                       nproc=1)
+   
+   baseline_3_clones <- calcBaseline(db=collapseClones_db_3_clones, 
+                                     sequenceColumn = "SEQUENCE_IMGT",
+                                     germlineColumn = "GERMLINE_IMGT_D_MASK", 
+                                     testStatistic = "focused",
+                                     regionDefinition = IMGT_ALL,
+                                     targetingModel = HH_S5F,
+                                     cloneColumn = "CLONE",
+                                     juncLenCol = "JUNCTION_LENGTH",
+                                     nproc=1)
+  expect_equal(baseline_clone_3146@binomK, baseline_3_clones@binomK[1,], check.attributes=F)
+  expect_equal(baseline_clone_3822@binomK, baseline_3_clones@binomK[2,], check.attributes=F) 
+  expect_equal(baseline_clone_467@binomK,  baseline_3_clones@binomK[3,], check.attributes=F)
+  expect_equal(baseline_clone_3146@binomN, baseline_3_clones@binomN[1,], check.attributes=F)
+  expect_equal(baseline_clone_3822@binomN, baseline_3_clones@binomN[2,], check.attributes=F) 
+  expect_equal(baseline_clone_467@binomN,  baseline_3_clones@binomN[3,], check.attributes=F)
+  expect_equal(baseline_clone_3146@binomP, baseline_3_clones@binomP[1,], check.attributes=F)
+  expect_equal(baseline_clone_3822@binomP, baseline_3_clones@binomP[2,], check.attributes=F) 
+  expect_equal(baseline_clone_467@binomP,  baseline_3_clones@binomP[3,], check.attributes=F) 
+  expect_equal(baseline_clone_3146@pdfs$cdr,   baseline_3_clones@pdfs$cdr[1,], check.attributes=F)
+  expect_equal(baseline_clone_3822@pdfs$cdr,   baseline_3_clones@pdfs$cdr[2,], check.attributes=F) 
+  expect_equal(baseline_clone_467@pdfs$cdr,    baseline_3_clones@pdfs$cdr[3,], check.attributes=F) 
+  expect_equal(baseline_clone_3146@pdfs$fwr,   baseline_3_clones@pdfs$fwr[1,], check.attributes=F)
+  expect_equal(baseline_clone_3822@pdfs$fwr,   baseline_3_clones@pdfs$fwr[2,], check.attributes=F) 
+  expect_equal(baseline_clone_467@pdfs$fwr,    baseline_3_clones@pdfs$fwr[3,], check.attributes=F) 
+  
+  
+  db_clone_3170 <- subset(ExampleDb, CLONE %in% c("3170"))
+  clone_3170_colapsed_IMGT_ALL <- collapseClones(db_clone_3170, cloneColumn = "CLONE", 
+                                               sequenceColumn = "SEQUENCE_IMGT", 
+                                               germlineColumn = "GERMLINE_IMGT_D_MASK",
+                                               regionDefinition = IMGT_ALL,
+                                               juncLenCol = "JUNCTION_LENGTH")
+  baseline_clone_3146_IMGT_ALL <- calcBaseline(db=clone_3146_colapsed, 
+                                             sequenceColumn = "SEQUENCE_IMGT",
+                                             germlineColumn = "GERMLINE_IMGT_D_MASK", 
+                                             testStatistic = "focused",
+                                             regionDefinition = IMGT_ALL,
+                                             targetingModel = HH_S5F,
+                                             cloneColumn = "CLONE",
+                                             juncLenCol = "JUNCTION_LENGTH",
+                                             nproc=1)
+  clone_3170_colapsed_IMGT_ALL_REGIONS <- collapseClones(db_clone_3170, cloneColumn = "CLONE", 
+                                               sequenceColumn = "SEQUENCE_IMGT", 
+                                               germlineColumn = "GERMLINE_IMGT_D_MASK",
+                                               regionDefinition = IMGT_ALL_REGIONS,
+                                               juncLenCol = "JUNCTION_LENGTH")
+  baseline_clone_3146_IMGT_ALL_REGIONS <- calcBaseline(db=clone_3146_colapsed, 
+                                             sequenceColumn = "SEQUENCE_IMGT",
+                                             germlineColumn = "GERMLINE_IMGT_D_MASK", 
+                                             testStatistic = "focused",
+                                             regionDefinition = IMGT_ALL_REGIONS,
+                                             targetingModel = HH_S5F,
+                                             cloneColumn = "CLONE",
+                                             juncLenCol = "JUNCTION_LENGTH",
+                                             nproc=1)
+  expect_equal(baseline_clone_3146_IMGT_ALL@regionDefinition,IMGT_ALL)
+  expect_equal(baseline_clone_3146_IMGT_ALL_REGIONS@regionDefinition,IMGT_ALL_REGIONS)
+  expect_equal(baseline_clone_3146_IMGT_ALL@regions,c("cdr","fwr"))
+  expect_equal(baseline_clone_3146_IMGT_ALL_REGIONS@regions,c("cdr1", "cdr2",
+                                                              "cdr3", "fwr1", 
+                                                              "fwr2", "fwr3",
+                                                              "fwr4"))
+})

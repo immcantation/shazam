@@ -156,6 +156,24 @@ makeNullRegionDefinition <- function(regionLength) {
 #'   \item  \code{IMGT_V_BY_SEGMENTS}:  The IMGT numbered V segment up to position nucleotide 312.
 #'                                      This definition has no subdivisons and treats the entire V segment
 #'                                      as a single region.
+#'   \item  \code{IMGT_ALL        }:    The IMGT numbered segments of FWR1/2/3/4 and CDR1/2/3.
+#'                                      This definition combines regions of CDR1, CDR2, CDR3 into a single CDR region, 
+#'                                      and FWR1, FWR2, FWR3 FWR4 into a single FWR region.
+#'                                      Note that untill function \link{makeRegion} will be applied
+#'                                      - this \code{IMGT_SCHEMES} will have the slot \code{seqLength}
+#'                                      with value 0, and the \code{boundaries} slot will be empty. This is since
+#'                                      these slots depend on the junction length which is unknown yet.
+#'                                      After \link{makeRegion} is applied - these slots get specific values
+#'                                      per the specific sequence and junction length.
+#'   \item  \code{IMGT_ALL_REGIONS}:    The IMGT numbered segments of FWR1/2/3/4 and CDR1/2/3.
+#'                                      This defines separate regions for each of CDR1, CDR2, CDR3, 
+#'                                      FWR1, FWR2, FWR3 and FWR4. 
+#'                                      Note that untill function \link{makeRegion} will be applied
+#'                                      - this \code{IMGT_SCHEMES} will have the slot \code{seqLength}
+#'                                      with value 0, and the \code{boundaries} slot will be empty. This is since
+#'                                      these slots depend on the junction length which is unknown yet.
+#'                                      After \link{makeRegion} is applied - these slots get specific values
+#'                                      per the specific sequence and junction length.
 #' }
 #' 
 #' @references
@@ -181,5 +199,13 @@ NULL
 NULL
 
 #' @name    IMGT_V_BY_SEGMENTS
+#' @rdname  IMGT_SCHEMES
+NULL
+
+#' @name    IMGT_ALL_REGIONS
+#' @rdname  IMGT_SCHEMES
+NULL
+
+#' @name    IMGT_ALL
 #' @rdname  IMGT_SCHEMES
 NULL

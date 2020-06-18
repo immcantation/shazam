@@ -5,6 +5,580 @@ NULL
 
 #### Clonal consensus building functions ####
 
+# Constructs effective clonal sequences for all clones
+#
+# \code{collapseClonesL} creates effective input and germline sequences for each clonal 
+# group and appends columns containing the consensus sequences to the input 
+# \code{data.frame}.
+#
+# @param   db                  \code{data.frame} containing sequence data. Required.
+# @param   cloneColumn         \code{character} name of the column containing clonal 
+#                              identifiers. Required.
+# @param   sequenceColumn      \code{character} name of the column containing input 
+#                              sequences. Required. The length of each input sequence should 
+#                              match that of its corresponding germline sequence.
+# @param   germlineColumn      \code{character} name of the column containing germline 
+#                              sequences. Required. The length of each germline sequence 
+#                              should match that of its corresponding input sequence.
+# @param   muFreqColumn        \code{character} name of the column containing mutation
+#                              frequency. Optional. Applicable to the \code{"mostMutated"}
+#                              and \code{"leastMutated"} methods. If not supplied, mutation
+#                              frequency is computed by calling \code{observedMutations}.
+#                              Default is \code{NULL}. See Cautions for note on usage.
+# @param   regionDefinition    \link{RegionDefinition} object defining the regions
+#                              and boundaries of the Ig sequences. Optional. Default is 
+#                              \code{NULL}.
+# @param   method              method for calculating input consensus sequence. Required. 
+#                              One of \code{"thresholdedFreq"}, \code{"mostCommon"}, 
+#                              \code{"catchAll"}, \code{"mostMutated"}, or 
+#                              \code{"leastMutated"}. See "Methods" for details.
+# @param   minimumFrequency    frequency threshold for calculating input consensus sequence.
+#                              Applicable to and required for the \code{"thresholdedFreq"} 
+#                              method. A canonical choice is 0.6. Default is \code{NULL}. 
+# @param   includeAmbiguous    whether to use ambiguous characters to represent positions 
+#                              at which there are multiple characters with frequencies that 
+#                              are at least \code{minimumFrequency} or that are maximal 
+#                              (i.e. ties). Applicable to and required for the 
+#                              \code{"thresholdedFreq"} and \code{"mostCommon"} methods. 
+#                              Default is \code{FALSE}. See "Choosing ambiguous characters" 
+#                              for rules on choosing ambiguous characters.
+# @param   breakTiesStochastic In case of ties, whether to randomly pick a sequence from 
+#                              sequences that fulfill the criteria as consensus. Applicable 
+#                              to and required for all methods except for \code{"catchAll"}. 
+#                              Default is \code{FALSE}. See "Methods" for details. 
+# @param   breakTiesByColumns  A list of the form 
+#                              \code{list(c(col_1, col_2, ...), c(fun_1, fun_2, ...))}, 
+#                              where \code{col_i} is a \code{character} name of a column 
+#                              in \code{db}, and \code{fun_i} is a function to be applied 
+#                              on that column. Currently, only \code{max} and \code{min} 
+#                              are supported. Note that the two \code{c()}'s in \code{list()} 
+#                              are essential (i.e. if there is only 1 column, the list should 
+#                              be of the form \code{list(c(col_1), c(func_1))}. Applicable 
+#                              to and optional for the \code{"mostMutated"} and 
+#                              \code{"leastMutated"} methods. If supplied, \code{fun_i}'s 
+#                              are applied on \code{col_i}'s to help break ties. Default 
+#                              is \code{NULL}. See "Methods" for details. 
+# @param   expandedDb          \code{logical} indicating whether or not to return the 
+#                              expanded \code{db}, containing all the sequences (as opposed
+#                              to returning just one sequence per clone).
+# @param   nproc               Number of cores to distribute the operation over. If the 
+#                              \code{cluster} has already been set earlier, then pass the 
+#                              \code{cluster}. This will ensure that it is not reset.
+#                              
+# 
+# @return   A modified \code{db} with the following additional columns: 
+#           \itemize{
+#             \item \code{clonal_sequence}:  effective sequence for the clone.
+#             \item \code{clonal_germline}:  germline sequence for the clone.
+#             \item \code{clonal_sequence_mufreq}:  mutation frequency of 
+#                   \code{clonal_sequence}; only added for the \code{"mostMutated"}
+#                   and \code{"leastMutated"} methods.
+#           }
+#                      
+#           \code{clonal_sequence} is generated with the method of choice indicated 
+#           by \code{method}, and \code{clonal_germline} is generated with the 
+#           \code{"mostCommon"} method, along with, where applicable, user-defined 
+#           parameters such as \code{minimumFrequency}, \code{includeAmbiguous}, 
+#           \code{breakTiesStochastic}, and \code{breakTiesByColumns}.
+#           
+#
+# @section Consensus lengths: For each clone, \code{clonal_sequence} and 
+#          \code{clonal_germline} have the same length. 
+#          
+#          \itemize{
+#                \item For the \code{"thresholdedFreq"}, \code{"mostCommon"}, and 
+#                \code{"catchAll"} methods:
+#          
+#                The length of the consensus sequences is determined by the longest possible
+#                consensus sequence (baesd on \code{inputSeq} and \code{germlineSeq}) and 
+#                \code{regionDefinition@seqLength} (if supplied), whichever is shorter.
+#
+#                Given a set of sequences of potentially varying lengths, the longest possible 
+#                length of their consensus sequence is taken to be the longest length along 
+#                which there is information contained at every nucleotide position across 
+#                majority of the sequences. Majority is defined to be greater than 
+#                \code{floor(n/2)}, where \code{n} is the number of sequences. If the longest 
+#                possible consensus length is 0, there will be a warning and an empty string 
+#                (\code{""}) will be returned. 
+#          
+#                If a length limit is defined by supplying a \code{regionDefinition} via 
+#                \code{regionDefinition@seqLength}, the consensus length will be further 
+#                restricted to the shorter of the longest possible length and 
+#                \code{regionDefinition@seqLength}.
+#          
+#                \item For the \code{"mostMutated"} and \code{"leastMutated"} methods:
+#                
+#                The length of the consensus sequences depends on that of the most/least 
+#                mutated input sequence, and, if supplied, the length limit defined by 
+#                \code{regionDefinition@seqLength}, whichever is shorter. If the germline 
+#                consensus computed using the \code{"mostCommon"} method is longer than 
+#                the most/least mutated input sequence, the germline consensus is trimmed 
+#                to be of the same length as the input consensus.
+#               
+#           }
+#
+# @section Methods: The descriptions below use "sequences" as a generalization of input 
+#          sequences and germline sequences. 
+#          
+#          \itemize{
+#          
+#              \item \code{method="thresholdedFreq"}
+#              
+#                    A threshold must be supplied to the argument \code{minimumFrequency}. At 
+#                    each position along the length of the consensus sequence, the frequency 
+#                    of each nucleotide/character across sequences is tabulated. The 
+#                    nucleotide/character whose frequency is at least (i.e. \code{>=}) 
+#                    \code{minimumFrequency} becomes the consensus; if there is none, the
+#                    consensus nucleotide will be \code{"N"}.
+#                    
+#                    When there are ties (frequencies of multiple nucleotides/characters 
+#                    are at least \code{minimumFrequency}), this method can be deterministic 
+#                    or stochastic, depending on additional parameters.
+#                    
+#                    \itemize{
+#                         \item With \code{includeAmbiguous=TRUE}, ties are resolved 
+#                               deterministically by representing ties using ambiguous 
+#                               characters. See "Choosing ambiguous characters" for how 
+#                               ambiguous characters are chosen.
+#                         \item With \code{breakTiesStochastic=TRUE}, ties are resolved 
+#                               stochastically by randomly picking a character amongst the 
+#                               ties.
+#                         \item When both \code{TRUE}, \code{includeAmbiguous} takes 
+#                               precedence over \code{breakTiesStochastic}.
+#                         \item When both \code{FALSE}, the first character from the ties is 
+#                               taken to be the consensus following the order of \code{"A"}, 
+#                               \code{"T"}, \code{"G"}, \code{"C"}, \code{"N"}, \code{"."}, 
+#                               and \code{"-"}.
+#                    }
+#                    
+#                    Below are some examples looking at a single position based on 5 
+#                    sequences with \code{minimumFrequency=0.6}, 
+#                    \code{includeAmbiguous=FALSE}, and \code{breakTiesStochastic=FALSE}:
+#                    
+#                    \itemize{
+#                         \item If the sequences have \code{"A"}, \code{"A"}, \code{"A"}, 
+#                               \code{"T"}, \code{"C"}, the consensus will be \code{"A"}, 
+#                               because \code{"A"} has frequency 0.6, which is at least 
+#                               \code{minimumFrequency}.
+#                         \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, 
+#                               \code{"T"}, \code{"C"}, the consensus will be \code{"N"}, 
+#                               because none of \code{"A"}, \code{"T"}, or \code{"C"} has 
+#                               frequency that is at least \code{minimumFrequency}.
+#                    }
+#          
+#               \item \code{method="mostCommon"}
+#               
+#                     The most frequent nucleotide/character across sequences at each 
+#                     position along the length of the consensus sequence makes up the consensus.
+#                    
+#                     When there are ties (multiple nucleotides/characters with equally 
+#                     maximal frequencies), this method can be deterministic or stochastic, 
+#                     depending on additional parameters. The same rules for breaking ties 
+#                     for \code{method="thresholdedFreq"} apply.
+#                    
+#                     Below are some examples looking at a single position based on 5 
+#                     sequences with \code{includeAmbiguous=FALSE}, and 
+#                     \code{breakTiesStochastic=FALSE}:
+#                     
+#                     \itemize{
+#                          \item If the sequences have \code{"A"}, \code{"A"}, \code{"T"}, 
+#                                \code{"A"}, \code{"C"}, the consensus will be \code{"A"}.
+#                          \item If the sequences have \code{"T"}, \code{"T"}, \code{"C"}, 
+#                                \code{"C"}, \code{"G"}, the consensus will be \code{"T"}, 
+#                                because \code{"T"} is before \code{"C"} in the order of 
+#                                \code{"A"}, \code{"T"}, \code{"G"}, \code{"C"}, \code{"N"}, 
+#                                \code{"."}, and \code{"-"}. 
+#                     }       
+#                     
+#                     
+#               \item \code{method="catchAll"}
+#               
+#                     This method returns a consensus sequence capturing most of the 
+#                     information contained in the sequences. Ambiguous characters are 
+#                     used where applicable. See "Choosing ambiguous characters" for how 
+#                     ambiguous characters are chosen. This method is deterministic and 
+#                     does not involve breaking ties.
+#                     
+#                     Below are some examples for \code{method="catchAll"} looking at a 
+#                     single position based on 5 sequences:
+#                     
+#                     \itemize{
+#                          \item If the sequences have \code{"N"}, \code{"N"}, \code{"N"}, 
+#                                \code{"N"}, \code{"N"}, the consensus will be \code{"N"}.
+#                          \item If the sequences have \code{"N"}, \code{"A"}, \code{"A"}, 
+#                                \code{"A"}, \code{"A"}, the consensus will be \code{"A"}.
+#                          \item If the sequences have \code{"N"}, \code{"A"}, \code{"G"}, 
+#                                \code{"A"}, \code{"A"}, the consensus will be \code{"R"}.
+#                          \item If the sequences have \code{"-"}, \code{"-"}, \code{"."}, 
+#                                \code{"."}, \code{"."}, the consensus will be \code{"-"}.
+#                          \item If the sequences have \code{"-"}, \code{"-"}, \code{"-"}, 
+#                                \code{"-"}, \code{"-"}, the consensus will be \code{"-"}.
+#                          \item If the sequences have \code{"."}, \code{"."}, \code{"."}, 
+#                                \code{"."}, \code{"."}, the consensus will be \code{"."}.
+#                    }
+#                    
+#              \item \code{method="mostMutated"} and \code{method="leastMutated"}
+#              
+#                    These methods return the most/least mutated sequence as the consensus 
+#                    sequence. 
+#                    
+#                    When there are ties (multple sequences have the maximal/minimal mutation
+#                    frequency), this method can be deterministic or stochastic, depending on 
+#                    additional parameters.
+#                    
+#                    \itemize{
+#                         \item With \code{breakTiesStochastic=TRUE}, ties are resolved 
+#                               stochastically by randomly picking a sequence out of 
+#                               sequences with the maximal/minimal mutation frequency.
+#                         \item When \code{breakTiesByColumns} is supplied, ties are resolved
+#                               deterministically. Column by column, a function is applied on 
+#                               the column and sequences with column value matching the 
+#                               functional value are retained, until ties are resolved or 
+#                               columns run out. In the latter case, the first remaining 
+#                               sequence is taken as the consensus.
+#                         \item When \code{breakTiesStochastic=TRUE} and 
+#                               \code{breakTiesByColumns} is also supplied, 
+#                               \code{breakTiesStochastic} takes precedence over 
+#                               \code{breakTiesByColumns}.
+#                         \item When \code{breakTiesStochastic=FALSE} and 
+#                               \code{breakTiesByColumns} is not supplied (i.e. \code{NULL}), 
+#                               the sequence that appears first amongst the ties is taken 
+#                               as the consensus.
+#                    }
+#          
+#          }
+#          
+# 
+# @section Choosing ambiguous characters: 
+#          
+#          Ambiguous characters may be present in the returned consensuses when using the
+#          \code{"catchAll"} method and when using the \code{"thresholdedFreq"} or 
+#          \code{"mostCommon"} methods with \code{includeAmbiguous=TRUE}. 
+#          
+#          The rules on choosing ambiguous characters are as follows:
+#          
+#          \itemize{
+#               \item If a position contains only \code{"N"} across sequences, the consensus 
+#                     at that position is \code{"N"}.
+#               \item If a position contains one or more of \code{"A"}, \code{"T"}, 
+#                     \code{"G"}, or \code{"C"}, the consensus will be an IUPAC character 
+#                     representing all of the characters present, regardless of whether 
+#                     \code{"N"}, \code{"-"}, or \code{"."} is present.
+#               \item If a position contains only \code{"-"} and \code{"."} across sequences, 
+#                     the consensus at thatp osition is taken to be \code{"-"}. 
+#               \item If a position contains only one of \code{"-"} or \code{"."} across 
+#                     sequences, the consensus at that position is taken to be the character 
+#                     present. 
+#          }
+# 
+# @section Cautions: 
+# 
+#          \itemize{
+#               \item   Note that this function does not perform multiple sequence alignment. 
+#                       As a prerequisite, it is assumed that the sequences in 
+#                       \code{sequenceColumn} and \code{germlineColumn} have been aligned 
+#                       somehow. In the case of immunoglobulin repertoire analysis, this 
+#                       usually means that the sequences are IMGT-gapped.
+#               \item   When using the \code{"mostMutated"} and \code{"leastMutated"} methods, 
+#                       if you supply both \code{muFreqColumn} and \code{regionDefinition},
+#                       it is your responsibility to ensure that the mutation frequency in
+#                       \code{muFreqColumn} was calculated with sequence lengths restricted 
+#                       to the \strong{same} \code{regionDefinition} you are supplying. 
+#                       Otherwise, the "most/least mutated" sequence you obtain might not 
+#                       be the most/least mutated given the \code{regionDefinition} supplied, 
+#                       because your mutation frequency was based on a 
+#                       \code{regionDefinition} different from the one supplied.
+#               \item   If you intend to run \code{collapseClones} before 
+#                       building a 5-mer targeting model, you \strong{must} choose 
+#                       parameters such that your collapsed clonal consensuses do 
+#                       \strong{not} include ambiguous characters. This is because the 
+#                       targeting model functions do NOT support ambiguous characters 
+#                       in their inputs.
+#               }
+# 
+# @seealso
+# See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
+# 
+# @examples
+# # Subset example data
+# data(ExampleDb, package="alakazam")
+# db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d" &
+#                         clone_id %in% c("3100", "3141", "3184"))
+# 
+# # thresholdedFreq method, resolving ties deterministically without using ambiguous characters
+# clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#                          germlineColumn="germline_alignment_d_mask",
+#                          method="thresholdedFreq", minimumFrequency=0.6,
+#                          includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+#
+# # mostCommon method, resolving ties deterministically using ambiguous characters
+# clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#                          germlineColumn="germline_alignment_d_mask",
+#                          method="mostCommon", 
+#                          includeAmbiguous=TRUE, breakTiesStochastic=FALSE)
+# 
+# # Make a copy of db that has a mutation frequency column
+# db2 <- observedMutations(db, frequency=TRUE, combine=TRUE)
+# 
+# # mostMutated method, resolving ties stochastically
+# clones <- collapseClones(db2, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#                          germlineColumn="germline_alignment_d_mask",
+#                          method="mostMutated", muFreqColumn="mu_freq", 
+#                          breakTiesStochastic=TRUE, breakTiesByColumns=NULL)
+#                          
+# # mostMutated method, resolving ties deterministically using additional columns
+# clones <- collapseClones(db2, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#                          germlineColumn="germline_alignment_d_mask",
+#                          method="mostMutated", muFreqColumn="mu_freq", 
+#                          breakTiesStochastic=FALSE, 
+#                          breakTiesByColumns=list(c("duplicate_count"), c(max)))
+# 
+# # Build consensus for V segment only
+# # Capture all nucleotide variations using ambiguous characters 
+# clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#                          germlineColumn="germline_alignment_d_mask",
+#                          method="catchAll", regionDefinition=IMGT_V)
+# 
+# # Return the same number of rows as the input
+# clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
+#                          germlineColumn="germline_alignment_d_mask",
+#                          method="mostCommon", expandedDb=TRUE)
+# 
+
+collapseClonesL <- function(db, 
+                            cloneColumn="clone_id", 
+                            sequenceColumn="sequence_alignment",
+                            germlineColumn="germline_alignment_d_mask",
+                            muFreqColumn=NULL,
+                            regionDefinition=NULL,
+                            method=c("mostCommon", "thresholdedFreq", "catchAll", 
+                                     "mostMutated", "leastMutated"),
+                            minimumFrequency=NULL,
+                            includeAmbiguous=FALSE,
+                            breakTiesStochastic=FALSE,
+                            breakTiesByColumns=NULL,
+                            expandedDb=FALSE,
+                            nproc=1) {
+    # Hack for visibility of foreach index variables
+    idx <- NULL
+    
+    ## DEBUG
+    # cloneColumn="CLONE"; sequenceColumn="sequence_alignment"; germlineColumn="germline_alignment_d_mask"
+    # expandedDb=FALSE; regionDefinition=NULL; method="mostCommon"; nproc=1
+    
+    #### parameter checks
+    
+    method <- match.arg(method)
+    
+    # check minimumFrequency for thresholdedFreq method
+    if (method=="thresholdedFreq") {
+        if (!is.numeric(minimumFrequency)) {
+            stop("minimumFrequency must be a numeric value.")
+        } else {
+            if ( minimumFrequency<0 | minimumFrequency>1 ) {
+                stop("minimumFrequency must be between 0 and 1.")
+            }
+        }
+    }
+    
+    # check includeAmbiguous & breakTiesStochastic for methods other than catchAll
+    if (method %in% c("thresholdedFreq", "mostCommon", "mostMutated", "leastMutated")) {
+        if (!is(includeAmbiguous, "logical")) {
+            stop ("includeAmbiguous must be TRUE or FALSE.")
+        }
+        if (!is(breakTiesStochastic, "logical")) {
+            stop ("breakTiesStochastic must be TRUE or FALSE.")
+        }
+    }
+    
+    # check breakTiesByColumns and muFreqColumn for methods most/leastMutated
+    if (method %in% c("mostMutated", "leastMutated")) {
+        
+        if (!is.null(breakTiesByColumns)) {
+            if (!is(breakTiesByColumns, "list")) {
+                stop ("breakTiesByColumns must be a list.")
+            }
+            if (length(breakTiesByColumns) != 2) {
+                stop ("breakTiesByColumns must be a nested list of length 2.")
+            }
+            if (length(breakTiesByColumns[[1]]) != length(breakTiesByColumns[[2]])) {
+                stop ("Nested vectors in breakTiesByColumns must have the same lengths.")
+            }
+            if (!all(is.character(breakTiesByColumns[[1]]))) {
+                stop ("The first vector in breakTiesByColumns must contain column names.")
+            }
+            if (!all( unlist( lapply(breakTiesByColumns[[2]], is.function)))) {
+                stop ("The second vector in breakTiesByColumns must contain functions.")
+            }
+            if (!all(breakTiesByColumns[[1]] %in% colnames(db))) {
+                stop ("All column named included in breakTiesByColumns must be present in db.")
+            }
+        }
+        
+        if ( (!is.null(muFreqColumn)) && (!muFreqColumn %in% colnames(db)) ) {
+            stop ("If specified, muFreqColumn must be a column present in db.")
+        }
+    }
+    
+    # check mutual exclusivitiy
+    if (method %in% c("thresholdedFreq", "mostCommon")){
+        if (includeAmbiguous & breakTiesStochastic) {
+            message("includeAmbiguous and breakTiesStochastic are mutually exclusive. When both TRUE, includeAmbiguous will take precedence.")
+        }
+        #if ( (!includeAmbiguous) & (!breakTiesStochastic) ) {
+        #    message("When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.")
+        #}
+        if (!is.null(breakTiesByColumns)) {
+            message("breakTiesByColumns is ignored when method is thresholdedFreq or mostCommon.")
+        }
+    }
+    
+    if (method %in% c("mostMutated", "leastMutated")){
+        if (breakTiesStochastic & !is.null(breakTiesByColumns)) {
+            message("breakTiesStochastic and breakTiesByColumns are mutually exclusive. When both set, breakTiesStochastic will take precedence.")
+        }
+        #if ( (!breakTiesStochastic) & is.null(breakTiesByColumns) ) {
+        #    message("When breakTiesStochastic is FALSE and breakTiesByColumns is NULL, ties are broken by taking the sequence that appears earlier in the data.frame.")
+        #}
+        if (includeAmbiguous) {
+            message("includeAmbiguous is ignored when method is mostMutated or leastMutated.")
+        }
+    }
+    
+    # Check for valid columns
+    check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
+    if (check != TRUE) { stop(check) }
+    
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
+    
+    ### Convert sequence columns to uppercase
+    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
+    
+    # If the user has previously set the cluster and does not wish to reset it
+    if(!is.numeric(nproc)){ 
+        cluster <- nproc 
+        nproc <- 0
+    }
+    
+    if (!is(expandedDb,  "logical")) {
+        stop ("expandedDb must be TRUE or FALSE.")
+    }
+    
+    # Convert clone identifiers to strings
+    db[[cloneColumn]] <- as.character(db[[cloneColumn]])
+    
+    # get row indices in db for each unique clone
+    uniqueClones <- unique(db[[cloneColumn]])
+    # crucial to have simplify=FALSE (otherwise won't return a list if uniqueClones has length 1)
+    uniqueClonesIdx <- sapply(uniqueClones, function(i){which(db[[cloneColumn]]==i)}, simplify=FALSE)
+    
+    # if method is most/leastMutated and muFreqColumn not specified,
+    # first calculate mutation frequency ($mu_freq)
+    # IMPORTANT: do this OUTSIDE foreach loop for calcClonalConsensus
+    # otherwise will get an error saying muFreqColumn not found in db
+    # (something to do with parallelization/foreach)
+    if ( (method %in% c("mostMutated", "leastMutated")) & is.null(muFreqColumn) ) {
+        message("Calculating observed mutation frequency...")
+        db <- observedMutations(db=db, sequenceColumn=sequenceColumn,
+                                germlineColumn=germlineColumn, 
+                                regionDefinition=regionDefinition,
+                                frequency=TRUE, combine=TRUE, 
+                                mutationDefinition=NULL, nproc=nproc)
+        muFreqColumn <- "mu_freq"
+    }
+    
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, cpuCount())
+    
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.
+    if (nproc == 1) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    } else {
+        if (nproc != 0) { 
+            #cluster <- makeCluster(nproc, type="SOCK") 
+            cluster <- parallel::makeCluster(nproc, type= "PSOCK")
+        }
+        parallel::clusterExport(cluster, 
+                                list('db', 'cloneColumn', 'sequenceColumn', 'germlineColumn', 'muFreqColumn',
+                                     'regionDefinition', 'method', 'minimumFrequency','includeAmbiguous',
+                                     'breakTiesStochastic', 'breakTiesByColumns', 
+                                     'calcClonalConsensus', 'consensusSequence', 'breakTiesHelper',
+                                     'chars2Ambiguous', 'nucs2IUPAC', 'IUPAC_DNA_2',  'NUCLEOTIDES_AMBIGUOUS',
+                                     'uniqueClonesIdx', 'c2s', 's2c'), 
+                                envir=environment() )
+        registerDoParallel(cluster)
+    }
+    
+    # Printing status to console
+    #cat("Collapsing clonal sequences...\n")
+    
+    # avoid .combine="cbind"!
+    # if there is only 1 unique clone, .combind="cbind" will result in a vector (as opposed to
+    # a matrix) being returned, which will subsequently result a failure in
+    # cons_db$clonal_sequence <- cons_mat[, 1]
+    cons_mat <- foreach(idx=1:length(uniqueClonesIdx),
+                        .verbose=FALSE, .errorhandling='stop') %dopar% {
+                            
+                            cloneIdx <- uniqueClonesIdx[[idx]]
+                            cloneDb <- db[cloneIdx, ]
+                            
+                            # collapse clone
+                            calcClonalConsensus(db=cloneDb,
+                                                sequenceColumn=sequenceColumn,
+                                                germlineColumn=germlineColumn,
+                                                muFreqColumn=muFreqColumn,
+                                                regionDefinition=regionDefinition,
+                                                method=method,
+                                                minimumFrequency=minimumFrequency,
+                                                includeAmbiguous=includeAmbiguous,
+                                                breakTiesStochastic=breakTiesStochastic,
+                                                breakTiesByColumns=breakTiesByColumns)
+                        }
+    # using cbind below will give a matrix with columns being clones
+    # use rbind to have rows be clones
+    # cols: inputCons, germlineCons, inputMuFreq
+    cons_mat <- do.call(rbind, cons_mat)
+    
+    # Stop cluster
+    if(nproc > 1) { parallel::stopCluster(cluster) }
+    
+    # Build return data.frame
+    if (expandedDb) { 
+        # Fill all rows with the consensus sequence
+        clone_index <- match(db[[cloneColumn]], uniqueClones)
+        cons_db <- db
+        cons_db$clonal_sequence <- unlist(cons_mat[, 1])[clone_index]
+        cons_db$clonal_germline <- unlist(cons_mat[, 2])[clone_index]
+        
+        # assign mutation frequency corresponding to consensus into clonal_sequence_mufreq
+        if (method %in% c("mostMutated", "leastMutated")) {
+            cons_db$clonal_sequence_mufreq <- unlist(cons_mat[, 3])[clone_index]
+        }
+    } else {
+        # Return only the first row of each clone
+        clone_index <- match(uniqueClones, db[[cloneColumn]])
+        cons_db <- db[clone_index, ]
+        cons_db$clonal_sequence <- unlist(cons_mat[, 1])
+        cons_db$clonal_germline <- unlist(cons_mat[, 2])
+        
+        # assign mutation frequency corresponding to consensus into clonal_sequence_mufreq
+        if (method %in% c("mostMutated", "leastMutated")) {
+            cons_db$clonal_sequence_mufreq <- unlist(cons_mat[, 3])
+        }
+    }
+    
+    return(cons_db)
+}
+
+#### Clonal consensus building functions ####
+
 #' Constructs effective clonal sequences for all clones
 #'
 #' \code{collapseClones} creates effective input and germline sequences for each clonal 
@@ -64,7 +638,8 @@ NULL
 #' @param   nproc               Number of cores to distribute the operation over. If the 
 #'                              \code{cluster} has already been set earlier, then pass the 
 #'                              \code{cluster}. This will ensure that it is not reset.
-#'                              
+#' @param   juncLenCol          \code{character} name of the column containing the junction length.
+#'                              Needed when \code{regionDefinition} includes CDR3 and FWR4.                             
 #' 
 #' @return   A modified \code{db} with the following additional columns: 
 #'           \itemize{
@@ -345,236 +920,88 @@ NULL
 #'                          method="mostCommon", expandedDb=TRUE)
 #' 
 #' @export
-collapseClones <- function(db, 
-                           cloneColumn="clone_id", 
-                           sequenceColumn="sequence_alignment",
-                           germlineColumn="germline_alignment_d_mask",
-                           muFreqColumn=NULL,
+#' 
+collapseClones <- function(db, cloneColumn = "clone_id", 
+                           sequenceColumn = "sequence_alignment",
+                           germlineColumn = "germline_alignment_d_mask",
+                           muFreqColumn = NULL,
                            regionDefinition=NULL,
-                           method=c("mostCommon", "thresholdedFreq", "catchAll", 
-                                    "mostMutated", "leastMutated"),
-                           minimumFrequency=NULL,
-                           includeAmbiguous=FALSE,
-                           breakTiesStochastic=FALSE,
-                           breakTiesByColumns=NULL,
-                           expandedDb=FALSE,
-                           nproc=1) {
-    # Hack for visibility of foreach index variables
-    idx <- NULL
+                           method = c("mostCommon","thresholdedFreq","catchAll","mostMutated","leastMutated"),
+                           minimumFrequency = NULL, 
+                           includeAmbiguous = FALSE, 
+                           breakTiesStochastic = FALSE, breakTiesByColumns = NULL, 
+                           expandedDb = FALSE, nproc = 1,
+                           juncLenCol="junction_length") {
+    # This function is split into 3 cases:
+    # 1. RegionDefinition is NULL.
+    #    In this case original collapseClonesL can be used.
+    #    This case is different from case 2, as regioDefinition@name cannot be extracted
+    #    from RegionDefintion
+    # 2. Region definition does not include FWR3 and CDR4 (meaning it is
+    #    different than IMGT_ALL and IMGT_ALL_REGIONS).
+    #    In this case original collapseClonesL can be used.
+    # 3. Region definition includes FWR3 and CDR4 (meaning it is 
+    #    IMGT_ALL or IMGT_ALL_REGIONS).
+    #    In this case - need to calculate collapseClonesL per clone
+    #    as regionDefinition is different per clone.    
     
-    ## DEBUG
-    # cloneColumn="CLONE"; sequenceColumn="sequence_alignment"; germlineColumn="germline_alignment_d_mask"
-    # expandedDb=FALSE; regionDefinition=NULL; method="mostCommon"; nproc=1
-    
-    #### parameter checks
-    
-    method <- match.arg(method)
-    
-    # check minimumFrequency for thresholdedFreq method
-    if (method=="thresholdedFreq") {
-        if (!is.numeric(minimumFrequency)) {
-            stop("minimumFrequency must be a numeric value.")
-        } else {
-            if ( minimumFrequency<0 | minimumFrequency>1 ) {
-                stop("minimumFrequency must be between 0 and 1.")
-            }
-        }
+    # Case 1:
+    if (is.null(regionDefinition))  {
+        collapsed_clones_db <- collapseClonesL(db=db, cloneColumn = cloneColumn, 
+                                               sequenceColumn = sequenceColumn,
+                                               germlineColumn = germlineColumn,
+                                               muFreqColumn = muFreqColumn,
+                                               regionDefinition=regionDefinition,
+                                               method = method,
+                                               minimumFrequency = minimumFrequency, 
+                                               includeAmbiguous = includeAmbiguous, 
+                                               breakTiesStochastic = breakTiesStochastic,
+                                               breakTiesByColumns = breakTiesByColumns, 
+                                               expandedDb = expandedDb, 
+                                               nproc = nproc)
     }
     
-    # check includeAmbiguous & breakTiesStochastic for methods other than catchAll
-    if (method %in% c("thresholdedFreq", "mostCommon", "mostMutated", "leastMutated")) {
-        if (!is(includeAmbiguous, "logical")) {
-            stop ("includeAmbiguous must be TRUE or FALSE.")
-        }
-        if (!is(breakTiesStochastic, "logical")) {
-            stop ("breakTiesStochastic must be TRUE or FALSE.")
-        }
+    # Case 2:
+    else if ((regionDefinition@name != "IMGT_ALL_REGIONS") & (regionDefinition@name != "IMGT_ALL")) {
+        collapsed_clones_db <- collapseClonesL(db=db, cloneColumn = cloneColumn, 
+                                               sequenceColumn = sequenceColumn,
+                                               germlineColumn = germlineColumn,
+                                               muFreqColumn = muFreqColumn,
+                                               regionDefinition=regionDefinition,
+                                               method = method,
+                                               minimumFrequency = minimumFrequency, 
+                                               includeAmbiguous = includeAmbiguous, 
+                                               breakTiesStochastic = breakTiesStochastic,
+                                               breakTiesByColumns = breakTiesByColumns, 
+                                               expandedDb = expandedDb, 
+                                               nproc = nproc)
     }
     
-    # check breakTiesByColumns and muFreqColumn for methods most/leastMutated
-    if (method %in% c("mostMutated", "leastMutated")) {
-        
-        if (!is.null(breakTiesByColumns)) {
-            if (!is(breakTiesByColumns, "list")) {
-                stop ("breakTiesByColumns must be a list.")
-            }
-            if (length(breakTiesByColumns) != 2) {
-                stop ("breakTiesByColumns must be a nested list of length 2.")
-            }
-            if (length(breakTiesByColumns[[1]]) != length(breakTiesByColumns[[2]])) {
-                stop ("Nested vectors in breakTiesByColumns must have the same lengths.")
-            }
-            if (!all(is.character(breakTiesByColumns[[1]]))) {
-                stop ("The first vector in breakTiesByColumns must contain column names.")
-            }
-            if (!all( unlist( lapply(breakTiesByColumns[[2]], is.function)))) {
-                stop ("The second vector in breakTiesByColumns must contain functions.")
-            }
-            if (!all(breakTiesByColumns[[1]] %in% colnames(db))) {
-                stop ("All column named included in breakTiesByColumns must be present in db.")
-            }
-        }
-        
-        if ( (!is.null(muFreqColumn)) && (!muFreqColumn %in% colnames(db)) ) {
-            stop ("If specified, muFreqColumn must be a column present in db.")
-        }
+    # Case 3:
+    else if ((regionDefinition@name == "IMGT_ALL_REGIONS") | (regionDefinition@name == "IMGT_ALL")) {
+        # Since each clone needs a different regionDefinition - then this function 
+        # will go over all clones in db, and for each clone it will run the function
+        # collapseClonesL with its own regionDefinition.
+              clones_list <- makeClonesList(db=db, clone_col=cloneColumn)
+              collapsed_clones_list <- sapply(X = clones_list,
+                                             FUN = collapseOneClone,
+                                             db=db, juncLenCol=juncLenCol, 
+                                             cloneColumn=cloneColumn,
+                                             sequenceColumn=sequenceColumn, 
+                                             regionDefinition=regionDefinition,
+                                             germlineColumn=germlineColumn, 
+                                             muFreqColumn=muFreqColumn, 
+                                             method=method,
+                                             minimumFrequency=minimumFrequency,
+                                             includeAmbiguous=includeAmbiguous,
+                                             breakTiesStochastic=breakTiesStochastic,
+                                             breakTiesByColumns=breakTiesByColumns, 
+                                             expandedDb=expandedDb, 
+                                             nproc=nproc, simplify=FALSE, 
+                                             USE.NAMES = FALSE)
+              collapsed_clones_db <- do.call("rbind",collapsed_clones_list)
     }
-    
-    # check mutual exclusivitiy
-    if (method %in% c("thresholdedFreq", "mostCommon")){
-        if (includeAmbiguous & breakTiesStochastic) {
-            message("includeAmbiguous and breakTiesStochastic are mutually exclusive. When both TRUE, includeAmbiguous will take precedence.")
-        }
-        #if ( (!includeAmbiguous) & (!breakTiesStochastic) ) {
-        #    message("When both includeAmbiguous and breakTiesStochastic are FALSE, ties are broken in the order of 'A', 'T', 'G', 'C', 'N', '.', and '-'.")
-        #}
-        if (!is.null(breakTiesByColumns)) {
-            message("breakTiesByColumns is ignored when method is thresholdedFreq or mostCommon.")
-        }
-    }
-    
-    if (method %in% c("mostMutated", "leastMutated")){
-        if (breakTiesStochastic & !is.null(breakTiesByColumns)) {
-            message("breakTiesStochastic and breakTiesByColumns are mutually exclusive. When both set, breakTiesStochastic will take precedence.")
-        }
-        #if ( (!breakTiesStochastic) & is.null(breakTiesByColumns) ) {
-        #    message("When breakTiesStochastic is FALSE and breakTiesByColumns is NULL, ties are broken by taking the sequence that appears earlier in the data.frame.")
-        #}
-        if (includeAmbiguous) {
-            message("includeAmbiguous is ignored when method is mostMutated or leastMutated.")
-        }
-    }
-    
-    # Check for valid columns
-    check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn))
-    if (check != TRUE) { stop(check) }
-    
-    # Check region definition
-    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
-        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
-    }
-    
-    ### Convert sequence columns to uppercase
-    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
-    
-    # If the user has previously set the cluster and does not wish to reset it
-    if(!is.numeric(nproc)){ 
-        cluster <- nproc 
-        nproc <- 0
-    }
-    
-    if (!is(expandedDb,  "logical")) {
-        stop ("expandedDb must be TRUE or FALSE.")
-    }
-    
-    # Convert clone identifiers to strings
-    db[[cloneColumn]] <- as.character(db[[cloneColumn]])
-    
-    # get row indices in db for each unique clone
-    uniqueClones <- unique(db[[cloneColumn]])
-    # crucial to have simplify=FALSE (otherwise won't return a list if uniqueClones has length 1)
-    uniqueClonesIdx <- sapply(uniqueClones, function(i){which(db[[cloneColumn]]==i)}, simplify=FALSE)
-    
-    # if method is most/leastMutated and muFreqColumn not specified,
-    # first calculate mutation frequency ($mu_freq)
-    # IMPORTANT: do this OUTSIDE foreach loop for calcClonalConsensus
-    # otherwise will get an error saying muFreqColumn not found in db
-    # (something to do with parallelization/foreach)
-    if ( (method %in% c("mostMutated", "leastMutated")) & is.null(muFreqColumn) ) {
-        message("Calculating observed mutation frequency...")
-        db <- observedMutations(db=db, sequenceColumn=sequenceColumn,
-                                germlineColumn=germlineColumn, 
-                                regionDefinition=regionDefinition,
-                                frequency=TRUE, combine=TRUE, 
-                                mutationDefinition=NULL, nproc=nproc)
-        muFreqColumn <- "mu_freq"
-    }
-    
-    # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, cpuCount())
-    
-    # If user wants to paralellize this function and specifies nproc > 1, then
-    # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.
-    if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ 
-        # (needed for 'foreach' in non-parallel mode)
-        registerDoSEQ()
-    } else {
-        if (nproc != 0) { 
-            #cluster <- makeCluster(nproc, type="SOCK") 
-            cluster <- parallel::makeCluster(nproc, type= "PSOCK")
-        }
-        parallel::clusterExport(cluster, 
-                                list('db', 'cloneColumn', 'sequenceColumn', 'germlineColumn', 'muFreqColumn',
-                                     'regionDefinition', 'method', 'minimumFrequency','includeAmbiguous',
-                                     'breakTiesStochastic', 'breakTiesByColumns', 
-                                     'calcClonalConsensus', 'consensusSequence', 'breakTiesHelper',
-                                     'chars2Ambiguous', 'nucs2IUPAC', 'IUPAC_DNA_2',  'NUCLEOTIDES_AMBIGUOUS',
-                                     'uniqueClonesIdx', 'c2s', 's2c'), 
-                                envir=environment() )
-        registerDoParallel(cluster)
-    }
-    
-    # Printing status to console
-    #cat("Collapsing clonal sequences...\n")
-    
-    # avoid .combine="cbind"!
-    # if there is only 1 unique clone, .combind="cbind" will result in a vector (as opposed to
-    # a matrix) being returned, which will subsequently result a failure in
-    # cons_db$clonal_sequence <- cons_mat[, 1]
-    cons_mat <- foreach(idx=1:length(uniqueClonesIdx),
-                        .verbose=FALSE, .errorhandling='stop') %dopar% {
-                            
-                            cloneIdx <- uniqueClonesIdx[[idx]]
-                            cloneDb <- db[cloneIdx, ]
-                            
-                            # collapse clone
-                            calcClonalConsensus(db=cloneDb,
-                                                sequenceColumn=sequenceColumn,
-                                                germlineColumn=germlineColumn,
-                                                muFreqColumn=muFreqColumn,
-                                                regionDefinition=regionDefinition,
-                                                method=method,
-                                                minimumFrequency=minimumFrequency,
-                                                includeAmbiguous=includeAmbiguous,
-                                                breakTiesStochastic=breakTiesStochastic,
-                                                breakTiesByColumns=breakTiesByColumns)
-                        }
-    # using cbind below will give a matrix with columns being clones
-    # use rbind to have rows be clones
-    # cols: inputCons, germlineCons, inputMuFreq
-    cons_mat <- do.call(rbind, cons_mat)
-    
-    # Stop cluster
-    if(nproc > 1) { parallel::stopCluster(cluster) }
-    
-    # Build return data.frame
-    if (expandedDb) { 
-        # Fill all rows with the consensus sequence
-        clone_index <- match(db[[cloneColumn]], uniqueClones)
-        cons_db <- db
-        cons_db$clonal_sequence <- unlist(cons_mat[, 1])[clone_index]
-        cons_db$clonal_germline <- unlist(cons_mat[, 2])[clone_index]
-        
-        # assign mutation frequency corresponding to consensus into clonal_sequence_mufreq
-        if (method %in% c("mostMutated", "leastMutated")) {
-            cons_db$clonal_sequence_mufreq <- unlist(cons_mat[, 3])[clone_index]
-        }
-    } else {
-        # Return only the first row of each clone
-        clone_index <- match(uniqueClones, db[[cloneColumn]])
-        cons_db <- db[clone_index, ]
-        cons_db$clonal_sequence <- unlist(cons_mat[, 1])
-        cons_db$clonal_germline <- unlist(cons_mat[, 2])
-        
-        # assign mutation frequency corresponding to consensus into clonal_sequence_mufreq
-        if (method %in% c("mostMutated", "leastMutated")) {
-            cons_db$clonal_sequence_mufreq <- unlist(cons_mat[, 3])
-        }
-    }
-    
-    return(cons_db)
+  return(collapsed_clones_db)
 }
 
 
@@ -1257,127 +1684,126 @@ calcClonalConsensus <- function(db,
 
 #### Mutation counting functions ####
 
-#' Calculate observed numbers of mutations
-#'
-#' \code{observedMutations} calculates the observed number of mutations for each 
-#' sequence in the input \code{data.frame}.
-#'
-#' @param    db                  \code{data.frame} containing sequence data.
-#' @param    sequenceColumn      \code{character} name of the column containing input 
-#'                               sequences. IUPAC ambiguous characters for DNA are 
-#'                               supported.
-#' @param    germlineColumn      \code{character} name of the column containing 
-#'                               the germline or reference sequence. IUPAC ambiguous 
-#'                               characters for DNA are supported.
-#' @param    regionDefinition    \link{RegionDefinition} object defining the regions
-#'                               and boundaries of the Ig sequences. If NULL, mutations 
-#'                               are counted for entire sequence.
-#' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
-#'                               and silent mutation criteria. If \code{NULL} then 
-#'                               replacement and silent are determined by exact 
-#'                               amino acid identity.
-#' @param    ambiguousMode       whether to consider ambiguous characters as 
-#'                               \code{"either or"} or \code{"and"} when determining and 
-#'                               counting the type(s) of mutations. Applicable only if
-#'                               \code{sequenceColumn} and/or \code{germlineColumn} 
-#'                               contain(s) ambiguous characters. One of 
-#'                               \code{c("eitherOr", "and")}. Default is \code{"eitherOr"}.                               
-#' @param    frequency           \code{logical} indicating whether or not to calculate
-#'                               mutation frequencies. Default is \code{FALSE}.
-#' @param    combine             \code{logical} indicating whether for each sequence should
-#'                               the mutation counts for the different regions (CDR, FWR) and 
-#'                               mutation types be combined and return one value of 
-#'                               count/frequency per sequence instead of 
-#'                               multiple values. Default is \code{FALSE}.                          
-#' @param    nproc               number of cores to distribute the operation over. If the 
-#'                               cluster has already been set the call function with 
-#'                               \code{nproc} = 0 to not reset or reinitialize. Default is 
-#'                               \code{nproc} = 1.
-#' 
-#' @return   A modified \code{db} \code{data.frame} with observed mutation counts for each 
-#'           sequence listed. The columns names are dynamically created based on the
-#'           regions in the \code{regionDefinition}. For example, when using the
-#'           \link{IMGT_V} definition, which defines positions for CDR and
-#'           FWR, the following columns are added:
-#'           \itemize{
-#'             \item  \code{mu_count_cdr_r}:  number of replacement mutations in CDR1 and 
-#'                                            CDR2 of the V-segment.
-#'             \item  \code{mu_count_cdr_s}:  number of silent mutations in CDR1 and CDR2 
-#'                                            of the V-segment.
-#'             \item  \code{mu_count_fwr_r}:  number of replacement mutations in FWR1, 
-#'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{mu_count_fwr_s}:  number of silent mutations in FWR1, FWR2 and
-#'                                            FWR3 of the V-segment.
-#'           }
-#'           If \code{frequency=TRUE}, R and S mutation frequencies are
-#'           calculated over the number of non-N positions in the speficied regions.
-#'           \itemize{
-#'             \item  \code{mu_freq_cdr_r}:  frequency of replacement mutations in CDR1 and 
-#'                                            CDR2 of the V-segment.
-#'             \item  \code{mu_freq_cdr_s}:  frequency of silent mutations in CDR1 and CDR2 
-#'                                            of the V-segment.
-#'             \item  \code{mu_freq_fwr_r}:  frequency of replacement mutations in FWR1, 
-#'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{mu_freq_fwr_s}:  frequency of silent mutations in FWR1, FWR2 and
-#'                                            FWR3 of the V-segment.
-#'           } 
-#'           If \code{frequency=TRUE} and \code{combine=TRUE}, the mutations and non-N positions
-#'           are aggregated and a single \code{mu_freq} value is returned
-#'           \itemize{
-#'             \item  \code{mu_freq}:  frequency of replacement and silent mutations in the 
-#'                                      specified region
-#'           }     
-#'                                  
-#' @details
-#' Mutation counts are determined by comparing the input sequences (in the column specified 
-#' by \code{sequenceColumn}) to the germline sequence (in the column specified by 
-#' \code{germlineColumn}). See \link{calcObservedMutations} for more technical details, 
-#' \strong{including criteria for which sequence differences are included in the mutation 
-#' counts and which are not}.
-#' 
-#' The mutations are binned as either replacement (R) or silent (S) across the different 
-#' regions of the sequences as defined by \code{regionDefinition}. Typically, this would 
-#' be the framework (FWR) and complementarity determining (CDR) regions of IMGT-gapped 
-#' nucleotide sequences. Mutation counts are appended to the input \code{db} as 
-#' additional columns.
-#' 
-#' 
-#' @seealso  
-#' \link{calcObservedMutations} is called by this function to get the number of mutations 
-#' in each sequence grouped by the \link{RegionDefinition}. 
-#' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
-#' See \link{expectedMutations} for calculating expected mutation frequencies.
-#'           
-#' 
-#' @examples
-#' # Subset example data
-#' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
-#'
-#' # Calculate mutation frequency over the entire sequence
-#' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
-#'                             germlineColumn="germline_alignment_d_mask",
-#'                             frequency=TRUE,
-#'                             nproc=1)
-#'
-#' # Count of V-region mutations split by FWR and CDR
-#' # With mutations only considered replacement if charge changes
-#' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
-#'                             germlineColumn="germline_alignment_d_mask",
-#'                             regionDefinition=IMGT_V,
-#'                             mutationDefinition=CHARGE_MUTATIONS,
-#'                             nproc=1)
-#'                      
-#' @export
-observedMutations <- function(db, 
-                              sequenceColumn="sequence_alignment",
-                              germlineColumn="germline_alignment_d_mask",
-                              regionDefinition=NULL,
-                              mutationDefinition=NULL,
-                              ambiguousMode=c("eitherOr", "and"),
-                              frequency=FALSE,
-                              combine=FALSE,
-                              nproc=1) {
+# Calculate observed numbers of mutations
+#
+# \code{observedMutationsL} calculates the observed number of mutations for each 
+# sequence in the input \code{data.frame}.
+#
+# @param    db                  \code{data.frame} containing sequence data.
+# @param    sequenceColumn      \code{character} name of the column containing input 
+#                               sequences. IUPAC ambiguous characters for DNA are 
+#                               supported.
+# @param    germlineColumn      \code{character} name of the column containing 
+#                               the germline or reference sequence. IUPAC ambiguous 
+#                               characters for DNA are supported.
+# @param    regionDefinition    \link{RegionDefinition} object defining the regions
+#                               and boundaries of the Ig sequences. If NULL, mutations 
+#                               are counted for entire sequence.
+# @param    mutationDefinition  \link{MutationDefinition} object defining replacement
+#                               and silent mutation criteria. If \code{NULL} then 
+#                               replacement and silent are determined by exact 
+#                               amino acid identity.
+# @param    ambiguousMode       whether to consider ambiguous characters as 
+#                               \code{"either or"} or \code{"and"} when determining and 
+#                               counting the type(s) of mutations. Applicable only if
+#                               \code{sequenceColumn} and/or \code{germlineColumn} 
+#                               contain(s) ambiguous characters. One of 
+#                               \code{c("eitherOr", "and")}. Default is \code{"eitherOr"}.                               
+# @param    frequency           \code{logical} indicating whether or not to calculate
+#                               mutation frequencies. Default is \code{FALSE}.
+# @param    combine             \code{logical} indicating whether for each sequence should
+#                               the mutation counts for the different regions (CDR, FWR) and 
+#                               mutation types be combined and return one value of 
+#                               count/frequency per sequence instead of 
+#                               multiple values. Default is \code{FALSE}.                          
+# @param    nproc               number of cores to distribute the operation over. If the 
+#                               cluster has already been set the call function with 
+#                               \code{nproc} = 0 to not reset or reinitialize. Default is 
+#                               \code{nproc} = 1.
+# 
+# @return   A modified \code{db} \code{data.frame} with observed mutation counts for each 
+#           sequence listed. The columns names are dynamically created based on the
+#           regions in the \code{regionDefinition}. For example, when using the
+#           \link{IMGT_V} definition, which defines positions for CDR and
+#           FWR, the following columns are added:
+#           \itemize{
+#             \item  \code{mu_count_cdr_r}:  number of replacement mutations in CDR1 and 
+#                                            CDR2 of the V-segment.
+#             \item  \code{mu_count_cdr_s}:  number of silent mutations in CDR1 and CDR2 
+#                                            of the V-segment.
+#             \item  \code{mu_count_fwr_r}:  number of replacement mutations in FWR1, 
+#                                            FWR2 and FWR3 of the V-segment.
+#             \item  \code{mu_count_fwr_s}:  number of silent mutations in FWR1, FWR2 and
+#                                            FWR3 of the V-segment.
+#           }
+#           If \code{frequency=TRUE}, R and S mutation frequencies are
+#           calculated over the number of non-N positions in the speficied regions.
+#           \itemize{
+#             \item  \code{mu_freq_cdr_r}:  frequency of replacement mutations in CDR1 and 
+#                                            CDR2 of the V-segment.
+#             \item  \code{mu_freq_cdr_s}:  frequency of silent mutations in CDR1 and CDR2 
+#                                            of the V-segment.
+#             \item  \code{mu_freq_fwr_r}:  frequency of replacement mutations in FWR1, 
+#                                            FWR2 and FWR3 of the V-segment.
+#             \item  \code{mu_freq_fwr_s}:  frequency of silent mutations in FWR1, FWR2 and
+#                                            FWR3 of the V-segment.
+#           } 
+#           If \code{frequency=TRUE} and \code{combine=TRUE}, the mutations and non-N positions
+#           are aggregated and a single \code{mu_freq} value is returned
+#           \itemize{
+#             \item  \code{mu_freq}:  frequency of replacement and silent mutations in the 
+#                                      specified region
+#           }     
+#                                  
+# @details
+# Mutation counts are determined by comparing the input sequences (in the column specified 
+# by \code{sequenceColumn}) to the germline sequence (in the column specified by 
+# \code{germlineColumn}). See \link{calcObservedMutations} for more technical details, 
+# \strong{including criteria for which sequence differences are included in the mutation 
+# counts and which are not}.
+# 
+# The mutations are binned as either replacement (R) or silent (S) across the different 
+# regions of the sequences as defined by \code{regionDefinition}. Typically, this would 
+# be the framework (FWR) and complementarity determining (CDR) regions of IMGT-gapped 
+# nucleotide sequences. Mutation counts are appended to the input \code{db} as 
+# additional columns.
+# 
+# 
+# @seealso  
+# \link{calcObservedMutations} is called by this function to get the number of mutations 
+# in each sequence grouped by the \link{RegionDefinition}. 
+# See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
+# See \link{expectedMutations} for calculating expected mutation frequencies.
+#           
+# 
+# @examples
+# # Subset example data
+# data(ExampleDb, package="alakazam")
+# db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
+#
+# # Calculate mutation frequency over the entire sequence
+# db_obs <- observedMutationsL(db, sequenceColumn="sequence_alignment",
+#                              germlineColumn="germline_alignment_d_mask",
+#                              frequency=TRUE,
+#                              nproc=1)
+#
+# # Count of V-region mutations split by FWR and CDR
+# # With mutations only considered replacement if charge changes
+# db_obs <- observedMutationsL(db, sequenceColumn="sequence_alignment",
+#                              germlineColumn="germline_alignment_d_mask",
+#                              regionDefinition=IMGT_V,
+#                              mutationDefinition=CHARGE_MUTATIONS,
+#                              nproc=1)
+#                      
+observedMutationsL <- function(db, 
+                               sequenceColumn="sequence_alignment",
+                               germlineColumn="germline_alignment_d_mask",
+                               regionDefinition=NULL,
+                               mutationDefinition=NULL,
+                               ambiguousMode=c("eitherOr", "and"),
+                               frequency=FALSE,
+                               combine=FALSE,
+                               nproc=1) {
     # Hack for visibility of foreach index variable
     idx <- NULL
     
@@ -1524,6 +1950,230 @@ observedMutations <- function(db,
     db_new <- cbind(db, observed_mutations)
     return(db_new)    
 }
+
+#### Mutation counting functions ####
+
+#' Calculate observed numbers of mutations
+#'
+#' \code{observedMutations} calculates the observed number of mutations for each 
+#' sequence in the input \code{data.frame}.
+#'
+#' @param    db                  \code{data.frame} containing sequence data.
+#' @param    sequenceColumn      \code{character} name of the column containing input 
+#'                               sequences. IUPAC ambiguous characters for DNA are 
+#'                               supported.
+#' @param    germlineColumn      \code{character} name of the column containing 
+#'                               the germline or reference sequence. IUPAC ambiguous 
+#'                               characters for DNA are supported.
+#' @param    regionDefinition    \link{RegionDefinition} object defining the regions
+#'                               and boundaries of the Ig sequences. If NULL, mutations 
+#'                               are counted for entire sequence.
+#' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
+#'                               and silent mutation criteria. If \code{NULL} then 
+#'                               replacement and silent are determined by exact 
+#'                               amino acid identity.
+#' @param    ambiguousMode       whether to consider ambiguous characters as 
+#'                               \code{"either or"} or \code{"and"} when determining and 
+#'                               counting the type(s) of mutations. Applicable only if
+#'                               \code{sequenceColumn} and/or \code{germlineColumn} 
+#'                               contain(s) ambiguous characters. One of 
+#'                               \code{c("eitherOr", "and")}. Default is \code{"eitherOr"}.                               
+#' @param    frequency           \code{logical} indicating whether or not to calculate
+#'                               mutation frequencies. Default is \code{FALSE}.
+#' @param    combine             \code{logical} indicating whether for each sequence should
+#'                               the mutation counts for the different regions (CDR, FWR) and 
+#'                               mutation types be combined and return one value of 
+#'                               count/frequency per sequence instead of 
+#'                               multiple values. Default is \code{FALSE}.                          
+#' @param    nproc               number of cores to distribute the operation over. If the 
+#'                               cluster has already been set the call function with 
+#'                               \code{nproc} = 0 to not reset or reinitialize. Default is 
+#'                               \code{nproc} = 1.
+#' @param    refOption           can be one of \code{"germline"} or \code{"parent"}.
+#'                               Indicates the reference sequence source upon which
+#'                               the observed mutations are calculated.
+#' @param    cloneColumn         clone id column name in \code{db}
+#' @param    juncLengthColumn    junction length column name in \code{db}
+#' @param    parentColumn        parent column name in \code{db}
+#' 
+#' @return   A modified \code{db} \code{data.frame} with observed mutation counts for each 
+#'           sequence listed. The columns names are dynamically created based on the
+#'           regions in the \code{regionDefinition}. For example, when using the
+#'           \link{IMGT_V} definition, which defines positions for CDR and
+#'           FWR, the following columns are added:
+#'           \itemize{
+#'             \item  \code{mu_count_cdr_r}:  number of replacement mutations in CDR1 and 
+#'                                            CDR2 of the V-segment.
+#'             \item  \code{mu_count_cdr_s}:  number of silent mutations in CDR1 and CDR2 
+#'                                            of the V-segment.
+#'             \item  \code{mu_count_fwr_r}:  number of replacement mutations in FWR1, 
+#'                                            FWR2 and FWR3 of the V-segment.
+#'             \item  \code{mu_count_fwr_s}:  number of silent mutations in FWR1, FWR2 and
+#'                                            FWR3 of the V-segment.
+#'           }
+#'           If \code{frequency=TRUE}, R and S mutation frequencies are
+#'           calculated over the number of non-N positions in the speficied regions.
+#'           \itemize{
+#'             \item  \code{mu_freq_cdr_r}:  frequency of replacement mutations in CDR1 and 
+#'                                            CDR2 of the V-segment.
+#'             \item  \code{mu_freq_cdr_s}:  frequency of silent mutations in CDR1 and CDR2 
+#'                                            of the V-segment.
+#'             \item  \code{mu_freq_fwr_r}:  frequency of replacement mutations in FWR1, 
+#'                                            FWR2 and FWR3 of the V-segment.
+#'             \item  \code{mu_freq_fwr_s}:  frequency of silent mutations in FWR1, FWR2 and
+#'                                            FWR3 of the V-segment.
+#'           } 
+#'           If \code{frequency=TRUE} and \code{combine=TRUE}, the mutations and non-N positions
+#'           are aggregated and a single \code{mu_freq} value is returned
+#'           \itemize{
+#'             \item  \code{mu_freq}:  frequency of replacement and silent mutations in the 
+#'                                      specified region
+#'           }     
+#'                                  
+#' @details
+#' Mutation counts are determined by comparing the input sequences (in the column specified 
+#' by \code{sequenceColumn}) to a reference sequence. 
+#' Reference sequence depends onr \cod{refOption}:
+#' If \cod{refOption} == "germline" - reference sequence is germline sequence (in the column specified by 
+#' \code{germlineColumn}). 
+#' If \cod{refOption} == "parent" - reference sequence is parent sequence (in the column specified by 
+#' \code{parentColumn}). This option assumes that the \code{db} includes linegae information,
+#' such that each sequence has its parent sequence information (see more details in 
+#' \link{makeGraphDf})
+#' See \link{calcObservedMutations} for more technical details, 
+#' \strong{including criteria for which sequence differences are included in the mutation 
+#' counts and which are not}.
+#' 
+#' The mutations are binned as either replacement (R) or silent (S) across the different 
+#' regions of the sequences as defined by \code{regionDefinition}. Typically, this would 
+#' be the framework (FWR) and complementarity determining (CDR) regions of IMGT-gapped 
+#' nucleotide sequences. Mutation counts are appended to the input \code{db} as 
+#' additional columns.
+#' 
+#' 
+#' @seealso  
+#' \link{calcObservedMutations} is called by this function to get the number of mutations 
+#' in each sequence grouped by the \link{RegionDefinition}. 
+#' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
+#' See \link{expectedMutations} for calculating expected mutation frequencies.
+#'           
+#' 
+#' @examples
+#' # Subset example data
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
+#'
+#' # Calculate mutation frequency over the entire sequence
+#' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+#'                             germlineColumn="germline_alignment_d_mask",
+#'                             frequency=TRUE,
+#'                             nproc=1)
+#'
+#' # Count of V-region mutations split by FWR and CDR
+#' # With mutations only considered replacement if charge changes
+#' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+#'                             germlineColumn="germline_alignment_d_mask",
+#'                             regionDefinition=IMGT_V,
+#'                             mutationDefinition=CHARGE_MUTATIONS,
+#'                             nproc=1)
+#'                      
+#' @export 
+
+
+observedMutations <- function(db,sequenceColumn = "sequence_alignment", 
+                               germlineColumn = "germline_alignment",
+                               regionDefinition=NULL, mutationDefinition = NULL, 
+                               ambiguousMode = c("eitherOr", "and"), 
+                               frequency = FALSE, combine = FALSE, nproc = 1,
+                               refOption = "germline", 
+                               cloneColumn = "CLONE", 
+                               #juncLengthColumn = "junction_length",
+                               juncLengthColumn = "JUNCTION_LENGTH",
+                               parentColumn = "PARENT_SEQUENCE") {
+    
+# This function is split into 3 cases:
+# 1. RegionDefinition is NULL.
+#    In this case original observedMutationsL can be used.
+#    This case is different from case 2, as regioDefinition@name cannot be extracted
+#    from RegionDefintion
+# 2. Region definition does not include FWR3 and CDR4 (meaning it is
+#    different than IMGT_ALL and IMGT_ALL_REGIONS).
+#    In this case original observedMutationsL can be used.
+# 3. Region definition includes FWR3 and CDR4 (meaning it is 
+#    IMGT_ALL or IMGT_ALL_REGIONS).
+#    In this case - need to calculate obserevedMutations per clone
+#    as regionDefinition is different per clone.
+    
+    # setting the reference column:
+    if (refOption == "germline") {
+        refColumn <- germlineColumn
+    }
+    else if (refOption == "parent") {
+        refColumn <- parentColumn
+    }
+    else {
+        stop(deparse(substitute(refOption)), " is not a valid refOption")
+    }
+    
+    
+    # Case 1:
+    if (is.null(regionDefinition))  {
+        observedMutations_db <- observedMutationsL(db=db, sequenceColumn = sequenceColumn, 
+                                                  germlineColumn = refColumn, 
+                                                  mutationDefinition = mutationDefinition, 
+                                                  ambiguousMode = ambiguousMode, 
+                                                  frequency = frequency, 
+                                                  combine = combine, 
+                                                  nproc = nproc)
+    }
+    
+    # Case 2:
+    else if ((regionDefinition@name != "IMGT_ALL_REGIONS") & (regionDefinition@name != "IMGT_ALL")) {
+        observedMutations_db <- observedMutationsL(db=db, sequenceColumn = sequenceColumn, 
+                                                  germlineColumn = refColumn, 
+                                                  regionDefinition = regionDefinition, 
+                                                  mutationDefinition = mutationDefinition, 
+                                                  ambiguousMode = ambiguousMode, 
+                                                  frequency = frequency, 
+                                                  combine = combine, 
+                                                  nproc = nproc)
+    }
+    
+    # Case 3:
+    else if ((regionDefinition@name == "IMGT_ALL_REGIONS") | (regionDefinition@name == "IMGT_ALL")) {
+        
+        # Since each clone needs a different regionDefinition - then this function 
+        # will loop on all clones in db, and for each clone it will run the function
+        # observedMutationsL with its own regionDefinition.
+        
+        # Before looping: setting a list of all clones in db (without the transpose this is not working properly):  
+        clones_in_db <- t(unique(db[,c(cloneColumn)]))
+        first_clone <- TRUE
+        for (cur_clone in clones_in_db) {
+            # subseting the db to lines for specific clone
+            cur_clone_db <- db[db[,cloneColumn] == cur_clone,]
+            # setting the regionDefinition for the specific clone:
+            cur_clone_reg <- makeRegion(juncLength = cur_clone_db[1,juncLengthColumn], 
+                                        sequenceImgt = cur_clone_db[1,sequenceColumn], 
+                                        regionDefinition=regionDefinition)
+            clone_observedMutations_db <- observedMutationsL(db=cur_clone_db, sequenceColumn = sequenceColumn, 
+                                                            germlineColumn=refColumn, 
+                                                            regionDefinition=cur_clone_reg, 
+                                                            mutationDefinition=mutationDefinition, 
+                                                            ambiguousMode=ambiguousMode, 
+                                                            frequency=frequency, 
+                                                            combine=combine, nproc=nproc) 
+            # binding current clone_observedMutations_db to one big data frame:
+            if (first_clone == TRUE) {
+                observedMutations_db <- clone_observedMutations_db
+                first_clone <- FALSE
+            } else {
+                observedMutations_db <- rbind(observedMutations_db,clone_observedMutations_db)
+            }
+        } # end of for loop
+    }
+    return(observedMutations_db)
+} 
 
 
 #' Count the number of observed mutations in a sequence.
@@ -2520,85 +3170,85 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
 
 #### Expected frequencies calculating functions ####
 
-#' Calculate expected mutation frequencies
-#'
-#' \code{expectedMutations} calculates the expected mutation frequencies for each 
-#' sequence in the input \code{data.frame}.
-#'
-#' @param    db                  \code{data.frame} containing sequence data.
-#' @param    sequenceColumn      \code{character} name of the column containing input 
-#'                               sequences.
-#' @param    germlineColumn      \code{character} name of the column containing 
-#'                               the germline or reference sequence.
-#' @param    targetingModel      \link{TargetingModel} object. Default is \link{HH_S5F}.
-#' @param    regionDefinition    \link{RegionDefinition} object defining the regions
-#'                               and boundaries of the Ig sequences.
-#' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
-#'                               and silent mutation criteria. If \code{NULL} then 
-#'                               replacement and silent are determined by exact 
-#'                               amino acid identity.
-#' @param    nproc               \code{numeric} number of cores to distribute the operation
-#'                               over. If the cluster has already been set the call function with 
-#'                               \code{nproc} = 0 to not reset or reinitialize. Default is 
-#'                               \code{nproc} = 1.
-#' 
-#' @return   A modified \code{db} \code{data.frame} with expected mutation frequencies 
-#'           for each region defined in \code{regionDefinition}.
-#'          
-#'           The columns names are dynamically created based on the regions in  
-#'           \code{regionDefinition}. For example, when using the \link{IMGT_V}
-#'           definition, which defines positions for CDR and FWR, the following columns are
-#'           added:  
-#'           \itemize{
-#'             \item  \code{mu_expected_cdr_r}:  number of replacement mutations in CDR1 and 
-#'                                            CDR2 of the V-segment.
-#'             \item  \code{mu_expected_cdr_s}:  number of silent mutations in CDR1 and CDR2 
-#'                                            of the V-segment.
-#'             \item  \code{mu_expected_fwr_r}:  number of replacement mutations in FWR1, 
-#'                                            FWR2 and FWR3 of the V-segment.
-#'             \item  \code{mu_expected_fwr_s}:  number of silent mutations in FWR1, FWR2 and
-#'                                            FWR3 of the V-segment.
-#'           }
-#'           
-#' @details
-#' Only the part of the sequences defined in \code{regionDefinition} are analyzed. 
-#' For example, when using the \link{IMGT_V} definition, mutations in
-#' positions beyond 312 will be ignored.
-#' 
-#' @seealso  
-#' \link{calcExpectedMutations} is called by this function to calculate the expected 
-#' mutation frequencies. See \link{observedMutations} for getting observed 
-#' mutation counts. See \link{IMGT_SCHEMES} for a set of predefined 
-#' \link{RegionDefinition} objects.
-#' 
-#' @examples
-#' # Subset example data
-#' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
-#'
-#' # Calculate expected mutations over V region
-#' db_exp <- expectedMutations(db,
-#'                             sequenceColumn="sequence_alignment",
-#'                             germlineColumn="germline_alignment_d_mask",
-#'                             regionDefinition=IMGT_V,
-#'                             nproc=1)
-#' 
-#' # Calculate hydropathy expected mutations over V region
-#' db_exp <- expectedMutations(db,
-#'                            sequenceColumn="sequence_alignment",
-#'                            germlineColumn="germline_alignment_d_mask",
-#'                            regionDefinition=IMGT_V,
-#'                            mutationDefinition=HYDROPATHY_MUTATIONS,
-#'                            nproc=1)
-#'
-#' @export
-expectedMutations <- function(db, 
-                              sequenceColumn="sequence_alignment",
-                              germlineColumn="germline_alignment_d_mask",
-                              targetingModel=HH_S5F,
-                              regionDefinition=NULL,
-                              mutationDefinition=NULL,
-                              nproc=1) {
+# Calculate expected mutation frequencies
+#
+# \code{expectedMutationsL} calculates the expected mutation frequencies for each 
+# sequence in the input \code{data.frame}.
+#
+# @param    db                  \code{data.frame} containing sequence data.
+# @param    sequenceColumn      \code{character} name of the column containing input 
+#                               sequences.
+# @param    germlineColumn      \code{character} name of the column containing 
+#                               the germline or reference sequence.
+# @param    targetingModel      \link{TargetingModel} object. Default is \link{HH_S5F}.
+# @param    regionDefinition    \link{RegionDefinition} object defining the regions
+#                               and boundaries of the Ig sequences.
+# @param    mutationDefinition  \link{MutationDefinition} object defining replacement
+#                               and silent mutation criteria. If \code{NULL} then 
+#                               replacement and silent are determined by exact 
+#                               amino acid identity.
+# @param    nproc               \code{numeric} number of cores to distribute the operation
+#                               over. If the cluster has already been set the call function with 
+#                               \code{nproc} = 0 to not reset or reinitialize. Default is 
+#                               \code{nproc} = 1.
+# 
+# @return   A modified \code{db} \code{data.frame} with expected mutation frequencies 
+#           for each region defined in \code{regionDefinition}.
+#          
+#           The columns names are dynamically created based on the regions in  
+#           \code{regionDefinition}. For example, when using the \link{IMGT_V}
+#           definition, which defines positions for CDR and FWR, the following columns are
+#           added:  
+#           \itemize{
+#             \item  \code{mu_expected_cdr_r}:  number of replacement mutations in CDR1 and 
+#                                            CDR2 of the V-segment.
+#             \item  \code{mu_expected_cdr_s}:  number of silent mutations in CDR1 and CDR2 
+#                                            of the V-segment.
+#             \item  \code{mu_expected_fwr_r}:  number of replacement mutations in FWR1, 
+#                                            FWR2 and FWR3 of the V-segment.
+#             \item  \code{mu_expected_fwr_s}:  number of silent mutations in FWR1, FWR2 and
+#                                            FWR3 of the V-segment.
+#           }
+#           
+# @details
+# Only the part of the sequences defined in \code{regionDefinition} are analyzed. 
+# For example, when using the \link{IMGT_V} definition, mutations in
+# positions beyond 312 will be ignored.
+# 
+# @seealso  
+# \link{calcExpectedMutationsL} is called by this function to calculate the expected 
+# mutation frequencies. See \link{observedMutations} for getting observed 
+# mutation counts. See \link{IMGT_SCHEMES} for a set of predefined 
+# \link{RegionDefinition} objects.
+# 
+# @examples
+# # Subset example data
+# data(ExampleDb, package="alakazam")
+# db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
+#
+# # Calculate expected mutations over V region
+# db_exp <- expectedMutationsL(db,
+#                              sequenceColumn="sequence_alignment",
+#                              germlineColumn="germline_alignment_d_mask",
+#                              regionDefinition=IMGT_V,
+#                              nproc=1)
+# 
+# # Calculate hydropathy expected mutations over V region
+# db_exp <- expectedMutationsL(db,
+#                             sequenceColumn="sequence_alignment",
+#                             germlineColumn="germline_alignment_d_mask",
+#                             regionDefinition=IMGT_V,
+#                             mutationDefinition=HYDROPATHY_MUTATIONS,
+#                             nproc=1)
+#
+# @export
+expectedMutationsL <- function(db, 
+                               sequenceColumn="sequence_alignment",
+                               germlineColumn="germline_alignment_d_mask",
+                               targetingModel=HH_S5F,
+                               regionDefinition=NULL,
+                               mutationDefinition=NULL,
+                               nproc=1) {
     # Hack for visibility of foreach index variable
     idx <- NULL
     
@@ -2710,6 +3360,177 @@ expectedMutations <- function(db,
     
 }
 
+#### Expected frequencies calculating functions ####
+
+#' Calculate expected mutation frequencies
+#'
+#' \code{expectedMutations} calculates the expected mutation frequencies for each 
+#' sequence in the input \code{data.frame}.
+#'
+#' @param    db                  \code{data.frame} containing sequence data.
+#' @param    sequenceColumn      \code{character} name of the column containing input 
+#'                               sequences.
+#' @param    germlineColumn      \code{character} name of the column containing 
+#'                               the germline or reference sequence.
+#' @param    targetingModel      \link{TargetingModel} object. Default is \link{HH_S5F}.
+#' @param    regionDefinition    \link{RegionDefinition} object defining the regions
+#'                               and boundaries of the Ig sequences.
+#' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
+#'                               and silent mutation criteria. If \code{NULL} then 
+#'                               replacement and silent are determined by exact 
+#'                               amino acid identity.
+#' @param    nproc               \code{numeric} number of cores to distribute the operation
+#'                               over. If the cluster has already been set the call function with 
+#'                               \code{nproc} = 0 to not reset or reinitialize. Default is 
+#'                               \code{nproc} = 1.
+#' @param    refOption           can be one of \code{"germline"} or \code{"parent"}.
+#'                               Indicates the reference sequence source upon which
+#'                               the observed mutations are calculated.
+#' @param    cloneColumn         clone id column name in \code{db}
+#' @param    juncLengthColumn    junction length column name in \code{db}
+#' @param    parentColumn        parent sequence column name in \code{db}
+#' 
+#' @return   A modified \code{db} \code{data.frame} with expected mutation frequencies 
+#'           for each region defined in \code{regionDefinition}.
+#'          
+#'           The columns names are dynamically created based on the regions in  
+#'           \code{regionDefinition}. For example, when using the \link{IMGT_V}
+#'           definition, which defines positions for CDR and FWR, the following columns are
+#'           added:  
+#'           \itemize{
+#'             \item  \code{mu_expected_cdr_r}:  number of replacement mutations in CDR1 and 
+#'                                            CDR2 of the V-segment.
+#'             \item  \code{mu_expected_cdr_s}:  number of silent mutations in CDR1 and CDR2 
+#'                                            of the V-segment.
+#'             \item  \code{mu_expected_fwr_r}:  number of replacement mutations in FWR1, 
+#'                                            FWR2 and FWR3 of the V-segment.
+#'             \item  \code{mu_expected_fwr_s}:  number of silent mutations in FWR1, FWR2 and
+#'                                            FWR3 of the V-segment.
+#'           }
+#'           
+#' @details
+#' Only the part of the sequences defined in \code{regionDefinition} are analyzed. 
+#' For example, when using the \link{IMGT_V} definition, mutations in
+#' positions beyond 312 will be ignored.
+#' 
+#' @seealso  
+#' \link{calcExpectedMutations} is called by this function to calculate the expected 
+#' mutation frequencies. See \link{observedMutations} for getting observed 
+#' mutation counts. See \link{IMGT_SCHEMES} for a set of predefined 
+#' \link{RegionDefinition} objects.
+#' 
+#' @examples
+#' # Subset example data
+#' data(ExampleDb, package="alakazam")
+#' db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
+#'
+#' # Calculate expected mutations over V region
+#' db_exp <- expectedMutations(db,
+#'                             sequenceColumn="sequence_alignment",
+#'                             germlineColumn="germline_alignment_d_mask",
+#'                             regionDefinition=IMGT_V,
+#'                             nproc=1)
+#' 
+#' # Calculate hydropathy expected mutations over V region
+#' db_exp <- expectedMutations(db,
+#'                            sequenceColumn="sequence_alignment",
+#'                            germlineColumn="germline_alignment_d_mask",
+#'                            regionDefinition=IMGT_V,
+#'                            mutationDefinition=HYDROPATHY_MUTATIONS,
+#'                            nproc=1)
+#'
+#' @export
+#'
+expectedMutations <- function(db,sequenceColumn = "sequence_alignment", 
+                               germlineColumn = "germline_alignment", 
+                               targetingModel = HH_S5F, 
+                               regionDefinition=NULL, mutationDefinition = NULL, 
+                               nproc = 1,
+                               refOption = "germline", 
+                               cloneColumn = "CLONE", 
+                               #juncLengthColumn = "junction_length",
+                               juncLengthColumn = "JUNCTION_LENGTH",
+                               parentColumn = "PARENT_SEQUENCE") {
+    
+    # we will split this function into 3 cases:
+    # 1. RegionDefinition is NULL.
+    # In this case original expectedMutationsL can be used.
+    # This case is different from case 2, as regioDefinition@name cannot be extracted
+    # from RegionDefintion
+    # 2. Region definition does not include FWR3 and CDR4 (meaning it is
+    # different than IMGT_ALL and IMGT_ALL_REGIONS).
+    # In this case original expectedMutationsL can be used.
+    # 3. Region definition includes FWR3 and CDR4 (meaning it is 
+    # IMGT_ALL or IMGT_ALL_REGIONS).
+    # In this case - need to calculate expectedMutations per clone
+    # as regionDefinition is different per clone.
+    
+    # setting the reference column:
+    if (refOption == "germline") {
+        refColumn <- germlineColumn
+    }
+    else if (refOption == "parent") {
+        refColumn <- parentColumn
+    }
+    else {
+        stop(deparse(substitute(refOption)), " is not a valid refOption")
+    }
+    
+    
+    # Case 1:
+    if (is.null(regionDefinition))  {
+        expectedMutations_db <- expectedMutationsL(db=db, sequenceColumn = sequenceColumn, 
+                                                   germlineColumn = refColumn, 
+                                                   targetingModel = targetingModel, 
+                                                   mutationDefinition = mutationDefinition, 
+                                                   nproc = nproc)
+    }
+    
+    # Case 2:
+    else if ((regionDefinition@name != "IMGT_ALL_REGIONS") & (regionDefinition@name != "IMGT_ALL")) {
+        expectedMutations_db <- expectedMutationsL(db=db, sequenceColumn = sequenceColumn, 
+                                                   germlineColumn = refColumn, 
+                                                   targetingModel = targetingModel, 
+                                                   regionDefinition = regionDefinition, 
+                                                   mutationDefinition = mutationDefinition, 
+                                                   nproc = nproc)
+    }
+    
+    # Case 3:
+    else if ((regionDefinition@name == "IMGT_ALL_REGIONS") | (regionDefinition@name == "IMGT_ALL")) {
+        
+        # Since each clone needs a different regionDefinition - then this function will loop on all clones in db,
+        # and for each clone it will run the function expectedMutationsL with its own regionDefinition.
+        # before looping: setting a list of all clones in db:  
+        clones_in_db <- t(unique(db[,c(cloneColumn)]))
+        first_clone <- TRUE
+        for (cur_clone in clones_in_db) {
+            # subseting the db to lines for specific clone
+            cur_clone_db <- db[db[,cloneColumn] == cur_clone,]
+            # setting the regionDefinition for the specific clone:
+            junc_len <- nchar(cur_clone_db[1,sequenceColumn])
+            cur_clone_reg <- makeRegion(juncLength = cur_clone_db[1,juncLengthColumn], 
+                                        sequenceImgt =   cur_clone_db[1,sequenceColumn], 
+                                        regionDefinition=regionDefinition)
+            
+            clone_expectedMutations_db <- expectedMutationsL(db=cur_clone_db, sequenceColumn = sequenceColumn, 
+                                                             germlineColumn=refColumn, 
+                                                             targetingModel = targetingModel, 
+                                                             regionDefinition=cur_clone_reg, 
+                                                             mutationDefinition=mutationDefinition, 
+                                                             nproc=nproc) 
+            # binding current clone_expectedMutations_db to one big data frame:
+            if (first_clone == TRUE) {
+                expectedMutations_db <- clone_expectedMutations_db
+                first_clone <- FALSE
+            }
+            else {
+                expectedMutations_db <- rbind(expectedMutations_db,clone_expectedMutations_db)
+            }
+        } # end of for loop
+    }
+    return(expectedMutations_db)
+} 
 
 #' Calculate expected mutation frequencies of a sequence
 #'
@@ -3252,5 +4073,4 @@ checkAmbiguousExist <- function(seqs) {
     bool <- stri_detect_regex(str=seqs, pattern="[^atgcnATGCN\\-\\.]")
     return(bool)
 }
-
 
