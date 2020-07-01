@@ -1,6 +1,6 @@
 Package: shazam
 Type: Package
-Version: 1.0.0.9991
+Version: 1.0.0.999
 Date: 2020-07-01
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
