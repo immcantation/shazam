@@ -50,7 +50,7 @@ makeClonesList <-  function(db, clone_col="CLONE") {
 #   - Clone size (after collapsing relevant lines)
 makeChaneoCloneCurClone <- function(db, cur_clone_num, id="sequence_id",  
                                     seq="SEQUENCE_IMGT", germ="GERMLINE_IMGT",  
-                                    vcall="v_call", jcall="j_call",  
+                                    v_call="v_call", j_call="j_call",  
                                     junc_len="JUNCTION_LENGTH", clone="clone_id", 
                                     mask_char="N", max_mask=0,pad_end=FALSE,text_fields=NULL, 
                                     num_fields=NULL, seq_fields=NULL,
@@ -60,7 +60,7 @@ makeChaneoCloneCurClone <- function(db, cur_clone_num, id="sequence_id",
     # subseting the db to lines for specific clone
     cur_clone_db <- db[db[,clone] == cur_clone_num,]
     curCloneObj <- makeChangeoClone(data=cur_clone_db, id=id, seq=seq, germ=germ, 
-                                      vcall=vcall, jcall=jcall, junc_len=junc_len, 
+                                      v_call=v_call, j_call=j_call, junc_len=junc_len, 
                                       clone=clone, mask_char=mask_char, 
                                       max_mask=max_mask, pad_end=pad_end, 
                                       text_fields=text_fields, 
