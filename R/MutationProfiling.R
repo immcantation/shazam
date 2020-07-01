@@ -2032,10 +2032,10 @@ observedMutationsL <- function(db,
 #' @details
 #' Mutation counts are determined by comparing the input sequences (in the column specified 
 #' by \code{sequenceColumn}) to a reference sequence. 
-#' Reference sequence depends onr \cod{refOption}:
-#' If \cod{refOption} == "germline" - reference sequence is germline sequence (in the column specified by 
+#' Reference sequence depends on \code{refOption}:
+#' If \code{refOption} == "germline" - reference sequence is germline sequence (in the column specified by 
 #' \code{germlineColumn}). 
-#' If \cod{refOption} == "parent" - reference sequence is parent sequence (in the column specified by 
+#' If \code{refOption} == "parent" - reference sequence is parent sequence (in the column specified by 
 #' \code{parentColumn}). This option assumes that the \code{db} includes linegae information,
 #' such that each sequence has its parent sequence information (see more details in 
 #' \link{makeGraphDf})
