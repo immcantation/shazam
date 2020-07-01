@@ -597,7 +597,6 @@ test_that("calcBaseline and groupBaseline, AIRR migration", {
 })
 
 test_that("calcBaseline Extended regions", {
-    library("parallel")
     load(file.path("..", "data-tests", "ExampleDb.rda"))
     db_clone_3146 <- subset(ExampleDb, CLONE %in% c("3146"))
     clone_3146_colapsed <- collapseClones(db_clone_3146, cloneColumn = "CLONE", 
