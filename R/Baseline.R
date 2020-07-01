@@ -2241,7 +2241,7 @@ calcBaseline <- function(db,
                          mutationDefinition = NULL,
                          calcStats = FALSE, 
                          nproc = 1,
-                         # following are relevant only when regioDefinition includes CDR3 and FWR4:
+                         # following are relevant only when regionDefinition includes CDR3 and FWR4:
                          cloneColumn = NULL,
                          juncLenCol = NULL) {
                          
@@ -2276,7 +2276,7 @@ calcBaseline <- function(db,
         clones_list <- makeClonesList(db=db, clone_col=cloneColumn)
         
         # bellow 2 lines are for running faster in parallel cores:
-        cl <- makeCluster(detectCores(), type='PSOCK')
+        cl <- parallel::makeCluster(nproc, type='PSOCK')
         registerDoParallel(cl)
         clones_baseline_list <- sapply(X=clones_list, FUN=calcBaselineOneClone, db=db, 
                                        juncLenCol=juncLenCol,
