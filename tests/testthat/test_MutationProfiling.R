@@ -2639,11 +2639,11 @@ test_that("observedMutations, parents as ref", {
     library("alakazam")
     library("igraph")
     load(file.path("..", "data-tests", "ExampleDb.rda")) 
-    #dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
-    dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
+    dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
+    #dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
     clone_3177_obj <- makeChaneoCloneCurClone(db=ExampleDb, cur_clone_num=3177, seq="SEQUENCE_IMGT", 
                                               germ="GERMLINE_IMGT_D_MASK", clone="CLONE", id="SEQUENCE_ID",
-                                              vcall="V_CALL", jcall="J_CALL", junc_len="JUNCTION_LENGTH") 
+                                              v_call="V_CALL", j_call="J_CALL", junc_len="JUNCTION_LENGTH") 
     print(names(clone_3177_obj))
     if (file.access(dnapars_exec, mode=1) == -1) {
         expect_error(
@@ -2799,74 +2799,78 @@ test_that("expectedMutations, extended with regard to germline", {
 })
 
 test_that("expectedMutations, extended with regard to parent", {
-    library("alakazam")
-    library("igraph")
     #dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
-    dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
-    load(file.path("..", "data-tests", "ExampleDb.rda")) 
-    clone_3163_db <- subset(ExampleDb,CLONE == 3163) 
-    clone_3163_obj <- makeChangeoClone(clone_3163_db, seq="SEQUENCE_IMGT",
-                                       id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
-                                       germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
-                                       vcall = "V_CALL", jcall = "J_CALL")
-    clone_3163_graph <- buildPhylipLineage(clone_3163_obj, dnapars_exec, rm_temp = TRUE)  
-    clone_3163_GraphDf <- makeGraphDf(clone_3163_graph, clone_3163_obj)
-    
-    clone_3100_db <- subset(ExampleDb,CLONE == 3100) 
-    clone_3100_obj <- makeChangeoClone(clone_3100_db, seq="SEQUENCE_IMGT",
-                                       id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
-                                       germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
-                                       vcall = "V_CALL", jcall = "J_CALL")
-    clone_3100_graph <- buildPhylipLineage(clone_3100_obj, dnapars_exec, rm_temp = TRUE)  
-    clone_3100_GraphDf <- makeGraphDf(clone_3100_graph, clone_3100_obj)
-    
-    clone_3115_db <- subset(ExampleDb,CLONE == 3115) 
-    clone_3115_obj <- makeChangeoClone(clone_3115_db, seq="SEQUENCE_IMGT",
-                                       id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
-                                       germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
-                                       vcall = "V_CALL", jcall = "J_CALL")
-    clone_3115_graph <- buildPhylipLineage(clone_3115_obj, dnapars_exec, rm_temp = TRUE)  
-    clone_3115_GraphDf <- makeGraphDf(clone_3115_graph, clone_3115_obj)
-    
-    GraphDf_all <- rbind(clone_3163_GraphDf,clone_3100_GraphDf,clone_3115_GraphDf)
-    
-    db_exp_ALL_REGIONS <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
-                                            cloneColumn="clone", 
-                                            germlineColumn="germline_imgt",
-                                            juncLengthColumn="junction_length",
-                                            refOption = "parent", parentColumn = "parent_sequence",  
-                                            regionDefinition=IMGT_ALL_REGIONS)
-    db_exp_ALL_REGIONS_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
-                                            cloneColumn="clone", 
-                                            germlineColumn="parent_sequence",
-                                            juncLengthColumn="junction_length",
-                                            regionDefinition=IMGT_ALL_REGIONS)
-    db_exp_ALL <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
-                                    cloneColumn="clone", 
-                                    germlineColumn="germline_imgt",
-                                    juncLengthColumn="junction_length",
-                                    refOption = "parent", parentColumn = "parent_sequence",  
-                                    regionDefinition=IMGT_ALL)
-    db_exp_ALL_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
-                                      cloneColumn="clone", 
-                                      germlineColumn="parent_sequence",
-                                      juncLengthColumn="junction_length",
-                                      regionDefinition=IMGT_ALL)
-    db_exp_V_REGIONS <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+    #dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
+    dnapars_exec <- Sys.which('dnapars')
+    # If dnapars found, run, else, skip
+    if (dnapars_exec != "") {
+        load(file.path("..", "data-tests", "ExampleDb.rda")) 
+        clone_3163_db <- subset(ExampleDb,CLONE == 3163) 
+        clone_3163_obj <- makeChangeoClone(clone_3163_db, seq="SEQUENCE_IMGT",
+                                           id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
+                                           germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
+                                           v_call = "V_CALL", j_call = "J_CALL")
+        clone_3163_graph <- buildPhylipLineage(clone_3163_obj, dnapars_exec, rm_temp = TRUE)  
+        clone_3163_GraphDf <- makeGraphDf(clone_3163_graph, clone_3163_obj)
+        
+        clone_3100_db <- subset(ExampleDb,CLONE == 3100) 
+        clone_3100_obj <- makeChangeoClone(clone_3100_db, seq="SEQUENCE_IMGT",
+                                           id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
+                                           germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
+                                           v_call = "V_CALL", j_call = "J_CALL")
+        clone_3100_graph <- buildPhylipLineage(clone_3100_obj, dnapars_exec, rm_temp = TRUE)  
+        clone_3100_GraphDf <- makeGraphDf(clone_3100_graph, clone_3100_obj)
+        
+        clone_3115_db <- subset(ExampleDb,CLONE == 3115) 
+        clone_3115_obj <- makeChangeoClone(clone_3115_db, seq="SEQUENCE_IMGT",
+                                           id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
+                                           germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
+                                           v_call = "V_CALL", j_call = "J_CALL")
+        clone_3115_graph <- buildPhylipLineage(clone_3115_obj, dnapars_exec, rm_temp = TRUE)  
+        clone_3115_GraphDf <- makeGraphDf(clone_3115_graph, clone_3115_obj)
+        
+        GraphDf_all <- rbind(clone_3163_GraphDf,clone_3100_GraphDf,clone_3115_GraphDf)
+        
+        db_exp_ALL_REGIONS <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                                cloneColumn="clone", 
+                                                germlineColumn="germline_imgt",
+                                                juncLengthColumn="junction_length",
+                                                refOption = "parent", parentColumn = "parent_sequence",  
+                                                regionDefinition=IMGT_ALL_REGIONS)
+        db_exp_ALL_REGIONS_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                                  cloneColumn="clone", 
+                                                  germlineColumn="parent_sequence",
+                                                  juncLengthColumn="junction_length",
+                                                  regionDefinition=IMGT_ALL_REGIONS)
+        db_exp_ALL <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                        cloneColumn="clone", 
+                                        germlineColumn="germline_imgt",
+                                        juncLengthColumn="junction_length",
+                                        refOption = "parent", parentColumn = "parent_sequence",  
+                                        regionDefinition=IMGT_ALL)
+        db_exp_ALL_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
                                           cloneColumn="clone", 
-                                          germlineColumn="germline_imgt",
+                                          germlineColumn="parent_sequence",
                                           juncLengthColumn="junction_length",
-                                          refOption = "parent", parentColumn = "parent_sequence",  
-                                          regionDefinition=IMGT_V_BY_REGIONS)
-    db_exp_V_REGIONS_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
-                                            germlineColumn="parent_sequence",
-                                            regionDefinition=IMGT_V_BY_REGIONS)
-   # checking that expected mutations with regard to parent seuqnece,
-   # is the same as expected mutations with regard to germline when germline 
-   # sequence column was set as parent sequence column. 
-   expect_equal(db_exp_ALL_REGIONS,db_exp_ALL_REGIONS_g)
-   expect_equal(db_exp_ALL,db_exp_ALL_g) 
-   expect_equal(db_exp_V_REGIONS,db_exp_V_REGIONS_g) 
+                                          regionDefinition=IMGT_ALL)
+        db_exp_V_REGIONS <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                              cloneColumn="clone", 
+                                              germlineColumn="germline_imgt",
+                                              juncLengthColumn="junction_length",
+                                              refOption = "parent", parentColumn = "parent_sequence",  
+                                              regionDefinition=IMGT_V_BY_REGIONS)
+        db_exp_V_REGIONS_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
+                                                germlineColumn="parent_sequence",
+                                                regionDefinition=IMGT_V_BY_REGIONS)
+        # checking that expected mutations with regard to parent seuqnece,
+        # is the same as expected mutations with regard to germline when germline 
+        # sequence column was set as parent sequence column. 
+        expect_equal(db_exp_ALL_REGIONS,db_exp_ALL_REGIONS_g)
+        expect_equal(db_exp_ALL,db_exp_ALL_g) 
+        expect_equal(db_exp_V_REGIONS,db_exp_V_REGIONS_g)
+    } else {
+        message("dnapars not found, skipping test: expectedMutations, extended with regard to parent")
+    }
 })
 
 test_that("collapseClones, extended regions", {

@@ -7,11 +7,9 @@ test_that("makeClonesList", {
 })
 
 test_that("makeChaneoCloneCurClone", {
-    library("alakazam")
-    library("igraph")
-    data("ExampleDb")
+    data("ExampleDb", package = "alakazam")
     clone_3128_db <- subset(ExampleDb, clone_id == 3128)
-    clone_3128_changeO<-makeChangeoClone(clone_3128_db, seq="sequence_alignment", germ="germline_alignment")
+    clone_3128_changeO <- makeChangeoClone(clone_3128_db, seq="sequence_alignment", germ="germline_alignment")
     clone_3128_changeO_direct <- makeChaneoCloneCurClone(ExampleDb, cur_clone_num = 3128, 
                                                          germ="germline_alignment", 
                                                          junc_len = "junction_length",
@@ -38,16 +36,15 @@ test_that("makeChaneoCloneCurClone", {
 })
 
 test_that("makeGraphCurClone", {
-    library("igraph")
-    data("ExampleDb")
+    data("ExampleDb", package="alakazam")
     clone_3141_obj <- makeChaneoCloneCurClone(db=ExampleDb, cur_clone_num=3141, 
                                               seq="sequence_alignment", 
                                               junc_len = "junction_length",
                                               germ="germline_alignment") 
     expect_equal(dim(clone_3141_obj@data)[1],17)
     expect_equal(sum(clone_3141_obj@data$collapse_count),44)
-    #dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
-    dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
+    dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
+    # dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
     if (file.access(dnapars_exec, mode=1) == -1) {
         expect_error(
             clone_3141_graph <- makeGraphCurClone(clone_3141_obj,dnapars_exec),
@@ -78,10 +75,9 @@ test_that("makeGraphCurClone", {
 })
 
 test_that("makeGraphDf", {
-    library("igraph")
-    data("ExampleDb")
-    #dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
-    dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
+    data("ExampleDb", package="alakazam")
+    dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
+    #dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
     clone_3177_obj <- makeChaneoCloneCurClone(db=ExampleDb, cur_clone_num=3177, 
                                               seq="sequence_alignment", 
                                               junc_len = "junction_length",
@@ -103,7 +99,7 @@ test_that("makeGraphDf", {
 })
 
 test_that("makeRegion", {
-    data("ExampleDb")
+    data("ExampleDb", package="alakazam")
     junction_length_10 <- ExampleDb[10,"junction_length"]
     sequence_imgt_10 <- ExampleDb[10,"sequence_alignment"]
     seq_10_reg_def <- makeRegion(juncLength = junction_length_10, 
