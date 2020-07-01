@@ -920,7 +920,6 @@ collapseClonesL <- function(db,
 #'                          method="mostCommon", expandedDb=TRUE)
 #' 
 #' @export
-#' 
 collapseClones <- function(db, cloneColumn = "clone_id", 
                            sequenceColumn = "sequence_alignment",
                            germlineColumn = "germline_alignment_d_mask",
