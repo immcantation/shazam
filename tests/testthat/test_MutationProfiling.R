@@ -2641,7 +2641,7 @@ test_that("observedMutations, parents as ref", {
     load(file.path("..", "data-tests", "ExampleDb.rda")) 
     dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
     #dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
-    clone_3177_obj <- makeChaneoCloneCurClone(db=ExampleDb, cur_clone_num=3177, seq="SEQUENCE_IMGT", 
+    clone_3177_obj <- makeChangeoCloneCurClone(db=ExampleDb, cur_clone_num=3177, seq="SEQUENCE_IMGT", 
                                               germ="GERMLINE_IMGT_D_MASK", clone="CLONE", id="SEQUENCE_ID",
                                               v_call="V_CALL", j_call="J_CALL", junc_len="JUNCTION_LENGTH") 
     print(names(clone_3177_obj))

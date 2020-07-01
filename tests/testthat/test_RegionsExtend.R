@@ -6,11 +6,11 @@ test_that("makeClonesList", {
                  as.list(c("30","115","125","467")))
 })
 
-test_that("makeChaneoCloneCurClone", {
+test_that("makeChangeoCloneCurClone", {
     data("ExampleDb", package = "alakazam")
     clone_3128_db <- subset(ExampleDb, clone_id == 3128)
     clone_3128_changeO <- makeChangeoClone(clone_3128_db, seq="sequence_alignment", germ="germline_alignment")
-    clone_3128_changeO_direct <- makeChaneoCloneCurClone(ExampleDb, cur_clone_num = 3128, 
+    clone_3128_changeO_direct <- makeChangeoCloneCurClone(ExampleDb, cur_clone_num = 3128, 
                                                          germ="germline_alignment", 
                                                          junc_len = "junction_length",
                                                          seq="sequence_alignment")
@@ -37,7 +37,7 @@ test_that("makeChaneoCloneCurClone", {
 
 test_that("makeGraphCurClone", {
     data("ExampleDb", package="alakazam")
-    clone_3141_obj <- makeChaneoCloneCurClone(db=ExampleDb, cur_clone_num=3141, 
+    clone_3141_obj <- makeChangeoCloneCurClone(db=ExampleDb, cur_clone_num=3141, 
                                               seq="sequence_alignment", 
                                               junc_len = "junction_length",
                                               germ="germline_alignment") 
@@ -57,7 +57,7 @@ test_that("makeGraphCurClone", {
         expect_equal(igraph::ecount(clone_3141_graph),17)
     }
     
-    clone_3184_obj <- makeChaneoCloneCurClone(db=ExampleDb, cur_clone_num=3184, 
+    clone_3184_obj <- makeChangeoCloneCurClone(db=ExampleDb, cur_clone_num=3184, 
                                               seq="sequence_alignment", 
                                               junc_len = "junction_length",
                                               germ="germline_alignment") 
@@ -78,7 +78,7 @@ test_that("makeGraphDf", {
     data("ExampleDb", package="alakazam")
     dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
     #dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
-    clone_3177_obj <- makeChaneoCloneCurClone(db=ExampleDb, cur_clone_num=3177, 
+    clone_3177_obj <- makeChangeoCloneCurClone(db=ExampleDb, cur_clone_num=3177, 
                                               seq="sequence_alignment", 
                                               junc_len = "junction_length",
                                               germ="germline_alignment") 

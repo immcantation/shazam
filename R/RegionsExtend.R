@@ -30,9 +30,9 @@ makeClonesList <-  function(db, clone_col="CLONE") {
 # - germ: name of the column containing germline DNA sequences. 
 #         All entries in this column should be identical for any given clone, 
 #         and they must be multiple aligned with the data in the seq column.
-# - vcall: name of the column containing V-segment allele assignments. 
+# - v_call: name of the column containing V-segment allele assignments. 
 #          All entries in this column should be identical to the gene level.
-# - jcall: name of the column containing J-segment allele assignments. 
+# - j_call: name of the column containing J-segment allele assignments. 
 #          All entries in this column should be identical to the gene level.
 # - junc_len: name of the column containing the length of the junction as a numeric value. 
 #             All entries in this column should be identical for any given clone.
@@ -48,7 +48,7 @@ makeClonesList <-  function(db, clone_col="CLONE") {
 # A ChangeoClone object of the specific clone_num
 #   - ChangeoClone object of the specific clone_num 
 #   - Clone size (after collapsing relevant lines)
-makeChaneoCloneCurClone <- function(db, cur_clone_num, id="sequence_id",  
+makeChangeoCloneCurClone <- function(db, cur_clone_num, id="sequence_id",  
                                     seq="SEQUENCE_IMGT", germ="GERMLINE_IMGT",  
                                     v_call="v_call", j_call="j_call",  
                                     junc_len="JUNCTION_LENGTH", clone="clone_id", 
@@ -104,7 +104,7 @@ makeGraphCurClone <- function(curCloneObj,dnapars_exec,seq_id_col="sequence_id")
 #' Additional \strong{columns} are added for parent_sequence and parent 
 #' (which is the parent sequence id).
 #' 
-#' Additional \strong{rows} are added for infered sequences and the germline of the clone graph.
+#' Additional \strong{rows} are added for inferred sequences and the germline of the clone graph.
 #' 
 #' \link{makeGraphDf} also renames sequence_id content according to the following 
 #' (assume clone number is 34):  
@@ -124,6 +124,7 @@ makeGraphCurClone <- function(curCloneObj,dnapars_exec,seq_id_col="sequence_id")
 #' @return A \code{ChangeoClone} object with additional columns (parent_sequence and parent)
 #'         and additional rows (for germline and inferred sequences)
 #' @examples 
+#' \dontrun{
 #' library("igraph")
 #' library("dplyr")
 #' # Load and subset example data:
@@ -133,7 +134,7 @@ makeGraphCurClone <- function(curCloneObj,dnapars_exec,seq_id_col="sequence_id")
 #' dnapars_exec <- "~/apps/phylip-3.69/dnapars"
 #' clone_3170_graph <- buildPhylipLineage(clone_3170_obj, dnapars_exec, rm_temp = TRUE)  
 #' clone_3170_GraphDf <- makeGraphDf(clone_3170_graph, clone_3170_obj)
-#' 
+#' }
 #' @export
 makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq="sequence") {
     # extracting the cur_clone_num from the inputs to function:
@@ -289,9 +290,9 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
 #' @param   germ        name of the column containing germline DNA sequences. 
 #'                       All entries in this column should be identical for any given clone, 
 #'                       and they must be multiple aligned with the data in the seq column.
-#' @param   vcall        name of the column containing V-segment allele assignments. 
+#' @param   v_call        name of the column containing V-segment allele assignments. 
 #'                       All entries in this column should be identical to the gene level.
-#' @param   jcall        name of the column containing J-segment allele assignments. 
+#' @param   j_call        name of the column containing J-segment allele assignments. 
 #'                       All entries in this column should be identical to the gene level.
 #' @param   junc_len     name of the column containing the length of the junction as a numeric value. 
 #'                       All entries in this column should be identical for any given clone.
@@ -314,16 +315,15 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
 #' plotCloneLineageTree(db=ExampleDb, curClone=3139, seq="sequence_alignment",
 #'                      id="sequence_id", germ="germline_alignment", dnapars_exec = dnapars_exec)
 #' @export   
-#'
-plotCloneLineageTree <- function(db, curClone=NULL, id="sequenc_id", 
+plotCloneLineageTree <- function(db, curClone=NULL, id="sequence_id", 
                                  seq="SEQUENCE_IMGT", germ="GERMLINE_IMGT", 
-                                 vcall="v_call", jcall="j_call", 
+                                 v_call="v_call", j_call="j_call", 
                                  junc_len="JUNCTION_LENGTH", clone="clone_id", 
                                  mask_char="N", max_mask=0, pad_end=FALSE, 
                                  dnapars_exec) {
-    curCloneObj <- makeChaneoCloneCurClone(db=db, cur_clone_num=curClone, id=id, 
-                                         seq=seq,germ=germ, vcall=vcall, 
-                                         jcall=jcall, junc_len=junc_len, 
+    curCloneObj <- makeChangeoCloneCurClone(db=db, cur_clone_num=curClone, id=id, 
+                                         seq=seq,germ=germ, v_call=v_call, 
+                                         j_call=j_call, junc_len=junc_len, 
                                          clone=clone, mask_char=mask_char, 
                                          max_mask=max_mask, pad_end=pad_end)
     curCloneGraph <- makeGraphCurClone(curCloneObj, dnapars_exec)
@@ -332,7 +332,7 @@ plotCloneLineageTree <- function(db, curClone=NULL, id="sequenc_id",
                                        ifelse(grepl("Inferred", 
                                                     V(curCloneGraph)$label), 
                                               "lightpink", "lightblue"))
-    #making the graph vertices show the simple sequenc_id
+    #making the graph vertices show the simple sequence_id
     par(mar=c(0, 0, 0, 0) + 1)
     plot(curCloneGraph, layout=layout_as_tree, edge.arrow.mode=0, 
          vertex.frame.color="black", vertex.label.cex=0.8,
