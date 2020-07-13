@@ -73,8 +73,8 @@ https://doi.org/10.1093/bioinformatics/btv359).
 To cite the selection analysis methods, please use:
 
 Yaari G, Uduman M, Kleinstein S (2012). “Quantifying selection in high-throughput
-Immunoglobulin sequencing data sets.” _Nucleic acids research_, *40*(17), e134.
-doi: 10.1093/nar/gks457 (URL: https://doi.org/10.1093/nar/gks457).
+Immunoglobulin sequencing data sets.” _Nucleic acids research_, *40*(17), e134. doi:
+10.1093/nar/gks457 (URL: https://doi.org/10.1093/nar/gks457).
 
 To cite the HH_S5F model and the targeting model generation methods, please use:
 

@@ -32,7 +32,7 @@ subsample = NULL,
 progress = FALSE,
 cellIdColumn = NULL,
 locusColumn = NULL,
-only_heavy = TRUE,
+onlyHeavy = TRUE,
 keepVJLgroup = TRUE
 )
 ```
@@ -117,7 +117,7 @@ locusColumn
 :   name of the character column containing locus information. Only applicable and 
 required for single-cell mode.
 
-only_heavy
+onlyHeavy
 :   use only `IGH` (for BCR data) or `TRB/TRD` (for TCR data) 
 sequences for grouping. Only applicable and required for single-cell mode. 
 Default is `TRUE`. Also see [groupGenes](http://www.rdocumentation.org/packages/alakazam/topics/groupGenes).
@@ -139,7 +139,7 @@ sequences in the `dist_nearest` column if `cross=NULL`. If `cross` was
 specified, distances will be added as the `cross_dist_nearest` column. 
 
 Note that distances between light chain sequences are not calculated, even if light chains 
-were used for VJL grouping via `only_heavy=FALSE`. Light chain sequences, if any,
+were used for VJL grouping via `onlyHeavy=FALSE`. Light chain sequences, if any,
 will have `NA` in the `dist_nearest` field.
 
 Note that the output `vCallColumn` and `jCallColumn` columns will be converted to 
@@ -165,7 +165,7 @@ Namely, each row represents a sequence/chain. Sequences/chains from the same cel
 by a cell ID in the `cellIdColumn` field. Under this mode, there is a choice of whether 
 grouping should be done using `IGH` for BCR data or `TRB/TRD` for TCR data 
 sequences only, or using both `IGH and IGK/IGL` for BCR data or 
-`TRB/TRD and TRA/TRG` for TCR data sequences. This is governed by `only_heavy`.
+`TRB/TRD and TRA/TRG` for TCR data sequences. This is governed by `onlyHeavy`.
 
 Note that for `distToNearest`, a cell with multiple `IGH` (for BCR data) or 
 multiple `TRB/TRD` (for TCR data) is not allowed.

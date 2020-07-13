@@ -100,16 +100,16 @@ heavy and light chain junction lengths.
 
 There is also a choice of whether grouping should be done using `IGH` for BCR data 
 or `TRB/TRD` for TCR data sequences only, or using both `IGH` and `IGK`/`IGL` for BCR data or 
-`TRB`/`TRD` and `TRA`/`TRG` for TCR data sequences. This is governed by `only_heavy`.
+`TRB`/`TRD` and `TRA`/`TRG` for TCR data sequences. This is governed by `onlyHeavy`.
 
 
 
 ```r
 # Single-cell mode 
 # Group cells in a one-stage process (VJthenLen=FALSE) and using
-# both heavy and light chain sequences (only_heavy=FALSE)
+# both heavy and light chain sequences (onlyHeavy=FALSE)
 dist_sc <- distToNearest(db, cellIdColumn="cell", locusColumn="locus", 
-                         VJthenLen=FALSE, only_heavy=FALSE)
+                         VJthenLen=FALSE, onlyHeavy=FALSE)
 ```
 
 Regardless of whether grouping was done using only the heavy chain sequences, or both heavy 
@@ -241,7 +241,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1210044
+## [1] 0.1211511
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -336,6 +336,26 @@ If there are very large groups of sequences that share V call, J call and juncti
 # Explore V-J-junction length groups sizes to use subsample
 # Show the size of the largest groups
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(alakazam)
 top_10_sizes <- ExampleDb %>%
      group_by(junction_length) %>% # group by junction length

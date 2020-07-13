@@ -265,12 +265,12 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
     expect_error(distToNearest(db=data_t1, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                                model="ham", normalize="len", symmetry="avg",
                                first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
-                               cellIdColumn="CELL_ID", locusColumn="LOCUS", only_heavy=FALSE))
+                               cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE))
     
     expect_error(distToNearest(db=data_t1, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                                model="ham", normalize="len", symmetry="avg",
                                first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
-                               cellIdColumn="CELL_ID", locusColumn="LOCUS", only_heavy=TRUE))
+                               cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=TRUE))
     
     ## with data_t2, expect smooth run
     # group using HC VJL & LC VJL
@@ -278,24 +278,24 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
     dtn1 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                          model="ham", normalize="len", symmetry="avg",
                          first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
-                         cellIdColumn="CELL_ID", locusColumn="LOCUS", only_heavy=FALSE)
+                         cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE)
     # first=T
     dtn2 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                          model="ham", normalize="len", symmetry="avg",
                          first=TRUE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
-                         cellIdColumn="CELL_ID", locusColumn="LOCUS", only_heavy=FALSE)
+                         cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE)
     
     # group using HC VJL only, without LC VJL
     # first=F
     dtn3 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                           model="ham", normalize="len", symmetry="avg",
                           first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
-                          cellIdColumn="CELL_ID", locusColumn="LOCUS", only_heavy=TRUE)
+                          cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=TRUE)
     # first=T
     dtn4 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                           model="ham", normalize="len", symmetry="avg",
                           first=TRUE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
-                          cellIdColumn="CELL_ID", locusColumn="LOCUS", only_heavy=TRUE)
+                          cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=TRUE)
     
     # calcualte expected
     
