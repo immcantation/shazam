@@ -688,20 +688,20 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                           single-cell mode.
 #' @param    locusColumn     name of the character column containing locus information. Only applicable and 
 #'                           required for single-cell mode.
-#' @param    groupUsingOnlyIGH    use only heavy chain (\code{IGH}) sequences for VJL grouping, disregarding 
-#'                                light chains. Only applicable and required for single-cell mode. 
-#'                                Default is \code{TRUE}. Also see \link[alakazam]{groupGenes}.                   
-#' @param    keepVJLgroup         a Boolean value specifying whether to keep in the output the the column 
-#'                                column indicating grouping based on VJL combinations. Only applicable for
-#'                                1-stage partitioning (i.e. \code{VJthenLen=FALSE}). Also see 
-#'                                \link[alakazam]{groupGenes}.
+#' @param    only_heavy      use only \code{IGH} (for BCR data) or \code{TRB/TRD} (for TCR data) 
+#'                           sequences for grouping. Only applicable and required for single-cell mode. 
+#'                           Default is \code{TRUE}. Also see \link[alakazam]{groupGenes}.                   
+#' @param    keepVJLgroup    a Boolean value specifying whether to keep in the output the the column 
+#'                           column indicating grouping based on VJL combinations. Only applicable for
+#'                           1-stage partitioning (i.e. \code{VJthenLen=FALSE}). Also see 
+#'                           \link[alakazam]{groupGenes}.
 #' 
 #' @return   Returns a modified \code{db} data.frame with nearest neighbor distances between heavy chain
 #'           sequences in the \code{dist_nearest} column if \code{cross=NULL}. If \code{cross} was 
 #'           specified, distances will be added as the \code{cross_dist_nearest} column. 
 #'           
 #'           Note that distances between light chain sequences are not calculated, even if light chains 
-#'           were used for VJL grouping via \code{groupUsingOnlyIGH=FALSE}. Light chain sequences, if any,
+#'           were used for VJL grouping via \code{only_heavy=FALSE}. Light chain sequences, if any,
 #'           will have \code{NA} in the \code{dist_nearest} field.
 #'           
 #'           Note that the output \code{vCallColumn} and \code{jCallColumn} columns will be converted to 
@@ -716,16 +716,19 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' distances. Under non-single-cell mode, all input sequences will be used for calculating nearest
 #' neighbor distances, regardless of the values in the \code{locusColumn} field (if present).
 #' 
+#' Values in the \code{locusColumn} column must be one of \code{c("IGH", "IGI", "IGK", "IGL"} for BCR 
+#' data or \code{"TRA", "TRB", "TRD", "TRG")} for TCR data. Otherwise, the function returns an 
+#' error message and stops.
+#' 
 #' For single-cell mode, the input format is the same as that for \link[alakazam]{groupGenes}. 
 #' Namely, each row represents a sequence/chain. Sequences/chains from the same cell are linked
 #' by a cell ID in the \code{cellIdColumn} field. Under this mode, there is a choice of whether 
-#' grouping should be done using heavy chain (\code{IGH}) sequences only, or using both 
-#' heavy chain (\code{IGH}) and light chain (\code{IGK}, \code{IGL}) sequences. This is governed 
-#' by \code{groupUsingOnlyIGH}.
+#' grouping should be done using \code{IGH} for BCR data or \code{TRB/TRD} for TCR data 
+#' sequences only, or using both \code{IGH and IGK/IGL} for BCR data or 
+#' \code{TRB/TRD and TRA/TRG} for TCR data sequences. This is governed by \code{only_heavy}.
 #' 
-#' If used, values in the \code{locusColumn} column must be one of \code{"IGH"}, \code{"IGK"}, and \code{"IGL"}.
-#' 
-#' Note that for \code{distToNearest}, a cell with multiple heavy chains is not allowed.
+#' Note that for \code{distToNearest}, a cell with multiple \code{IGH} (for BCR data) or 
+#' multiple \code{TRB/TRD} (for TCR data) is not allowed.
 #' 
 #' The distance to nearest (heavy chain) neighbor can be used to estimate a threshold for assigning 
 #' Ig sequences to clonal groups. A histogram of the resulting vector is often bimodal, with the 
@@ -814,7 +817,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                           first=TRUE, VJthenLen=TRUE, nproc=1, fields=NULL, cross=NULL, 
                           mst=FALSE, subsample=NULL, progress=FALSE,
                           cellIdColumn=NULL, locusColumn=NULL, 
-                          groupUsingOnlyIGH=TRUE, keepVJLgroup=TRUE) {
+                          only_heavy=TRUE, keepVJLgroup=TRUE) {
     
     # Hack for visibility of foreach index variables
     i <- NULL
@@ -830,8 +833,11 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if ( !is.null(cellIdColumn) & !is.null(locusColumn) ) {
         singleCell <- TRUE
         
-        if (!all(db[[locusColumn]] %in% c("IGH", "IGK", "IGL"))) {
-            stop("The locus column must be one of {IGH, IGK, IGL}.")
+        # check locus column
+        valid_loci <- c("IGH", "IGI", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG")
+        check <- !all(unique(data[[locusColumn]]) %in% valid_loci)
+        if (check) {
+            stop("The locus column contains invalid loci annotations.")
         }
         
     } else {
@@ -853,14 +859,22 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     
     # Disallow multiple heavy chains per cell
     if (singleCell) {
-        bool <- sapply(unique(db[[cellIdColumn]]), function(x) { 
-            return( sum( db[[locusColumn]][db[[cellIdColumn]]==x] == "IGH" )>1 ) 
-        } )
-        if (any(bool)) {
-            stop("Detected multiple heavy chains in cell(s). Each cell must contain only 1 heavy chain.")
+        # check multiple heavy chains
+        x <- sum(table(db[[cellIdColumn]][db[[locusColumn]] == "IGH"]) > 1)
+        if (x > 0) {
+            stop(paste(x, "cell(s) with multiple heavy chains found. One heavy chain per cell is expected."))
+        }
+        # check multiple beta chains
+        x <- sum(table(db[[cellIdColumn]][db[[locusColumn]] == "TRB"]) > 1)
+        if (x > 0) {
+            stop(paste(x, "cell(s) with multiple beta chains found. One beta chain per cell is expected."))
+        }
+        # check multiple delta chains
+        x <- sum(table(db[[cellIdColumn]][db[[locusColumn]] == "TRD"]) > 1)
+        if (x > 0) {
+            stop(paste(x, "cell(s) with multiple delta chains found. One delta chain per cell is expected."))
         }
     }
-    
     
     # Check for invalid characters
     # heavy
@@ -882,7 +896,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # V+J only first
         # creates $vj_group
         db <- groupGenes(db, v_call=vCallColumn, j_call=jCallColumn, junc_len=NULL,
-                         cell_id=cellIdColumn, locus=locusColumn, only_igh=groupUsingOnlyIGH,
+                         cell_id=cellIdColumn, locus=locusColumn, only_heavy=only_heavy,
                          first=first)
         # L (later)  
         group_cols <- c("vj_group", junc_len)
@@ -892,7 +906,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # creates $vj_group
         # note that despite the name (VJ), this is based on V+J+L
         db <- groupGenes(db, v_call=vCallColumn, j_call=jCallColumn, junc_len=junc_len,
-                         cell_id=cellIdColumn, locus=locusColumn, only_igh=groupUsingOnlyIGH,
+                         cell_id=cellIdColumn, locus=locusColumn, only_heavy=only_heavy,
                          first=first)
         group_cols <- c("vj_group")
     }

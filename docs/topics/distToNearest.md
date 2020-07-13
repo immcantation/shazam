@@ -32,7 +32,7 @@ subsample = NULL,
 progress = FALSE,
 cellIdColumn = NULL,
 locusColumn = NULL,
-groupUsingOnlyIGH = TRUE,
+only_heavy = TRUE,
 keepVJLgroup = TRUE
 )
 ```
@@ -117,9 +117,9 @@ locusColumn
 :   name of the character column containing locus information. Only applicable and 
 required for single-cell mode.
 
-groupUsingOnlyIGH
-:   use only heavy chain (`IGH`) sequences for VJL grouping, disregarding 
-light chains. Only applicable and required for single-cell mode. 
+only_heavy
+:   use only `IGH` (for BCR data) or `TRB/TRD` (for TCR data) 
+sequences for grouping. Only applicable and required for single-cell mode. 
 Default is `TRUE`. Also see [groupGenes](http://www.rdocumentation.org/packages/alakazam/topics/groupGenes).
 
 keepVJLgroup
@@ -139,7 +139,7 @@ sequences in the `dist_nearest` column if `cross=NULL`. If `cross` was
 specified, distances will be added as the `cross_dist_nearest` column. 
 
 Note that distances between light chain sequences are not calculated, even if light chains 
-were used for VJL grouping via `groupUsingOnlyIGH=FALSE`. Light chain sequences, if any,
+were used for VJL grouping via `only_heavy=FALSE`. Light chain sequences, if any,
 will have `NA` in the `dist_nearest` field.
 
 Note that the output `vCallColumn` and `jCallColumn` columns will be converted to 
@@ -156,16 +156,19 @@ Under single-cell mode, only heavy chain sequences will be used for calculating 
 distances. Under non-single-cell mode, all input sequences will be used for calculating nearest
 neighbor distances, regardless of the values in the `locusColumn` field (if present).
 
+Values in the `locusColumn` column must be one of `c("IGH", "IGI", "IGK", "IGL"` for BCR 
+data or `"TRA", "TRB", "TRD", "TRG")` for TCR data. Otherwise, the function returns an 
+error message and stops.
+
 For single-cell mode, the input format is the same as that for [groupGenes](http://www.rdocumentation.org/packages/alakazam/topics/groupGenes). 
 Namely, each row represents a sequence/chain. Sequences/chains from the same cell are linked
 by a cell ID in the `cellIdColumn` field. Under this mode, there is a choice of whether 
-grouping should be done using heavy chain (`IGH`) sequences only, or using both 
-heavy chain (`IGH`) and light chain (`IGK`, `IGL`) sequences. This is governed 
-by `groupUsingOnlyIGH`.
+grouping should be done using `IGH` for BCR data or `TRB/TRD` for TCR data 
+sequences only, or using both `IGH and IGK/IGL` for BCR data or 
+`TRB/TRD and TRA/TRG` for TCR data sequences. This is governed by `only_heavy`.
 
-If used, values in the `locusColumn` column must be one of `"IGH"`, `"IGK"`, and `"IGL"`.
-
-Note that for `distToNearest`, a cell with multiple heavy chains is not allowed.
+Note that for `distToNearest`, a cell with multiple `IGH` (for BCR data) or 
+multiple `TRB/TRD` (for TCR data) is not allowed.
 
 The distance to nearest (heavy chain) neighbor can be used to estimate a threshold for assigning 
 Ig sequences to clonal groups. A histogram of the resulting vector is often bimodal, with the 

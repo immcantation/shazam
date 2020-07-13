@@ -1,3 +1,11 @@
+Version 1.0.0.999: July 13, 2020
+-------------------------------------------------------------------------------
+
++ Added the TCR grouping option to the `distToNearest` function. Changed the 
+  `groupUsingOnlyIGH` argument to `only_heavy` in `distToNearest` function. 
+
+
+
 Version 1.0.0 May 9, 2020
 -------------------------------------------------------------------------------
 

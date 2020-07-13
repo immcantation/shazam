@@ -85,10 +85,10 @@ used for calculating the nearest neighbor distances.
 
 Under the single-cell mode, each row of the input `db` should represent a sequence/chain. 
 Sequences/chains from the same cell are linked by a cell ID in a `cellIdColumn` column. 
-Note that a cell should have exactly one heavy chain sequence in `db`. A `locusColumn` 
-column indicates whether each sequence is from the heavy or the light chain. The values 
-in the `locusColumn` column must be one of `IGH`, `IGK`, and `IGL`. To invoke the 
-single-cell mode, both the `cellIdColumn` and `locusColumn` arguments must be specified. 
+Note that a cell should have exactly one `IGH` sequence for BCR data or 
+`TRB`/`TRD` for TCR data. The values in the `locusColumn` column must be one of `IGH`, 
+`IGI`, `IGK`, or `IGL` for BCR data or `TRA`, `TRB`, `TRD`, or `TRG` for TCR data. To invoke 
+the single-cell mode, both the `cellIdColumn` and `locusColumn` arguments must be specified. 
 
 There is a choice of whether grouping should be done as a one-stage process or a 
 two-stage process. This can be specified via `VJthenLen`. In the one-stage process 
@@ -98,18 +98,18 @@ combination. In the two-stage process (`VJthenLen=TRUE`), cells are first divide
 chain V gene and J gene (VJ combination), and light chain VJ combination; and then by
 heavy and light chain junction lengths. 
 
-There is also a choice of whether grouping should be done using heavy chain (`IGH`) sequences 
-only, or using both heavy chain (`IGH`) and light chain (`IGK`, `IGL`) sequences. This can be 
-specified via `groupUsingOnlyIGH`. 
+There is also a choice of whether grouping should be done using `IGH` for BCR data 
+or `TRB/TRD` for TCR data sequences only, or using both `IGH` and `IGK`/`IGL` for BCR data or 
+`TRB`/`TRD` and `TRA`/`TRG` for TCR data sequences. This is governed by `only_heavy`.
 
 
 
 ```r
 # Single-cell mode 
 # Group cells in a one-stage process (VJthenLen=FALSE) and using
-# both heavy and light chain sequences (groupUsingOnlyIGH=FALSE)
+# both heavy and light chain sequences (only_heavy=FALSE)
 dist_sc <- distToNearest(db, cellIdColumn="cell", locusColumn="locus", 
-                         VJthenLen=FALSE, groupUsingOnlyIGH=FALSE)
+                         VJthenLen=FALSE, only_heavy=FALSE)
 ```
 
 Regardless of whether grouping was done using only the heavy chain sequences, or both heavy 
@@ -241,7 +241,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1203668
+## [1] 0.121784
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -336,26 +336,6 @@ If there are very large groups of sequences that share V call, J call and juncti
 # Explore V-J-junction length groups sizes to use subsample
 # Show the size of the largest groups
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(alakazam)
 top_10_sizes <- ExampleDb %>%
      group_by(junction_length) %>% # group by junction length
@@ -368,6 +348,10 @@ top_10_sizes <- ExampleDb %>%
      arrange(desc(SIZE)) %>% # sort by decreasing size
      select(SIZE) %>% 
      top_n(10) # show the top 10
+```
+
+```
+## `summarise()` ungrouping output (override with `.groups` argument)
 ```
 
 ```
