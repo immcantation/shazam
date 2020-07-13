@@ -835,7 +835,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         
         # check locus column
         valid_loci <- c("IGH", "IGI", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG")
-        check <- !all(unique(data[[locusColumn]]) %in% valid_loci)
+        check <- !all(unique(db[[locusColumn]]) %in% valid_loci)
         if (check) {
             stop("The locus column contains invalid loci annotations.")
         }
