@@ -1,9 +1,10 @@
-Version 1.0.0.999: July 13, 2020
+Version 1.0.1: July 16, 2020
 -------------------------------------------------------------------------------
 
-+ Added the TCR grouping option to the `distToNearest` function. Changed the 
-  `groupUsingOnlyIGH` argument to `onlyHeavy` in `distToNearest` function. 
+Distance Profiling:
 
++ Added support for TCR genes to `distToNearest`. 
++ Renamed the `groupUsingOnlyIGH` argument of `distToNearest` to `onlyHeavy`.
 
 
 Version 1.0.0 May 9, 2020
