@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 1.0.1
-Date: 2020-07-16
+Date: 2020-07-18
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Namita", "Gupta", role=c("aut"), 
@@ -42,7 +42,7 @@ Depends:
     R (>= 3.5.0),
     ggplot2 (>= 3.2.0)
 Imports:
-    alakazam (>= 1.0.1.999),
+    alakazam (>= 1.0.2),
     ape,
     diptest,
     doParallel,

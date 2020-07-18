@@ -77,30 +77,31 @@ dist_s5f <- distToNearest(ExampleDb, sequenceColumn="junction",
 ## Calculating nearest neighbor distances (single-cell paired heavy and light chain sequences)
 
 The `distToNearest` function also supports running under single-cell mode where an input 
-`db` containing single-cell paired heavy and light chain sequences is supplied. In this 
-case, by default, cells are first divided into partitions containing the same heavy chain 
-V gene and J gene (and if specified, junction length), and the same light chain V gene 
-and J gene (and if specified, junction length). Then, only the heavy chain sequences are 
-used for calculating the nearest neighbor distances.
+`db` containing single-cell paired IGH:IGK/IGL, TRB:TRA, or TRD:TRG chain sequences are 
+supplied. In this case, by default, cells are first divided into partitions containing 
+the same heavy/long chain (IGH, TRB, TRD) V gene and J gene (and if specified, junction 
+length), and the same light/short chain (IGK, IGL, TRA, TRG) V gene and J gene (and if 
+specified, junction length). Then, only the heavy chain sequences are used for 
+calculating the nearest neighbor distances.
 
 Under the single-cell mode, each row of the input `db` should represent a sequence/chain. 
 Sequences/chains from the same cell are linked by a cell ID in a `cellIdColumn` column. 
-Note that a cell should have exactly one `IGH` sequence for BCR data or 
-`TRB`/`TRD` for TCR data. The values in the `locusColumn` column must be one of `IGH`, 
-`IGI`, `IGK`, or `IGL` for BCR data or `TRA`, `TRB`, `TRD`, or `TRG` for TCR data. To invoke 
-the single-cell mode, both the `cellIdColumn` and `locusColumn` arguments must be specified. 
+Note that a cell should have exactly one `IGH` sequence (BCR) or `TRB`/`TRD` (TCR). 
+The values in the `locusColumn` column must be one of `IGH`, `IGI`, `IGK`, or `IGL` (BCR)
+or `TRA`, `TRB`, `TRD`, or `TRG` (TCR). To invoke the single-cell mode, `cellIdColumn` 
+must be specified and `locusColumn` must be correct. 
 
 There is a choice of whether grouping should be done as a one-stage process or a 
 two-stage process. This can be specified via `VJthenLen`. In the one-stage process 
-(`VJthenLen=FALSE`), cells are divided into partitions containing same heavy chain V 
-gene, J gene, and junction length (VJL combination), and the same light chain VJL 
-combination. In the two-stage process (`VJthenLen=TRUE`), cells are first divided by heavy 
-chain V gene and J gene (VJ combination), and light chain VJ combination; and then by
-heavy and light chain junction lengths. 
+(`VJthenLen=FALSE`), cells are divided into partitions containing same heavy/long chain V 
+gene, J gene, and junction length (V-J-length combination), and the same light chain 
+V-J-length combination. In the two-stage process (`VJthenLen=TRUE`), cells are first 
+divided by heavy/long chain V gene and J gene (V-J combination), and light/short 
+chain V-J combination; and then by the corresponding junction lengths. 
 
-There is also a choice of whether grouping should be done using `IGH` for BCR data 
-or `TRB/TRD` for TCR data sequences only, or using both `IGH` and `IGK`/`IGL` for BCR data or 
-`TRB`/`TRD` and `TRA`/`TRG` for TCR data sequences. This is governed by `onlyHeavy`.
+There is also a choice of whether grouping should be done using `IGH` (BCR) 
+or `TRB/TRD` (TCR) sequences only, or using both `IGH` and `IGK`/`IGL` (BCR) or 
+`TRB`/`TRD` and `TRA`/`TRG` (TCR) sequences. This is governed by `onlyHeavy`.
 
 
 
@@ -241,7 +242,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1211511
+## [1] 0.1210574
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -327,47 +328,34 @@ compare within-sample variation to cross-sample variation.
 
 ## Speeding up pairwise-distance-matrix calculations with subsampling
 
-The `subsample` option in `distToNearest` allows to speed up calculations and reduce memory usage.
+The `subsample` option in `distToNearest` allows to speed up calculations and 
+reduce memory usage.
 
-If there are very large groups of sequences that share V call, J call and junction length, `distToNearest` will need a lot of memory and it will take a long time to calculate all the distances. Without subsampling, in a large group of n=70,000 sequences `distToNearest` calculates a n\*n distance matrix. With subsampling, e.g. to s=15,000, the distance matrix for the same group has size s\*n, and for each sequence in `db`, the distance value is calculated by comparing the sequence to the subsampled sequences from the same V-J-junction length group. 
+If there are very large groups of sequences that share V call, J call and junction length, 
+`distToNearest` will need a lot of memory and it will take a long time to calculate all 
+the distances. Without subsampling, in a large group of n=70,000 sequences 
+`distToNearest` calculates a n\*n distance matrix. With subsampling, e.g. to s=15,000, 
+the distance matrix for the same group has size s\*n, and for each sequence in `db`, 
+the distance value is calculated by comparing the sequence to the subsampled sequences 
+from the same V-J-junction length group. 
 
 
 ```r
 # Explore V-J-junction length groups sizes to use subsample
 # Show the size of the largest groups
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(alakazam)
 top_10_sizes <- ExampleDb %>%
-     group_by(junction_length) %>% # group by junction length
-     do(alakazam::groupGenes(., first=TRUE)) %>% # group by V and J call
-     mutate(GROUP_ID=paste(junction_length, vj_group, sep="_")) %>% # Create group ids based on junction length and VJ calls
+     group_by(junction_length) %>% # Group by junction length
+     do(alakazam::groupGenes(., first=TRUE)) %>% # Group by V and J call
+     mutate(GROUP_ID=paste(junction_length, vj_group, sep="_")) %>% # Create group ids
      ungroup() %>%
-     group_by(GROUP_ID) %>% # group by GROUP_ID
-     distinct(junction) %>% # for each group, we want to count unique junctions, so keep distinct
-     summarize(SIZE=n()) %>% # get the size of the group, the number of sequences
-     arrange(desc(SIZE)) %>% # sort by decreasing size
+     group_by(GROUP_ID) %>% # Group by GROUP_ID
+     distinct(junction) %>% # Vount unique junctions per group
+     summarize(SIZE=n()) %>% # Get the size of the group
+     arrange(desc(SIZE)) %>% # Sort by decreasing size
      select(SIZE) %>% 
-     top_n(10) # show the top 10
+     top_n(10) # Filter to the top 10
 ```
 
 ```
@@ -400,11 +388,10 @@ top_10_sizes
 
 ```r
 # Use 30 to subsample
-# NOTE. This is a toy example. To use 30 with real data 
-# is probably not a good choice.
+# NOTE: This is a toy example. Subsampling to 30 sequence with real data is unwise
 dist <- distToNearest(ExampleDb, sequenceColumn="junction", 
                       vCallColumn="v_call_genotyped", jCallColumn="j_call",
                       model="ham", 
                       first=FALSE, normalize="len",
-                      subsample = 30)
+                      subsample=30)
 ```

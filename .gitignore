@@ -2,6 +2,7 @@
 .Rhistory
 .Rproj.user
 *.Rproj
+Rplots.*
 man/*.Rd
 vignettes/*.R
 vignettes/*.html
