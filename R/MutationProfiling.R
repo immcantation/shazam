@@ -1837,8 +1837,10 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
                 seqP[getContextInCodon(x)] <- c_inputSeq[x]
                 return(seqP) }))
             # split the string of codons into vector of codons
-            c_germlineSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_germlineSeq_codons)), " ")[[1]]
-            c_inputSeq_codons <- strsplit(gsub("([[:alnum:]]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
+            # [[:alnum:]]{3} will fail to capture non-ATGC (such as "-CC")
+            # to include a literal -, place it first or last
+            c_germlineSeq_codons <- strsplit(gsub("([A-Z\\.-]{3})", "\\1 ", c2s(c_germlineSeq_codons)), " ")[[1]]
+            c_inputSeq_codons <- strsplit(gsub("([A-Z\\.-]{3})", "\\1 ", c2s(c_inputSeq_codons)), " ")[[1]]
             
             # Determine whether the mutations are R or S
             # a table where rows are r/s/stop/na, cols are codon positions
