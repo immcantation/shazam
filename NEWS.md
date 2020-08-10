@@ -1,3 +1,13 @@
+Version 1.0.1.999: August 9, 2020
+-------------------------------------------------------------------------------
+
+Mutation Profiling:
+
++ Fixed a bug in `observedMutations` and `calcObservedMutations` causing 
+  mutation counting to fail when there are gap (`-`) characters in the 
+  germline sequence.
+
+
 Version 1.0.1: July 18, 2020
 -------------------------------------------------------------------------------
 
