@@ -73,9 +73,9 @@ Suggests:
     testthat
 Collate:
     'Shazam.R'
+    'Core.R'
     'RegionDefinitions.R'
     'Baseline.R'
-    'Core.R'
     'DistToNearest.R'
     'MutationDefinitions.R'
     'MutationProfiling.R'

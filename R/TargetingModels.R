@@ -1,6 +1,7 @@
 # Targeting models
 
 #' @include Shazam.R
+#' @include Core.R
 NULL
 
 #### Data ####
@@ -799,8 +800,9 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #'                                     vCallColumn="v_call",
 #'                                     minNumSeqMutations=200,
 #'                                     numSeqMutationsOnly=FALSE)
-#' # View mutability esimates (not run)
-#' # print(mut_model)
+#'                                     
+#' # View top 5 mutability estimates
+#' head(sort(mut_model, decreasing=TRUE), 5)
 #' 
 #' # View the number of S mutations used for estimating mutabilities
 #' mut_model@numMutS
@@ -1449,7 +1451,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
-#'
+#' 
 #' # Create model using only silent mutations and ignore multiple mutations
 #' model <- createTargetingModel(db, model="s", sequenceColumn="sequence_alignment",
 #'                               germlineColumn="germline_alignment_d_mask",
@@ -1461,6 +1463,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' # View number of silent mutations used for estimating mutability
 #' model@numMutS
 #' }
+#' 
 #' @export
 createTargetingModel <- function(db, model=c("s", "rs"), sequenceColumn="sequence_alignment",
                                  germlineColumn="germline_alignment_d_mask",
@@ -1519,7 +1522,9 @@ createTargetingModel <- function(db, model=c("s", "rs"), sequenceColumn="sequenc
                      citation=modelCitation,
                      substitution=sub_mat,
                      mutability=mut_mat,
-                     targeting=tar_mat@.Data)
+                     targeting=tar_mat@.Data,
+                     numMutS=mut_mat@numMutS,
+                     numMutR=mut_mat@numMutR)
 
     return(model_obj)
 }

@@ -1,6 +1,7 @@
 # Generates distance to nearest neighbor
 
 #' @include Shazam.R
+#' @include Core.R
 NULL
 
 #### Classes ####
