@@ -131,8 +131,21 @@ numSeqMutationsOnly=FALSE)
 
 *Warning*:Insufficient number of mutations to infer some 5-mers. Filled with 0. 
 ```R
-# View mutability esimates (not run)
-# print(mut_model)
+
+# View top 5 mutability estimates
+head(sort(mut_model, decreasing=TRUE), 5)
+
+```
+
+
+```
+      AAAGG       CAAGA       CAAGC       CAAGT       AATTC 
+0.005630619 0.005630619 0.005630619 0.005630619 0.005115064 
+
+```
+
+
+```R
 
 # View the number of S mutations used for estimating mutabilities
 mut_model@numMutS

@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
-Version: 1.0.0.999
-Date: 2020-07-01
+Version: 1.0.2
+Date: 2020-08-10
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Namita", "Gupta", role=c("aut"), 
@@ -42,7 +42,7 @@ Depends:
     R (>= 3.5.0),
     ggplot2 (>= 3.2.0)
 Imports:
-    alakazam (>= 1.0.0),
+    alakazam (>= 1.0.2),
     ape,
     diptest,
     doParallel,
@@ -73,9 +73,9 @@ Suggests:
     testthat
 Collate:
     'Shazam.R'
+    'Core.R'
     'RegionDefinitions.R'
     'Baseline.R'
-    'Core.R'
     'DistToNearest.R'
     'MutationDefinitions.R'
     'MutationProfiling.R'

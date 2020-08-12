@@ -1,7 +1,8 @@
 # SHMulate
 
-#' @include MutationProfiling.R
 #' @include Shazam.R
+#' @include Core.R
+#' @include MutationProfiling.R
 NULL
 
 

@@ -1,6 +1,7 @@
 # Class definitions for sequence regions
 
 #' @include Shazam.R
+#' @include Core.R
 NULL
 
 #### Constants ####
