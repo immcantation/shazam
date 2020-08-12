@@ -553,10 +553,10 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
 # Output:               
 #                       consensus sequence for the specific clone and reion definition.
 # 
-collapseOneClone <- function(clone_num, db, juncLenCol="JUNCTION_LENGTH", 
-                             cloneColumn = "CLONE", sequenceColumn = "SEQUENCE_IMGT", 
+collapseOneClone <- function(clone_num, db, juncLenCol="junction_length", 
+                             cloneColumn = "clone_id", sequenceColumn = "sequence_alignment", 
                              regionDefinition = IMGT_ALL_REGIONS,
-                             germlineColumn = "GERMLINE_IMGT_D_MASK", 
+                             germlineColumn = "germline_alignment_d_mask", 
                              muFreqColumn = NULL, 
                              method=c("mostCommon","thresholdedFreq","catchAll","mostMutated","leastMutated"),
                              minimumFrequency = NULL,includeAmbiguous = FALSE, 
