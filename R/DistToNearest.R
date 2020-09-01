@@ -1008,9 +1008,9 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         idx <- uniqueGroupsIdx[[i]]
         
         if (singleCell) {
-            # only use IGH
+            # only use IGH, TRB, TRD
             # wrt idx
-            idxBool <- db[[locusColumn]][idx] == "IGH"
+            idxBool <- db[[locusColumn]][idx] %in% c("IGH", "TRB", "TRD")
         } else {
             idxBool <- rep(TRUE, length(idx))
         }
