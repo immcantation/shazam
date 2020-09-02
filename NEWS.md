@@ -1,3 +1,9 @@
+Version 1.0.2.999: September 1, 2020
+-------------------------------------------------------------------------------
+
++ Fixed a bug in `distToNearest` where TRB and TRD sequences where ignored in 
+  distance calculation.
+
 Version 1.0.2: August 10, 2020
 -------------------------------------------------------------------------------
 
