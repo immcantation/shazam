@@ -360,14 +360,14 @@ IMGT_ALL_REGIONS <- new("RegionDefinition", name="IMGT_ALL_REGIONS",
                                  "fwr4_r", "fwr4_s"), 
                         citation="Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin and T cell receptor variable domains and Ig superfamily V-like domains. Developmental and comparative immunology. 2003;27:55-77.")
 
-IMGT_ALL <- new("RegionDefinition", name="IMGT_ALL",
+IMGT_VDJ <- new("RegionDefinition", name="IMGT_VDJ",
                 description="IMGT numbering scheme defining the V(D)J segment only by cdr/fwr regions, including cdr3 and fwr4", 
                 boundaries=factor(), seqLength=0, 
                 regions=c("cdr", "fwr"), 
                 labels=c("cdr_r", "cdr_s", "fwr_r", "fwr_s"),  
                 citation="Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin and T cell receptor variable domains and Ig superfamily V-like domains. Developmental and comparative immunology. 2003;27:55-77.")
 usethis::use_data(IMGT_ALL_REGIONS, overwrite=TRUE)
-usethis::use_data(IMGT_ALL, overwrite=TRUE)
+usethis::use_data(IMGT_VDJ, overwrite=TRUE)
 
 #' Defining a Region that will include also CDR3 and FWR4 based on junction length and sequence
 #' 
@@ -393,7 +393,7 @@ usethis::use_data(IMGT_ALL, overwrite=TRUE)
 #'        
 #'- \strong{fwr4}: Bases (313 + \code{juncLength} - 6 + 1) to sequence_length. 
 #' 
-#' \strong{For \code{regionDefinition}="IMGT_ALL":}
+#' \strong{For \code{regionDefinition}="IMGT_VDJ":}
 #' 
 #'- \strong{fwr}: Bases	1 to 78 (based on \link{IMGT_V_BY_REGIONS} definitions)
 #'
@@ -412,14 +412,14 @@ usethis::use_data(IMGT_ALL, overwrite=TRUE)
 #'                the first codon from fwr4.  
 #'
 #' Note: In case the \code{regionDefinition} argument is not one of the extended
-#'       regions (\code{IMGT_ALL_REGIONS} or \code{IMGT_ALL}) - then this
+#'       regions (\code{IMGT_ALL_REGIONS} or \code{IMGT_VDJ}) - then this
 #'       function will return the \code{regionDefinition} as is.
 #'
 #' @param  juncLength         The junction length of the sequence
 #' @param  sequenceImgt       The imgt aligned sequence
 #' @param  regionDefinition   The \link{RegionDefinition} type to calculate
 #'                            the regionDefinition for. Can be one of 2: 
-#'                            \code{"IMGT_ALL_REGIONS"} or \code{"IMGT_ALL"}. 
+#'                            \code{"IMGT_ALL_REGIONS"} or \code{"IMGT_VDJ"}. 
 #'                            Only these 2 regions include all
 #'                            CDR1/2/3 and FWR1/2/3/4 regions.
 #' @return a \link{RegionDefinition} object that includes CDR1/2/3 and 
@@ -448,7 +448,7 @@ makeRegion <- function(juncLength, sequenceImgt,
                          levels=c(levels(IMGT_V_BY_REGIONS@boundaries), "cdr3", "fwr4"))
     boundaries[313:(313 + as.integer(juncLength) - 6 - 1)] <- factor("cdr3")
     boundaries[(313 + as.integer(juncLength) - 6):seqLength] <- factor("fwr4")
-    if (regionDefinition@name == "IMGT_ALL") {
+    if (regionDefinition@name == "IMGT_VDJ") {
         boundaries <- gsub(pattern="fwr.", replacement = "fwr", x=boundaries, perl=TRUE)
         boundaries <- gsub(pattern="cdr.", replacement = "cdr", x=boundaries, perl=TRUE)
         boundaries <- factor(boundaries, levels=c("fwr", "cdr"))
@@ -462,7 +462,7 @@ makeRegion <- function(juncLength, sequenceImgt,
                       citation=regionDefinition@citation)
     # taking care of non-extended region definitions:
     if ((regionDefinition@name != "IMGT_ALL_REGIONS") & 
-        (regionDefinition@name != "IMGT_ALL")) {
+        (regionDefinition@name != "IMGT_VDJ")) {
         region_out <- regionDefinition
     }
     return(region_out)
@@ -481,7 +481,7 @@ makeRegion <- function(juncLength, sequenceImgt,
 # Output:
 # A regionDefinition object for the specific clone 
 # Note: regionDefinition needs to be calculated specifically for the clone if it
-#       is of type IMGT_ALL or IMGT_ALL_REGIONS, as it includes also cdr3 and fwr4
+#       is of type IMGT_VDJ or IMGT_ALL_REGIONS, as it includes also cdr3 and fwr4
 #       which are specific to clone.
 # Note: The region definition is same for all sequences in clone - so doing it 
 #       based on first sequence in clone.  

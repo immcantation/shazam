@@ -157,7 +157,7 @@ makeNullRegionDefinition <- function(regionLength) {
 #'   \item  \code{IMGT_V_BY_SEGMENTS}:  The IMGT numbered V segment up to position nucleotide 312.
 #'                                      This definition has no subdivisons and treats the entire V segment
 #'                                      as a single region.
-#'   \item  \code{IMGT_ALL        }:    The IMGT numbered segments of FWR1/2/3/4 and CDR1/2/3.
+#'   \item  \code{IMGT_VDJ        }:    The IMGT numbered segments of FWR1/2/3/4 and CDR1/2/3.
 #'                                      This definition combines regions of CDR1, CDR2, CDR3 into a single CDR region, 
 #'                                      and FWR1, FWR2, FWR3 FWR4 into a single FWR region.
 #'                                      Note that until function \link{makeRegion} will be applied
@@ -207,6 +207,6 @@ NULL
 #' @rdname  IMGT_SCHEMES
 NULL
 
-#' @name    IMGT_ALL
+#' @name    IMGT_VDJ
 #' @rdname  IMGT_SCHEMES
 NULL

@@ -109,7 +109,7 @@ test_that("makeRegion", {
     sequence_imgt_45 <- ExampleDb[45,"sequence_alignment"]
     seq_45_reg_def <- makeRegion(juncLength = junction_length_45, 
                                  sequenceImgt = sequence_imgt_45, 
-                                 regionDefinition = IMGT_ALL)
+                                 regionDefinition = IMGT_VDJ)
     junction_length_333 <- ExampleDb[333,"junction_length"]
     sequence_imgt_333 <- ExampleDb[333,"sequence_alignment"]
     seq_reg_def_IMGT_V <- makeRegion(juncLength = junction_length_333, 
@@ -127,7 +127,7 @@ test_that("makeRegion", {
     
     expect_that(seq_10_reg_def, is_a("RegionDefinition"))
     expect_equal(seq_10_reg_def@name, "IMGT_ALL_REGIONS")
-    expect_equal(seq_45_reg_def@name, "IMGT_ALL")
+    expect_equal(seq_45_reg_def@name, "IMGT_VDJ")
     expect_equal(seq_10_reg_def@description, 
                  "IMGT numbering scheme defining the V(D)J segment by individual cdr1/2/3 and fwr1/2/3/4 regions")
     expect_equal(seq_45_reg_def@description, 
@@ -173,11 +173,11 @@ test_that("getCloneRegion", {
     
     clone_3227_reg <- getCloneRegion(clone_num = 3227, db = ExampleDb, 
                                      seq_col = "sequence_alignment", clone_col = "clone_id", 
-                                     regionDefinition = IMGT_ALL)
+                                     regionDefinition = IMGT_VDJ)
     seq_376 <- ExampleDb[376,]
     seq_376_reg_def <- makeRegion(juncLength = 60, 
                                   sequenceImgt = seq_376[,"germline_alignment"], 
-                                  regionDefinition = IMGT_ALL)
+                                  regionDefinition = IMGT_VDJ)
     
     clone_6940_reg <- getCloneRegion(clone_num = 6940, db = ExampleDb, 
                                      seq_col = "sequence_alignment", clone_col = "clone_id", 
@@ -212,7 +212,7 @@ test_that("collapseOneClone", {
                                               seq_col = "sequence_alignment")
     region_3110_ALL <- getCloneRegion(clone_num = 3110, db = ExampleDb, 
                                       clone_col = "clone_id", 
-                                      regionDefinition = IMGT_ALL,
+                                      regionDefinition = IMGT_VDJ,
                                       seq_col = "sequence_alignment")
     collapseOneClone_3110_V_BY_REGIONS <- collapseOneClone(clone_num = 3110, db=ExampleDb, 
                                               juncLenCol="junction_length", 
@@ -240,7 +240,7 @@ test_that("collapseOneClone", {
                                                           juncLenCol="junction_length", 
                                                           cloneColumn = "clone_id", 
                                                           sequenceColumn = "sequence_alignment", 
-                                                          regionDefinition = IMGT_ALL,
+                                                          regionDefinition = IMGT_VDJ,
                                                           germlineColumn = "germline_alignment")
     collapseOneClone_db_3110_ALL <- collapseClones(db=db_3110, 
                                                            cloneColumn = "clone_id", 
