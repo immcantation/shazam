@@ -14,7 +14,7 @@ NULL
 # A vector of all clone numbers in db (each clone number 
 #  will appear only once in the list).  
 # the transpose is needed to ge tthe proper length of the coerced value
-makeClonesList <-  function(db, clone_col="CLONE") {
+makeClonesList <-  function(db, clone_col="clone_id") {
     clones_list <- as.list(t(unique(db[, c(clone_col)])))
     return(clones_list)
 }
@@ -616,17 +616,17 @@ collapseOneClone <- function(clone_num, db, juncLenCol="junction_length",
 
 
 
-calcBaselineOneClone <- function(clone_num, db, sequenceColumn = "SEQUENCE_IMGT", 
-                                 cloneColumn="CLONE",
-                                 juncLenCol="JUNCTION_LENGTH",
-                                 germlineColumn = "GERMLINE_IMGT",
+calcBaselineOneClone <- function(clone_num, db, sequenceColumn = "sequence_alignment", 
+                                 cloneColumn="clone_id",
+                                 juncLenCol="junction_length",
+                                 germlineColumn = "germline_alignment",
                                  testStatistic = c("local", "focused", "imbalanced"), 
                                  regionDefinition = IMGT_VDJ_REGIONS,
                                  targetingModel = HH_S5F, 
                                  mutationDefinition = NULL,
                                  calcStats = FALSE, 
                                  nproc = 1) {
-    clone_db <- db[db[,cloneColumn] == clone_num,]
+    clone_db <- db[db[[cloneColumn]] == clone_num,]
     reg_def <- getCloneRegion(clone_num=clone_num, db=clone_db, 
                               seq_col=sequenceColumn,
                               juncLenCol=juncLenCol,
