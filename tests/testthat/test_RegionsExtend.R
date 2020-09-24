@@ -1,8 +1,8 @@
 
 test_that("makeClonesList", {
     load(file.path("..", "data-tests", "ExampleDb.rda")) 
-    expect_equal(length(makeClonesList(ExampleDb))[1],1199)
-    expect_equal(makeClonesList(subset(ExampleDb,CLONE %in% c(30,125,115,467))), 
+    expect_equal(length(makeClonesList(ExampleDb, clone_col="CLONE"))[1],1199)
+    expect_equal(makeClonesList(subset(ExampleDb,CLONE %in% c(30,125,115,467)), clone_col="CLONE"), 
                  as.list(c("30","115","125","467")))
 })
 
