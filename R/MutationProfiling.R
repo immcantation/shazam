@@ -2037,7 +2037,7 @@ observedMutationsL <- function(db,
 #' If \code{refOption} == "germline" - reference sequence is germline sequence (in the column specified by 
 #' \code{germlineColumn}). 
 #' If \code{refOption} == "parent" - reference sequence is parent sequence (in the column specified by 
-#' \code{parentColumn}). This option assumes that the \code{db} includes linegae information,
+#' \code{parentColumn}). This option assumes that the \code{db} includes lineage information,
 #' such that each sequence has its parent sequence information (see more details in 
 #' \link{makeGraphDf})
 #' See \link{calcObservedMutations} for more technical details, 
@@ -2076,20 +2076,30 @@ observedMutationsL <- function(db,
 #'                             regionDefinition=IMGT_V,
 #'                             mutationDefinition=CHARGE_MUTATIONS,
 #'                             nproc=1)
-#'                      
+#'                             
+#' # Count of VDJ-region mutations, split by FWR and CDR
+#' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+#'                             germlineColumn="germline_alignment_d_mask",
+#'                             regionDefinition=IMGT_VDJ,
+#'                             nproc=1)             
+#' # Count of VDJ-region mutations, split by FWR and CDR
+#' ## TODO: This doesn't work because 'parent_sequence' doesnt' exits.
+#' Update example to include how to create that column.
+#' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+#'                             germlineColumn="germline_alignment_d_mask",
+#'                             refOption="parent",
+#'                             regionDefinition=IMGT_VDJ,
+#'                             nproc=1)         
 #' @export 
-
-
 observedMutations <- function(db,sequenceColumn = "sequence_alignment", 
                                germlineColumn = "germline_alignment",
                                regionDefinition=NULL, mutationDefinition = NULL, 
                                ambiguousMode = c("eitherOr", "and"), 
                                frequency = FALSE, combine = FALSE, nproc = 1,
                                refOption = "germline", 
-                               cloneColumn = "CLONE", 
-                               #juncLengthColumn = "junction_length",
-                               juncLengthColumn = "JUNCTION_LENGTH",
-                               parentColumn = "PARENT_SEQUENCE") {
+                               cloneColumn = "clone_id", 
+                               juncLengthColumn = "junction_length",
+                               parentColumn = "parent_sequence") {
     
 # This function is split into 3 cases:
 # 1. RegionDefinition is NULL.
@@ -2112,9 +2122,8 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
         refColumn <- parentColumn
     }
     else {
-        stop(deparse(substitute(refOption)), " is not a valid refOption")
+        stop(deparse(substitute(refOption)), " is not a valid refOption. Expecting 'germline' or 'parent'.")
     }
-    
     
     # Case 1:
     if (is.null(regionDefinition))  {
