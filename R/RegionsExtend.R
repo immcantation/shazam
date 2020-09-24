@@ -349,7 +349,7 @@ plotCloneLineageTree <- function(db, curClone=NULL, id="sequence_id",
 #' full, except for slots seqLength and boundaries and - which will be 0 and 
 #' empty respectively, and filled only after using function makeRegion.  
 #' 
-IMGT_ALL_REGIONS <- new("RegionDefinition", name="IMGT_ALL_REGIONS",
+IMGT_VDJ_REGIONS <- new("RegionDefinition", name="IMGT_VDJ_REGIONS",
                         description="IMGT numbering scheme defining the V(D)J segment by individual cdr1/2/3 and fwr1/2/3/4 regions",
                         boundaries=factor(), seqLength=0, 
                         regions=c("cdr1", "cdr2", "cdr3", "fwr1", "fwr2", 
@@ -366,7 +366,7 @@ IMGT_VDJ <- new("RegionDefinition", name="IMGT_VDJ",
                 regions=c("cdr", "fwr"), 
                 labels=c("cdr_r", "cdr_s", "fwr_r", "fwr_s"),  
                 citation="Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin and T cell receptor variable domains and Ig superfamily V-like domains. Developmental and comparative immunology. 2003;27:55-77.")
-usethis::use_data(IMGT_ALL_REGIONS, overwrite=TRUE)
+usethis::use_data(IMGT_VDJ_REGIONS, overwrite=TRUE)
 usethis::use_data(IMGT_VDJ, overwrite=TRUE)
 
 #' Defining a Region that will include also CDR3 and FWR4 based on junction length and sequence
@@ -375,7 +375,7 @@ usethis::use_data(IMGT_VDJ, overwrite=TRUE)
 #' This function gets as input a junction length and an imgt aligned sequence
 #' and outputs a \link{RegionDefinition} object that includes following regions:   
 #' 
-#' \strong{For \code{regionDefinition="IMGT_ALL_REGIONS"}:}
+#' \strong{For \code{regionDefinition="IMGT_VDJ_REGIONS"}:}
 #' 
 #'- \strong{fwr1}: Bases 1 to 78 (based on \link{IMGT_V_BY_REGIONS} definitions)  
 #'
@@ -412,14 +412,14 @@ usethis::use_data(IMGT_VDJ, overwrite=TRUE)
 #'                the first codon from fwr4.  
 #'
 #' Note: In case the \code{regionDefinition} argument is not one of the extended
-#'       regions (\code{IMGT_ALL_REGIONS} or \code{IMGT_VDJ}) - then this
+#'       regions (\code{IMGT_VDJ_REGIONS} or \code{IMGT_VDJ}) - then this
 #'       function will return the \code{regionDefinition} as is.
 #'
 #' @param  juncLength         The junction length of the sequence
 #' @param  sequenceImgt       The imgt aligned sequence
 #' @param  regionDefinition   The \link{RegionDefinition} type to calculate
 #'                            the regionDefinition for. Can be one of 2: 
-#'                            \code{"IMGT_ALL_REGIONS"} or \code{"IMGT_VDJ"}. 
+#'                            \code{"IMGT_VDJ_REGIONS"} or \code{"IMGT_VDJ"}. 
 #'                            Only these 2 regions include all
 #'                            CDR1/2/3 and FWR1/2/3/4 regions.
 #' @return a \link{RegionDefinition} object that includes CDR1/2/3 and 
@@ -432,11 +432,11 @@ usethis::use_data(IMGT_VDJ, overwrite=TRUE)
 #' sequenceImgt<-ExampleDb[1,"sequence_alignment"]
 #' seq_1_reg_def<-makeRegion(juncLength = juncLength, 
 #'                           sequenceImgt = sequenceImgt, 
-#'                           regionDefinition = IMGT_ALL_REGIONS)
+#'                           regionDefinition = IMGT_VDJ_REGIONS)
 #' @export
 
 makeRegion <- function(juncLength, sequenceImgt,  
-                       regionDefinition=IMGT_ALL_REGIONS) {
+                       regionDefinition=IMGT_VDJ_REGIONS) {
     if (!is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
@@ -461,7 +461,7 @@ makeRegion <- function(juncLength, sequenceImgt,
                       labels=regionDefinition@labels, 
                       citation=regionDefinition@citation)
     # taking care of non-extended region definitions:
-    if ((regionDefinition@name != "IMGT_ALL_REGIONS") & 
+    if ((regionDefinition@name != "IMGT_VDJ_REGIONS") & 
         (regionDefinition@name != "IMGT_VDJ")) {
         region_out <- regionDefinition
     }
@@ -481,14 +481,14 @@ makeRegion <- function(juncLength, sequenceImgt,
 # Output:
 # A regionDefinition object for the specific clone 
 # Note: regionDefinition needs to be calculated specifically for the clone if it
-#       is of type IMGT_VDJ or IMGT_ALL_REGIONS, as it includes also cdr3 and fwr4
+#       is of type IMGT_VDJ or IMGT_VDJ_REGIONS, as it includes also cdr3 and fwr4
 #       which are specific to clone.
 # Note: The region definition is same for all sequences in clone - so doing it 
 #       based on first sequence in clone.  
 getCloneRegion <- function(clone_num, db, seq_col="sequence", 
                            juncLenCol="junction_length", 
                            clone_col="clone", 
-                           regionDefinition=IMGT_ALL_REGIONS) {
+                           regionDefinition=IMGT_VDJ_REGIONS) {
     # subseting the db to lines for specific clone
     clone_db <- db[db[,clone_col] == clone_num,]
     # getting one of the sequences of the specific clone: 
@@ -501,7 +501,7 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
 
 # calculating consensus sequence for one clone only.  
 # Note: works same as collapseClones function, but on one clone only, and thus
-# can work with extended region definitions such as IMGT_ALL and IMGT_ALL_REGIONS.
+# can work with extended region definitions such as IMGT_VDJ and IMGT_VDJ_REGIONS.
 # Inputs:
 # - clone_num:        the clone number for which to calculate the consensus sequence.
 # - db:               data.frame containing sequence data. 
@@ -555,7 +555,7 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
 # 
 collapseOneClone <- function(clone_num, db, juncLenCol="junction_length", 
                              cloneColumn = "clone_id", sequenceColumn = "sequence_alignment", 
-                             regionDefinition = IMGT_ALL_REGIONS,
+                             regionDefinition = IMGT_VDJ_REGIONS,
                              germlineColumn = "germline_alignment_d_mask", 
                              muFreqColumn = NULL, 
                              method=c("mostCommon","thresholdedFreq","catchAll","mostMutated","leastMutated"),
@@ -621,7 +621,7 @@ calcBaselineOneClone <- function(clone_num, db, sequenceColumn = "SEQUENCE_IMGT"
                                  juncLenCol="JUNCTION_LENGTH",
                                  germlineColumn = "GERMLINE_IMGT",
                                  testStatistic = c("local", "focused", "imbalanced"), 
-                                 regionDefinition = IMGT_ALL_REGIONS,
+                                 regionDefinition = IMGT_VDJ_REGIONS,
                                  targetingModel = HH_S5F, 
                                  mutationDefinition = NULL,
                                  calcStats = FALSE, 

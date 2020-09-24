@@ -938,10 +938,10 @@ collapseClones <- function(db, cloneColumn = "clone_id",
     #    This case is different from case 2, as regioDefinition@name cannot be extracted
     #    from RegionDefintion
     # 2. Region definition does not include FWR3 and CDR4 (meaning it is
-    #    different than IMGT_VDJ and IMGT_ALL_REGIONS).
+    #    different than IMGT_VDJ and IMGT_VDJ_REGIONS).
     #    In this case original collapseClonesL can be used.
     # 3. Region definition includes FWR3 and CDR4 (meaning it is 
-    #    IMGT_VDJ or IMGT_ALL_REGIONS).
+    #    IMGT_VDJ or IMGT_VDJ_REGIONS).
     #    In this case - need to calculate collapseClonesL per clone
     #    as regionDefinition is different per clone.    
     
@@ -962,7 +962,7 @@ collapseClones <- function(db, cloneColumn = "clone_id",
     }
     
     # Case 2:
-    else if ((regionDefinition@name != "IMGT_ALL_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
+    else if ((regionDefinition@name != "IMGT_VDJ_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
         collapsed_clones_db <- collapseClonesL(db=db, cloneColumn = cloneColumn, 
                                                sequenceColumn = sequenceColumn,
                                                germlineColumn = germlineColumn,
@@ -978,7 +978,7 @@ collapseClones <- function(db, cloneColumn = "clone_id",
     }
     
     # Case 3:
-    else if ((regionDefinition@name == "IMGT_ALL_REGIONS") | (regionDefinition@name == "IMGT_VDJ")) {
+    else if ((regionDefinition@name == "IMGT_VDJ_REGIONS") | (regionDefinition@name == "IMGT_VDJ")) {
         # Since each clone needs a different regionDefinition - then this function 
         # will go over all clones in db, and for each clone it will run the function
         # collapseClonesL with its own regionDefinition.
@@ -2097,10 +2097,10 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
 #    This case is different from case 2, as regioDefinition@name cannot be extracted
 #    from RegionDefintion
 # 2. Region definition does not include FWR3 and CDR4 (meaning it is
-#    different than IMGT_VDJ and IMGT_ALL_REGIONS).
+#    different than IMGT_VDJ and IMGT_VDJ_REGIONS).
 #    In this case original observedMutationsL can be used.
 # 3. Region definition includes FWR3 and CDR4 (meaning it is 
-#    IMGT_VDJ or IMGT_ALL_REGIONS).
+#    IMGT_VDJ or IMGT_VDJ_REGIONS).
 #    In this case - need to calculate obserevedMutations per clone
 #    as regionDefinition is different per clone.
     
@@ -2128,7 +2128,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     }
     
     # Case 2:
-    else if ((regionDefinition@name != "IMGT_ALL_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
+    else if ((regionDefinition@name != "IMGT_VDJ_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
         observedMutations_db <- observedMutationsL(db=db, sequenceColumn = sequenceColumn, 
                                                   germlineColumn = refColumn, 
                                                   regionDefinition = regionDefinition, 
@@ -2140,7 +2140,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     }
     
     # Case 3:
-    else if ((regionDefinition@name == "IMGT_ALL_REGIONS") | (regionDefinition@name == "IMGT_VDJ")) {
+    else if ((regionDefinition@name == "IMGT_VDJ_REGIONS") | (regionDefinition@name == "IMGT_VDJ")) {
         
         # Since each clone needs a different regionDefinition - then this function 
         # will loop on all clones in db, and for each clone it will run the function
@@ -3460,10 +3460,10 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     # This case is different from case 2, as regioDefinition@name cannot be extracted
     # from RegionDefintion
     # 2. Region definition does not include FWR3 and CDR4 (meaning it is
-    # different than IMGT_VDJ and IMGT_ALL_REGIONS).
+    # different than IMGT_VDJ and IMGT_VDJ_REGIONS).
     # In this case original expectedMutationsL can be used.
     # 3. Region definition includes FWR3 and CDR4 (meaning it is 
-    # IMGT_VDJ or IMGT_ALL_REGIONS).
+    # IMGT_VDJ or IMGT_VDJ_REGIONS).
     # In this case - need to calculate expectedMutations per clone
     # as regionDefinition is different per clone.
     
@@ -3489,7 +3489,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     }
     
     # Case 2:
-    else if ((regionDefinition@name != "IMGT_ALL_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
+    else if ((regionDefinition@name != "IMGT_VDJ_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
         expectedMutations_db <- expectedMutationsL(db=db, sequenceColumn = sequenceColumn, 
                                                    germlineColumn = refColumn, 
                                                    targetingModel = targetingModel, 
@@ -3499,7 +3499,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     }
     
     # Case 3:
-    else if ((regionDefinition@name == "IMGT_ALL_REGIONS") | (regionDefinition@name == "IMGT_VDJ")) {
+    else if ((regionDefinition@name == "IMGT_VDJ_REGIONS") | (regionDefinition@name == "IMGT_VDJ")) {
         
         # Since each clone needs a different regionDefinition - then this function will loop on all clones in db,
         # and for each clone it will run the function expectedMutationsL with its own regionDefinition.

@@ -166,7 +166,7 @@ makeNullRegionDefinition <- function(regionLength) {
 #'                                      these slots depend on the junction length which is unknown yet.
 #'                                      After \link{makeRegion} is applied - these slots get specific values
 #'                                      per the specific sequence and junction length.
-#'   \item  \code{IMGT_ALL_REGIONS}:    The IMGT numbered segments of FWR1/2/3/4 and CDR1/2/3.
+#'   \item  \code{IMGT_VDJ_REGIONS}:    The IMGT numbered segments of FWR1/2/3/4 and CDR1/2/3.
 #'                                      This defines separate regions for each of CDR1, CDR2, CDR3, 
 #'                                      FWR1, FWR2, FWR3 and FWR4. 
 #'                                      Note that until function \link{makeRegion} will be applied
@@ -203,7 +203,7 @@ NULL
 #' @rdname  IMGT_SCHEMES
 NULL
 
-#' @name    IMGT_ALL_REGIONS
+#' @name    IMGT_VDJ_REGIONS
 #' @rdname  IMGT_SCHEMES
 NULL
 
