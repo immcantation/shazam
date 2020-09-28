@@ -2266,7 +2266,7 @@ calcBaseline <- function(db,
     }
     
     # Case 2:
-    else if ((regionDefinition@name != "IMGT_VDJ_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
+    else if ((regionDefinition@name != "IMGT_VDJ_BY_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
         ret_baseline <- calcBaselineL(db=db, sequenceColumn = sequenceColumn,
                                       germlineColumn = germlineColumn,
                                       testStatistic = testStatistic, 
@@ -2278,7 +2278,7 @@ calcBaseline <- function(db,
     }
     
     # Case 3:
-    else if ((regionDefinition@name == "IMGT_VDJ_REGIONS") | (regionDefinition@name == "IMGT_VDJ")) {
+    else if ((regionDefinition@name == "IMGT_VDJ_BY_REGIONS") | (regionDefinition@name == "IMGT_VDJ")) {
         
         clones_list <- makeClonesList(db=db, clone_col=cloneColumn)
         
