@@ -2160,7 +2160,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
         first_clone <- TRUE
         for (cur_clone in clones_in_db) {
             # subseting the db to lines for specific clone
-            cur_clone_db <- db[db[,cloneColumn] == cur_clone,]
+            cur_clone_db <- db[db[[cloneColumn]] == cur_clone,]
             # setting the regionDefinition for the specific clone:
             cur_clone_reg <- makeRegion(juncLength = cur_clone_db[1,juncLengthColumn], 
                                         sequenceImgt = cur_clone_db[1,sequenceColumn], 
@@ -3517,7 +3517,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
         first_clone <- TRUE
         for (cur_clone in clones_in_db) {
             # subseting the db to lines for specific clone
-            cur_clone_db <- db[db[,cloneColumn] == cur_clone,]
+            cur_clone_db <- db[db[[cloneColumn]] == cur_clone,]
             # setting the regionDefinition for the specific clone:
             junc_len <- nchar(cur_clone_db[1,sequenceColumn])
             cur_clone_reg <- makeRegion(juncLength = cur_clone_db[1,juncLengthColumn], 

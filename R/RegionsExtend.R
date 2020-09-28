@@ -58,7 +58,7 @@ makeChangeoCloneCurClone <- function(db, cur_clone_num, id="sequence_id",
     #clone_header <- as.character(as.name(clone))
     #cur_clone_db <- subset(db, clone_header == cur_clone_num)
     # subseting the db to lines for specific clone
-    cur_clone_db <- db[db[,clone] == cur_clone_num,]
+    cur_clone_db <- db[db[[clone]] == cur_clone_num,]
     curCloneObj <- makeChangeoClone(data=cur_clone_db, id=id, seq=seq, germ=germ, 
                                       v_call=v_call, j_call=j_call, junc_len=junc_len, 
                                       clone=clone, mask_char=mask_char, 
@@ -89,7 +89,7 @@ makeChangeoCloneCurClone <- function(db, cur_clone_num, id="sequence_id",
 makeGraphCurClone <- function(curCloneObj,dnapars_exec,seq_id_col="sequence_id") {
     # The below line is in order to avoid warning message
     # (message: "binding factor and character vector, coercing into character vector")
-    curCloneObj@data[,seq_id_col] <- as.character(curCloneObj@data[,seq_id_col]) 
+    curCloneObj@data[[seq_id_col]] <- as.character(curCloneObj@data[[seq_id_col]]) 
     curCloneGraph <- buildPhylipLineage(curCloneObj,dnapars_exec,rm_temp = TRUE)  
     # in case that the cur_clone_num does not include at least 2 unique sequences - the curCloneGraph will be "NULL".
     #note: "N" instead of A/C/G/T does not make a sequence unique.
@@ -490,7 +490,7 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
                            clone_col="clone", 
                            regionDefinition=IMGT_VDJ_REGIONS) {
     # subseting the db to lines for specific clone
-    clone_db <- db[db[,clone_col] == clone_num,]
+    clone_db <- db[db[[clone_col]] == clone_num,]
     # getting one of the sequences of the specific clone: 
     seq <- clone_db[1, seq_col]
     junc_len <- clone_db[1, juncLenCol]
@@ -562,7 +562,7 @@ collapseOneClone <- function(clone_num, db, juncLenCol="junction_length",
                              minimumFrequency = NULL,includeAmbiguous = FALSE, 
                              breakTiesStochastic = FALSE,
                              breakTiesByColumns = NULL, expandedDb = FALSE, nproc = 1) {
-    clone_db <- db[db[,cloneColumn] == clone_num,]
+    clone_db <- db[db[[cloneColumn]] == clone_num,]
     clone_reg_def <- getCloneRegion(clone_num=clone_num, db=clone_db, 
                                     seq_col=sequenceColumn, 
                                     juncLenCol=juncLenCol, 
@@ -631,7 +631,7 @@ calcBaselineOneClone <- function(clone_num, db, sequenceColumn = "sequence_align
                               seq_col=sequenceColumn,
                               juncLenCol=juncLenCol,
                               clone_col=cloneColumn, regionDefinition=regionDefinition)
-    clone_baseline <- shazam:::calcBaselineL(db=clone_db,sequenceColumn = sequenceColumn,
+    clone_baseline <- calcBaselineL(db=clone_db,sequenceColumn = sequenceColumn,
                                     germlineColumn = germlineColumn, 
                                     testStatistic = testStatistic,
                                     regionDefinition = reg_def,
