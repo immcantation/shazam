@@ -82,13 +82,13 @@
 #'
 #' @section  Lineage information merging into ChangeoClone :
 #' \code{shazam} provides tools to merge lineage information of clones to 
-#' a \link{changeOclone} object. This includes parent ID and parent sequence for 
+#' a \link{ChangeoClone} object. This includes parent ID and parent sequence for 
 #' each read in db. The motivation for this is to enable BASELINe analysis of 
 #' observed and expected mutations, with regard to the sequence parent, instead 
 #' the sequence germline. 
 #' 
 #' \itemize{
-#'   \item  \link{makeGraphDf}:              Adding Lineage information to changeOclone.
+#'   \item  \link{makeGraphDf}:              Adding Lineage information to ChangeoClone.
 #'   \item  \link{plotCloneLineageTree}:     Ploting a clone lineage tree.
 #' }
 #'
