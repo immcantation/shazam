@@ -343,33 +343,6 @@ plotCloneLineageTree <- function(db, curClone=NULL, id="sequence_id",
            fill=c("lightgreen", "lightpink", "lightblue"), cex=0.75)
 }
 
-# Extended region definitions
-# 
-# These 2 new regions will be of class RegionDefinition, with most of its slots
-# full, except for slots seqLength and boundaries and - which will be 0 and
-# empty respectively, and filled only after using function makeRegion.
-
-IMGT_VDJ_BY_REGIONS <- new("RegionDefinition", name="IMGT_VDJ_BY_REGIONS",
-                        description="IMGT numbering scheme defining the V(D)J segment by individual cdr1/2/3 and fwr1/2/3/4 regions",
-                        boundaries=factor(), seqLength=0, 
-                        regions=c("cdr1", "cdr2", "cdr3", "fwr1", "fwr2", 
-                                  "fwr3","fwr4"), 
-                        labels=c("cdr1_r", "cdr1_s", "cdr2_r", "cdr2_s", 
-                                 "cdr3_r", "cdr3_s", "fwr1_r", "fwr1_s", 
-                                 "fwr2_r", "fwr2_s", "fwr3_r", "fwr3_s", 
-                                 "fwr4_r", "fwr4_s"), 
-                        citation="Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin and T cell receptor variable domains and Ig superfamily V-like domains. Developmental and comparative immunology. 2003;27:55-77.")
-usethis::use_data(IMGT_VDJ_BY_REGIONS, overwrite=TRUE)
-
-
-IMGT_VDJ <- new("RegionDefinition", name="IMGT_VDJ",
-                description="IMGT numbering scheme defining the V(D)J segment only by cdr/fwr regions, including cdr3 and fwr4", 
-                boundaries=factor(), seqLength=0, 
-                regions=c("cdr", "fwr"), 
-                labels=c("cdr_r", "cdr_s", "fwr_r", "fwr_s"),  
-                citation="Lefranc MP, Pommie C, Ruiz M, Giudicelli V, Foulquier E, Truong L, Thouvenin-Contet V, Lefranc G. IMGT unique numbering for immunoglobulin and T cell receptor variable domains and Ig superfamily V-like domains. Developmental and comparative immunology. 2003;27:55-77.")
-usethis::use_data(IMGT_VDJ, overwrite=TRUE)
-
 #' Defining a Region that will include also CDR3 and FWR4 based on junction length and sequence
 #' 
 #' @details  
