@@ -631,13 +631,15 @@ calcBaselineOneClone <- function(clone_num, db, sequenceColumn = "sequence_align
                               seq_col=sequenceColumn,
                               juncLenCol=juncLenCol,
                               clone_col=cloneColumn, regionDefinition=regionDefinition)
-    clone_baseline <- calcBaselineL(db=clone_db,sequenceColumn = sequenceColumn,
+    clone_baseline <- shazam:::calcBaselineL(db=clone_db,sequenceColumn = sequenceColumn,
                                     germlineColumn = germlineColumn, 
                                     testStatistic = testStatistic,
                                     regionDefinition = reg_def,
                                     targetingModel = targetingModel,
                                     mutationDefinition = mutationDefinition,
-                                    calcStats = calcStats, nproc = nproc)
+                                    calcStats = calcStats, nproc = nproc,
+                                    cloneColumn=cloneColumn,
+                                    juncLengthColumn=juncLenCol)
     return(clone_baseline)
 }
 

@@ -235,7 +235,6 @@ test_that("calcBaseline", {
     db_clonal <- collapseClones(db, cloneColumn="CLONE", 
                                 sequenceColumn="SEQUENCE_IMGT",
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
-                                juncLenCol = "JUNCTION_LENGTH",
                                 method="thresholdedFreq", minimumFrequency=0.6,
                                 includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
     
@@ -245,8 +244,7 @@ test_that("calcBaseline", {
     #set.seed(723)
     db_baseline <- calcBaseline(db=db_clonal, 
                                 sequenceColumn="clonal_sequence",
-                                germlineColumn="clonal_germline",
-                                juncLenCol = "JUNCTION_LENGTH",
+                                germlineColumn="clonal_germline", 
                                 testStatistic="focused",
                                 regionDefinition=IMGT_V,
                                 targetingModel = HH_S5F,

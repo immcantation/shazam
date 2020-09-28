@@ -378,7 +378,9 @@ calcBaselineL <- function(db,
                          targetingModel=HH_S5F,
                          mutationDefinition=NULL,
                          calcStats=FALSE,
-                         nproc=1) {
+                         nproc=1,
+                         cloneColumn=NULL,
+                         juncLengthColumn=NULL) {
     # Hack for visibility of foreach index variable
     idx <- NULL
     
@@ -386,7 +388,7 @@ calcBaselineL <- function(db,
     testStatistic <- match.arg(testStatistic)
     
     # Check for valid columns
-    check <- checkColumns(db, c(sequenceColumn, germlineColumn))
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn, cloneColumn, juncLengthColumn))
     if (check != TRUE) { stop(check) }
     
     # Check region definition
@@ -422,6 +424,7 @@ calcBaselineL <- function(db,
         cluster <- parallel::makeCluster(nproc, type="PSOCK")
         parallel::clusterExport(cluster, list('db',
                                               'sequenceColumn', 'germlineColumn', 
+                                              'cloneColumn', 'juncLengthColumn',
                                               'testStatistic', 'regionDefinition',
                                               'targetingModel', 'mutationDefinition','calcStats',
                                               'break2chunks', 'PowersOfTwo', 
@@ -480,7 +483,9 @@ calcBaselineL <- function(db,
                                 regionDefinition=regionDefinition,
                                 mutationDefinition=mutationDefinition,
                                 frequency=FALSE, combine=FALSE,
-                                nproc=0)
+                                nproc=0,
+                                cloneColumn=cloneColumn,
+                                juncLengthColumn=juncLengthColumn)
         
         # Calculate the expected frequencies of mutations
         db <- expectedMutations(db,
@@ -489,7 +494,9 @@ calcBaselineL <- function(db,
                                 regionDefinition=regionDefinition,
                                 targetingModel=targetingModel,
                                 mutationDefinition=mutationDefinition,
-                                nproc=0)
+                                nproc=0,
+                                cloneColumn=cloneColumn,
+                                juncLengthColumn=juncLengthColumn)
     }
     
     # Calculate PDFs for each sequence
