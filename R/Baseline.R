@@ -2283,8 +2283,8 @@ calcBaseline <- function(db,
         clones_list <- makeClonesList(db=db, clone_col=cloneColumn)
         
         # bellow 2 lines are for running faster in parallel cores:
-        cl <- parallel::makeCluster(nproc, type='PSOCK')
-        registerDoParallel(cl)
+        # cl <- parallel::makeCluster(nproc, type='PSOCK')
+        # registerDoParallel(cl)
         clones_baseline_list <- sapply(X=clones_list, FUN=calcBaselineOneClone, db=db, 
                                        juncLenCol=juncLenCol,
                                        sequenceColumn = sequenceColumn, cloneColumn=cloneColumn, 
@@ -2367,7 +2367,7 @@ calcBaseline <- function(db,
                             binomK=baseline_binomK, binomN=baseline_binomN, binomP=baseline_binomP,
                             pdfs=baseline_pdfs, stats=baseline_stats)  
         # going back to none paralel mode:
-        registerDoSEQ()
+        # registerDoSEQ()
     }
     
     return(ret_baseline)
