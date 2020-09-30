@@ -3458,10 +3458,9 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                regionDefinition=NULL, mutationDefinition = NULL, 
                                nproc = 1,
                                refOption = "germline", 
-                               cloneColumn = "CLONE", 
-                               #juncLengthColumn = "junction_length",
-                               juncLengthColumn = "JUNCTION_LENGTH",
-                               parentColumn = "PARENT_SEQUENCE") {
+                               cloneColumn = "clone_id", 
+                               juncLengthColumn = "junction_length",
+                               parentColumn = "parent_sequence") {
     
     # we will split this function into 3 cases:
     # 1. RegionDefinition is NULL.

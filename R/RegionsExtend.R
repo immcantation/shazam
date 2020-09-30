@@ -49,9 +49,9 @@ makeClonesList <-  function(db, clone_col="clone_id") {
 #   - ChangeoClone object of the specific clone_num 
 #   - Clone size (after collapsing relevant lines)
 makeChangeoCloneCurClone <- function(db, cur_clone_num, id="sequence_id",  
-                                    seq="SEQUENCE_IMGT", germ="GERMLINE_IMGT",  
+                                    seq="sequence_alignment", germ="germline_alignment",  
                                     v_call="v_call", j_call="j_call",  
-                                    junc_len="JUNCTION_LENGTH", clone="clone_id", 
+                                    junc_len="junction_length", clone="clone_id", 
                                     mask_char="N", max_mask=0,pad_end=FALSE,text_fields=NULL, 
                                     num_fields=NULL, seq_fields=NULL,
                                     add_count=TRUE, verbose=FALSE) {
@@ -316,9 +316,9 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
 #'                      id="sequence_id", germ="germline_alignment", dnapars_exec = dnapars_exec)
 #' @export   
 plotCloneLineageTree <- function(db, curClone=NULL, id="sequence_id", 
-                                 seq="SEQUENCE_IMGT", germ="GERMLINE_IMGT", 
+                                 seq="sequence_alignment", germ="germline_alignment", 
                                  v_call="v_call", j_call="j_call", 
-                                 junc_len="JUNCTION_LENGTH", clone="clone_id", 
+                                 junc_len="junction_length", clone="clone_id", 
                                  mask_char="N", max_mask=0, pad_end=FALSE, 
                                  dnapars_exec) {
     curCloneObj <- makeChangeoCloneCurClone(db=db, cur_clone_num=curClone, id=id, 
