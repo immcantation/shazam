@@ -502,9 +502,13 @@ calcBaselineL <- function(db,
     # Calculate PDFs for each sequence
     
     # Print status to console if not using extended regions definitions
-    if ((regionDefinition@name != "IMGT_VDJ_BY_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
-        cat("Calculating BASELINe probability density functions...\n")   
+    status <- NULL
+    if (!is.null(regionDefinition)) {
+        if (!regionDefinition@name %in% c("IMGT_VDJ_BY_REGIONS", "IMGT_VDJ")) {
+            status <- "Calculating BASELINe probability density functions...\n"
+        }    
     }
+    cat(status)
     
     # Number of sequences (used in foreach)
     totalNumbOfSequences <- nrow(db)
