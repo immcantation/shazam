@@ -3332,8 +3332,10 @@ expectedMutationsL <- function(db,
     }
     
     
-    # Printing status to console
-    cat("Calculating the expected frequencies of mutations...\n")
+    # Printing status to console if not using extended region definitions
+    if ((regionDefinition@name != "IMGT_VDJ_BY_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
+        cat("Calculating the expected frequencies of mutations...\n")
+    }
     
     # Calculate targeting for each sequence (based on the germline)
     # Should be a 5 x N matrix where N in the number of nucleotides defined by
