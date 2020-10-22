@@ -995,7 +995,8 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                                  "pairwise5MerDist",
                                  "nonsquare5MerDist",
                                  "singleCell",
-                                 "locusColumn")
+                                 "locusColumn",
+                                 "%>%")
         parallel::clusterExport(cluster, export_functions, envir=environment())
     }
     
