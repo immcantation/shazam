@@ -995,8 +995,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                                  "pairwise5MerDist",
                                  "nonsquare5MerDist",
                                  "singleCell",
-                                 "locusColumn",
-                                 "%>%")
+                                 "locusColumn")
         parallel::clusterExport(cluster, export_functions, envir=environment())
     }
     
@@ -1022,9 +1021,8 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         
         crossGroups <- NULL
         if (!is.null(cross)) {
-            crossGroups <- db_group %>% 
-              dplyr::group_by(!!!rlang::syms(cross)) %>%
-              dplyr::group_indices()
+              x <- dplyr::group_by(db_group, !!!rlang::syms(cross))
+              crossGroups <- dplyr::group_indices(x)
         }
         
         arrSeqs <-  db[[sequenceColumn]][idx]

@@ -1,8 +1,12 @@
-Version 1.0.2.999: September 1, 2020
+Version 1.0.2.999: November 10, 2020
 -------------------------------------------------------------------------------
+
+Distance Profiling:
 
 + Fixed a bug in `distToNearest` where TRB and TRD sequences where ignored in 
   distance calculation.
++ Fixed a bug in `distToNearest` causing a fatal error when `cross` was set.
+
 
 Version 1.0.2: August 10, 2020
 -------------------------------------------------------------------------------
