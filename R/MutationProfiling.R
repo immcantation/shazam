@@ -1513,11 +1513,11 @@ observedMutations <- function(db,
     if (ncol(observed_mutations) > 1) sep <- "_"
     observed_mutations[is.na(observed_mutations)] <- 0
     if (frequency == TRUE) {
-        colnames(observed_mutations) <- gsub("_$","",paste("mu_freq", colnames(observed_mutations), sep=sep))
+        colnames(observed_mutations) <- gsub("_$", "", paste("mu_freq", colnames(observed_mutations), sep=sep))
     } else {
-        colnames(observed_mutations) <- gsub("_$","",paste("mu_count", colnames(observed_mutations), sep=sep))
+        colnames(observed_mutations) <- gsub("_$", "", paste("mu_count", colnames(observed_mutations), sep=sep))
     }
-    
+
     # Properly shutting down the cluster
     if (nproc > 1) { parallel::stopCluster(cluster) }
     
