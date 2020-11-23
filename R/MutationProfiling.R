@@ -2092,14 +2092,19 @@ observedMutationsL <- function(db,
 #'                             nproc=1)         
 #' @export 
 observedMutations <- function(db,sequenceColumn = "sequence_alignment", 
-                               germlineColumn = "germline_alignment",
+                               germlineColumn = "germline_alignment_d_mask",
                                regionDefinition=NULL, mutationDefinition = NULL, 
                                ambiguousMode = c("eitherOr", "and"), 
                                frequency = FALSE, combine = FALSE, nproc = 1,
-                               refOption = "germline", 
+                               refOption = c("germline", "parent"), 
                                cloneColumn = "clone_id", 
                                juncLengthColumn = "junction_length",
                                parentColumn = "parent_sequence") {
+    
+    checkColumns(db, c(sequenceColumn, germlineColumn, cloneColumn))
+    ambiguousMode <- match.arg(ambiguousMode)
+    refOption <- match.arg(refOption)
+    
     
 # This function is split into 3 cases:
 # 1. RegionDefinition is NULL.
@@ -2117,11 +2122,9 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     # setting the reference column:
     if (refOption == "germline") {
         refColumn <- germlineColumn
-    }
-    else if (refOption == "parent") {
+    } else if (refOption == "parent") {
         refColumn <- parentColumn
-    }
-    else {
+    } else {
         stop(deparse(substitute(refOption)), " is not a valid refOption. Expecting 'germline' or 'parent'.")
     }
     
