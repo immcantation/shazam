@@ -203,61 +203,61 @@ test_that("getCloneRegion", {
     expect_equal(clone_6940_reg,seq_793_reg_def)
 })
 
-test_that("collapseOneClone", {
-    data("ExampleDb")
-    db_3110 <- subset(ExampleDb,clone_id == 3110)
-    region_3110_ALL_REGIONS <- getCloneRegion(clone_num = 3110, db = ExampleDb, 
-                                              clone_col = "clone_id", 
-                                              regionDefinition = IMGT_VDJ_BY_REGIONS,
-                                              seq_col = "sequence_alignment")
-    region_3110_ALL <- getCloneRegion(clone_num = 3110, db = ExampleDb, 
-                                      clone_col = "clone_id", 
-                                      regionDefinition = IMGT_VDJ,
-                                      seq_col = "sequence_alignment")
-    collapseOneClone_3110_V_BY_REGIONS <- collapseOneClone(clone_num = 3110, db=ExampleDb, 
-                                              juncLenCol="junction_length", 
-                                              cloneColumn = "clone_id", 
-                                              sequenceColumn = "sequence_alignment", 
-                                              regionDefinition = IMGT_V_BY_REGIONS,
-                                              germlineColumn = "germline_alignment")
-    collapseOneClone_db_3110_V_BY_REGIONS <- collapseClones(db=db_3110, 
-                                               cloneColumn = "clone_id", 
-                                               sequenceColumn = "sequence_alignment", 
-                                               regionDefinition = IMGT_V_BY_REGIONS,
-                                               germlineColumn = "germline_alignment")
-    collapseOneClone_3110_ALL_REGIONS <- collapseOneClone(clone_num = 3110, db=ExampleDb, 
-                                                           juncLenCol="junction_length", 
-                                                           cloneColumn = "clone_id", 
-                                                           sequenceColumn = "sequence_alignment", 
-                                                           regionDefinition = IMGT_VDJ_BY_REGIONS,
-                                                           germlineColumn = "germline_alignment")
-    collapseOneClone_db_3110_ALL_REGIONS <- collapseClones(db=db_3110, 
-                                                            cloneColumn = "clone_id", 
-                                                            sequenceColumn = "sequence_alignment", 
-                                                            regionDefinition = region_3110_ALL_REGIONS,
-                                                            germlineColumn = "germline_alignment")
-    collapseOneClone_3110_ALL <- collapseOneClone(clone_num = 3110, db=ExampleDb, 
-                                                          juncLenCol="junction_length", 
-                                                          cloneColumn = "clone_id", 
-                                                          sequenceColumn = "sequence_alignment", 
-                                                          regionDefinition = IMGT_VDJ,
-                                                          germlineColumn = "germline_alignment")
-    collapseOneClone_db_3110_ALL <- collapseClones(db=db_3110, 
-                                                           cloneColumn = "clone_id", 
-                                                           sequenceColumn = "sequence_alignment", 
-                                                           regionDefinition = region_3110_ALL,
-                                                           germlineColumn = "germline_alignment")
-    
-    expect_equal(collapseOneClone_3110_V_BY_REGIONS, collapseOneClone_db_3110_V_BY_REGIONS)
-    expect_equal(collapseOneClone_3110_ALL_REGIONS, collapseOneClone_db_3110_ALL_REGIONS)
-    expect_equal(collapseOneClone_3110_ALL, collapseOneClone_db_3110_ALL)
-    expect_equal(as.character(collapseOneClone_3110_V_BY_REGIONS[,"clonal_sequence"]),
-                 substr(as.character(collapseOneClone_3110_ALL_REGIONS[,"clonal_sequence"]),
-                 start=1, stop=312))
-    expect_equal(as.character(collapseOneClone_3110_V_BY_REGIONS[,"clonal_germline"]),
-                 substr(as.character(collapseOneClone_3110_ALL_REGIONS[,"clonal_germline"]),
-                        start=1, stop=312))
-})
+# test_that("collapseOneClone", {
+#     data("ExampleDb")
+#     db_3110 <- subset(ExampleDb,clone_id == 3110)
+#     region_3110_ALL_REGIONS <- getCloneRegion(clone_num = 3110, db = ExampleDb, 
+#                                               clone_col = "clone_id", 
+#                                               regionDefinition = IMGT_VDJ_BY_REGIONS,
+#                                               seq_col = "sequence_alignment")
+#     region_3110_ALL <- getCloneRegion(clone_num = 3110, db = ExampleDb, 
+#                                       clone_col = "clone_id", 
+#                                       regionDefinition = IMGT_VDJ,
+#                                       seq_col = "sequence_alignment")
+#     collapseOneClone_3110_V_BY_REGIONS <- collapseOneClone(clone_num = 3110, db=ExampleDb, 
+#                                               juncLenCol="junction_length", 
+#                                               cloneColumn = "clone_id", 
+#                                               sequenceColumn = "sequence_alignment", 
+#                                               regionDefinition = IMGT_V_BY_REGIONS,
+#                                               germlineColumn = "germline_alignment")
+#     collapseOneClone_db_3110_V_BY_REGIONS <- collapseClones(db=db_3110, 
+#                                                cloneColumn = "clone_id", 
+#                                                sequenceColumn = "sequence_alignment", 
+#                                                regionDefinition = IMGT_V_BY_REGIONS,
+#                                                germlineColumn = "germline_alignment")
+#     collapseOneClone_3110_ALL_REGIONS <- collapseOneClone(clone_num = 3110, db=ExampleDb, 
+#                                                            juncLenCol="junction_length", 
+#                                                            cloneColumn = "clone_id", 
+#                                                            sequenceColumn = "sequence_alignment", 
+#                                                            regionDefinition = IMGT_VDJ_BY_REGIONS,
+#                                                            germlineColumn = "germline_alignment")
+#     collapseOneClone_db_3110_ALL_REGIONS <- collapseClones(db=db_3110, 
+#                                                             cloneColumn = "clone_id", 
+#                                                             sequenceColumn = "sequence_alignment", 
+#                                                             regionDefinition = region_3110_ALL_REGIONS,
+#                                                             germlineColumn = "germline_alignment")
+#     collapseOneClone_3110_ALL <- collapseOneClone(clone_num = 3110, db=ExampleDb, 
+#                                                           juncLenCol="junction_length", 
+#                                                           cloneColumn = "clone_id", 
+#                                                           sequenceColumn = "sequence_alignment", 
+#                                                           regionDefinition = IMGT_VDJ,
+#                                                           germlineColumn = "germline_alignment")
+#     collapseOneClone_db_3110_ALL <- collapseClones(db=db_3110, 
+#                                                            cloneColumn = "clone_id", 
+#                                                            sequenceColumn = "sequence_alignment", 
+#                                                            regionDefinition = region_3110_ALL,
+#                                                            germlineColumn = "germline_alignment")
+#     
+#     expect_equal(collapseOneClone_3110_V_BY_REGIONS, collapseOneClone_db_3110_V_BY_REGIONS)
+#     expect_equal(collapseOneClone_3110_ALL_REGIONS, collapseOneClone_db_3110_ALL_REGIONS)
+#     expect_equal(collapseOneClone_3110_ALL, collapseOneClone_db_3110_ALL)
+#     expect_equal(as.character(collapseOneClone_3110_V_BY_REGIONS[,"clonal_sequence"]),
+#                  substr(as.character(collapseOneClone_3110_ALL_REGIONS[,"clonal_sequence"]),
+#                  start=1, stop=312))
+#     expect_equal(as.character(collapseOneClone_3110_V_BY_REGIONS[,"clonal_germline"]),
+#                  substr(as.character(collapseOneClone_3110_ALL_REGIONS[,"clonal_germline"]),
+#                         start=1, stop=312))
+# })
 
 
 test_that("calcBaselineOneClone", {

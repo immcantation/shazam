@@ -13,7 +13,7 @@ NULL
 # output: 
 # A vector of all clone numbers in db (each clone number 
 #  will appear only once in the list).  
-# the transpose is needed to ge tthe proper length of the coerced value
+# the transpose is needed to get the proper length of the coerced value
 makeClonesList <-  function(db, clone_col="clone_id") {
     clones_list <- as.list(t(unique(db[, c(clone_col)])))
     return(clones_list)
@@ -472,90 +472,6 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
                       regionDefinition=regionDefinition)
     return(reg)
 }
-
-# calculating consensus sequence for one clone only.  
-# Note: works same as collapseClones function, but on one clone only, and thus
-# can work with extended region definitions such as IMGT_VDJ and IMGT_VDJ_BY_REGIONS.
-# Inputs:
-# - clone_num:        the clone number for which to calculate the consensus sequence.
-# - db:               data.frame containing sequence data. 
-# - juncLenCol:       column name of junction length
-# - cloneColumn:      name of the column containing clonal identifiers
-# - sequenceColumn:   name of the column containing input sequences. 
-#                     The length of each input sequence should match that of its 
-#                     corresponding germline sequence.
-# - regionDefinition: RegionDefinition object defining the regions and boundaries 
-#                     of the Ig sequences. 
-# - germlineColumn:   name of the column containing germline sequences.
-#                     The length of each germline sequence should match that of 
-#                     its corresponding input sequence.
-# - muFreqColumn:     name of the column containing mutation frequency. 
-#                     Applicable to the "mostMutated" and "leastMutated" methods. 
-#                     If not supplied, mutation frequency is computed by calling 
-#                     observedMutations. Default is NULL. See Cautions for note on usage.
-# - method:           method for calculating input consensus sequence. 
-#                     One of "thresholdedFreq", "mostCommon", "catchAll", "mostMutated", 
-#                     or "leastMutated". See "Methods" for details.
-# - minimumFrequency: frequency threshold for calculating input consensus sequence. 
-#                     Applicable to and required for the "thresholdedFreq" method. 
-#                     A canonical choice is 0.6. Default is NULL.
-# - includeAmbiguous: whether to use ambiguous characters to represent positions at 
-#                     which there are multiple characters with frequencies that are 
-#                     at least minimumFrequency or that are maximal (i.e. ties). 
-#                     Applicable to and required for the "thresholdedFreq" and "mostCommon" 
-#                     methods. Default is FALSE. See "Choosing ambiguous characters" 
-#                     for rules on choosing ambiguous characters.
-# - breakTiesStochastic: In case of ties, whether to randomly pick a sequence from 
-#                        sequences that fulfill the criteria as consensus. 
-#                        Applicable to and required for all methods except for "catchAll". 
-#                        Default is FALSE. See "Methods" for details.
-# - breakTiesByColumns: A list of the form list(c(col_1, col_2, ...), c(fun_1, fun_2, ...)), 
-#                       where col_i is a character name of a column in db, and fun_i 
-#                       is a function to be applied on that column. Currently, 
-#                       only max and min are supported. Note that the two c()'s in 
-#                       list() are essential (i.e. if there is only 1 column, the 
-#                       list should be of the form list(c(col_1), c(func_1)). 
-#                       Applicable to and optional for the "mostMutated" and "leastMutated" 
-#                       methods. If supplied, fun_i's are applied on col_i's to 
-#                       help break ties. Default is NULL. See "Methods" for details.
-# - expandedDb:         logical, indicating whether or not to return the expanded db, 
-#                       containing all the sequences (as opposed to returning just 
-#                       one sequence per clone).
-# - nproc:              Number of cores to distribute the operation over. 
-#                       If the cluster has already been set earlier, then pass 
-#                       the cluster. This will ensure that it is not reset.
-# Output:               
-#                       consensus sequence for the specific clone and reion definition.
-# 
-collapseOneClone <- function(clone_num, db, juncLenCol="junction_length", 
-                             cloneColumn = "clone_id", sequenceColumn = "sequence_alignment", 
-                             regionDefinition = IMGT_VDJ_BY_REGIONS,
-                             germlineColumn = "germline_alignment_d_mask", 
-                             muFreqColumn = NULL, 
-                             method=c("mostCommon","thresholdedFreq","catchAll","mostMutated","leastMutated"),
-                             minimumFrequency = NULL,includeAmbiguous = FALSE, 
-                             breakTiesStochastic = FALSE,
-                             breakTiesByColumns = NULL, expandedDb = FALSE, nproc = 1) {
-    clone_db <- db[db[[cloneColumn]] == clone_num,]
-    clone_reg_def <- getCloneRegion(clone_num=clone_num, db=clone_db, 
-                                    seq_col=sequenceColumn, 
-                                    juncLenCol=juncLenCol, 
-                                    clone_col=cloneColumn, 
-                                    regionDefinition=regionDefinition)
-    collapsed_clone <- collapseClonesL(db=clone_db, cloneColumn = cloneColumn, 
-                                       sequenceColumn=sequenceColumn,
-                                       germlineColumn=germlineColumn, 
-                                       muFreqColumn = muFreqColumn, 
-                                       regionDefinition = clone_reg_def, 
-                                       method = method, 
-                                       minimumFrequency = minimumFrequency, 
-                                       includeAmbiguous = includeAmbiguous,
-                                       breakTiesStochastic = breakTiesStochastic, 
-                                       breakTiesByColumns=breakTiesByColumns, 
-                                       expandedDb=expandedDb, nproc=nproc)
-    return(collapsed_clone)
-}
-
 
 # This function calculates baseline for one clone in db.  
 # It will first calculate the specific clone region definition 
