@@ -135,6 +135,7 @@
 #'                          mutate summarize
 #'                          mutate_at summarize_at
 #'                          rename transmute
+#'                          left_join
 #' @importFrom  foreach     foreach %dopar% registerDoSEQ
 #' @importFrom  igraph      V E as_adjacency_matrix graph_from_data_frame
 #'                          vertex_attr set_vertex_attr
