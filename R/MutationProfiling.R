@@ -1332,7 +1332,7 @@ calcClonalConsensus <- function(db,
 #' @param    parentColumn        parent column name in \code{db}
 #' @param    fields              additional fields used for grouping. Only relevant
 #'                               when using \code{regionDefinition} \code{IMGT_VDJ}
-#'                               or \code{IMGT_VDJ_BY_REGIONS}, when \code{loneColumn}
+#'                               or \code{IMGT_VDJ_BY_REGIONS}, when \code{cloneColumn}
 #'                               is used to create region definitions for each clone.
 #'                               Use this, for example, to avoid combining sequences 
 #'                               with the same clone_id that belong to different
