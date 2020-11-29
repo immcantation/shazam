@@ -479,7 +479,7 @@ collapseClones <- function(db, cloneColumn = "clone_id",
     # use `fields` information to id clones
     db$fields_clone_id <- db %>%
         group_by(!!!rlang::syms(c(fields, cloneColumn))) %>%
-        group_indices()
+        dplyr::group_indices()
     db$fields_clone_id <- as.character(db$fields_clone_id)
     
     # get row indices in db for each unique clone
@@ -1514,7 +1514,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
         # definition for each clone
         db$field_group <- db %>%
             group_by(!!!rlang::syms(c(fields, cloneColumn))) %>%
-            group_indices()
+            dplyr::group_indices()
     } else {
         # No grouping needed
         if (!is.null(fields)) {
@@ -1528,6 +1528,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
     
+
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){ 
         cluster <- nproc 
@@ -1551,7 +1552,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                               'makeNullRegionDefinition', 'mutationDefinition',
                                               'getCodonPos','getContextInCodon','mutationType',
                                               'AMINO_ACIDS',
-                                              'binMutationsByRegion', 'countNonNByRegion'), 
+                                              'binMutationsByRegion', 'countNonNByRegion','makeRegion'), 
                                 envir=environment())
         registerDoParallel(cluster)
     } else if (nproc == 1) {
@@ -1560,53 +1561,65 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
         registerDoSEQ()
     }
     
+    ## Prepare extended region definitions and export to cluster
+    extendedRegionDefinitions <- NULL
+    if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
+        extendedRegionDefinitions <- foreach(idx=iterators::icount(length(field_groups))) %dopar% {
+            group_id <- field_groups[idx]
+            db_group <- db[db[['field_group']] == group_id,,drop=F]
+            
+            makeRegion(juncLength = db_group[[juncLengthColumn]][1],
+                       sequenceImgt = db_group[[sequenceColumn]][1],
+                       regionDefinition=regionDefinition)
+            
+        }
+    }
+    if (nproc > 1) { 
+        parallel::clusterExport(cluster, 
+                                list('extendedRegionDefinitions'),
+                                envir=environment())
+    }
+    
     # Printing status to console
     #cat("Calculating observed number of mutations...\n")
     
     # Identify all the mutations in the sequences
+    numbOfSeqs <- nrow(db)
     observedMutations_list <-
-        foreach(idx=iterators::icount(length(field_groups))) %dopar% {
-            group_id <- field_groups[idx]
-            db_group <- db %>%
-                filter(field_group == group_id )
+        foreach(idx=iterators::icount(numbOfSeqs)) %dopar% {
+            group_id <- db[['field_group']][idx]
             groupRegionDefinition <- regionDefinition
             if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-                groupRegionDefinition <- makeRegion(juncLength = db_group[[juncLengthColumn]][1],
-                                                    sequenceImgt = db_group[[sequenceColumn]][1],
-                                                    regionDefinition=regionDefinition)
+                rd_idx <- which(field_groups == group_id)
+                groupRegionDefinition <- extendedRegionDefinitions[[rd_idx]]
             }
             
-            groupObservedMutations <- bind_rows(lapply(1:nrow(db_group), function(db_row) {
-                oM <- calcObservedMutations(db_group[[sequenceColumn]][db_row], 
-                                                db_group[[refColumn]][db_row],
-                                                frequency=frequency & !combine,
-                                                regionDefinition=groupRegionDefinition,
-                                                mutationDefinition=mutationDefinition,
-                                                returnRaw=combine,
-                                                ambiguousMode=ambiguousMode)
-                this_row_id <- db_group[['tmp_obsmu_row_id']][db_row]
-                
-                if (combine) {
-                    num_mutations <- 0
-                    if (!all(is.na(oM$pos))) {
-                        num_mutations <- sum(oM$pos$r, oM$pos$s)
-                    }
-                    if (!frequency) {
-                        c("mu_count"=num_mutations, "tmp_obsmu_row_id"=this_row_id)
-                    } else {
-                        num_nonN <- sum(oM$nonN)
-                        mu_freq <- num_mutations/num_nonN
-                        c("mu_freq"=mu_freq, "tmp_obsmu_row_id"=this_row_id)
-                    }
-                } else {
-                    oM['tmp_obsmu_row_id'] <- this_row_id
-                    oM
-                }
-            }))
+            oM <- calcObservedMutations(db[[sequenceColumn]][idx], 
+                                        db[[refColumn]][idx],
+                                        frequency=frequency & !combine,
+                                        regionDefinition=groupRegionDefinition,
+                                        mutationDefinition=mutationDefinition,
+                                        returnRaw=combine,
+                                        ambiguousMode=ambiguousMode)
+            this_row_id <- db[['tmp_obsmu_row_id']][idx]
             
-            groupObservedMutations
+            if (combine) {
+                num_mutations <- 0
+                if (!all(is.na(oM$pos))) {
+                    num_mutations <- sum(oM$pos$r, oM$pos$s)
+                }
+                if (!frequency) {
+                    c("mu_count"=num_mutations, "tmp_obsmu_row_id"=this_row_id)
+                } else {
+                    num_nonN <- sum(oM$nonN)
+                    mu_freq <- num_mutations/num_nonN
+                    c("mu_freq"=mu_freq, "tmp_obsmu_row_id"=this_row_id)
+                }
+            } else {
+                oM['tmp_obsmu_row_id'] <- this_row_id
+                oM
+            }
         }
-    
     # Convert list of mutations to data.frame
     if (combine) {
         labels_length <- 2 # mutation count and tmp_obsmu_row_id
@@ -1618,9 +1631,9 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     }
     
     # Convert mutation vector list to a matrix
-    observed_mutations <- do.call(rbind, lapply(observedMutations_list, function(x) { 
-        length(x) <- labels_length 
-        return(x) }))
+    observed_mutations <- as.data.frame(do.call(rbind, lapply(observedMutations_list, function(x) { 
+         length(x) <- labels_length 
+         return(x) })), stringsAsFactors=F)
     #observed_mutations <- t(sapply(observedMutations_list, c))
     
     sep <- "_"
