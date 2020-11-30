@@ -1771,40 +1771,7 @@ fastConv<-function(cons, max_sigma=20, length_sigma=4001){
 #'                              and \code{"leastMutated"} methods. If not supplied, mutation
 #'                              frequency is computed by calling \code{observedMutations}.
 #'                              Default is \code{NULL}. See Cautions for note on usage.
-#' @param   method              method for calculating input consensus sequence. Required. 
-#'                              One of \code{"thresholdedFreq"}, \code{"mostCommon"}, 
-#'                              \code{"catchAll"}, \code{"mostMutated"}, or 
-#'                              \code{"leastMutated"}. See "Methods" for details.
-#' @param   minimumFrequency    frequency threshold for calculating input consensus sequence.
-#'                              Applicable to and required for the \code{"thresholdedFreq"} 
-#'                              method. A canonical choice is 0.6. Default is \code{NULL}. 
-#' @param   includeAmbiguous    whether to use ambiguous characters to represent positions 
-#'                              at which there are multiple characters with frequencies that 
-#'                              are at least \code{minimumFrequency} or that are maximal 
-#'                              (i.e. ties). Applicable to and required for the 
-#'                              \code{"thresholdedFreq"} and \code{"mostCommon"} methods. 
-#'                              Default is \code{FALSE}. See "Choosing ambiguous characters" 
-#'                              for rules on choosing ambiguous characters.
-#' @param   breakTiesStochastic In case of ties, whether to randomly pick a sequence from 
-#'                              sequences that fulfill the criteria as consensus. Applicable 
-#'                              to and required for all methods except for \code{"catchAll"}. 
-#'                              Default is \code{FALSE}. See "Methods" for details. 
-#' @param   breakTiesByColumns  A list of the form 
-#'                              \code{list(c(col_1, col_2, ...), c(fun_1, fun_2, ...))}, 
-#'                              where \code{col_i} is a \code{character} name of a column 
-#'                              in \code{db}, and \code{fun_i} is a function to be applied 
-#'                              on that column. Currently, only \code{max} and \code{min} 
-#'                              are supported. Note that the two \code{c()}'s in \code{list()} 
-#'                              are essential (i.e. if there is only 1 column, the list should 
-#'                              be of the form \code{list(c(col_1), c(func_1))}. Applicable 
-#'                              to and optional for the \code{"mostMutated"} and 
-#'                              \code{"leastMutated"} methods. If supplied, \code{fun_i}'s 
-#'                              are applied on \code{col_i}'s to help break ties. Default 
-#'                              is \code{NULL}. See "Methods" for details. 
-#' @param   expandedDb          \code{logical} indicating whether or not to return the 
-#'                              expanded \code{db}, containing all the sequences (as opposed
-#'                              to returning just one sequence per clone).'
-#' 
+#'                              #' 
 #' @return  A \link{Baseline} object containing the modified \code{db} and BASELINe 
 #'          posterior probability density functions (PDF) for each of the sequences.
 #'           
