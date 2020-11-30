@@ -267,383 +267,6 @@ editBaseline <- function(baseline, field, value) {
 
 #### Calculation functions ####
 
-# Calculate the BASELINe PDFs (excluding CDR3 and FWR4 regions)
-# 
-# \code{calcBaselineL} calculates the BASELINe posterior probability density 
-# functions (PDFs) for sequences in the given Change-O \code{data.frame}.
-#
-# @param   db                  \code{data.frame} containing sequence data and annotations.
-# @param   sequenceColumn      \code{character} name of the column in \code{db} 
-#                              containing input sequences.
-# @param   germlineColumn      \code{character} name of the column in \code{db} 
-#                              containing germline sequences.
-# @param   testStatistic       \code{character} indicating the statistical framework 
-#                              used to test for selection. One of 
-#                              \code{c("local", "focused", "imbalanced")}.
-# @param   regionDefinition    \link{RegionDefinition} object defining the regions
-#                              and boundaries of the Ig sequences.
-# @param   targetingModel      \link{TargetingModel} object. Default is  \link{HH_S5F}.
-# @param   mutationDefinition  \link{MutationDefinition} object defining replacement
-#                              and silent mutation criteria. If \code{NULL} then 
-#                              replacement and silent are determined by exact 
-#                              amino acid identity. Note, if the input data.frame 
-#                              already contains observed and expected mutation frequency 
-#                              columns then mutations will not be recalculated and this
-#                              argument will be ignored.
-# @param   calcStats           \code{logical} indicating whether or not to calculate the 
-#                              summary statistics \code{data.frame} stored in the 
-#                              \code{stats} slot of a \link{Baseline} object.
-# @param   nproc               number of cores to distribute the operation over. If 
-#                              \code{nproc=0} then the \code{cluster} has already been
-#                              set and will not be reset.
-# 
-# @return  A \link{Baseline} object containing the modified \code{db} and BASELINe 
-#          posterior probability density functions (PDF) for each of the sequences.
-#           
-# @details 
-# Calculates the BASELINe posterior probability density function (PDF) for 
-# sequences in the provided \code{db}. 
-#          
-# \strong{Note}: Individual sequences within clonal groups are not, strictly speaking, 
-# independent events and it is generally appropriate to only analyze selection 
-# pressures on an effective sequence for each clonal group. For this reason,
-# it is strongly recommended that the input \code{db} contains one effective 
-# sequence per clone. Effective clonal sequences can be obtained by calling 
-# the \link{collapseClones} function.
-#                   
-# If the \code{db} does not contain the 
-# required columns to calculate the PDFs (namely mu_count & mu_expected)
-# then the function will:
-#   \enumerate{
-#   \item  Calculate the numbers of observed mutations.
-#   \item  Calculate the expected frequencies of mutations and modify the provided 
-#          \code{db}. The modified \code{db} will be included as part of the 
-#          returned \code{Baseline} object.
-# }
-#          
-# The \code{testStatistic} indicates the statistical framework used to test for selection. 
-# E.g.
-# \itemize{
-#   \item   \code{local} = CDR_R / (CDR_R + CDR_S).
-#   \item   \code{focused} = CDR_R / (CDR_R + CDR_S + FWR_S).
-#   \item   \code{imbalanced} = CDR_R + CDR_S / (CDR_R + CDR_S + FWR_S + FRW_R).
-# }
-# For \code{focused} the \code{regionDefinition} must only contain two regions. If more 
-# than two regions are defined the \code{local} test statistic will be used.
-# For further information on the frame of these tests see Uduman et al. (2011).
-#                              
-# @references
-# \enumerate{
-#   \item  Hershberg U, et al. Improved methods for detecting selection by mutation 
-#            analysis of Ig V region sequences. 
-#            Int Immunol. 2008 20(5):683-94.
-#   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
-#            Nucleic Acids Res. 2011 39(Web Server issue):W499-504.
-#   \item  Yaari G, et al. Models of somatic hypermutation targeting and substitution based
-#            on synonymous mutations from high-throughput immunoglobulin sequencing data.
-#            Front Immunol. 2013 4(November):358.
-#  }
-# 
-# @seealso See \link{Baseline} for the return object.
-#          See \link{groupBaseline} and \link{summarizeBaseline} for further processing.
-#          See \link{plotBaselineSummary} and \link{plotBaselineDensity} for plotting results.
-# 
-# @examples
-# # Load and subset example data
-# data(ExampleDb, package="alakazam")
-# db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
-# 
-# # Collapse clones
-# db <- collapseClones(db, cloneColumn="clone_id", 
-#                      sequenceColumn="sequence_alignment",
-#                      germlineColumn="germline_alignment_d_mask",
-#                      method="thresholdedFreq", minimumFrequency=0.6,
-#                      includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
-#  
-# # Calculate BASELINe
-# baseline <- calcBaselineL(db, 
-#                           sequenceColumn="clonal_sequence",
-#                           germlineColumn="clonal_germline", 
-#                           testStatistic="focused",
-#                           regionDefinition=IMGT_V,
-#                           targetingModel=HH_S5F,
-#                           nproc=1)
-#                          
-# @export
-calcBaselineL <- function(db,
-                         sequenceColumn="clonal_sequence",
-                         germlineColumn="clonal_germline",
-                         testStatistic=c("local", "focused", "imbalanced"),
-                         regionDefinition=NULL,
-                         targetingModel=HH_S5F,
-                         mutationDefinition=NULL,
-                         calcStats=FALSE,
-                         nproc=1,
-                         cloneColumn=NULL,
-                         juncLengthColumn=NULL) {
-    # Hack for visibility of foreach index variable
-    idx <- NULL
-    
-    # Evaluate argument choices
-    testStatistic <- match.arg(testStatistic)
-    
-    # Check for valid columns
-    check <- checkColumns(db, c(sequenceColumn, germlineColumn, cloneColumn, juncLengthColumn))
-    if (check != TRUE) { stop(check) }
-    
-    # Check region definition
-    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
-        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
-    }
-    
-    # Check mutation definition
-    if (!is.null(mutationDefinition) & !is(mutationDefinition, "MutationDefinition")) {
-        stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
-    }
-    
-    # Check targeting model
-    if (!is(targetingModel, "TargetingModel")) {
-        stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
-    }
-    
-    # Convert sequence columns to uppercase
-    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
-    
-    # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, cpuCount())
-    # nproc_arg will be passed to any function that has the nproc argument
-    # If the cluster is already being set by the parent function then 
-    # this will be set to 'cluster', that way the child function does not close
-    # the connections and reset the cluster.
-    #nproc_arg <- nproc
-    
-    # If user wants to paralellize this function and specifies nproc > 1, then
-    # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.  
-    if (nproc > 1) {        
-        cluster <- parallel::makeCluster(nproc, type="PSOCK")
-        parallel::clusterExport(cluster, list('db',
-                                              'sequenceColumn', 'germlineColumn', 
-                                              'cloneColumn', 'juncLengthColumn',
-                                              'testStatistic', 'regionDefinition',
-                                              'targetingModel', 'mutationDefinition','calcStats',
-                                              'break2chunks', 'PowersOfTwo', 
-                                              'convolutionPowersOfTwo', 
-                                              'convolutionPowersOfTwoByTwos', 
-                                              'weighted_conv', 
-                                              'calculate_bayesGHelper', 
-                                              'groupPosteriors', 'fastConv',
-                                              'calcBaselineHelper',
-                                              'c2s', 's2c', 'words', 'translate',
-                                              'calcBaselineBinomialPdf','CONST_I',
-                                              'BAYESIAN_FITTED',
-                                              'calcObservedMutations','NUCLEOTIDES',
-                                              'NUCLEOTIDES_AMBIGUOUS', 'IUPAC2nucs',
-                                              'makeNullRegionDefinition',
-                                              'getCodonPos','getContextInCodon',
-                                              'mutationType',
-                                              'AMINO_ACIDS','binMutationsByRegion',
-                                              'collapseMatrixToVector','calcExpectedMutations',
-                                              'calculateTargeting','HH_S5F','calculateMutationalPaths',
-                                              'CODON_TABLE'), 
-        envir=environment() )    
-        registerDoParallel(cluster, cores=nproc)
-        #nproc_arg <- cluster
-    } else if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ 
-        # (needed for 'foreach' in non-parallel mode)
-        registerDoSEQ()
-    }
-    
-    # If db does not contain the required columns to calculate the PDFs (namely mu_count 
-    # & mu_expected mutations), then the function will:
-    #          1. Calculate the numbers of observed mutations
-    #          2. Calculate the expected frequencies of mutations    
-    # After that BASELINe prob. densities can be calcualted per sequence. 
-    if (is.null(regionDefinition)) {
-        rd_labels <- makeNullRegionDefinition()@labels
-        observedColumns <- paste0("mu_count_", rd_labels)
-        expectedColumns <- paste0("mu_expected_", rd_labels)
-    } else {
-        observedColumns <- paste0("mu_count_", regionDefinition@labels)
-        expectedColumns <- paste0("mu_expected_", regionDefinition@labels)
-    }
-    
-    if (!all(c(observedColumns, expectedColumns) %in% colnames(db))) {
-        # If the germlineColumn & sequenceColumn are not found in the db error and quit
-        if (!all(c(sequenceColumn, germlineColumn) %in% colnames(db))) {
-            stop(paste0("Both ", sequenceColumn, " & ", germlineColumn, 
-                         " columns need to be present in the db"))
-        }
-        
-        # Calculate the numbers of observed mutations
-        db <- observedMutations(db,
-                                sequenceColumn=sequenceColumn,
-                                germlineColumn=germlineColumn,
-                                regionDefinition=regionDefinition,
-                                mutationDefinition=mutationDefinition,
-                                frequency=FALSE, combine=FALSE,
-                                nproc=0,
-                                cloneColumn=cloneColumn,
-                                juncLengthColumn=juncLengthColumn)
-        
-        # Calculate the expected frequencies of mutations
-        db <- expectedMutations(db,
-                                sequenceColumn=sequenceColumn,
-                                germlineColumn=germlineColumn,
-                                regionDefinition=regionDefinition,
-                                targetingModel=targetingModel,
-                                mutationDefinition=mutationDefinition,
-                                nproc=0,
-                                cloneColumn=cloneColumn,
-                                juncLengthColumn=juncLengthColumn)
-    }
-    
-    # Calculate PDFs for each sequence
-    
-    # Print status to console if not using extended regions definitions
-    status <- NULL
-    if (!is.null(regionDefinition)) {
-        if (!regionDefinition@name %in% c("IMGT_VDJ_BY_REGIONS", "IMGT_VDJ")) {
-            status <- "Calculating BASELINe probability density functions...\n"
-        }    
-    }
-    cat(status)
-    
-    # Number of sequences (used in foreach)
-    totalNumbOfSequences <- nrow(db)
-    # The column indexes of the mu_count_ and mu_expected_
-    cols_observed <- grep( paste0("mu_count_"),  colnames(db) ) 
-    cols_expected <- grep( paste0("mu_expected_"),  colnames(db) ) 
-    
-    # Exporting additional environment variables and functions needed to run foreach 
-    if ( nproc!=1 ) {
-        parallel::clusterExport( 
-            cluster, list('cols_observed', 'cols_expected'), 
-            envir=environment() 
-        )
-        registerDoParallel(cluster)
-    }
-    
-    list_pdfs <- list()
-    list_numbOfSeqs <- list()
-    list_k <- list()
-    list_n <- list()
-    list_p <- list()
-    
-    if (is.null(regionDefinition)) {
-        regions <- makeNullRegionDefinition()@regions   
-    } else {
-        regions <- regionDefinition@regions
-    }
-    # For every region (e.g. CDR, FWR etc.)
-    for (region in regions) {
-        
-        # Foreach returns a list of PDFs
-        list_region_pdfs <- 
-            foreach(idx=iterators::icount(totalNumbOfSequences)) %dopar% {                
-                calcBaselineHelper( 
-                    observed = db[cols_observed][idx,],
-                    expected = db[cols_expected][idx,],
-                    region = region,
-                    testStatistic = testStatistic,
-                    regionDefinition = regionDefinition
-                )
-            }
-        
-        # Count the number of non NA PDFs 
-        list_numbOfSeqs[[region]] <- rep(1,totalNumbOfSequences)
-        #is.na(list_region_pdfs)] <- 0
-        
-        # Convert the list of the region's PDFs into a matrix                
-        
-        mat_pdfs_binom <- 
-            do.call( rbind, 
-                     lapply( 
-                         list_region_pdfs, 
-                         function(x) { 
-                             length(x) <- 4004 
-                             return(x)
-                         }
-                     )
-            )
-        #cat(class(mat_pdfs_binom), "\n") # for debugging
-        #cat(dim(mat_pdfs_binom), "\n") # for debugging
-        
-        # IMPORTANT: if input has a single sequence, mat_pdfs_binom (1-row) gets coerced 
-        # into a numeric vector without matrix(..., nrow=nrow(mat_pdfs_binom))
-        list_pdfs[[region]] <- matrix(mat_pdfs_binom[, 1:4001], nrow=nrow(mat_pdfs_binom))
-        #cat(class(list_pdfs[[region]]), "\n") # for debugging
-        stopifnot(is(list_pdfs[[region]], "matrix"))
-        
-        list_k[[region]] <- mat_pdfs_binom[, 4002]
-        list_n[[region]] <- mat_pdfs_binom[, 4003]
-        list_p[[region]] <- mat_pdfs_binom[, 4004]
-        list_numbOfSeqs[[region]][is.na(list_k[[region]])] <- 0
-    }
-    
-    
-    # Template for values for the regions
-    mat_template <- matrix( NA, 
-                            ncol=length(regions), 
-                            nrow=totalNumbOfSequences,
-                            dimnames=list(1:totalNumbOfSequences, regions)
-    )
-    
-    # numbOfSeqs
-    # This holds the number of non NA sequences
-    numbOfSeqs <- mat_template
-    for(region in regions){
-        numbOfSeqs[,region] <-   list_numbOfSeqs[[region]]
-    }
-    
-    # binomK
-    # This holds the number of exact successin in the binomial trials
-    binomK <- mat_template
-    for(region in regions){
-        binomK[,region] <-   list_k[[region]]
-    }
-    
-    # binomN
-    # This holds the total numbers trials in the binomial
-    binomN <- mat_template
-    for(region in regions){
-        binomN[,region] <-   list_n[[region]]
-    }
-    
-    # binomP
-    # This holds the prob of successin in the binomial trials
-    binomP <- mat_template
-    for(region in regions){
-        binomP[,region] <-   list_p[[region]]
-    }
-    
-    
-    # Create a Baseline object with the above results to return
-    baseline <- createBaseline(description="",
-                               db=as.data.frame(db),
-                               regionDefinition=regionDefinition,
-                               testStatistic=testStatistic,
-                               regions=regions,
-                               numbOfSeqs=numbOfSeqs,
-                               binomK=binomK,
-                               binomN=binomN,
-                               binomP=binomP,
-                               pdfs=list_pdfs )
-    
-    # Calculate BASELINe stats and update slot
-    if (calcStats==TRUE) {
-        baseline <- summarizeBaseline(baseline)
-    }
-    
-    # Stop cluster
-    if (nproc > 1) { parallel::stopCluster(cluster) }
-    
-    return(baseline)
-    
-}
-
-
 
 # Helper function for calcBaseline
 #
@@ -2095,7 +1718,6 @@ fastConv<-function(cons, max_sigma=20, length_sigma=4001){
 
 
 
-
 #' Calculate the BASELINe PDFs (including for regions that include CDR3 and FWR4)
 #' 
 #' \code{calcBaseline} calculates the BASELINe posterior probability density 
@@ -2133,6 +1755,17 @@ fastConv<-function(cons, max_sigma=20, length_sigma=4001){
 #'                              containing the junction length. Relevant only for 
 #'                              when regionDefinition includes CDR and FWR4 (else
 #'                              this value can be \code{NULL})  
+#' @param   refOption           can be one of \code{"germline"} or \code{"parent"}.
+#'                               Indicates the reference sequence source upon which
+#'                               the observed mutations are calculated. 
+#' @param   parentColumn        parent column name in \code{db}
+#' @param   fields              additional fields used for grouping. Only relevant
+#'                               when using \code{regionDefinition} \code{IMGT_VDJ}
+#'                               or \code{IMGT_VDJ_BY_REGIONS}, when \code{cloneColumn}
+#'                               is used to create region definitions for each clone.
+#'                               Use this, for example, to avoid combining sequences 
+#'                               with the same clone_id that belong to different
+#'                               sample_id.
 #' @param   muFreqColumn        \code{character} name of the column containing mutation
 #'                              frequency. Optional. Applicable to the \code{"mostMutated"}
 #'                              and \code{"leastMutated"} methods. If not supplied, mutation
@@ -2256,127 +1889,330 @@ calcBaseline <- function(db,
                          nproc = 1,
                          # following are relevant only when regionDefinition includes CDR3 and FWR4:
                          cloneColumn = NULL,
-                         juncLengthColumn = NULL) {
-                         
+                         juncLengthColumn = NULL,
+                         refOption = c("germline", "parent"),
+                         parentColumn = "parent_sequence",
+                         fields = NULL) {
     
-    # Case 1:
-    if (is.null(regionDefinition))  {
-        ret_baseline <- calcBaselineL(db=db, sequenceColumn = sequenceColumn,
-                                      germlineColumn = germlineColumn,
-                                      testStatistic = testStatistic, 
-                                      targetingModel = targetingModel, 
-                                      regionDefinition = regionDefinition, 
-                                      mutationDefinition = mutationDefinition, 
-                                      calcStats= calcStats,
-                                      nproc = nproc)
+    # Hack for visibility of foreach index variable
+    idx <- NULL
+    
+    # Evaluate argument choices
+    testStatistic <- match.arg(testStatistic)
+    refOption <- match.arg(refOption)
+    
+    # setting the reference column:
+    if (refOption == "germline") {
+        refColumn <- germlineColumn
+    } else if (refOption == "parent") {
+        refColumn <- parentColumn
+    } else {
+        stop(deparse(substitute(refOption)), " is not a valid refOption. Expecting 'germline' or 'parent'.")
     }
     
-    # Case 2:
-    else if ((regionDefinition@name != "IMGT_VDJ_BY_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
-        ret_baseline <- calcBaselineL(db=db, sequenceColumn = sequenceColumn,
-                                      germlineColumn = germlineColumn,
-                                      testStatistic = testStatistic, 
-                                      targetingModel = targetingModel, 
-                                      regionDefinition = regionDefinition, 
-                                      mutationDefinition = mutationDefinition, 
-                                      calcStats= calcStats,
-                                      nproc = nproc)
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn, refColumn, fields))
+    if (check != TRUE) { stop(check) }
+    
+    regionDefinitionName <- ""
+    if (!is.null(regionDefinition)) {
+        regionDefinitionName <- regionDefinition@name
     }
     
-    # Case 3:
-    else if ((regionDefinition@name == "IMGT_VDJ_BY_REGIONS") | (regionDefinition@name == "IMGT_VDJ")) {
-        
-        clones_list <- makeClonesList(db=db, clone_col=cloneColumn)
-        
-        # bellow 2 lines are for running faster in parallel cores:
-        # cl <- parallel::makeCluster(nproc, type='PSOCK')
-        # registerDoParallel(cl)
-        clones_baseline_list <- sapply(X=clones_list, FUN=calcBaselineOneClone, db=db, 
-                                       juncLengthColumn=juncLengthColumn,
-                                       sequenceColumn = sequenceColumn, cloneColumn=cloneColumn, 
-                                       germlineColumn = germlineColumn, 
-                                       testStatistic = testStatistic, 
-                                       regionDefinition = regionDefinition, 
-                                       targetingModel = targetingModel, 
-                                       mutationDefinition = mutationDefinition,
-                                       calcStats = calcStats, nproc = nproc)
-        
-        # now setting the different slots of the result baseline class:
-        # description:
-        baseline_description <- ""
-    
-        #testStatistic:
-        baseline_testStatistic <- clones_baseline_list[[1]]@testStatistic
-    
-        #regions:
-        baseline_regions <- clones_baseline_list[[1]]@regions
-
-        # to be used for all following:
-        clones_list_length <- length(clones_list)
-        x__ <- 1:clones_list_length
-        
-        # db:
-        db_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@db,
-                          USE.NAMES = FALSE,simplify = FALSE)
-    
-        baseline_db <- do.call("rbind",db_list)
-    
-        #numbOfSeqs:
-        numbOfSeqs_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@numbOfSeqs,
-                                  USE.NAMES = FALSE,simplify = FALSE)
-        baseline_numbOfSeqs <- do.call("rbind",numbOfSeqs_list)
-        rownames(baseline_numbOfSeqs) <- as.character(c(1:dim(baseline_numbOfSeqs)[1]))
-    
-        #binomK:
-        binomK_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@binomK,
-                          USE.NAMES = FALSE, simplify = FALSE)
-        baseline_binomK <- do.call("rbind",binomK_list)
-        rownames(baseline_binomK) <- as.character(c(1:dim(baseline_binomK)[1]))
-    
-        #binomN:
-        binomN_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@binomN,
-                              USE.NAMES = FALSE, simplify = FALSE)
-        baseline_binomN <- do.call("rbind",binomN_list)
-        rownames(baseline_binomN) <- as.character(c(1:dim(baseline_binomN)[1]))
-    
-        #binomP:
-        binomP_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@binomP,
-                              USE.NAMES = FALSE, simplify = FALSE)
-        baseline_binomP <- do.call("rbind",binomP_list)
-        rownames(baseline_binomP) <- as.character(c(1:dim(baseline_binomP)[1]))
-    
-        #pdfs:
-        # First - setting an empty list with proper length and names:
-        baseline_pdfs.names <-names(clones_baseline_list[[1]]@pdfs)
-        baseline_pdfs  <-  vector("list", length(baseline_pdfs.names))
-        names(baseline_pdfs) <- baseline_pdfs.names
-        # now each list element is a matrix:
-        for (pdf in names(clones_baseline_list[[1]]@pdfs)) {
-           pdf_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@pdfs[[pdf]],
-                              USE.NAMES = FALSE, simplify = FALSE)
-           baseline_pdfs[[pdf]] <- do.call("rbind",pdf_list)
-        }  
-    
-        #stats:
-        stats_list <- sapply(X=x__, FUN=function(x2) clones_baseline_list[[x2]]@stats,
-                             USE.NAMES = FALSE, simplify = FALSE)
-        baseline_stats <- do.call("rbind",stats_list)
-    
-        # If regionDefinition include CDR3 and FWR4 - then the regionDefinition is different for each clone,
-        # In this case - regionDefinition will be NULL.
-        baseline_regionDefinition <- regionDefinition
-    
-    
-        ret_baseline <- new("Baseline",description=baseline_description, db=baseline_db, 
-                            regionDefinition=baseline_regionDefinition, testStatistic=baseline_testStatistic,
-                            regions=baseline_regions, numbOfSeqs=baseline_numbOfSeqs, 
-                            binomK=baseline_binomK, binomN=baseline_binomN, binomP=baseline_binomP,
-                            pdfs=baseline_pdfs, stats=baseline_stats)  
-        # going back to none paralel mode:
-        # registerDoSEQ()
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
     
-    return(ret_baseline)
+    # Check mutation definition
+    if (!is.null(mutationDefinition) & !is(mutationDefinition, "MutationDefinition")) {
+        stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
+    }
+    
+    # Check targeting model
+    if (!is(targetingModel, "TargetingModel")) {
+        stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
+    }
+    
+    if ( regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
+        check <- checkColumns(db, c(juncLengthColumn, cloneColumn))
+        if (check != TRUE) { stop(check) }
+        # Group by cloneColumn and fields. Needed later to create and use a region 
+        # definition for each clone
+        db$baseline_field_group <- db %>%
+            group_by(!!!rlang::syms(c(fields, cloneColumn))) %>%
+            dplyr::group_indices()
+    } else {
+        # No grouping needed
+        if (!is.null(fields)) {
+            message(paste0("`fields` is set (", paste(fields, collapse=", "),") but is not used with `regionDefinition` (", regionDefinitionName,")."))
+        }
+        db$baseline_field_group <- 1:nrow(db)
+    }
+    field_groups <- unique(db[['baseline_field_group']])
+    db$tmp_baseline_row_id <- 1:nrow(db)
+    
+    # Convert sequence columns to uppercase
+    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
+    
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, cpuCount())
+    # nproc_arg will be passed to any function that has the nproc argument
+    # If the cluster is already being set by the parent function then 
+    # this will be set to 'cluster', that way the child function does not close
+    # the connections and reset the cluster.
+    #nproc_arg <- nproc
+    
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.  
+    if (nproc > 1) {        
+        cluster <- parallel::makeCluster(nproc, type="PSOCK")
+        parallel::clusterExport(cluster, list('db',
+                                              'sequenceColumn', 'germlineColumn', 
+                                              'cloneColumn', 'juncLengthColumn', 'field_groups','makeRegion',
+                                              'testStatistic', 'regionDefinition',
+                                              'targetingModel', 'mutationDefinition','calcStats',
+                                              'break2chunks', 'PowersOfTwo', 
+                                              'convolutionPowersOfTwo', 
+                                              'convolutionPowersOfTwoByTwos', 
+                                              'weighted_conv', 
+                                              'calculate_bayesGHelper', 
+                                              'groupPosteriors', 'fastConv',
+                                              'calcBaselineHelper',
+                                              'c2s', 's2c', 'words', 'translate',
+                                              'calcBaselineBinomialPdf','CONST_I',
+                                              'BAYESIAN_FITTED',
+                                              'calcObservedMutations','NUCLEOTIDES',
+                                              'NUCLEOTIDES_AMBIGUOUS', 'IUPAC2nucs',
+                                              'makeNullRegionDefinition',
+                                              'getCodonPos','getContextInCodon',
+                                              'mutationType',
+                                              'AMINO_ACIDS','binMutationsByRegion',
+                                              'collapseMatrixToVector','calcExpectedMutations',
+                                              'calculateTargeting','HH_S5F','calculateMutationalPaths',
+                                              'CODON_TABLE'), 
+                                envir=environment() )    
+        registerDoParallel(cluster, cores=nproc)
+        #nproc_arg <- cluster
+    } else if (nproc == 1) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    }
+    
+    # If db does not contain the required columns to calculate the PDFs (namely mu_count 
+    # & mu_expected mutations), then the function will:
+    #          1. Calculate the numbers of observed mutations
+    #          2. Calculate the expected frequencies of mutations    
+    # After that BASELINe prob. densities can be calcualted per sequence. 
+    if (is.null(regionDefinition)) {
+        rd_labels <- makeNullRegionDefinition()@labels
+        observedColumns <- paste0("mu_count_", rd_labels)
+        expectedColumns <- paste0("mu_expected_", rd_labels)
+    } else {
+        observedColumns <- paste0("mu_count_", regionDefinition@labels)
+        expectedColumns <- paste0("mu_expected_", regionDefinition@labels)
+    }
+    
+    if (!all(c(observedColumns, expectedColumns) %in% colnames(db))) {
+        # If the germlineColumn & sequenceColumn are not found in the db error and quit
+        if (!all(c(sequenceColumn, germlineColumn) %in% colnames(db))) {
+            stop(paste0("Both ", sequenceColumn, " & ", germlineColumn, 
+                        " columns need to be present in the db"))
+        }
+        
+        # Calculate the numbers of observed mutations
+        db <- observedMutations(db,
+                                sequenceColumn=sequenceColumn,
+                                germlineColumn=germlineColumn,
+                                regionDefinition=regionDefinition,
+                                mutationDefinition=mutationDefinition,
+                                frequency=FALSE, combine=FALSE,
+                                nproc=0,
+                                cloneColumn=cloneColumn,
+                                juncLengthColumn=juncLengthColumn,
+                                refOption=refOption,
+                                parentColumn = parentColumn,
+                                fields=fields)
+        
+        # Calculate the expected frequencies of mutations
+        db <- expectedMutations(db,
+                                sequenceColumn=sequenceColumn,
+                                germlineColumn=germlineColumn,
+                                regionDefinition=regionDefinition,
+                                targetingModel=targetingModel,
+                                mutationDefinition=mutationDefinition,
+                                nproc=0,
+                                cloneColumn=cloneColumn,
+                                juncLengthColumn=juncLengthColumn,
+                                refOption=refOption,
+                                parentColumn = parentColumn,
+                                fields=fields)
+    }
+    
+    # Calculate PDFs for each sequence
+    
+    # Print status to console if not using extended regions definitions
+    cat("Calculating BASELINe probability density functions...\n")
+    
+    # Number of sequences (used in foreach)
+    totalNumbOfSequences <- nrow(db)
+    # The column indexes of the mu_count_ and mu_expected_
+    cols_observed <- grep( paste0("mu_count_"),  colnames(db) ) 
+    cols_expected <- grep( paste0("mu_expected_"),  colnames(db) ) 
+    
+    ## Prepare extended region definitions and export to cluster
+    extendedRegionDefinitions <- NULL
+    if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
+        extendedRegionDefinitions <- foreach(idx=iterators::icount(length(field_groups))) %dopar% {
+            group_id <- field_groups[idx]
+            db_group <- db[db[['baseline_field_group']] == group_id,,drop=F]
+            
+            makeRegion(juncLength = db_group[[juncLengthColumn]][1],
+                       sequenceImgt = db_group[[sequenceColumn]][1],
+                       regionDefinition=regionDefinition)
+            
+        }
+    }
+    
+    # Exporting additional environment variables and functions needed to run foreach 
+    if ( nproc>1 ) {
+        parallel::clusterExport( 
+            cluster, list('cols_observed', 'cols_expected','extendedRegionDefinitions','calcBaselineHelper'), 
+            envir=environment() 
+        )
+        registerDoParallel(cluster)
+    }
+    
+    list_pdfs <- list()
+    list_numbOfSeqs <- list()
+    list_k <- list()
+    list_n <- list()
+    list_p <- list()
+    
+    if (is.null(regionDefinition)) {
+        regions <- makeNullRegionDefinition()@regions   
+    } else {
+        regions <- regionDefinition@regions
+    }
+    
+    # For every region (e.g. CDR, FWR etc.)
+    for (region in regions) {
+        
+        # Foreach returns a list of PDFs
+        list_region_pdfs <- 
+            foreach(idx=iterators::icount(totalNumbOfSequences)) %dopar% {  
+                
+                group_id <- db[['baseline_field_group']][idx]
+                groupRegionDefinition <- regionDefinition
+                if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
+                    rd_idx <- which(field_groups == group_id)
+                    groupRegionDefinition <- extendedRegionDefinitions[[rd_idx]]
+                }
+                
+                calcBaselineHelper( 
+                    observed = db[cols_observed][idx,],
+                    expected = db[cols_expected][idx,],
+                    region = region,
+                    testStatistic = testStatistic,
+                    regionDefinition = groupRegionDefinition
+                )
+            }
+        
+        # Count the number of non NA PDFs 
+        list_numbOfSeqs[[region]] <- rep(1,totalNumbOfSequences)
+        #is.na(list_region_pdfs)] <- 0
+        
+        # Convert the list of the region's PDFs into a matrix                
+        
+        mat_pdfs_binom <- 
+            do.call( rbind, 
+                     lapply( 
+                         list_region_pdfs, 
+                         function(x) { 
+                             length(x) <- 4004 
+                             return(x)
+                         }
+                     )
+            )
+        #cat(class(mat_pdfs_binom), "\n") # for debugging
+        #cat(dim(mat_pdfs_binom), "\n") # for debugging
+        
+        # IMPORTANT: if input has a single sequence, mat_pdfs_binom (1-row) gets coerced 
+        # into a numeric vector without matrix(..., nrow=nrow(mat_pdfs_binom))
+        list_pdfs[[region]] <- matrix(mat_pdfs_binom[, 1:4001], nrow=nrow(mat_pdfs_binom))
+        #cat(class(list_pdfs[[region]]), "\n") # for debugging
+        stopifnot(is(list_pdfs[[region]], "matrix"))
+        
+        list_k[[region]] <- mat_pdfs_binom[, 4002]
+        list_n[[region]] <- mat_pdfs_binom[, 4003]
+        list_p[[region]] <- mat_pdfs_binom[, 4004]
+        list_numbOfSeqs[[region]][is.na(list_k[[region]])] <- 0
+    }
+    
+    # WIP - check Milca's funcittion, hotw it handles hte new data struct for rextender regions
+    # Template for values for the regions
+    mat_template <- matrix( NA, 
+                            ncol=length(regions), 
+                            nrow=totalNumbOfSequences,
+                            dimnames=list(1:totalNumbOfSequences, regions)
+    )
+    
+    # numbOfSeqs
+    # This holds the number of non NA sequences
+    numbOfSeqs <- mat_template
+    for(region in regions){
+        numbOfSeqs[,region] <-   list_numbOfSeqs[[region]]
+    }
+    
+    # binomK
+    # This holds the number of exact successin in the binomial trials
+    binomK <- mat_template
+    for(region in regions){
+        binomK[,region] <-   list_k[[region]]
+    }
+    
+    # binomN
+    # This holds the total numbers trials in the binomial
+    binomN <- mat_template
+    for(region in regions){
+        binomN[,region] <-   list_n[[region]]
+    }
+    
+    # binomP
+    # This holds the prob of successin in the binomial trials
+    binomP <- mat_template
+    for(region in regions){
+        binomP[,region] <-   list_p[[region]]
+    }
+    
+    # If regionDefinition include CDR3 and FWR4 - then the regionDefinition is different for each clone,
+    # In this case - regionDefinition will be NULL.
+    
+    # Create a Baseline object with the above results to return
+    baseline <- createBaseline(description="",
+                               db=as.data.frame(db) %>% 
+                                   arrange(tmp_baseline_row_id) %>% 
+                                   select(-baseline_field_group,-tmp_baseline_row_id),
+                               regionDefinition=regionDefinition,
+                               testStatistic=testStatistic,
+                               regions=regions,
+                               numbOfSeqs=numbOfSeqs,
+                               binomK=binomK,
+                               binomN=binomN,
+                               binomP=binomP,
+                               pdfs=list_pdfs )
+    
+    # Calculate BASELINe stats and update slot
+    if (calcStats==TRUE) {
+        baseline <- summarizeBaseline(baseline)
+    }
+    
+    # Stop cluster
+    if (nproc > 1) { parallel::stopCluster(cluster) }
+    
+    return(baseline)
+    
 }
 
 
