@@ -604,19 +604,19 @@ test_that("calcBaseline Extended regions", {
                                           sequenceColumn = "SEQUENCE_IMGT", 
                                           germlineColumn = "GERMLINE_IMGT_D_MASK",
                                           regionDefinition = IMGT_VDJ,
-                                          juncLenCol = "JUNCTION_LENGTH")
+                                          juncLengthColumn = "JUNCTION_LENGTH")
     db_clone_3822 <- subset(ExampleDb, CLONE %in% c("3822"))
     clone_3822_colapsed <- collapseClones(db_clone_3822, cloneColumn = "CLONE", 
                                           sequenceColumn = "SEQUENCE_IMGT", 
                                           germlineColumn = "GERMLINE_IMGT_D_MASK",
                                           regionDefinition = IMGT_VDJ,
-                                          juncLenCol = "JUNCTION_LENGTH")
+                                          juncLengthColumn = "JUNCTION_LENGTH")
     db_clone_467 <- subset(ExampleDb, CLONE %in% c("467"))
     clone_467_colapsed <- collapseClones(db_clone_467, cloneColumn = "CLONE", 
                                           sequenceColumn = "SEQUENCE_IMGT", 
                                           germlineColumn = "GERMLINE_IMGT_D_MASK",
                                           regionDefinition = IMGT_VDJ,
-                                          juncLenCol = "JUNCTION_LENGTH")
+                                          juncLengthColumn = "JUNCTION_LENGTH")
    db_3_clones <- rbind(db_clone_3146, db_clone_3822, db_clone_467) 
    collapseClones_db_3_clones <- collapseClones(db = db_3_clones, cloneColumn = "CLONE", 
                                                 sequenceColumn = "SEQUENCE_IMGT",
@@ -630,7 +630,7 @@ test_that("calcBaseline Extended regions", {
                                      regionDefinition = IMGT_VDJ,
                                      targetingModel = HH_S5F,
                                      cloneColumn = "CLONE",
-                                     juncLenCol = "JUNCTION_LENGTH",
+                                     juncLengthColumn = "JUNCTION_LENGTH",
                                      nproc=1)
    baseline_clone_3822 <- calcBaseline(db=clone_3822_colapsed, 
                                        sequenceColumn = "SEQUENCE_IMGT",
@@ -639,7 +639,7 @@ test_that("calcBaseline Extended regions", {
                                        regionDefinition = IMGT_VDJ,
                                        targetingModel = HH_S5F,
                                        cloneColumn = "CLONE",
-                                       juncLenCol = "JUNCTION_LENGTH",
+                                       juncLengthColumn = "JUNCTION_LENGTH",
                                        nproc=1)
    baseline_clone_467 <- calcBaseline(db=clone_467_colapsed, 
                                        sequenceColumn = "SEQUENCE_IMGT",
@@ -648,7 +648,7 @@ test_that("calcBaseline Extended regions", {
                                        regionDefinition = IMGT_VDJ,
                                        targetingModel = HH_S5F,
                                        cloneColumn = "CLONE",
-                                       juncLenCol = "JUNCTION_LENGTH",
+                                       juncLengthColumn = "JUNCTION_LENGTH",
                                        nproc=1)
    
    baseline_3_clones <- calcBaseline(db=collapseClones_db_3_clones, 
@@ -658,7 +658,7 @@ test_that("calcBaseline Extended regions", {
                                      regionDefinition = IMGT_VDJ,
                                      targetingModel = HH_S5F,
                                      cloneColumn = "CLONE",
-                                     juncLenCol = "JUNCTION_LENGTH",
+                                     juncLengthColumn = "JUNCTION_LENGTH",
                                      nproc=1)
   expect_equal(baseline_clone_3146@binomK, baseline_3_clones@binomK[1,], check.attributes=F)
   expect_equal(baseline_clone_3822@binomK, baseline_3_clones@binomK[2,], check.attributes=F) 
@@ -682,7 +682,7 @@ test_that("calcBaseline Extended regions", {
                                                sequenceColumn = "SEQUENCE_IMGT", 
                                                germlineColumn = "GERMLINE_IMGT_D_MASK",
                                                regionDefinition = IMGT_VDJ,
-                                               juncLenCol = "JUNCTION_LENGTH")
+                                               juncLengthColumn = "JUNCTION_LENGTH")
   baseline_clone_3146_IMGT_VDJ <- calcBaseline(db=clone_3146_colapsed, 
                                              sequenceColumn = "SEQUENCE_IMGT",
                                              germlineColumn = "GERMLINE_IMGT_D_MASK", 
@@ -690,13 +690,13 @@ test_that("calcBaseline Extended regions", {
                                              regionDefinition = IMGT_VDJ,
                                              targetingModel = HH_S5F,
                                              cloneColumn = "CLONE",
-                                             juncLenCol = "JUNCTION_LENGTH",
+                                             juncLengthColumn = "JUNCTION_LENGTH",
                                              nproc=1)
   clone_3170_colapsed_IMGT_VDJ_BY_REGIONS <- collapseClones(db_clone_3170, cloneColumn = "CLONE", 
                                                sequenceColumn = "SEQUENCE_IMGT", 
                                                germlineColumn = "GERMLINE_IMGT_D_MASK",
                                                regionDefinition = IMGT_VDJ_BY_REGIONS,
-                                               juncLenCol = "JUNCTION_LENGTH")
+                                               juncLengthColumn = "JUNCTION_LENGTH")
   baseline_clone_3146_IMGT_VDJ_BY_REGIONS <- calcBaseline(db=clone_3146_colapsed, 
                                              sequenceColumn = "SEQUENCE_IMGT",
                                              germlineColumn = "GERMLINE_IMGT_D_MASK", 
@@ -704,7 +704,7 @@ test_that("calcBaseline Extended regions", {
                                              regionDefinition = IMGT_VDJ_BY_REGIONS,
                                              targetingModel = HH_S5F,
                                              cloneColumn = "CLONE",
-                                             juncLenCol = "JUNCTION_LENGTH",
+                                             juncLengthColumn = "JUNCTION_LENGTH",
                                              nproc=1)
   expect_equal(baseline_clone_3146_IMGT_VDJ@regionDefinition,IMGT_VDJ)
   expect_equal(baseline_clone_3146_IMGT_VDJ_BY_REGIONS@regionDefinition,IMGT_VDJ_BY_REGIONS)

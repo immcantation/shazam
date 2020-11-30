@@ -65,7 +65,7 @@ NULL
 #' @param   nproc               Number of cores to distribute the operation over. If the 
 #'                              \code{cluster} has already been set earlier, then pass the 
 #'                              \code{cluster}. This will ensure that it is not reset.
-#' @param   juncLenCol          \code{character} name of the column containing the junction length.
+#' @param   juncLengthColumn          \code{character} name of the column containing the junction length.
 #'                              Needed when \code{regionDefinition} includes CDR3 and FWR4.    
 #' @param    fields             additional fields used for grouping. Use sample_id, to
 #'                              avoid combining sequences with the same clone_id 
@@ -360,7 +360,7 @@ collapseClones <- function(db, cloneColumn = "clone_id",
                            includeAmbiguous = FALSE, 
                            breakTiesStochastic = FALSE, breakTiesByColumns = NULL, 
                            expandedDb = FALSE, nproc = 1,
-                           juncLenCol="junction_length",
+                           juncLengthColumn="junction_length",
                            fields=NULL) {
 
     # Hack for visibility of foreach index variables
@@ -553,7 +553,7 @@ collapseClones <- function(db, cloneColumn = "clone_id",
                                 cloneRegionDefinition <- getCloneRegion(clone_num=clone_num, 
                                                                         db=cloneDb, 
                                                                         seq_col=sequenceColumn, 
-                                                                        juncLenCol=juncLenCol, 
+                                                                        juncLengthColumn=juncLengthColumn, 
                                                                         clone_col='fields_clone_id', 
                                                                         regionDefinition=regionDefinition)
                             }

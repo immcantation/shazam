@@ -2880,13 +2880,13 @@ test_that("collapseClones, extended regions", {
                                       sequenceColumn="SEQUENCE_IMGT", 
                                       germlineColumn="GERMLINE_IMGT_D_MASK",
                                       regionDefinition = IMGT_VDJ,
-                                      juncLenCol = "JUNCTION_LENGTH")
+                                      juncLengthColumn = "JUNCTION_LENGTH")
     db_clone_942 <- subset(ExampleDb, CLONE %in% c("942"))
     clone_942_colapsed <- collapseClones(db_clone_942, cloneColumn="CLONE", 
                                           sequenceColumn="SEQUENCE_IMGT", 
                                           germlineColumn="GERMLINE_IMGT_D_MASK",
                                           regionDefinition = IMGT_VDJ_BY_REGIONS,
-                                          juncLenCol = "JUNCTION_LENGTH")
+                                          juncLengthColumn = "JUNCTION_LENGTH")
     # check values for clones of size 1:
     expect_equal(db_clone_4035,clone_4035_colapsed[,1:15])
     expect_equal(as.character(clone_4035_colapsed[,"GERMLINE_IMGT_D_MASK"]),
@@ -2909,7 +2909,7 @@ test_that("collapseClones, extended regions", {
                                                        sequenceColumn="SEQUENCE_IMGT", 
                                                        germlineColumn="GERMLINE_IMGT_D_MASK",
                                                        regionDefinition = IMGT_VDJ_BY_REGIONS,
-                                                       juncLenCol = "JUNCTION_LENGTH")
+                                                       juncLengthColumn = "JUNCTION_LENGTH")
     # check that for first 312 bp - the collapsed is the same for both region type 
     # IMGT_V_BY_REGIONS and IMGT_VDJ_BY_REGIONS
     expect_equal(as.character(clones_colapsed_N[1,"clonal_sequence"]),

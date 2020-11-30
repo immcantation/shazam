@@ -2129,7 +2129,7 @@ fastConv<-function(cons, max_sigma=20, length_sigma=4001){
 #'                              containing clonal identifiers. Relevant only for 
 #'                              when regionDefinition includes CDR and FWR4 (else
 #'                              this value can be \code{NULL})
-#' @param   juncLenCol          \code{character} name of the column in \code{db} 
+#' @param   juncLengthColumn          \code{character} name of the column in \code{db} 
 #'                              containing the junction length. Relevant only for 
 #'                              when regionDefinition includes CDR and FWR4 (else
 #'                              this value can be \code{NULL})  
@@ -2256,7 +2256,7 @@ calcBaseline <- function(db,
                          nproc = 1,
                          # following are relevant only when regionDefinition includes CDR3 and FWR4:
                          cloneColumn = NULL,
-                         juncLenCol = NULL) {
+                         juncLengthColumn = NULL) {
                          
     
     # Case 1:
@@ -2292,7 +2292,7 @@ calcBaseline <- function(db,
         # cl <- parallel::makeCluster(nproc, type='PSOCK')
         # registerDoParallel(cl)
         clones_baseline_list <- sapply(X=clones_list, FUN=calcBaselineOneClone, db=db, 
-                                       juncLenCol=juncLenCol,
+                                       juncLengthColumn=juncLengthColumn,
                                        sequenceColumn = sequenceColumn, cloneColumn=cloneColumn, 
                                        germlineColumn = germlineColumn, 
                                        testStatistic = testStatistic, 

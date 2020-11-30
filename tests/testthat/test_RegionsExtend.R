@@ -215,7 +215,7 @@ test_that("getCloneRegion", {
 #                                       regionDefinition = IMGT_VDJ,
 #                                       seq_col = "sequence_alignment")
 #     collapseOneClone_3110_V_BY_REGIONS <- collapseOneClone(clone_num = 3110, db=ExampleDb, 
-#                                               juncLenCol="junction_length", 
+#                                               juncLengthColumn="junction_length", 
 #                                               cloneColumn = "clone_id", 
 #                                               sequenceColumn = "sequence_alignment", 
 #                                               regionDefinition = IMGT_V_BY_REGIONS,
@@ -226,7 +226,7 @@ test_that("getCloneRegion", {
 #                                                regionDefinition = IMGT_V_BY_REGIONS,
 #                                                germlineColumn = "germline_alignment")
 #     collapseOneClone_3110_ALL_REGIONS <- collapseOneClone(clone_num = 3110, db=ExampleDb, 
-#                                                            juncLenCol="junction_length", 
+#                                                            juncLengthColumn="junction_length", 
 #                                                            cloneColumn = "clone_id", 
 #                                                            sequenceColumn = "sequence_alignment", 
 #                                                            regionDefinition = IMGT_VDJ_BY_REGIONS,
@@ -237,7 +237,7 @@ test_that("getCloneRegion", {
 #                                                             regionDefinition = region_3110_ALL_REGIONS,
 #                                                             germlineColumn = "germline_alignment")
 #     collapseOneClone_3110_ALL <- collapseOneClone(clone_num = 3110, db=ExampleDb, 
-#                                                           juncLenCol="junction_length", 
+#                                                           juncLengthColumn="junction_length", 
 #                                                           cloneColumn = "clone_id", 
 #                                                           sequenceColumn = "sequence_alignment", 
 #                                                           regionDefinition = IMGT_VDJ,
@@ -292,7 +292,7 @@ test_that("calcBaselineOneClone", {
                                      calcStats = T)    
     calcBaselineOneClone_391 <- calcBaselineOneClone(db=ExampleDb, clone_num = 391,
                                                      cloneColumn = "CLONE", 
-                                                     juncLenCol = "JUNCTION_LENGTH",
+                                                     juncLengthColumn = "JUNCTION_LENGTH",
                                                      regionDefinition = IMGT_V,
                                                      testStatistic="focused",
                                                      calcStats = T,
@@ -300,7 +300,7 @@ test_that("calcBaselineOneClone", {
                                                      germlineColumn = "GERMLINE_IMGT_D_MASK")
     calcBaselineOneClone_3095 <- calcBaselineOneClone(db=ExampleDb, clone_num = 3095,
                                                      cloneColumn = "CLONE", 
-                                                     juncLenCol = "JUNCTION_LENGTH",
+                                                     juncLengthColumn = "JUNCTION_LENGTH",
                                                      regionDefinition = IMGT_V_BY_REGIONS,
                                                      testStatistic="local",
                                                      calcStats = F,
@@ -308,7 +308,7 @@ test_that("calcBaselineOneClone", {
                                                      germlineColumn = "GERMLINE_IMGT_D_MASK")
     calcBaselineOneClone_3157 <- calcBaselineOneClone(db=ExampleDb, clone_num = 3157,
                                                       cloneColumn = "CLONE", 
-                                                      juncLenCol = "JUNCTION_LENGTH",
+                                                      juncLengthColumn = "JUNCTION_LENGTH",
                                                       regionDefinition = IMGT_V_BY_SEGMENTS,
                                                       testStatistic="imbalanced",
                                                       calcStats = T,

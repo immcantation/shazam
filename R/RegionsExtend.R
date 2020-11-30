@@ -449,7 +449,7 @@ makeRegion <- function(juncLength, sequenceImgt,
 # - clone_num:        the clone number for which to calculate the region definition.
 # - db:               a ChangeoClone database that includes clone numbers. 
 # - seq_col:          the name of the db column containing the sequence that is imgt aligned.
-# - juncLenCol:       the name of the db column containing the junction length.
+# - juncLengthColumn:       the name of the db column containing the junction length.
 # - clone_col:        the name of the db column containing the clone number.
 # - regionDefinition: the region definition type to be output for this clone. 
 # Output:
@@ -460,14 +460,14 @@ makeRegion <- function(juncLength, sequenceImgt,
 # Note: The region definition is same for all sequences in clone - so doing it 
 #       based on first sequence in clone.  
 getCloneRegion <- function(clone_num, db, seq_col="sequence", 
-                           juncLenCol="junction_length", 
+                           juncLengthColumn="junction_length", 
                            clone_col="clone", 
                            regionDefinition=IMGT_VDJ_BY_REGIONS) {
     # subseting the db to lines for specific clone
     clone_db <- db[db[[clone_col]] == clone_num,]
     # getting one of the sequences of the specific clone: 
     seq <- clone_db[1, seq_col]
-    junc_len <- clone_db[1, juncLenCol]
+    junc_len <- clone_db[1, juncLengthColumn]
     reg <- makeRegion(juncLength=junc_len, sequenceImgt=seq, 
                       regionDefinition=regionDefinition)
     return(reg)
@@ -481,7 +481,7 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
 # - db:                 data.frame containing sequence data and annotations
 # - sequenceColumn:     character name of the column in db containing input sequences.
 # - cloneColumn:        the name of the db column containing the clone number.
-# - juncLenCol:         column name of junction length 
+# - juncLengthColumn:         column name of junction length 
 # - germlineColumn:     character name of the column in db containing germline sequences.
 # - testStatistic:      character indicating the statistical framework used to 
 #                       test for selection. One of c("local", "focused", "imbalanced").
@@ -508,7 +508,7 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
 
 calcBaselineOneClone <- function(clone_num, db, sequenceColumn = "sequence_alignment", 
                                  cloneColumn="clone_id",
-                                 juncLenCol="junction_length",
+                                 juncLengthColumn="junction_length",
                                  germlineColumn = "germline_alignment",
                                  testStatistic = c("local", "focused", "imbalanced"), 
                                  regionDefinition = IMGT_VDJ_BY_REGIONS,
@@ -519,7 +519,7 @@ calcBaselineOneClone <- function(clone_num, db, sequenceColumn = "sequence_align
     clone_db <- db[db[[cloneColumn]] == clone_num,]
     reg_def <- getCloneRegion(clone_num=clone_num, db=clone_db, 
                               seq_col=sequenceColumn,
-                              juncLenCol=juncLenCol,
+                              juncLengthColumn=juncLengthColumn,
                               clone_col=cloneColumn, regionDefinition=regionDefinition)
     clone_baseline <- calcBaselineL(db=clone_db,sequenceColumn = sequenceColumn,
                                     germlineColumn = germlineColumn, 
@@ -529,7 +529,7 @@ calcBaselineOneClone <- function(clone_num, db, sequenceColumn = "sequence_align
                                     mutationDefinition = mutationDefinition,
                                     calcStats = calcStats, nproc = nproc,
                                     cloneColumn=cloneColumn,
-                                    juncLengthColumn=juncLenCol)
+                                    juncLengthColumn=juncLengthColumn)
     return(clone_baseline)
 }
 
