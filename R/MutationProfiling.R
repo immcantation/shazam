@@ -1508,7 +1508,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     }
     
     if ((regionDefinitionName == "IMGT_VDJ_BY_REGIONS") | (regionDefinitionName == "IMGT_VDJ")) {
-        check <- checkColumns(db, c(juncLengthColumn, cloneColumn, fields))
+        check <- checkColumns(db, c(juncLengthColumn, cloneColumn))
         if (check != TRUE) { stop(check) }
         # Group by cloneColumn and fields. Needed later to create and use a region 
         # definition for each clone
@@ -2661,205 +2661,6 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
     
 }
 
-
-#### Expected frequencies calculating functions ####
-
-# Calculate expected mutation frequencies
-#
-# \code{expectedMutationsL} calculates the expected mutation frequencies for each 
-# sequence in the input \code{data.frame}.
-#
-# @param    db                  \code{data.frame} containing sequence data.
-# @param    sequenceColumn      \code{character} name of the column containing input 
-#                               sequences.
-# @param    germlineColumn      \code{character} name of the column containing 
-#                               the germline or reference sequence.
-# @param    targetingModel      \link{TargetingModel} object. Default is \link{HH_S5F}.
-# @param    regionDefinition    \link{RegionDefinition} object defining the regions
-#                               and boundaries of the Ig sequences.
-# @param    mutationDefinition  \link{MutationDefinition} object defining replacement
-#                               and silent mutation criteria. If \code{NULL} then 
-#                               replacement and silent are determined by exact 
-#                               amino acid identity.
-# @param    nproc               \code{numeric} number of cores to distribute the operation
-#                               over. If the cluster has already been set the call function with 
-#                               \code{nproc} = 0 to not reset or reinitialize. Default is 
-#                               \code{nproc} = 1.
-# 
-# @return   A modified \code{db} \code{data.frame} with expected mutation frequencies 
-#           for each region defined in \code{regionDefinition}.
-#          
-#           The columns names are dynamically created based on the regions in  
-#           \code{regionDefinition}. For example, when using the \link{IMGT_V}
-#           definition, which defines positions for CDR and FWR, the following columns are
-#           added:  
-#           \itemize{
-#             \item  \code{mu_expected_cdr_r}:  number of replacement mutations in CDR1 and 
-#                                            CDR2 of the V-segment.
-#             \item  \code{mu_expected_cdr_s}:  number of silent mutations in CDR1 and CDR2 
-#                                            of the V-segment.
-#             \item  \code{mu_expected_fwr_r}:  number of replacement mutations in FWR1, 
-#                                            FWR2 and FWR3 of the V-segment.
-#             \item  \code{mu_expected_fwr_s}:  number of silent mutations in FWR1, FWR2 and
-#                                            FWR3 of the V-segment.
-#           }
-#           
-# @details
-# Only the part of the sequences defined in \code{regionDefinition} are analyzed. 
-# For example, when using the \link{IMGT_V} definition, mutations in
-# positions beyond 312 will be ignored.
-# 
-# @seealso  
-# \link{calcExpectedMutationsL} is called by this function to calculate the expected 
-# mutation frequencies. See \link{observedMutations} for getting observed 
-# mutation counts. See \link{IMGT_SCHEMES} for a set of predefined 
-# \link{RegionDefinition} objects.
-# 
-# @examples
-# # Subset example data
-# data(ExampleDb, package="alakazam")
-# db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
-#
-# # Calculate expected mutations over V region
-# db_exp <- expectedMutationsL(db,
-#                              sequenceColumn="sequence_alignment",
-#                              germlineColumn="germline_alignment_d_mask",
-#                              regionDefinition=IMGT_V,
-#                              nproc=1)
-# 
-# # Calculate hydropathy expected mutations over V region
-# db_exp <- expectedMutationsL(db,
-#                             sequenceColumn="sequence_alignment",
-#                             germlineColumn="germline_alignment_d_mask",
-#                             regionDefinition=IMGT_V,
-#                             mutationDefinition=HYDROPATHY_MUTATIONS,
-#                             nproc=1)
-#
-# @export
-expectedMutationsL <- function(db, 
-                               sequenceColumn="sequence_alignment",
-                               germlineColumn="germline_alignment_d_mask",
-                               targetingModel=HH_S5F,
-                               regionDefinition=NULL,
-                               mutationDefinition=NULL,
-                               nproc=1) {
-    # Hack for visibility of foreach index variable
-    idx <- NULL
-    
-    # Check for valid columns
-    check <- checkColumns(db, c(sequenceColumn, germlineColumn))
-    if (check != TRUE) { stop(check) }
-    
-    # Check region definition
-    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
-        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
-    }
-    
-    # Check mutation definition
-    if (!is.null(mutationDefinition) & !is(mutationDefinition, "MutationDefinition")) {
-        stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
-    }
-    
-    # Check if mutation count/freq columns already exist
-    # and throw overwritting warning
-    if (!is.null(regionDefinition)) {
-        labels <- regionDefinition@labels
-    } else {
-        labels <- makeNullRegionDefinition()@labels
-    }
-    
-    labels <- paste("mu_expected_", labels, sep="")
-    
-    label_exists <- labels[labels %in% colnames(db)]
-    if (length(label_exists)>0) {
-        warning(paste0("Columns ", 
-                       paste(label_exists, collapse=", "),
-                       " exist and will be overwritten")
-        )
-        db[label_exists] <- NULL
-    }    
-    
-    # Check targeting model
-    if (!is(targetingModel, "TargetingModel")) {
-        stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
-    }
-    
-    # Convert sequence columns to uppercase
-    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
-    
-    # If the user has previously set the cluster and does not wish to reset it
-    if(!is.numeric(nproc)){ 
-        cluster = nproc 
-        nproc = 0
-    }
-    
-    # Ensure that the nproc does not exceed the number of cores/CPUs available
-    nproc <- min(nproc, cpuCount(), na.rm=T)
-    
-    # If user wants to paralellize this function and specifies nproc > 1, then
-    # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.  
-    if (nproc > 1) {        
-        cluster <- parallel::makeCluster(nproc, type = "PSOCK")
-        parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
-                                              'regionDefinition','targetingModel',
-                                              'calcExpectedMutations','calculateTargeting',
-                                              's2c','c2s','NUCLEOTIDES','HH_S5F',
-                                              'calculateMutationalPaths','CODON_TABLE'),
-                                envir=environment() )
-        registerDoParallel(cluster)
-    } else if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ 
-        # (needed for 'foreach' in non-parallel mode)
-        registerDoSEQ()
-    }
-    
-    
-    # Printing status to console if not using extended region definitions
-    status <- NULL
-    if (!is.null(regionDefinition)) {
-        if (!regionDefinition@name %in% c("IMGT_VDJ_BY_REGIONS", "IMGT_VDJ")) {
-            status <- "Calculating the expected frequencies of mutations...\n"
-        }    
-    }
-    cat(status)
-    
-    # Calculate targeting for each sequence (based on the germline)
-    # Should be a 5 x N matrix where N in the number of nucleotides defined by
-    # the regionDefinition
-    numbOfSeqs <- nrow(db)
-    
-    targeting_list <-
-        foreach (idx=iterators::icount(numbOfSeqs)) %dopar% {
-            calcExpectedMutations(germlineSeq=db[[germlineColumn]][idx],
-                                  inputSeq=db[[sequenceColumn]][idx],
-                                  targetingModel=targetingModel,
-                                  regionDefinition=regionDefinition,
-                                  mutationDefinition=mutationDefinition)
-        }
-    
-    # Convert list of expected mutation freq to data.frame
-    if (is.null(regionDefinition)) {
-        labels_length <- length(makeNullRegionDefinition()@labels)
-    } else {
-        labels_length <- length(regionDefinition@labels)
-    }
-    expectedMutationFrequencies <- do.call(rbind, lapply(targeting_list, function(x) { 
-        length(x) <- labels_length 
-        return(x) })) 
-    
-    expectedMutationFrequencies[is.na(expectedMutationFrequencies)] <- 0
-    colnames(expectedMutationFrequencies) <- paste0("mu_expected_", colnames(expectedMutationFrequencies))
-    
-    # Properly shutting down the cluster
-    if(nproc>1){ parallel::stopCluster(cluster) }
-    
-    # Bind the observed mutations to db
-    db_new <- cbind(db, expectedMutationFrequencies)
-    return(db_new)    
-    
-}
-
 #### Expected frequencies calculating functions ####
 
 #' Calculate expected mutation frequencies
@@ -2949,86 +2750,187 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                refOption = "germline", 
                                cloneColumn = "clone_id", 
                                juncLengthColumn = "junction_length",
-                               parentColumn = "parent_sequence") {
+                               parentColumn = "parent_sequence",
+                               fields=NULL) {
     
-    # we will split this function into 3 cases:
-    # 1. RegionDefinition is NULL.
-    # In this case original expectedMutationsL can be used.
-    # This case is different from case 2, as regioDefinition@name cannot be extracted
-    # from RegionDefintion
-    # 2. Region definition does not include FWR3 and CDR4 (meaning it is
-    # different than IMGT_VDJ and IMGT_VDJ_BY_REGIONS).
-    # In this case original expectedMutationsL can be used.
-    # 3. Region definition includes FWR3 and CDR4 (meaning it is 
-    # IMGT_VDJ or IMGT_VDJ_BY_REGIONS).
-    # In this case - need to calculate expectedMutations per clone
-    # as regionDefinition is different per clone.
-    
+    # Hack for visibility of foreach index variable
+    idx <- NULL
+
     # setting the reference column:
     if (refOption == "germline") {
         refColumn <- germlineColumn
-    }
-    else if (refOption == "parent") {
+    } else if (refOption == "parent") {
         refColumn <- parentColumn
+    } else {
+        stop(deparse(substitute(refOption)), " is not a valid refOption. Expecting 'germline' or 'parent'.")
     }
-    else {
-        stop(deparse(substitute(refOption)), " is not a valid refOption")
+    
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn, refColumn, fields))
+    if (check != TRUE) { stop(check) }
+    
+    regionDefinitionName <- ""
+    if (!is.null(regionDefinition)) {
+        regionDefinitionName <- regionDefinition@name
+    }
+    
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
+    
+    # Check mutation definition
+    if (!is.null(mutationDefinition) & !is(mutationDefinition, "MutationDefinition")) {
+        stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
+    }
+    
+    # Check if mutation count/freq columns already exist
+    # and throw overwritting warning
+    if (!is.null(regionDefinition)) {
+        labels <- regionDefinition@labels
+    } else {
+        labels <- makeNullRegionDefinition()@labels
+    }
+    
+    labels <- paste("mu_expected_", labels, sep="")
+    
+    label_exists <- labels[labels %in% colnames(db)]
+    if (length(label_exists)>0) {
+        warning(paste0("Columns ", 
+                       paste(label_exists, collapse=", "),
+                       " exist and will be overwritten")
+        )
+        db[,label_exists] <- NULL
+    }    
+    
+    # Check targeting model
+    if (!is(targetingModel, "TargetingModel")) {
+        stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
     }
     
     
-    # Case 1:
-    if (is.null(regionDefinition))  {
-        expectedMutations_db <- expectedMutationsL(db=db, sequenceColumn = sequenceColumn, 
-                                                   germlineColumn = refColumn, 
-                                                   targetingModel = targetingModel, 
-                                                   mutationDefinition = mutationDefinition, 
-                                                   nproc = nproc)
+    if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
+        check <- checkColumns(db, c(juncLengthColumn, cloneColumn))
+        if (check != TRUE) { stop(check) }
+        # Group by cloneColumn and fields. Needed later to create and use a region 
+        # definition for each clone
+        db$field_group <- db %>%
+            group_by(!!!rlang::syms(c(fields, cloneColumn))) %>%
+            dplyr::group_indices()
+    } else {
+        # No grouping needed
+        if (!is.null(fields)) {
+            message(paste0("`fields` is set (", paste(fields, collapse=", "),") but is not used with `regionDefinition` (", regionDefinitionName,")."))
+        }
+        db$field_group <- 1:nrow(db)
+    }
+    field_groups <- unique(db[['field_group']])
+    db$tmp_expmu_row_id <- 1:nrow(db)
+    
+    # Convert sequence columns to uppercase
+    db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
+    
+    # If the user has previously set the cluster and does not wish to reset it
+    if(!is.numeric(nproc)){ 
+        cluster = nproc 
+        nproc = 0
     }
     
-    # Case 2:
-    else if ((regionDefinition@name != "IMGT_VDJ_BY_REGIONS") & (regionDefinition@name != "IMGT_VDJ")) {
-        expectedMutations_db <- expectedMutationsL(db=db, sequenceColumn = sequenceColumn, 
-                                                   germlineColumn = refColumn, 
-                                                   targetingModel = targetingModel, 
-                                                   regionDefinition = regionDefinition, 
-                                                   mutationDefinition = mutationDefinition, 
-                                                   nproc = nproc)
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, cpuCount(), na.rm=T)
+    
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters & 
+    # export all nesseary environment variables, functions and packages.  
+    if (nproc > 1) {        
+        cluster <- parallel::makeCluster(nproc, type = "PSOCK")
+        parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
+                                              'refColumn', 'regionDefinitionName', 'juncLengthColumn','field_groups', 'makeRegion',
+                                              'regionDefinition','targetingModel',
+                                              'calcExpectedMutations','calculateTargeting',
+                                              's2c','c2s','NUCLEOTIDES','HH_S5F',
+                                              'calculateMutationalPaths','CODON_TABLE'),
+                                envir=environment() )
+        registerDoParallel(cluster)
+    } else if (nproc == 1) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
     }
     
-    # Case 3:
-    else if ((regionDefinition@name == "IMGT_VDJ_BY_REGIONS") | (regionDefinition@name == "IMGT_VDJ")) {
-        
-        # Since each clone needs a different regionDefinition - then this function will loop on all clones in db,
-        # and for each clone it will run the function expectedMutationsL with its own regionDefinition.
-        # before looping: setting a list of all clones in db:  
-        clones_in_db <- t(unique(db[,c(cloneColumn)]))
-        first_clone <- TRUE
-        for (cur_clone in clones_in_db) {
-            # subseting the db to lines for specific clone
-            cur_clone_db <- db[db[[cloneColumn]] == cur_clone,]
-            # setting the regionDefinition for the specific clone:
-            junc_len <- nchar(cur_clone_db[1,sequenceColumn])
-            cur_clone_reg <- makeRegion(juncLength = cur_clone_db[1,juncLengthColumn], 
-                                        sequenceImgt =   cur_clone_db[1,sequenceColumn], 
-                                        regionDefinition=regionDefinition)
+    
+    ## Prepare extended region definitions and export to cluster
+    extendedRegionDefinitions <- NULL
+    if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
+        extendedRegionDefinitions <- foreach(idx=iterators::icount(length(field_groups))) %dopar% {
+            group_id <- field_groups[idx]
+            db_group <- db[db[['field_group']] == group_id,,drop=F]
             
-            clone_expectedMutations_db <- expectedMutationsL(db=cur_clone_db, sequenceColumn = sequenceColumn, 
-                                                             germlineColumn=refColumn, 
-                                                             targetingModel = targetingModel, 
-                                                             regionDefinition=cur_clone_reg, 
-                                                             mutationDefinition=mutationDefinition, 
-                                                             nproc=nproc) 
-            # binding current clone_expectedMutations_db to one big data frame:
-            if (first_clone == TRUE) {
-                expectedMutations_db <- clone_expectedMutations_db
-                first_clone <- FALSE
-            }
-            else {
-                expectedMutations_db <- rbind(expectedMutations_db,clone_expectedMutations_db)
-            }
-        } # end of for loop
+            makeRegion(juncLength = db_group[[juncLengthColumn]][1],
+                       sequenceImgt = db_group[[sequenceColumn]][1],
+                       regionDefinition=regionDefinition)
+            
+        }
     }
-    return(expectedMutations_db)
+    if (nproc > 1) { 
+        parallel::clusterExport(cluster, 
+                                list('extendedRegionDefinitions'),
+                                envir=environment())
+    }
+    
+    
+    # Printing status to console
+    # cat("Calculating the expected frequencies of mutations...\n")
+    
+    # Calculate targeting for each sequence (based on the germline)
+    # Should be a 5 x N matrix where N in the number of nucleotides defined by
+    # the regionDefinition
+    numbOfSeqs <- nrow(db)
+    
+    targeting_list <-
+        foreach (idx=iterators::icount(numbOfSeqs)) %dopar% {
+            
+            group_id <- db[['field_group']][idx]
+            groupRegionDefinition <- regionDefinition
+            if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
+                rd_idx <- which(field_groups == group_id)
+                groupRegionDefinition <- extendedRegionDefinitions[[rd_idx]]
+            }
+            
+            eM <- calcExpectedMutations(germlineSeq=db[[refColumn]][idx],
+                                  inputSeq=db[[sequenceColumn]][idx],
+                                  targetingModel=targetingModel,
+                                  regionDefinition=groupRegionDefinition,
+                                  mutationDefinition=mutationDefinition)
+            eM['tmp_expmu_row_id'] <- db[['tmp_expmu_row_id']][idx]
+            eM
+        }
+    
+    # Convert list of expected mutation freq to data.frame
+    if (is.null(regionDefinition)) {
+        labels_length <- length(makeNullRegionDefinition()@labels) + 1 # +1 for tmp row_id
+    } else {
+        labels_length <- length(regionDefinition@labels) + 1
+    }
+    expectedMutationFrequencies <- as.data.frame(do.call(rbind, lapply(targeting_list, function(x) { 
+        length(x) <- labels_length
+        return(x) })), stringsAsFactors=F) 
+    
+    expectedMutationFrequencies[is.na(expectedMutationFrequencies)] <- 0
+    
+    col_names <- colnames(expectedMutationFrequencies)
+    mu_col_names <- col_names != "tmp_expmu_row_id"
+    colnames(expectedMutationFrequencies)[mu_col_names] <- paste0("mu_expected_", colnames(expectedMutationFrequencies)[mu_col_names])
+    
+    # Properly shutting down the cluster
+    if(nproc>1){ parallel::stopCluster(cluster) }
+    
+    # Bind the observed mutations to db
+    db_new <- db %>%
+        ungroup() %>%
+        left_join(expectedMutationFrequencies, by="tmp_expmu_row_id") %>%
+        arrange(tmp_expmu_row_id) %>%
+        select(-field_group, -tmp_expmu_row_id) 
+    return(db_new) 
 } 
 
 #' Calculate expected mutation frequencies of a sequence

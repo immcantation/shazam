@@ -105,7 +105,7 @@ test_that("expectedMutations works with regionDefinition==NULL",{
                                          germlineColumn="GERMLINE_IMGT_D_MASK",
                                          regionDefinition=IMGT_V,
                                          nproc=1)
-    expect_identical(db_mutations, db_mutations_df)
+    expect_identical(as.data.frame(db_mutations), db_mutations_df)
     
     ## Check 5 examples for each, at different positions
     ## cdr_r, first 5
