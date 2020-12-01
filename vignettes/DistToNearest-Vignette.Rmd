@@ -125,7 +125,7 @@ or `TRB/TRD` (TCR) sequences only, or using both `IGH` and `IGK`/`IGL` (BCR) or
 `TRB`/`TRD` and `TRA`/`TRG` (TCR) sequences. This is governed by `onlyHeavy`.
 
 
-```{r, eval=FALSE, warning=FALSE}
+```{r, eval=TRUE, warning=FALSE}
 # Single-cell mode 
 # Group cells in a one-stage process (VJthenLen=FALSE) and using
 # both heavy and light chain sequences (onlyHeavy=FALSE)
