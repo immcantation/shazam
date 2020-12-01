@@ -98,14 +98,14 @@ dist_s5f <- distToNearest(ExampleDb, sequenceColumn="junction",
 ## Calculating nearest neighbor distances (single-cell paired heavy and light chain sequences)
 
 The `distToNearest` function also supports running under single-cell mode where an input 
-`db` containing single-cell paired IGH:IGK/IGL, TRB:TRA, or TRD:TRG chain sequences are 
+`Example10x` containing single-cell paired IGH:IGK/IGL, TRB:TRA, or TRD:TRG chain sequences are 
 supplied. In this case, by default, cells are first divided into partitions containing 
 the same heavy/long chain (IGH, TRB, TRD) V gene and J gene (and if specified, junction 
 length), and the same light/short chain (IGK, IGL, TRA, TRG) V gene and J gene (and if 
 specified, junction length). Then, only the heavy chain sequences are used for 
 calculating the nearest neighbor distances.
 
-Under the single-cell mode, each row of the input `db` should represent a sequence/chain. 
+Under the single-cell mode, each row of the input `Example10x` should represent a sequence/chain. 
 Sequences/chains from the same cell are linked by a cell ID in a `cellIdColumn` column. 
 Note that a cell should have exactly one `IGH` sequence (BCR) or `TRB`/`TRD` (TCR). 
 The values in the `locusColumn` column must be one of `IGH`, `IGI`, `IGK`, or `IGL` (BCR)
@@ -129,7 +129,9 @@ or `TRB/TRD` (TCR) sequences only, or using both `IGH` and `IGK`/`IGL` (BCR) or
 # Single-cell mode 
 # Group cells in a one-stage process (VJthenLen=FALSE) and using
 # both heavy and light chain sequences (onlyHeavy=FALSE)
-dist_sc <- distToNearest(db, cellIdColumn="cell", locusColumn="locus", 
+
+data(Example10x, package="alakazam")
+dist_sc <- distToNearest(Example10x, cellIdColumn="cell_id", locusColumn="locus", 
                          VJthenLen=FALSE, onlyHeavy=FALSE)
 ```
 
