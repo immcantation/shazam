@@ -31,6 +31,7 @@ models, can also be performed along with model driven simulations of SHM.
 + [expectedMutations](expectedMutations.md):        Compute expected mutation frequencies.
 + [shmulateSeq](shmulateSeq.md):              Simulate mutations in a single sequence.
 + [shmulateTree](shmulateTree.md):             Simulate mutations over a lineage tree.
++ [makeRegion](makeRegion.md):               Extends region definition for FWR1/2/3/4 and CDR1/2/3.
 
 
 
@@ -98,6 +99,22 @@ distances to nearest neighbors.
 distances to nearest neighbors.
 + [calcTargetingDistance](calcTargetingDistance.md):    Construct a nucleotide distance matrix from a 
 5-mer targeting model.
+
+
+
+Lineage information merging into ChangeoClone 
+-------------------
+
+
+`shazam` provides tools to merge lineage information of clones to 
+a [ChangeoClone](http://www.rdocumentation.org/packages/alakazam/topics/ChangeoClone-class) object. This includes parent ID and parent sequence for 
+each read in db. The motivation for this is to enable BASELINe analysis of 
+observed and expected mutations, with regard to the sequence parent, instead 
+the sequence germline. 
+
+
++ [makeGraphDf](makeGraphDf.md):              Adding Lineage information to ChangeoClone.
++ [plotCloneLineageTree](plotCloneLineageTree.md):     Ploting a clone lineage tree.
 
 
 

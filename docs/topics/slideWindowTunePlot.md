@@ -57,13 +57,13 @@ jitter.y.amt
 `jitter.y=TRUE`. Default is 0.1.
 
 pchs
-:   point types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot.default).
+:   point types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
 
 ltys
-:   line types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot.default).
+:   line types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
 
 cols
-:   colors to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot.default).
+:   colors to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
 
 plotLegend
 :   whether to plot legend. Default is `TRUE`.

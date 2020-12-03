@@ -119,7 +119,9 @@ bulk sequencing data is assumed.
 locusColumn
 :   name of the column containing locus information. 
 Only applicable to single-cell data.
-Ignored if `cellIdColumn=NULL`.
+Ignored if `cellIdColumn=NULL`. Valid loci values
+are "IGH", "IGI", "IGK", "IGL", "TRA", "TRB", 
+"TRD", and "TRG".
 
 onlyHeavy
 :   use only the IGH (BCR) or TRB/TRD (TCR) sequences 

@@ -13,11 +13,13 @@ Usage
 expectedMutations(
 db,
 sequenceColumn = "sequence_alignment",
-germlineColumn = "germline_alignment_d_mask",
+germlineColumn = "germline_alignment",
 targetingModel = HH_S5F,
 regionDefinition = NULL,
 mutationDefinition = NULL,
-nproc = 1
+nproc = 1,
+cloneColumn = "clone_id",
+juncLengthColumn = "junction_length"
 )
 ```
 
@@ -53,6 +55,12 @@ nproc
 over. If the cluster has already been set the call function with 
 `nproc` = 0 to not reset or reinitialize. Default is 
 `nproc` = 1.
+
+cloneColumn
+:   clone id column name in `db`
+
+juncLengthColumn
+:   junction length column name in `db`
 
 
 
@@ -103,17 +111,6 @@ germlineColumn="germline_alignment_d_mask",
 regionDefinition=IMGT_V,
 nproc=1)
 
-```
-
-
-```
-Calculating the expected frequencies of mutations...
-
-```
-
-
-```R
-
 # Calculate hydropathy expected mutations over V region
 db_exp <- expectedMutations(db,
 sequenceColumn="sequence_alignment",
@@ -121,12 +118,6 @@ germlineColumn="germline_alignment_d_mask",
 regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS,
 nproc=1)
-```
-
-
-```
-Calculating the expected frequencies of mutations...
-
 ```
 
 

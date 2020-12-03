@@ -53,9 +53,8 @@ nproc=1)
 
 ```
 
-
+*calcBaseline will calculate observed and expected mutations for sequence_alignment using germline_alignment_d_mask as a reference.*
 ```
-Calculating the expected frequencies of mutations...
 Calculating BASELINe probability density functions...
 
 ```

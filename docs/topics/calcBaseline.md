@@ -1,4 +1,4 @@
-**calcBaseline** - *Calculate the BASELINe PDFs*
+**calcBaseline** - *Calculate the BASELINe PDFs (including for regions that include CDR3 and FWR4)*
 
 Description
 --------------------
@@ -19,7 +19,9 @@ regionDefinition = NULL,
 targetingModel = HH_S5F,
 mutationDefinition = NULL,
 calcStats = FALSE,
-nproc = 1
+nproc = 1,
+cloneColumn = NULL,
+juncLengthColumn = NULL
 )
 ```
 
@@ -67,6 +69,26 @@ nproc
 :   number of cores to distribute the operation over. If 
 `nproc=0` then the `cluster` has already been
 set and will not be reset.
+
+cloneColumn
+:   `character` name of the column in `db` 
+containing clonal identifiers. Relevant only for 
+when regionDefinition includes CDR and FWR4 (else
+this value can be `NULL`)
+
+juncLengthColumn
+:   `character` name of the column in `db` 
+containing the junction length. Relevant only for 
+when regionDefinition includes CDR and FWR4 (else
+this value can be `NULL`)
+
+muFreqColumn
+:   `character` name of the column containing mutation
+frequency. Optional. Applicable to the `"mostMutated"`
+and `"leastMutated"` methods. If not supplied, mutation
+frequency is computed by calling `observedMutations`.
+Default is `NULL`. See Cautions for note on usage.
+#'
 
 
 
@@ -154,9 +176,8 @@ targetingModel=HH_S5F,
 nproc=1)
 ```
 
-
+*calcBaseline will calculate observed and expected mutations for clonal_sequence using clonal_germline as a reference.*
 ```
-Calculating the expected frequencies of mutations...
 Calculating BASELINe probability density functions...
 
 ```

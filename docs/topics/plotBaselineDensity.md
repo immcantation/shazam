@@ -137,9 +137,8 @@ nproc=1)
 
 ```
 
-
+*calcBaseline will calculate observed and expected mutations for clonal_sequence using clonal_germline as a reference.*
 ```
-Calculating the expected frequencies of mutations...
 Calculating BASELINe probability density functions...
 
 ```
@@ -170,7 +169,7 @@ colorElement="group", sigmaLimits=c(-1, 1))
 
 ```
 
-![6](plotBaselineDensity-6.png)
+![7](plotBaselineDensity-7.png)
 
 ```R
 
@@ -180,7 +179,7 @@ plotBaselineDensity(grouped, "sample_id", "c_call", facetBy="group",
 colorValues=sample_colors, sigmaLimits=c(-1, 1))
 ```
 
-![8](plotBaselineDensity-8.png)
+![9](plotBaselineDensity-9.png)
 
 
 See also

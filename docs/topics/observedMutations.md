@@ -19,7 +19,9 @@ mutationDefinition = NULL,
 ambiguousMode = c("eitherOr", "and"),
 frequency = FALSE,
 combine = FALSE,
-nproc = 1
+nproc = 1,
+cloneColumn = "clone_id",
+juncLengthColumn = "junction_length"
 )
 ```
 
@@ -75,6 +77,12 @@ cluster has already been set the call function with
 `nproc` = 0 to not reset or reinitialize. Default is 
 `nproc` = 1.
 
+cloneColumn
+:   clone id column name in `db`
+
+juncLengthColumn
+:   junction length column name in `db`
+
 
 
 
@@ -97,7 +105,7 @@ FWR2 and FWR3 of the V-segment.
 FWR3 of the V-segment.
 
 If `frequency=TRUE`, R and S mutation frequencies are
-calculated over the number of non-N positions in the speficied regions.
+calculated over the number of non-N positions in the specified regions.
 
 + `mu_freq_cdr_r`:  frequency of replacement mutations in CDR1 and 
 CDR2 of the V-segment.
@@ -120,8 +128,10 @@ Details
 -------------------
 
 Mutation counts are determined by comparing the input sequences (in the column specified 
-by `sequenceColumn`) to the germline sequence (in the column specified by 
-`germlineColumn`). See [calcObservedMutations](calcObservedMutations.md) for more technical details, 
+by `sequenceColumn`) to a reference sequence. If `db` includes lineage information,
+e.g. in the field `parent_sequence`, the reference sequence can be set to  
+use that field as reference sequence. Ssee more details in [makeGraphDf](makeGraphDf.md)).
+See [calcObservedMutations](calcObservedMutations.md) for more technical details, 
 **including criteria for which sequence differences are included in the mutation 
 counts and which are not**.
 
@@ -154,6 +164,21 @@ germlineColumn="germline_alignment_d_mask",
 regionDefinition=IMGT_V,
 mutationDefinition=CHARGE_MUTATIONS,
 nproc=1)
+
+# Count of VDJ-region mutations, split by FWR and CDR
+db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+germlineColumn="germline_alignment_d_mask",
+regionDefinition=IMGT_VDJ,
+nproc=1)    
+### Not run:
+# Count of VDJ-region mutations, split by FWR and CDR
+# # This doesn't work because 'parent_sequence' doesn't exist,
+# # it should be calculated before
+# Update example to include how to create that column.
+# db_obs <- observedMutations(db, sequenceColumn="parent_sequence",
+# germlineColumn="germline_alignment_d_mask",
+# regionDefinition=IMGT_VDJ,
+# nproc=1)
 ```
 
 

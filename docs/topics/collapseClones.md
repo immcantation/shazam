@@ -25,7 +25,9 @@ includeAmbiguous = FALSE,
 breakTiesStochastic = FALSE,
 breakTiesByColumns = NULL,
 expandedDb = FALSE,
-nproc = 1
+nproc = 1,
+juncLengthColumn = "junction_length",
+fields = NULL
 )
 ```
 
@@ -110,6 +112,15 @@ nproc
 :   Number of cores to distribute the operation over. If the 
 `cluster` has already been set earlier, then pass the 
 `cluster`. This will ensure that it is not reset.
+
+juncLengthColumn
+:   `character` name of the column containing the junction length.
+Needed when `regionDefinition` includes CDR3 and FWR4.
+
+fields
+:   additional fields used for grouping. Use sample_id, to
+avoid combining sequences with the same clone_id 
+that belong to different sample_id.
 
 
 
