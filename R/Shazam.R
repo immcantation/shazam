@@ -125,6 +125,7 @@
 #'                          isValidAASeq translateStrings gridPlot
 #'                          getMRCA getPathLengths tableEdges
 #'                          progressBar baseTheme checkColumns cpuCount
+#'                          makeChangeoClone summarizeSubtrees buildPhylipLineage
 #' @importFrom  ape         mst
 #' @importFrom  diptest     dip.test
 #' @importFrom  doParallel  registerDoParallel
@@ -138,7 +139,8 @@
 #'                          left_join
 #' @importFrom  foreach     foreach %dopar% registerDoSEQ
 #' @importFrom  igraph      V E as_adjacency_matrix graph_from_data_frame
-#'                          vertex_attr set_vertex_attr
+#'                          vertex_attr set_vertex_attr 
+#'                          layout_as_tree V<-
 #' @importFrom  iterators   icount
 #' @importFrom  kedd        h.ucv
 #' @importFrom  KernSmooth  bkde

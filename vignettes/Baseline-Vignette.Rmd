@@ -48,15 +48,18 @@ fields (columns) to be present in the table:
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 # Load example data
 library(shazam)
+library(alakazam)
 data(ExampleDb, package="alakazam")
 ```
 
-## Calculate selection PDFs for individual sequences
+## Preprocessing
 
-Selection scores are calculated with the `calcBaseline` function. This can
-be performed with a single call to `calcBaseline`, which performs all 
-required steps. Alternatively, one can perform each step separately for
-greater control over the analysis parameters.
+Before starting the selection analysis, data need to be prepared in one of 
+two ways:
+
+1. Constructing clonal consensus sequences.
+
+1. Using lineage information.
 
 ### Constructing clonal consensus sequences
 
@@ -78,6 +81,40 @@ clones <- collapseClones(ExampleDb, cloneColumn="clone_id",
                          includeAmbiguous=FALSE, breakTiesStochastic=FALSE, 
                          nproc=1)
 ```
+
+### Adding lineage information
+
+For each clone, lineage information can be incorporated following these steps:
+
+```{r eval=F, warning=F, results="hide"}
+# Subset to sequences with clone_id=3170
+clone_3170_db <- subset(ExampleDb, clone_id == 3170)
+dim(clone_3170_db)
+colnames(clone_3170_db)
+
+# Generate a ChangeoClone object for lineage construction 
+clone_3170_obj <- makeChangeoClone(clone_3170_db, seq="sequence_alignment", germ="germline_alignment")
+
+# Run the lineage reconstruction
+dnapars_exec <- "/usr/local/bin/dnapars"
+clone_3170_graph <- buildPhylipLineage(clone_3170_obj, dnapars_exec, rm_temp = TRUE)
+
+# Generating a data.frame from the graph object, 
+# and merge it with clone data.frame
+clone_3170_GraphDf <- makeGraphDf(clone_3170_graph, clone_3170_obj)
+dim(clone_3170_GraphDf)
+colnames(clone_3170_GraphDf)
+```
+
+`makeGraphDb` creates a `ChangeoClone` object with the column `parent_sequence`. This field
+can be used to analyze mutations for each sequence relative to their `parent_sequence`.
+
+## Calculate selection PDFs for individual sequences
+
+Selection scores are calculated with the `calcBaseline` function. This can
+be performed with a single call to `calcBaseline`, which performs all 
+required steps. Alternatively, one can perform each step separately for
+greater control over the analysis parameters.
 
 ### Calculating selection in multiple steps
 

@@ -225,8 +225,8 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
     # include sequences of germline and inferred.
     # Setting the "sequence" column to be named "sequence"
     if (objSeq=="sequence") {
-        cur_clone_merged_df <- subset(cur_clone_merged_df, select=c(-sequence.x))
-        cur_clone_merged_df <- rename(cur_clone_merged_df, sequence=sequence.y)
+        cur_clone_merged_df <- cur_clone_merged_df %>% select(-!!rlang::sym("sequence.x"))
+        cur_clone_merged_df <- rename(cur_clone_merged_df, sequence=!!rlang::sym("sequence.y"))
     } else {
         cur_clone_merged_df1<-cur_clone_merged_df1[!(names(cur_clone_merged_df1) %in% c(objSeq))]
     }
@@ -245,14 +245,14 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
     # now checking if the germline sequence is equal to its (only) child sequence. 
     # For example if "250_7" sequence parent is the "250_Germline" sequence, 
     # then mergin them to one line called "250_7_Germline". 
-    germ_seq_line <- filter(cur_clone_merged_df,orig_sequence_id=="Germline")
+    germ_seq_line <- filter(cur_clone_merged_df,!!rlang::sym("orig_sequence_id")=="Germline")
     germ_seq <- germ_seq_line[,objSeq]
-    germ_son_seq_line <- filter(cur_clone_merged_df,orig_parent=="Germline")
+    germ_son_seq_line <- filter(cur_clone_merged_df,!!rlang::sym("orig_parent")=="Germline")
     germ_son_seq <- germ_son_seq_line[,objSeq]
     if (seqDist(germ_seq, germ_son_seq) == 0) {
         # removing from db the line of the germline:
         cur_clone_merged_df <- filter(cur_clone_merged_df, 
-                                      orig_sequence_id!="Germline")
+                                      !!rlang::sym("orig_sequence_id")!="Germline")
         # renaming the sequence id of the germline son - to include "Germline"
         # in its name:
         cur_clone_merged_df[,objSeqId]<-ifelse(cur_clone_merged_df[,"orig_parent"] == "Germline", 
@@ -262,8 +262,8 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
                                                  
         # Change the parent SEQUENCE to be NA (as it is the Germline)
         cur_clone_merged_df <- mutate(cur_clone_merged_df, 
-                                      parent=ifelse(orig_parent == "Germline", "NA", 
-                                                    parent))
+                                      parent=ifelse(!!rlangh::sym("orig_parent") == "Germline", "NA", 
+                                                    !!rlang::sym("parent")))
     }
     return(cur_clone_merged_df)
 }
@@ -465,6 +465,9 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
                            regionDefinition=IMGT_VDJ_BY_REGIONS) {
     # subseting the db to lines for specific clone
     clone_db <- db[db[[clone_col]] == clone_num,]
+    if ( length(unique(clone_db[[juncLengthColumn]])) >1 ) {
+        stop("Expecting clones where all sequences have the same junction lenth. Different lengths found for clone ", clone_num)
+    }
     # getting one of the sequences of the specific clone: 
     seq <- clone_db[1, seq_col]
     junc_len <- clone_db[1, juncLengthColumn]

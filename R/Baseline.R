@@ -1755,13 +1755,6 @@ fastConv<-function(cons, max_sigma=20, length_sigma=4001){
 #'                              containing the junction length. Relevant only for 
 #'                              when regionDefinition includes CDR and FWR4 (else
 #'                              this value can be \code{NULL})  
-#' @param   fields              additional fields used for grouping. Only relevant
-#'                               when using \code{regionDefinition} \code{IMGT_VDJ}
-#'                               or \code{IMGT_VDJ_BY_REGIONS}, when \code{cloneColumn}
-#'                               is used to create region definitions for each clone.
-#'                               Use this, for example, to avoid combining sequences 
-#'                               with the same clone_id that belong to different
-#'                               sample_id.
 #' @param   muFreqColumn        \code{character} name of the column containing mutation
 #'                              frequency. Optional. Applicable to the \code{"mostMutated"}
 #'                              and \code{"leastMutated"} methods. If not supplied, mutation
@@ -1852,8 +1845,7 @@ calcBaseline <- function(db,
                          nproc = 1,
                          # following are relevant only when regionDefinition includes CDR3 and FWR4:
                          cloneColumn = NULL,
-                         juncLengthColumn = NULL,
-                         fields = NULL) {
+                         juncLengthColumn = NULL) {
     
     # Hack for visibility of foreach index variable
     idx <- NULL
@@ -1861,7 +1853,7 @@ calcBaseline <- function(db,
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic)
     
-    check <- checkColumns(db, c(sequenceColumn, germlineColumn, fields))
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
     
     regionDefinitionName <- ""
@@ -1884,26 +1876,9 @@ calcBaseline <- function(db,
         stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
     }
     
-    if ( regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-        check <- checkColumns(db, c(juncLengthColumn, cloneColumn))
-        if (check != TRUE) { stop(check) }
-        # Group by cloneColumn and fields. Needed later to create and use a region 
-        # definition for each clone
-        db$baseline_field_group <- db %>%
-            group_by(!!!rlang::syms(c(fields, cloneColumn))) %>%
-            dplyr::group_indices()
-    } else {
-        # No grouping needed
-        if (!is.null(fields)) {
-            message(paste0("`fields` is set (", paste(fields, collapse=", "),") but is not used with `regionDefinition` (", regionDefinitionName,")."))
-        }
-        db$baseline_field_group <- 1:nrow(db)
-    }
-    field_groups <- unique(db[['baseline_field_group']])
-    db$tmp_baseline_row_id <- 1:nrow(db)
-    
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
+    db$tmp_baseline_row_id <- 1:nrow(db)
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, cpuCount())
@@ -1920,7 +1895,7 @@ calcBaseline <- function(db,
         cluster <- parallel::makeCluster(nproc, type="PSOCK")
         parallel::clusterExport(cluster, list('db',
                                               'sequenceColumn', 'germlineColumn', 
-                                              'cloneColumn', 'juncLengthColumn', 'field_groups','makeRegion',
+                                              'cloneColumn', 'juncLengthColumn', 'makeRegion',
                                               'testStatistic', 'regionDefinition',
                                               'targetingModel', 'mutationDefinition','calcStats',
                                               'break2chunks', 'PowersOfTwo', 
@@ -1965,14 +1940,17 @@ calcBaseline <- function(db,
         expectedColumns <- paste0("mu_expected_", regionDefinition@labels)
     }
     
-    ## TODO add a warning/message of overwritting or creating mutation columns
-    
     if (!all(c(observedColumns, expectedColumns) %in% colnames(db))) {
+        
         # If the germlineColumn & sequenceColumn are not found in the db error and quit
         if (!all(c(sequenceColumn, germlineColumn) %in% colnames(db))) {
             stop(paste0("Both ", sequenceColumn, " & ", germlineColumn, 
                         " columns need to be present in the db"))
         }
+        
+        message(paste0("calcBaseline will calculate observed and expected mutations for ",
+                       sequenceColumn," using ", germlineColumn, " as a reference."))
+        
         
         # Calculate the numbers of observed mutations
         db <- observedMutations(db,
@@ -1983,8 +1961,7 @@ calcBaseline <- function(db,
                                 frequency=FALSE, combine=FALSE,
                                 nproc=0,
                                 cloneColumn=cloneColumn,
-                                juncLengthColumn=juncLengthColumn,
-                                fields=fields)
+                                juncLengthColumn=juncLengthColumn)
         
         # Calculate the expected frequencies of mutations
         db <- expectedMutations(db,
@@ -1995,8 +1972,11 @@ calcBaseline <- function(db,
                                 mutationDefinition=mutationDefinition,
                                 nproc=0,
                                 cloneColumn=cloneColumn,
-                                juncLengthColumn=juncLengthColumn,
-                                fields=fields)
+                                juncLengthColumn=juncLengthColumn)
+    } else {
+        message(paste0("calcBaseline will use existing observed and expected mutations, in the fields: ",
+                       paste0(observedColumns, sep=", ", collapse=", ")," and ", 
+                       paste0(expectedColumns, sep=", ", collapse=", ")))
     }
     
     # Calculate PDFs for each sequence
@@ -2010,24 +1990,11 @@ calcBaseline <- function(db,
     cols_observed <- grep( paste0("mu_count_"),  colnames(db) ) 
     cols_expected <- grep( paste0("mu_expected_"),  colnames(db) ) 
     
-    ## Prepare extended region definitions and export to cluster
-    extendedRegionDefinitions <- NULL
-    if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-        extendedRegionDefinitions <- foreach(idx=iterators::icount(length(field_groups))) %dopar% {
-            group_id <- field_groups[idx]
-            db_group <- db[db[['baseline_field_group']] == group_id,,drop=F]
-            
-            makeRegion(juncLength = db_group[[juncLengthColumn]][1],
-                       sequenceImgt = db_group[[sequenceColumn]][1],
-                       regionDefinition=regionDefinition)
-            
-        }
-    }
-    
+
     # Exporting additional environment variables and functions needed to run foreach 
     if ( nproc>1 ) {
         parallel::clusterExport( 
-            cluster, list('cols_observed', 'cols_expected','extendedRegionDefinitions','calcBaselineHelper'), 
+            cluster, list('cols_observed', 'cols_expected','calcBaselineHelper'), 
             envir=environment() 
         )
         registerDoParallel(cluster)
@@ -2052,11 +2019,12 @@ calcBaseline <- function(db,
         list_region_pdfs <- 
             foreach(idx=iterators::icount(totalNumbOfSequences)) %dopar% {  
                 
-                group_id <- db[['baseline_field_group']][idx]
-                groupRegionDefinition <- regionDefinition
+                rd <- regionDefinition
                 if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-                    rd_idx <- which(field_groups == group_id)
-                    groupRegionDefinition <- extendedRegionDefinitions[[rd_idx]]
+                    ## Prepare extended region definition
+                      rd <- makeRegion(juncLength = db[[juncLengthColumn]][idx],
+                                       sequenceImgt = db[[sequenceColumn]][idx],
+                                       regionDefinition=regionDefinition)
                 }
                 
                 calcBaselineHelper( 
@@ -2064,7 +2032,7 @@ calcBaseline <- function(db,
                     expected = db[cols_expected][idx,],
                     region = region,
                     testStatistic = testStatistic,
-                    regionDefinition = groupRegionDefinition
+                    regionDefinition = rd
                 )
             }
         
@@ -2142,7 +2110,7 @@ calcBaseline <- function(db,
     baseline <- createBaseline(description="",
                                db=as.data.frame(db) %>% 
                                    arrange(!!rlang::sym("tmp_baseline_row_id")) %>% 
-                                   select(-!!rlang::sym("baseline_field_group"),-!!rlang::sym("tmp_baseline_row_id")),
+                                   select(-!!rlang::sym("tmp_baseline_row_id")),
                                regionDefinition=regionDefinition,
                                testStatistic=testStatistic,
                                regions=regions,

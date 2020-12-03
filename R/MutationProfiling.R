@@ -1326,13 +1326,6 @@ calcClonalConsensus <- function(db,
 #'                               \code{nproc} = 1.
 #' @param    cloneColumn         clone id column name in \code{db}
 #' @param    juncLengthColumn    junction length column name in \code{db}
-#' @param    fields              additional fields used for grouping. Only relevant
-#'                               when using \code{regionDefinition} \code{IMGT_VDJ}
-#'                               or \code{IMGT_VDJ_BY_REGIONS}, when \code{cloneColumn}
-#'                               is used to create region definitions for each clone.
-#'                               Use this, for example, to avoid combining sequences 
-#'                               with the same clone_id that belong to different
-#'                               sample_id.
 #' 
 #' @return   A modified \code{db} \code{data.frame} with observed mutation counts for each 
 #'           sequence listed. The columns names are dynamically created based on the
@@ -1371,7 +1364,7 @@ calcClonalConsensus <- function(db,
 #' @details
 #' Mutation counts are determined by comparing the input sequences (in the column specified 
 #' by \code{sequenceColumn}) to a reference sequence. If \code{db} includes lineage information,
-#' e.g. in the field `parent_sequence`, the reference sequence can be set to  
+#' e.g. in the field \code{parent_sequence}, the reference sequence can be set to  
 #' use that field as reference sequence. Ssee more details in \link{makeGraphDf}).
 #' See \link{calcObservedMutations} for more technical details, 
 #' \strong{including criteria for which sequence differences are included in the mutation 
@@ -1432,13 +1425,12 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                ambiguousMode = c("eitherOr", "and"), 
                                frequency = FALSE, combine = FALSE, nproc = 1,
                                cloneColumn = "clone_id", 
-                               juncLengthColumn = "junction_length",
-                               fields=NULL) {
+                               juncLengthColumn = "junction_length") {
     
     
     ambiguousMode <- match.arg(ambiguousMode)
 
-    check <- checkColumns(db, c(sequenceColumn, germlineColumn, fields))
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
     
     regionDefinitionName <- ""
@@ -1486,26 +1478,10 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
         stop(deparse(substitute(mutationDefinition)), " is not a valid MutationDefinition object")
     }
     
-    if ((regionDefinitionName == "IMGT_VDJ_BY_REGIONS") | (regionDefinitionName == "IMGT_VDJ")) {
-        check <- checkColumns(db, c(juncLengthColumn, cloneColumn))
-        if (check != TRUE) { stop(check) }
-        # Group by cloneColumn and fields. Needed later to create and use a region 
-        # definition for each clone
-        db$field_group <- db %>%
-            group_by(!!!rlang::syms(c(fields, cloneColumn))) %>%
-            dplyr::group_indices()
-    } else {
-        # No grouping needed
-        if (!is.null(fields)) {
-            message(paste0("`fields` is set (", paste(fields, collapse=", "),") but is not used with `regionDefinition` (", regionDefinitionName,")."))
-        }
-        db$field_group <- 1:nrow(db)
-    }
-    field_groups <- unique(db[['field_group']])
-    db$tmp_obsmu_row_id <- 1:nrow(db)
     
     # Convert sequence columns to uppercase
     db <- toupperColumns(db, c(sequenceColumn, germlineColumn))
+    db$tmp_obsmu_row_id <- 1:nrow(db)
     
 
     # If the user has previously set the cluster and does not wish to reset it
@@ -1522,7 +1498,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
-                                              'regionDefinition', 'regionDefinitionName', 'field_groups',
+                                              'regionDefinition', 'regionDefinitionName',
                                               'frequency', 'combine',
                                               'ambiguousMode', 
                                               'calcObservedMutations','s2c','c2s','NUCLEOTIDES',
@@ -1540,25 +1516,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
         registerDoSEQ()
     }
     
-    ## Prepare extended region definitions and export to cluster
-    extendedRegionDefinitions <- NULL
-    if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-        extendedRegionDefinitions <- foreach(idx=iterators::icount(length(field_groups))) %dopar% {
-            group_id <- field_groups[idx]
-            db_group <- db[db[['field_group']] == group_id,,drop=F]
-            
-            makeRegion(juncLength = db_group[[juncLengthColumn]][1],
-                       sequenceImgt = db_group[[sequenceColumn]][1],
-                       regionDefinition=regionDefinition)
-            
-        }
-    }
-    if (nproc > 1) { 
-        parallel::clusterExport(cluster, 
-                                list('extendedRegionDefinitions'),
-                                envir=environment())
-    }
-    
+
     # Printing status to console
     #cat("Calculating observed number of mutations...\n")
     
@@ -1566,17 +1524,16 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     numbOfSeqs <- nrow(db)
     observedMutations_list <-
         foreach(idx=iterators::icount(numbOfSeqs)) %dopar% {
-            group_id <- db[['field_group']][idx]
-            groupRegionDefinition <- regionDefinition
+            rd <- regionDefinition
             if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-                rd_idx <- which(field_groups == group_id)
-                groupRegionDefinition <- extendedRegionDefinitions[[rd_idx]]
+                rd <- makeRegion(juncLength = db[[juncLengthColumn]][idx],
+                           sequenceImgt = db[[sequenceColumn]][idx],
+                           regionDefinition=regionDefinition)
             }
-            
             oM <- calcObservedMutations(db[[sequenceColumn]][idx], 
                                         db[[germlineColumn]][idx],
                                         frequency=frequency & !combine,
-                                        regionDefinition=groupRegionDefinition,
+                                        regionDefinition=rd,
                                         mutationDefinition=mutationDefinition,
                                         returnRaw=combine,
                                         ambiguousMode=ambiguousMode)
@@ -1640,8 +1597,8 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     db_new <- db %>%
         ungroup() %>%
         left_join(observed_mutations, by="tmp_obsmu_row_id") %>%
-        arrange(tmp_obsmu_row_id) %>%
-        select(-field_group, -tmp_obsmu_row_id) 
+        arrange(!!rlang::sym("tmp_obsmu_row_id")) %>%
+        select(-!!rlang::sym("tmp_obsmu_row_id"))
     
     return(db_new)
 } 
@@ -2723,13 +2680,12 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                regionDefinition=NULL, mutationDefinition = NULL, 
                                nproc = 1,
                                cloneColumn = "clone_id", 
-                               juncLengthColumn = "junction_length",
-                               fields=NULL) {
+                               juncLengthColumn = "junction_length") {
     
     # Hack for visibility of foreach index variable
     idx <- NULL
 
-    check <- checkColumns(db, c(sequenceColumn, germlineColumn, fields))
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
     
     regionDefinitionName <- ""
@@ -2771,23 +2727,6 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
         stop(deparse(substitute(targetingModel)), " is not a valid TargetingModel object")
     }
     
-    
-    if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-        check <- checkColumns(db, c(juncLengthColumn, cloneColumn))
-        if (check != TRUE) { stop(check) }
-        # Group by cloneColumn and fields. Needed later to create and use a region 
-        # definition for each clone
-        db$field_group <- db %>%
-            group_by(!!!rlang::syms(c(fields, cloneColumn))) %>%
-            dplyr::group_indices()
-    } else {
-        # No grouping needed
-        if (!is.null(fields)) {
-            message(paste0("`fields` is set (", paste(fields, collapse=", "),") but is not used with `regionDefinition` (", regionDefinitionName,")."))
-        }
-        db$field_group <- 1:nrow(db)
-    }
-    field_groups <- unique(db[['field_group']])
     db$tmp_expmu_row_id <- 1:nrow(db)
     
     # Convert sequence columns to uppercase
@@ -2808,7 +2747,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
-                                              'regionDefinitionName', 'juncLengthColumn','field_groups', 'makeRegion',
+                                              'regionDefinitionName', 'juncLengthColumn', 'makeRegion',
                                               'regionDefinition','targetingModel',
                                               'calcExpectedMutations','calculateTargeting',
                                               's2c','c2s','NUCLEOTIDES','HH_S5F',
@@ -2822,26 +2761,6 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     }
     
     
-    ## Prepare extended region definitions and export to cluster
-    extendedRegionDefinitions <- NULL
-    if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-        extendedRegionDefinitions <- foreach(idx=iterators::icount(length(field_groups))) %dopar% {
-            group_id <- field_groups[idx]
-            db_group <- db[db[['field_group']] == group_id,,drop=F]
-            
-            makeRegion(juncLength = db_group[[juncLengthColumn]][1],
-                       sequenceImgt = db_group[[sequenceColumn]][1],
-                       regionDefinition=regionDefinition)
-            
-        }
-    }
-    if (nproc > 1) { 
-        parallel::clusterExport(cluster, 
-                                list('extendedRegionDefinitions'),
-                                envir=environment())
-    }
-    
-    
     # Printing status to console
     # cat("Calculating the expected frequencies of mutations...\n")
     
@@ -2852,18 +2771,17 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     
     targeting_list <-
         foreach (idx=iterators::icount(numbOfSeqs)) %dopar% {
-            
-            group_id <- db[['field_group']][idx]
-            groupRegionDefinition <- regionDefinition
+            rd <- regionDefinition
             if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-                rd_idx <- which(field_groups == group_id)
-                groupRegionDefinition <- extendedRegionDefinitions[[rd_idx]]
+                rd <- makeRegion(juncLength = db[[juncLengthColumn]][idx],
+                           sequenceImgt = db[[sequenceColumn]][idx],
+                           regionDefinition=regionDefinition)
             }
             
             eM <- calcExpectedMutations(germlineSeq=db[[germlineColumn]][idx],
                                   inputSeq=db[[sequenceColumn]][idx],
                                   targetingModel=targetingModel,
-                                  regionDefinition=groupRegionDefinition,
+                                  regionDefinition=rd,
                                   mutationDefinition=mutationDefinition)
             eM['tmp_expmu_row_id'] <- db[['tmp_expmu_row_id']][idx]
             eM
@@ -2893,7 +2811,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
         ungroup() %>%
         left_join(expectedMutationFrequencies, by="tmp_expmu_row_id") %>%
         arrange(!!rlang::sym("tmp_expmu_row_id")) %>%
-        select(-!!rlang::sym("field_group"), -!!rlang::sym("tmp_expmu_row_id"))
+        select(-!!rlang::sym("tmp_expmu_row_id"))
     return(db_new) 
 } 
 
