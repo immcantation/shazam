@@ -604,8 +604,8 @@ collapseClones <- function(db, cloneColumn = "clone_id",
     }
     
     cons_db %>%
-        arrange(tmp_colclones_row_id) %>%
-        select(-tmp_colclones_row_id, -fields_clone_id)
+        arrange(!!rlang::sym("tmp_colclones_row_id")) %>%
+        select(-!!rlang::sym("tmp_colclones_row_id"), -!!rlang::sym("fields_clone_id"))
 }
 
 
@@ -1324,12 +1324,8 @@ calcClonalConsensus <- function(db,
 #'                               cluster has already been set the call function with 
 #'                               \code{nproc} = 0 to not reset or reinitialize. Default is 
 #'                               \code{nproc} = 1.
-#' @param    refOption           can be one of \code{"germline"} or \code{"parent"}.
-#'                               Indicates the reference sequence source upon which
-#'                               the observed mutations are calculated.
 #' @param    cloneColumn         clone id column name in \code{db}
 #' @param    juncLengthColumn    junction length column name in \code{db}
-#' @param    parentColumn        parent column name in \code{db}
 #' @param    fields              additional fields used for grouping. Only relevant
 #'                               when using \code{regionDefinition} \code{IMGT_VDJ}
 #'                               or \code{IMGT_VDJ_BY_REGIONS}, when \code{cloneColumn}
@@ -1374,14 +1370,9 @@ calcClonalConsensus <- function(db,
 #'                                  
 #' @details
 #' Mutation counts are determined by comparing the input sequences (in the column specified 
-#' by \code{sequenceColumn}) to a reference sequence. 
-#' Reference sequence depends on \code{refOption}:
-#' If \code{refOption} == "germline" - reference sequence is germline sequence (in the column specified by 
-#' \code{germlineColumn}). 
-#' If \code{refOption} == "parent" - reference sequence is parent sequence (in the column specified by 
-#' \code{parentColumn}). This option assumes that the \code{db} includes lineage information,
-#' such that each sequence has its parent sequence information (see more details in 
-#' \link{makeGraphDf})
+#' by \code{sequenceColumn}) to a reference sequence. If \code{db} includes lineage information,
+#' e.g. in the field `parent_sequence`, the reference sequence can be set to  
+#' use that field as reference sequence. Ssee more details in \link{makeGraphDf}).
 #' See \link{calcObservedMutations} for more technical details, 
 #' \strong{including criteria for which sequence differences are included in the mutation 
 #' counts and which are not}.
@@ -1426,11 +1417,11 @@ calcClonalConsensus <- function(db,
 #'                             nproc=1)    
 #'\dontrun{     
 #' # Count of VDJ-region mutations, split by FWR and CDR
-#' # This doesn't work because 'parent_sequence' doesn't exist.
+#' # This doesn't work because 'parent_sequence' doesn't exist,
+#' # it should be calculated before
 #' Update example to include how to create that column.
-#' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
+#' db_obs <- observedMutations(db, sequenceColumn="parent_sequence",
 #'                             germlineColumn="germline_alignment_d_mask",
-#'                             refOption="parent",
 #'                             regionDefinition=IMGT_VDJ,
 #'                             nproc=1)    
 #' }     
@@ -1440,26 +1431,14 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                regionDefinition=NULL, mutationDefinition = NULL, 
                                ambiguousMode = c("eitherOr", "and"), 
                                frequency = FALSE, combine = FALSE, nproc = 1,
-                               refOption = c("germline", "parent"), 
                                cloneColumn = "clone_id", 
                                juncLengthColumn = "junction_length",
-                               parentColumn = "parent_sequence",
                                fields=NULL) {
     
     
     ambiguousMode <- match.arg(ambiguousMode)
-    refOption <- match.arg(refOption)
-    
-    # setting the reference column:
-    if (refOption == "germline") {
-        refColumn <- germlineColumn
-    } else if (refOption == "parent") {
-        refColumn <- parentColumn
-    } else {
-        stop(deparse(substitute(refOption)), " is not a valid refOption. Expecting 'germline' or 'parent'.")
-    }
-    
-    check <- checkColumns(db, c(sequenceColumn, germlineColumn, refColumn, fields))
+
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn, fields))
     if (check != TRUE) { stop(check) }
     
     regionDefinitionName <- ""
@@ -1542,7 +1521,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     # export all nesseary environment variables, functions and packages.  
     if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
-        parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 'refColumn',
+        parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
                                               'regionDefinition', 'regionDefinitionName', 'field_groups',
                                               'frequency', 'combine',
                                               'ambiguousMode', 
@@ -1595,7 +1574,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
             }
             
             oM <- calcObservedMutations(db[[sequenceColumn]][idx], 
-                                        db[[refColumn]][idx],
+                                        db[[germlineColumn]][idx],
                                         frequency=frequency & !combine,
                                         regionDefinition=groupRegionDefinition,
                                         mutationDefinition=mutationDefinition,
@@ -2684,12 +2663,8 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
 #'                               over. If the cluster has already been set the call function with 
 #'                               \code{nproc} = 0 to not reset or reinitialize. Default is 
 #'                               \code{nproc} = 1.
-#' @param    refOption           can be one of \code{"germline"} or \code{"parent"}.
-#'                               Indicates the reference sequence source upon which
-#'                               the observed mutations are calculated.
 #' @param    cloneColumn         clone id column name in \code{db}
 #' @param    juncLengthColumn    junction length column name in \code{db}
-#' @param    parentColumn        parent sequence column name in \code{db}
 #' 
 #' @return   A modified \code{db} \code{data.frame} with expected mutation frequencies 
 #'           for each region defined in \code{regionDefinition}.
@@ -2747,25 +2722,14 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                targetingModel = HH_S5F, 
                                regionDefinition=NULL, mutationDefinition = NULL, 
                                nproc = 1,
-                               refOption = "germline", 
                                cloneColumn = "clone_id", 
                                juncLengthColumn = "junction_length",
-                               parentColumn = "parent_sequence",
                                fields=NULL) {
     
     # Hack for visibility of foreach index variable
     idx <- NULL
 
-    # setting the reference column:
-    if (refOption == "germline") {
-        refColumn <- germlineColumn
-    } else if (refOption == "parent") {
-        refColumn <- parentColumn
-    } else {
-        stop(deparse(substitute(refOption)), " is not a valid refOption. Expecting 'germline' or 'parent'.")
-    }
-    
-    check <- checkColumns(db, c(sequenceColumn, germlineColumn, refColumn, fields))
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn, fields))
     if (check != TRUE) { stop(check) }
     
     regionDefinitionName <- ""
@@ -2844,7 +2808,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
-                                              'refColumn', 'regionDefinitionName', 'juncLengthColumn','field_groups', 'makeRegion',
+                                              'regionDefinitionName', 'juncLengthColumn','field_groups', 'makeRegion',
                                               'regionDefinition','targetingModel',
                                               'calcExpectedMutations','calculateTargeting',
                                               's2c','c2s','NUCLEOTIDES','HH_S5F',
@@ -2896,7 +2860,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
                 groupRegionDefinition <- extendedRegionDefinitions[[rd_idx]]
             }
             
-            eM <- calcExpectedMutations(germlineSeq=db[[refColumn]][idx],
+            eM <- calcExpectedMutations(germlineSeq=db[[germlineColumn]][idx],
                                   inputSeq=db[[sequenceColumn]][idx],
                                   targetingModel=targetingModel,
                                   regionDefinition=groupRegionDefinition,
@@ -2928,8 +2892,8 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     db_new <- db %>%
         ungroup() %>%
         left_join(expectedMutationFrequencies, by="tmp_expmu_row_id") %>%
-        arrange(tmp_expmu_row_id) %>%
-        select(-field_group, -tmp_expmu_row_id) 
+        arrange(!!rlang::sym("tmp_expmu_row_id")) %>%
+        select(-!!rlang::sym("field_group"), -!!rlang::sym("tmp_expmu_row_id"))
     return(db_new) 
 } 
 

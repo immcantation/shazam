@@ -1755,10 +1755,6 @@ fastConv<-function(cons, max_sigma=20, length_sigma=4001){
 #'                              containing the junction length. Relevant only for 
 #'                              when regionDefinition includes CDR and FWR4 (else
 #'                              this value can be \code{NULL})  
-#' @param   refOption           can be one of \code{"germline"} or \code{"parent"}.
-#'                               Indicates the reference sequence source upon which
-#'                               the observed mutations are calculated. 
-#' @param   parentColumn        parent column name in \code{db}
 #' @param   fields              additional fields used for grouping. Only relevant
 #'                               when using \code{regionDefinition} \code{IMGT_VDJ}
 #'                               or \code{IMGT_VDJ_BY_REGIONS}, when \code{cloneColumn}
@@ -1857,8 +1853,6 @@ calcBaseline <- function(db,
                          # following are relevant only when regionDefinition includes CDR3 and FWR4:
                          cloneColumn = NULL,
                          juncLengthColumn = NULL,
-                         refOption = c("germline", "parent"),
-                         parentColumn = "parent_sequence",
                          fields = NULL) {
     
     # Hack for visibility of foreach index variable
@@ -1866,18 +1860,8 @@ calcBaseline <- function(db,
     
     # Evaluate argument choices
     testStatistic <- match.arg(testStatistic)
-    refOption <- match.arg(refOption)
     
-    # setting the reference column:
-    if (refOption == "germline") {
-        refColumn <- germlineColumn
-    } else if (refOption == "parent") {
-        refColumn <- parentColumn
-    } else {
-        stop(deparse(substitute(refOption)), " is not a valid refOption. Expecting 'germline' or 'parent'.")
-    }
-    
-    check <- checkColumns(db, c(sequenceColumn, germlineColumn, refColumn, fields))
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn, fields))
     if (check != TRUE) { stop(check) }
     
     regionDefinitionName <- ""
@@ -1981,6 +1965,8 @@ calcBaseline <- function(db,
         expectedColumns <- paste0("mu_expected_", regionDefinition@labels)
     }
     
+    ## TODO add a warning/message of overwritting or creating mutation columns
+    
     if (!all(c(observedColumns, expectedColumns) %in% colnames(db))) {
         # If the germlineColumn & sequenceColumn are not found in the db error and quit
         if (!all(c(sequenceColumn, germlineColumn) %in% colnames(db))) {
@@ -1998,8 +1984,6 @@ calcBaseline <- function(db,
                                 nproc=0,
                                 cloneColumn=cloneColumn,
                                 juncLengthColumn=juncLengthColumn,
-                                refOption=refOption,
-                                parentColumn = parentColumn,
                                 fields=fields)
         
         # Calculate the expected frequencies of mutations
@@ -2012,8 +1996,6 @@ calcBaseline <- function(db,
                                 nproc=0,
                                 cloneColumn=cloneColumn,
                                 juncLengthColumn=juncLengthColumn,
-                                refOption=refOption,
-                                parentColumn = parentColumn,
                                 fields=fields)
     }
     
@@ -2159,8 +2141,8 @@ calcBaseline <- function(db,
     # Create a Baseline object with the above results to return
     baseline <- createBaseline(description="",
                                db=as.data.frame(db) %>% 
-                                   arrange(tmp_baseline_row_id) %>% 
-                                   select(-baseline_field_group,-tmp_baseline_row_id),
+                                   arrange(!!rlang::sym("tmp_baseline_row_id")) %>% 
+                                   select(-!!rlang::sym("baseline_field_group"),-!!rlang::sym("tmp_baseline_row_id")),
                                regionDefinition=regionDefinition,
                                testStatistic=testStatistic,
                                regions=regions,
