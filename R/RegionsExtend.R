@@ -32,16 +32,20 @@ NULL
 #' 
 #' @return A \code{ChangeoClone} object with additional columns (parent_sequence and parent)
 #'         and additional rows (for germline and inferred sequences)
+#'         
 #' @examples 
 #' \dontrun{
 #' library("igraph")
 #' library("dplyr")
 #' # Load and subset example data:
-#' data(ExampleDb)
+#' data(ExampleDb, package="alakazam")
 #' clone_3170_db <- subset(ExampleDb, clone_id == 3170)
-#' clone_3170_obj <- makeChangeoClone(clone_3170_db, seq="sequence_alignment", germ="germline_alignment")
+#' clone_3170_obj <- makeChangeoClone(clone_3170_db, 
+#'                       seq="sequence_alignment",
+#'                        germ="germline_alignment")
 #' dnapars_exec <- "~/apps/phylip-3.69/dnapars"
-#' clone_3170_graph <- buildPhylipLineage(clone_3170_obj, dnapars_exec, rm_temp = TRUE)  
+#' clone_3170_graph <- buildPhylipLineage(clone_3170_obj, 
+#'                        dnapars_exec, rm_temp = TRUE)  
 #' clone_3170_GraphDf <- makeGraphDf(clone_3170_graph, clone_3170_obj)
 #' }
 #' @export
@@ -171,7 +175,7 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
                                                  
         # Change the parent SEQUENCE to be NA (as it is the Germline)
         cur_clone_merged_df <- mutate(cur_clone_merged_df, 
-                                      parent=ifelse(!!rlangh::sym("orig_parent") == "Germline", "NA", 
+                                      parent=ifelse(!!rlang::sym("orig_parent") == "Germline", "NA", 
                                                     !!rlang::sym("parent")))
     }
     return(cur_clone_merged_df)
@@ -233,47 +237,46 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
 #' @return a \link{RegionDefinition} object that includes CDR1/2/3 and 
 #'         FWR1/2/3/4 for the specific \code{sequenceImgt}, 
 #'         \code{juncLength} and \code{regionDefinition}.
+#'         
 #' @examples 
-#' Load and subset example data
-#' data(ExampleDb)  
-#' juncLength<-ExampleDb[1,"junction_length"]
-#' sequenceImgt<-ExampleDb[1,"sequence_alignment"]
+#' # Load and subset example data
+#' data(ExampleDb, package="alakazam")  
+#' juncLength <-ExampleDb[['junction_length']][1]
+#' sequenceImgt<-ExampleDb[['sequence_alignment']][1]
 #' seq_1_reg_def<-makeRegion(juncLength = juncLength, 
 #'                           sequenceImgt = sequenceImgt, 
 #'                           regionDefinition = IMGT_VDJ_BY_REGIONS)
 #' @export
-
-makeRegion <- function(juncLength, sequenceImgt,  
+makeRegion <- function(juncLength, sequenceImgt,
                        regionDefinition=IMGT_VDJ_BY_REGIONS) {
     if (!is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
-    # all slots except for boundaries and seqLength are already defined in regionDefinition
-    # First need to extract sequence length from sequence:
-    seqLength <- nchar(sequenceImgt)
-    # now for the boundaries slot:
-    boundaries <- factor(IMGT_V_BY_REGIONS@boundaries, 
-                         levels=c(levels(IMGT_V_BY_REGIONS@boundaries), "cdr3", "fwr4"))
-    boundaries[313:(313 + as.integer(juncLength) - 6 - 1)] <- factor("cdr3")
-    boundaries[(313 + as.integer(juncLength) - 6):seqLength] <- factor("fwr4")
-    if (regionDefinition@name == "IMGT_VDJ") {
-        boundaries <- gsub(pattern="fwr.", replacement = "fwr", x=boundaries, perl=TRUE)
-        boundaries <- gsub(pattern="cdr.", replacement = "cdr", x=boundaries, perl=TRUE)
-        boundaries <- factor(boundaries, levels=c("fwr", "cdr"))
-    } 
-    region_out <- new("RegionDefinition", 
-                      name=regionDefinition@name, 
-                      description=regionDefinition@description, 
-                      boundaries=boundaries, seqLength=unname(seqLength), 
-                      regions=regionDefinition@regions, 
-                      labels=regionDefinition@labels, 
-                      citation=regionDefinition@citation)
-    # taking care of non-extended region definitions:
-    if ((regionDefinition@name != "IMGT_VDJ_BY_REGIONS") & 
-        (regionDefinition@name != "IMGT_VDJ")) {
-        region_out <- regionDefinition
+    
+    if (regionDefinition@name %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) { 
+        # all slots except for boundaries and seqLength are already defined in regionDefinition
+        # First need to extract sequence length from sequence:
+        seqLength <- nchar(sequenceImgt)
+        # now for the boundaries slot:
+        boundaries <- factor(IMGT_V_BY_REGIONS@boundaries, 
+                             levels=c(levels(IMGT_V_BY_REGIONS@boundaries), "cdr3", "fwr4"))
+        boundaries[313:(313 + as.integer(juncLength) - 6 - 1)] <- factor("cdr3")
+        boundaries[(313 + as.integer(juncLength) - 6):seqLength] <- factor("fwr4")
+        if (regionDefinition@name == "IMGT_VDJ") {
+            boundaries <- gsub(pattern="fwr.", replacement = "fwr", x=boundaries, perl=TRUE)
+            boundaries <- gsub(pattern="cdr.", replacement = "cdr", x=boundaries, perl=TRUE)
+            boundaries <- factor(boundaries, levels=c("fwr", "cdr"))
+        } 
+        new("RegionDefinition", 
+            name=regionDefinition@name, 
+            description=regionDefinition@description, 
+            boundaries=boundaries, seqLength=unname(seqLength), 
+            regions=regionDefinition@regions, 
+            labels=regionDefinition@labels, 
+            citation=regionDefinition@citation)
+    } else {
+        regionDefinition  
     }
-    return(region_out)
 }
 
 

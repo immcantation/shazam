@@ -91,18 +91,16 @@ Examples
 -------------------
 
 ```R
-Load and subset example data
-data(ExampleDb)  
-juncLength<-ExampleDb[1,"junction_length"]
-sequenceImgt<-ExampleDb[1,"sequence_alignment"]
+# Load and subset example data
+data(ExampleDb, package="alakazam")  
+juncLength <-ExampleDb[['junction_length']][1]
+sequenceImgt<-ExampleDb[['sequence_alignment']][1]
 seq_1_reg_def<-makeRegion(juncLength = juncLength, 
 sequenceImgt = sequenceImgt, 
 regionDefinition = IMGT_VDJ_BY_REGIONS)
 ```
 
-**Error**: <text>:1:6: unexpected symbol
-1: Load and
-         ^
+
 
 
 

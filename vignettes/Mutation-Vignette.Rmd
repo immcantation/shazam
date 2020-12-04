@@ -115,7 +115,7 @@ g1 <- ggplot(db_obs, aes(x=c_call, y=mu_freq, fill=c_call)) +
 plot(g1)
 ```
 
-## Calculate mutations within subregions of the V-segment
+## Calculate mutations within subregions
 
 To restrict the mutational analysis to a particular area in the sequence, the `regionDefinition`
 argument needs to be assigned a `RegionDefinition` object, which simply defines the subregion 
@@ -125,6 +125,12 @@ boundaries of the Ig sequence. For convenience, `shazam` provides a set of such 
 * `IMGT_V_BY_REGIONS`: defines regions to be CDR1, CDR2, FWR1, FWR2 and FWR3;
 * `IMGT_V`: defines regions to be either CDR or FWR;
 * `IMGT_V_BY_SEGMENTS`: provides no subdivisons and treats the entire V segment as a single region.
+*  `IMGT_VDJ`: All regions, including CDR3 and FWR4, grouped as 
+    either CDR or FWR. This `RegionDefinition` is initially empty, and one is
+    created on the fly for each set of clonally related sequences.
+*  `IMGT_VDJ_BY_REGIONS`: CDR1, CDR2, CDR3, FWR1, FWR, FWR3 and FWR4 regions 
+    treated as individual regions. This `RegionDefinition` is initially empty, 
+    and one is created on the fly for each set of clonally related sequences.
 
 When supplying one of these objects to `regionDefinition`, and with `combined=FALSE`, the resultant mutation counts/frequencies will be tabulated in a way consistent with the granularity of the object's region definition. For example, 
 

@@ -524,7 +524,7 @@ collapseClones <- function(db, cloneColumn = "clone_id",
             cluster <- parallel::makeCluster(nproc, type= "PSOCK")
         }
         parallel::clusterExport(cluster, 
-                                list('db', 'sequenceColumn', 'germlineColumn', 'muFreqColumn',
+                                list('db', 'sequenceColumn', 'germlineColumn', 'muFreqColumn','juncLengthColumn',
                                      'regionDefinition', 'regionDefinitionName', 'method', 'minimumFrequency','includeAmbiguous',
                                      'breakTiesStochastic', 'breakTiesByColumns', 
                                      'calcClonalConsensus', 'consensusSequence', 'breakTiesHelper',
@@ -1507,7 +1507,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                               'makeNullRegionDefinition', 'mutationDefinition',
                                               'getCodonPos','getContextInCodon','mutationType',
                                               'AMINO_ACIDS',
-                                              'binMutationsByRegion', 'countNonNByRegion','makeRegion'), 
+                                              'binMutationsByRegion', 'countNonNByRegion','makeRegion', 'IMGT_V_BY_REGIONS'), 
                                 envir=environment())
         registerDoParallel(cluster)
     } else if (nproc == 1) {
@@ -2339,7 +2339,7 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
 #' 
 #' @seealso  \link{slideWindowDb} is called on \code{db} for tuning. See \link{slideWindowTunePlot} 
 #'           for visualization. See \link{calcObservedMutations} for generating \code{dbMutList}.
-#' 
+#'           
 #' @examples
 #' # Load and subset example data
 #' data(ExampleDb, package="alakazam")
@@ -2360,7 +2360,6 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
 #'                           returnRaw=TRUE)$pos })
 #' slideWindowTune(db, dbMutList=exDbMutList, 
 #'                 mutThreshRange=2:4, windowSizeRange=2:4)
-#'                                                            
 #' @export
 slideWindowTune <- function(db, sequenceColumn="sequence_alignment", 
                             germlineColumn="germline_alignment_d_mask",
@@ -2751,7 +2750,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                               'regionDefinition','targetingModel',
                                               'calcExpectedMutations','calculateTargeting',
                                               's2c','c2s','NUCLEOTIDES','HH_S5F',
-                                              'calculateMutationalPaths','CODON_TABLE'),
+                                              'calculateMutationalPaths','CODON_TABLE','IMGT_V_BY_REGIONS'),
                                 envir=environment() )
         registerDoParallel(cluster)
     } else if (nproc == 1) {

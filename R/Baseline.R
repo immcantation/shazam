@@ -1755,12 +1755,6 @@ fastConv<-function(cons, max_sigma=20, length_sigma=4001){
 #'                              containing the junction length. Relevant only for 
 #'                              when regionDefinition includes CDR and FWR4 (else
 #'                              this value can be \code{NULL})  
-#' @param   muFreqColumn        \code{character} name of the column containing mutation
-#'                              frequency. Optional. Applicable to the \code{"mostMutated"}
-#'                              and \code{"leastMutated"} methods. If not supplied, mutation
-#'                              frequency is computed by calling \code{observedMutations}.
-#'                              Default is \code{NULL}. See Cautions for note on usage.
-#'                              #' 
 #' @return  A \link{Baseline} object containing the modified \code{db} and BASELINe 
 #'          posterior probability density functions (PDF) for each of the sequences.
 #'           
@@ -1916,7 +1910,7 @@ calcBaseline <- function(db,
                                               'AMINO_ACIDS','binMutationsByRegion',
                                               'collapseMatrixToVector','calcExpectedMutations',
                                               'calculateTargeting','HH_S5F','calculateMutationalPaths',
-                                              'CODON_TABLE'), 
+                                              'CODON_TABLE','IMGT_V_BY_REGIONS'), 
                                 envir=environment() )    
         registerDoParallel(cluster, cores=nproc)
         #nproc_arg <- cluster

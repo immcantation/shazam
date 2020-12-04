@@ -89,7 +89,6 @@
 #' 
 #' \itemize{
 #'   \item  \link{makeGraphDf}:              Adding Lineage information to ChangeoClone.
-#'   \item  \link{plotCloneLineageTree}:     Ploting a clone lineage tree.
 #' }
 #'
 #' @name     shazam

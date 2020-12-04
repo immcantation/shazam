@@ -1,6 +1,9 @@
 #load(file.path("tests", "data-tests", "ExampleDb.rda"))
 load(file.path("..", "data-tests", "ExampleDb.rda"))
 
+# ExampleDb_airr
+load(file.path("..", "data-tests", "ExampleDb_airr.rda")) 
+
 #ensure older version of sample() used
 R_v <- paste(version$major, version$minor,sep=".")
 if ( numeric_version(R_v) >= numeric_version("3.6.0") ) {
@@ -2438,16 +2441,15 @@ test_that("collapseClones", {
 
 test_that("observedMutations", {
     
-    # ExampleDb
-    load(file.path("..", "data-tests", "ExampleDb.rda")) 
-    # ExampleDb_airr
-    load(file.path("..", "data-tests", "ExampleDb_airr.rda")) 
+    # Loaded top doc
+    # # ExampleDb
+    # load(file.path("..", "data-tests", "ExampleDb.rda")) 
+    # # ExampleDb_airr
+    # load(file.path("..", "data-tests", "ExampleDb_airr.rda")) 
     
     # subset
     db_c <- subset(ExampleDb, ISOTYPE == "IgG" & SAMPLE == "+7d")
     db_a <- subset(ExampleDb_airr, isotype == "IgG" & sample == "+7d")
-    
-    rm(ExampleDb, ExampleDb_airr)
     
     # mutation freq
     db_obs_c <- observedMutations(db_c, sequenceColumn="SEQUENCE_IMGT",

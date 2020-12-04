@@ -82,14 +82,6 @@ containing the junction length. Relevant only for
 when regionDefinition includes CDR and FWR4 (else
 this value can be `NULL`)
 
-muFreqColumn
-:   `character` name of the column containing mutation
-frequency. Optional. Applicable to the `"mostMutated"`
-and `"leastMutated"` methods. If not supplied, mutation
-frequency is computed by calling `observedMutations`.
-Default is `NULL`. See Cautions for note on usage.
-#'
-
 
 
 

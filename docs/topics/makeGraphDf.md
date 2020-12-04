@@ -85,11 +85,14 @@ Attaching package: ‘igraph’
 ```R
 # library("dplyr")
 # # Load and subset example data:
-# data(ExampleDb)
+# data(ExampleDb, package="alakazam")
 # clone_3170_db <- subset(ExampleDb, clone_id == 3170)
-# clone_3170_obj <- makeChangeoClone(clone_3170_db, seq="sequence_alignment", germ="germline_alignment")
+# clone_3170_obj <- makeChangeoClone(clone_3170_db, 
+# seq="sequence_alignment",
+# germ="germline_alignment")
 # dnapars_exec <- "~/apps/phylip-3.69/dnapars"
-# clone_3170_graph <- buildPhylipLineage(clone_3170_obj, dnapars_exec, rm_temp = TRUE)  
+# clone_3170_graph <- buildPhylipLineage(clone_3170_obj, 
+# dnapars_exec, rm_temp = TRUE)  
 # clone_3170_GraphDf <- makeGraphDf(clone_3170_graph, clone_3170_obj)
 ```
 
