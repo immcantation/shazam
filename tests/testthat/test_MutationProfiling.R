@@ -2626,22 +2626,30 @@ test_that("observedMutations, extended regions multi sequences", {
 })
 
 test_that("observedMutations, parents as ref", {
-    library("alakazam")
-    library("igraph")
+    # library("alakazam")
+    # library("igraph")
     load(file.path("..", "data-tests", "ExampleDb.rda")) 
     dnapars_exec <- "~/dummy/phylip-3.69/dnapars"
     #dnapars_exec <- "c:\\Users\\milcat\\phylip-3.698\\exe\\dnapars.exe"
-    clone_3177_obj <- makeChangeoCloneCurClone(db=ExampleDb, cur_clone_num=3177, seq="SEQUENCE_IMGT", 
-                                              germ="GERMLINE_IMGT_D_MASK", clone="CLONE", id="SEQUENCE_ID",
-                                              v_call="V_CALL", j_call="J_CALL", junc_len="JUNCTION_LENGTH") 
+    # clone_3177_obj <- makeChangeoCloneCurClone(db=ExampleDb, cur_clone_num=3177, seq="SEQUENCE_IMGT", 
+    #                                           germ="GERMLINE_IMGT_D_MASK", clone="CLONE", id="SEQUENCE_ID",
+    #                                           v_call="V_CALL", j_call="J_CALL", junc_len="JUNCTION_LENGTH") 
+    clone_3177_obj <- makeChangeoClone(data=ExampleDb[ExampleDb$CLONE=="3177",], seq="SEQUENCE_IMGT", 
+                                               germ="GERMLINE_IMGT_D_MASK", clone="CLONE", id="SEQUENCE_ID",
+                                               v_call="V_CALL", j_call="J_CALL", junc_len="JUNCTION_LENGTH")     
     print(names(clone_3177_obj))
     if (file.access(dnapars_exec, mode=1) == -1) {
+        # expect_error(
+        #     clone_3177_graph <- makeGraphCurClone(clone_3177_obj,dnapars_exec),
+        #     "The file ~/dummy/phylip-3.69/dnapars cannot be executed"
+        # )
         expect_error(
-            clone_3177_graph <- makeGraphCurClone(clone_3177_obj,dnapars_exec),
+            clone_3177_graph <- buildPhylipLineage(clone_3177_obj,dnapars_exec,rm_temp = TRUE),
             "The file ~/dummy/phylip-3.69/dnapars cannot be executed"
-        )
+        )        
     } else {
-       clone_3177_graph <- makeGraphCurClone(clone_3177_obj,dnapars_exec)
+       # clone_3177_graph <- makeGraphCurClone(clone_3177_obj,dnapars_exec)
+       clone_3177_graph <- buildPhylipLineage(clone_3177_obj,dnapars_exec,rm_temp = TRUE)  
        clone_3177_graphDF <- makeGraphDf(curCloneGraph=clone_3177_graph,  
                                          curCloneObj=clone_3177_obj, 
                                          objSeqId ="sequence_id", objSeq ="sequence")

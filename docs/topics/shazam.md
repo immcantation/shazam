@@ -114,7 +114,7 @@ the sequence germline.
 
 
 + [makeGraphDf](makeGraphDf.md):              Adding Lineage information to ChangeoClone.
-+ [plotCloneLineageTree](plotCloneLineageTree.md):     Ploting a clone lineage tree.
++ plotCloneLineageTree:     Ploting a clone lineage tree.
 
 
 

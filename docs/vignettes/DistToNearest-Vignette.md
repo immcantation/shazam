@@ -242,7 +242,7 @@ print(output)
 ```
 
 ```
-## [1] 0.120028
+## [1] 0.1218654
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -344,6 +344,32 @@ from the same V-J-junction length group.
 # Explore V-J-junction length groups sizes to use subsample
 # Show the size of the largest groups
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:igraph':
+## 
+##     as_data_frame, groups, union
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(alakazam)
 top_10_sizes <- ExampleDb %>%
      group_by(junction_length) %>% # Group by junction length

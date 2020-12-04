@@ -26,15 +26,18 @@ fields (columns) to be present in the table:
 ```r
 # Load example data
 library(shazam)
+library(alakazam)
 data(ExampleDb, package="alakazam")
 ```
 
-## Calculate selection PDFs for individual sequences
+## Preprocessing
 
-Selection scores are calculated with the `calcBaseline` function. This can
-be performed with a single call to `calcBaseline`, which performs all 
-required steps. Alternatively, one can perform each step separately for
-greater control over the analysis parameters.
+Before starting the selection analysis, data need to be prepared in one of 
+two ways:
+
+1. Constructing clonal consensus sequences.
+
+1. Incorporating lineage information.
 
 ### Constructing clonal consensus sequences
 
@@ -58,6 +61,41 @@ clones <- collapseClones(ExampleDb, cloneColumn="clone_id",
                          nproc=1)
 ```
 
+### Incorporating lineage information
+
+For each clone, lineage information can be incorporated following these steps:
+
+
+```r
+# Subset to sequences with clone_id=3170
+clone_3170_db <- subset(ExampleDb, clone_id == 3170)
+dim(clone_3170_db)
+colnames(clone_3170_db)
+
+# Generate a ChangeoClone object for lineage construction 
+changeoClone_3170 <- makeChangeoClone(clone_3170_db, seq="sequence_alignment", germ="germline_alignment")
+
+# Run the lineage reconstruction
+dnapars_exec <- "/usr/local/bin/dnapars"
+clone_3170_lineage <- buildPhylipLineage(changeoClone_3170, dnapars_exec, rm_temp = TRUE)
+
+# Generating a data.frame from the lineage tree graph object, 
+# and merge it with clone data.frame
+clone_3170_lineage_df <- makeGraphDf(clone_3170_lineage, changeoClone_3170)
+dim(clone_3170_lineage_df)
+colnames(clone_3170_lineage_df)
+```
+
+`makeGraphDb` creates a `ChangeoClone` object with the column `parent_sequence`. This field
+can be used to analyze mutations for each sequence relative to their `parent_sequence`.
+
+## Calculate selection PDFs for individual sequences
+
+Selection scores are calculated with the `calcBaseline` function. This can
+be performed with a single call to `calcBaseline`, which performs all 
+required steps. Alternatively, one can perform each step separately for
+greater control over the analysis parameters.
+
 ### Calculating selection in multiple steps
 
 Following construction of an effective sequence for each clone, the observed
@@ -73,14 +111,20 @@ also be passed in as parameters if they differ from the Change-O defaults.
 Mutations are counted by these functions separately for complementarity 
 determining (CDR) and framework (FWR) regions. The `regionDefinition` 
 argument defines whether these regions are handled separately, and where
-the boundaries lie. There are two built-in region definitions 
+the boundaries lie. There are several built-in region definitions 
 in the `shazam` package, both dependent upon the V segment
 being IMGT-gapped:
 
 *  `IMGT_V`: All regions in the V segment, excluding CDR3, grouped as 
     either CDR or FWR.
-*  `IMGT_V_BY_REGIONS`: The CDR1, CDR2, CDR3, FWR1, FWR and FWR3 regions 
+*  `IMGT_V_BY_REGIONS`: The CDR1, CDR2, FWR1, FWR and FWR3 regions 
     in the V segment (no CDR3) treated as individual regions.
+*   `IMGT_VDJ`: All regions, including CDR3 and FWR4, grouped as 
+    either CDR or FWR. This `RegionDefinition` is initially empty, and one is
+    created on the fly for each set of clonally related sequences.
+*   `IMGT_VDJ_BY_REGIONS`: CDR1, CDR2, CDR3, FWR1, FWR, FWR3 and FWR4 regions 
+    treated as individual regions. This `RegionDefinition` is initially empty, 
+    and one is created on the fly for each set of clonally related sequences.
 
 Users may define other region sets and boundaries by creating a custom
 `RegionDefinition` object.
@@ -112,6 +156,10 @@ baseline <- calcBaseline(expected, testStatistic="focused",
                          regionDefinition=IMGT_V, nproc=1)
 ```
 
+```
+## calcBaseline will use existing observed and expected mutations, in the fields: mu_count_cdr_r, , mu_count_cdr_s, , mu_count_fwr_r, , mu_count_fwr_s,  and mu_expected_cdr_r, , mu_expected_cdr_s, , mu_expected_fwr_r, , mu_expected_fwr_s,
+```
+
 ### Calculating selection in one step
 
 It is not required for `observedMutation` and `expectedMutations` to be run prior to 
@@ -124,6 +172,10 @@ calculating selection scores.
 # Calculate selection scores from scratch
 baseline <- calcBaseline(clones, testStatistic="focused", 
                          regionDefinition=IMGT_V, nproc=1)
+```
+
+```
+## calcBaseline will calculate observed and expected mutations for clonal_sequence using clonal_germline as a reference.
 ```
 
 ### Using alternative mutation definitions and models
@@ -216,7 +268,13 @@ clones_sub <- collapseClones(db_sub, cloneColumn="clone_id",
 # Calculate selection scores from scratch
 baseline_sub <- calcBaseline(clones_sub, testStatistic="focused", 
                              regionDefinition=IMGT_V, nproc=1)
+```
 
+```
+## calcBaseline will calculate observed and expected mutations for clonal_sequence using clonal_germline as a reference.
+```
+
+```r
 # Combine selection scores by time-point and isotype
 grouped_2 <- groupBaseline(baseline_sub, groupBy=c("sample_id", "c_call"))
 ```
@@ -284,7 +342,7 @@ isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick",
 plotBaselineSummary(grouped_1, "sample_id")
 ```
 
-![plot of chunk Baseline-Vignette-11](figure/Baseline-Vignette-11-1.png)
+![plot of chunk Baseline-Vignette-12](figure/Baseline-Vignette-12-1.png)
 
 ```r
 # Plot selection scores by time-point and isotype for only CDR
@@ -292,14 +350,14 @@ plotBaselineSummary(grouped_2, "sample_id", "c_call", groupColors=isotype_colors
                     subsetRegions="cdr")
 ```
 
-![plot of chunk Baseline-Vignette-11](figure/Baseline-Vignette-11-2.png)
+![plot of chunk Baseline-Vignette-12](figure/Baseline-Vignette-12-2.png)
 
 ```r
 # Group by CDR/FWR and facet by isotype
 plotBaselineSummary(grouped_2, "sample_id", "c_call", facetBy="group")
 ```
 
-![plot of chunk Baseline-Vignette-11](figure/Baseline-Vignette-11-3.png)
+![plot of chunk Baseline-Vignette-12](figure/Baseline-Vignette-12-3.png)
 
 `plotBaselineDensity` plots the full `Baseline` PDF of selection scores for the 
 given groups. The parameters are the same as those for `plotBaselineSummary`.
@@ -313,7 +371,7 @@ plotBaselineDensity(grouped_2, "c_call", groupColumn="sample_id", colorElement="
                     colorValues=sample_colors, sigmaLimits=c(-1, 1))
 ```
 
-![plot of chunk Baseline-Vignette-12](figure/Baseline-Vignette-12-1.png)
+![plot of chunk Baseline-Vignette-13](figure/Baseline-Vignette-13-1.png)
 
 
 ## Editing a field in a Baseline object

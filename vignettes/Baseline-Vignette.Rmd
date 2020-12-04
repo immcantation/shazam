@@ -59,7 +59,7 @@ two ways:
 
 1. Constructing clonal consensus sequences.
 
-1. Using lineage information.
+1. Incorporating lineage information.
 
 ### Constructing clonal consensus sequences
 
@@ -82,7 +82,7 @@ clones <- collapseClones(ExampleDb, cloneColumn="clone_id",
                          nproc=1)
 ```
 
-### Adding lineage information
+### Incorporating lineage information
 
 For each clone, lineage information can be incorporated following these steps:
 
@@ -93,17 +93,17 @@ dim(clone_3170_db)
 colnames(clone_3170_db)
 
 # Generate a ChangeoClone object for lineage construction 
-clone_3170_obj <- makeChangeoClone(clone_3170_db, seq="sequence_alignment", germ="germline_alignment")
+changeoClone_3170 <- makeChangeoClone(clone_3170_db, seq="sequence_alignment", germ="germline_alignment")
 
 # Run the lineage reconstruction
 dnapars_exec <- "/usr/local/bin/dnapars"
-clone_3170_graph <- buildPhylipLineage(clone_3170_obj, dnapars_exec, rm_temp = TRUE)
+clone_3170_lineage <- buildPhylipLineage(changeoClone_3170, dnapars_exec, rm_temp = TRUE)
 
-# Generating a data.frame from the graph object, 
+# Generating a data.frame from the lineage tree graph object, 
 # and merge it with clone data.frame
-clone_3170_GraphDf <- makeGraphDf(clone_3170_graph, clone_3170_obj)
-dim(clone_3170_GraphDf)
-colnames(clone_3170_GraphDf)
+clone_3170_lineage_df <- makeGraphDf(clone_3170_lineage, changeoClone_3170)
+dim(clone_3170_lineage_df)
+colnames(clone_3170_lineage_df)
 ```
 
 `makeGraphDb` creates a `ChangeoClone` object with the column `parent_sequence`. This field

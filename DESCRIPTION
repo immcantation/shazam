@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 1.0.2.999
-Date: 2020-12-03
+Date: 2020-12-04
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Namita", "Gupta", role=c("aut"), 
@@ -80,6 +80,7 @@ Collate:
     'MutationDefinitions.R'
     'MutationProfiling.R'
     'RegionsExtend.R'
+    'RegionsExtendLineageFunctions.R'
     'Shmulate.R'
     'TargetingModels.R'
 RoxygenNote: 7.1.1

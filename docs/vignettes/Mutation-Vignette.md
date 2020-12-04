@@ -56,7 +56,9 @@ db_obs %>%
 ```
 
 ```
-##      sequence_id mu_count_seq_r mu_count_seq_s
+## # A tibble: 4 x 3
+##   sequence_id    mu_count_seq_r mu_count_seq_s
+##   <chr>                   <dbl>          <dbl>
 ## 1 GN5SHBT07FUXY8              0              0
 ## 2 GN5SHBT05JMPI5              8              2
 ## 3 GN5SHBT08H4LPP              8              2
@@ -77,11 +79,13 @@ db_obs %>%
 ```
 
 ```
-##      sequence_id mu_freq_seq_r mu_freq_seq_s
-## 1 GN5SHBT07FUXY8    0.00000000   0.000000000
-## 2 GN5SHBT05JMPI5    0.02366864   0.005917160
-## 3 GN5SHBT08H4LPP    0.02359882   0.005899705
-## 4 GN5SHBT05JGND3    0.00000000   0.000000000
+## # A tibble: 4 x 3
+##   sequence_id    mu_freq_seq_r mu_freq_seq_s
+##   <chr>                  <dbl>         <dbl>
+## 1 GN5SHBT07FUXY8        0            0      
+## 2 GN5SHBT05JMPI5        0.0237       0.00592
+## 3 GN5SHBT08H4LPP        0.0236       0.00590
+## 4 GN5SHBT05JGND3        0            0
 ```
 
 Specifying the `combine=TRUE` argument will aggregate all mutation 
@@ -103,7 +107,9 @@ db_obs %>%
 ```
 
 ```
-##      sequence_id
+## # A tibble: 4 x 1
+##   sequence_id   
+##   <chr>         
 ## 1 GN5SHBT07FUXY8
 ## 2 GN5SHBT05JMPI5
 ## 3 GN5SHBT08H4LPP
@@ -160,11 +166,14 @@ db_obs_v %>%
 ```
 
 ```
-##      sequence_id mu_count_fwr1_r mu_count_fwr1_s mu_count_fwr2_r mu_count_fwr2_s mu_count_fwr3_r mu_count_fwr3_s
-## 1 GN5SHBT07FUXY8               0               0               0               0               0               0
-## 2 GN5SHBT05JMPI5               1               0               0               0               5               1
-## 3 GN5SHBT08H4LPP               1               0               0               0               5               1
-## 4 GN5SHBT05JGND3               0               0               0               0               0               0
+## # A tibble: 4 x 7
+##   sequence_id mu_count_fwr1_r mu_count_fwr1_s mu_count_fwr2_r mu_count_fwr2_s
+##   <chr>                 <dbl>           <dbl>           <dbl>           <dbl>
+## 1 GN5SHBT07F…               0               0               0               0
+## 2 GN5SHBT05J…               1               0               0               0
+## 3 GN5SHBT08H…               1               0               0               0
+## 4 GN5SHBT05J…               0               0               0               0
+## # … with 2 more variables: mu_count_fwr3_r <dbl>, mu_count_fwr3_s <dbl>
 ```
 
 ```r
@@ -181,11 +190,13 @@ db_obs_v %>%
 ```
 
 ```
-##      sequence_id mu_freq_cdr_r mu_freq_cdr_s mu_freq_fwr_r mu_freq_fwr_s
-## 1 GN5SHBT07FUXY8             0             0     0.0000000   0.000000000
-## 2 GN5SHBT05JMPI5             0             0     0.0251046   0.004184100
-## 3 GN5SHBT08H4LPP             0             0     0.0250000   0.004166667
-## 4 GN5SHBT05JGND3             0             0     0.0000000   0.000000000
+## # A tibble: 4 x 5
+##   sequence_id    mu_freq_cdr_r mu_freq_cdr_s mu_freq_fwr_r mu_freq_fwr_s
+##   <chr>                  <dbl>         <dbl>         <dbl>         <dbl>
+## 1 GN5SHBT07FUXY8             0             0        0            0      
+## 2 GN5SHBT05JMPI5             0             0        0.0251       0.00418
+## 3 GN5SHBT08H4LPP             0             0        0.025        0.00417
+## 4 GN5SHBT05JGND3             0             0        0            0
 ```
 
 Plot a comparison between CDR silent and replacement mutations.
@@ -235,11 +246,13 @@ db_obs_ch %>%
 ```
 
 ```
-##      sequence_id mu_freq_seq_r mu_freq_seq_s
-## 1 GN5SHBT07FUXY8   0.000000000    0.00000000
-## 2 GN5SHBT05JMPI5   0.002958580    0.02662722
-## 3 GN5SHBT08H4LPP   0.002949853    0.02654867
-## 4 GN5SHBT05JGND3   0.000000000    0.00000000
+## # A tibble: 4 x 3
+##   sequence_id    mu_freq_seq_r mu_freq_seq_s
+##   <chr>                  <dbl>         <dbl>
+## 1 GN5SHBT07FUXY8       0              0     
+## 2 GN5SHBT05JMPI5       0.00296        0.0266
+## 3 GN5SHBT08H4LPP       0.00295        0.0265
+## 4 GN5SHBT05JGND3       0              0
 ```
 
 We can make a plot to visualize if mutations that change the sequence charge are more 
