@@ -80,7 +80,6 @@ Collate:
     'MutationDefinitions.R'
     'MutationProfiling.R'
     'RegionsExtend.R'
-    'RegionsExtendLineageFunctions.R'
     'Shmulate.R'
     'TargetingModels.R'
 RoxygenNote: 7.1.1
