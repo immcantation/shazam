@@ -234,6 +234,7 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
 #'                            \code{"IMGT_VDJ_BY_REGIONS"} or \code{"IMGT_VDJ"}. 
 #'                            Only these 2 regions include all
 #'                            CDR1/2/3 and FWR1/2/3/4 regions.
+#'                            
 #' @return a \link{RegionDefinition} object that includes CDR1/2/3 and 
 #'         FWR1/2/3/4 for the specific \code{sequenceImgt}, 
 #'         \code{juncLength} and \code{regionDefinition}.
@@ -248,7 +249,7 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
 #'                           regionDefinition = IMGT_VDJ_BY_REGIONS)
 #' @export
 makeRegion <- function(juncLength, sequenceImgt,
-                       regionDefinition=IMGT_VDJ_BY_REGIONS) {
+                       regionDefinition=NULL) {
     if (!is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
@@ -299,7 +300,11 @@ makeRegion <- function(juncLength, sequenceImgt,
 getCloneRegion <- function(clone_num, db, seq_col="sequence", 
                            juncLengthColumn="junction_length", 
                            clone_col="clone", 
-                           regionDefinition=IMGT_VDJ_BY_REGIONS) {
+                           regionDefinition=NULL) {
+    # Check region definition
+    if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
+        stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+    }
     # subseting the db to lines for specific clone
     clone_db <- db[db[[clone_col]] == clone_num,]
     if ( length(unique(clone_db[[juncLengthColumn]])) >1 ) {

@@ -1507,7 +1507,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                               'makeNullRegionDefinition', 'mutationDefinition',
                                               'getCodonPos','getContextInCodon','mutationType',
                                               'AMINO_ACIDS',
-                                              'binMutationsByRegion', 'countNonNByRegion','makeRegion', 'IMGT_V_BY_REGIONS'), 
+                                              'binMutationsByRegion', 'countNonNByRegion','makeRegion','IMGT_V_BY_REGIONS'), 
                                 envir=environment())
         registerDoParallel(cluster)
     } else if (nproc == 1) {
