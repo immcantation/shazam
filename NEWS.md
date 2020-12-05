@@ -1,5 +1,11 @@
-Version 1.0.2.999: November 10, 2020
+Version 1.0.2.999: December 6, 2020
 -------------------------------------------------------------------------------
+
+New features:
+
++ `observedMutations`, `expectedMutations`, and `calcBaseline` can analyze mutations
+   in all regions (CDR1, CDR2, CDR3, FWR1, FWR2, FWR3 and FWR4) by specifying
+   `regionDefinition=IMGT_VDJ` or `regionDefinition=IMGT_VDJ_BY_REGIONS`.
 
 Distance Profiling:
 
