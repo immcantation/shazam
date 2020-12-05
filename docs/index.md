@@ -51,11 +51,11 @@ or use the [issue tracker](https://bitbucket.org/kleinstein/shazam/issues?status
 
 [Mohamed Uduman](mailto:mohamed.uduman@yale.edu) (aut)  
 [Namita Gupta](mailto:namita.gupta@yale.edu) (aut)  
-[Susanna Marquez](mailto:susanna.marquez@yale.edu) (aut, cre)  
+[Susanna Marquez](mailto:susanna.marquez@yale.edu) (aut)  
 [Julian Zhou](mailto:julian.zhou@yale.edu) (aut)  
 [Nima Nouri](mailto:nima.nouri@yale.edu) (aut)  
 [Ang Cui](mailto:angcui@mit.edu) (ctb)  
-[Jason Vander Heiden](mailto:jason.vanderheiden@gmail.com) (aut)  
+[Jason Vander Heiden](mailto:jason.vanderheiden@gmail.com) (aut, cre)  
 [Gur Yaari](mailto:gur.yaari@biu.ac.il) (aut)  
 [Steven Kleinstein](mailto:steven.kleinstein@yale.edu) (aut, cph)
 

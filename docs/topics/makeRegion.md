@@ -9,7 +9,7 @@ Defining a Region that will include also CDR3 and FWR4 based on junction length 
 Usage
 --------------------
 ```
-makeRegion(juncLength, sequenceImgt, regionDefinition = IMGT_VDJ_BY_REGIONS)
+makeRegion(juncLength, sequenceImgt, regionDefinition = NULL)
 ```
 
 Arguments
