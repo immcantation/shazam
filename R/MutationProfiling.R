@@ -548,6 +548,12 @@ collapseClones <- function(db, cloneColumn = "clone_id",
                             cloneDb <- db[cloneIdx, ]
                             clone_num <- unique(cloneDb[['fields_clone_id']])
                             
+                            # Verify the assumption that all sequences in the clone have the same
+                            # junction length.
+                            if (length(unique(cloneDb[[juncLengthColumn]])) > 1 ) {
+                                stop("Expecting all sequences in the same clone with the same junction lenght.")
+                            }
+                            
                             cloneRegionDefinition <- regionDefinition
                             if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) { 
                                 cloneRegionDefinition <- getCloneRegion(clone_num=clone_num, 
