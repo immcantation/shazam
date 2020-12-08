@@ -1969,8 +1969,8 @@ calcBaseline <- function(db,
                                 juncLengthColumn=juncLengthColumn)
     } else {
         message(paste0("calcBaseline will use existing observed and expected mutations, in the fields: ",
-                       paste0(observedColumns, sep=", ", collapse=", ")," and ", 
-                       paste0(expectedColumns, sep=", ", collapse=", ")))
+                       paste0(observedColumns, sep="", collapse=", ")," and ", 
+                       paste0(expectedColumns, sep="", collapse=", ")))
     }
     
     # Calculate PDFs for each sequence
