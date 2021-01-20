@@ -4,12 +4,6 @@ load(file.path("..", "data-tests", "ExampleDb.rda"))
 # ExampleDb_airr
 load(file.path("..", "data-tests", "ExampleDb_airr.rda")) 
 
-#ensure older version of sample() used
-R_v <- paste(version$major, version$minor,sep=".")
-if ( numeric_version(R_v) >= numeric_version("3.6.0") ) {
-    RNGkind(sample.kind="Round")   
-}
-
 #### collapseClones ####
 test_that("collapseClones", {
     # example data
@@ -17,15 +11,18 @@ test_that("collapseClones", {
     # clone with most sequences: CLONE 3128
     
     # Build clonal consensus for the full sequence
-    set.seed(7)
+    # ensure older version of sample() used 
+    # sample.kind="Rounding"
+    # Will show warning: non-uniform 'Rounding' sampler used
+    expect_warning(set.seed(7, sample.kind="Rounding"), "non-uniform 'Rounding' sampler used")
     clones.1 <- collapseClones(db, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
                                method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=FALSE)
-    set.seed(7)
+    expect_warning(set.seed(7, sample.kind="Rounding"), "non-uniform 'Rounding' sampler used")
     clones.1.df <- collapseClones(db, cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
                                   method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=FALSE)
     expect_identical(clones.1.df, clones.1)
     
-    set.seed(7)
+    expect_warning(set.seed(7, sample.kind="Rounding"), "non-uniform 'Rounding' sampler used")
     clones.2 <- collapseClones(db,  cloneColumn="CLONE", sequenceColumn="SEQUENCE_IMGT", germlineColumn="GERMLINE_IMGT_D_MASK",
                                method="thresholdedFreq", minimumFrequency=0.2, breakTiesStochastic=TRUE, nproc=1, expandedDb=TRUE)
     
@@ -44,11 +41,11 @@ test_that("collapseClones", {
 #### binMutationsByRegion ####
 test_that("binMutationsByRegion", {
     
-    set.seed(8)
+    expect_warning(set.seed(8, sample.kind="Rounding"),"non-uniform 'Rounding' sampler used")
     numbOfMutations <- sample(3:10, 1) 
-    set.seed(60)
+    expect_warning(set.seed(60, sample.kind="Rounding"),"non-uniform 'Rounding' sampler used")
     posOfMutations <- sort(sample(330, numbOfMutations))
-    set.seed(13)
+    expect_warning(set.seed(13, sample.kind="Rounding"),"non-uniform 'Rounding' sampler used")
     mutations_array <- matrix(0, nrow=2, ncol=numbOfMutations, dimnames=list(c("r", "s"), posOfMutations))
     mutations_array["r", ] = sample(x=0:10, size=numbOfMutations, replace=TRUE)
     mutations_array["s", ] = sample(x=0:10, size=numbOfMutations, replace=TRUE)

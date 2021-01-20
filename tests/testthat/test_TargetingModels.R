@@ -331,19 +331,21 @@ test_that("createSubstitutionMatrix & createMutabilityMatrix, AIRR migration", {
     
     expect_identical(sub_c, sub_a)
     
-    mut_c <- createMutabilityMatrix(db_c, sub_c, model="s", 
+    expect_warning(mut_c <- createMutabilityMatrix(db_c, sub_c, model="s", 
                                     sequenceColumn="SEQUENCE_IMGT",
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     vCallColumn="V_CALL",
                                     minNumSeqMutations=200,
-                                    numSeqMutationsOnly=FALSE)
+                                    numSeqMutationsOnly=FALSE), 
+                   "Insufficient number of mutations to infer some 5-mers. Filled with 0")
     
-    mut_a <- createMutabilityMatrix(db_a, sub_a, model="s", 
+    expect_warning(mut_a <- createMutabilityMatrix(db_a, sub_a, model="s", 
                                     sequenceColumn="sequence_alignment",
                                     germlineColumn="germline_alignment_d_mask",
                                     vCallColumn="v_call",
                                     minNumSeqMutations=200,
-                                    numSeqMutationsOnly=FALSE)
+                                    numSeqMutationsOnly=FALSE),
+                   "Insufficient number of mutations to infer some 5-mers. Filled with 0")
     
     expect_identical(mut_c, mut_a)
     
@@ -373,13 +375,15 @@ test_that("createTargetingModel, AIRR migration", {
     db_c <- subset(ExampleDb, ISOTYPE == "IgA" & SAMPLE == "-1h")
     db_a <- subset(ExampleDb_airr, isotype == "IgA" & sample == "-1h")
     
-    mod_c <- createTargetingModel(db_c, model="s", sequenceColumn="SEQUENCE_IMGT",
+    expect_warning(mod_c <- createTargetingModel(db_c, model="s", sequenceColumn="SEQUENCE_IMGT",
                                   germlineColumn="GERMLINE_IMGT_D_MASK",
-                                  vCallColumn="V_CALL", multipleMutation="ignore")
+                                  vCallColumn="V_CALL", multipleMutation="ignore"),
+                   "Insufficient number of mutations to infer some 5-mers. Filled with 0")
     
-    mod_a <- createTargetingModel(db_a, model="s", sequenceColumn="sequence_alignment",
+    expect_warning(mod_a <- createTargetingModel(db_a, model="s", sequenceColumn="sequence_alignment",
                                   germlineColumn="germline_alignment_d_mask",
-                                  vCallColumn="v_call", multipleMutation="ignore")
+                                  vCallColumn="v_call", multipleMutation="ignore"),
+                   "Insufficient number of mutations to infer some 5-mers. Filled with 0")
     
     expect_equal(mod_c, mod_a)
     
