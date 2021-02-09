@@ -46,13 +46,13 @@ criterion
 [minNumSeqMutationsTune](minNumSeqMutationsTune.md)).
 
 pchs
-:   point types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
+:   point types to pass on to [plot](http://www.rdocumentation.org/packages/base/topics/plot).
 
 ltys
-:   line types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
+:   line types to pass on to [plot](http://www.rdocumentation.org/packages/base/topics/plot).
 
 cols
-:   colors to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot).
+:   colors to pass on to [plot](http://www.rdocumentation.org/packages/base/topics/plot).
 
 plotLegend
 :   whether to plot legend. Default is `TRUE`. Only applicable 

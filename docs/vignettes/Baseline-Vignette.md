@@ -115,16 +115,16 @@ the boundaries lie. There are several built-in region definitions
 in the `shazam` package, both dependent upon the V segment
 being IMGT-gapped:
 
-*  `IMGT_V`: All regions in the V segment, excluding CDR3, grouped as 
-    either CDR or FWR.
-*  `IMGT_V_BY_REGIONS`: The CDR1, CDR2, FWR1, FWR and FWR3 regions 
-    in the V segment (no CDR3) treated as individual regions.
-*   `IMGT_VDJ`: All regions, including CDR3 and FWR4, grouped as 
-    either CDR or FWR. This `RegionDefinition` is initially empty, and one is
-    created on the fly for each set of clonally related sequences.
-*   `IMGT_VDJ_BY_REGIONS`: CDR1, CDR2, CDR3, FWR1, FWR, FWR3 and FWR4 regions 
-    treated as individual regions. This `RegionDefinition` is initially empty, 
-    and one is created on the fly for each set of clonally related sequences.
+* `IMGT_V`: All regions in the V segment, excluding CDR3, grouped as 
+  either CDR or FWR.
+* `IMGT_V_BY_REGIONS`: The CDR1, CDR2, FWR1, FWR and FWR3 regions 
+  in the V segment (no CDR3) treated as individual regions.
+* `IMGT_VDJ`: All regions, including CDR3 and FWR4, grouped as 
+  either CDR or FWR. This `RegionDefinition` is initially empty, and one is
+  created on the fly for each set of clonally related sequences.
+* `IMGT_VDJ_BY_REGIONS`: CDR1, CDR2, CDR3, FWR1, FWR, FWR3 and FWR4 regions 
+  treated as individual regions. This `RegionDefinition` is initially empty, 
+  and one is created on the fly for each set of clonally related sequences.
 
 Users may define other region sets and boundaries by creating a custom
 `RegionDefinition` object.
@@ -157,7 +157,7 @@ baseline <- calcBaseline(expected, testStatistic="focused",
 ```
 
 ```
-## calcBaseline will use existing observed and expected mutations, in the fields: mu_count_cdr_r, , mu_count_cdr_s, , mu_count_fwr_r, , mu_count_fwr_s,  and mu_expected_cdr_r, , mu_expected_cdr_s, , mu_expected_fwr_r, , mu_expected_fwr_s,
+## calcBaseline will use existing observed and expected mutations, in the fields: mu_count_cdr_r, mu_count_cdr_s, mu_count_fwr_r, mu_count_fwr_s and mu_expected_cdr_r, mu_expected_cdr_s, mu_expected_fwr_r, mu_expected_fwr_s
 ```
 
 ### Calculating selection in one step

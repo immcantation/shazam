@@ -47,7 +47,7 @@ entirely disregards 5-mers with multiple mutations.
 
 ```r
 # Create substitution model using silent mutations
-sub_model <- createSubstitutionMatrix(ExampleDb, model="S", 
+sub_model <- createSubstitutionMatrix(ExampleDb, model="s", 
                                        sequenceColumn="sequence_alignment",
                                        germlineColumn="germline_alignment_d_mask",
                                        vCallColumn="v_call")
@@ -61,7 +61,7 @@ inferring the substitution rates are available to adjust this function.
 
 ```r
 # Create mutability model using silent mutations
-mut_model <- createMutabilityMatrix(ExampleDb, sub_model, model="S",
+mut_model <- createMutabilityMatrix(ExampleDb, sub_model, model="s",
                                      sequenceColumn="sequence_alignment",
                                      germlineColumn="germline_alignment_d_mask",
                                      vCallColumn="v_call")

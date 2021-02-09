@@ -244,7 +244,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1202068
+## [1] 0.1198588
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -387,10 +387,6 @@ top_10_sizes <- ExampleDb %>%
 ```
 
 ```
-## `summarise()` ungrouping output (override with `.groups` argument)
-```
-
-```
 ## Selecting by SIZE
 ```
 
@@ -402,7 +398,7 @@ top_10_sizes
 ## # A tibble: 10 x 1
 ##     SIZE
 ##    <int>
-##  1    90
+##  1    89
 ##  2    37
 ##  3    36
 ##  4    34
