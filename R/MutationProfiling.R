@@ -1308,7 +1308,9 @@ calcClonalConsensus <- function(db,
 #'                               characters for DNA are supported.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences. If NULL, mutations 
-#'                               are counted for entire sequence.
+#'                               are counted for entire sequence. To use regions definitions,
+#'                               sequences in \code{sequenceColum} and \code{germlineColumn}
+#'                               must be aligned, following the IMGT schema.
 #' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
 #'                               and silent mutation criteria. If \code{NULL} then 
 #'                               replacement and silent are determined by exact 
@@ -1442,6 +1444,25 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     regionDefinitionName <- ""
     if (!is.null(regionDefinition)) {
         regionDefinitionName <- regionDefinition@name
+        
+        # Message if sequences don't have gaps or Ns (because makeChangeo clone
+        # masks IMGT gaps) as a proxy to detect not IMGT aligned sequences
+        if (all(!grepl("[\\.Nn]",db[[sequenceColumn]]))) {
+            warning("No IMGT gaps detected in ",sequenceColumn,".\nSequences in ", 
+                    sequenceColumn," and ", germlineColumn, 
+                    " should be aligned, with gaps (.,N or n) following the IMGT numbering scheme.")
+        }
+        if (all(!grepl("[\\.Nn]",db[[germlineColumn]]))) {
+            warning("No IMGT gaps detected in ",germlineColumn,
+                    ".\nSequences in ", sequenceColumn," and ", germlineColumn, 
+                    " should be aligned, with gaps (., N or n) following the IMGT numbering scheme.")
+        }        
+        
+        not_na <- !is.na(db[[germlineColumn]])
+        if (!all.equal(nchar(db[[sequenceColumn]][not_na]), nchar(db[[germlineColumn]][not_na]))) {
+            warning("Pairs of ", sequenceColumn, " and ", germlineColumn, " sequences with different lengths found.")
+            stop("Expecting IMGT aligned, same length sequences in ", sequenceColumn, " and ", germlineColumn,".")
+        }
     }
     
     # Check region definition
@@ -2616,7 +2637,9 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
 #'                               the germline or reference sequence.
 #' @param    targetingModel      \link{TargetingModel} object. Default is \link{HH_S5F}.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
-#'                               and boundaries of the Ig sequences.
+#'                               and boundaries of the Ig sequences. To use regions definitions,
+#'                               sequences in \code{sequenceColum} and \code{germlineColumn}
+#'                               must be aligned, following the IMGT schema.
 #' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
 #'                               and silent mutation criteria. If \code{NULL} then 
 #'                               replacement and silent are determined by exact 
@@ -2696,6 +2719,25 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     regionDefinitionName <- ""
     if (!is.null(regionDefinition)) {
         regionDefinitionName <- regionDefinition@name
+        
+        # Message if sequences don't have gaps or Ns (because makeChangeo clone
+        # masks IMGT gaps) as a proxy to detect not IMGT aligned sequences
+        if (all(!grepl("[\\.Nn]",db[[sequenceColumn]]))) {
+            warning("No IMGT gaps detected in ",sequenceColumn,".\nSequences in ", 
+                    sequenceColumn," and ", germlineColumn, 
+                    " should be aligned, with gaps (.,N or n) following the IMGT numbering scheme.")
+        }
+        if (all(!grepl("[\\.Nn]",db[[germlineColumn]]))) {
+            warning("No IMGT gaps detected in ",germlineColumn,
+                    ".\nSequences in ", sequenceColumn," and ", germlineColumn, 
+                    " should be aligned, with gaps (., N or n) following the IMGT numbering scheme.")
+        }        
+        
+        not_na <- !is.na(db[[germlineColumn]])
+        if (!all.equal(nchar(db[[sequenceColumn]][not_na]), nchar(db[[germlineColumn]][not_na]))) {
+            warning("Pairs of ", sequenceColumn, " and ", germlineColumn, " sequences with different lengths found.")
+            stop("Expecting IMGT aligned, same length sequences in ", sequenceColumn, " and ", germlineColumn,".")
+        }
     }
     
     # Check region definition
