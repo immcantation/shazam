@@ -254,29 +254,43 @@ makeRegion <- function(juncLength, sequenceImgt,
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
     
-    if (regionDefinition@name %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) { 
-        # all slots except for boundaries and seqLength are already defined in regionDefinition
-        # First need to extract sequence length from sequence:
-        seqLength <- nchar(sequenceImgt)
-        # now for the boundaries slot:
-        boundaries <- factor(IMGT_V_BY_REGIONS@boundaries, 
-                             levels=c(levels(IMGT_V_BY_REGIONS@boundaries), "cdr3", "fwr4"))
-        boundaries[313:(313 + as.integer(juncLength) - 6 - 1)] <- factor("cdr3")
-        boundaries[(313 + as.integer(juncLength) - 6):seqLength] <- factor("fwr4")
-        if (regionDefinition@name == "IMGT_VDJ") {
-            boundaries <- gsub(pattern="fwr.", replacement = "fwr", x=boundaries, perl=TRUE)
-            boundaries <- gsub(pattern="cdr.", replacement = "cdr", x=boundaries, perl=TRUE)
-            boundaries <- factor(boundaries, levels=c("fwr", "cdr"))
-        } 
-        new("RegionDefinition", 
-            name=regionDefinition@name, 
-            description=regionDefinition@description, 
-            boundaries=boundaries, seqLength=unname(seqLength), 
-            regions=regionDefinition@regions, 
-            labels=regionDefinition@labels, 
-            citation=regionDefinition@citation)
+    if (!is.null(regionDefinition)) {
+        if (regionDefinition@name %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) { 
+            # all slots except for boundaries and seqLength are already defined in regionDefinition
+            # First need to extract sequence length from sequence:
+            seqLength <- nchar(sequenceImgt)
+            
+            if (grepl("-", sequenceImgt)) {
+                # juncLength doesn't include alignment gaps, which are in sequenceImgt
+                # and need to be added to correctly identify the boundaries
+                junction_length_helper <- strsplit(sequenceImgt[[1]], "")[[1]] != "-"
+                junction_length_helper[1:310-1] <- 0
+                junction_end <- which(cumsum(junction_length_helper[1:length(junction_length_helper)])==juncLength[[1]])[1]
+                num_gaps <- sum(!junction_length_helper[310:junction_end])
+                juncLength <- juncLength + num_gaps
+            }
+            # now for the boundaries slot:
+            boundaries <- factor(IMGT_V_BY_REGIONS@boundaries, 
+                                 levels=c(levels(IMGT_V_BY_REGIONS@boundaries), "cdr3", "fwr4"))
+            boundaries[313:(313 + as.integer(juncLength) - 6 - 1)] <- factor("cdr3")
+            boundaries[(313 + as.integer(juncLength) - 6):seqLength] <- factor("fwr4")
+            if (regionDefinition@name == "IMGT_VDJ") {
+                boundaries <- gsub(pattern="fwr.", replacement = "fwr", x=boundaries, perl=TRUE)
+                boundaries <- gsub(pattern="cdr.", replacement = "cdr", x=boundaries, perl=TRUE)
+                boundaries <- factor(boundaries, levels=c("fwr", "cdr"))
+            } 
+            new("RegionDefinition", 
+                name=regionDefinition@name, 
+                description=regionDefinition@description, 
+                boundaries=boundaries, seqLength=unname(seqLength), 
+                regions=regionDefinition@regions, 
+                labels=regionDefinition@labels, 
+                citation=regionDefinition@citation)
+        } else {
+            regionDefinition  
+        }
     } else {
-        regionDefinition  
+        makeNullRegionDefinition()
     }
 }
 
@@ -311,8 +325,8 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
         stop("Expecting clones where all sequences have the same junction lenth. Different lengths found for clone ", clone_num)
     }
     # getting one of the sequences of the specific clone: 
-    seq <- clone_db[1, seq_col]
-    junc_len <- clone_db[1, juncLengthColumn]
+    seq <- clone_db[[seq_col]][1]
+    junc_len <- clone_db[[juncLengthColumn]][1]
     reg <- makeRegion(juncLength=junc_len, sequenceImgt=seq, 
                       regionDefinition=regionDefinition)
     return(reg)

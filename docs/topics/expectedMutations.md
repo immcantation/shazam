@@ -42,7 +42,9 @@ targetingModel
 
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions
-and boundaries of the Ig sequences.
+and boundaries of the Ig sequences. To use regions definitions,
+sequences in `sequenceColum` and `germlineColumn`
+must be aligned, following the IMGT schema.
 
 mutationDefinition
 :   [MutationDefinition](MutationDefinition-class.md) object defining replacement

@@ -1,5 +1,6 @@
 test_that("makeRegion", {
-    data("ExampleDb", package="alakazam")
+    # data("ExampleDb", package="alakazam")
+    load(file.path("..", "data-tests", "ExampleDb_airr.rda"))
     junction_length_10 <- ExampleDb[10,"junction_length"]
     sequence_imgt_10 <- ExampleDb[10,"sequence_alignment"]
     seq_10_reg_def <- makeRegion(juncLength = junction_length_10, 

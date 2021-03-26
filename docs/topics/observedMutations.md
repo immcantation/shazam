@@ -44,7 +44,9 @@ characters for DNA are supported.
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions
 and boundaries of the Ig sequences. If NULL, mutations 
-are counted for entire sequence.
+are counted for entire sequence. To use regions definitions,
+sequences in `sequenceColum` and `germlineColumn`
+must be aligned, following the IMGT schema.
 
 mutationDefinition
 :   [MutationDefinition](MutationDefinition-class.md) object defining replacement
