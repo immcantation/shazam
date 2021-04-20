@@ -260,20 +260,27 @@ makeRegion <- function(juncLength, sequenceImgt,
             # First need to extract sequence length from sequence:
             seqLength <- nchar(sequenceImgt)
             
-            if (grepl("-", sequenceImgt)) {
-                # juncLength doesn't include alignment gaps, which are in sequenceImgt
-                # and need to be added to correctly identify the boundaries
-                junction_length_helper <- strsplit(sequenceImgt[[1]], "")[[1]] != "-"
-                junction_length_helper[1:310-1] <- 0
-                junction_end <- which(cumsum(junction_length_helper[1:length(junction_length_helper)])==juncLength[[1]])[1]
-                num_gaps <- sum(!junction_length_helper[310:junction_end])
-                juncLength <- juncLength + num_gaps
-            }
+            # juncLength doesn't include alignment gaps, which are in sequenceImgt
+            # and need to be added to correctly identify the boundaries
+            # Also, sequence_alignment can have `.` that represent indels
+            junction_length_helper <- !strsplit(sequenceImgt[[1]], "")[[1]] %in% c("-",".")
+            junction_length_helper[1:310-1] <- 0
+            junction_end <- which(cumsum(junction_length_helper[1:length(junction_length_helper)])==juncLength[[1]])[1]
+            num_gaps <- sum(!junction_length_helper[310:junction_end])
+            juncLength <- juncLength + num_gaps
+
             # now for the boundaries slot:
             boundaries <- factor(IMGT_V_BY_REGIONS@boundaries, 
                                  levels=c(levels(IMGT_V_BY_REGIONS@boundaries), "cdr3", "fwr4"))
-            boundaries[313:(313 + as.integer(juncLength) - 6 - 1)] <- factor("cdr3")
-            boundaries[(313 + as.integer(juncLength) - 6):seqLength] <- factor("fwr4")
+            cdr3_end <- 313 + as.integer(juncLength) - 6 - 1
+            if (cdr3_end >= 313) {
+                boundaries[313:cdr3_end] <- factor("cdr3")
+                boundaries[(cdr3_end+1):seqLength] <- factor("fwr4")   
+            } else {
+                # I you are here, the junction is too short, <= 6nt
+                warning("CDR3 end < CDR3 start. Couldn't identify CDR3 and FWR4. Aligned junction length is: ", juncLength) 
+            }
+
             if (regionDefinition@name == "IMGT_VDJ") {
                 boundaries <- gsub(pattern="fwr.", replacement = "fwr", x=boundaries, perl=TRUE)
                 boundaries <- gsub(pattern="cdr.", replacement = "cdr", x=boundaries, perl=TRUE)

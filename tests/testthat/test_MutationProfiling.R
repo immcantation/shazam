@@ -415,7 +415,7 @@ test_that("observedMutations, when no mutations found", {
 
 ##### Tests 1A-1H (calcObservedMutations & observedMutations)
 ##### Tests 2A-2E (consensusSequence, calcClonalConsensus, collapseClones) 
-##### are for changed made during commits pushed during June 2-June 12 2017
+##### are for changes made during commits pushed during June 2-June 12 2017
 
 #### calcObservedMutations 1A ####
 test_that("calcObservedMutations, 1A, without ambiguous characters, length is multiple of 3", {
@@ -2923,4 +2923,30 @@ test_that("collapseClones, extended regions", {
                         start=313, stop=400))
     
     
+})
+
+test_that("observed mutations, when - or . in junction", {
+    load(file.path("..", "data-tests", "calcJunctionAlignment.rda"))
+    # plotJunctionAlignment(db[2,], germline_db)$plot
+    # #2 has indels in V region
+    om2 <- calcObservedMutations(db[['sequence_alignment']][2], db[['germline_alignment_d_mask']][2], returnRaw = T)
+    expect_equivalent(om2$nonN,334)
+    
+    # #5 has - in the junction (positions 323, 324)
+    # plotJunctionAlignment(db[5,], germline_db)$plot
+    # In the junction, there are two mutations (316, 318). 
+    om5 <- calcObservedMutations(db[['sequence_alignment']][5], db[['germline_alignment_d_mask']][5], returnRaw = T)
+    expect_equal(om5$pos$position, c(60, 63, 107, 113, 117, 120, 141, 162, 316, 318) )
+    expect_equivalent(om5$nonN, 325)
+    
+    # This sequence has ...... in the junction, but germline_alignment_d_mask is NA because
+    # CreateGermlines can't create a germline
+    # db[['germline_alignment_d_mask']][11] is NA, and this should return 
+    # positions NA, and not count the 'A' and return 1 in nonN    
+    om11 <- calcObservedMutations(db[['sequence_alignment']][11], db[['germline_alignment_d_mask']][11], returnRaw = T)
+    expect_true(is.na(om11$pos))
+    expect_true(is.na(om11$nonN))
+    # This is the same sequence as om11, but aligned with IgBLAST
+    # plotJunctionAlignment(db[8,], germline_db)$plot
+    om8 <- calcObservedMutations(db[['sequence_alignment']][8], db[['germline_alignment_d_mask']][8], returnRaw = T)
 })

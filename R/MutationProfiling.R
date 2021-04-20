@@ -1832,6 +1832,14 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     
     ambiguousMode <- match.arg(ambiguousMode)
     
+    if (is.na(inputSeq)) {
+        inputSeq <- ""
+    }
+    
+    if (is.na(germlineSeq)) {
+        inputSeq <- ""
+    }
+    
     # Check region definition
     if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
