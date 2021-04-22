@@ -699,6 +699,9 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #'                               and required for the \code{"thresholdedFreq"} and \code{"mostCommon"}
 #'                               methods. Default is \code{FALSE}. See "Choosing ambiguous characters"
 #'                               under \link{collapseClones} for rules on choosing ambiguous characters.
+#'                               Note: this argument refers to the use of ambiguous nucleotides in the 
+#'                               output consensus sequence. Ambiguous nucleotides in the input sequences
+#'                               are allowed for methods catchAll, mostMutated and leastMutated.
 #' @param   breakTiesStochastic  In case of ties, whether to randomly pick a sequence from sequences that
 #'                               fulfill the criteria as consensus. Applicable to and required for all methods
 #'                               except for \code{"catchAll"}. Default is \code{FALSE}. See "Methods"
