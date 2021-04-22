@@ -60,6 +60,10 @@ test_that("makeRegion", {
     expect_equal(seq_reg_def_IMGT_V_BY_CODONS,IMGT_V_BY_CODONS)
     expect_equal(seq_reg_def_IMGT_V_BY_REGIONS,IMGT_V_BY_REGIONS)
     expect_equal(seq_reg_def_IMGT_V_BY_SEGMENTS,IMGT_V_BY_SEGMENTS)
+    
+    # When no junction found
+    aln <- "...........................................CCACACAGACCCCCGGGCTGAGACCCAGGCAGGGAGGGGTGACGTTCCCAGGGA"
+    expect_warning(makeRegion(0, aln, IMGT_VDJ_BY_REGIONS ), "Aligned junction length is: 0")
 })
 
 test_that("getCloneRegion", {

@@ -265,14 +265,17 @@ makeRegion <- function(juncLength, sequenceImgt,
             # Also, sequence_alignment can have `.` that represent indels
             junction_length_helper <- !strsplit(sequenceImgt[[1]], "")[[1]] %in% c("-",".")
             junction_length_helper[1:310-1] <- 0
-            junction_end <- which(cumsum(junction_length_helper[1:length(junction_length_helper)])==juncLength[[1]])[1]
-            num_gaps <- sum(!junction_length_helper[310:junction_end])
-            juncLength <- juncLength + num_gaps
-
+            if (juncLength>0) {
+                junction_end <- which(cumsum(junction_length_helper[1:length(junction_length_helper)])==juncLength[[1]])[1]
+                num_gaps <- sum(!junction_length_helper[310:junction_end])
+                juncLength <- juncLength + num_gaps
+                cdr3_end <- 313 + as.integer(juncLength) - 6 - 1
+            } else {
+                cdr3_end <- 0
+            }
             # now for the boundaries slot:
             boundaries <- factor(IMGT_V_BY_REGIONS@boundaries, 
                                  levels=c(levels(IMGT_V_BY_REGIONS@boundaries), "cdr3", "fwr4"))
-            cdr3_end <- 313 + as.integer(juncLength) - 6 - 1
             if (cdr3_end >= 313) {
                 boundaries[313:cdr3_end] <- factor("cdr3")
                 boundaries[(cdr3_end+1):seqLength] <- factor("fwr4")   
@@ -297,7 +300,7 @@ makeRegion <- function(juncLength, sequenceImgt,
             regionDefinition  
         }
     } else {
-        makeNullRegionDefinition()
+        makeNullRegionDefinition(nchar(sequenceImgt))
     }
 }
 
