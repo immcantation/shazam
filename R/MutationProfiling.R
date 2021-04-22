@@ -894,14 +894,23 @@ consensusSequence <- function(sequences, db=NULL,
         ##### tabulation matrix
         # col: nucleotide position
         # row: A,T,G,C,N,.,-,na (to distinguish from NA)
-        tabMtxRownames <- c("A","T","G","C","N",".","-","na")
-        tabMtx <- matrix(0, ncol=lenMax, nrow=8, 
+        if (method != "catchAll") {
+            tabMtxRownames <- c("A","T","G","C","N",".","-","na")
+        } else {
+            # Allow for input ambiguous characters
+            tabMtxRownames <- c(NUCLEOTIDES_AMBIGUOUS,"na")
+        }
+        tabMtx <- matrix(0, ncol=lenMax, nrow=length(tabMtxRownames), 
                         dimnames=list(tabMtxRownames, NULL))
         ## across sequences, at each nuc position, how many A, T, G, C, N, ., -? 
         # this does not capture NA
         for (j in 1:ncol(seqsMtx)) {
             tab <- table(seqsMtx[, j])
-            tabMtx[match(names(tab), tabMtxRownames), j] <- tab
+            r <- match(names(tab), tabMtxRownames)
+            if (any(is.na(r))) {
+                stop("Ambiguous nucleotides or unexpected characters found in `sequences`.")
+            }
+            tabMtx[r, j] <- tab
         }
         ## across sequences, at each nuc position, how many NAs?
         numNAs <- colSums(is.na(seqsMtx))
@@ -1000,6 +1009,8 @@ consensusSequence <- function(sequences, db=NULL,
             consensus <- apply(as.matrix(tabMtx), 2, function(x){
                 # all characters that appear at a position across sequences
                 nonZeroNucs <- rownames(tabMtx)[x>0]
+                # Disambiguate, except N
+                nonZeroNucs <- unique(unlist(c(IUPAC_DNA[names(IUPAC_DNA)!="N"],"."=".","-"="-","N"="N")[nonZeroNucs]))
                 # convert characters to (ambiguous) characters
                 return(chars2Ambiguous(nonZeroNucs))
             })

@@ -81,6 +81,7 @@ test_that("observedMutations, charge mutations", {
 
 #### calcObservedMutations, hydropathy ####
 test_that("calcObservedMutations, hydropathy", {
+    
     in_seq <- ExampleDb[["SEQUENCE_IMGT"]][1]
     germ_seq <-  ExampleDb[["GERMLINE_IMGT_D_MASK"]][1]
     
@@ -1814,6 +1815,17 @@ test_that("consensusSequence, 2B, methods = thresholdedFreq, mostCommon, catchAl
     # no region definition
     expect_equal(shazam:::consensusSequence(seqs1, lenLimit=NULL,  method="catchAll"),
                  list(cons=catchAll.noRegDef, muFreq=NULL))
+    # With ambiguous input nucleotide
+    seqsY <- seqs1
+    seqsY[1] <- "AYGCATGCAT-G.NTC" # Y = C or T
+    expect_equal(shazam:::consensusSequence(seqsY, lenLimit=NULL,  method="catchAll"),
+                 list(cons=catchAll.noRegDef, muFreq=NULL))
+    # Ambiguous input nucleotides should fail for methods mostCommon and thresholdFreq
+    expect_error(shazam:::consensusSequence(seqsY, lenLimit=NULL,  method="mostCommon"),
+                 "Ambiguous nucleotides")
+    expect_error(shazam:::consensusSequence(seqsY, lenLimit=NULL,  method="thresholdedFreq"),
+                 "Ambiguous nucleotides")
+
     # with region definition
     expect_equal(shazam:::consensusSequence(seqs1, lenLimit=regDef1@seqLength,  method="catchAll"),
                  list(cons=substr(catchAll.noRegDef,1,regDef1@seqLength), muFreq=NULL))
