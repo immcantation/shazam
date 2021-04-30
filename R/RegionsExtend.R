@@ -274,8 +274,8 @@ makeRegion <- function(juncLength, sequenceImgt,
                 cdr3_end <- 0
             }
             # now for the boundaries slot:
-            boundaries <- factor(IMGT_V_BY_REGIONS@boundaries, 
-                                 levels=c(levels(IMGT_V_BY_REGIONS@boundaries), "cdr3", "fwr4"))
+            boundaries <- factor(shazam::IMGT_V_BY_REGIONS@boundaries, 
+                                 levels=c(levels(shazam::IMGT_V_BY_REGIONS@boundaries), "cdr3", "fwr4"))
             if (cdr3_end >= 313) {
                 boundaries[313:cdr3_end] <- factor("cdr3")
                 boundaries[(cdr3_end+1):seqLength] <- factor("fwr4")   
