@@ -56,7 +56,7 @@ test_that("Test cross distToNearest with model hh_s1f", {
                    0.4284, 0.0435, 0.1212, 0.3771, 0.3862, 0.1212, 0.3687),
                  tolerance=0.005)
     ## Check cross
-    ## Crossing shoud reproduce the same results as not crossed
+    ## Crossing should reproduce the same results as not crossed
     ## because both donors have the same db
     expect_equal(cross_dist_hs1f$cross_dist_nearest[1:nrow(dist_hs1f)],
                  dist_hs1f$dist_nearest, tolerance=0.005)
@@ -572,6 +572,12 @@ test_that("Test distance, Change-O tests", {
     # aa ham
     expect_equivalent(pairwiseDist(aa_seq, getAAMatrix())[1,],
                       aa_ham)
+    
+    # aa ham with cross
+    expect_equal(
+        nearestDist(nt_seq, model="aa"),
+        nearestDist(nt_seq, model="aa",crossGroups = 1:length(nt_seq))
+    )
     
     # nt    
     expect_equivalent(pairwiseDist(nt_seq, getDNAMatrix())[1,],

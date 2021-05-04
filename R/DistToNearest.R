@@ -581,6 +581,9 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
             this_group <- crossGroups[i]
             other_groups <-  which(crossGroups != this_group)
             other_seq <- unique(sequences[other_groups])
+            if (model=="aa") {
+                seq_uniq <- names(seq_uniq)
+            }
             other_idx <- match(other_seq, seq_uniq)
             this_idx <- match(sequences[i], seq_uniq)
             
