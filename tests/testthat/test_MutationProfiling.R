@@ -2859,7 +2859,7 @@ test_that("expectedMutations, extended with regard to parent", {
         db_exp_V_REGIONS_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
                                                 germlineColumn="parent_sequence",
                                                 regionDefinition=IMGT_V_BY_REGIONS)
-        # checking that expected mutations with regard to parent seuqnece,
+        # checking that expected mutations with regard to parent sequence,
         # is the same as expected mutations with regard to germline when germline 
         # sequence column was set as parent sequence column. 
         expect_equal(db_exp_ALL_REGIONS,db_exp_ALL_REGIONS_g)

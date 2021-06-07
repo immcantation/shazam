@@ -34,7 +34,7 @@ data(ExampleDb, package="alakazam")
 
 By default, `distToNearest`, the function for calculating distance between every 
 sequence and its nearest neighbor, assumes that it is running under non-single-cell
-mode and that every input seuqnece is a heavy chain sequence and will be used for 
+mode and that every input sequence is a heavy chain sequence and will be used for 
 calculation. It takes a few parameters to adjust how the distance is measured. If a 
 genotype has been inferred using the methods in the `tigger` package, and a 
 `v_call_genotyped` field has been added to the database, then this column may be 
@@ -244,7 +244,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1215042
+## [1] 0.1214014
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 

@@ -1,4 +1,4 @@
-Version 1.0.2.999: December 6, 2020
+Version 1.0.2.999: May 4, 2021
 -------------------------------------------------------------------------------
 
 New features:
@@ -12,7 +12,12 @@ Distance Profiling:
 + Fixed a bug in `distToNearest` where TRB and TRD sequences where ignored in 
   distance calculation.
 + Fixed a bug in `distToNearest` causing a fatal error when `cross` was set.
++ Fixed a bug in `nearestDist` causing a fatal error when using `model="aa"` 
+  and `crossGroups`.
 
+General:
+
++ Upgraded to alakazam >= 1.1.0
 
 Version 1.0.2: August 10, 2020
 -------------------------------------------------------------------------------

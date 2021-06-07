@@ -60,6 +60,9 @@ which there are multiple characters with frequencies that are at least
 and required for the `"thresholdedFreq"` and `"mostCommon"`
 methods. Default is `FALSE`. See "Choosing ambiguous characters"
 under [collapseClones](collapseClones.md) for rules on choosing ambiguous characters.
+Note: this argument refers to the use of ambiguous nucleotides in the 
+output consensus sequence. Ambiguous nucleotides in the input sequences
+are allowed for methods catchAll, mostMutated and leastMutated.
 
 breakTiesStochastic
 :   In case of ties, whether to randomly pick a sequence from sequences that
