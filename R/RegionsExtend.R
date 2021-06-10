@@ -355,7 +355,15 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
 }
 
 
-
+# Status: experimental, not exported function
+# data(oneseq_db, package="alakazam")
+# germline_db <- list(
+# "IGHV3-11*05"="CAGGTGCAGCTGGTGGAGTCTGGGGGA...GGCTTGGTCAAGCCTGGAGGGTCCCTGAGACTCTCCTGTGCAGCCTCTGGATTCACCTTC............AGTGACTACTACATGAGCTGGATCCGCCAGGCTCCAGGGAAGGGGCTGGAGTGGGTTTCATACATTAGTAGTAGT......AGTAGTTACACAAACTACGCAGACTCTGTGAAG...GGCCGATTCACCATCTCCAGAGACAACGCCAAGAACTCACTGTATCTGCAAATGAACAGCCTGAGAGCCGAGGACACGGCCGTGTATTACTGTGCGAGAGA",
+# "IGHD3-10*01"="GTATTACTATGGTTCGGGGAGTTATTATAAC",
+# "IGHJ5*02"="ACAACTGGTTCGACCCCTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCAG"
+# )
+# pja <- shazam:::plotJunctionAlignment(oneseq_db, germline_db)
+# pja$p
 plotJunctionAlignment <- function(db_row, germline_db, 
                                   sequence_alignment="sequence_alignment", 
                                   v_call="v_call", d_call="d_call", j_call="j_call",
@@ -537,7 +545,7 @@ plotJunctionAlignment <- function(db_row, germline_db,
                 # axis.ticks=element_blank(),
                 #axis.ticks = theme_segment(colour = "black"),
                 
-                panel.background =  element_rect(fill = NA, colour = "black", size = 0.25), 
+                # panel.background =  element_rect(fill = NA, colour = "black", size = 0.25), 
                 panel.border =      element_blank(),
                 #panel.grid.major =  element_line(colour = "grey", size = 0.05),
                 #panel.grid.minor =  element_line(colour = "grey", size = 0.05),
@@ -551,10 +559,13 @@ plotJunctionAlignment <- function(db_row, germline_db,
                 plot.title=element_text(size=font_size, 
                                         face="bold",
                                         lineheight = 0.8),
+                
+                legend.position="top",
                 legend.text = element_text(size=font_size),
-                legend.title = element_text(size=font_size),
+                # legend.title = element_text(size=font_size), 
+                legend.title=element_blank(),
                 legend.spacing = unit(0.25, "lines"),
-                legend.box="vertical",
+                legend.box="horizontal",
                 legend.box.spacing = unit(0.25, "lines"),
                 legend.key.height=unit(1,"line"),
                 legend.key.width=unit(1,"line"),
@@ -563,9 +574,7 @@ plotJunctionAlignment <- function(db_row, germline_db,
                 strip.text = element_text(size = font_size, face="plain"),
                 strip.background = element_blank(),
                 
-                legend.position="none",
                 plot.margin =       unit(c(0, 0, 0, 0), "lines")#,
-                #legend.title=element_blank()
             )   
     }
     
@@ -578,10 +587,12 @@ plotJunctionAlignment <- function(db_row, germline_db,
                       mutate(label=factor(label, levels = ordered_labels, ordered = T))
                   ,color="grey50") + 
         fig_theme() +  
-        scale_fill_manual(labels=names(dna_colors), values=dna_colors) +
-        scale_alpha_manual(values=c('TRUE'=1, 'FALSE'=0.2)) +
+        scale_fill_manual(values=dna_colors) +
+        scale_alpha_manual(values=c('TRUE'=1, 'FALSE'=0.2), guide=FALSE) +
         scale_y_discrete(breaks=ordered_labels, labels=ordered_labels, limits=rev(ordered_labels)) +
-        ylab("")
+        ylab("") +
+        guides(fill = guide_legend(nrow = 1)) +
+        scale_x_discrete(expand = c(0, 0)) 
     
     # 
     # zoom_regions <- p$data %>%
