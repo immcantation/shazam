@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 1.0.2.999
-Date: 2021-06-10
+Date: 2021-06-14
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Namita", "Gupta", role=c("aut"), 
@@ -14,7 +14,7 @@ Authors@R: c(person("Mohamed", "Uduman", role=c("aut"),
                     email="nima.nouri@yale.edu"),
              person("Ang", "Cui", role=c("ctb"), 
                     email="angcui@mit.edu"),
-             person("Jason", "Vander Heiden", role=c("aut", "cre"), 
+             person("Jason", "Vander Heiden", role=c("aut","cre"), 
                     email="jason.vanderheiden@gmail.com"),
              person("Gur", "Yaari", role=c("aut"), 
                     email="gur.yaari@biu.ac.il"),

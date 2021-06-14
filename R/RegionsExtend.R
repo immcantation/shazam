@@ -362,7 +362,7 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
 # "IGHD3-10*01"="GTATTACTATGGTTCGGGGAGTTATTATAAC",
 # "IGHJ5*02"="ACAACTGGTTCGACCCCTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCAG"
 # )
-# pja <- shazam:::plotJunctionAlignment(oneseq_db, germline_db)
+# pja <- shazam:::plotJunctionAlignment(oneseq_db, germline_db,regionDefinition=IMGT_VDJ_BY_REGIONS)
 # pja$p
 plotJunctionAlignment <- function(db_row, germline_db, 
                                   sequence_alignment="sequence_alignment", 
@@ -370,27 +370,44 @@ plotJunctionAlignment <- function(db_row, germline_db,
                                   v_germline_start="v_germline_start", v_germline_end="v_germline_end",
                                   d_germline_start="d_germline_start", d_germline_end="d_germline_end",
                                   j_germline_start="j_germline_start", j_germline_end="j_germline_end",
-                                  np1_length="np1_length",np2_length="np2_length",
+                                  np1_length="np1_length", # np2_length="np2_length",
                                   junction="junction", junction_length="junction_length",
-                                  germline_alignment="germline_alignment"
+                                  germline_alignment="germline_alignment",
+                                  regionDefinition=NULL
                                   
 ) {
     
     
     # Check for valid columns
     check <- checkColumns(db_row, c(sequence_alignment, 
-                                    v_call, d_call, j_call,
+                                    v_call, j_call, # d_call,
                                     v_germline_start, v_germline_end,
-                                    d_germline_start, d_germline_end,
+                                    # d_germline_start, # d_germline_end,
                                     j_germline_start, j_germline_end,
-                                    np1_length, np2_length, junction, junction_length)
+                                    np1_length, # np2_length, 
+                                    junction, junction_length)
     )
     if (check != TRUE) { stop(check) }
+    
+    if (!is.null(d_call)) {
+        d_columns <- c(d_call, d_germline_start, d_germline_end)
+        found <- d_columns %in% colnames(db_row)
+        if (any(!found)) {
+            stop( "Column(s) ", paste(d_columns[!found], sep="", collpase=",") ," not found.")
+        }
+    }
     
     if (!germline_alignment %in% colnames(db_row)) {
         warning("The column germline_alignment doesn't exist. Assigned NA value.")
         db_row[[germline_alignment]] <- NA
     }
+    
+    # Check region definition
+    if (!is.null(regionDefinition)) {
+        if (!is(regionDefinition, "RegionDefinition")) {
+            stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
+        }
+    } 
     
     junction_seq <- db_row[[junction]]
     v_allele <- getAllele(db_row[[v_call]], first=T)
@@ -444,11 +461,11 @@ plotJunctionAlignment <- function(db_row, germline_db,
         d_germline_df[['aligned']] <- d_germline_df$pos >= d_germ_start & d_germline_df$pos <= d_germ_end
         d_germ_start_off <- 1-d_germ_start
         d_germline_df$pos <- v_length + np1_len + d_germline_df$pos + d_germ_start_off
-        d_length <- d_germ_end - d_germ_start + 1
+        # d_length <- d_germ_end - d_germ_start + 1
     } else {
         d_germline_df <- data.frame()
     }
-    np2_len <- db_row[[np2_length]]
+    # np2_len <- db_row[[np2_length]]
     
     j_germline_df <- getPositionDf(j_germline,"j_germline")
     j_germ_start <- as.numeric(db_row[[j_germline_start]])
@@ -483,9 +500,9 @@ plotJunctionAlignment <- function(db_row, germline_db,
         
         # junction_end <- junction_start + nchar(db_row[[junction]]) -1
         junction_df <- data.frame("nucleotide"=strsplit(junction_alignment,"")[[1]], stringsAsFactors = F)
-        junction_df$pos <-  c(junction_start:junction_end)
-        junction_df$label <- "junction"
-        junction_df$aligned <- T
+        junction_df[['pos']] <-  c(junction_start:junction_end)
+        junction_df[['label']] <- "junction"
+        junction_df[['aligned']] <- T
     }        
     
     missing_junction_nt <- db_row[[junction_length]] - sum(junction_df$aligned)
@@ -502,20 +519,24 @@ plotJunctionAlignment <- function(db_row, germline_db,
     }
     
     # addRegionDefinition boundaries
-    region_definition <- shazam:::makeRegion(db_row[[junction_length]], db_row[[sequence_alignment]], IMGT_VDJ_BY_REGIONS )
+    region_definition <- makeRegion(db_row[[junction_length]], db_row[[sequence_alignment]], regionDefinition )
     
-    rdf <- data.frame(
-        "nucleotide"=as.character(region_definition@boundaries),
-        "pos"=1:length(region_definition@boundaries),
-        "label"="region_definition",
-        "aligned"=T,
-        stringsAsFactors = F)
+    if (!is.null(regionDefinition)) {
+        rdf <- data.frame(
+            "nucleotide"=as.character(region_definition@boundaries),
+            "pos"=1:length(region_definition@boundaries),
+            "label"="region_definition",
+            "aligned"=T,
+            stringsAsFactors = F)
+    } else {
+        rdf <- data.frame()
+    }
     
     df <- bind_rows(df, junction_df, rdf)
     ordered_labels <- c("region_definition",sequence_alignment, "junction", "v_germline", "d_germline","j_germline", germline_alignment)
-    df$label <- factor(df$label, levels=rev(ordered_labels), ordered = T)
+    df[['label']] <- factor(df[['label']], levels=rev(ordered_labels), ordered = T)
     
-    dna_colors <- c(
+    color_palette <- c(
         "A" = "lightskyblue2",
         "T" = "khaki2",
         "G" = "palegreen3",
@@ -531,7 +552,6 @@ plotJunctionAlignment <- function(db_row, germline_db,
         "fwr3" = "#8CCEDB",
         "fwr4" = "#8CCEDB"         
     )
-    
     
     fig_theme <- function(font_size=7) {
         theme_bw() +
@@ -579,64 +599,26 @@ plotJunctionAlignment <- function(db_row, germline_db,
     }
     
     p <- ggplot(data=df %>% 
-                    filter(label == "region_definition") %>%
-                    mutate(label=factor(label, levels = ordered_labels, ordered = T)), aes(x=pos, y=label, fill=nucleotide, alpha=aligned)) +
+                    dplyr::filter(.data$label == "region_definition") %>%
+                    dplyr::mutate(label=factor(.data$label, levels = ordered_labels, ordered = T)), 
+                aes(x=.data$pos, y=.data$label, fill=.data$nucleotide, alpha=.data$aligned)) +
         geom_tile( height=0.3) + 
         geom_tile(data=df %>% 
-                      filter(label != "region_definition") %>%
-                      mutate(label=factor(label, levels = ordered_labels, ordered = T))
-                  ,color="grey50") + 
+                      dplyr::filter(.data$label != "region_definition") %>%
+                      dplyr::mutate(label=factor(.data$label, levels = ordered_labels, ordered = T)), 
+                  color="grey50") + 
         fig_theme() +  
-        scale_fill_manual(values=dna_colors) +
+        scale_fill_manual(values=color_palette) +
         scale_alpha_manual(values=c('TRUE'=1, 'FALSE'=0.2), guide=FALSE) +
-        scale_y_discrete(breaks=ordered_labels, labels=ordered_labels, limits=rev(ordered_labels)) +
-        ylab("") +
+        scale_y_discrete(breaks=ordered_labels, labels=ordered_labels, limits=rev(ordered_labels), expand = c(0, 0)) +
+        ylab("") + xlab("IMGT position") +
         guides(fill = guide_legend(nrow = 1)) +
-        scale_x_discrete(expand = c(0, 0)) 
+        scale_x_continuous(expand = c(0, 0)) 
     
-    # 
-    # zoom_regions <- p$data %>%
-    #     filter(!label %in% sequence_alignment) %>%
-    #     group_by(label) %>%
-    #     summarize(range_pos=range(pos)) %>%
-    #     ungroup() %>%
-    #     group_by(label) %>%
-    #     summarize(min_pos=max(min(range_pos)-15, min(p$data$pos)),
-    #               max_pos=min(max(range_pos)+15, max(p$data$pos))) %>%
-    #     ungroup()
-    # 
-    # p_v <- p +
-    #     coord_cartesian(xlim = zoom_regions %>% filter(label=="v_germline") %>% select(-label) %>% as.numeric()) +
-    #     ggtitle(v_allele)
-    # p_d <- p +
-    #     coord_cartesian(xlim = zoom_regions %>% filter(label=="d_germline") %>% select(-label) %>% as.numeric()) +
-    #     ggtitle(d_allele)
-    # p_j <- p +
-    #     coord_cartesian(xlim = zoom_regions %>% filter(label=="j_germline") %>% select(-label) %>% as.numeric()) +
-    #     ggtitle(j_allele)
-    # 
-    # if (!is.na(d_allele)) {
-    #     p_all <- plot_grid(
-    #         p_v,
-    #         plot_grid(p_d, p_j, labels=c("D","J")),
-    #         labels=c("V","",""),
-    #         ncol=1,nrow=2
-    #     )
-    # } else {
-    #     p_all <- plot_grid(
-    #         p_v, p_j,
-    #         labels=c("V","J"),
-    #         ncol=1,nrow=2
-    #     )
-    # }
+   
     list(
         p=p,
-        # plot=p_all,
-        data=df #,
-        # iris= p +
-            # coord_polar(theta = "x")
+        data=df
     )
-    #} else {
-    #    message("TODO. d_call is NA")
-    # }
+
 }
