@@ -1,4 +1,4 @@
-Version 1.0.2.999: May 4, 2021
+Version 1.0.2.999: June 17, 2021
 -------------------------------------------------------------------------------
 
 New features:
@@ -17,7 +17,7 @@ Distance Profiling:
 
 General:
 
-+ Upgraded to alakazam >= 1.1.0
++ Upgraded to alakazam >= 1.1.0 and ggplot2 >= 3.3.4
 
 Version 1.0.2: August 10, 2020
 -------------------------------------------------------------------------------
