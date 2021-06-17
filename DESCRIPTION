@@ -6,7 +6,7 @@ Authors@R: c(person("Mohamed", "Uduman", role=c("aut"),
                     email="mohamed.uduman@yale.edu"),
              person("Namita", "Gupta", role=c("aut"), 
                     email="namita.gupta@yale.edu"),
-             person("Susanna", "Marquez", role=c("aut"), 
+             person("Susanna", "Marquez", role=c("aut", "cre"), 
                     email="susanna.marquez@yale.edu"),
              person("Julian", "Zhou", role=c("aut"), 
                     email="julian.zhou@yale.edu"),
@@ -14,7 +14,7 @@ Authors@R: c(person("Mohamed", "Uduman", role=c("aut"),
                     email="nima.nouri@yale.edu"),
              person("Ang", "Cui", role=c("ctb"), 
                     email="angcui@mit.edu"),
-             person("Jason", "Vander Heiden", role=c("aut","cre"), 
+             person("Jason", "Vander Heiden", role=c("aut"), 
                     email="jason.vanderheiden@gmail.com"),
              person("Gur", "Yaari", role=c("aut"), 
                     email="gur.yaari@biu.ac.il"),
@@ -40,7 +40,7 @@ VignetteBuilder: knitr
 Encoding: UTF-8
 Depends:
     R (>= 3.5.0),
-    ggplot2 (>= 3.2.0)
+    ggplot2 (>= 3.3.4)
 Imports:
     alakazam (>= 1.1.0),
     ape,
