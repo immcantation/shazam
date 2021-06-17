@@ -2268,16 +2268,18 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                     ymin=!!rlang::sym("text_y") - 0.5,
                     ymax=!!rlang::sym("text_y") + 0.5)
         
-
+        # Use only colors for motifs present in sub_df
+        sub_colors <- motif_colors[names(motif_colors) %in% sub_df$motif]
+        
         # Define base plot object
         p1 <- ggplot(sub_df) + 
             base_theme + 
             #ggtitle(paste0("NN", center_nuc, "NN")) +
             xlab("") +
             ylab("") + 
-            scale_color_manual(name="Motif", values=c(motif_colors, dna_colors), 
-                               breaks=names(motif_colors)) +
-            scale_fill_manual(name="", values=c(motif_colors, dna_colors), guide=FALSE) +
+            scale_color_manual(name="Motif", values=c(sub_colors, dna_colors), 
+                               breaks=names(sub_colors)) +
+            scale_fill_manual(name="", values=c(sub_colors, dna_colors), guide="none") +
             geom_rect(data=sub_rect, 
                       mapping=aes_string(xmin="rect_min", xmax="rect_max", ymin="ymin", ymax="ymax", 
                                          fill="text_label", color="text_label"), 
@@ -2317,29 +2319,29 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                              legend.direction="horizontal",
                              legend.justification=c(0.5, 1),
                              legend.position=c(0.5, 1)) +
-                guides(color=guide_legend(override.aes=list(linetype=1, size=2*size))) +
                 scale_x_continuous(expand=c(0, 0)) +
                 scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
                 coord_polar(theta="x") +
                 geom_segment(data=sub_df, mapping=aes_string(x="x", xend="x", yend="score", color="motif"), 
-                             y=score_offset, size=0.75*size)
+                             y=score_offset, size=0.75*size) +
+                guides(color=guide_legend(override.aes=list(linetype=1, size=2*size)))
+              
         } else if (style == "bar") {
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
-            sub_colors <- motif_colors[names(motif_colors) %in% sub_df$motif]
             p1 <- p1 + theme(plot.margin=grid::unit(c(1, 1, 1, 1), "lines"),
                              panel.grid=element_blank(), 
                              panel.border=element_rect(color="black"),
                              axis.text.x=element_blank(), 
                              axis.ticks.x=element_blank(),
                              legend.position="top") +
-                guides(color=guide_legend(override.aes=list(fill=sub_colors, linetype=0))) +
                 ylab("Mutability") +
                 scale_x_continuous(expand=c(0, 1)) +
                 scale_y_continuous(limits=y_limits, breaks=y_breaks, expand=c(0, 0.5),
                                    labels=function(x) scales::scientific(.invert_score(x))) +
                 geom_bar(data=sub_df, mapping=aes_string(x="x", y="score", fill="motif", color="motif"), 
-                         stat="identity", position="identity", size=0, width=0.7)
+                         stat="identity", position="identity", size=0, width=0.7) +
+              guides(color=guide_legend(override.aes=list(fill=sub_colors, linetype=0)))
         }
 
         # Add additional theme elements

@@ -609,7 +609,7 @@ plotJunctionAlignment <- function(db_row, germline_db,
                   color="grey50") + 
         fig_theme() +  
         scale_fill_manual(values=color_palette) +
-        scale_alpha_manual(values=c('TRUE'=1, 'FALSE'=0.2), guide=FALSE) +
+        scale_alpha_manual(values=c('TRUE'=1, 'FALSE'=0.2), guide="none") +
         scale_y_discrete(breaks=ordered_labels, labels=ordered_labels, limits=rev(ordered_labels), expand = c(0, 0)) +
         ylab("") + xlab("IMGT position") +
         guides(fill = guide_legend(nrow = 1)) +
