@@ -97,7 +97,7 @@ changeoClone_3170 <- makeChangeoClone(clone_3170_db, seq="sequence_alignment", g
 
 # Run the lineage reconstruction
 dnapars_exec <- "/usr/local/bin/dnapars"
-clone_3170_lineage <- buildPhylipLineage(changeoClone_3170, dnapars_exec, rm_temp = TRUE)
+clone_3170_lineage <- buildPhylipLineage(changeoClone_3170, dnapars_exec, rm_temp=TRUE)
 
 # Generating a data.frame from the lineage tree graph object, 
 # and merge it with clone data.frame
@@ -106,7 +106,7 @@ dim(clone_3170_lineage_df)
 colnames(clone_3170_lineage_df)
 ```
 
-`makeGraphDb` creates a `ChangeoClone` object with the column `parent_sequence`. This field
+`makeGraphDf` creates a `ChangeoClone` object with the column `parent_sequence`. This field
 can be used to analyze mutations for each sequence relative to their `parent_sequence`.
 
 ## Calculate selection PDFs for individual sequences

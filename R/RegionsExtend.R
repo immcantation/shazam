@@ -1,11 +1,11 @@
-# Region definition extention for including fwr/2/3/4 and cdr/2/3
+# Region definition extension for including FWR2-4 and CDR2-3
 
 #' @include Shazam.R
 NULL
 
-#### functions foe extending region definition also to cdr3 and fwr4 ####
+#### Extend region definition to CDR3 and FWR4 ####
 
-#' Generating a data frame from graph object, and mering it with clone data frame 
+#' Generate a data frame from graph object and clone data frame 
 #'
 #' @details
 #' \code{makeGraphDf} adds columns and rows to the clones database: 
@@ -555,47 +555,37 @@ plotJunctionAlignment <- function(db_row, germline_db,
     
     fig_theme <- function(font_size=7) {
         theme_bw() +
-            theme(
-                text = element_text(size=font_size),
-                
-                axis.title = element_text(size=font_size),
-                axis.text = element_text(size=font_size),
-                axis.text.x=element_text(size=font_size),
-                axis.text.y=element_text(size=font_size),
-                # axis.ticks=element_blank(),
-                #axis.ticks = theme_segment(colour = "black"),
-                
-                # panel.background =  element_rect(fill = NA, colour = "black", size = 0.25), 
-                panel.border =      element_blank(),
-                #panel.grid.major =  element_line(colour = "grey", size = 0.05),
-                #panel.grid.minor =  element_line(colour = "grey", size = 0.05),
-                panel.grid.major.y = element_blank(),
-                panel.grid.minor.y = element_blank(),
-                panel.grid.major.x = element_blank(),
-                panel.grid.minor.x = element_blank(),
-                panel.spacing = unit(0.25, "lines"),
-                
-                
-                plot.title=element_text(size=font_size, 
+            theme(text=element_text(size=font_size),
+                 axis.title=element_text(size=font_size),
+                 axis.text=element_text(size=font_size),
+                 axis.text.x=element_text(size=font_size),
+                 axis.text.y=element_text(size=font_size),
+                 #axis.ticks=element_blank(),
+                 #axis.ticks=theme_segment(colour = "black"),
+                 #panel.background=element_rect(fill = NA, colour = "black", size = 0.25), 
+                 panel.border=element_blank(),
+                 #panel.grid.major=element_line(colour = "grey", size = 0.05),
+                 #panel.grid.minor=element_line(colour = "grey", size = 0.05),
+                 panel.grid.major.y=element_blank(),
+                 panel.grid.minor.y=element_blank(),
+                 panel.grid.major.x=element_blank(),
+                 panel.grid.minor.x=element_blank(),
+                 panel.spacing=unit(0.25, "lines"),
+                 plot.title=element_text(size=font_size, 
                                         face="bold",
-                                        lineheight = 0.8),
-                
-                legend.position="top",
-                legend.text = element_text(size=font_size),
-                # legend.title = element_text(size=font_size), 
-                legend.title=element_blank(),
-                legend.spacing = unit(0.25, "lines"),
-                legend.box="horizontal",
-                legend.box.spacing = unit(0.25, "lines"),
-                legend.key.height=unit(1,"line"),
-                legend.key.width=unit(1,"line"),
-                
-                
-                strip.text = element_text(size = font_size, face="plain"),
-                strip.background = element_blank(),
-                
-                plot.margin =       unit(c(0, 0, 0, 0), "lines")#,
-            )   
+                                        lineheight=0.8),
+                 legend.position="top",
+                 legend.text=element_text(size=font_size),
+                 # legend.title = element_text(size=font_size), 
+                 legend.title=element_blank(),
+                 legend.spacing=unit(0.25, "lines"),
+                 legend.box="horizontal",
+                 legend.box.spacing=unit(0.25, "lines"),
+                 legend.key.height=unit(1,"line"),
+                 legend.key.width=unit(1,"line"),
+                 strip.text = element_text(size = font_size, face="plain"),
+                 strip.background = element_blank(),
+                 plot.margin= unit(c(0, 0, 0, 0), "lines"))   
     }
     
     p <- ggplot(data=df %>% 
@@ -609,16 +599,12 @@ plotJunctionAlignment <- function(db_row, germline_db,
                   color="grey50") + 
         fig_theme() +  
         scale_fill_manual(values=color_palette) +
-        scale_alpha_manual(values=c('TRUE'=1, 'FALSE'=0.2), guide="none") +
-        scale_y_discrete(breaks=ordered_labels, labels=ordered_labels, limits=rev(ordered_labels), expand = c(0, 0)) +
+        scale_alpha_manual(values=c("TRUE"=1, "FALSE"=0.2), guide="none") +
+        scale_y_discrete(breaks=ordered_labels, labels=ordered_labels, limits=rev(ordered_labels), expand=c(0, 0)) +
         ylab("") + xlab("IMGT position") +
-        guides(fill = guide_legend(nrow = 1)) +
-        scale_x_continuous(expand = c(0, 0)) 
+        guides(fill=guide_legend(nrow=1)) +
+        scale_x_continuous(expand=c(0, 0)) 
     
    
-    list(
-        p=p,
-        data=df
-    )
-
+    list(p=p, data=df)
 }

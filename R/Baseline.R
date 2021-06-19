@@ -1348,27 +1348,20 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
     
     if (sizeElement == "none") {
         p1 <- p1 +
-            guides( 
-                size="none", 
-                colour = guide_legend(override.aes = list(size = size_values))
-                )        
-        if (length(unique(c(groupColumn,idColumn)))>1) {
+            guides(size="none", 
+                   colour = guide_legend(override.aes=list(size=size_values)))        
+        if (length(unique(c(groupColumn, idColumn))) > 1) {
             p1 <- p1 +
-                guides (
-                    linetype = guide_legend(override.aes = list(size = size_values))
-                )
+                guides (linetype=guide_legend(override.aes=list(size=size_values)))
         }
     } else if (sizeElement == colorElement) {
         p1 <- p1 +
-            guides( 
-                size="none", 
-                colour = guide_legend(override.aes = list(size = size_values)))
+            guides(size="none", 
+                   colour = guide_legend(override.aes = list(size = size_values)))
     } else {
         p1 <- p1 +
-            guides( 
-                size="none", 
-                linetype = guide_legend(override.aes = list(size = size_values))
-            ) 
+            guides(size="none", 
+                   linetype = guide_legend(override.aes = list(size = size_values))) 
     }
     
       

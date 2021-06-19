@@ -73,6 +73,7 @@ pages:
       - topics/plotBaselineSummary.md
       - topics/createBaseline.md
       - topics/editBaseline.md
+      - topics/makeGraphDf.md
       - topics/Baseline-class.md
     - 'Distance Profiling':
       - topics/distToNearest.md
@@ -88,5 +89,6 @@ pages:
       - topics/IMGT_SCHEMES.md
       - topics/createMutationDefinition.md
       - topics/createRegionDefinition.md
+      - topics/makeRegion.md
       - topics/MutationDefinition-class.md
       - topics/RegionDefinition-class.md
