@@ -3,7 +3,11 @@
 Description
 --------------------
 
-Defining a Region that will include also CDR3 and FWR4 based on junction length and sequence
+Predefined `RegionDefinition` objects don't include the CDR3 and FWR4 regions because their
+boundaries depend on the junction length, and need to be calculated for each sequence. 
+`makeRegion` gets as input a junction length and an IMGT aligned sequence
+and outputs a `RegionDefinition` object that includes the segments CDR1/2/3 
+and FWR1/2/3/4.
 
 
 Usage
@@ -22,7 +26,7 @@ sequenceImgt
 :   The imgt aligned sequence
 
 regionDefinition
-:   The [RegionDefinition](RegionDefinition-class.md) type to calculate
+:   The `RegionDefinition` type to calculate
 the regionDefinition for. Can be one of 2: 
 `"IMGT_VDJ_BY_REGIONS"` or `"IMGT_VDJ"`. 
 Only these 2 regions include all
@@ -34,7 +38,7 @@ CDR1/2/3 and FWR1/2/3/4 regions.
 Value
 -------------------
 
-a [RegionDefinition](RegionDefinition-class.md) object that includes CDR1/2/3 and 
+a `RegionDefinition` object that includes CDR1/2/3 and 
 FWR1/2/3/4 for the specific `sequenceImgt`, 
 `juncLength` and `regionDefinition`.
 
@@ -42,46 +46,34 @@ FWR1/2/3/4 for the specific `sequenceImgt`,
 Details
 -------------------
 
-This function gets as input a junction length and an imgt aligned sequence
-and outputs a [RegionDefinition](RegionDefinition-class.md) object that includes following regions:   
+For `regionDefinition="IMGT_VDJ_BY_REGIONS"` the function returns a `RegionDefinition` 
+object with regions:
 
-**For `regionDefinition="IMGT_VDJ_BY_REGIONS"`:**
 
-- **fwr1**: Bases 1 to 78 (based on [IMGT_V_BY_REGIONS](IMGT_SCHEMES.md) definitions)  
++ `fwr1`:   Positions 1 to 78.
++ `cdr1`:   Positions 79 to 114.
++ `fwr2`:   Positions 115 to 165.
++ `cdr2`:   Positions 166 to 195.
++ `fwr3`:   Positions 196 to 312.
++ `cdr3`:   Positions 313 to (313 + juncLength - 6) - since junction 
+sequence includes (on the left) the last codon from fwr3, and 
+(on the right) the first codon from fwr4.  
++ `fwr4`:   Positions (313 + juncLength - 6 + 1) to the end of the sequence.
 
-- **cdr1**: Bases 79 to 114 (based on [IMGT_V_BY_REGIONS](IMGT_SCHEMES.md) definitions) 
 
-- **fwr2**: Bases 115 to 165 (based on [IMGT_V_BY_REGIONS](IMGT_SCHEMES.md) definitions) 
+For `regionDefinition="IMGT_VDJ"` the function returns a `RegionDefinition` 
+object with regions:
 
-- **cdr2**: Bases 166 to 195 (based on [IMGT_V_BY_REGIONS](IMGT_SCHEMES.md) definitions) 
 
-- **fwr3**: Bases 196 to 312 (based on [IMGT_V_BY_REGIONS](IMGT_SCHEMES.md) definitions)
++ `fwr`:   Positions belonging to a framework region.
++ `cdr`:   Positions belonging to a cdr.
 
-- **cdr3**: Bases 313 to (313 + `juncLength` - 6) - since junction sequnece 
-includes (on the left) the last codon from fwr3, and (on the right)  
-the first codon from fwr4.  
 
-- **fwr4**: Bases (313 + `juncLength` - 6 + 1) to sequence_length. 
 
-**For `regionDefinition`="IMGT_VDJ":**
+Note
+-------------------
 
-- **fwr**: Bases	1 to 78 (based on [IMGT_V_BY_REGIONS](IMGT_SCHEMES.md) definitions)
-
-Bases	115 to 165 (based on [IMGT_V_BY_REGIONS](IMGT_SCHEMES.md) definitions)
- 
-Bases	196 to 312 (based on [IMGT_V_BY_REGIONS](IMGT_SCHEMES.md) definitions)
- 
-Bases	(313 + `juncLength` - 6 + 1) to sequence_length.
-
-- **cdr**: Bases	79 to 114 (based on [IMGT_V_BY_REGIONS](IMGT_SCHEMES.md) definitions)
- 
-Bases	166 to 195 (based on [IMGT_V_BY_REGIONS](IMGT_SCHEMES.md) definitions) 
-
-Bases	313 to (313 + `juncLength` - 6) - since junction sequnece 
-includes (on the left) the last codon from fwr3, and (on the right) 
-the first codon from fwr4.  
-
-Note: In case the `regionDefinition` argument is not one of the extended
+In case the `regionDefinition` argument is not one of the extended
 regions (`IMGT_VDJ_BY_REGIONS` or `IMGT_VDJ`) - then this
 function will return the `regionDefinition` as is.
 
@@ -97,10 +89,16 @@ juncLength <-ExampleDb[['junction_length']][1]
 sequenceImgt<-ExampleDb[['sequence_alignment']][1]
 seq_1_reg_def<-makeRegion(juncLength = juncLength, 
 sequenceImgt = sequenceImgt, 
-regionDefinition = IMGT_VDJ_BY_REGIONS)
+regionDefinition = IMGT_VDJ)
 ```
 
 
+
+See also
+-------------------
+
+See [RegionDefinition](RegionDefinition-class.md) for the return object. 
+See [IMGT_SCHEMES](IMGT_SCHEMES.md) for a set of predefined `RegionDefinition` objects.
 
 
 

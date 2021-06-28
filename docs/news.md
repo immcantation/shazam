@@ -1,7 +1,11 @@
-Version 1.0.2.999: May 4, 2021
+Version 1.0.2.999: June 17, 2021
 -------------------------------------------------------------------------------
 
-New features:
+General:
+
++ Updated dependencies to alakazam >= 1.1.0 and ggplot2 >= 3.3.4.
+
+Selection Analysis:
 
 + `observedMutations`, `expectedMutations`, and `calcBaseline` can analyze mutations
    in all regions (CDR1, CDR2, CDR3, FWR1, FWR2, FWR3 and FWR4) by specifying
@@ -15,9 +19,6 @@ Distance Profiling:
 + Fixed a bug in `nearestDist` causing a fatal error when using `model="aa"` 
   and `crossGroups`.
 
-General:
-
-+ Upgraded to alakazam >= 1.1.0
 
 Version 1.0.2: August 10, 2020
 -------------------------------------------------------------------------------
@@ -144,7 +145,7 @@ Mutation Profiling:
 + `shmulateTree` has new arguments, `start` and `end`, to specify the region
   in the sequence where mutations can be introduced. 
 
-Selection Analysis
+Selection Analysis:
 
 + Added the function `consensusSequence` which can be used to build a 
   consensus sequence using a variety of methods.
@@ -181,7 +182,7 @@ Distance Calculation:
 + Fixed a bug in `plotDensityThreshold` and `plotGmmThreshold` wherein the
   `breaks` argument was ignored when specifying `xmax` and/or `xmin`.
 
-Selection Analsis:
+Selection Analysis:
 
 + Fixed a plotting bug in `plotBaselineDensity` arising when the `groupColumn` 
   and `idColumn` arguments were set to the same column.

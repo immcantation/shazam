@@ -183,62 +183,55 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
 
 #' Defining a Region that will include also CDR3 and FWR4 based on junction length and sequence
 #' 
-#' @details  
-#' This function gets as input a junction length and an imgt aligned sequence
-#' and outputs a \link{RegionDefinition} object that includes following regions:   
+#' Predefined \code{RegionDefinition} objects don't include the CDR3 and FWR4 regions because their
+#' boundaries depend on the junction length, and need to be calculated for each sequence. 
+#' \code{makeRegion} gets as input a junction length and an IMGT aligned sequence
+#' and outputs a \code{RegionDefinition} object that includes the segments CDR1/2/3 
+#' and FWR1/2/3/4.
 #' 
-#' \strong{For \code{regionDefinition="IMGT_VDJ_BY_REGIONS"}:}
-#' 
-#'- \strong{fwr1}: Bases 1 to 78 (based on \link{IMGT_V_BY_REGIONS} definitions)  
-#'
-#'- \strong{cdr1}: Bases 79 to 114 (based on \link{IMGT_V_BY_REGIONS} definitions) 
-#'
-#'- \strong{fwr2}: Bases 115 to 165 (based on \link{IMGT_V_BY_REGIONS} definitions) 
-#' 
-#'- \strong{cdr2}: Bases 166 to 195 (based on \link{IMGT_V_BY_REGIONS} definitions) 
-#' 
-#'- \strong{fwr3}: Bases 196 to 312 (based on \link{IMGT_V_BY_REGIONS} definitions)
-#'
-#'- \strong{cdr3}: Bases 313 to (313 + \code{juncLength} - 6) - since junction sequnece 
-#'                 includes (on the left) the last codon from fwr3, and (on the right)  
-#'                 the first codon from fwr4.  
-#'        
-#'- \strong{fwr4}: Bases (313 + \code{juncLength} - 6 + 1) to sequence_length. 
-#' 
-#' \strong{For \code{regionDefinition}="IMGT_VDJ":}
-#' 
-#'- \strong{fwr}: Bases	1 to 78 (based on \link{IMGT_V_BY_REGIONS} definitions)
-#'
-#'                Bases	115 to 165 (based on \link{IMGT_V_BY_REGIONS} definitions)
-#'  
-#'                Bases	196 to 312 (based on \link{IMGT_V_BY_REGIONS} definitions)
-#'  
-#'                Bases	(313 + \code{juncLength} - 6 + 1) to sequence_length.
-#'            
-#'- \strong{cdr}: Bases	79 to 114 (based on \link{IMGT_V_BY_REGIONS} definitions)
-#'  
-#'                Bases	166 to 195 (based on \link{IMGT_V_BY_REGIONS} definitions) 
-#' 
-#'                Bases	313 to (313 + \code{juncLength} - 6) - since junction sequnece 
-#'                includes (on the left) the last codon from fwr3, and (on the right) 
-#'                the first codon from fwr4.  
-#'
-#' Note: In case the \code{regionDefinition} argument is not one of the extended
-#'       regions (\code{IMGT_VDJ_BY_REGIONS} or \code{IMGT_VDJ}) - then this
-#'       function will return the \code{regionDefinition} as is.
-#'
 #' @param  juncLength         The junction length of the sequence
 #' @param  sequenceImgt       The imgt aligned sequence
-#' @param  regionDefinition   The \link{RegionDefinition} type to calculate
+#' @param  regionDefinition   The \code{RegionDefinition} type to calculate
 #'                            the regionDefinition for. Can be one of 2: 
 #'                            \code{"IMGT_VDJ_BY_REGIONS"} or \code{"IMGT_VDJ"}. 
 #'                            Only these 2 regions include all
 #'                            CDR1/2/3 and FWR1/2/3/4 regions.
 #'                            
-#' @return a \link{RegionDefinition} object that includes CDR1/2/3 and 
+#' @return a \code{RegionDefinition} object that includes CDR1/2/3 and 
 #'         FWR1/2/3/4 for the specific \code{sequenceImgt}, 
 #'         \code{juncLength} and \code{regionDefinition}.
 #'         
+#' @details
+#' For \code{regionDefinition="IMGT_VDJ_BY_REGIONS"} the function returns a \code{RegionDefinition} 
+#' object with regions:
+#'
+#' \itemize{
+#'   \item  \code{fwr1}:   Positions 1 to 78.
+#'   \item  \code{cdr1}:   Positions 79 to 114.
+#'   \item  \code{fwr2}:   Positions 115 to 165.
+#'   \item  \code{cdr2}:   Positions 166 to 195.
+#'   \item  \code{fwr3}:   Positions 196 to 312.
+#'   \item  \code{cdr3}:   Positions 313 to (313 + juncLength - 6) - since junction 
+#'                        sequence includes (on the left) the last codon from fwr3, and 
+#'                        (on the right) the first codon from fwr4.  
+#'   \item  \code{fwr4}:   Positions (313 + juncLength - 6 + 1) to the end of the sequence.
+#' }
+#'
+#' For \code{regionDefinition="IMGT_VDJ"} the function returns a \code{RegionDefinition} 
+#' object with regions:
+#' 
+#' \itemize{
+#'   \item  \code{fwr}:   Positions belonging to a framework region.
+#'   \item  \code{cdr}:   Positions belonging to a cdr.
+#' }
+#' 
+#' @note In case the \code{regionDefinition} argument is not one of the extended
+#'       regions (\code{IMGT_VDJ_BY_REGIONS} or \code{IMGT_VDJ}) - then this
+#'       function will return the \code{regionDefinition} as is.
+#'         
+#' @seealso  See \link{RegionDefinition} for the return object. 
+#'           See \link{IMGT_SCHEMES} for a set of predefined \code{RegionDefinition} objects.
+#'
 #' @examples 
 #' # Load and subset example data
 #' data(ExampleDb, package="alakazam")  
@@ -246,7 +239,7 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
 #' sequenceImgt<-ExampleDb[['sequence_alignment']][1]
 #' seq_1_reg_def<-makeRegion(juncLength = juncLength, 
 #'                           sequenceImgt = sequenceImgt, 
-#'                           regionDefinition = IMGT_VDJ_BY_REGIONS)
+#'                           regionDefinition = IMGT_VDJ)
 #' @export
 makeRegion <- function(juncLength, sequenceImgt,
                        regionDefinition=NULL) {

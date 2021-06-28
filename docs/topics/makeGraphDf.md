@@ -1,9 +1,9 @@
-**makeGraphDf** - *Generating a data frame from graph object, and mering it with clone data frame*
+**makeGraphDf** - *Generate a data frame from graph object and clone data frame*
 
 Description
 --------------------
 
-Generating a data frame from graph object, and mering it with clone data frame
+Generate a data frame from graph object and clone data frame
 
 
 Usage
