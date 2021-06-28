@@ -38,7 +38,7 @@ with value 0, and the `boundaries` slot will be empty. This is since
 these slots depend on the junction length which is unknown yet.
 After [makeRegion](makeRegion.md) is applied - these slots get specific values
 per the specific sequence and junction length.
-+ `IMGT_VDJ_BY_REGIONS`: The IMGT numbered segments of FWR1/2/3/4 and CDR1/2/3.
++ `IMGT_VDJ_BY_REGIONS`:    The IMGT numbered segments of FWR1/2/3/4 and CDR1/2/3.
 This defines separate regions for each of CDR1, CDR2, CDR3, 
 FWR1, FWR2, FWR3 and FWR4. 
 Note that until function [makeRegion](makeRegion.md) will be applied

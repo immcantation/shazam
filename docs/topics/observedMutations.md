@@ -175,7 +175,7 @@ nproc=1)
 ### Not run:
 # Count of VDJ-region mutations, split by FWR and CDR
 # # This doesn't work because 'parent_sequence' doesn't exist,
-# # it should be calculated before
+# # it should be calculated before. See \link{makeGraphDf}.
 # Update example to include how to create that column.
 # db_obs <- observedMutations(db, sequenceColumn="parent_sequence",
 # germlineColumn="germline_alignment_d_mask",
@@ -192,6 +192,7 @@ See also
 in each sequence grouped by the [RegionDefinition](RegionDefinition-class.md). 
 See [IMGT_SCHEMES](IMGT_SCHEMES.md) for a set of predefined [RegionDefinition](RegionDefinition-class.md) objects.
 See [expectedMutations](expectedMutations.md) for calculating expected mutation frequencies.
+See [makeGraphDf](makeGraphDf.md) for creating the field `parent_sequence`.
 
 
 

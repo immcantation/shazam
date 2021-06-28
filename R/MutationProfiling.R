@@ -1404,6 +1404,7 @@ calcClonalConsensus <- function(db,
 #' in each sequence grouped by the \link{RegionDefinition}. 
 #' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
 #' See \link{expectedMutations} for calculating expected mutation frequencies.
+#' See \link{makeGraphDf} for creating the field \code{parent_sequence}.
 #'           
 #' 
 #' @examples
@@ -1433,7 +1434,7 @@ calcClonalConsensus <- function(db,
 #'\dontrun{     
 #' # Count of VDJ-region mutations, split by FWR and CDR
 #' # This doesn't work because 'parent_sequence' doesn't exist,
-#' # it should be calculated before
+#' # it should be calculated before. See \link{makeGraphDf}.
 #' Update example to include how to create that column.
 #' db_obs <- observedMutations(db, sequenceColumn="parent_sequence",
 #'                             germlineColumn="germline_alignment_d_mask",
