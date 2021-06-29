@@ -222,9 +222,9 @@ makeGraphDf <- function(curCloneGraph, curCloneObj, objSeqId="sequence_id", objS
 #'             \item  \code{cdr}:   Positions belonging to a CDR.
 #'           }
 #' 
-#' @note     In case the \code{regionDefinition} argument is not one of the extended
-#'           regions (\code{IMGT_VDJ_BY_REGIONS} or \code{IMGT_VDJ}) - then this
-#'           function will return the input \code{regionDefinition} as is.
+#'           In case the \code{regionDefinition} argument is not one of the extended
+#'           regions (\code{IMGT_VDJ_BY_REGIONS} or \code{IMGT_VDJ}) then the input 
+#'           \code{regionDefinition} is returned as is.
 #'         
 #' @seealso  See \link{RegionDefinition} for the return object. 
 #'           See \link{IMGT_SCHEMES} for a set of predefined \code{RegionDefinition} objects.
