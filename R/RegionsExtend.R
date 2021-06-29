@@ -18,8 +18,9 @@ NULL
 #' @param   objSeqId        sequence id field name in \code{curCloneObj}.
 #' @param   objSeq          sequence field name in \code{curCloneObj}.
 #' 
-#' @return A \code{ChangeoClone} data frame with additional columns (\code{parent_sequence} 
-#'         and \code{parent}) and additional rows (for germline and inferred sequences)
+#' @return   A \code{data.frame} with sequence and lineage information, including the
+#'           parent sequence (\code{parent_sequence}), an internal parent identifier (\code{parent}),
+#'           and additional rows for germline sequence and inferred intermediate sequences.
 #'         
 #' @details
 #' \code{makeGraphDf} adds to the \code{ChangeoClone} data frame: 
@@ -48,23 +49,20 @@ NULL
 #' 
 #' @seealso See \link{observedMutations} to calculate mutation frequencies using
 #'          \code{parent_sequence} as reference germline.
+#' 
 #' @examples 
-#' \dontrun{
-#' library("igraph")
-#' library("dplyr")
-#' # Load and subset example data:
+#' # Load and subset example data
 #' data(ExampleDb, package="alakazam")
-#' clone_3170_db <- subset(ExampleDb, clone_id == 3170)
-#' clone_3170_obj <- makeChangeoClone(clone_3170_db, 
-#'                       seq="sequence_alignment",
-#'                        germ="germline_alignment")
-#' dnapars_exec <- "~/apps/phylip-3.69/dnapars"
-#' clone_3170_graph <- buildPhylipLineage(clone_3170_obj, 
-#'                        dnapars_exec, rm_temp = TRUE)  
-#' clone_3170_GraphDf <- makeGraphDf(clone_3170_graph, clone_3170_obj)
-#' }
+#' data(ExampleTrees, package="alakazam")
+#' graph <- ExampleTrees[[17]]
+#' db <- subset(ExampleDb, clone_id == graph$clone)
+#' clone <- alakazam::makeChangeoClone(db)
+#' 
+#' # Extend data with lineage information
+#' df <- makeGraphDf(graph, clone)
+#' 
 #' @export
-makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq="sequence") {
+makeGraphDf <- function(curCloneGraph, curCloneObj, objSeqId="sequence_id", objSeq="sequence") {
     # extracting the cur_clone_num from the inputs to function:
     cur_clone_num <- curCloneObj@clone
     # generating a data frame from the clone igraph object 
@@ -204,17 +202,17 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
 #' and outputs a \code{RegionDefinition} object that includes the segments CDR1/2/3 
 #' and FWR1/2/3/4.
 #' 
-#' @param  juncLength         The junction length of the sequence
-#' @param  sequenceImgt       The imgt aligned sequence
-#' @param  regionDefinition   The \code{RegionDefinition} type to calculate
-#'                            the regionDefinition for. Can be one of 2: 
-#'                            \code{"IMGT_VDJ_BY_REGIONS"} or \code{"IMGT_VDJ"}. 
-#'                            Only these 2 regions include all
-#'                            CDR1/2/3 and FWR1/2/3/4 regions.
+#' @param   juncLength         junction length of the sequence.
+#' @param   sequenceImgt       IMGT numbered aligned sequence.
+#' @param   regionDefinition   \code{RegionDefinition} type to calculate
+#'                             the region definition for. Can be one: 
+#'                             \code{"IMGT_VDJ_BY_REGIONS"} or \code{"IMGT_VDJ"}. 
+#'                             Only these two regions include all
+#'                             CDR1/2/3 and FWR1/2/3/4 regions.
 #'                            
-#' @return a \code{RegionDefinition} object that includes CDR1/2/3 and 
-#'         FWR1/2/3/4 for the specific \code{sequenceImgt}, 
-#'         \code{juncLength} and \code{regionDefinition}.
+#' @return  A\code{RegionDefinition} object that includes CDR1/2/3 and 
+#'          FWR1/2/3/4 for the specific \code{sequenceImgt}, 
+#'          \code{juncLength} and \code{regionDefinition}.
 #'         
 #' @details
 #' For \code{regionDefinition="IMGT_VDJ_BY_REGIONS"} the function returns a \code{RegionDefinition} 
@@ -250,11 +248,11 @@ makeGraphDf <- function(curCloneGraph, curCloneObj,objSeqId="sequence_id",objSeq
 #' @examples 
 #' # Load and subset example data
 #' data(ExampleDb, package="alakazam")  
-#' juncLength <-ExampleDb[['junction_length']][1]
-#' sequenceImgt<-ExampleDb[['sequence_alignment']][1]
-#' seq_1_reg_def<-makeRegion(juncLength = juncLength, 
-#'                           sequenceImgt = sequenceImgt, 
-#'                           regionDefinition = IMGT_VDJ)
+#' juncLength <- ExampleDb[['junction_length']][1]
+#' sequenceImgt <- ExampleDb[['sequence_alignment']][1]
+#' seq_1_reg_def <- makeRegion(juncLength=juncLength, 
+#'                             sequenceImgt=sequenceImgt, 
+#'                             regionDefinition=IMGT_VDJ)
 #' @export
 makeRegion <- function(juncLength, sequenceImgt,
                        regionDefinition=NULL) {
@@ -265,7 +263,7 @@ makeRegion <- function(juncLength, sequenceImgt,
             stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
         }
         
-        if (regionDefinition@name %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) { 
+        if (regionDefinition@name %in% c("IMGT_VDJ_BY_REGIONS", "IMGT_VDJ")) { 
             # all slots except for boundaries and seqLength are already defined in regionDefinition
             # First need to extract sequence length from sequence:
             seqLength <- nchar(sequenceImgt)
@@ -381,9 +379,7 @@ plotJunctionAlignment <- function(db_row, germline_db,
                                   np1_length="np1_length", # np2_length="np2_length",
                                   junction="junction", junction_length="junction_length",
                                   germline_alignment="germline_alignment",
-                                  regionDefinition=NULL
-                                  
-) {
+                                  regionDefinition=NULL) {
     
     
     # Check for valid columns

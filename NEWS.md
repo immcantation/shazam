@@ -1,4 +1,4 @@
-Version 1.0.2.999: June 17, 2021
+Version 1.1.0: June 29, 2021
 -------------------------------------------------------------------------------
 
 General:
@@ -7,9 +7,13 @@ General:
 
 Selection Analysis:
 
-+ `observedMutations`, `expectedMutations`, and `calcBaseline` can analyze mutations
-   in all regions (CDR1, CDR2, CDR3, FWR1, FWR2, FWR3 and FWR4) by specifying
-   `regionDefinition=IMGT_VDJ` or `regionDefinition=IMGT_VDJ_BY_REGIONS`.
++ `observedMutations`, `expectedMutations`, and `calcBaseline` can analyze 
+   mutations in all regions (CDR1, CDR2, CDR3, FWR1, FWR2, FWR3 and FWR4) by 
+   specifying `regionDefinition=IMGT_VDJ` or 
+   `regionDefinition=IMGT_VDJ_BY_REGIONS`.
++ Added the function `makeRegion` to build a `RegionDefinition` object extending 
+  to CDR3 and FWR4.
++ Added the function `makeGraphDf`.
 
 Distance Profiling:
 
@@ -18,6 +22,10 @@ Distance Profiling:
 + Fixed a bug in `distToNearest` causing a fatal error when `cross` was set.
 + Fixed a bug in `nearestDist` causing a fatal error when using `model="aa"` 
   and `crossGroups`.
+
+Targeting Models:
+
++ Fixed an incompatibility with newer versions of ggplot2 in `plotMutability`.
 
 
 Version 1.0.2: August 10, 2020
