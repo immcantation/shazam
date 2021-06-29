@@ -1,13 +1,12 @@
-**makeRegion** - *Defining a Region that will include also CDR3 and FWR4 based on junction length and sequence*
+**makeRegion** - *Build a RegionDefinition object that includes CDR3 and FWR4.*
 
 Description
 --------------------
 
-Predefined `RegionDefinition` objects don't include the CDR3 and FWR4 regions because their
-boundaries depend on the junction length, and need to be calculated for each sequence. 
-`makeRegion` gets as input a junction length and an IMGT aligned sequence
-and outputs a `RegionDefinition` object that includes the segments CDR1/2/3 
-and FWR1/2/3/4.
+`makeRegion` takes as input a junction length and an IMGT-numbered sequence
+and outputs a custom `RegionDefinition` object that includes the boundary definitions of 
+CDR1-3 and FWR1-4 for that sequence. In contrast the universal `RegionDefinition` object 
+that end with FWR3, the returned definition is per-sequence due to variable junction lengths.
 
 
 Usage
@@ -20,17 +19,18 @@ Arguments
 -------------------
 
 juncLength
-:   The junction length of the sequence
+:   junction length of the sequence.
 
 sequenceImgt
-:   The imgt aligned sequence
+:   IMGT-numbered sequence.
 
 regionDefinition
-:   The `RegionDefinition` type to calculate
-the regionDefinition for. Can be one of 2: 
-`"IMGT_VDJ_BY_REGIONS"` or `"IMGT_VDJ"`. 
-Only these 2 regions include all
-CDR1/2/3 and FWR1/2/3/4 regions.
+:   `RegionDefinition` type to calculate the region definition for. 
+Can be one of `IMGT_VDJ_BY_REGIONS` or `IMGT_VDJ`,
+which are template definitions that include CDR1-3 and FWR1-4. 
+Only these two regions include all CDR1-3 and FWR1-4 regions.
+If this argument is set to `NULL` then an empty 
+`RegionDefinition` will be returned.
 
 
 
@@ -38,16 +38,11 @@ CDR1/2/3 and FWR1/2/3/4 regions.
 Value
 -------------------
 
-a `RegionDefinition` object that includes CDR1/2/3 and 
-FWR1/2/3/4 for the specific `sequenceImgt`, 
-`juncLength` and `regionDefinition`.
+A `RegionDefinition` object that includes CDR1-3 and FWR1-4 for the  
+`sequenceImgt`, `juncLength`, and `regionDefinition` specified.
 
-
-Details
--------------------
-
-For `regionDefinition="IMGT_VDJ_BY_REGIONS"` the function returns a `RegionDefinition` 
-object with regions:
+For `regionDefinition=IMGT_VDJ_BY_REGIONS` the returned `RegionDefinition` 
+includes:
 
 
 + `fwr1`:   Positions 1 to 78.
@@ -56,17 +51,16 @@ object with regions:
 + `cdr2`:   Positions 166 to 195.
 + `fwr3`:   Positions 196 to 312.
 + `cdr3`:   Positions 313 to (313 + juncLength - 6) - since junction 
-sequence includes (on the left) the last codon from fwr3, and 
-(on the right) the first codon from fwr4.  
+sequence includes (on the left) the last codon from FWR3, and 
+(on the right) the first codon from FWR4.  
 + `fwr4`:   Positions (313 + juncLength - 6 + 1) to the end of the sequence.
 
 
-For `regionDefinition="IMGT_VDJ"` the function returns a `RegionDefinition` 
-object with regions:
+For `regionDefinition=IMGT_VDJ` the returned `RegionDefinition` includes:
 
 
-+ `fwr`:   Positions belonging to a framework region.
-+ `cdr`:   Positions belonging to a cdr.
++ `fwr`:   Positions belonging to a FWR.
++ `cdr`:   Positions belonging to a CDR.
 
 
 
@@ -75,7 +69,7 @@ Note
 
 In case the `regionDefinition` argument is not one of the extended
 regions (`IMGT_VDJ_BY_REGIONS` or `IMGT_VDJ`) - then this
-function will return the `regionDefinition` as is.
+function will return the input `regionDefinition` as is.
 
 
 
@@ -85,11 +79,9 @@ Examples
 ```R
 # Load and subset example data
 data(ExampleDb, package="alakazam")  
-juncLength <-ExampleDb[['junction_length']][1]
-sequenceImgt<-ExampleDb[['sequence_alignment']][1]
-seq_1_reg_def<-makeRegion(juncLength = juncLength, 
-sequenceImgt = sequenceImgt, 
-regionDefinition = IMGT_VDJ)
+len <- ExampleDb$junction_length[1]
+sequence <- ExampleDb$sequence_alignment[1]
+region <- makeRegion(len, sequence, regionDefinition=IMGT_VDJ)
 ```
 
 

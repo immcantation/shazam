@@ -244,7 +244,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1194783
+## [1] 0.1209498
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -351,12 +351,6 @@ library(dplyr)
 ```
 ## 
 ## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:igraph':
-## 
-##     as_data_frame, groups, union
 ```
 
 ```

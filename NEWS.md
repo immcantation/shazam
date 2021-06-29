@@ -11,9 +11,10 @@ Selection Analysis:
    mutations in all regions (CDR1, CDR2, CDR3, FWR1, FWR2, FWR3 and FWR4) by 
    specifying `regionDefinition=IMGT_VDJ` or 
    `regionDefinition=IMGT_VDJ_BY_REGIONS`.
-+ Added the function `makeRegion` to build a `RegionDefinition` object extending 
-  to CDR3 and FWR4.
-+ Added the function `makeGraphDf`.
++ Added the function `makeRegion` to build sequence-specific `RegionDefinition` 
+  objects extending to CDR3 and FWR4.
++ Added the function `makeGraphDf` to faciliate mutational analysis on 
+  lineage trees.
 
 Distance Profiling:
 
