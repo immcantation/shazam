@@ -284,7 +284,7 @@ makeRegion <- function(juncLength, sequenceImgt, regionDefinition=NULL) {
             boundaries[(cdr3_end+1):seqLength] <- factor("fwr4")      
         } 
     } else {
-        # I you are here, the junction is too short, <= 6nt
+        # If you are here, the junction is too short, <= 6nt
         warning("CDR3 end < CDR3 start. Couldn't identify CDR3 and FWR4. Aligned junction length is: ", juncLength) 
     }
 
