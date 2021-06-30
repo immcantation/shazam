@@ -1432,6 +1432,7 @@ calcClonalConsensus <- function(db,
 #'                             nproc=1)
 #'                             
 #' # Extend data with lineage information
+#' data(ExampleTrees, package="alakazam")
 #' graph <- ExampleTrees[[17]]
 #' clone <- alakazam::makeChangeoClone(subset(ExampleDb, clone_id == graph$clone))
 #' gdf <- makeGraphDf(graph, clone)
