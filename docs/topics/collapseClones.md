@@ -336,7 +336,7 @@ at that position is `"N"`.
 representing all of the characters present, regardless of whether 
 `"N"`, `"-"`, or `"."` is present.
 +  If a position contains only `"-"` and `"."` across sequences, 
-the consensus at thatp osition is taken to be `"-"`. 
+the consensus at that position is taken to be `"-"`. 
 +  If a position contains only one of `"-"` or `"."` across 
 sequences, the consensus at that position is taken to be the character 
 present. 

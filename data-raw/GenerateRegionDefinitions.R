@@ -54,7 +54,7 @@ usethis::use_data(IMGT_V_BY_SEGMENTS, overwrite=TRUE)
 # 
 # These 2 new regions will be of class RegionDefinition, with most of its slots
 # full, except for slots seqLength and boundaries and - which will be 0 and
-# empty respectively, and filled only after using function makeRegion.
+# empty respectively, and filled only after using function setRegionBoundaries.
 
 IMGT_VDJ_BY_REGIONS <- new("RegionDefinition", name="IMGT_VDJ_BY_REGIONS",
                            description="IMGT numbering scheme defining the V(D)J segment by individual cdr1/2/3 and fwr1/2/3/4 regions",
