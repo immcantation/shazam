@@ -1,30 +1,30 @@
-test_that("makeRegion", {
+test_that("setRegionBoundaries", {
     # data("ExampleDb", package="alakazam")
     load(file.path("..", "data-tests", "ExampleDb_airr.rda"))
     junction_length_10 <- ExampleDb[10,"junction_length"]
     sequence_imgt_10 <- ExampleDb[10,"sequence_alignment"]
-    seq_10_reg_def <- makeRegion(juncLength = junction_length_10, 
-                                 sequenceImgt = sequence_imgt_10, 
-                                 regionDefinition = IMGT_VDJ_BY_REGIONS)
+    seq_10_reg_def <- setRegionBoundaries(juncLength = junction_length_10, 
+                                          sequenceImgt = sequence_imgt_10, 
+                                          regionDefinition = IMGT_VDJ_BY_REGIONS)
     junction_length_45 <- ExampleDb[45,"junction_length"]
     sequence_imgt_45 <- ExampleDb[45,"sequence_alignment"]
-    seq_45_reg_def <- makeRegion(juncLength = junction_length_45, 
-                                 sequenceImgt = sequence_imgt_45, 
-                                 regionDefinition = IMGT_VDJ)
+    seq_45_reg_def <- setRegionBoundaries(juncLength = junction_length_45, 
+                                          sequenceImgt = sequence_imgt_45, 
+                                          regionDefinition = IMGT_VDJ)
     junction_length_333 <- ExampleDb[333,"junction_length"]
     sequence_imgt_333 <- ExampleDb[333,"sequence_alignment"]
-    seq_reg_def_IMGT_V <- makeRegion(juncLength = junction_length_333, 
-                                         sequenceImgt = sequence_imgt_333, 
-                                         regionDefinition = IMGT_V)
-    seq_reg_def_IMGT_V_BY_CODONS <- makeRegion(juncLength = junction_length_10, 
-                                                   sequenceImgt = sequence_imgt_10, 
-                                                   regionDefinition = IMGT_V_BY_CODONS)
-    seq_reg_def_IMGT_V_BY_REGIONS <- makeRegion(juncLength = junction_length_45, 
-                                                   sequenceImgt = sequence_imgt_45, 
-                                                   regionDefinition = IMGT_V_BY_REGIONS)
-    seq_reg_def_IMGT_V_BY_SEGMENTS <- makeRegion(juncLength = junction_length_333, 
-                                                 sequenceImgt = sequence_imgt_333, 
-                                                 regionDefinition = IMGT_V_BY_SEGMENTS)
+    seq_reg_def_IMGT_V <- setRegionBoundaries(juncLength = junction_length_333, 
+                                              sequenceImgt = sequence_imgt_333, 
+                                              regionDefinition = IMGT_V)
+    seq_reg_def_IMGT_V_BY_CODONS <- setRegionBoundaries(juncLength = junction_length_10, 
+                                                        sequenceImgt = sequence_imgt_10, 
+                                                        regionDefinition = IMGT_V_BY_CODONS)
+    seq_reg_def_IMGT_V_BY_REGIONS <- setRegionBoundaries(juncLength = junction_length_45, 
+                                                         sequenceImgt = sequence_imgt_45, 
+                                                         regionDefinition = IMGT_V_BY_REGIONS)
+    seq_reg_def_IMGT_V_BY_SEGMENTS <- setRegionBoundaries(juncLength = junction_length_333, 
+                                                          sequenceImgt = sequence_imgt_333, 
+                                                          regionDefinition = IMGT_V_BY_SEGMENTS)
     
     expect_that(seq_10_reg_def, is_a("RegionDefinition"))
     expect_equal(seq_10_reg_def@name, "IMGT_VDJ_BY_REGIONS")
@@ -63,39 +63,39 @@ test_that("makeRegion", {
     
     # When no junction found
     aln <- "...........................................CCACACAGACCCCCGGGCTGAGACCCAGGCAGGGAGGGGTGACGTTCCCAGGGA"
-    expect_warning(makeRegion(0, aln, IMGT_VDJ_BY_REGIONS ), "Aligned junction length is: 0")
+    expect_warning(setRegionBoundaries(0, aln, IMGT_VDJ_BY_REGIONS ), "Aligned junction length is: 0")
     
     # sequence <- "GTCTCCCTCCCCGCCCAGCTGGGATCTCAGGGCTTCATTTTCTGTCCTCCACCATCATGGGGTCAACCGCCATCCTCGCCCTCCTCCTGGCTGTTCTCCCAGGAGTCTGTGCCGAGGTGCAGCTGATGCAGTCTGGCGCACAGGTGAGAAAGCCGGGTGAGTCTCTGAAGATCTCCTGTCAGGCTTCTGGATACATCTTCTCCGACTACTGGATCGGCTGGGTGCGCCAAGTGCCCGGTAAAGGCCTGGAGTGGGTGGGGATCATCTATCCTAGTGACTCTGAAACCAGCTACAGTCCGTCCTTCGAAGGCCAGGTCACCATCTCAGCCGACAAGTCCATCACCACCGCCTACCTGTCATGGAGCGGCCTGAAGCCCTCGGACACTGCCCTCTATTACTGTGCGAGACATACCGGAGAACCCTACTACCACGCCTCCACCAAGGGCC"
     aln <- "GAGGTGCAGCTGATGCAGTCTGGCGCA...CAGGTGAGAAAGCCGGGTGAGTCTCTGAAGATCTCCTGTCAGGCTTCTGGATACATCTTC............TCCGACTACTGGATCGGCTGGGTGCGCCAAGTGCCCGGTAAAGGCCTGGAGTGGGTGGGGATCATCTATCCTAGT......GACTCTGAAACCAGCTACAGTCCGTCCTTCGAA...GGCCAGGTCACCATCTCAGCCGACAAGTCCATCACCACCGCCTACCTGTCATGGAGCGGCCTGAAGCCCTCGGACACTGCCCTCTATTACTGTGCGAGACATACCGGAGAACCCTACTACCACG"
     # junction <- "TGTGCGAGACATACCGGAGAACCCTACTACCACGCCT"
-    expect_warning(makeRegion(37, aln, IMGT_VDJ_BY_REGIONS ), "junction ends past `sequenceImgt`")
+    expect_warning(setRegionBoundaries(37, aln, IMGT_VDJ_BY_REGIONS ), "junction ends past `sequenceImgt`")
 })
 
 test_that("getCloneRegion", {
     data("ExampleDb")
     clone_2834_reg <- getCloneRegion(clone_num = 2834, db = ExampleDb, 
-                                   seq_col = "sequence_alignment", clone_col = "clone_id", 
-                                   regionDefinition = IMGT_VDJ_BY_REGIONS)
+                                     seq_col = "sequence_alignment", clone_col = "clone_id", 
+                                     regionDefinition = IMGT_VDJ_BY_REGIONS)
     seq_343 <- ExampleDb[343,]
-    seq_343_reg_def <- makeRegion(juncLength = 48, 
-                                 sequenceImgt = seq_343[,"germline_alignment"], 
-                                 regionDefinition = IMGT_VDJ_BY_REGIONS)
+    seq_343_reg_def <- setRegionBoundaries(juncLength = 48, 
+                                           sequenceImgt = seq_343[,"germline_alignment"], 
+                                           regionDefinition = IMGT_VDJ_BY_REGIONS)
     
     clone_3227_reg <- getCloneRegion(clone_num = 3227, db = ExampleDb, 
                                      seq_col = "sequence_alignment", clone_col = "clone_id", 
                                      regionDefinition = IMGT_VDJ)
     seq_376 <- ExampleDb[376,]
-    seq_376_reg_def <- makeRegion(juncLength = 60, 
-                                  sequenceImgt = seq_376[,"germline_alignment"], 
-                                  regionDefinition = IMGT_VDJ)
+    seq_376_reg_def <- setRegionBoundaries(juncLength = 60, 
+                                           sequenceImgt = seq_376[,"germline_alignment"], 
+                                           regionDefinition = IMGT_VDJ)
     
     clone_6940_reg <- getCloneRegion(clone_num = 6940, db = ExampleDb, 
                                      seq_col = "sequence_alignment", clone_col = "clone_id", 
                                      regionDefinition = IMGT_V_BY_REGIONS)
     seq_793 <- ExampleDb[793,]
-    seq_793_reg_def <- makeRegion(juncLength = 84, 
-                                  sequenceImgt = seq_793[,"germline_alignment"], 
-                                  regionDefinition = IMGT_V_BY_REGIONS)
+    seq_793_reg_def <- setRegionBoundaries(juncLength = 84, 
+                                           sequenceImgt = seq_793[,"germline_alignment"], 
+                                           regionDefinition = IMGT_V_BY_REGIONS)
     
     expect_equal(as.numeric(seq_343[,"clone_id"]),2834)
     expect_equal(as.numeric(seq_343[,"junction_length"]),48)

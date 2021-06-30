@@ -1,9 +1,9 @@
-**makeRegion** - *Build a RegionDefinition object that includes CDR3 and FWR4.*
+**setRegionBoundaries** - *Build a RegionDefinition object that includes CDR3 and FWR4.*
 
 Description
 --------------------
 
-`makeRegion` takes as input a junction length and an IMGT-numbered sequence
+`setRegionBoundaries` takes as input a junction length and an IMGT-numbered sequence
 and outputs a custom `RegionDefinition` object that includes the boundary definitions of 
 CDR1-3 and FWR1-4 for that sequence. In contrast the universal `RegionDefinition` object 
 that end with FWR3, the returned definition is per-sequence due to variable junction lengths.
@@ -12,7 +12,7 @@ that end with FWR3, the returned definition is per-sequence due to variable junc
 Usage
 --------------------
 ```
-makeRegion(juncLength, sequenceImgt, regionDefinition = NULL)
+setRegionBoundaries(juncLength, sequenceImgt, regionDefinition = NULL)
 ```
 
 Arguments
@@ -63,13 +63,9 @@ For `regionDefinition=IMGT_VDJ` the returned `RegionDefinition` includes:
 + `cdr`:   Positions belonging to a CDR.
 
 
-
-Note
--------------------
-
 In case the `regionDefinition` argument is not one of the extended
-regions (`IMGT_VDJ_BY_REGIONS` or `IMGT_VDJ`) - then this
-function will return the input `regionDefinition` as is.
+regions (`IMGT_VDJ_BY_REGIONS` or `IMGT_VDJ`) then the input 
+`regionDefinition` is returned as is.
 
 
 
@@ -81,7 +77,7 @@ Examples
 data(ExampleDb, package="alakazam")  
 len <- ExampleDb$junction_length[1]
 sequence <- ExampleDb$sequence_alignment[1]
-region <- makeRegion(len, sequence, regionDefinition=IMGT_VDJ)
+region <- setRegionBoundaries(len, sequence, regionDefinition=IMGT_VDJ)
 ```
 
 

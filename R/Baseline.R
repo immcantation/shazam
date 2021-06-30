@@ -1882,7 +1882,7 @@ calcBaseline <- function(db,
         cluster <- parallel::makeCluster(nproc, type="PSOCK")
         parallel::clusterExport(cluster, list('db',
                                               'sequenceColumn', 'germlineColumn', 
-                                              'cloneColumn', 'juncLengthColumn', 'makeRegion',
+                                              'cloneColumn', 'juncLengthColumn', 'setRegionBoundaries',
                                               'testStatistic', 'regionDefinition',
                                               'targetingModel', 'mutationDefinition','calcStats',
                                               'break2chunks', 'PowersOfTwo', 
@@ -2009,9 +2009,9 @@ calcBaseline <- function(db,
                 rd <- regionDefinition
                 if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
                     ## Prepare extended region definition
-                      rd <- makeRegion(juncLength = db[[juncLengthColumn]][idx],
-                                       sequenceImgt = db[[sequenceColumn]][idx],
-                                       regionDefinition=regionDefinition)
+                      rd <- setRegionBoundaries(juncLength = db[[juncLengthColumn]][idx],
+                                                sequenceImgt = db[[sequenceColumn]][idx],
+                                                regionDefinition=regionDefinition)
                 }
                 
                 calcBaselineHelper( 

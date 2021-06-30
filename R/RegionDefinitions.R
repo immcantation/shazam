@@ -159,19 +159,19 @@ makeNullRegionDefinition <- function(regionLength) {
 #'                                       as a single region.
 #'   \item  \code{IMGT_VDJ}:             IMGT numbered regions for CDR1-3 and FWR1-4 with combined CDR and FWR 
 #'                                       definitions spanning CDR1-3 and FWR1-4, respectively.
-#'                                       Note, unless the definition object has been updated using \link{makeRegion} 
+#'                                       Note, unless the definition object has been updated using \link{setRegionBoundaries} 
 #'                                       this schema will have a value of \code{0} for the \code{seqLength} slot and
 #'                                       the \code{boundaries} slot will be empty. This is because
 #'                                       these slots depend on the junction length which is unknown in the template 
-#'                                       scheme. After \link{makeRegion} has been run, these slots will be populated
+#'                                       scheme. After \link{setRegionBoundaries} has been run, these slots will be populated
 #'                                       with the appropriate values for the specied sequence and junction length.
 #'   \item  \code{IMGT_VDJ_BY_REGIONS}:  The IMGT numbered regions for FWR1-4 and CDR1-3 with separate region boundaries
 #'                                       for each of CDR1, CDR2, CDR3, FWR1, FWR2, FWR3 and FWR4. 
-#'                                       Note, unless the definition object has been updated using \link{makeRegion} 
+#'                                       Note, unless the definition object has been updated using \link{setRegionBoundaries} 
 #'                                       this schema will have a value of \code{0} for the \code{seqLength} slot and
 #'                                       the \code{boundaries} slot will be empty. This is because
 #'                                       these slots depend on the junction length which is unknown in the template 
-#'                                       scheme. After \link{makeRegion} has been run, these slots will be populated
+#'                                       scheme. After \link{setRegionBoundaries} has been run, these slots will be populated
 #'                                       with the appropriate values for the specied sequence and junction length.
 #' }
 #' 

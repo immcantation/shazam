@@ -19,7 +19,7 @@ A [MutationDefinition](MutationDefinition-class.md) object defining:
 + `CHARGE_MUTATIONS`:      Amino acid mutations are defined by changes
 in side chain charge class.
 + `HYDROPATHY_MUTATIONS`:  Amino acid mutations are defined by changes
-in side chain hydrophobicitity class.
+in side chain hydrophobicity class.
 + `POLARITY_MUTATIONS`:    Amino acid mutations are defined by changes
 in side chain polarity class.
 + `VOLUME_MUTATIONS`:      Amino acid mutations are defined by changes

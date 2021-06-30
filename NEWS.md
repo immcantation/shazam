@@ -1,4 +1,4 @@
-Version 1.1.0: June 29, 2021
+Version 1.1.0: June 30, 2021
 -------------------------------------------------------------------------------
 
 General:
@@ -13,7 +13,7 @@ Selection Analysis:
    `regionDefinition=IMGT_VDJ_BY_REGIONS`.
 + Added the function `makeRegion` to build sequence-specific `RegionDefinition` 
   objects extending to CDR3 and FWR4.
-+ Added the function `makeGraphDf` to faciliate mutational analysis on 
++ Added the function `makeGraphDf` to facilitate mutational analysis on 
   lineage trees.
 
 Distance Profiling:

@@ -86,8 +86,8 @@ dim(clone_3170_lineage_df)
 colnames(clone_3170_lineage_df)
 ```
 
-`makeGraphDf` creates a `ChangeoClone` object with the column `parent_sequence`. This field
-can be used to analyze mutations for each sequence relative to their `parent_sequence`.
+`makeGraphDf` creates a `data.frame` with the column `parent_sequence`, which can be used to analyze 
+mutations for each sequence relative to their `parent_sequence`.
 
 ## Calculate selection PDFs for individual sequences
 
@@ -372,7 +372,6 @@ plotBaselineDensity(grouped_2, "c_call", groupColumn="sample_id", colorElement="
 ```
 
 ![plot of chunk Baseline-Vignette-13](figure/Baseline-Vignette-13-1.png)
-
 
 ## Editing a field in a Baseline object
 

@@ -132,7 +132,7 @@ Details
 Mutation counts are determined by comparing the input sequences (in the column specified 
 by `sequenceColumn`) to a reference sequence. If `db` includes lineage information,
 e.g. in the field `parent_sequence`, the reference sequence can be set to  
-use that field as reference sequence. Ssee more details in [makeGraphDf](makeGraphDf.md)).
+use that field as reference sequence. See more details in [makeGraphDf](makeGraphDf.md)).
 See [calcObservedMutations](calcObservedMutations.md) for more technical details, 
 **including criteria for which sequence differences are included in the mutation 
 counts and which are not**.
@@ -151,7 +151,7 @@ Examples
 ```R
 # Subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
+db <- ExampleDb[1:10, ]
 
 # Calculate mutation frequency over the entire sequence
 db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
@@ -171,19 +171,24 @@ nproc=1)
 db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 regionDefinition=IMGT_VDJ,
-nproc=1)    
-### Not run:
-# Count of VDJ-region mutations, split by FWR and CDR
-# # This doesn't work because 'parent_sequence' doesn't exist,
-# # it should be calculated before. See \link{makeGraphDf}.
-# Update example to include how to create that column.
-# db_obs <- observedMutations(db, sequenceColumn="parent_sequence",
-# germlineColumn="germline_alignment_d_mask",
-# regionDefinition=IMGT_VDJ,
-# nproc=1)
+nproc=1)
+
+Count of mutations between observed sequence and immediate ancenstor
+graph <- ExampleTrees[[17]]
+clone <- alakazam::makeChangeoClone(subset(ExampleDb, clone_id == graph$clone))
+gdf <- makeGraphDf(graph, clone)
+
+# Extend data with lineage information
+db_obs <- observedMutations(gdf, sequenceColumn="sequence",
+germlineColumn="parent_sequence",
+regionDefinition=IMGT_VDJ,
+nproc=1)
 ```
 
-
+**Error**: <text>:25:7: unexpected symbol
+24: 
+25: Count of
+          ^
 
 See also
 -------------------

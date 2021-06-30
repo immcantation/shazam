@@ -270,7 +270,7 @@ NULL
 #'                     representing all of the characters present, regardless of whether 
 #'                     \code{"N"}, \code{"-"}, or \code{"."} is present.
 #'               \item If a position contains only \code{"-"} and \code{"."} across sequences, 
-#'                     the consensus at thatp osition is taken to be \code{"-"}. 
+#'                     the consensus at that position is taken to be \code{"-"}. 
 #'               \item If a position contains only one of \code{"-"} or \code{"."} across 
 #'                     sequences, the consensus at that position is taken to be the character 
 #'                     present. 
@@ -1387,7 +1387,7 @@ calcClonalConsensus <- function(db,
 #' Mutation counts are determined by comparing the input sequences (in the column specified 
 #' by \code{sequenceColumn}) to a reference sequence. If \code{db} includes lineage information,
 #' e.g. in the field \code{parent_sequence}, the reference sequence can be set to  
-#' use that field as reference sequence. Ssee more details in \link{makeGraphDf}).
+#' use that field as reference sequence. See more details in \link{makeGraphDf}).
 #' See \link{calcObservedMutations} for more technical details, 
 #' \strong{including criteria for which sequence differences are included in the mutation 
 #' counts and which are not}.
@@ -1405,12 +1405,11 @@ calcClonalConsensus <- function(db,
 #' See \link{IMGT_SCHEMES} for a set of predefined \link{RegionDefinition} objects.
 #' See \link{expectedMutations} for calculating expected mutation frequencies.
 #' See \link{makeGraphDf} for creating the field \code{parent_sequence}.
-#'           
 #' 
 #' @examples
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
+#' db <- ExampleDb[1:10, ]
 #'
 #' # Calculate mutation frequency over the entire sequence
 #' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
@@ -1430,17 +1429,19 @@ calcClonalConsensus <- function(db,
 #' db_obs <- observedMutations(db, sequenceColumn="sequence_alignment",
 #'                             germlineColumn="germline_alignment_d_mask",
 #'                             regionDefinition=IMGT_VDJ,
-#'                             nproc=1)    
-#'\dontrun{     
-#' # Count of VDJ-region mutations, split by FWR and CDR
-#' # This doesn't work because 'parent_sequence' doesn't exist,
-#' # it should be calculated before. See \link{makeGraphDf}.
-#' Update example to include how to create that column.
-#' db_obs <- observedMutations(db, sequenceColumn="parent_sequence",
-#'                             germlineColumn="germline_alignment_d_mask",
+#'                             nproc=1)
+#'                             
+#' Count of mutations between observed sequence and immediate ancenstor
+#' graph <- ExampleTrees[[17]]
+#' clone <- alakazam::makeChangeoClone(subset(ExampleDb, clone_id == graph$clone))
+#' gdf <- makeGraphDf(graph, clone)
+#' 
+#' # Extend data with lineage information
+#' db_obs <- observedMutations(gdf, sequenceColumn="sequence",
+#'                             germlineColumn="parent_sequence",
 #'                             regionDefinition=IMGT_VDJ,
 #'                             nproc=1)    
-#' }     
+#'     
 #' @export 
 observedMutations <- function(db,sequenceColumn = "sequence_alignment", 
                                germlineColumn = "germline_alignment_d_mask",
@@ -1549,7 +1550,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                               'makeNullRegionDefinition', 'mutationDefinition',
                                               'getCodonPos','getContextInCodon','mutationType',
                                               'AMINO_ACIDS',
-                                              'binMutationsByRegion', 'countNonNByRegion','makeRegion','IMGT_V_BY_REGIONS'), 
+                                              'binMutationsByRegion', 'countNonNByRegion','setRegionBoundaries','IMGT_V_BY_REGIONS'), 
                                 envir=environment())
         registerDoParallel(cluster)
     } else if (nproc == 1) {
@@ -1568,7 +1569,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
         foreach(idx=iterators::icount(numbOfSeqs)) %dopar% {
             rd <- regionDefinition
             if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-                rd <- makeRegion(juncLength = db[[juncLengthColumn]][idx],
+                rd <- setRegionBoundaries(juncLength = db[[juncLengthColumn]][idx],
                            sequenceImgt = db[[sequenceColumn]][idx],
                            regionDefinition=regionDefinition)
             }
@@ -2817,7 +2818,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
-                                              'regionDefinitionName', 'juncLengthColumn', 'makeRegion',
+                                              'regionDefinitionName', 'juncLengthColumn', 'setRegionBoundaries',
                                               'regionDefinition','targetingModel',
                                               'calcExpectedMutations','calculateTargeting',
                                               's2c','c2s','NUCLEOTIDES','HH_S5F',
@@ -2843,7 +2844,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
         foreach (idx=iterators::icount(numbOfSeqs)) %dopar% {
             rd <- regionDefinition
             if (regionDefinitionName %in% c("IMGT_VDJ_BY_REGIONS","IMGT_VDJ")) {
-                rd <- makeRegion(juncLength = db[[juncLengthColumn]][idx],
+                rd <- setRegionBoundaries(juncLength = db[[juncLengthColumn]][idx],
                            sequenceImgt = db[[sequenceColumn]][idx],
                            regionDefinition=regionDefinition)
             }

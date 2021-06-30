@@ -22,7 +22,7 @@
 #'   \item  \link{expectedMutations}:        Compute expected mutation frequencies.
 #'   \item  \link{shmulateSeq}:              Simulate mutations in a single sequence.
 #'   \item  \link{shmulateTree}:             Simulate mutations over a lineage tree.
-#'   \item  \link{makeRegion}:               Extends region definition for FWR1/2/3/4 and CDR1/2/3.
+#'   \item  \link{setRegionBoundaries}:      Extends a region definition to include CDR3 and FWR4.
 #' }
 #' 
 #' @section  SHM targeting models:
@@ -78,17 +78,6 @@
 #'                                           distances to nearest neighbors.
 #'   \item  \link{calcTargetingDistance}:    Construct a nucleotide distance matrix from a 
 #'                                           5-mer targeting model.
-#' }
-#'
-#' @section  Lineage information merging into ChangeoClone :
-#' \code{shazam} provides tools to merge lineage information of clones to 
-#' a \link{ChangeoClone} object. This includes parent ID and parent sequence for 
-#' each read in db. The motivation for this is to enable BASELINe analysis of 
-#' observed and expected mutations, with regard to the sequence parent, instead 
-#' the sequence germline. 
-#' 
-#' \itemize{
-#'   \item  \link{makeGraphDf}:              Adding Lineage information to ChangeoClone.
 #' }
 #'
 #' @name     shazam
