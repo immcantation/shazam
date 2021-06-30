@@ -1431,12 +1431,12 @@ calcClonalConsensus <- function(db,
 #'                             regionDefinition=IMGT_VDJ,
 #'                             nproc=1)
 #'                             
-#' Count of mutations between observed sequence and immediate ancenstor
+#' # Extend data with lineage information
 #' graph <- ExampleTrees[[17]]
 #' clone <- alakazam::makeChangeoClone(subset(ExampleDb, clone_id == graph$clone))
 #' gdf <- makeGraphDf(graph, clone)
 #' 
-#' # Extend data with lineage information
+#' # Count of mutations between observed sequence and immediate ancenstor
 #' db_obs <- observedMutations(gdf, sequenceColumn="sequence",
 #'                             germlineColumn="parent_sequence",
 #'                             regionDefinition=IMGT_VDJ,
