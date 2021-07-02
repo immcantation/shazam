@@ -66,7 +66,7 @@ shmulateSeq(sequence, numMutations=4, targetingModel=MK_RS5NF)
 
 `shmulateTree` generates a set of simulated sequences based on an input sequence and a lineage tree. The input sequence will act as the most recent common ancestor (MRCA) of the lineage tree, and sequences in the offspring nodes will be simulated with the numbers of mutations corresponding to the edge weights of the tree.
 
-The lineage tree is supplied by the user as an `igraph` object, such as that returned by `buildPhylipLineage` of the `alakazam` package. For details, see the `Reconstruction of Ig lineage trees` vignette of `alakazam`. It is assumed that the `name` vertex attribute of the root node is `Germline`, as is the case with the trees built by `buildPhylipLineage`. 
+The lineage tree is supplied by the user as an igraph `graph` object, such as that returned by `buildPhylipLineage` of the `alakazam` package. For details, see the `Reconstruction of Ig lineage trees` vignette of `alakazam`. It is assumed that the `name` vertex attribute of the root node is `Germline`, as is the case with the trees built by `buildPhylipLineage`. 
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 library(alakazam)

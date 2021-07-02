@@ -30,7 +30,7 @@ shmulateSeq(sequence, numMutations=6)
 ```
 
 ```
-## [1] "NGATCTGGCGACACGGCCGAGAGTTATTGTGCGAGAGATG.TTTA"
+## [1] "NGATCTGACGCCACGGTCGTCTATTACTGTGAGAGAAATA.TTTG"
 ```
 
 ```r
@@ -39,7 +39,7 @@ shmulateSeq(sequence, numMutations=0.2, frequency=TRUE)
 ```
 
 ```
-## [1] "NGATGTGACGACGCGGCCGTGTGTTCCCCTGAGAGAGAAA.TGTA"
+## [1] "NTTTCTGATGGAACGGCCGTGTATTACTATACGAGAGACA.TTTG"
 ```
 
 ```r
@@ -48,14 +48,14 @@ shmulateSeq(sequence, numMutations=4, targetingModel=MK_RS5NF)
 ```
 
 ```
-## [1] "NGATGTGACGACACGACCGTGTACTACTGTGCGAGATATA.TTTA"
+## [1] "NGCTCTGACGACACGGCCGTGTGTTATTGTGCGAAAGATA.TTTA"
 ```
 
 ## Simulate mutations in a lineage tree
 
 `shmulateTree` generates a set of simulated sequences based on an input sequence and a lineage tree. The input sequence will act as the most recent common ancestor (MRCA) of the lineage tree, and sequences in the offspring nodes will be simulated with the numbers of mutations corresponding to the edge weights of the tree.
 
-The lineage tree is supplied by the user as an `igraph` object, such as that returned by `buildPhylipLineage` of the `alakazam` package. For details, see the `Reconstruction of Ig lineage trees` vignette of `alakazam`. It is assumed that the `name` vertex attribute of the root node is `Germline`, as is the case with the trees built by `buildPhylipLineage`. 
+The lineage tree is supplied by the user as an igraph `graph` object, such as that returned by `buildPhylipLineage` of the `alakazam` package. For details, see the `Reconstruction of Ig lineage trees` vignette of `alakazam`. It is assumed that the `name` vertex attribute of the root node is `Germline`, as is the case with the trees built by `buildPhylipLineage`. 
 
 
 ```r
@@ -77,13 +77,13 @@ shmulateTree(sequence, graph)
 ```
 ##             name                                      sequence distance
 ## 1      Inferred1 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-## 2 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTGCTGTGCGAGAGATAATTTA        2
-## 3 GN5SHBT03EP4KC NGATCTGGCGACACGGCCGTGTACTGCTGTGCGAGAGATAATTTG        3
-## 4 GN5SHBT01AKANC NGATCTGACGACACGGCCGTATGTTACTGTGCGGGAGATAATTTA        4
-## 5 GN5SHBT01A3SFZ NGATCTGACGACACGGCCGTGACTTGTTGTGCGAGAGATAGCTCA        6
-## 6 GN5SHBT08HUU7M NGATCTGGGGACACGGCCGTGGACTGCTGTGCGAGAAATAATTTG        3
-## 7 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTCTATTGCTGTGCGAGAGATAATTTA        1
-## 8 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTGCTCTGCGAGAGATAATTTA        1
+## 2 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTCTTACTGTGCGAAAGATAGTTTA        2
+## 3 GN5SHBT03EP4KC NGATGTGACGACACGGCCATGTCCTACTGTGCGAAAGATAGTTTA        3
+## 4 GN5SHBT01AKANC NGATCTGACGACACGGCCGTCTATTGCTGTGCGACAGATGGTTTA        4
+## 5 GN5SHBT01A3SFZ NGATCTGGCGACACGGCCGTGTGTTACTGTGCGACAGACACTTTG        6
+## 6 GN5SHBT08HUU7M NGATGTCACGACACGGCCATGTCCTACTGTGCGAAAGATTGTTTC        3
+## 7 GN5SHBT04CEA6I NGTTCTGACGACACGGCCGTGTCTTACTGTGCGAAAGATAGTTTA        1
+## 8 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTCCTACTGTGCGAAAGATAGTTTA        1
 ```
 
 It is possible to exclude certain specified nodes from being considered as the MRCA and from being included as part of the simulation. To specify such nodes, use the `field` argument to indicate which annotation field in `vertex_attr(graph)` contains information relevant to deciding which nodes to exclude, and the `exclude` argument to indicate the value in the annotation field that nodes to be excluded carry. 
@@ -119,11 +119,11 @@ shmulateTree(sequence, graph, field="sample_id", exclude=NA)
 ```
 ##             name                                      sequence distance
 ## 1 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-## 2 GN5SHBT03EP4KC NGATCTGACGACGCGGCCGTGAACTACTGTGCGAGAGATAGTTTA        3
-## 3 GN5SHBT01A3SFZ NGAGTTGACGACACGGCCGTGTATTATTGTGGGAGGGATAATTTA        6
-## 4 GN5SHBT08HUU7M NGATCTGACGACGAGGCCGAGAACCACTGTGCGAGAGATAGTTTA        3
-## 5 GN5SHBT04CEA6I NGACCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        1
-## 6 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGGTTA        1
+## 2 GN5SHBT03EP4KC NGATCTGACGGCACGGCCGTGTATCACTGTGCGAGAGATAGTTTC        3
+## 3 GN5SHBT01A3SFZ NCATCTGACGACACGTCCGTATATTGCTGTGCGAAAGATAATTTA        6
+## 4 GN5SHBT08HUU7M NGATCCGACGGCACGGCCGTGTATCACTGTGCGAGAGTTAGCTTC        3
+## 5 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTGTACTACTGTGCGAGAGATAGTTTA        1
+## 6 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTACTGTGCGAGCGATAGTTTA        1
 ```
 
 It is also possible to add a proportional number of mutations to the immediate offsprings of the MRCA based on the fraction of the nucleotide sequence that is within the junction region. This is achieved via the optional `junctionWeight` argument, to be supplied as a numeric value between `0` and `1`. 
@@ -147,11 +147,11 @@ shmulateTree(sequence, graph, junctionWeight=0.2)
 ```
 ##             name                                      sequence distance
 ## 1      Inferred1 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-## 2 GN5SHBT07JDYW5 NGATTTGACGACACGGCCGTATATTACTGTGCGAGAGATAGTTTA        2
-## 3 GN5SHBT03EP4KC NGATTTGACGACACGGCCATGTATTACTGTGCGAGAGATAATTTA        3
-## 4 GN5SHBT01AKANC NGATCTGACGACACGACCGTCGATTATTGTGCGAGAGAGAGTTTA        5
-## 5 GN5SHBT01A3SFZ NAATTTGACGACACGGGCGTTTTTTACTGTGCGAGAGAATGTTTA        6
-## 6 GN5SHBT08HUU7M NCATTTGACGACACGGCCATGTCTTACTGTGCGAGAGATAACTTA        3
-## 7 GN5SHBT04CEA6I NGATTTGACGACACGGCCGTATTTTACTGTGCGAGAGATAGTTTA        1
-## 8 GN5SHBT06IXJIH NGATTTGACGACACGGCCGTATATTACTGTGCGAGAGATTGTTTA        1
+## 2 GN5SHBT07JDYW5 NGATCTGACGACACGTCCGTGTATTACTGTGCGAGAGATAGTTCA        2
+## 3 GN5SHBT03EP4KC NGATCTGAACACACGTCCGTGTATTGCTGTGCGAGAGATAGTTCA        3
+## 4 GN5SHBT01AKANC NGATGTGACGACACGGCCGTGTATTACTGTGCGAGATATACCTTG        5
+## 5 GN5SHBT01A3SFZ NGATCTGACGACACGTCCTTCTACTACTGTCCGAGAGATCGTTCG        6
+## 6 GN5SHBT08HUU7M NGATCTGAACACACGTCCGTGTATCACTGTGCGAGAGATAGCTCA        3
+## 7 GN5SHBT04CEA6I NGATCTGACGACACGTCCGTGTATTACTGTGCGAGAGACAGTTCA        1
+## 8 GN5SHBT06IXJIH NGATCTGACGACACGTCCGTGTATTACTGTGCGAGAGATAGTTCG        1
 ```
