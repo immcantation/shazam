@@ -129,11 +129,8 @@ specified region
 Details
 -------------------
 
-Mutation counts are determined by comparing the input sequences (in the column specified 
-by `sequenceColumn`) to a reference sequence. If `db` includes lineage information,
-e.g. in the field `parent_sequence`, the reference sequence can be set to  
-use that field as reference sequence. See more details in [makeGraphDf](makeGraphDf.md)).
-See [calcObservedMutations](calcObservedMutations.md) for more technical details, 
+Mutation counts are determined by comparing a reference sequence to the input sequences in the 
+column specified by `sequenceColumn`. See [calcObservedMutations](calcObservedMutations.md) for more technical details, 
 **including criteria for which sequence differences are included in the mutation 
 counts and which are not**.
 
@@ -142,6 +139,10 @@ regions of the sequences as defined by `regionDefinition`. Typically, this would
 be the framework (FWR) and complementarity determining (CDR) regions of IMGT-gapped 
 nucleotide sequences. Mutation counts are appended to the input `db` as 
 additional columns.
+
+If `db` includes lineage information, such as the `parent_sequence` column created by 
+[makeGraphDf](makeGraphDf.md), the reference sequence can be set to use that field as reference sequence 
+using the `germlineColumn` argument.
 
 
 

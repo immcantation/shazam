@@ -1384,11 +1384,8 @@ calcClonalConsensus <- function(db,
 #'           }     
 #'                                  
 #' @details
-#' Mutation counts are determined by comparing the input sequences (in the column specified 
-#' by \code{sequenceColumn}) to a reference sequence. If \code{db} includes lineage information,
-#' e.g. in the field \code{parent_sequence}, the reference sequence can be set to  
-#' use that field as reference sequence. See more details in \link{makeGraphDf}).
-#' See \link{calcObservedMutations} for more technical details, 
+#' Mutation counts are determined by comparing a reference sequence to the input sequences in the 
+#' column specified by \code{sequenceColumn}. See \link{calcObservedMutations} for more technical details, 
 #' \strong{including criteria for which sequence differences are included in the mutation 
 #' counts and which are not}.
 #' 
@@ -1398,6 +1395,9 @@ calcClonalConsensus <- function(db,
 #' nucleotide sequences. Mutation counts are appended to the input \code{db} as 
 #' additional columns.
 #' 
+#' If \code{db} includes lineage information, such as the \code{parent_sequence} column created by 
+#' \link{makeGraphDf}, the reference sequence can be set to use that field as reference sequence 
+#' using the \code{germlineColumn} argument.
 #' 
 #' @seealso  
 #' \link{calcObservedMutations} is called by this function to get the number of mutations 
