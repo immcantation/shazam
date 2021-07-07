@@ -907,14 +907,24 @@ consensusSequence <- function(sequences, db=NULL,
                         dimnames=list(tabMtxRownames, NULL))
         ## across sequences, at each nuc position, how many A, T, G, C, N, ., -? 
         # this does not capture NA
-        for (j in 1:ncol(seqsMtx)) {
-            tab <- table(seqsMtx[, j])
-            r <- match(names(tab), tabMtxRownames)
-            if (any(is.na(r))) {
-                stop("Ambiguous nucleotides or unexpected characters found in `sequences`.")
-            }
-            tabMtx[r, j] <- tab
+        # for (j in 1:ncol(seqsMtx)) {
+        #     tab <- table(seqsMtx[, j])
+        #     r <- match(names(tab), tabMtxRownames)
+        #     if (any(is.na(r))) {
+        #         stop("Ambiguous nucleotides or unexpected characters found in `sequences`.")
+        #     }
+        #     tabMtx[r, j] <- tab
+        # }
+        # This is faster:
+        if (!all(na.omit(as.vector(seqsMtx)) %in% tabMtxRownames)) {
+            stop("Ambiguous nucleotides or unexpected characters found in `sequences`.")
         }
+        tabMtx <- apply(seqsMtx, 2, function(j) {
+            sapply(tabMtxRownames, function(nt){
+                sum(j == nt, na.rm=T)
+            })
+        })
+        
         ## across sequences, at each nuc position, how many NAs?
         numNAs <- colSums(is.na(seqsMtx))
         tabMtx["na", ] <- numNAs
