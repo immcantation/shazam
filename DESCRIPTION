@@ -77,7 +77,6 @@ Collate:
     'RegionDefinitions.R'
     'Baseline.R'
     'DistToNearest.R'
-    'IMGTToKabat.R'
     'MutationDefinitions.R'
     'MutationProfiling.R'
     'RegionsExtend.R'
