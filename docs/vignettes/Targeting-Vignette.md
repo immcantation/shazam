@@ -29,6 +29,8 @@ be present in the table:
 # Load example data
 library(shazam)
 data(ExampleDb, package="alakazam")
+# Subset to IGHG, for faster usage demonstration
+ExampleDb <- ExampleDb[ExampleDb$c_call == "IGHG",]
 ```
 
 ## Infer targeting model (substitution and mutability)
