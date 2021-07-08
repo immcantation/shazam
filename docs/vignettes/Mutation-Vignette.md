@@ -26,7 +26,7 @@ library(ggplot2)
 
 # Load and subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG") & sample_id == "+7d")
+db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
 ```
 
 ## Calculate the counts and frequencies of mutations over the entire sequence
@@ -59,10 +59,10 @@ db_obs %>%
 ## # A tibble: 4 x 3
 ##   sequence_id    mu_count_seq_r mu_count_seq_s
 ##   <chr>                   <dbl>          <dbl>
-## 1 GN5SHBT06IU6DX              0              2
-## 2 GN5SHBT02DKEL8              0              1
-## 3 GN5SHBT06HJRH4              1              2
-## 4 GN5SHBT05GAIZJ              1              2
+## 1 GN5SHBT07FUXY8              0              0
+## 2 GN5SHBT05JMPI5              8              2
+## 3 GN5SHBT08H4LPP              8              2
+## 4 GN5SHBT05JGND3              0              0
 ```
 
 ```r
@@ -82,10 +82,10 @@ db_obs %>%
 ## # A tibble: 4 x 3
 ##   sequence_id    mu_freq_seq_r mu_freq_seq_s
 ##   <chr>                  <dbl>         <dbl>
-## 1 GN5SHBT06IU6DX       0             0.00610
-## 2 GN5SHBT02DKEL8       0             0.00303
-## 3 GN5SHBT06HJRH4       0.00306       0.00612
-## 4 GN5SHBT05GAIZJ       0.00306       0.00612
+## 1 GN5SHBT07FUXY8        0            0      
+## 2 GN5SHBT05JMPI5        0.0237       0.00592
+## 3 GN5SHBT08H4LPP        0.0236       0.00590
+## 4 GN5SHBT05JGND3        0            0
 ```
 
 Specifying the `combine=TRUE` argument will aggregate all mutation 
@@ -110,10 +110,10 @@ db_obs %>%
 ## # A tibble: 4 x 1
 ##   sequence_id   
 ##   <chr>         
-## 1 GN5SHBT06IU6DX
-## 2 GN5SHBT02DKEL8
-## 3 GN5SHBT06HJRH4
-## 4 GN5SHBT05GAIZJ
+## 1 GN5SHBT07FUXY8
+## 2 GN5SHBT05JMPI5
+## 3 GN5SHBT08H4LPP
+## 4 GN5SHBT05JGND3
 ```
 
 We can plot the mutation frequencies a explore differences between samples or isotypes.
@@ -175,10 +175,10 @@ db_obs_v %>%
 ## # A tibble: 4 x 7
 ##   sequence_id    mu_count_fwr1_r mu_count_fwr1_s mu_count_fwr2_r mu_count_fwr2_s mu_count_fwr3_r mu_count_fwr3_s
 ##   <chr>                    <dbl>           <dbl>           <dbl>           <dbl>           <dbl>           <dbl>
-## 1 GN5SHBT06IU6DX               0               0               0               0               0               0
-## 2 GN5SHBT02DKEL8               0               0               0               0               0               0
-## 3 GN5SHBT06HJRH4               0               0               0               0               0               0
-## 4 GN5SHBT05GAIZJ               0               0               0               0               0               0
+## 1 GN5SHBT07FUXY8               0               0               0               0               0               0
+## 2 GN5SHBT05JMPI5               1               0               0               0               5               1
+## 3 GN5SHBT08H4LPP               1               0               0               0               5               1
+## 4 GN5SHBT05JGND3               0               0               0               0               0               0
 ```
 
 ```r
@@ -198,10 +198,10 @@ db_obs_v %>%
 ## # A tibble: 4 x 5
 ##   sequence_id    mu_freq_cdr_r mu_freq_cdr_s mu_freq_fwr_r mu_freq_fwr_s
 ##   <chr>                  <dbl>         <dbl>         <dbl>         <dbl>
-## 1 GN5SHBT06IU6DX             0             0             0             0
-## 2 GN5SHBT02DKEL8             0             0             0             0
-## 3 GN5SHBT06HJRH4             0             0             0             0
-## 4 GN5SHBT05GAIZJ             0             0             0             0
+## 1 GN5SHBT07FUXY8             0             0        0            0      
+## 2 GN5SHBT05JMPI5             0             0        0.0251       0.00418
+## 3 GN5SHBT08H4LPP             0             0        0.025        0.00417
+## 4 GN5SHBT05JGND3             0             0        0            0
 ```
 
 Plot a comparison between CDR silent and replacement mutations.
@@ -254,10 +254,10 @@ db_obs_ch %>%
 ## # A tibble: 4 x 3
 ##   sequence_id    mu_freq_seq_r mu_freq_seq_s
 ##   <chr>                  <dbl>         <dbl>
-## 1 GN5SHBT06IU6DX             0       0.00610
-## 2 GN5SHBT02DKEL8             0       0.00303
-## 3 GN5SHBT06HJRH4             0       0.00917
-## 4 GN5SHBT05GAIZJ             0       0.00917
+## 1 GN5SHBT07FUXY8       0              0     
+## 2 GN5SHBT05JMPI5       0.00296        0.0266
+## 3 GN5SHBT08H4LPP       0.00295        0.0265
+## 4 GN5SHBT05JGND3       0              0
 ```
 
 We can make a plot to visualize if mutations that change the sequence charge are more 
