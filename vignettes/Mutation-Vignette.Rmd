@@ -48,7 +48,7 @@ library(ggplot2)
 
 # Load and subset example data
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
+db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG") & sample_id == "+7d")
 ```
 
 ## Calculate the counts and frequencies of mutations over the entire sequence

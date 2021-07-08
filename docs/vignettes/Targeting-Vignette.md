@@ -29,8 +29,9 @@ be present in the table:
 # Load example data
 library(shazam)
 data(ExampleDb, package="alakazam")
-# Subset to IGHG, for faster usage demonstration
-ExampleDb <- ExampleDb[ExampleDb$c_call == "IGHG",]
+
+# Subset to IGHG for faster usage demonstration
+db <- subset(ExampleDb, c_call == "IGHG")
 ```
 
 ## Infer targeting model (substitution and mutability)
@@ -49,10 +50,10 @@ entirely disregards 5-mers with multiple mutations.
 
 ```r
 # Create substitution model using silent mutations
-sub_model <- createSubstitutionMatrix(ExampleDb, model="s", 
-                                       sequenceColumn="sequence_alignment",
-                                       germlineColumn="germline_alignment_d_mask",
-                                       vCallColumn="v_call")
+sub_model <- createSubstitutionMatrix(db, model="s", 
+                                      sequenceColumn="sequence_alignment",
+                                      germlineColumn="germline_alignment_d_mask",
+                                      vCallColumn="v_call")
 ```
 
 The function for inferring a mutability model (`createMutabilityMatrix`) counts 
@@ -63,10 +64,10 @@ inferring the substitution rates are available to adjust this function.
 
 ```r
 # Create mutability model using silent mutations
-mut_model <- createMutabilityMatrix(ExampleDb, sub_model, model="s",
-                                     sequenceColumn="sequence_alignment",
-                                     germlineColumn="germline_alignment_d_mask",
-                                     vCallColumn="v_call")
+mut_model <- createMutabilityMatrix(db, sub_model, model="s",
+                                    sequenceColumn="sequence_alignment",
+                                    germlineColumn="germline_alignment_d_mask",
+                                    vCallColumn="v_call")
 ```
 
 `createMutabilityMatrix` creates an object of class `MutabilityModel` that contains 
@@ -124,7 +125,7 @@ using the `collapseClones` function.
 
 ```r
 # Collapse sequences into clonal consensus
-clone_db <- collapseClones(ExampleDb, cloneColumn="clone_id", 
+clone_db <- collapseClones(db, cloneColumn="clone_id", 
                            sequenceColumn="sequence_alignment",
                            germlineColumn="germline_alignment_d_mask",
                            nproc=1)
