@@ -453,6 +453,13 @@ collapseClones <- function(db, cloneColumn = "clone_id",
     check <- checkColumns(db, c(cloneColumn, sequenceColumn, germlineColumn, fields))
     if (check != TRUE) { stop(check) }
     
+    # Check for NAs
+    na_rows <- which(is.na(db[,c(cloneColumn, sequenceColumn, germlineColumn)] ), arr.ind=T)
+    if (nrow(na_rows)>0) {
+        na_cols <- c(cloneColumn, sequenceColumn, germlineColumn)[unique(na_rows[,2])]
+        stop("NA values found in column(s): ", paste(na_cols, collapse=", "),". ",length(unique(na_rows[,1])), " sequence(s) affected.")
+    }
+    
     # Check region definition
     if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
