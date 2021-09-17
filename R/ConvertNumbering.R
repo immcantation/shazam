@@ -1,22 +1,22 @@
 #### Convert Numbering ####
 
-# Converts numbering systems like Kabat or IMGT using these conventions:
-# http://www.imgt.org/IMGTScientificChart/Numbering/IMGT-Kabat_part1.html
-# with Gaps (unoccupied positions) shown by "G" and Asterisks (*) shown by "S": 
-# arbitrary mappings (multiple possible "to" values) represented with "NA"
-#
-# @param   locus   string indicating heavy ("IGH") or light chains ("IGK" or "IGL)
-# @param   from    string indicating numbering system to convert to ("IMGT" or "KABAT")
-# @param   to      string indicating original numbering system ("IMGT" or "KABAT")
-# @param   x       vector of strings representing original numbering
-# @return  A vector of string indicating the corresponding numbering
-#
-# @examples
-# convertNumbering("IGH", "IMGT", "KABAT", c("51", "23", "110"))
-# convertNumbering("IGH", "KABAT", "IMGT", c("51", "23", "G"))
-
-library(dplyr)
-
+#' convertNumbering: IMGT-Kabat number conversion
+#' 
+#' Converts numbering systems like Kabat or IMGT using these conventions:
+#' http://www.imgt.org/IMGTScientificChart/Numbering/IMGT-Kabat_part1.html
+#' with Gaps (unoccupied positions) shown by "G" and Asterisks (*) shown by "S": 
+#' arbitrary mappings (multiple possible "to" values) represented with "NA"
+#'
+#' @param   locus   string indicating heavy ("IGH") or light chains ("IGK" or "IGL)
+#' @param   from    string indicating numbering system to convert to ("IMGT" or "KABAT")
+#' @param   to      string indicating original numbering system ("IMGT" or "KABAT")
+#' @param   x       vector of strings representing original numbering
+#' @return  A vector of string indicating the corresponding numbering
+#' 
+#' @examples
+#' convertNumbering("IGH", "IMGT", "KABAT", c("51", "23", "110"))
+#' convertNumbering("IGH", "KABAT", "IMGT", c("51", "23", "G"))
+# TODO: @export
 convertNumbering <- function(locus, from, to, arrayOfSeqs) {
   from_map <- pull(CONVERT_NUM_REF, paste(locus, from, sep='_')) 
   to_map <- pull(CONVERT_NUM_REF, paste(locus, to, sep='_')) 

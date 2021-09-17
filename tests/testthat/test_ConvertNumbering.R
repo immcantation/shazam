@@ -1,5 +1,4 @@
 #### ConvertNumbering ####
-library(testthat)
 test_that("Ensure numberings are consistent and stable", {
     ## Reproduce example
     imgt_seqs <- c("51", "23", "31", "18", "4", "90", "58", "59", "3")

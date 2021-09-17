@@ -124,7 +124,7 @@
 #'                          mutate summarize
 #'                          mutate_at summarize_at
 #'                          rename transmute
-#'                          left_join
+#'                          left_join recode pull
 #' @importFrom  foreach     foreach %dopar% registerDoSEQ
 #' @importFrom  igraph      V E as_adjacency_matrix graph_from_data_frame
 #'                          vertex_attr set_vertex_attr 
@@ -229,6 +229,10 @@ NULL
 
 # TODO: And what is this?
 # BAYESIAN_FITTED
+
+# IMGT-KABAT numbering mapping
+# As described hare http://www.imgt.org/IMGTScientificChart/Numbering/IMGT-Kabat_part1.html
+# CONVERT_NUM_REF
 
 # Add built-in variables to global variables environment
 utils::globalVariables(c("HH_S1F", "HKL_S1F", "MK_RS1NF",

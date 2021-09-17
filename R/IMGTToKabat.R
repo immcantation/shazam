@@ -2,7 +2,7 @@
 # http://www.imgt.org/IMGTScientificChart/Numbering/IMGT-Kabat_part1.html.
 # Gaps (unoccupied positions) are shown by "G".
 # Asteriks (*) are shown by "S"
-
+# TODO: remove this file
 imgtToKabat_ighv <- function(x) {
   coresp <- c("1"="1", "2"="2", "3"="3", "4"="4", "5"="5", "6"="6", "7"="7", "8"="8", "9"="9", "10"="G", "11"="10", 
               "12"="11", "13"="12", "14"="13",  "15"="14", "16"="15", "17"="16", "18"="17", "19"="18", "20"="19", 
