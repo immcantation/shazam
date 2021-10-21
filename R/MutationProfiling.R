@@ -2449,7 +2449,7 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
                               function(i){
                                   calcObservedMutations(inputSeq=db[i, sequenceColumn],
                                                         germlineSeq=db[i, germlineColumn],
-                                                        returnRaw=T)$pos})    
+                                                        returnRaw=T)$pos}, simplify = F)    
     } else {
         if (verbose) {cat("dbMutList supplied; skipped calling calcObservedMutations()\n")}
         inputMutList <- dbMutList
