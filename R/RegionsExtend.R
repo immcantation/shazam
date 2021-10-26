@@ -347,13 +347,13 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
 
 
 # Status: experimental, not exported function
-# data(oneseq_db, package="alakazam")
+# data(SingleDb, package="alakazam")
 # germline_db <- list(
 # "IGHV3-11*05"="CAGGTGCAGCTGGTGGAGTCTGGGGGA...GGCTTGGTCAAGCCTGGAGGGTCCCTGAGACTCTCCTGTGCAGCCTCTGGATTCACCTTC............AGTGACTACTACATGAGCTGGATCCGCCAGGCTCCAGGGAAGGGGCTGGAGTGGGTTTCATACATTAGTAGTAGT......AGTAGTTACACAAACTACGCAGACTCTGTGAAG...GGCCGATTCACCATCTCCAGAGACAACGCCAAGAACTCACTGTATCTGCAAATGAACAGCCTGAGAGCCGAGGACACGGCCGTGTATTACTGTGCGAGAGA",
 # "IGHD3-10*01"="GTATTACTATGGTTCGGGGAGTTATTATAAC",
 # "IGHJ5*02"="ACAACTGGTTCGACCCCTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCAG"
 # )
-# pja <- shazam:::plotJunctionAlignment(oneseq_db, germline_db,regionDefinition=IMGT_VDJ_BY_REGIONS)
+# pja <- shazam:::plotJunctionAlignment(SingleDb, germline_db,regionDefinition=IMGT_VDJ_BY_REGIONS)
 # pja$p
 plotJunctionAlignment <- function(db_row, germline_db, 
                                   sequence_alignment="sequence_alignment", 
