@@ -38,6 +38,7 @@ LazyData: true
 BuildVignettes: true
 VignetteBuilder: knitr
 Encoding: UTF-8
+biocViews:
 Depends:
     R (>= 3.5.0),
     ggplot2 (>= 3.3.4)
