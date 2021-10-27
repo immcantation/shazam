@@ -2340,6 +2340,9 @@ slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
 #'                               consecutive nucleotides. Must be between 1 and \code{windowSize} 
 #'                               inclusive. 
 #' @param    windowSize          length of consecutive nucleotides. Must be at least 2.
+#' @param   nproc                Number of cores to distribute the operation over. If the 
+#'                               \code{cluster} has already been set earlier, then pass the 
+#'                               \code{cluster}. This will ensure that it is not reset.
 #'                               
 #' @return   a logical vector. The length of the vector matches the number of input sequences in 
 #'           \code{db}. Each entry in the vector indicates whether the corresponding input sequence
@@ -2358,16 +2361,53 @@ slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
 #'               mutThresh=6, windowSize=10)
 #' 
 #' @export
-slideWindowDb <- function(db, sequenceColumn="sequence_alignment", 
+slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
                           germlineColumn="germline_alignment_d_mask",
-                          mutThresh, windowSize){
-    db_filter <- sapply(1:nrow(db), function(i) { slideWindowSeq(inputSeq = db[i, sequenceColumn],
-                                                                 germlineSeq = db[i, germlineColumn],
-                                                                 mutThresh = mutThresh,
-                                                                 windowSize = windowSize)})
-    return(db_filter)
-}
+                          mutThresh=6, windowSize=10, nproc=1){
 
+    # Check input
+    check <- checkColumns(db, c(sequenceColumn, germlineColumn))
+    if (check != TRUE) { stop(check) }
+
+    db <- db[,c(sequenceColumn, germlineColumn)]
+    # If the user has previously set the cluster and does not wish to reset it
+    if(!is.numeric(nproc)){
+        cluster <- nproc
+        nproc <- 0
+    }
+
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, cpuCount())
+
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters &
+    # export all nesseary environment variables, functions and packages.
+    if (nproc == 1) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    } else {
+        if (nproc != 0) {
+            #cluster <- makeCluster(nproc, type="SOCK")
+            cluster <- parallel::makeCluster(nproc, type= "PSOCK")
+        }
+        parallel::clusterExport(cluster,
+                                list('db', 'sequenceColumn', 'germlineColumn',
+                                     'mutThresh', 'windowSize'),
+                                envir=environment() )
+        registerDoParallel(cluster)
+    }
+
+    unlist(foreach(i=1:nrow(db),
+                   .verbose=FALSE, .errorhandling='stop') %dopar% {
+                       slideWindowSeq(inputSeq = db[i, sequenceColumn],
+                                      germlineSeq = db[i, germlineColumn],
+                                      mutThresh = mutThresh,
+                                      windowSize = windowSize)
+
+                   })
+
+}
 
 #' Parameter tuning for sliding window approach
 #'

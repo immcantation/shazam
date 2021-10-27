@@ -1,3 +1,14 @@
+Version 1.1.0.999: October 27, 2021
+-------------------------------------------------------------------------------
+
+Mutation Profiling:
+
++ `shmulateTree` has new argument `nproc` to specify the number of cores. Default
+   values `mutThresh` and `windowSize` have been set to `mutThresh=6` and
+   `windowSize=10`.
+
+
+
 Version 1.1.0: July 8, 2021
 -------------------------------------------------------------------------------
 
