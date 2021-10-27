@@ -2364,7 +2364,9 @@ slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
 slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
                           germlineColumn="germline_alignment_d_mask",
                           mutThresh=6, windowSize=10, nproc=1){
-
+    # Hack for visibility of foreach index variables
+    i <- NULL
+    
     # Check input
     check <- checkColumns(db, c(sequenceColumn, germlineColumn))
     if (check != TRUE) { stop(check) }
@@ -2404,7 +2406,6 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
                                       germlineSeq = db[i, germlineColumn],
                                       mutThresh = mutThresh,
                                       windowSize = windowSize)
-
                    })
 
 }
