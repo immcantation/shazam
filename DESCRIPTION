@@ -36,7 +36,7 @@ URL: http://shazam.readthedocs.io
 BugReports: https://bitbucket.org/kleinstein/shazam/issues
 LazyData: true
 BuildVignettes: true
-VignetteBuilder: knitr
+VignetteBuilder: knitr, rmarkdown
 Encoding: UTF-8
 biocViews:
 Depends:
