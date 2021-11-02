@@ -78,7 +78,6 @@ Collate:
     'Baseline.R'
     'ConvertNumbering.R'
     'DistToNearest.R'
-    'IMGTToKabat.R'
     'MutationDefinitions.R'
     'MutationProfiling.R'
     'RegionsExtend.R'
