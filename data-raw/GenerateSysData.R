@@ -93,6 +93,7 @@ load("data-raw/FWR_Nuc_Mat.RData")
 load("data-raw/CODON_TABLE.RData")
 load("data-raw/BAYESIAN_FITTED.RData")
 load("data-raw/CONST_I.RData")
+load("data-raw/CONVERT_NUMBERING.RData")
 
 #### Save to R/sysdata.rda ####
 usethis::use_data(NUCLEOTIDES,
@@ -114,6 +115,7 @@ usethis::use_data(NUCLEOTIDES,
                    NUCLEOTIDES_AMBIGUOUS,
                    IUPAC_DNA_2,
                    EXPANDED_AMBIGUOUS_CODONS,
+                   CONVERT_NUM_REF, 
                    internal=TRUE, overwrite=TRUE)
 
 
