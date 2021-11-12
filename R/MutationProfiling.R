@@ -2340,7 +2340,7 @@ slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
 #'                               consecutive nucleotides. Must be between 1 and \code{windowSize} 
 #'                               inclusive. 
 #' @param    windowSize          length of consecutive nucleotides. Must be at least 2.
-#' @param   nproc                Number of cores to distribute the operation over. If the 
+#' @param    nproc                Number of cores to distribute the operation over. If the 
 #'                               \code{cluster} has already been set earlier, then pass the 
 #'                               \code{cluster}. This will ensure that it is not reset.
 #'                               
@@ -2432,7 +2432,9 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
 #'                               must be at least 2.
 #' @param    verbose             whether to print out messages indicating current progress. Default
 #'                               is \code{TRUE}.              
-#'                               
+#' @param    nproc                Number of cores to distribute the operation over. If the 
+#'                               \code{cluster} has already been set earlier, then pass the 
+#'                               \code{cluster}. This will ensure that it is not reset.
 #' @return   a list of logical matrices. Each matrix corresponds to a \code{windowSize} in 
 #'           \code{windowSizeRange}. Each column in a matrix corresponds to a \code{mutThresh} in
 #'           \code{mutThreshRange}.
@@ -2474,7 +2476,8 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
 slideWindowTune <- function(db, sequenceColumn="sequence_alignment", 
                             germlineColumn="germline_alignment_d_mask",
                             dbMutList=NULL,
-                            mutThreshRange, windowSizeRange, verbose=TRUE){
+                            mutThreshRange, windowSizeRange, verbose=TRUE,
+                            nproc=1){
     # check preconditions
     stopifnot(!is.null(db))
     stopifnot(min(mutThreshRange) >= 1 & 
@@ -2482,15 +2485,44 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
                   min(windowSizeRange) >= 2)
     
     
+    db <- db[,c(sequenceColumn, germlineColumn)]
+    # If the user has previously set the cluster and does not wish to reset it
+    if(!is.numeric(nproc)){
+        cluster <- nproc
+        nproc <- 0
+    }
+    
+    # Ensure that the nproc does not exceed the number of cores/CPUs available
+    nproc <- min(nproc, cpuCount())
+    
+    # If user wants to paralellize this function and specifies nproc > 1, then
+    # initialize and register slave R processes/clusters &
+    # export all nesseary environment variables, functions and packages.
+    if (nproc == 1) {
+        # If needed to run on a single core/cpu then, regsiter DoSEQ
+        # (needed for 'foreach' in non-parallel mode)
+        registerDoSEQ()
+    } else {
+        if (nproc != 0) {
+            #cluster <- makeCluster(nproc, type="SOCK")
+            cluster <- parallel::makeCluster(nproc, type= "PSOCK")
+        }
+        parallel::clusterExport(cluster,
+                                list('db', 'sequenceColumn', 'germlineColumn',
+                                     'calcObservedMutations'),
+                                envir=environment() )
+        registerDoParallel(cluster)
+    }
+    
     # get positions of R/S mutations for sequences in db
     # do this here and then call slideWindowSeqHelper (so it's done only once)
     # instead of calling slideWindowDb which does this every time it is called
     if (is.null(dbMutList)) {
-        inputMutList <- sapply(1:nrow(db), 
-                              function(i){
-                                  calcObservedMutations(inputSeq=db[i, sequenceColumn],
-                                                        germlineSeq=db[i, germlineColumn],
-                                                        returnRaw=T)$pos}, simplify = F)    
+        inputMutList <- foreach(i=1:nrow(db),
+                .verbose=FALSE, .errorhandling='stop') %dopar% {
+                    calcObservedMutations(inputSeq=db[i, sequenceColumn],
+                                          germlineSeq=db[i, germlineColumn],
+                                          returnRaw=T)$pos}
     } else {
         if (verbose) {cat("dbMutList supplied; skipped calling calcObservedMutations()\n")}
         inputMutList <- dbMutList
