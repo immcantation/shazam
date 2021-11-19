@@ -2490,6 +2490,20 @@ test_that("observedMutations", {
     
 })
 
+test_that("slideWindowSeqHelper", {
+    # Sequence with 2 consecutive mutations
+    mutPos <- calcObservedMutations("CCAAAAAAA","AAAAAAAAA", returnRaw = T)
+    # expected behaviour is return TRUE if there are equal to or more than 
+    # `mutThresh` number of mutations in any window of size `windowSize`.
+    expect_true(slideWindowSeqHelper(mutPos$pos, mutThresh=2, windowSize=3))
+    expect_false(slideWindowSeqHelper(mutPos$pos, mutThresh=3, windowSize=3))
+    
+    # Sequence with 2 mutations in a 4 nt window
+    mutPos <- calcObservedMutations("CAACAAAAA","AAAAAAAAA", returnRaw = T)
+    expect_false(slideWindowSeqHelper(mutPos$pos, mutThresh=2, windowSize=3))
+    expect_true(slideWindowSeqHelper(mutPos$pos, mutThresh=2, windowSize=4))
+})
+
 test_that("slideWindowDb", {
     
     # ExampleDb

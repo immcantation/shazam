@@ -2273,7 +2273,7 @@ countNonNByRegion <- function(regDef, ambiMode, inputChars, germChars,
 #' 
 #' # Determine if in_seq has 6 or more mutations in 10 consecutive nucleotides
 #' slideWindowSeq(inputSeq=in_seq, germlineSeq=germ_seq, mutThresh=6, windowSize=10)
-#'                                 
+#' slideWindowSeq(inputSeq="TCGTCGAAAA", germlineSeq="AAAAAAAAAA", mutThresh=6, windowSize=10)
 #' @export
 slideWindowSeq <- function(inputSeq, germlineSeq, mutThresh, windowSize){
     # identify all R and S mutations in input sequence
@@ -2300,7 +2300,6 @@ slideWindowSeq <- function(inputSeq, germlineSeq, mutThresh, windowSize){
 #
 # @return   \code{TRUE} if there are equal to or more than \code{mutThresh} number of mutations
 #           in any window of \code{windowSize} consecutive nucleotides; \code{FALSE} if otherwise.
-#
 slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
     # check preconditions
     stopifnot(mutThresh >= 1 & mutThresh <= windowSize & windowSize>=2)
@@ -2389,14 +2388,20 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     } else {
+        cluster_type <- "FORK"
+        if (.Platform$OS.type == "windows") {
+            cluster_type <- "PSOCK"
+        }
         if (nproc != 0) {
             #cluster <- makeCluster(nproc, type="SOCK")
-            cluster <- parallel::makeCluster(nproc, type= "PSOCK")
+            cluster <- parallel::makeCluster(nproc, type= cluster_type)
         }
-        parallel::clusterExport(cluster,
-                                list('db', 'sequenceColumn', 'germlineColumn',
-                                     'mutThresh', 'windowSize'),
-                                envir=environment() )
+        if (cluster_type == "PSOCK") {
+            parallel::clusterExport(cluster,
+                                    list('db', 'sequenceColumn', 'germlineColumn',
+                                         'mutThresh', 'windowSize'),
+                                    envir=environment() )
+        }
         registerDoParallel(cluster)
     }
 
@@ -2503,14 +2508,22 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     } else {
+        
+        cluster_type <- "FORK"
+        if (.Platform$OS.type == "windows") {
+            cluster_type <- "PSOCK"
+        }
+        
         if (nproc != 0) {
             #cluster <- makeCluster(nproc, type="SOCK")
-            cluster <- parallel::makeCluster(nproc, type= "PSOCK")
+            cluster <- parallel::makeCluster(nproc, type= cluster_type)
         }
-        parallel::clusterExport(cluster,
-                                list('db', 'sequenceColumn', 'germlineColumn',
-                                     'calcObservedMutations'),
-                                envir=environment() )
+        if (cluster_type == "PSOCK") {
+            parallel::clusterExport(cluster,
+                                    list('db', 'sequenceColumn', 'germlineColumn',
+                                         'calcObservedMutations'),
+                                    envir=environment() )
+        }
         registerDoParallel(cluster)
     }
     
