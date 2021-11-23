@@ -2522,6 +2522,82 @@ test_that("slideWindowDb", {
     
 })
 
+test_that("slideWindowTunePlot",{
+    db <- data.frame(
+        "sequence_alignment" = c(
+            "AAAAAAAAA", # 0 mutations
+            "CAAAAAAAA", # 1 mutation
+            "CCAAAAAAA", # 2 mutations
+            "CCACCAAAA"  # 4 mutations
+        ),
+        "germline_alignment_d_mask" = c("AAAAAAAAA",
+                                        "AAAAAAAAA",  
+                                        "AAAAAAAAA",
+                                        "AAAAAAAAA"
+        ))
+    
+    # Inspect mutations
+    # lapply(1:nrow(db), function(i) {
+    #     calcObservedMutations(db[["sequence_alignment"]][i],
+    #                           +                               db[["germline_alignment_d_mask"]][i], returnRaw = T)
+    # })
+    
+    tuneList <- slideWindowTune(db = db, 
+                    mutThreshRange = 2:4, windowSizeRange = 3:5,
+                    verbose = FALSE)
+    
+    
+    # 2 sequences have at least 2 mutations in a window of 3 nt
+    expect_equal(tuneList[['3']][,"2"], c(F,F,T,T))
+    # No sequence has 3 mutations in a window of 3 nt
+    expect_equal(tuneList[['3']][,"3"], c(F,F,F,F))
+    # Mutation threshold 4 is not analized for window size 3
+    expect_equal(tuneList[['3']][,"4"], c(NA,NA,NA,NA))
+    
+
+    expect_equal(tuneList[['4']][,"2"], c(F,F,T,T))
+    # One sequence has 3 mutations in a window of 4 nt
+    expect_equal(tuneList[['4']][,"3"], c(F,F,F,T))
+    # No sequence has 4 mutations in a window of 4 nt
+    expect_equal(tuneList[['4']][,"4"], c(F,F,F,F))
+    
+    expect_equal(tuneList[['5']][,"2"], c(F,F,T,T))
+    # One sequence has 3 mutations in a window of 5 nt
+    expect_equal(tuneList[['5']][,"3"], c(F,F,F,T))
+    # One sequence has 4 mutations in a window of 5 nt
+    expect_equal(tuneList[['5']][,"4"], c(F,F,F,T))
+    
+    swtp <- slideWindowTunePlot(tuneList, plotFiltered = NULL, returnRaw = T) %>%
+        as.data.frame()
+    # For window size 3, sequences 3 and 4 have 2 mutations
+    # mutations threshold 4 is not analyzed
+    # 0 sequences have 3 mutations in a window of size 3
+    expect_equal(as.numeric(swtp[1,-1]), c(2,0,NA))
+    
+    # For window size 4, sequence 3 has 2 mutations and
+    # sequence 4 has 3 mutations
+    # there are no cases of 4 mutations in a window of size 4
+    expect_equal(as.numeric(swtp[2,-1]), c(1,1,0))
+    
+    # For window size 5, sequence 3 has 2 mutations and
+    # sequence 4 has 4 mutations
+    expect_equal(as.numeric(swtp[3,-1]), c(1,0,1))
+    
+    # With plotFiltered=TRUE
+    swtp <- slideWindowTunePlot(tuneList, plotFiltered = TRUE, returnRaw = T) %>%
+        as.data.frame()
+    expect_equal(as.numeric(swtp[1,-1]), c(2,0,NA))
+    expect_equal(as.numeric(swtp[2,-1]), c(2,1,0))
+    expect_equal(as.numeric(swtp[3,-1]), c(2,1,1))
+    
+    # With plotFiltered=FALSE
+    swtp <- slideWindowTunePlot(tuneList, plotFiltered = FALSE, returnRaw = T) %>%
+        as.data.frame()
+    expect_equal(as.numeric(swtp[1,-1]), c(2,4,NA))
+    expect_equal(as.numeric(swtp[2,-1]), c(2,3,4))
+    expect_equal(as.numeric(swtp[3,-1]), c(2,3,3))
+})
+
 test_that("expectedMutations", {
     
     # ExampleDb

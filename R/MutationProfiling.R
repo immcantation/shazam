@@ -2357,7 +2357,7 @@ slideWindowSeqHelper <- function(mutPos, mutThresh, windowSize){
 #' # Apply the sliding window approach on a subset of ExampleDb
 #' slideWindowDb(db=ExampleDb[1:10, ], sequenceColumn="sequence_alignment", 
 #'               germlineColumn="germline_alignment_d_mask", 
-#'               mutThresh=6, windowSize=10)
+#'               mutThresh=6, windowSize=10, nproc=1)
 #' 
 #' @export
 slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
@@ -2442,7 +2442,9 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
 #'                               \code{cluster}. This will ensure that it is not reset.
 #' @return   a list of logical matrices. Each matrix corresponds to a \code{windowSize} in 
 #'           \code{windowSizeRange}. Each column in a matrix corresponds to a \code{mutThresh} in
-#'           \code{mutThreshRange}.
+#'           \code{mutThreshRange}. Each row corresponds to a sequence. \code{TRUE} values
+#'           mean the sequences has at least the number of mutations specified in the column name,
+#'           for that \code{windowSize}.
 #' 
 #' @details  If, in a given combination of \code{mutThresh} and \code{windowSize}, \code{mutThresh} 
 #'           is greater than \code{windowSize}, \code{NA}s will be returned for that particular
@@ -2585,8 +2587,10 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
 #' Visualize results from \link{slideWindowTune}
 #' 
 #' @param    tuneList            a list of logical matrices returned by \link{slideWindowTune}.
-#' @param    plotFiltered        whether to plot the number of filtered sequences (as opposed to
-#'                               the number of remaining sequences). Default is \code{TRUE}.
+#' @param    plotFiltered        whether to plot the number of filtered (TRUE), 
+#'                               or remaining (FALSE) sequences for each mutation threshold. 
+#'                               Use `NULL` to plot the number of sequences at each mutation
+#'                               value. Default is \code{TRUE}.
 #' @param    percentage          whether to plot on the y-axis the percentage of filtered sequences
 #'                               (as opposed to the absolute number). Default is \code{FALSE}.                             
 #' @param    jitter.x            whether to jitter x-axis values. Default is \code{FALSE}.                               
@@ -2605,10 +2609,23 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
 #' @param    legendHoriz         whether to make legend horizontal. Default is \code{FALSE}.
 #' @param    legendCex           numeric values by which legend should be magnified relative to 1.
 #' @param    title               plot main title. Default is NULL (no title)
+#' @param    returnRaw           Return a data.frame with sequence counts (TRUE) or a
+#'                               plot. Default is \code{FALSE}.
 #' 
-#' @details  For each \code{windowSize}, the numbers of sequences filtered or remaining after applying
-#'           the sliding window approach are plotted on the y-axis against thresholds on the number of
-#'           mutations in a window on the x-axis.
+#' @details  For each \code{windowSize}, if \code{plotFiltered=TRUE}, the x-axis 
+#'           represents a mutation threshold range, and the y-axis the number of
+#'           sequences that have at least that number of mutations. If 
+#'           \code{plotFiltered=TRUE}, the y-axis represents the number of sequences
+#'           that have less mutations than the mutation threshold range. For the same
+#'           window size, a sequence can be included in the counts for different
+#'           mutation thresholds. For example, sequence "CCACCAAAA" with germline
+#'           "AAAAAAAAA" has 4 mutations. This sequence has at least 2 mutations 
+#'           and at least 3 mutations, in a window of size 4. the sequence will
+#'           be included in the sequence count for mutation thresholds 2 and 3.
+#'           If \code{plotFiltered=TRUE}, the sequences are counted only once for
+#'           each window size, at their largest mutation threshold. The above 
+#'           example sequence would be included in the sequence count for 
+#'           mutation threshold 3. 
 #'           
 #'           When plotting, a user-defined \code{amount} of jittering can be applied on values plotted
 #'           on either axis or both axes via adjusting \code{jitter.x}, \code{jitter.y}, 
@@ -2653,20 +2670,26 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
 #' slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
 #'                     plotFiltered=TRUE, percentage=TRUE, 
 #'                     jitter.y=TRUE, jitter.y.amt=0.01)
-#'                                                             
 #' @export
 slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALSE,
                                jitter.x = FALSE, jitter.x.amt = 0.1,
                                jitter.y = FALSE, jitter.y.amt = 0.1,
                                pchs = 1, ltys = 2, cols = 1,
                                plotLegend = TRUE, legendPos = "topright", 
-                               legendHoriz = FALSE, legendCex = 1, title=NULL){
+                               legendHoriz = FALSE, legendCex = 1, title=NULL,
+                               returnRaw=FALSE){
     
-    # invert (!) tuneList if plotting retained sequences
-    ylab.part.2 <- "filtered"
-    if (!plotFiltered) {
-        tuneList <- lapply(tuneList, function(x){!x})
-        ylab.part.2 <- "remaining"}
+    if (!is.null(plotFiltered)) {
+        # invert (!) tuneList if plotting retained sequences
+        ylab.part.2 <- "filtered"
+        xlab <- "Threshold on number of mutations"
+        if (!plotFiltered) {
+            tuneList <- lapply(tuneList, function(x){!x})
+            ylab.part.2 <- "remaining"}
+    } else {
+        xlab <- "Maximum number of mutations"
+        ylab.part.2 <- NULL
+    }
     
     # if number of pchs/ltys/cols provided does not match number of lines expected
     # expand into vector with repeating values (otherwise legend would break)
@@ -2675,13 +2698,38 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
     if (length(cols)!=length(tuneList)) {cols <- rep(cols, length.out=length(tuneList))}
     
     # tabulate tuneList (and if applicable convert to percentage)
+    if (is.null(plotFiltered)) {
+        # preprocess tuneList to count each sequence once,
+        # considering the largest number of mutations in the window
+        plotList.tmp <- lapply(tuneList, function(window_df) {
+            # For each sequence
+            bind_rows(lapply(1:nrow(window_df), function(i) {
+                x <- window_df[i,]
+                # Find the mutation thresholds that are T
+                idx <- which(x)
+                # If there are none (all F or NA values) or there is only one, do nothig
+                # If there are more than one, keep the largest index and set the previous values to F
+                if (length(idx) > 1) {
+                    idx <- max(idx)
+                    x[1:(idx-1)] <- F
+                }
+                x
+            }))
+        })
+        tuneList <- plotList.tmp
+    }
     plotList <- lapply(tuneList, colSums)
+    
     if (percentage) {plotList <- lapply(plotList, function(x){x/nrow(tuneList[[1]])})}
+    
+    if (returnRaw) {
+        return (bind_rows(plotList, .id = "windowSize"))
+    }
     
     # get x-axis values (i.e. mutThreshRange; colnames of matrix in tuneList with most columns)
     #threshes = as.numeric(colnames(tuneList[[which.max(lapply(lapply(tuneList, colnames), length))]]))
-    threshes <- as.numeric(colnames(tuneList[[1]]))
-    
+    threshes <- as.numeric(colnames(tuneList[[1]]))   
+
     # plot for first window size
     x1 <- threshes
     if (jitter.x) {x1 <- jitter(x1, amount=jitter.x.amt)}
@@ -2707,7 +2755,7 @@ slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALS
          ylim = ylims,
          # xlim: +/- jitter.x.amt*2 to accommodate for amount of jittering on x-axis
          xlim = c(min(threshes)-jitter.x.amt*2, max(threshes+jitter.x.amt*2)),
-         xaxt="n", xlab="Threshold on number of mutations",
+         xaxt="n", xlab=xlab,
          ylab=paste(ylab.part.1, ylab.part.2),
          cex.lab=1.5, cex.axis=1.5, type="b", lwd=1.5,
          pch=pchs[1], lty=ltys[1], col=cols[1])
