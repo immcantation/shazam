@@ -2373,8 +2373,11 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
     db <- db[,c(sequenceColumn, germlineColumn)]
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){
+        stop_cluster <- FALSE
         cluster <- nproc
         nproc <- 0
+    } else {
+        stop_cluster <- TRUE
     }
 
     # Ensure that the nproc does not exceed the number of cores/CPUs available
@@ -2384,7 +2387,7 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
     # initialize and register slave R processes/clusters &
     # export all nesseary environment variables, functions and packages.
     if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ
+        # If needed to run on a single core/cpu then, register DoSEQ
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     } else {
@@ -2405,13 +2408,17 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
         registerDoParallel(cluster)
     }
 
-    unlist(foreach(i=1:nrow(db),
+    filter <- unlist(foreach(i=1:nrow(db),
                    .verbose=FALSE, .errorhandling='stop') %dopar% {
                        slideWindowSeq(inputSeq = db[i, sequenceColumn],
                                       germlineSeq = db[i, germlineColumn],
                                       mutThresh = mutThresh,
                                       windowSize = windowSize)
                    })
+    if (stop_cluster & !is.numeric(nproc)) {
+        parallel::stopCluster(cluster)
+    }
+    filter
 
 }
 
@@ -2495,8 +2502,11 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
     db <- db[,c(sequenceColumn, germlineColumn)]
     # If the user has previously set the cluster and does not wish to reset it
     if(!is.numeric(nproc)){
+        stop_cluster <- FALSE
         cluster <- nproc
         nproc <- 0
+    } else {
+        stop_cluster <- TRUE
     }
     
     # Ensure that the nproc does not exceed the number of cores/CPUs available
@@ -2577,6 +2587,10 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
         }
     }
     names(cur.list) <- as.character(windowSizeRange)
+    
+    if (stop_cluster & !is.numeric(nproc)) {
+        parallel::stopCluster(cluster)
+    }
     
     return(cur.list)
 }
