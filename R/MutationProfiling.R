@@ -2399,7 +2399,7 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
         if (cluster_type == "PSOCK") {
             parallel::clusterExport(cluster,
                                     list('db', 'sequenceColumn', 'germlineColumn',
-                                         'mutThresh', 'windowSize'),
+                                         'mutThresh', 'windowSize','slideWindowSeq'),
                                     envir=environment() )
         }
         registerDoParallel(cluster)
