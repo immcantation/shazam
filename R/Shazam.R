@@ -149,7 +149,7 @@
 #'                          stri_count_boundaries stri_count_regex 
 #'                          stri_extract_all_regex stri_extract_first_regex  
 #'                          stri_replace_all_regex stri_replace_first_regex
-#' @importFrom  tidyr       gather spread
+#' @importFrom  tidyr       gather spread pivot_wider
 #' @importFrom  tidyselect  all_of
 NULL
 

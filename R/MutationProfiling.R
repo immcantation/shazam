@@ -2543,50 +2543,62 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
     # do this here and then call slideWindowSeqHelper (so it's done only once)
     # instead of calling slideWindowDb which does this every time it is called
     if (is.null(dbMutList)) {
+        if (verbose) {cat(paste0("Identifying mutated positions\n"))}
+        pb <- txtProgressBar(0, nrow(db), style = 3 )
         inputMutList <- foreach(i=1:nrow(db),
                 .verbose=FALSE, .errorhandling='stop') %dopar% {
+                    setTxtProgressBar(pb, i)
                     calcObservedMutations(inputSeq=db[i, sequenceColumn],
                                           germlineSeq=db[i, germlineColumn],
-                                          returnRaw=T)$pos}
+                                          returnRaw=T)$pos
+                }
     } else {
         if (verbose) {cat("dbMutList supplied; skipped calling calcObservedMutations()\n")}
         inputMutList <- dbMutList
     }
     
-    # apply slideWindow on combinations of windowSize and mutThresh
-    for (size in windowSizeRange) {
-        if (verbose) {cat(paste0("now computing for windowSize = ", size, "\n"))}
-        
-        for (thresh in mutThreshRange) {
-            if (thresh <= size){
-                if (verbose) {cat(paste0(">>> mutThresh = ", thresh, "\n"))}
-                # apply slideWindow using current pair of parameters
-                cur.logical <- unlist(lapply(inputMutList,
-                                            slideWindowSeqHelper,
-                                            mutThresh = thresh, windowSize = size))
-            } else {
-                if (verbose) {cat(paste0(">>> mutThresh = ", thresh, " > windowSize = ", 
-                                         size, " (skipped)\n"))}
-                # NA if skipped
-                cur.logical <- rep(NA, nrow(db))
-            }
-            # store results for each thresh as a column in a logical matrix
-            if (thresh == mutThreshRange[1]) {
-                cur.mtx <- matrix(data=cur.logical, nrow=length(cur.logical))
-            } else {
-                cur.mtx <- cbind(cur.mtx, cur.logical)
-            }
-        }
-        colnames(cur.mtx) <- as.character(mutThreshRange)
-        
-        # store results for each size (and threshes under that size) as a logical matrix in a list
-        if (size == windowSizeRange[1]) {
-            cur.list <- list(cur.mtx)
-        } else {
-            cur.list <- c(cur.list, list(cur.mtx))
-        }
-    }
-    names(cur.list) <- as.character(windowSizeRange)
+    # if (nproc != 1) {
+    #     parallel::clusterExport(cluster,
+    #                             list('dbMutList'),
+    #                             envir=environment() )
+    # }
+    
+    # Get window-threshold combinations
+    combs <- expand.grid(windowSizeRange, mutThreshRange)
+    pb2 <- txtProgressBar(0, nrow(combs), style = 3 )
+    if (verbose) {cat(paste0("\nAnalyzing combinations of windowSizeRange and mutThreshRange\n"))}
+    tmp <- foreach(i=1:nrow(combs),
+                   .verbose=FALSE, .combine=rbind, .errorhandling='stop') %dopar% {
+                       setTxtProgressBar(pb2, i)
+                       size <- combs[i,1]
+                       thresh <- combs[i,2]
+                       if (thresh <= size){
+                           # apply slideWindow using current pair of parameters
+                           cur.logical <- unlist(lapply(inputMutList,
+                                                        shazam:::slideWindowSeqHelper,
+                                                        mutThresh = thresh, windowSize = size))
+                       } else {
+                           if (verbose) {cat(paste0(">>> mutThresh = ", thresh, " > windowSize = ",
+                                                    size, " (skipped)\n"))}
+                           # NA if skipped
+                           cur.logical <- rep(NA, nrow(db))
+                       }
+                       data.frame(list(
+                           "windowSize"=size,
+                           "mutThreshold"=thresh,
+                           "cur_logical"=cur.logical,
+                           "row_idx"=1:length(cur.logical)
+                       ))
+                   }
+
+    cur.list <- lapply(split(tmp, f=tmp[['windowSize']]), function(x) {
+        x <- x[,colnames(x) != "windowSize"]
+        pivot_wider(x, names_from=mutThreshold, values_from=cur_logical, id_cols=row_idx) %>%
+            arrange(row_idx) %>%
+            select(-row_idx) %>%
+            as.matrix()
+    })
+    
     
     if (stop_cluster & !is.numeric(nproc)) {
         parallel::stopCluster(cluster)
