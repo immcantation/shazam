@@ -2323,7 +2323,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                 scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
                 coord_polar(theta="x") +
                 geom_segment(data=sub_df, mapping=aes_string(x="x", xend="x", yend="score", color="motif"), 
-                             y=score_offset, size=0.75*size) +
+                             y=score_offset, size=0.75*size, position=position_nudge(x = -0.5)) +
                 guides(color=guide_legend(override.aes=list(linetype=1, size=2*size)))
               
         } else if (style == "bar") {
@@ -2340,7 +2340,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                 scale_y_continuous(limits=y_limits, breaks=y_breaks, expand=c(0, 0.5),
                                    labels=function(x) scales::scientific(.invert_score(x))) +
                 geom_bar(data=sub_df, mapping=aes_string(x="x", y="score", fill="motif", color="motif"), 
-                         stat="identity", position="identity", size=0, width=0.7) +
+                         stat="identity", position=position_nudge(x = -0.5), size=0, width=0.7) +
               guides(color=guide_legend(override.aes=list(fill=sub_colors, linetype=0)))
         }
 
