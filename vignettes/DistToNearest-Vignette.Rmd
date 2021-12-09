@@ -340,7 +340,7 @@ top_10_sizes <- ExampleDb %>%
      mutate(GROUP_ID=paste(junction_length, vj_group, sep="_")) %>% # Create group ids
      ungroup() %>%
      group_by(GROUP_ID) %>% # Group by GROUP_ID
-     distinct(junction) %>% # Vount unique junctions per group
+     distinct(junction) %>% # Count unique junctions per group
      summarize(SIZE=n()) %>% # Get the size of the group
      arrange(desc(SIZE)) %>% # Sort by decreasing size
      select(SIZE) %>% 
