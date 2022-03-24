@@ -2682,7 +2682,7 @@ listObservedMutations <- function(db, sequenceColumn="sequence_alignment",
     } 
     
     mutations <- mapply(listMutations, db[[sequenceColumn]], db[[germlineColumn]], 
-                        multipleMutation, model, USE.NAMES=FALSE)
+                        multipleMutation, model, USE.NAMES=FALSE, SIMPLIFY = F)
     return(mutations)
 }
 

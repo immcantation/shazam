@@ -15,6 +15,27 @@ test_that("createSubstitutionMatrix", {
     idx <- sample(length(sub), 10)
     expected <- c(0.621, 0.314, NA, NA, 0.16, NA, 0.531, 0.152, 0.314, 0.057)
     expect_equal(sub[idx], expected, tolerance=0.001)
+    
+})
+
+test_that("createSubstitutionMatrix with one row", {
+    
+    db <- data.frame(sequence_alignment = c("ACATACGTACGT"),
+                      parent_sequence = c("ACGTACGTACGT"),
+                      germline_v_call = c("a"))
+    
+    sub <- createSubstitutionMatrix(db, 
+                                    model = "s", 
+                                    sequenceColumn = "sequence_alignment",
+                                    germlineColumn = "parent_sequence", 
+                                    vCallColumn = "germline_v_call",
+                                    multipleMutation = "independent", 
+                                    minNumMutations = 50,
+                                    returnModel = "5mer", 
+                                    numMutationsOnly = T)
+    # ACATACGTACGT  (1 s mutation, expected 5-mer: ACGTA)
+    expect_equal(sub["ACGTA","fivemer.total"], 1)
+    
 })
 
 #### createMutabilityMatrix ####
