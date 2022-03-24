@@ -67,7 +67,7 @@ NULL
 #'                              \code{cluster}. This will ensure that it is not reset.
 #' @param   juncLengthColumn          \code{character} name of the column containing the junction length.
 #'                              Needed when \code{regionDefinition} includes CDR3 and FWR4.    
-#' @param    fields             additional fields used for grouping. Use sample_id, to
+#' @param   fields             additional fields used for grouping. Use sample_id, to
 #'                              avoid combining sequences with the same clone_id 
 #'                              that belong to different sample_id.                                                       
 #' 
