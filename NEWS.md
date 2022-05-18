@@ -1,5 +1,11 @@
-Version 1.1.0.999: October 27, 2021
+Version 1.1.0.999: May 18, 2022
 -------------------------------------------------------------------------------
+
+General:
+
++ Removed dependency: kedd. The CRAN kedd package (by Arsalane Chouaib Guidoum) 
+  has been scheduled for archival on 2022-05-25. We have adapted the functions
+  used by shazam and removed the dependency.
 
 Mutation Profiling:
 

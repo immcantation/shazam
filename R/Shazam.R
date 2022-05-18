@@ -130,7 +130,6 @@
 #'                          vertex_attr set_vertex_attr 
 #'                          layout_as_tree V<-
 #' @importFrom  iterators   icount
-#' @importFrom  kedd        h.ucv
 #' @importFrom  KernSmooth  bkde
 #' @importFrom  lazyeval    interp
 #' @importFrom  MASS        fitdistr

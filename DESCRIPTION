@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 1.1.0.999
-Date: 2022-03-24
+Date: 2022-05-18
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Namita", "Gupta", role=c("aut"), 
@@ -53,7 +53,6 @@ Imports:
     grid,
     igraph,
     iterators,
-    kedd,
     KernSmooth,
     lazyeval,
     MASS,
@@ -84,4 +83,5 @@ Collate:
     'RegionsExtend.R'
     'Shmulate.R'
     'TargetingModels.R'
-RoxygenNote: 7.1.2
+    'kedd.R'
+RoxygenNote: 7.2.0

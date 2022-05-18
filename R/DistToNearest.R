@@ -1266,7 +1266,7 @@ findThreshold <- function (distances, method=c("density", "gmm"),
     # gaussian_scaling <- (1/(4 * pi))^(1/10)
     
     # Ideal bandwidth
-    bandwidth <- kedd::h.ucv(unique(distances), 4)$h
+    bandwidth <- h.ucv(unique(distances), 4)$h
     #bandwidth <- kedd::h.ucv(distances, 4)$h
     #bandwidth <- ks::hucv(unique(distances), deriv.order=4)
     
