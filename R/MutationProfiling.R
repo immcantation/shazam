@@ -2536,7 +2536,7 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
         if (cluster_type == "PSOCK") {
             parallel::clusterExport(cluster,
                                     list('db', 'sequenceColumn', 'germlineColumn',
-                                         'calcObservedMutations'),
+                                         'calcObservedMutations','slideWindowSeqHelper'),
                                     envir=environment() )
         }
         registerDoParallel(cluster)
@@ -2578,7 +2578,7 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
                        if (thresh <= size){
                            # apply slideWindow using current pair of parameters
                            cur.logical <- unlist(lapply(inputMutList,
-                                                        shazam:::slideWindowSeqHelper,
+                                                        slideWindowSeqHelper,
                                                         mutThresh = thresh, windowSize = size))
                        } else {
                            if (verbose) {cat(paste0(">>> mutThresh = ", thresh, " > windowSize = ",
