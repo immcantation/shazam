@@ -56,7 +56,7 @@ db_obs %>%
 ```
 
 ```
-## # A tibble: 4 x 3
+## # A tibble: 4 × 3
 ##   sequence_id    mu_count_seq_r mu_count_seq_s
 ##   <chr>                   <dbl>          <dbl>
 ## 1 GN5SHBT07FUXY8              0              0
@@ -79,7 +79,7 @@ db_obs %>%
 ```
 
 ```
-## # A tibble: 4 x 3
+## # A tibble: 4 × 3
 ##   sequence_id    mu_freq_seq_r mu_freq_seq_s
 ##   <chr>                  <dbl>         <dbl>
 ## 1 GN5SHBT07FUXY8        0            0      
@@ -107,7 +107,7 @@ db_obs %>%
 ```
 
 ```
-## # A tibble: 4 x 1
+## # A tibble: 4 × 1
 ##   sequence_id   
 ##   <chr>         
 ## 1 GN5SHBT07FUXY8
@@ -172,13 +172,14 @@ db_obs_v %>%
 ```
 
 ```
-## # A tibble: 4 x 7
-##   sequence_id    mu_count_fwr1_r mu_count_fwr1_s mu_count_fwr2_r mu_count_fwr2_s mu_count_fwr3_r mu_count_fwr3_s
-##   <chr>                    <dbl>           <dbl>           <dbl>           <dbl>           <dbl>           <dbl>
-## 1 GN5SHBT07FUXY8               0               0               0               0               0               0
-## 2 GN5SHBT05JMPI5               1               0               0               0               5               1
-## 3 GN5SHBT08H4LPP               1               0               0               0               5               1
-## 4 GN5SHBT05JGND3               0               0               0               0               0               0
+## # A tibble: 4 × 7
+##   sequence_id    mu_count_fwr1_r mu_count_fwr1_s mu_count_fwr2_r mu_count_fwr2_s
+##   <chr>                    <dbl>           <dbl>           <dbl>           <dbl>
+## 1 GN5SHBT07FUXY8               0               0               0               0
+## 2 GN5SHBT05JMPI5               1               0               0               0
+## 3 GN5SHBT08H4LPP               1               0               0               0
+## 4 GN5SHBT05JGND3               0               0               0               0
+## # … with 2 more variables: mu_count_fwr3_r <dbl>, mu_count_fwr3_s <dbl>
 ```
 
 ```r
@@ -195,7 +196,7 @@ db_obs_v %>%
 ```
 
 ```
-## # A tibble: 4 x 5
+## # A tibble: 4 × 5
 ##   sequence_id    mu_freq_cdr_r mu_freq_cdr_s mu_freq_fwr_r mu_freq_fwr_s
 ##   <chr>                  <dbl>         <dbl>         <dbl>         <dbl>
 ## 1 GN5SHBT07FUXY8             0             0        0            0      
@@ -251,7 +252,7 @@ db_obs_ch %>%
 ```
 
 ```
-## # A tibble: 4 x 3
+## # A tibble: 4 × 3
 ##   sequence_id    mu_freq_seq_r mu_freq_seq_s
 ##   <chr>                  <dbl>         <dbl>
 ## 1 GN5SHBT07FUXY8       0              0     

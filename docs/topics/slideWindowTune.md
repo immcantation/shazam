@@ -19,7 +19,8 @@ germlineColumn = "germline_alignment_d_mask",
 dbMutList = NULL,
 mutThreshRange,
 windowSizeRange,
-verbose = TRUE
+verbose = TRUE,
+nproc = 1
 )
 ```
 
@@ -55,6 +56,11 @@ verbose
 :   whether to print out messages indicating current progress. Default
 is `TRUE`.
 
+nproc
+:   Number of cores to distribute the operation over. If the 
+`cluster` has already been set earlier, then pass the 
+`cluster`. This will ensure that it is not reset.
+
 
 
 
@@ -63,7 +69,9 @@ Value
 
 a list of logical matrices. Each matrix corresponds to a `windowSize` in 
 `windowSizeRange`. Each column in a matrix corresponds to a `mutThresh` in
-`mutThreshRange`.
+`mutThreshRange`. Each row corresponds to a sequence. `TRUE` values
+mean the sequences has at least the number of mutations specified in the column name,
+for that `windowSize`.
 
 
 Details
@@ -97,19 +105,10 @@ slideWindowTune(db, mutThreshRange=2:4, windowSizeRange=7:9)
 
 
 ```
-now computing for windowSize = 7
->>> mutThresh = 2
->>> mutThresh = 3
->>> mutThresh = 4
-now computing for windowSize = 8
->>> mutThresh = 2
->>> mutThresh = 3
->>> mutThresh = 4
-now computing for windowSize = 9
->>> mutThresh = 2
->>> mutThresh = 3
->>> mutThresh = 4
-
+Identifying mutated positions
+  |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%  |                                                                              |                                                                      |   0%
+Analyzing combinations of windowSizeRange and mutThreshRange
+  |                                                                              |========                                                              |  11%  |                                                                              |================                                                      |  22%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================                                       |  44%  |                                                                              |=======================================                               |  56%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================                |  78%  |                                                                              |==============================================================        |  89%  |                                                                              |======================================================================| 100%
 ```
 
 
@@ -148,6 +147,11 @@ $`9`
 slideWindowTune(db, mutThreshRange=2:4, windowSizeRange=2:4, 
 verbose=FALSE)
 
+```
+
+
+```
+  |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%  |                                                                              |                                                                      |   0%  |                                                                              |========                                                              |  11%  |                                                                              |================                                                      |  22%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================                                       |  44%  |                                                                              |=======================================                               |  56%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================                |  78%  |                                                                              |==============================================================        |  89%  |                                                                              |======================================================================| 100%
 ```
 
 
@@ -194,19 +198,12 @@ mutThreshRange=2:4, windowSizeRange=2:4)
 
 ```
 dbMutList supplied; skipped calling calcObservedMutations()
-now computing for windowSize = 2
->>> mutThresh = 2
->>> mutThresh = 3 > windowSize = 2 (skipped)
->>> mutThresh = 4 > windowSize = 2 (skipped)
-now computing for windowSize = 3
->>> mutThresh = 2
->>> mutThresh = 3
->>> mutThresh = 4 > windowSize = 3 (skipped)
-now computing for windowSize = 4
->>> mutThresh = 2
->>> mutThresh = 3
->>> mutThresh = 4
-
+  |                                                                              |                                                                      |   0%
+Analyzing combinations of windowSizeRange and mutThreshRange
+  |                                                                              |========                                                              |  11%  |                                                                              |================                                                      |  22%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================                                       |  44%>>> mutThresh = 3 > windowSize = 2 (skipped)
+  |                                                                              |=======================================                               |  56%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================                |  78%>>> mutThresh = 4 > windowSize = 2 (skipped)
+  |                                                                              |==============================================================        |  89%>>> mutThresh = 4 > windowSize = 3 (skipped)
+  |                                                                              |======================================================================| 100%
 ```
 
 

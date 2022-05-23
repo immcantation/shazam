@@ -54,6 +54,18 @@ germ_seq <-  ExampleDb[["germline_alignment_d_mask"]][100]
 
 # Determine if in_seq has 6 or more mutations in 10 consecutive nucleotides
 slideWindowSeq(inputSeq=in_seq, germlineSeq=germ_seq, mutThresh=6, windowSize=10)
+
+```
+
+
+```
+[1] FALSE
+
+```
+
+
+```R
+slideWindowSeq(inputSeq="TCGTCGAAAA", germlineSeq="AAAAAAAAAA", mutThresh=6, windowSize=10)
 ```
 
 

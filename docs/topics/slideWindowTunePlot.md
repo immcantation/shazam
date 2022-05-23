@@ -24,7 +24,8 @@ plotLegend = TRUE,
 legendPos = "topright",
 legendHoriz = FALSE,
 legendCex = 1,
-title = NULL
+title = NULL,
+returnRaw = FALSE
 )
 ```
 
@@ -35,8 +36,10 @@ tuneList
 :   a list of logical matrices returned by [slideWindowTune](slideWindowTune.md).
 
 plotFiltered
-:   whether to plot the number of filtered sequences (as opposed to
-the number of remaining sequences). Default is `TRUE`.
+:   whether to plot the number of filtered (TRUE), 
+or remaining (FALSE) sequences for each mutation threshold. 
+Use `NULL` to plot the number of sequences at each mutation
+value. Default is `TRUE`.
 
 percentage
 :   whether to plot on the y-axis the percentage of filtered sequences
@@ -82,15 +85,30 @@ legendCex
 title
 :   plot main title. Default is NULL (no title)
 
+returnRaw
+:   Return a data.frame with sequence counts (TRUE) or a
+plot. Default is `FALSE`.
+
 
 
 
 Details
 -------------------
 
-For each `windowSize`, the numbers of sequences filtered or remaining after applying
-the sliding window approach are plotted on the y-axis against thresholds on the number of
-mutations in a window on the x-axis.
+For each `windowSize`, if `plotFiltered=TRUE`, the x-axis 
+represents a mutation threshold range, and the y-axis the number of
+sequences that have at least that number of mutations. If 
+`plotFiltered=TRUE`, the y-axis represents the number of sequences
+that have less mutations than the mutation threshold range. For the same
+window size, a sequence can be included in the counts for different
+mutation thresholds. For example, sequence "CCACCAAAA" with germline
+"AAAAAAAAA" has 4 mutations. This sequence has at least 2 mutations 
+and at least 3 mutations, in a window of size 4. the sequence will
+be included in the sequence count for mutation thresholds 2 and 3.
+If `plotFiltered=TRUE`, the sequences are counted only once for
+each window size, at their largest mutation threshold. The above 
+example sequence would be included in the sequence count for 
+mutation threshold 3. 
 
 When plotting, a user-defined `amount` of jittering can be applied on values plotted
 on either axis or both axes via adjusting `jitter.x`, `jitter.y`, 
@@ -118,6 +136,16 @@ tuneList <- slideWindowTune(db = ExampleDb[1:10, ],
 mutThreshRange = 2:4, windowSizeRange = 3:5,
 verbose = FALSE)
 
+```
+
+
+```
+  |                                                                              |                                                                      |   0%  |                                                                              |=======                                                               |  10%  |                                                                              |==============                                                        |  20%  |                                                                              |=====================                                                 |  30%  |                                                                              |============================                                          |  40%  |                                                                              |===================================                                   |  50%  |                                                                              |==========================================                            |  60%  |                                                                              |=================================================                     |  70%  |                                                                              |========================================================              |  80%  |                                                                              |===============================================================       |  90%  |                                                                              |======================================================================| 100%  |                                                                              |                                                                      |   0%  |                                                                              |========                                                              |  11%  |                                                                              |================                                                      |  22%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================                                       |  44%  |                                                                              |=======================================                               |  56%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================                |  78%  |                                                                              |==============================================================        |  89%  |                                                                              |======================================================================| 100%
+```
+
+
+```R
+
 # Visualize
 # Plot numbers of sequences filtered without jittering y-axis values
 slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, 
@@ -125,7 +153,7 @@ plotFiltered=TRUE, jitter.y=FALSE)
 
 ```
 
-![2](slideWindowTunePlot-2.png)
+![4](slideWindowTunePlot-4.png)
 
 ```R
 
@@ -136,7 +164,7 @@ plotFiltered=TRUE, jitter.y=TRUE)
 
 ```
 
-![4](slideWindowTunePlot-4.png)
+![6](slideWindowTunePlot-6.png)
 
 ```R
 
@@ -147,7 +175,7 @@ legendPos="bottomright")
 
 ```
 
-![6](slideWindowTunePlot-6.png)
+![8](slideWindowTunePlot-8.png)
 
 ```R
 
@@ -157,7 +185,7 @@ plotFiltered=TRUE, percentage=TRUE,
 jitter.y=TRUE, jitter.y.amt=0.01)
 ```
 
-![8](slideWindowTunePlot-8.png)
+![10](slideWindowTunePlot-10.png)
 
 
 See also

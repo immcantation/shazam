@@ -16,8 +16,9 @@ slideWindowDb(
 db,
 sequenceColumn = "sequence_alignment",
 germlineColumn = "germline_alignment_d_mask",
-mutThresh,
-windowSize
+mutThresh = 6,
+windowSize = 10,
+nproc = 1
 )
 ```
 
@@ -41,6 +42,11 @@ inclusive.
 windowSize
 :   length of consecutive nucleotides. Must be at least 2.
 
+nproc
+:   Number of cores to distribute the operation over. If the 
+`cluster` has already been set earlier, then pass the 
+`cluster`. This will ensure that it is not reset.
+
 
 
 
@@ -63,7 +69,7 @@ data(ExampleDb, package="alakazam")
 # Apply the sliding window approach on a subset of ExampleDb
 slideWindowDb(db=ExampleDb[1:10, ], sequenceColumn="sequence_alignment", 
 germlineColumn="germline_alignment_d_mask", 
-mutThresh=6, windowSize=10)
+mutThresh=6, windowSize=10, nproc=1)
 ```
 
 
