@@ -1,4 +1,4 @@
-Version 1.1.0.999: May 18, 2022
+Version 1.1.0.999: May 23, 2022
 -------------------------------------------------------------------------------
 
 General:
@@ -6,13 +6,23 @@ General:
 + Removed dependency: kedd. The CRAN kedd package (by Arsalane Chouaib Guidoum) 
   has been scheduled for archival on 2022-05-25. We have adapted the functions
   used by shazam and removed the dependency.
+  
+New feature:
+
++ Added the function `convertNumbering` to convert between numbering systems (IMGT, Kabat).
 
 Mutation Profiling:
 
 + `shmulateTree` has new argument `nproc` to specify the number of cores. Default
    values `mutThresh` and `windowSize` have been set to `mutThresh=6` and
    `windowSize=10`.
-
+   
++ Added the option `plotFiltered=NULL` to `slideWindowTunePlot`.
+   
++ Fixed a bug in `listObservedMutations` not returning a list when `db` had
+  one sequence with one mutation.
+  
++ Fixed bars shifted in `plotMutability`.
 
 
 Version 1.1.0: July 8, 2021

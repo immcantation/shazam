@@ -2492,6 +2492,9 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
                             dbMutList=NULL,
                             mutThreshRange, windowSizeRange, verbose=TRUE,
                             nproc=1){
+    # Hack for visibility of foreach index variables
+    i <- NULL
+    
     # check preconditions
     stopifnot(!is.null(db))
     stopifnot(min(mutThreshRange) >= 1 & 
@@ -2593,9 +2596,11 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
 
     cur.list <- lapply(split(tmp, f=tmp[['windowSize']]), function(x) {
         x <- x[,colnames(x) != "windowSize"]
-        pivot_wider(x, names_from=mutThreshold, values_from=cur_logical, id_cols=row_idx) %>%
-            arrange(row_idx) %>%
-            select(-row_idx) %>%
+        pivot_wider(x, names_from=!!rlang::sym("mutThreshold"), 
+                       values_from=!!rlang::sym("cur_logical"), 
+                       id_cols=!!rlang::sym("row_idx")) %>%
+            arrange(!!rlang::sym("row_idx")) %>%
+            select(-!!rlang::sym("row_idx")) %>%
             as.matrix()
     })
     
