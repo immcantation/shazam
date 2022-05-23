@@ -184,7 +184,7 @@ createMutationDefinition <- function(name,
 #' 
 #' @references
 #' \enumerate{
-#'   \item  \url{http://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html} 
+#'   \item  \url{https://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html} 
 #' }
 #' 
 #' @name   MUTATION_SCHEMES

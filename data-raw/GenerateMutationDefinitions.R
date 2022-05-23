@@ -45,7 +45,7 @@ aa_volume <- c(setNames(aa_imgt$VOLUME, aa_imgt$IUPAC), aa_ambig)
 
 # Make objects
 # TODO: Need to figure out exactly which publications they used!
-imgt_cite <- "http://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html"
+imgt_cite <- "https://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html"
 HYDROPATHY_MUTATIONS <- createMutationDefinition(name="Hydropathy", 
                                                  description="Hydropathy mutation definition",
                                                  classes=aa_hydropathy,
