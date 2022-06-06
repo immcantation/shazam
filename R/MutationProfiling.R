@@ -2399,12 +2399,10 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
             #cluster <- makeCluster(nproc, type="SOCK")
             cluster <- parallel::makeCluster(nproc, type= cluster_type)
         }
-        if (cluster_type == "PSOCK") {
-            parallel::clusterExport(cluster,
+        parallel::clusterExport(cluster,
                                     list('db', 'sequenceColumn', 'germlineColumn',
                                          'mutThresh', 'windowSize','slideWindowSeq'),
                                     envir=environment() )
-        }
         registerDoParallel(cluster)
     }
 
@@ -2533,12 +2531,10 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
             #cluster <- makeCluster(nproc, type="SOCK")
             cluster <- parallel::makeCluster(nproc, type= cluster_type)
         }
-        if (cluster_type == "PSOCK") {
-            parallel::clusterExport(cluster,
+        parallel::clusterExport(cluster,
                                     list('db', 'sequenceColumn', 'germlineColumn',
                                          'calcObservedMutations','slideWindowSeqHelper'),
                                     envir=environment() )
-        }
         registerDoParallel(cluster)
     }
     
