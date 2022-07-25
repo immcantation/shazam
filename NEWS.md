@@ -1,3 +1,9 @@
+Version 1.1.1.999: July 25, 2022
+-------------------------------------------------------------------------------
+
++ Bug fix in parallelization set up for functions `slideWindowTune` 
+  and `slideWindowDb`.
+
 Version 1.1.1: May 23, 2022
 -------------------------------------------------------------------------------
 
