@@ -2522,7 +2522,7 @@ test_that("slideWindowDb", {
     
 })
 
-test_that("slideWindowTunePlot",{
+test_that("plotSlideWindowTune",{
     db <- data.frame(
         "sequence_alignment" = c(
             "AAAAAAAAA", # 0 mutations
@@ -2567,7 +2567,7 @@ test_that("slideWindowTunePlot",{
     # One sequence has 4 mutations in a window of 5 nt
     expect_equal(tuneList[['5']][,"4"], c(F,F,F,T))
     
-    swtp <- slideWindowTunePlot(tuneList, plotFiltered = NULL, returnRaw = T) %>%
+    swtp <- plotSlideWindowTune(tuneList, plotFiltered = 'per_mutation', returnRaw = T) %>%
         as.data.frame()
     # For window size 3, sequences 3 and 4 have 2 mutations
     # mutations threshold 4 is not analyzed
@@ -2584,14 +2584,14 @@ test_that("slideWindowTunePlot",{
     expect_equal(as.numeric(swtp[3,-1]), c(1,0,1))
     
     # With plotFiltered=TRUE
-    swtp <- slideWindowTunePlot(tuneList, plotFiltered = TRUE, returnRaw = T) %>%
+    swtp <- plotSlideWindowTune(tuneList, plotFiltered = 'filtered', returnRaw = T) %>%
         as.data.frame()
     expect_equal(as.numeric(swtp[1,-1]), c(2,0,NA))
     expect_equal(as.numeric(swtp[2,-1]), c(2,1,0))
     expect_equal(as.numeric(swtp[3,-1]), c(2,1,1))
     
     # With plotFiltered=FALSE
-    swtp <- slideWindowTunePlot(tuneList, plotFiltered = FALSE, returnRaw = T) %>%
+    swtp <- plotSlideWindowTune(tuneList, plotFiltered = 'remaining', returnRaw = T) %>%
         as.data.frame()
     expect_equal(as.numeric(swtp[1,-1]), c(2,4,NA))
     expect_equal(as.numeric(swtp[2,-1]), c(2,3,4))
