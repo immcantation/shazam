@@ -2626,8 +2626,10 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
 #' @param    jitter.y            whether to jitter y-axis values. Default is \code{FALSE}.
 #' @param    jitter.y.amt        amount of jittering to be applied on y-axis values if 
 #'                               \code{jitter.y=TRUE}. Default is 0.1.                               
-#' @param    pchs                point types to pass on to \link{plot}.
-#' @param    ltys                line types to pass on to \link{plot}.
+#' @param    pchs                point types to pass on to \link{plot}. Default is
+#'                               \code{1:length(plotFiltered)}.
+#' @param    ltys                line types to pass on to \link{plot}. Default is
+#'                               \code{1:length(plotFiltered)}.
 #' @param    cols                colors to pass on to \link{plot}.                             
 #' @param    plotLegend          whether to plot legend. Default is \code{TRUE}.
 #' @param    legendPos           position of legend to pass on to \link{legend}. Can be either a
@@ -2698,10 +2700,12 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
 #'                     plotFiltered='filtered', percentage=TRUE, 
 #'                     jitter.y=TRUE, jitter.y.amt=0.01)
 #' @export
-plotSlideWindowTune <- function(tuneList, plotFiltered = 'filtered', percentage = FALSE,
+plotSlideWindowTune <- function(tuneList, 
+                               plotFiltered = c('filtered','remaining','per_mutation'), 
+                               percentage = FALSE,
                                jitter.x = FALSE, jitter.x.amt = 0.1,
                                jitter.y = FALSE, jitter.y.amt = 0.1,
-                               pchs = 1, ltys = 2, cols = 1,
+                               pchs = 1:length(tuneList), ltys = 1:length(tuneList), cols = 1,
                                plotLegend = TRUE, legendPos = "topright", 
                                legendHoriz = FALSE, legendCex = 1, title=NULL,
                                returnRaw=FALSE){
@@ -2729,7 +2733,7 @@ plotSlideWindowTune <- function(tuneList, plotFiltered = 'filtered', percentage 
     if (length(cols)!=length(tuneList)) {cols <- rep(cols, length.out=length(tuneList))}
     
     # tabulate tuneList (and if applicable convert to percentage)
-    if (plotFiltered != 'per_mutation') {
+    if (plotFiltered == 'per_mutation') {
         # preprocess tuneList to count each sequence once,
         # considering the largest number of mutations in the window
         plotList.tmp <- lapply(tuneList, function(window_df) {
@@ -2835,10 +2839,10 @@ plotSlideWindowTune <- function(tuneList, plotFiltered = 'filtered', percentage 
 #' Wrapper function for \link{plotSlideWindowTune}
 #' 
 #' @param    tuneList            a list of logical matrices returned by \link{slideWindowTune}.
-#' @param    plotFiltered        whether to plot the number of filtered (TRUE), 
-#'                               or remaining (FALSE) sequences for each mutation threshold. 
-#'                               Use `NULL` to plot the number of sequences at each mutation
-#'                               value. Default is \code{TRUE}.
+#' @param    plotFiltered        whether to plot the number of filtered (\code{TRUE} or \code{filtered}), 
+#'                               or remaining (FALSE or remaining) sequences for each mutation threshold. 
+#'                               Use \code{NULL} or \code{per_mutation} to plot the number of sequences 
+#'                               at each mutation value. Default is \code{TRUE}.
 #' @param    percentage          whether to plot on the y-axis the percentage of filtered sequences
 #'                               (as opposed to the absolute number). Default is \code{FALSE}.                             
 #' @param    jitter.x            whether to jitter x-axis values. Default is \code{FALSE}.                               
@@ -2919,21 +2923,25 @@ plotSlideWindowTune <- function(tuneList, plotFiltered = 'filtered', percentage 
 #'                     plotFiltered=TRUE, percentage=TRUE, 
 #'                     jitter.y=TRUE, jitter.y.amt=0.01)
 #' @export
-slideWindowTunePlot <- function(tuneList, plotFiltered = TRUE, percentage = FALSE,
+slideWindowTunePlot <- function(tuneList, 
+                                plotFiltered = c(TRUE,FALSE,NULL,'filtered','remaining','per_mutation'), 
+                                percentage = FALSE,
                                 jitter.x = FALSE, jitter.x.amt = 0.1,
                                 jitter.y = FALSE, jitter.y.amt = 0.1,
                                 pchs = 1, ltys = 2, cols = 1,
                                 plotLegend = TRUE, legendPos = "topright", 
                                 legendHoriz = FALSE, legendCex = 1, title=NULL,
                                 returnRaw=FALSE){
+    
     warning("slideWindowTunePlot() is deprecated, please see plotSlideWindowTune() for future use")
+    plotFiltered <- match.arg(plotFiltered)
     # logic for converting T/F/NULL to new values
-    if (plotFiltered == TRUE) {
-        plotFilteredMapped = 'filtered'
-    } else if (plotFiltered == FALSE) {
-        plotFilteredMapped = 'remaining'
-    } else if (is.na(plotFiltered)) {
-        plotFilteredMapped = 'per_mutation'
+    if (plotFiltered %in% c(TRUE,'filtered')) {
+        plotFilteredMapped <- 'filtered'
+    } else if (plotFiltered %in% c(FALSE,'remaining')) {
+        plotFilteredMapped <- 'remaining'
+    } else {
+        plotFilteredMapped <- 'per_mutation'
     }
     
     plotSlideWindowTune(tuneList, plotFiltered = plotFilteredMapped, 
