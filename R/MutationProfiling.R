@@ -2627,9 +2627,9 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
 #' @param    jitter.y.amt        amount of jittering to be applied on y-axis values if 
 #'                               \code{jitter.y=TRUE}. Default is 0.1.                               
 #' @param    pchs                point types to pass on to \link{plot}. Default is
-#'                               \code{1:length(plotFiltered)}.
+#'                               \code{1:length(tuneList)}.
 #' @param    ltys                line types to pass on to \link{plot}. Default is
-#'                               \code{1:length(plotFiltered)}.
+#'                               \code{1:length(tuneList)}.
 #' @param    cols                colors to pass on to \link{plot}.                             
 #' @param    plotLegend          whether to plot legend. Default is \code{TRUE}.
 #' @param    legendPos           position of legend to pass on to \link{legend}. Can be either a
