@@ -2709,6 +2709,8 @@ plotSlideWindowTune <- function(tuneList,
                                plotLegend = TRUE, legendPos = "topright", 
                                legendHoriz = FALSE, legendCex = 1, title=NULL,
                                returnRaw=FALSE){
+    # collapse parameter if no user input then first item is selected
+    plotFiltered <- match.arg(plotFiltered)
     
     if (plotFiltered == 'filtered') {
         xlab <- "Threshold on number of mutations"
@@ -2934,6 +2936,7 @@ slideWindowTunePlot <- function(tuneList,
                                 returnRaw=FALSE){
     
     warning("slideWindowTunePlot() is deprecated, please see plotSlideWindowTune() for future use")
+    # collapse parameter if no user input then first item is selected
     plotFiltered <- match.arg(plotFiltered)
     # logic for converting T/F/NULL to new values
     if (plotFiltered %in% c(TRUE,'filtered')) {
