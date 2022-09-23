@@ -47,9 +47,11 @@ fields (columns) to be present in the table:
 * `junction_length`
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
-# Subset example data to one sample
 library(shazam)
+library(dplyr)
 data(ExampleDb, package="alakazam")
+ExampleDb %>%
+    count(sample_id)
 ```
 
 ## Calculating nearest neighbor distances (heavy chain sequences)
@@ -85,12 +87,14 @@ the overall distance.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Use nucleotide Hamming distance and normalize by junction length
-dist_ham <- distToNearest(ExampleDb, sequenceColumn="junction", 
+dist_ham <- distToNearest(ExampleDb %>% filter(sample_id == "+7d"), 
+                          sequenceColumn="junction", 
                           vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="ham", normalize="len", nproc=1)
 
 # Use genotyped V assignments, a 5-mer model and no normalization
-dist_s5f <- distToNearest(ExampleDb, sequenceColumn="junction", 
+dist_s5f <- distToNearest(ExampleDb %>% filter(sample_id == "+7d"), 
+                          sequenceColumn="junction", 
                           vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="hh_s5f", normalize="none", nproc=1)
 ```
@@ -332,7 +336,6 @@ from the same V-J-junction length group.
 ```{r subsample, eval=TRUE, warning=FALSE}
 # Explore V-J-junction length groups sizes to use subsample
 # Show the size of the largest groups
-library(dplyr)
 library(alakazam)
 top_10_sizes <- ExampleDb %>%
      group_by(junction_length) %>% # Group by junction length
