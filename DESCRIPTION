@@ -1,7 +1,7 @@
 Package: shazam
 Type: Package
 Version: 1.1.1.999
-Date: 2022-06-06
+Date: 2022-09-23
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Namita", "Gupta", role=c("aut"), 
@@ -77,11 +77,12 @@ Collate:
     'RegionDefinitions.R'
     'Baseline.R'
     'ConvertNumbering.R'
+    'MutationProfiling.R'
+    'Deprecated.R'
     'DistToNearest.R'
     'MutationDefinitions.R'
-    'MutationProfiling.R'
     'RegionsExtend.R'
     'Shmulate.R'
     'TargetingModels.R'
     'kedd.R'
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
