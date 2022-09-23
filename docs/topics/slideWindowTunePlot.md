@@ -1,9 +1,9 @@
-**slideWindowTunePlot** - *Visualize parameter tuning for sliding window approach*
+**slideWindowTunePlot** - *slideWindowTunePlot - plotSlideWindowTune backward compatability*
 
 Description
 --------------------
 
-Visualize results from [slideWindowTune](slideWindowTune.md)
+Wrapper function for [plotSlideWindowTune](plotSlideWindowTune.md)
 
 
 Usage
@@ -11,7 +11,7 @@ Usage
 ```
 slideWindowTunePlot(
 tuneList,
-plotFiltered = TRUE,
+plotFiltered = c(TRUE, FALSE, NULL, "filtered", "remaining", "per_mutation"),
 percentage = FALSE,
 jitter.x = FALSE,
 jitter.x.amt = 0.1,
@@ -36,10 +36,10 @@ tuneList
 :   a list of logical matrices returned by [slideWindowTune](slideWindowTune.md).
 
 plotFiltered
-:   whether to plot the number of filtered (TRUE), 
-or remaining (FALSE) sequences for each mutation threshold. 
-Use `NULL` to plot the number of sequences at each mutation
-value. Default is `TRUE`.
+:   whether to plot the number of filtered (`TRUE` or `filtered`), 
+or remaining (FALSE or remaining) sequences for each mutation threshold. 
+Use `NULL` or `per_mutation` to plot the number of sequences 
+at each mutation value. Default is `TRUE`.
 
 percentage
 :   whether to plot on the y-axis the percentage of filtered sequences
@@ -153,7 +153,7 @@ plotFiltered=TRUE, jitter.y=FALSE)
 
 ```
 
-![4](slideWindowTunePlot-4.png)
+*Warning*:slideWindowTunePlot() is deprecated, please see plotSlideWindowTune() for future use![5](slideWindowTunePlot-5.png)
 
 ```R
 
@@ -164,7 +164,7 @@ plotFiltered=TRUE, jitter.y=TRUE)
 
 ```
 
-![6](slideWindowTunePlot-6.png)
+*Warning*:slideWindowTunePlot() is deprecated, please see plotSlideWindowTune() for future use![8](slideWindowTunePlot-8.png)
 
 ```R
 
@@ -175,7 +175,7 @@ legendPos="bottomright")
 
 ```
 
-![8](slideWindowTunePlot-8.png)
+*Warning*:slideWindowTunePlot() is deprecated, please see plotSlideWindowTune() for future use![11](slideWindowTunePlot-11.png)
 
 ```R
 
@@ -185,7 +185,7 @@ plotFiltered=TRUE, percentage=TRUE,
 jitter.y=TRUE, jitter.y.amt=0.01)
 ```
 
-![10](slideWindowTunePlot-10.png)
+*Warning*:slideWindowTunePlot() is deprecated, please see plotSlideWindowTune() for future use![14](slideWindowTunePlot-14.png)
 
 
 See also
