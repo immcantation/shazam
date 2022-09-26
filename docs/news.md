@@ -6,8 +6,8 @@ Mutation Profiling:
 + Bug fix in parallelization set up for functions `slideWindowTune` 
   and `slideWindowDb`.
   
-+ `plotSlideWindowTune` (`slideWindowTunePlot`). Added three additional possible
-   values to the parameter `plotFiltered`, for easier usage. The new values 
++ `plotSlideWindowTune` (`slideWindowTunePlot`). Updated the possible
+   values of the parameter `plotFiltered`, for easier usage. The new values 
    (and their equivalent values in `slideWindowTunePlot`) are `filtered` (`TRUE`), 
    `remaining` (`FALSE`), and `per_mutation` (`NULL`). 
   

@@ -116,7 +116,9 @@ slideWindowTunePlot <- function(tuneList,
     }
     
     # logic for converting T/F/NULL to new values
-    if (plotFiltered %in% c(TRUE,'filtered')) {
+    if (is.null(plotFiltered)) {
+        plotFilteredMapped <- 'per_mutation'
+    } else if (plotFiltered %in% c(TRUE,'filtered')) {
         plotFilteredMapped <- 'filtered'
     } else if (plotFiltered %in% c(FALSE,'remaining')) {
         plotFilteredMapped <- 'remaining'
