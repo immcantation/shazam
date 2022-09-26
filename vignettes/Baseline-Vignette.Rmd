@@ -181,7 +181,7 @@ It is not required for `observedMutation` and `expectedMutations` to be run prio
 data.frame, then `calcBaseline` will call the appropriate functions prior to 
 calculating selection scores.
 
-```{r, eval=TRUE, warning=FALSE, results="hide"}
+```{r, eval=FALSE, warning=FALSE, results="hide"}
 # Calculate selection scores from scratch
 baseline <- calcBaseline(clones, testStatistic="focused", 
                          regionDefinition=IMGT_V, nproc=1)
