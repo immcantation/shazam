@@ -173,13 +173,14 @@ db_obs_v %>%
 
 ```
 ## # A tibble: 4 × 7
-##   sequence_id    mu_count_fwr1_r mu_count_fwr1_s mu_count_fwr2_r mu_count_fwr2_s
-##   <chr>                    <dbl>           <dbl>           <dbl>           <dbl>
-## 1 GN5SHBT07FUXY8               0               0               0               0
-## 2 GN5SHBT05JMPI5               1               0               0               0
-## 3 GN5SHBT08H4LPP               1               0               0               0
-## 4 GN5SHBT05JGND3               0               0               0               0
-## # … with 2 more variables: mu_count_fwr3_r <dbl>, mu_count_fwr3_s <dbl>
+##   sequence_id    mu_count_fwr1_r mu_count_fwr1_s mu_co…¹ mu_co…² mu_co…³ mu_co…⁴
+##   <chr>                    <dbl>           <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
+## 1 GN5SHBT07FUXY8               0               0       0       0       0       0
+## 2 GN5SHBT05JMPI5               1               0       0       0       5       1
+## 3 GN5SHBT08H4LPP               1               0       0       0       5       1
+## 4 GN5SHBT05JGND3               0               0       0       0       0       0
+## # … with abbreviated variable names ¹​mu_count_fwr2_r, ²​mu_count_fwr2_s,
+## #   ³​mu_count_fwr3_r, ⁴​mu_count_fwr3_s
 ```
 
 ```r

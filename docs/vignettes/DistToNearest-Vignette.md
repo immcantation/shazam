@@ -25,9 +25,19 @@ fields (columns) to be present in the table:
 
 
 ```r
-# Subset example data to one sample
 library(shazam)
+library(dplyr)
 data(ExampleDb, package="alakazam")
+ExampleDb %>%
+    count(sample_id)
+```
+
+```
+## # A tibble: 2 × 2
+##   sample_id     n
+##   <chr>     <int>
+## 1 -1h        1000
+## 2 +7d         999
 ```
 
 ## Calculating nearest neighbor distances (heavy chain sequences)
@@ -64,12 +74,14 @@ the overall distance.
 
 ```r
 # Use nucleotide Hamming distance and normalize by junction length
-dist_ham <- distToNearest(ExampleDb, sequenceColumn="junction", 
+dist_ham <- distToNearest(ExampleDb %>% filter(sample_id == "+7d"), 
+                          sequenceColumn="junction", 
                           vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="ham", normalize="len", nproc=1)
 
 # Use genotyped V assignments, a 5-mer model and no normalization
-dist_s5f <- distToNearest(ExampleDb, sequenceColumn="junction", 
+dist_s5f <- distToNearest(ExampleDb %>% filter(sample_id == "+7d"), 
+                          sequenceColumn="junction", 
                           vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="hh_s5f", normalize="none", nproc=1)
 ```
@@ -204,7 +216,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1738391
+## [1] 0.2527657
 ```
 
 ### Automated threshold detection via a mixture model
@@ -244,7 +256,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1214102
+## [1] 0.1249637
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -345,27 +357,6 @@ from the same V-J-junction length group.
 ```r
 # Explore V-J-junction length groups sizes to use subsample
 # Show the size of the largest groups
-library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(alakazam)
 top_10_sizes <- ExampleDb %>%
      group_by(junction_length) %>% # Group by junction length

@@ -174,10 +174,6 @@ baseline <- calcBaseline(clones, testStatistic="focused",
                          regionDefinition=IMGT_V, nproc=1)
 ```
 
-```
-## calcBaseline will calculate observed and expected mutations for clonal_sequence using clonal_germline as a reference.
-```
-
 ### Using alternative mutation definitions and models
 
 The default behavior of `observedMutations` and `expectedMutations`, and
@@ -204,7 +200,7 @@ The default behavior of `expectedMutations` is to use the human 5-mer mutation m
 
 ```r
 # Calculate selection on charge class with the mouse 5-mer model
-baseline <- calcBaseline(clones, testStatistic="focused", 
+baseline_mk_rs5nf <- calcBaseline(clones, testStatistic="focused", 
                          regionDefinition=IMGT_V, 
                          targetingModel=MK_RS5NF,
                          mutationDefinition=CHARGE_MUTATIONS,

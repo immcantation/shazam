@@ -12,8 +12,7 @@ Usage
 consensusSequence(
 sequences,
 db = NULL,
-method = c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated",
-"leastMutated"),
+method = c("mostCommon", "thresholdedFreq", "catchAll", "mostMutated", "leastMutated"),
 minFreq = NULL,
 muFreqColumn = NULL,
 lenLimit = NULL,
