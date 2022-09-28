@@ -236,9 +236,11 @@ createBaseline <- function(description="",
 #'
 #' @examples
 #' \donttest{
-#' # Subset example data
+#' # Subset example data as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
+#' set.seed(112)
+#' db <- dplyr::slice_sample(db, n=100)
 #' 
 #' # Make Baseline object
 #' baseline <- calcBaseline(db, 
@@ -431,10 +433,12 @@ calcBaselineBinomialPdf <- function (x=3,
 #'  }
 #' 
 #' @examples  
-#' \donttest{
-#' # Subset example data from alakazam
+#' \dontrun{
+#' # Subset example data from alakazam as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
+#' set.seed(112)
+#' db <- dplyr::slice_sample(db, n=200)
 #' 
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",
@@ -465,7 +469,6 @@ calcBaselineBinomialPdf <- function (x=3,
 #' plotBaselineDensity(grouped2, idColumn="sample_id", groupColumn="c_call",
 #'                     colorElement="group", colorValues=isotype_colors,
 #'                     sigmaLimits=c(-1, 1))
-#' 
 #' # Collapse previous isotype (within variable) grouped PDFs into sample PDFs
 #' grouped3 <- groupBaseline(grouped2, groupBy="sample_id")
 #' sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
@@ -506,6 +509,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
     # export all nesseary environment variables, functions and packages.  
     baseline@db <- data.frame()
     gc()
+    
     if (nproc > 1){        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport( cluster, list('baseline', 'uniqueGroupsIdx',
@@ -566,6 +570,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                             })
                 rm(matrix_GroupPdfs)
                 gc()
+                
                 # Determine the number of sequences that went into creating each of the PDFs
                 # If running groupBaseline for the first time after calcBaseline, then
                 # each PDF should have a numbOfSeqs=1. 
@@ -600,6 +605,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                     sorted_numbOfSeqs_region <- sort(numbOfSeqs_region)
                     rm(numbOfSeqs_region)
                     gc()
+                    
                     sorted_list_GroupPdfs <- list()
                     for(newIndex in 1:len_numbOfSeqs_region){
                         sorted_list_GroupPdfs[[newIndex]] <-  list_GroupPdfs[[ as.numeric(names(sorted_numbOfSeqs_region)[newIndex]) ]]
@@ -620,7 +626,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                         list_sameWeightPdfs <- sorted_list_GroupPdfs[indexesOfWeight]
                         updatedPdf <- groupPosteriors(list_sameWeightPdfs)
                         rm(list_sameWeightPdfs)
-                        gc()
+                        
                         # The new updated weights for this convoluted PDF
                         updatedWeight <- as.numeric(pdfWeight) * length(indexesOfWeight)
                         
@@ -628,7 +634,6 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                         sorted_numbOfSeqs_region  <- sorted_numbOfSeqs_region[-indexesOfWeight]
                         sorted_list_GroupPdfs <- sorted_list_GroupPdfs[-indexesOfWeight]
                         rm(indexesOfWeight)
-                        gc()
                         
                         # add the convoluted PDF and its new weight
                         newLength <- length(sorted_numbOfSeqs_region)+1
@@ -784,6 +789,8 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call == "IGHG")
+#' set.seed(112)
+#' db <- dplyr::slice_sample(db, n=100)
 #' 
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",
@@ -926,9 +933,11 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #' 
 #' @examples
 #' \donttest{
-#' # Subset example data
+#' # Subset example data as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG", "IGHA"))
+#' db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
+#' set.seed(112)
+#' db <- dplyr::slice_sample(db, n=200)
 #'
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",
@@ -1171,10 +1180,12 @@ baseline2DistPValue <-function(base1, base2) {
 #' @seealso  Takes as input a \link{Baseline} object returned from \link{groupBaseline}.
 #' 
 #' @examples
-#' \donttest{
-#' # Subset example data
+#' \dontrun{
+#' # Subset example data as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
+#' set.seed(112)
+#' db <- dplyr::slice_sample(db, n=100)
 #' 
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",
@@ -1425,9 +1436,11 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #' 
 #' @examples
 #' \donttest{
-#' # Subset example data
+#' # Subset example data as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
+#' set.seed(112)
+#' db <- dplyr::slice_sample(db, n=75)
 #' 
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",

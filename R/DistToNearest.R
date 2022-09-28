@@ -1144,28 +1144,18 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #' 
 #' @examples
 #' \donttest{
-#' # Subset example data to one sample as a demo
+#' # Subset example data to 50 sequences, one sample and isotype as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, sample_id == "-1h")
+#' db <- subset(ExampleDb, sample_id == "-1h" & c_call=="IGHG")[1:50,]
 #' 
 #' # Use nucleotide Hamming distance and normalize by junction length
 #' db <- distToNearest(db, sequenceColumn="junction", vCallColumn="v_call",
 #'                     jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 #'                             
-#' # Find threshold using the "gmm" method with optimal threshold
-#' output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", cutoff="opt")
-#' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
-#' print(output)
-#'
 #' # Find threshold using the "gmm" method with user defined specificity
 #' output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", 
 #'                         cutoff="user", spc=0.99)
 #' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
-#' print(output)
-#'
-#' # Find threshold using the "density" method and plot the results
-#' output <- findThreshold(db$dist_nearest, method="density")
-#' plot(output)
 #' print(output)
 #' }
 #' @export

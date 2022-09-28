@@ -2897,7 +2897,8 @@ plotSlideWindowTune <- function(tuneList,
 #' # Subset example data
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG") & sample_id == "+7d")
-#'
+#' set.seed(112)
+#' db <- dplyr::slice_sample(db, n=100)
 #' # Calculate expected mutations over V region
 #' db_exp <- expectedMutations(db,
 #'                             sequenceColumn="sequence_alignment",
@@ -2914,7 +2915,6 @@ plotSlideWindowTune <- function(tuneList,
 #'                            nproc=1)
 #'
 #' @export
-#'
 expectedMutations <- function(db,sequenceColumn = "sequence_alignment", 
                                germlineColumn = "germline_alignment", 
                                targetingModel = HH_S5F, 

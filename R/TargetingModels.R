@@ -376,7 +376,7 @@ setMethod("plot", c(x="TargetingModel", y="missing"),
 #' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")[1:25,]
 #'
 #' # Count the number of mutations per 5-mer
 #' subCount <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
@@ -786,9 +786,9 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #' 
 #' @examples
 #' \donttest{
-#' # Subset example data to one isotype and sample as a demo
+#' # Subset example data to 50 sequences of one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")[1:50,]
 #'
 #' # Create model using only silent mutations
 #' sub_model <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
@@ -1107,7 +1107,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("s", "rs"),
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
-#'
+#' set.seed(112)
+#' db <- dplyr::slice_sample(db, n=75)
 #' # Create model using only silent mutations
 #' sub <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 #'                                 germlineColumn="germline_alignment_d_mask",
@@ -1234,6 +1235,8 @@ extendSubstitutionMatrix <- function(substitutionModel) {
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
+#' set.seed(112)
+#' db <- dplyr::slice_sample(db, n=75)
 #'
 #' # Create model using only silent mutations and ignore multiple mutations
 #' sub_model <- createSubstitutionMatrix(db, model="s", sequenceColumn="sequence_alignment",
@@ -1346,9 +1349,9 @@ extendMutabilityMatrix <- function(mutabilityModel) {
 #' 
 #' @examples
 #' \donttest{
-#' # Subset example data to one isotype and sample as a demo
+#' # Subset example data to 50 sequences, of one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")[1:50,]
 #'
 #' # Create 4x1024 models using only silent mutations
 #' sub_model <- createSubstitutionMatrix(db, model="s", sequenceColumn="sequence_alignment",
@@ -1450,7 +1453,7 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' \donttest{
 #' # Subset example data to one isotype and sample as a demo
 #' data(ExampleDb, package="alakazam")
-#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
+#' db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")[1:80,]
 #' 
 #' # Create model using only silent mutations and ignore multiple mutations
 #' model <- createTargetingModel(db, model="s", sequenceColumn="sequence_alignment",
@@ -2411,9 +2414,11 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
 #' 
 #' @examples
 #' \donttest{
-#' # Subset example data to one isotype and sample as demos
+#' # Subset example data to one isotype and 200 sequences
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call == "IGHA")
+#' set.seed(112)
+#' db <- dplyr::slice_sample(db, n=50)
 #' 
 #' tuneMtx = list()
 #' for (i in 1:length(unique(db$sample_id))) {
@@ -2440,7 +2445,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
 #' # plot with legend for both samples for a subset of minNumMutations values
 #' plotTune(tuneMtx, thresh=c(5, 15, 25, 40), criterion="3mer",
 #'          pchs=16:17, ltys=1:2, cols=2:3, 
-#'          plotLegend=TRUE, legendPos=c(5, 100))
+#'          plotLegend=TRUE, legendPos=c(25, 30))
 #' 
 #' # plot for only 1 sample for all the minNumMutations values (no legend)
 #' plotTune(tuneMtx[[1]], thresh=seq(from=5, to=50, by=5), criterion="3mer")
