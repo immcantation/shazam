@@ -1440,7 +1440,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #' data(ExampleDb, package="alakazam")
 #' db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
 #' set.seed(112)
-#' db <- dplyr::slice_sample(db, n=75)
+#' db <- dplyr::slice_sample(db, n=50)
 #' 
 #' # Collapse clones
 #' db <- collapseClones(db, cloneColumn="clone_id",
@@ -1465,10 +1465,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #' isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
 #'                     "IGHG"="seagreen", "IGHA"="steelblue")
 #' plotBaselineSummary(grouped, "sample_id", "c_call", 
-#'                     groupColors=isotype_colors)
-#' 
-#' # Facet by group instead of region
-#' plotBaselineSummary(grouped, "sample_id", "c_call", facetBy="group")
+#'                     groupColors=isotype_colors, facetBy="region")
 #' }
 #' 
 #' @export
