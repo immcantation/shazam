@@ -63,9 +63,9 @@ Examples
 -------------------
 
 ```R
-# Subset example data to one isotype and sample as a demo
+# Subset example data to 50 sequences, of one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
+db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")[1:50,]
 
 # Create 4x1024 models using only silent mutations
 sub_model <- createSubstitutionMatrix(db, model="s", sequenceColumn="sequence_alignment",

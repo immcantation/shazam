@@ -134,7 +134,7 @@ Examples
 ```R
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
+db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")[1:25,]
 
 # Count the number of mutations per 5-mer
 subCount <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",

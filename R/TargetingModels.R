@@ -695,7 +695,7 @@ createSubstitutionMatrix <- function(db, model=c("s", "rs"),
 #'                                      returnModel="5mer", numMutationsOnly=TRUE)
 #' 
 #' # Tune minNumMutations
-#' minNumMutationsTune(subCount, seq(from=10, to=100, by=10))
+#' minNumMutationsTune(subCount, seq(from=10, to=80, by=10))
 #'                                       
 #' @export
 minNumMutationsTune <- function(subCount, minNumMutationsRange) {

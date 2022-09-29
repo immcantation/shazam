@@ -112,9 +112,9 @@ Examples
 -------------------
 
 ```R
-# Subset example data to one isotype and sample as a demo
+# Subset example data to 50 sequences of one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
+db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")[1:50,]
 
 # Create model using only silent mutations
 sub_model <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
@@ -139,8 +139,8 @@ head(sort(mut_model, decreasing=TRUE), 5)
 
 
 ```
-      AAAGG       CAAGA       CAAGC       CAAGT       AATTC 
-0.005630619 0.005630619 0.005630619 0.005630619 0.005115064 
+    AAGTA     ACGTA     AGGTA     ATGTA     CAGTA 
+0.0088995 0.0088995 0.0088995 0.0088995 0.0088995 
 
 ```
 
@@ -154,7 +154,7 @@ mut_model@numMutS
 
 
 ```
-[1] 897
+[1] 410
 
 ```
 

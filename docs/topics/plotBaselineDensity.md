@@ -115,71 +115,44 @@ Examples
 -------------------
 
 ```R
-# Subset example data
-data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
-
-# Collapse clones
-db <- collapseClones(db, cloneColumn="clone_id",
-sequenceColumn="sequence_alignment",
-germlineColumn="germline_alignment_d_mask",
-method="thresholdedFreq", minimumFrequency=0.6,
-includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
-
-# Calculate BASELINe
-baseline <- calcBaseline(db, 
-sequenceColumn="clonal_sequence",
-germlineColumn="clonal_germline", 
-testStatistic="focused",
-regionDefinition=IMGT_V,
-targetingModel=HH_S5F,
-nproc=1)
-
+### Not run:
+# Subset example data as a demo
+# data(ExampleDb, package="alakazam")
+# db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
+# set.seed(112)
+# db <- dplyr::slice_sample(db, n=100)
+# 
+# # Collapse clones
+# db <- collapseClones(db, cloneColumn="clone_id",
+# sequenceColumn="sequence_alignment",
+# germlineColumn="germline_alignment_d_mask",
+# method="thresholdedFreq", minimumFrequency=0.6,
+# includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+# 
+# # Calculate BASELINe
+# baseline <- calcBaseline(db, 
+# sequenceColumn="clonal_sequence",
+# germlineColumn="clonal_germline", 
+# testStatistic="focused",
+# regionDefinition=IMGT_V,
+# targetingModel=HH_S5F,
+# nproc=1)
+#  
+# # Grouping the PDFs by the sample and isotype annotations
+# grouped <- groupBaseline(baseline, groupBy=c("sample_id", "c_call"))
+# 
+# # Plot density faceted by region with custom isotype colors
+# isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
+# "IGHG"="seagreen", "IGHA"="steelblue")
+# plotBaselineDensity(grouped, "sample_id", "c_call", colorValues=isotype_colors, 
+# colorElement="group", sigmaLimits=c(-1, 1))
+# 
+# # Facet by isotype instead of region
+# sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
+# plotBaselineDensity(grouped, "sample_id", "c_call", facetBy="group",
+# colorValues=sample_colors, sigmaLimits=c(-1, 1))
 ```
 
-*calcBaseline will calculate observed and expected mutations for clonal_sequence using clonal_germline as a reference.*
-```
-Calculating BASELINe probability density functions...
-
-```
-
-
-```R
- 
-# Grouping the PDFs by the sample and isotype annotations
-grouped <- groupBaseline(baseline, groupBy=c("sample_id", "c_call"))
-
-```
-
-
-```
-Grouping BASELINe probability density functions...
-Calculating BASELINe statistics...
-
-```
-
-
-```R
-
-# Plot density faceted by region with custom isotype colors
-isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick", 
-"IGHG"="seagreen", "IGHA"="steelblue")
-plotBaselineDensity(grouped, "sample_id", "c_call", colorValues=isotype_colors, 
-colorElement="group", sigmaLimits=c(-1, 1))
-
-```
-
-![7](plotBaselineDensity-7.png)
-
-```R
-
-# Facet by isotype instead of region
-sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
-plotBaselineDensity(grouped, "sample_id", "c_call", facetBy="group",
-colorValues=sample_colors, sigmaLimits=c(-1, 1))
-```
-
-![9](plotBaselineDensity-9.png)
 
 
 See also

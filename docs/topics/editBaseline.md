@@ -38,9 +38,11 @@ Examples
 -------------------
 
 ```R
-# Subset example data
+# Subset example data as a demo
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, c_call == "IGHG" & sample_id == "+7d")
+set.seed(112)
+db <- dplyr::slice_sample(db, n=100)
 
 # Make Baseline object
 baseline <- calcBaseline(db, 

@@ -59,9 +59,11 @@ Examples
 -------------------
 
 ```R
-# Subset example data
+# Subset example data as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG", "IGHA"))
+db <- subset(ExampleDb, c_call %in% c("IGHM", "IGHG"))
+set.seed(112)
+db <- dplyr::slice_sample(db, n=200)
 
 # Collapse clones
 db <- collapseClones(db, cloneColumn="clone_id",
@@ -120,13 +122,9 @@ testBaseline(grouped, groupBy="c_call")
 
 
 ```
-  region         test      pvalue        fdr
-1    cdr IGHM != IGHA 0.126536071 0.15184329
-2    cdr IGHM != IGHG 0.040137450 0.08027490
-3    cdr IGHA != IGHG 0.101394824 0.15184329
-4    fwr IGHM != IGHA 0.010416292 0.03124888
-5    fwr IGHM != IGHG 0.006309629 0.03124888
-6    fwr IGHA != IGHG 0.334456382 0.33445638
+  region         test    pvalue       fdr
+1    cdr IGHM != IGHG 0.1353078 0.1353078
+2    fwr IGHM != IGHG 0.1112142 0.1353078
 
 ```
 

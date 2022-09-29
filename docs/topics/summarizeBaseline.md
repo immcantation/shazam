@@ -69,6 +69,8 @@ Examples
 # Subset example data
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, c_call == "IGHG")
+set.seed(112)
+db <- dplyr::slice_sample(db, n=100)
 
 # Collapse clones
 db <- collapseClones(db, cloneColumn="clone_id",

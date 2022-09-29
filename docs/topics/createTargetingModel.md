@@ -119,7 +119,7 @@ Examples
 ```R
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
-db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
+db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")[1:80,]
 
 # Create model using only silent mutations and ignore multiple mutations
 model <- createTargetingModel(db, model="s", sequenceColumn="sequence_alignment",
@@ -138,8 +138,8 @@ head(sort(model@mutability, decreasing=TRUE), 5)
 
 
 ```
-     AAGTA      ACGTA      AGGTA      CAGTA      CCGTA 
-0.01480406 0.01480406 0.01480406 0.01480406 0.01480406 
+     TACAA      TACAC      TACAG      TACAT      TACAN 
+0.02184414 0.02184414 0.02184414 0.02184414 0.02184414 
 
 ```
 
@@ -152,7 +152,7 @@ model@numMutS
 
 
 ```
-[1] 723
+[1] 519
 
 ```
 

@@ -64,7 +64,8 @@ Examples
 # Subset example data to one isotype and sample as a demo
 data(ExampleDb, package="alakazam")
 db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
-
+set.seed(112)
+db <- dplyr::slice_sample(db, n=75)
 # Create model using only silent mutations
 sub <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
@@ -88,8 +89,8 @@ minNumSeqMutationsTune(mutCount, seq(from=100, to=300, by=50))
 
 ```
          100 150 200 250 300
-measured 237 200 140 107  97
-inferred 787 824 884 917 927
+measured 194 128  92  77  55
+inferred 830 896 932 947 969
 
 ```
 

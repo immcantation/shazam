@@ -81,15 +81,15 @@ model="s", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=TRUE)
 
 # Tune minNumMutations
-minNumMutationsTune(subCount, seq(from=10, to=100, by=10))
+minNumMutationsTune(subCount, seq(from=10, to=80, by=10))
 ```
 
 
 ```
-      10  20  30   40   50   60   70   80   90  100
-5mer   5   2   1    1    0    0    0    0    0    0
-3mer 143 111  53   22   17    2    1    1    1    0
-1mer 876 911 970 1001 1007 1022 1023 1023 1023 1024
+      10  20  30   40   50   60   70   80
+5mer   5   2   1    1    0    0    0    0
+3mer 143 111  53   22   17    2    1    1
+1mer 876 911 970 1001 1007 1022 1023 1023
 
 ```
 
