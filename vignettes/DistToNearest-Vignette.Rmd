@@ -50,7 +50,11 @@ fields (columns) to be present in the table:
 library(shazam)
 library(dplyr)
 data(ExampleDb, package="alakazam")
-ExampleDb %>%
+# subset for speed
+set.seed(112)
+db <- ExampleDb %>% 
+    sample_n(size=500)
+db %>%
     count(sample_id)
 ```
 
@@ -87,13 +91,13 @@ the overall distance.
 
 ```{r, eval=TRUE, warning=FALSE}
 # Use nucleotide Hamming distance and normalize by junction length
-dist_ham <- distToNearest(ExampleDb %>% filter(sample_id == "+7d"), 
+dist_ham <- distToNearest(db %>% filter(sample_id == "+7d"), 
                           sequenceColumn="junction", 
                           vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="ham", normalize="len", nproc=1)
 
 # Use genotyped V assignments, a 5-mer model and no normalization
-dist_s5f <- distToNearest(ExampleDb %>% filter(sample_id == "+7d"), 
+dist_s5f <- distToNearest(db %>% filter(sample_id == "+7d"), 
                           sequenceColumn="junction", 
                           vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="hh_s5f", normalize="none", nproc=1)
@@ -263,10 +267,10 @@ separately.
 In the previous examples we used a subset of the original example data. In the
 following example, we will use the two available samples, `-1h` and `+7d`, 
 and will set `fields="sample_id"`. This will reproduce previous results for sample 
-`-1h` and add results for sample `+7d`.
+`+7d` and add results for sample `-1d`.
 
 ```{r fields, eval=TRUE, warning=FALSE}
-dist_fields <- distToNearest(ExampleDb, model="ham", normalize="len", 
+dist_fields <- distToNearest(db, model="ham", normalize="len", 
                              fields="sample_id", nproc=1)
 ```
 
@@ -285,8 +289,8 @@ p4 <- ggplot(subset(dist_fields, !is.na(dist_nearest)),
 plot(p4)
 ```
 
-In this case, the threshold selected for `-1h` seems to work well 
-for `+7d` as well.
+In this case, the threshold selected for `+7d` seems to work well 
+for `-1d` as well.
 
 ## Calculating nearest neighbor distances across groups rather than within a groups
 
