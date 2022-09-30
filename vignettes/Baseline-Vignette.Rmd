@@ -50,6 +50,8 @@ fields (columns) to be present in the table:
 library(shazam)
 library(alakazam)
 data(ExampleDb, package="alakazam")
+# Subset for faster demonstration
+ExampleDb <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG"))
 ```
 
 ## Preprocessing
