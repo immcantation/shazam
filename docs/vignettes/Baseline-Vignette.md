@@ -28,6 +28,8 @@ fields (columns) to be present in the table:
 library(shazam)
 library(alakazam)
 data(ExampleDb, package="alakazam")
+# Subset for faster demonstration
+ExampleDb <- subset(ExampleDb, c_call %in% c("IGHA", "IGHG"))
 ```
 
 ## Preprocessing
@@ -310,8 +312,8 @@ testBaseline(grouped_1, groupBy="sample_id")
 
 ```
 ##   region       test     pvalue        fdr
-## 1    cdr -1h != +7d 0.05019208 0.08610636
-## 2    fwr -1h != +7d 0.08610636 0.08610636
+## 1    cdr -1h != +7d 0.04494357 0.08988715
+## 2    fwr -1h != +7d 0.49922881 0.49922881
 ```
 
 ## Plot and compare selection scores for groups
