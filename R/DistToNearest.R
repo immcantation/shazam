@@ -861,6 +861,9 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if (!is.null(cellIdColumn) & !is.null(locusColumn)) {
         singleCell <- TRUE
         
+        if (any(is.na(db[[locusColumn]]))) {
+            stop("The locus column contains NA loci annotations.")
+        }
         # check locus column
         valid_loci <- c("IGH", "IGI", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG")
         check <- !all(unique(db[[locusColumn]]) %in% valid_loci)
