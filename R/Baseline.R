@@ -1994,7 +1994,7 @@ calcBaseline <- function(db,
             cluster, list('cols_observed', 'cols_expected','calcBaselineHelper'), 
             envir=environment() 
         )
-        registerDoParallel(cluster)
+        registerDoParallel(cluster,cores=nproc)
     }
     
     list_pdfs <- list()

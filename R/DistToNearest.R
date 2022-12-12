@@ -975,7 +975,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         registerDoSEQ()
     } else if( nproc > 1 ) {
         cluster <- parallel::makeCluster(nproc, type="PSOCK")
-        registerDoParallel(cluster)
+        registerDoParallel(cluster,cores=nproc)
     } else {
         stop('Nproc must be positive.')
     }

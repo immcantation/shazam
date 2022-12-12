@@ -538,7 +538,7 @@ collapseClones <- function(db, cloneColumn = "clone_id",
                                      'chars2Ambiguous', 'nucs2IUPAC', 'IUPAC_DNA_2',  'NUCLEOTIDES_AMBIGUOUS',
                                      'uniqueClonesIdx', 'c2s', 's2c','getCloneRegion'), 
                                 envir=environment() )
-        registerDoParallel(cluster)
+        registerDoParallel(cluster,cores=nproc)
     }
     
     # Printing status to console
@@ -1570,7 +1570,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                               'AMINO_ACIDS',
                                               'binMutationsByRegion', 'countNonNByRegion','setRegionBoundaries','IMGT_V_BY_REGIONS'), 
                                 envir=environment())
-        registerDoParallel(cluster)
+        registerDoParallel(cluster,cores=nproc)
     } else if (nproc == 1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
@@ -2403,7 +2403,7 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
                                     list('db', 'sequenceColumn', 'germlineColumn',
                                          'mutThresh', 'windowSize','slideWindowSeq'),
                                     envir=environment() )
-        registerDoParallel(cluster)
+        registerDoParallel(cluster,cores=nproc)
     }
 
     filter <- unlist(foreach(i=1:nrow(db),
@@ -2535,7 +2535,7 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
                                     list('db', 'sequenceColumn', 'germlineColumn',
                                          'calcObservedMutations','slideWindowSeqHelper'),
                                     envir=environment() )
-        registerDoParallel(cluster)
+        registerDoParallel(cluster,cores=nproc)
     }
     
     # get positions of R/S mutations for sequences in db
@@ -3013,7 +3013,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                               's2c','c2s','NUCLEOTIDES','HH_S5F',
                                               'calculateMutationalPaths','CODON_TABLE','IMGT_V_BY_REGIONS'),
                                 envir=environment() )
-        registerDoParallel(cluster)
+        registerDoParallel(cluster,cores=nproc)
     } else if (nproc == 1) {
         # If needed to run on a single core/cpu then, regsiter DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
