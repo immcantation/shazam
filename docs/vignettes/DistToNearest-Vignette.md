@@ -28,7 +28,11 @@ fields (columns) to be present in the table:
 library(shazam)
 library(dplyr)
 data(ExampleDb, package="alakazam")
-ExampleDb %>%
+# subset for speed
+set.seed(112)
+db <- ExampleDb %>% 
+    sample_n(size=500)
+db %>%
     count(sample_id)
 ```
 
@@ -36,8 +40,8 @@ ExampleDb %>%
 ## # A tibble: 2 × 2
 ##   sample_id     n
 ##   <chr>     <int>
-## 1 -1h        1000
-## 2 +7d         999
+## 1 -1h         247
+## 2 +7d         253
 ```
 
 ## Calculating nearest neighbor distances (heavy chain sequences)
@@ -74,13 +78,13 @@ the overall distance.
 
 ```r
 # Use nucleotide Hamming distance and normalize by junction length
-dist_ham <- distToNearest(ExampleDb %>% filter(sample_id == "+7d"), 
+dist_ham <- distToNearest(db %>% filter(sample_id == "+7d"), 
                           sequenceColumn="junction", 
                           vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="ham", normalize="len", nproc=1)
 
 # Use genotyped V assignments, a 5-mer model and no normalization
-dist_s5f <- distToNearest(ExampleDb %>% filter(sample_id == "+7d"), 
+dist_s5f <- distToNearest(db %>% filter(sample_id == "+7d"), 
                           sequenceColumn="junction", 
                           vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="hh_s5f", normalize="none", nproc=1)
@@ -216,7 +220,7 @@ print(output)
 ```
 
 ```
-## [1] 0.2527657
+## [1] 0.2468924
 ```
 
 ### Automated threshold detection via a mixture model
@@ -256,7 +260,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1213957
+## [1] 0.1208385
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is governed 
@@ -275,11 +279,11 @@ separately.
 In the previous examples we used a subset of the original example data. In the
 following example, we will use the two available samples, `-1h` and `+7d`, 
 and will set `fields="sample_id"`. This will reproduce previous results for sample 
-`-1h` and add results for sample `+7d`.
+`+7d` and add results for sample `-1d`.
 
 
 ```r
-dist_fields <- distToNearest(ExampleDb, model="ham", normalize="len", 
+dist_fields <- distToNearest(db, model="ham", normalize="len", 
                              fields="sample_id", nproc=1)
 ```
 
@@ -301,8 +305,8 @@ plot(p4)
 
 ![plot of chunk DistToNearest-Vignette-8](figure/DistToNearest-Vignette-8-1.png)
 
-In this case, the threshold selected for `-1h` seems to work well 
-for `+7d` as well.
+In this case, the threshold selected for `+7d` seems to work well 
+for `-1d` as well.
 
 ## Calculating nearest neighbor distances across groups rather than within a groups
 
