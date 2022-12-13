@@ -2,7 +2,7 @@
 
 Basic mutational load calculations are provided by the `observedMutations` function. 
 `observedMutations` provides multiple options to control how mutations are calculated.
-Mutations can be calculated as either counts or frequencies, may be divided into 
+Mutations can be calculated as either counts or frequencies, divided into 
 replacement (R) and silent (S) mutations, and subset into FWR and CDR specific mutations.
 Additionally, alternative mutational definitions may be considered based on the 
 physicochemical properties of translated codons.
@@ -10,7 +10,7 @@ physicochemical properties of translated codons.
 ## Example data
 
 A small example AIRR Rearrangement database is included in the `alakazam` package. 
-Analyzing mutations requires the following fields (columns) to 
+Analyzing mutations requires the following fields (columns) to
 be present in the table: 
 
 * `sequence_alignment`
@@ -20,9 +20,9 @@ be present in the table:
 ```r
 # Import required packages
 library(alakazam)
-library(shazam)
 library(dplyr)
 library(ggplot2)
+library(shazam)
 
 # Load and subset example data
 data(ExampleDb, package="alakazam")
@@ -116,15 +116,16 @@ db_obs %>%
 ## 4 GN5SHBT05JGND3  0
 ```
 
-We can plot the mutation frequencies a explore differences between samples or isotypes.
+We can plot the mutation frequencies and explore differences between samples or isotypes.
 
 
 ```r
 g1 <- ggplot(db_obs, aes(x=c_call, y=mu_freq, fill=c_call)) +
-        theme_bw() + ggtitle("Total mutations") +
-        xlab("Isotype") + ylab("Mutation frequency") +
-        scale_fill_manual(name="Isotype", values=IG_COLORS) +
-        geom_boxplot()
+        geom_boxplot() + 
+        labs(title = "Total mutations", 
+             x = "Isotype", y = "Mutation frequency") +
+        scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) +
+        theme_bw() 
 plot(g1)
 ```
 
@@ -139,7 +140,7 @@ boundaries of the Ig sequence. For convenience, `shazam` provides a set of such 
 * `IMGT_V_BY_CODONS`: treats each codon, from codon 1 to codon 104, as a distinct region;
 * `IMGT_V_BY_REGIONS`: defines regions to be CDR1, CDR2, FWR1, FWR2 and FWR3;
 * `IMGT_V`: defines regions to be either CDR or FWR;
-* `IMGT_V_BY_SEGMENTS`: provides no subdivisons and treats the entire V segment as a single region.
+* `IMGT_V_BY_SEGMENTS`: provides no subdivisions and treats the entire V segment as a single region.
 *  `IMGT_VDJ`: All regions, including CDR3 and FWR4, grouped as 
     either CDR or FWR. This `RegionDefinition` is initially empty, and one is
     created on the fly for each set of clonally related sequences.
@@ -173,14 +174,12 @@ db_obs_v %>%
 
 ```
 ## # A tibble: 4 × 7
-##   sequence_id    mu_count_fwr1_r mu_count_fwr1_s mu_co…¹ mu_co…² mu_co…³ mu_co…⁴
-##   <chr>                    <dbl>           <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
-## 1 GN5SHBT07FUXY8               0               0       0       0       0       0
-## 2 GN5SHBT05JMPI5               1               0       0       0       5       1
-## 3 GN5SHBT08H4LPP               1               0       0       0       5       1
-## 4 GN5SHBT05JGND3               0               0       0       0       0       0
-## # … with abbreviated variable names ¹​mu_count_fwr2_r, ²​mu_count_fwr2_s,
-## #   ³​mu_count_fwr3_r, ⁴​mu_count_fwr3_s
+##   sequence_id    mu_count_fwr1_r mu_count_fwr1_s mu_count_fwr2_r mu_count_fwr2_s mu_count_fwr3_r mu_count_fwr3_s
+##   <chr>                    <dbl>           <dbl>           <dbl>           <dbl>           <dbl>           <dbl>
+## 1 GN5SHBT07FUXY8               0               0               0               0               0               0
+## 2 GN5SHBT05JMPI5               1               0               0               0               5               1
+## 3 GN5SHBT08H4LPP               1               0               0               0               5               1
+## 4 GN5SHBT05JGND3               0               0               0               0               0               0
 ```
 
 ```r
@@ -211,29 +210,30 @@ Plot a comparison between CDR silent and replacement mutations.
 
 ```r
 g2 <- ggplot(db_obs_v, aes(x=c_call, y=mu_freq_cdr_s, fill=c_call)) +
-        theme_bw() + ggtitle("CDR silent mutations") +
-        xlab("Isotype") + ylab("Mutation frequency") +
-        scale_fill_manual(name="Isotype", values=IG_COLORS) +
-        geom_boxplot()
+        geom_boxplot() + 
+        labs(title = "CDR silent mutations", 
+             x = "Isotype", y = "Mutation frequency") +
+        scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) +
+        theme_bw()
 g3 <- ggplot(db_obs_v, aes(x=c_call, y=mu_freq_cdr_r, fill=c_call)) +
-        theme_bw() + ggtitle("CDR replacement mutations") +
-        xlab("Isotype") + ylab("Mutation frequency") +
-        scale_fill_manual(name="Isotype", values=IG_COLORS) +
-        geom_boxplot()
+        geom_boxplot() + 
+        labs(title = "CDR replacement mutations", 
+           x = "Isotype", y = "Mutation frequency") +
+        scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) +
+        theme_bw()
 alakazam::gridPlot(g2, g3, ncol=2)
 ```
 
 ![plot of chunk Mutation-Vignette-6](figure/Mutation-Vignette-6-1.png)
 
-
 ## Use amino acid physicochemical properties to define mutations
 
-By default, replacement and silent are determined by exact amino acid identity. But this can be 
-changed by setting the `mutationDefinition` argument. For convenience, `shazam` provides a set 
-of `MutationDefinition` objects defining changes in amino acid charge, hydrophobicity, polarity 
-and volume.
+By default, replacement and silent mutations are determined by exact amino acid 
+identity; this can be changed by setting the `mutationDefinition` argument. 
+For convenience, `shazam` provides a set of `MutationDefinition` objects defining 
+changes in amino acid charge, hydrophobicity, polarity and volume.
 
-In the following example, replacement mutation are defined as amino acid changes that lead to a 
+In the following example, replacement mutations are defined as amino acid changes that lead to a 
 change in charge (`mutationDefinition=CHARGE_MUTATIONS`). Mutations that do not alter
 the charge classification of a translated codon will be considered silent mutations.
 
@@ -269,437 +269,10 @@ frequent in one isotype.
 ```r
 g4 <- ggplot(db_obs_ch, aes(x=c_call, y=mu_freq_seq_r, fill=c_call)) +
         geom_boxplot() + 
-        scale_fill_manual(name="Isotype", values=IG_COLORS) + 
         labs(title="Charge replacement mutations", 
-             x="Isotype", y="Mutation frequency")
+             x="Isotype", y="Mutation frequency") +
+        scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) + 
         theme_bw()
-```
-
-```
-## List of 94
-##  $ line                      :List of 6
-##   ..$ colour       : chr "black"
-##   ..$ linewidth    : num 0.5
-##   ..$ linetype     : num 1
-##   ..$ lineend      : chr "butt"
-##   ..$ arrow        : logi FALSE
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
-##  $ rect                      :List of 5
-##   ..$ fill         : chr "white"
-##   ..$ colour       : chr "black"
-##   ..$ linewidth    : num 0.5
-##   ..$ linetype     : num 1
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ text                      :List of 11
-##   ..$ family       : chr ""
-##   ..$ face         : chr "plain"
-##   ..$ colour       : chr "black"
-##   ..$ size         : num 11
-##   ..$ hjust        : num 0.5
-##   ..$ vjust        : num 0.5
-##   ..$ angle        : num 0
-##   ..$ lineheight   : num 0.9
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : logi FALSE
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ title                     : NULL
-##  $ aspect.ratio              : NULL
-##  $ axis.title                : NULL
-##  $ axis.title.x              :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 1
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 2.75points 0points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.title.x.top          :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 0
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 2.75points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.title.x.bottom       : NULL
-##  $ axis.title.y              :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 1
-##   ..$ angle        : num 90
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 2.75points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.title.y.left         : NULL
-##  $ axis.title.y.right        :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 0
-##   ..$ angle        : num -90
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 0points 2.75points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text                 :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : chr "grey30"
-##   ..$ size         : 'rel' num 0.8
-##   ..$ hjust        : NULL
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.x               :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 1
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 2.2points 0points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.x.top           :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : num 0
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 2.2points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.x.bottom        : NULL
-##  $ axis.text.y               :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : num 1
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 2.2points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.text.y.left          : NULL
-##  $ axis.text.y.right         :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : num 0
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 0points 2.2points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ axis.ticks                :List of 6
-##   ..$ colour       : chr "grey20"
-##   ..$ linewidth    : NULL
-##   ..$ linetype     : NULL
-##   ..$ lineend      : NULL
-##   ..$ arrow        : logi FALSE
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
-##  $ axis.ticks.x              : NULL
-##  $ axis.ticks.x.top          : NULL
-##  $ axis.ticks.x.bottom       : NULL
-##  $ axis.ticks.y              : NULL
-##  $ axis.ticks.y.left         : NULL
-##  $ axis.ticks.y.right        : NULL
-##  $ axis.ticks.length         : 'simpleUnit' num 2.75points
-##   ..- attr(*, "unit")= int 8
-##  $ axis.ticks.length.x       : NULL
-##  $ axis.ticks.length.x.top   : NULL
-##  $ axis.ticks.length.x.bottom: NULL
-##  $ axis.ticks.length.y       : NULL
-##  $ axis.ticks.length.y.left  : NULL
-##  $ axis.ticks.length.y.right : NULL
-##  $ axis.line                 : list()
-##   ..- attr(*, "class")= chr [1:2] "element_blank" "element"
-##  $ axis.line.x               : NULL
-##  $ axis.line.x.top           : NULL
-##  $ axis.line.x.bottom        : NULL
-##  $ axis.line.y               : NULL
-##  $ axis.line.y.left          : NULL
-##  $ axis.line.y.right         : NULL
-##  $ legend.background         :List of 5
-##   ..$ fill         : NULL
-##   ..$ colour       : logi NA
-##   ..$ linewidth    : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ legend.margin             : 'margin' num [1:4] 5.5points 5.5points 5.5points 5.5points
-##   ..- attr(*, "unit")= int 8
-##  $ legend.spacing            : 'simpleUnit' num 11points
-##   ..- attr(*, "unit")= int 8
-##  $ legend.spacing.x          : NULL
-##  $ legend.spacing.y          : NULL
-##  $ legend.key                :List of 5
-##   ..$ fill         : chr "white"
-##   ..$ colour       : logi NA
-##   ..$ linewidth    : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ legend.key.size           : 'simpleUnit' num 1.2lines
-##   ..- attr(*, "unit")= int 3
-##  $ legend.key.height         : NULL
-##  $ legend.key.width          : NULL
-##  $ legend.text               :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : 'rel' num 0.8
-##   ..$ hjust        : NULL
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ legend.text.align         : NULL
-##  $ legend.title              :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : num 0
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ legend.title.align        : NULL
-##  $ legend.position           : chr "right"
-##  $ legend.direction          : NULL
-##  $ legend.justification      : chr "center"
-##  $ legend.box                : NULL
-##  $ legend.box.just           : NULL
-##  $ legend.box.margin         : 'margin' num [1:4] 0cm 0cm 0cm 0cm
-##   ..- attr(*, "unit")= int 1
-##  $ legend.box.background     : list()
-##   ..- attr(*, "class")= chr [1:2] "element_blank" "element"
-##  $ legend.box.spacing        : 'simpleUnit' num 11points
-##   ..- attr(*, "unit")= int 8
-##  $ panel.background          :List of 5
-##   ..$ fill         : chr "white"
-##   ..$ colour       : logi NA
-##   ..$ linewidth    : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ panel.border              :List of 5
-##   ..$ fill         : logi NA
-##   ..$ colour       : chr "grey20"
-##   ..$ linewidth    : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ panel.spacing             : 'simpleUnit' num 5.5points
-##   ..- attr(*, "unit")= int 8
-##  $ panel.spacing.x           : NULL
-##  $ panel.spacing.y           : NULL
-##  $ panel.grid                :List of 6
-##   ..$ colour       : chr "grey92"
-##   ..$ linewidth    : NULL
-##   ..$ linetype     : NULL
-##   ..$ lineend      : NULL
-##   ..$ arrow        : logi FALSE
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
-##  $ panel.grid.major          : NULL
-##  $ panel.grid.minor          :List of 6
-##   ..$ colour       : NULL
-##   ..$ linewidth    : 'rel' num 0.5
-##   ..$ linetype     : NULL
-##   ..$ lineend      : NULL
-##   ..$ arrow        : logi FALSE
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_line" "element"
-##  $ panel.grid.major.x        : NULL
-##  $ panel.grid.major.y        : NULL
-##  $ panel.grid.minor.x        : NULL
-##  $ panel.grid.minor.y        : NULL
-##  $ panel.ontop               : logi FALSE
-##  $ plot.background           :List of 5
-##   ..$ fill         : NULL
-##   ..$ colour       : chr "white"
-##   ..$ linewidth    : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ plot.title                :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : 'rel' num 1.2
-##   ..$ hjust        : num 0
-##   ..$ vjust        : num 1
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 5.5points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ plot.title.position       : chr "panel"
-##  $ plot.subtitle             :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : num 0
-##   ..$ vjust        : num 1
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 0points 0points 5.5points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ plot.caption              :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : 'rel' num 0.8
-##   ..$ hjust        : num 1
-##   ..$ vjust        : num 1
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 5.5points 0points 0points 0points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ plot.caption.position     : chr "panel"
-##  $ plot.tag                  :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : 'rel' num 1.2
-##   ..$ hjust        : num 0.5
-##   ..$ vjust        : num 0.5
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ plot.tag.position         : chr "topleft"
-##  $ plot.margin               : 'margin' num [1:4] 5.5points 5.5points 5.5points 5.5points
-##   ..- attr(*, "unit")= int 8
-##  $ strip.background          :List of 5
-##   ..$ fill         : chr "grey85"
-##   ..$ colour       : chr "grey20"
-##   ..$ linewidth    : NULL
-##   ..$ linetype     : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_rect" "element"
-##  $ strip.background.x        : NULL
-##  $ strip.background.y        : NULL
-##  $ strip.clip                : chr "inherit"
-##  $ strip.placement           : chr "inside"
-##  $ strip.text                :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : chr "grey10"
-##   ..$ size         : 'rel' num 0.8
-##   ..$ hjust        : NULL
-##   ..$ vjust        : NULL
-##   ..$ angle        : NULL
-##   ..$ lineheight   : NULL
-##   ..$ margin       : 'margin' num [1:4] 4.4points 4.4points 4.4points 4.4points
-##   .. ..- attr(*, "unit")= int 8
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ strip.text.x              : NULL
-##  $ strip.text.y              :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : NULL
-##   ..$ angle        : num -90
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  $ strip.switch.pad.grid     : 'simpleUnit' num 2.75points
-##   ..- attr(*, "unit")= int 8
-##  $ strip.switch.pad.wrap     : 'simpleUnit' num 2.75points
-##   ..- attr(*, "unit")= int 8
-##  $ strip.text.y.left         :List of 11
-##   ..$ family       : NULL
-##   ..$ face         : NULL
-##   ..$ colour       : NULL
-##   ..$ size         : NULL
-##   ..$ hjust        : NULL
-##   ..$ vjust        : NULL
-##   ..$ angle        : num 90
-##   ..$ lineheight   : NULL
-##   ..$ margin       : NULL
-##   ..$ debug        : NULL
-##   ..$ inherit.blank: logi TRUE
-##   ..- attr(*, "class")= chr [1:2] "element_text" "element"
-##  - attr(*, "class")= chr [1:2] "theme" "gg"
-##  - attr(*, "complete")= logi TRUE
-##  - attr(*, "validate")= logi TRUE
-```
-
-```r
 plot(g4)
 ```
 
