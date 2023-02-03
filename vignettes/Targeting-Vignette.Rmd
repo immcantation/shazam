@@ -48,8 +48,10 @@ be present in the table:
 * `v_call`
 
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
-# Load example data
+# Import required packages
 library(shazam)
+
+# Load example data
 data(ExampleDb, package="alakazam")
 
 # Subset to IGHG for faster usage demonstration

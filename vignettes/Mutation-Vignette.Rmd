@@ -25,7 +25,7 @@ vignette: >
 
 Basic mutational load calculations are provided by the `observedMutations` function. 
 `observedMutations` provides multiple options to control how mutations are calculated.
-Mutations can be calculated as either counts or frequencies, may be divided into 
+Mutations can be calculated as either counts or frequencies, divided into 
 replacement (R) and silent (S) mutations, and subset into FWR and CDR specific mutations.
 Additionally, alternative mutational definitions may be considered based on the 
 physicochemical properties of translated codons.
@@ -33,7 +33,7 @@ physicochemical properties of translated codons.
 ## Example data
 
 A small example AIRR Rearrangement database is included in the `alakazam` package. 
-Analyzing mutations requires the following fields (columns) to 
+Analyzing mutations requires the following fields (columns) to
 be present in the table: 
 
 * `sequence_alignment`
@@ -42,9 +42,9 @@ be present in the table:
 ```{r, eval=TRUE, warning=FALSE, message=FALSE}
 # Import required packages
 library(alakazam)
-library(shazam)
 library(dplyr)
 library(ggplot2)
+library(shazam)
 
 # Load and subset example data
 data(ExampleDb, package="alakazam")
@@ -104,14 +104,15 @@ db_obs %>%
     head(n=4)
 ```
 
-We can plot the mutation frequencies a explore differences between samples or isotypes.
+We can plot the mutation frequencies and explore differences between samples or isotypes.
 
 ```{r, eval=TRUE, warning=FALSE}
 g1 <- ggplot(db_obs, aes(x=c_call, y=mu_freq, fill=c_call)) +
-        theme_bw() + ggtitle("Total mutations") +
-        xlab("Isotype") + ylab("Mutation frequency") +
-        scale_fill_manual(name="Isotype", values=IG_COLORS) +
-        geom_boxplot()
+        geom_boxplot() + 
+        labs(title = "Total mutations", 
+             x = "Isotype", y = "Mutation frequency") +
+        scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) +
+        theme_bw() 
 plot(g1)
 ```
 
@@ -124,7 +125,7 @@ boundaries of the Ig sequence. For convenience, `shazam` provides a set of such 
 * `IMGT_V_BY_CODONS`: treats each codon, from codon 1 to codon 104, as a distinct region;
 * `IMGT_V_BY_REGIONS`: defines regions to be CDR1, CDR2, FWR1, FWR2 and FWR3;
 * `IMGT_V`: defines regions to be either CDR or FWR;
-* `IMGT_V_BY_SEGMENTS`: provides no subdivisons and treats the entire V segment as a single region.
+* `IMGT_V_BY_SEGMENTS`: provides no subdivisions and treats the entire V segment as a single region.
 *  `IMGT_VDJ`: All regions, including CDR3 and FWR4, grouped as 
     either CDR or FWR. This `RegionDefinition` is initially empty, and one is
     created on the fly for each set of clonally related sequences.
@@ -170,27 +171,28 @@ Plot a comparison between CDR silent and replacement mutations.
 
 ```{r, eval=TRUE, warning=FALSE}
 g2 <- ggplot(db_obs_v, aes(x=c_call, y=mu_freq_cdr_s, fill=c_call)) +
-        theme_bw() + ggtitle("CDR silent mutations") +
-        xlab("Isotype") + ylab("Mutation frequency") +
-        scale_fill_manual(name="Isotype", values=IG_COLORS) +
-        geom_boxplot()
+        geom_boxplot() + 
+        labs(title = "CDR silent mutations", 
+             x = "Isotype", y = "Mutation frequency") +
+        scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) +
+        theme_bw()
 g3 <- ggplot(db_obs_v, aes(x=c_call, y=mu_freq_cdr_r, fill=c_call)) +
-        theme_bw() + ggtitle("CDR replacement mutations") +
-        xlab("Isotype") + ylab("Mutation frequency") +
-        scale_fill_manual(name="Isotype", values=IG_COLORS) +
-        geom_boxplot()
+        geom_boxplot() + 
+        labs(title = "CDR replacement mutations", 
+           x = "Isotype", y = "Mutation frequency") +
+        scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) +
+        theme_bw()
 alakazam::gridPlot(g2, g3, ncol=2)
 ```
 
-
 ## Use amino acid physicochemical properties to define mutations
 
-By default, replacement and silent are determined by exact amino acid identity. But this can be 
-changed by setting the `mutationDefinition` argument. For convenience, `shazam` provides a set 
-of `MutationDefinition` objects defining changes in amino acid charge, hydrophobicity, polarity 
-and volume.
+By default, replacement and silent mutations are determined by exact amino acid 
+identity; this can be changed by setting the `mutationDefinition` argument. 
+For convenience, `shazam` provides a set of `MutationDefinition` objects defining 
+changes in amino acid charge, hydrophobicity, polarity and volume.
 
-In the following example, replacement mutation are defined as amino acid changes that lead to a 
+In the following example, replacement mutations are defined as amino acid changes that lead to a 
 change in charge (`mutationDefinition=CHARGE_MUTATIONS`). Mutations that do not alter
 the charge classification of a translated codon will be considered silent mutations.
 
@@ -214,9 +216,9 @@ frequent in one isotype.
 ```{r, eval=TRUE, warning=FALSE}
 g4 <- ggplot(db_obs_ch, aes(x=c_call, y=mu_freq_seq_r, fill=c_call)) +
         geom_boxplot() + 
-        scale_fill_manual(name="Isotype", values=IG_COLORS) + 
         labs(title="Charge replacement mutations", 
-             x="Isotype", y="Mutation frequency")
+             x="Isotype", y="Mutation frequency") +
+        scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) + 
         theme_bw()
 plot(g4)
 ```

@@ -137,7 +137,7 @@ plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk
 
 ```
 
-*Warning*:The dot-dot notation (`..density..`) was deprecated in ggplot2 3.4.0.![3](findThreshold-3.png)
+![2](findThreshold-2.png)
 
 ```R
 print(output)
@@ -145,7 +145,7 @@ print(output)
 
 
 ```
-[1] 0.2441226
+[1] 0.2493799
 
 ```
 

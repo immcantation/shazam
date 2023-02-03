@@ -26,8 +26,10 @@ be present in the table:
 
 
 ```r
-# Load example data
+# Import required packages
 library(shazam)
+
+# Load example data
 data(ExampleDb, package="alakazam")
 
 # Subset to IGHG for faster usage demonstration
