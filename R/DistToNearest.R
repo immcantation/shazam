@@ -1256,12 +1256,17 @@ findThreshold <- function (distances, method=c("density", "gmm"),
  smoothValley <- function(distances) {
     # Remove NA, NaN, and infinite distances
     distances <- distances[!is.na(distances) & !is.nan(distances) & !is.infinite(distances)]
-
+    unique_distances <- unique(distances)
     # Gaussian distribution bandwidth scale parameter
     # gaussian_scaling <- (1/(4 * pi))^(1/10)
     
     # Ideal bandwidth
-    bandwidth <- h.ucv(unique(distances), 4)$h
+    if (length(unique_distances) < 3 ) {
+        stop("The `smoothValley` funcion used by the density method requires ", 
+             "at least 3 unique distance values.\n",
+             "Found distance values: ", paste(unique_distances, collapse=", "))
+    }
+    bandwidth <- h.ucv(unique_distances, 4)$h
     #bandwidth <- kedd::h.ucv(distances, 4)$h
     #bandwidth <- ks::hucv(unique(distances), deriv.order=4)
     
