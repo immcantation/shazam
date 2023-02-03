@@ -2284,27 +2284,27 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                                breaks=names(sub_colors)) +
             scale_fill_manual(name="", values=c(sub_colors, dna_colors), guide="none") +
             geom_rect(data=sub_rect, 
-                      mapping=aes_string(xmin="rect_min", xmax="rect_max", ymin="ymin", ymax="ymax", 
-                                         fill="text_label", color="text_label"), 
+                      mapping=aes(xmin=rect_min, xmax=rect_max, ymin=ymin, ymax=ymax, 
+                                         fill=text_label, color=text_label), 
                       size=0.5*size, alpha=1, show.legend=FALSE) +
             #geom_tile(data=sub_rect, 
             #          mapping=aes_string(x="text_x", y="text_y", width="rect_width", fill="text_label"), 
             #          size=0, alpha=0.7, show.legend=FALSE) +
             #geom_tile(data=sub_melt, mapping=aes_string(x="x", y="pos", fill="char"), size=0, alpha=0.7,
             #          show.legend=FALSE) +
-            geom_text(data=sub_text[[3]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
+            geom_text(data=sub_text[[3]], mapping=aes(x=text_x, y=text_y, label=text_label), 
                       color="black", hjust=0.5, vjust=0.5, size=3*size, fontface=2)
         
         # Add 5-mer nucleotide labels
         if (center_nuc %in% c("A", "C")) {
-            p1 <- p1 + geom_text(data=sub_text[[1]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
+            p1 <- p1 + geom_text(data=sub_text[[1]], mapping=aes(x=text_x, y=text_y, label=text_label), 
                                  color="black", hjust=0.5, vjust=0.5, size=2*size) +
-                geom_text(data=sub_text[[2]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
+                geom_text(data=sub_text[[2]], mapping=aes(x=text_x, y=text_y, label=text_label), 
                           color="black", hjust=0.5, vjust=0.5, size=2*size)
         } else if (center_nuc %in% c("G", "T")) {
-            p1 <- p1 + geom_text(data=sub_text[[4]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
+            p1 <- p1 + geom_text(data=sub_text[[4]], mapping=aes(x=text_x, y=text_y, label=text_label), 
                                  color="black", hjust=0.5, vjust=0.5, size=2*size) +
-                geom_text(data=sub_text[[5]], mapping=aes_string(x="text_x", y="text_y", label="text_label"), 
+                geom_text(data=sub_text[[5]], mapping=aes(x=text_x, y=text_y, label=text_label), 
                           color="black", hjust=0.5, vjust=0.5, size=2*size)
         }
 
@@ -2325,7 +2325,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                 scale_x_continuous(expand=c(0, 0)) +
                 scale_y_continuous(limits=y_limits, expand=c(0, 0)) +
                 coord_polar(theta="x") +
-                geom_segment(data=sub_df, mapping=aes_string(x="x", xend="x", yend="score", color="motif"), 
+                geom_segment(data=sub_df, mapping=aes(x=x, xend=x, yend=score, color=motif), 
                              y=score_offset, size=0.75*size, position=position_nudge(x = -0.5)) +
                 guides(color=guide_legend(override.aes=list(linetype=1, size=2*size)))
               
@@ -2342,7 +2342,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                 scale_x_continuous(expand=c(0, 1)) +
                 scale_y_continuous(limits=y_limits, breaks=y_breaks, expand=c(0, 0.5),
                                    labels=function(x) scales::scientific(.invert_score(x))) +
-                geom_bar(data=sub_df, mapping=aes_string(x="x", y="score", fill="motif", color="motif"), 
+                geom_bar(data=sub_df, mapping=aes(x=x, y=score, fill=motif, color=motif), 
                          stat="identity", position=position_nudge(x = -0.5), size=0, width=0.7) +
               guides(color=guide_legend(override.aes=list(fill=sub_colors, linetype=0)))
         }

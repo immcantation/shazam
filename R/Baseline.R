@@ -1228,7 +1228,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
     # baseline=grouped
     # idColumn="sample_id"; groupColumn="c_call"; subsetRegions=NULL; sigmaLimits=c(-5, 5)
     # facetBy="region"; style="density"; size=1; silent=FALSE
-    
+
     # Check input
     colorElement <- match.arg(colorElement)
     style <- match.arg(style)
@@ -1322,18 +1322,18 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
         names(size_values) <- size_names
         
         # Plot probability density curve
-        p1 <- ggplot(dens_df, aes_string(x="SIGMA", y="DENSITY")) +
+        p1 <- ggplot(dens_df, aes(x=SIGMA, y=DENSITY)) +
             base_theme + 
             xlab(expression(Sigma)) +
             ylab("Density") +
             geom_line(aes(size=size))
         # Add line
         if (colorElement == "id" & is.null(secondaryColumn)) {
-            p1 <- p1 + aes_string(color=idColumn)
+            p1 <- p1 + aes(color=!!rlang::sym(idColumn))
         } else if (colorElement == "id" & !is.null(secondaryColumn)) {
-            p1 <- p1 + aes_string(color=idColumn, linetype=secondaryColumn)
+            p1 <- p1 + aes(color=!!rlang::sym(idColumn), linetype=!!rlang::sym(secondaryColumn))
         } else if (colorElement == "group") {
-            p1 <- p1 + aes_string(color=secondaryColumn, linetype=idColumn)
+            p1 <- p1 + aes(color=!!rlang::sym(secondaryColumn), linetype=!!rlang::sym(idColumn))
         } else {
             stop("Incompatible arguments for groupColumn, colorElement and facetBy")
         }
@@ -1523,13 +1523,13 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
         if (!is.null(groupColumn) & !is.null(groupColors)) {
             stats_df[,groupColumn] <- factor(stats_df[,groupColumn], levels=names(groupColors))
         }
-        p1 <- ggplot(stats_df, aes_string(x=idColumn, y="baseline_sigma", ymax=max("baseline_sigma"))) +
+        p1 <- ggplot(stats_df, aes(x=!!rlang::sym(idColumn), y=baseline_sigma, ymax=max(baseline_sigma))) +
             base_theme + 
             xlab("") +
             ylab(expression(Sigma)) +
             geom_hline(yintercept=0, size=1*size, linetype=2, color="grey") +
             geom_point(size=3*size, position=position_dodge(0.6)) +
-            geom_errorbar(aes_string(ymin="baseline_ci_lower", ymax="baseline_ci_upper"), 
+            geom_errorbar(aes(ymin=baseline_ci_lower, ymax=baseline_ci_upper), 
                           width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.6))
         if (!is.null(title)) {
             p1 <- p1 + ggtitle(title)
@@ -1539,12 +1539,12 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
         } else if (!is.null(groupColumn) & !is.null(groupColors) & facetBy == "region") {
             #groupColors <- factor(groupColors, levels=groupColors)
             p1 <- p1 + scale_color_manual(name=groupColumn, values=groupColors) +
-                aes_string(color=groupColumn) + facet_grid(region ~ .)
+                aes(color=!!rlang::sym(groupColumn)) + facet_grid(region ~ .)
         } else if (!is.null(groupColumn) & is.null(groupColors) & facetBy == "region") {
-            p1 <- p1 + aes_string(color=groupColumn) + facet_grid(region ~ .)
+            p1 <- p1 + aes(color=!!rlang::sym(groupColumn)) + facet_grid(region ~ .)
         } else if (!is.null(groupColumn) & facetBy == "group") {
             p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
-                aes_string(color="region") + facet_grid(paste(groupColumn, "~ ."))
+                aes(color=region) + facet_grid(paste(groupColumn, "~ ."))
         } else {
             stop("Cannot facet by group if groupColumn=NULL")
         }

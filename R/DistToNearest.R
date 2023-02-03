@@ -1953,21 +1953,21 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
     if (is.null(xmax)) { xmax <- NA }
     
     # Plot distToNearest distribution plus Gaussian fits
-    p <- ggplot(xdf, aes_string(x="x")) +
+    p <- ggplot(xdf, aes(x=x)) +
         baseTheme() + 
         xlab("Distance") + 
         ylab("Density") +
-        geom_histogram(aes_string(y="..density.."), binwidth=binwidth, 
+        geom_histogram(aes(y=after_stat(density)), binwidth=binwidth, 
                        fill="gray40", color="white") +
-        geom_line(data=fit1, aes_string(x="x", y="y"), color="darkslateblue", size=size) +
-        geom_line(data=fit2, aes_string(x="x", y="y"), color="darkslateblue", size=size) +
+        geom_line(data=fit1, aes(x=x, y=y), color="darkslateblue", linewidth=size) +
+        geom_line(data=fit2, aes(x=x, y=y), color="darkslateblue", linewidth=size) +
         geom_vline(xintercept=data@threshold, color="firebrick", 
                    linetype="longdash", size=size)
     
     # Add cross histogram
     if (!is.null(cross)) {
         cdf <- data.frame(x=cross[is.finite(cross)])
-        p <- p + geom_histogram(data=cdf, aes_q(x=~x, y=~-(..density..)), binwidth=binwidth, 
+        p <- p + geom_histogram(data=cdf, aes(x=x, y=-after_stat(density)), binwidth=binwidth, 
                                 fill="gray40", color="white", position="identity") +
             scale_y_continuous(labels=abs)
     }
@@ -2062,13 +2062,13 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     if (is.null(xmax)) { xmax <- NA }
     
     # Plot distToNearest distribution plus Gaussian fits
-    p <- ggplot(xdf, aes_string(x="x")) +
+    p <- ggplot(xdf, aes(x=x)) +
         baseTheme() +
         xlab("Distance") + 
         ylab("Density") +
-        geom_histogram(aes_string(y="..density.."), binwidth=binwidth, 
+        geom_histogram(aes(y=after_stat(density)), binwidth=binwidth, 
                        fill="gray40", color="white") +
-        geom_line(data=ddf, aes_string(x="x", y="y"), 
+        geom_line(data=ddf, aes(x=x, y=y), 
                   color="darkslateblue", size=size) +
         geom_vline(xintercept=data@threshold, 
                    color="firebrick", linetype="longdash", size=size)
