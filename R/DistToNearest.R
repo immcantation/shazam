@@ -2076,7 +2076,7 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     # Add cross histogram
     if (!is.null(cross)) {
         cdf <- data.frame(x=cross[is.finite(cross)])
-        p <- p + geom_histogram(data=cdf, aes_q(x=~x, y=~-(..density..)), binwidth=binwidth, 
+        p <- p + geom_histogram(data=cdf, aes(x=x, y=-after_stat(density)), binwidth=binwidth, 
                                 fill="gray40", color="white", position="identity") +
              scale_y_continuous(labels=abs)
     }
