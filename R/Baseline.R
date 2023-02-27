@@ -1509,7 +1509,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
         theme(panel.background=element_blank(),
               panel.grid.major=element_blank(),
               panel.grid.minor=element_blank(),
-              panel.border=element_rect(color="black", size=0.5)) +
+              panel.border=element_rect(color="black", linewidth=0.5)) +
         theme(strip.background=element_rect(fill="white", color="black", linewidth=0.5)) +
         theme(axis.title.x=element_blank(),
               axis.text.x=element_blank(), 
