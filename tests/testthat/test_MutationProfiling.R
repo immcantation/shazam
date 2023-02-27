@@ -2975,12 +2975,12 @@ test_that("collapseClones, extended regions", {
                                           regionDefinition = IMGT_VDJ_BY_REGIONS,
                                           juncLengthColumn = "JUNCTION_LENGTH")
     # check values for clones of size 1:
-    expect_equal(db_clone_4035,clone_4035_colapsed[,1:15])
+    expect_equal(db_clone_4035,clone_4035_colapsed[,1:16])
     expect_equal(as.character(clone_4035_colapsed[,"GERMLINE_IMGT_D_MASK"]),
                  as.character(clone_4035_colapsed[,"clonal_germline"]))
     expect_equal(as.character(clone_4035_colapsed[,"SEQUENCE_IMGT"]),
                  as.character(clone_4035_colapsed[,"clonal_sequence"]))
-    expect_equal(db_clone_942,clone_942_colapsed[,1:15])
+    expect_equal(db_clone_942,clone_942_colapsed[,1:16])
     expect_equal(as.character(clone_942_colapsed[,"GERMLINE_IMGT_D_MASK"]),
                  as.character(clone_942_colapsed[,"clonal_germline"]))
     expect_equal(as.character(clone_942_colapsed[,"SEQUENCE_IMGT"]),
