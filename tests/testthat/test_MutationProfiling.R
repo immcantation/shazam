@@ -2737,7 +2737,8 @@ test_that("observedMutations, parents as ref", {
     #                                           v_call="V_CALL", j_call="J_CALL", junc_len="JUNCTION_LENGTH") 
     clone_3177_obj <- makeChangeoClone(data=ExampleDb[ExampleDb$CLONE=="3177",], seq="SEQUENCE_IMGT", 
                                                germ="GERMLINE_IMGT_D_MASK", clone="CLONE", id="SEQUENCE_ID",
-                                               v_call="V_CALL", j_call="J_CALL", junc_len="JUNCTION_LENGTH")     
+                                               v_call="V_CALL", j_call="J_CALL", junc_len="JUNCTION_LENGTH",
+                                               locus = "LOCUS")     
     print(names(clone_3177_obj))
     if (file.access(dnapars_exec, mode=1) == -1) {
         # expect_error(
@@ -2899,7 +2900,8 @@ test_that("expectedMutations, extended with regard to parent", {
         clone_3163_obj <- makeChangeoClone(clone_3163_db, seq="SEQUENCE_IMGT",
                                            id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
                                            germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
-                                           v_call = "V_CALL", j_call = "J_CALL")
+                                           v_call = "V_CALL", j_call = "J_CALL",
+                                           locus="LOCUS")
         clone_3163_graph <- buildPhylipLineage(clone_3163_obj, dnapars_exec, rm_temp = TRUE)  
         clone_3163_GraphDf <- makeGraphDf(clone_3163_graph, clone_3163_obj)
         
@@ -2907,7 +2909,8 @@ test_that("expectedMutations, extended with regard to parent", {
         clone_3100_obj <- makeChangeoClone(clone_3100_db, seq="SEQUENCE_IMGT",
                                            id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
                                            germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
-                                           v_call = "V_CALL", j_call = "J_CALL")
+                                           v_call = "V_CALL", j_call = "J_CALL",
+                                           locus="LOCUS")
         clone_3100_graph <- buildPhylipLineage(clone_3100_obj, dnapars_exec, rm_temp = TRUE)  
         clone_3100_GraphDf <- makeGraphDf(clone_3100_graph, clone_3100_obj)
         
@@ -2915,7 +2918,8 @@ test_that("expectedMutations, extended with regard to parent", {
         clone_3115_obj <- makeChangeoClone(clone_3115_db, seq="SEQUENCE_IMGT",
                                            id = "SEQUENCE_ID", junc_len = "JUNCTION_LENGTH", 
                                            germ="GERMLINE_IMGT_D_MASK", clone = "CLONE",
-                                           v_call = "V_CALL", j_call = "J_CALL")
+                                           v_call = "V_CALL", j_call = "J_CALL",
+                                           locus="LOCUS")
         clone_3115_graph <- buildPhylipLineage(clone_3115_obj, dnapars_exec, rm_temp = TRUE)  
         clone_3115_GraphDf <- makeGraphDf(clone_3115_graph, clone_3115_obj)
         
