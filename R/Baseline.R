@@ -1359,20 +1359,20 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
     
     if (sizeElement == "none") {
         p1 <- p1 +
-            guides(size="none", 
-                   colour = guide_legend(override.aes=list(size=size_values)))        
+            guides(linewidth="none", 
+                   colour = guide_legend(override.aes=list(linewidth=size_values)))        
         if (length(unique(c(groupColumn, idColumn))) > 1) {
             p1 <- p1 +
-                guides (linetype=guide_legend(override.aes=list(size=size_values)))
+                guides (linetype=guide_legend(override.aes=list(linewidth=size_values)))
         }
     } else if (sizeElement == colorElement) {
         p1 <- p1 +
-            guides(size="none", 
-                   colour = guide_legend(override.aes = list(size = size_values)))
+            guides(linewidth="none", 
+                   colour = guide_legend(override.aes = list(linewidth = size_values)))
     } else {
         p1 <- p1 +
-            guides(size="none", 
-                   linetype = guide_legend(override.aes = list(size = size_values))) 
+            guides(linewidth="none", 
+                   linetype = guide_legend(override.aes = list(linewidth = size_values))) 
     }
     
       
@@ -1527,10 +1527,10 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
             base_theme + 
             xlab("") +
             ylab(expression(Sigma)) +
-            geom_hline(yintercept=0, size=1*size, linetype=2, color="grey") +
+            geom_hline(yintercept=0, linewidth=1*size, linetype=2, color="grey") +
             geom_point(size=3*size, position=position_dodge(0.6)) +
             geom_errorbar(aes(ymin=baseline_ci_lower, ymax=baseline_ci_upper), 
-                          width=0.2, size=0.5*size, alpha=0.8, position=position_dodge(0.6))
+                          width=0.2, linewidth=0.5*size, alpha=0.8, position=position_dodge(0.6))
         if (!is.null(title)) {
             p1 <- p1 + ggtitle(title)
         }    

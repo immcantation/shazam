@@ -1962,7 +1962,7 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
         geom_line(data=fit1, aes(x=x, y=y), color="darkslateblue", linewidth=size) +
         geom_line(data=fit2, aes(x=x, y=y), color="darkslateblue", linewidth=size) +
         geom_vline(xintercept=data@threshold, color="firebrick", 
-                   linetype="longdash", size=size)
+                   linetype="longdash", linewidth=size)
     
     # Add cross histogram
     if (!is.null(cross)) {
@@ -2069,9 +2069,9 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
         geom_histogram(aes(y=after_stat(density)), binwidth=binwidth, 
                        fill="gray40", color="white") +
         geom_line(data=ddf, aes(x=x, y=y), 
-                  color="darkslateblue", size=size) +
+                  color="darkslateblue", linewidth=size) +
         geom_vline(xintercept=data@threshold, 
-                   color="firebrick", linetype="longdash", size=size)
+                   color="firebrick", linetype="longdash", linewidth=size)
     
     # Add cross histogram
     if (!is.null(cross)) {
