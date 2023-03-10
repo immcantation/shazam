@@ -106,7 +106,7 @@
 #' @import   graphics
 #' @import   methods
 #' @import   utils
-#' @importFrom  alakazam    getAllele getGene getFamily getSegment groupGenes
+#' @importFrom  alakazam    getAllele getGene getFamily getSegment getLocus groupGenes
 #'                          getAAMatrix getDNAMatrix IUPAC_DNA
 #'                          pairwiseDist nonsquareDist pairwiseEqual 
 #'                          seqDist seqEqual
