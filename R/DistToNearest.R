@@ -1017,10 +1017,12 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     
     # Export groups to the clusters
     if (nproc > 1) { 
+        # This subsetting improves performance
+        required_cols <- unique(c(group_cols,cross,locusColumn,sequenceColumn,"TMP_DIST_NEAREST"))
         db_notused_cols <- db %>%
-            select(c(DTN_ROW_ID, !any_of(c(group_cols,cross,locusColumn,sequenceColumn))))
+            select(c(DTN_ROW_ID, !any_of(required_cols)))
         db <- db %>%
-            select(c(DTN_ROW_ID,  any_of(c(group_cols,cross,locusColumn,sequenceColumn))))
+            select(c(DTN_ROW_ID,  any_of(required_cols)))
         export_functions <- list("db",
                                  "uniqueGroupsIdx", 
                                  "cross",
