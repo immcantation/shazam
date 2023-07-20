@@ -874,7 +874,9 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     }
     
     # check locus column contains valid values
-    valid_loci <- c("IGH", "IGI", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG")
+    # We could use the airr schema: valid_loci <- airr::RearrangementSchema['locus'][['enum']]
+    valid_loci <- c("IGH", "IGI", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG") 
+    
     seen_loci <- unique(db[[locusColumn]])
     check <- !all(seen_loci %in% valid_loci)
     if (check) {
