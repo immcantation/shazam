@@ -10,7 +10,7 @@ markdown_extensions:
   - toc:
       permalink: True
 docs_dir: docs
-pages:
+nav:
   - 'About':
     - 'Introduction': index.md
     - 'Download & Installation': install.md
