@@ -1,3 +1,6 @@
+#' @keywords internal
+"_PACKAGE"
+
 # Shazam package documentation and import directives
 
 #' The shazam package
