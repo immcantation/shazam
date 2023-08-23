@@ -68,6 +68,13 @@ data(ExampleDb, package = "alakazam")
 data(ExampleTrees, package = "alakazam")
 graph <- ExampleTrees[[17]]
 db <- subset(ExampleDb, clone_id == graph$clone)
+
+```
+
+*This graph was created by an old(er) igraph version.
+  Call upgrade_graph() on it to use with the current igraph version
+  For now we convert it on the fly...*
+```R
 clone <- alakazam::makeChangeoClone(db)
 
 # Extend data with lineage information

@@ -42,8 +42,8 @@ db %>% count(sample_id)
 ## # A tibble: 2 × 2
 ##   sample_id     n
 ##   <chr>     <int>
-## 1 -1h         247
-## 2 +7d         253
+## 1 +7d         253
+## 2 -1h         247
 ```
 
 ## Calculating nearest neighbor distances (heavy chain sequences)
@@ -283,7 +283,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1246892
+## [1] 0.1256494
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is

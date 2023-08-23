@@ -32,6 +32,7 @@ subsample = NULL,
 progress = FALSE,
 cellIdColumn = NULL,
 locusColumn = "locus",
+locusValues = c("IGH"),
 onlyHeavy = TRUE,
 keepVJLgroup = TRUE
 )
@@ -118,10 +119,12 @@ bulk sequencing data is assumed.
 
 locusColumn
 :   name of the column containing locus information. 
-Only applicable to single-cell data.
-Ignored if `cellIdColumn=NULL`. Valid loci values
+Valid loci values
 are "IGH", "IGI", "IGK", "IGL", "TRA", "TRB", 
 "TRD", and "TRG".
+
+locusValues
+:   Loci values to focus the analysis on.
 
 onlyHeavy
 :   use only the IGH (BCR) or TRB/TRD (TCR) sequences 
@@ -271,7 +274,8 @@ See also
 See [calcTargetingDistance](calcTargetingDistance.md) for generating nucleotide distance matrices 
 from a [TargetingModel](TargetingModel-class.md) object. See [HH_S5F](HH_S5F.md), [HH_S1F](HH_S1F.md), 
 [MK_RS1NF](MK_RS1NF.md), [getDNAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getDNAMatrix), and [getAAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getAAMatrix)
-for individual model details.
+for individual model details. [getLocus](http://www.rdocumentation.org/packages/alakazam/topics/getSegment) to get locus
+values based on allele calls.
 
 
 

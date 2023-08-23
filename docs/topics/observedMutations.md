@@ -178,6 +178,13 @@ nproc=1)
 data(ExampleTrees, package="alakazam")
 graph <- ExampleTrees[[17]]
 clone <- alakazam::makeChangeoClone(subset(ExampleDb, clone_id == graph$clone))
+
+```
+
+*This graph was created by an old(er) igraph version.
+  Call upgrade_graph() on it to use with the current igraph version
+  For now we convert it on the fly...*
+```R
 gdf <- makeGraphDf(graph, clone)
 
 # Count of mutations between observed sequence and immediate ancenstor

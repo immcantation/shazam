@@ -340,7 +340,7 @@ isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick",
 plotBaselineSummary(grouped_1, "sample_id")
 ```
 
-![plot of chunk Baseline-Vignette-50](figure/Baseline-Vignette-50-1.png)
+![plot of chunk Baseline-Vignette-12](figure/Baseline-Vignette-12-1.png)
 
 ```r
 # Plot selection scores by time-point and isotype for only CDR
@@ -348,14 +348,14 @@ plotBaselineSummary(grouped_2, "sample_id", "c_call", groupColors=isotype_colors
                     subsetRegions="cdr")
 ```
 
-![plot of chunk Baseline-Vignette-50](figure/Baseline-Vignette-50-2.png)
+![plot of chunk Baseline-Vignette-12](figure/Baseline-Vignette-12-2.png)
 
 ```r
 # Group by CDR/FWR and facet by isotype
 plotBaselineSummary(grouped_2, "sample_id", "c_call", facetBy="group")
 ```
 
-![plot of chunk Baseline-Vignette-50](figure/Baseline-Vignette-50-3.png)
+![plot of chunk Baseline-Vignette-12](figure/Baseline-Vignette-12-3.png)
 
 `plotBaselineDensity` plots the full `Baseline` PDF of selection scores for the 
 given groups. The parameters are the same as those for `plotBaselineSummary`.
@@ -369,7 +369,7 @@ plotBaselineDensity(grouped_2, "c_call", groupColumn="sample_id", colorElement="
                     colorValues=sample_colors, sigmaLimits=c(-1, 1))
 ```
 
-![plot of chunk Baseline-Vignette-51](figure/Baseline-Vignette-51-1.png)
+![plot of chunk Baseline-Vignette-13](figure/Baseline-Vignette-13-1.png)
 
 ## Editing a field in a Baseline object
 
