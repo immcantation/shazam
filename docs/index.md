@@ -1,3 +1,5 @@
+#
+
 [![](http://cranlogs.r-pkg.org/badges/grand-total/shazam)](https://www.r-pkg.org/pkg/shazam)
 [![](https://cranlogs.r-pkg.org/badges/shazam)](https://www.r-pkg.org/pkg/shazam)
 [![](https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=plastic)](https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html)
@@ -45,14 +47,14 @@ For help and questions please contact the [Immcantation Group](mailto:immcantati
 or use the [issue tracker](https://bitbucket.org/kleinstein/shazam/issues?status=new&status=open).
 
 
-# Dependencies
+## Dependencies
 
 **Depends:** ggplot2  
 **Imports:** alakazam, ape, diptest, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, KernSmooth, lazyeval, MASS, methods, parallel, progress, rlang, scales, seqinr, stats, stringi, tidyr, tidyselect, utils  
 **Suggests:** knitr, rmarkdown, testthat
 
 
-# Authors
+## Authors
 
 [Mohamed Uduman](mailto:mohamed.uduman@yale.edu) (aut)  
 [Namita Gupta](mailto:namita.gupta@yale.edu) (aut)  
@@ -65,7 +67,7 @@ or use the [issue tracker](https://bitbucket.org/kleinstein/shazam/issues?status
 [Steven Kleinstein](mailto:steven.kleinstein@yale.edu) (aut, cph)
 
 
-# Citing
+## Citing
 
 To cite the SHazaM package in publications, please use:
 
@@ -105,6 +107,6 @@ use:
 
 
 
-# License
+## License
 
 AGPL-3
