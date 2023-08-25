@@ -35,6 +35,7 @@ nav:
       - topics/slideWindowSeq.md
       - topics/slideWindowTune.md
       - topics/slideWindowTunePlot.md
+      - topics/plotSlideWindowTune.md
       - topics/shmulateSeq.md
       - topics/shmulateTree.md
     - 'Targeting Inference':
@@ -92,3 +93,4 @@ nav:
       - topics/setRegionBoundaries.md
       - topics/MutationDefinition-class.md
       - topics/RegionDefinition-class.md
+      - topics/convertNumbering.md
