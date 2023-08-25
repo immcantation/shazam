@@ -1,3 +1,5 @@
+#
+
 Download
 -------------------------------------------------------------------------------
 
@@ -36,8 +38,8 @@ library(devtools)
 install_bitbucket("kleinstein/shazam@master")
 ```
 
-Note, using `install_bitbucket` will not build the documentation. To generate the 
-documentation, clone the repository and build as normal using devtools, 
+Note, using `install_bitbucket` will not build the documentation. To generate the
+documentation, clone the repository and build as normal using devtools,
 roxygen and knitr:
 
 ```R
@@ -47,3 +49,4 @@ document()
 build()
 install()
 ```
+
