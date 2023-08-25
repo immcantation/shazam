@@ -2,13 +2,20 @@ site_name: shazam
 site_favicon: img/favicon.ico
 repo_url: https://bitbucket.org/kleinstein/shazam
 edit_uri: src/master/docs/
-theme: readthedocs
+theme:
+  name: readthedocs
+  navigation_depth: 2
+  collapse_navigation: False
+  sticky_navigation: False
+  locale: en
+  logo: null
 markdown_extensions:
   - def_list
   - sane_lists
   - smarty
   - toc:
       permalink: True
+      baselevel: 1
 docs_dir: docs
 nav:
   - 'About':
