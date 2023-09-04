@@ -10,3 +10,4 @@ LICENSE
 mkdocs.yml
 bitbucket-pipelines.yml
 install_alakazam.R
+.readthedocs.yaml

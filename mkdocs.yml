@@ -18,6 +18,7 @@ markdown_extensions:
       baselevel: 1
 docs_dir: docs
 nav:
+  - 'Immcantation Portal': https://immcantation.readthedocs.io/
   - 'About':
     - 'Introduction': index.md
     - 'Download & Installation': install.md

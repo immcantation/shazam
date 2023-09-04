@@ -1,6 +1,4 @@
-# 
-
-**shazam** - *The shazam package*
+# The shazam package
 
 Description
 --------------------
