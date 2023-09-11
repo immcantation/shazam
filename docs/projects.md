@@ -11,6 +11,9 @@ Related Projects
 * [Alakazam](http://alakazam.readthedocs.io) - 
   V(D)J gene usage, repertoire diversity and
   physicochemical property analysis.
+* [SHazaM](http://shazam.readthedocs.io) -
+  Mutation profiling and selection strength quantification
+  physicochemical property analysis
 * [TIgGER](http://tigger.readthedocs.io) - 
   Polymorphism detection and genotyping.
 * [SCOPer](https://scoper.readthedocs.io) -
