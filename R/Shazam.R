@@ -1,4 +1,5 @@
 #' @keywords internal
+#' @aliases shazam-package
 "_PACKAGE"
 
 # Shazam package documentation and import directives
