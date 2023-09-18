@@ -138,7 +138,7 @@
 #' @importFrom  lazyeval    interp
 #' @importFrom  MASS        fitdistr
 #' @importFrom  progress    progress_bar
-#' @importFrom  rlang       sym syms
+#' @importFrom  rlang       sym syms .data
 #' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format
 #'                          math_format percent scientific pretty_breaks
 #' @importFrom  seqinr      c2s s2c words translate
@@ -153,7 +153,7 @@
 #'                          stri_extract_all_regex stri_extract_first_regex  
 #'                          stri_replace_all_regex stri_replace_first_regex
 #' @importFrom  tidyr       gather spread pivot_wider
-#' @importFrom  tidyselect  all_of
+#' @importFrom  tidyselect  all_of any_of
 NULL
 
 # Package loading actions

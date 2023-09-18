@@ -942,8 +942,8 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # creates $vj_group
         db <- db %>%
             ungroup() %>%
-            group_by(DTN_TMP_FIELD) %>%
-            do(groupGenes(., v_call=vCallColumn, j_call=jCallColumn, junc_len=NULL,
+            group_by(!!rlang::sym("DTN_TMP_FIELD")) %>%
+            do(groupGenes(.data, v_call=vCallColumn, j_call=jCallColumn, junc_len=NULL,
                          cell_id=cellIdColumn, locus=locusColumn, only_heavy=onlyHeavy,
                          first=first)) %>%
             ungroup()
@@ -956,8 +956,8 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # note that despite the name (VJ), this is based on V+J+L
         db <- db %>%
             ungroup() %>%
-            group_by(DTN_TMP_FIELD) %>%
-            do(groupGenes(., v_call=vCallColumn, j_call=jCallColumn, junc_len=junc_len,
+            group_by(!!rlang::sym("DTN_TMP_FIELD")) %>%
+            do(groupGenes(.data, v_call=vCallColumn, j_call=jCallColumn, junc_len=junc_len,
                           cell_id=cellIdColumn, locus=locusColumn, only_heavy=onlyHeavy,
                           first=first)) %>%
             ungroup()
@@ -970,7 +970,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # make vj_group unique across fields by pasting field group
         db <- db %>%
             dplyr::rowwise() %>%
-            mutate(vj_group=paste("F",DTN_TMP_FIELD,"_",vj_group, sep="", collapse = "")) %>%
+            mutate(vj_group=paste("F",!!rlang::sym("DTN_TMP_FIELD"),"_",!!rlang::sym("vj_group"), sep="", collapse = "")) %>%
             ungroup() 
     }
     db[['DTN_TMP_FIELD']] <- NULL
@@ -1022,9 +1022,9 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # This subsetting improves performance
         required_cols <- unique(c(group_cols,cross,locusColumn,sequenceColumn,"TMP_DIST_NEAREST"))
         db_notused_cols <- db %>%
-            select(c(DTN_ROW_ID, !any_of(required_cols)))
+            select(c(!!rlang::sym("DTN_ROW_ID"), !any_of(required_cols)))
         db <- db %>%
-            select(c(DTN_ROW_ID,  any_of(required_cols)))
+            select(c(!!rlang::sym("DTN_ROW_ID"),  any_of(required_cols)))
         export_functions <- list("db",
                                  "uniqueGroupsIdx", 
                                  "cross",
@@ -2006,21 +2006,25 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
     if (is.null(xmax)) { xmax <- NA }
     
     # Plot distToNearest distribution plus Gaussian fits
-    p <- ggplot(xdf, aes(x=x)) +
+    p <- ggplot(xdf, aes(x=!!rlang::sym("x"))) +
         baseTheme() + 
         xlab("Distance") + 
         ylab("Density") +
         geom_histogram(aes(y=after_stat(density)), binwidth=binwidth, 
                        fill="gray40", color="white") +
-        geom_line(data=fit1, aes(x=x, y=y), color="darkslateblue", linewidth=size) +
-        geom_line(data=fit2, aes(x=x, y=y), color="darkslateblue", linewidth=size) +
+        geom_line(data=fit1, aes(x=!!rlang::sym("x"), y=!!rlang::sym("y")), 
+                  color="darkslateblue", linewidth=size) +
+        geom_line(data=fit2, aes(x=!!rlang::sym("x"), y=!!rlang::sym("y")), 
+                  color="darkslateblue", linewidth=size) +
         geom_vline(xintercept=data@threshold, color="firebrick", 
                    linetype="longdash", linewidth=size)
     
     # Add cross histogram
     if (!is.null(cross)) {
         cdf <- data.frame(x=cross[is.finite(cross)])
-        p <- p + geom_histogram(data=cdf, aes(x=x, y=-after_stat(density)), binwidth=binwidth, 
+        p <- p + geom_histogram(data=cdf, 
+                                aes(x=!!rlang::sym("x"), 
+                                    y=-after_stat(density)), binwidth=binwidth, 
                                 fill="gray40", color="white", position="identity") +
             scale_y_continuous(labels=abs)
     }
@@ -2115,13 +2119,15 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     if (is.null(xmax)) { xmax <- NA }
     
     # Plot distToNearest distribution plus Gaussian fits
-    p <- ggplot(xdf, aes(x=x)) +
+    p <- ggplot(xdf, aes(x=!!rlang::sym("x"))) +
         baseTheme() +
         xlab("Distance") + 
         ylab("Density") +
         geom_histogram(aes(y=after_stat(density)), binwidth=binwidth, 
                        fill="gray40", color="white") +
-        geom_line(data=ddf, aes(x=x, y=y), 
+        geom_line(data=ddf, 
+                  aes(x=!!rlang::sym("x"), 
+                      y=!!rlang::sym("y")), 
                   color="darkslateblue", linewidth=size) +
         geom_vline(xintercept=data@threshold, 
                    color="firebrick", linetype="longdash", linewidth=size)
@@ -2129,7 +2135,10 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     # Add cross histogram
     if (!is.null(cross)) {
         cdf <- data.frame(x=cross[is.finite(cross)])
-        p <- p + geom_histogram(data=cdf, aes(x=x, y=-after_stat(density)), binwidth=binwidth, 
+        p <- p + geom_histogram(data=cdf, 
+                                aes(x=!!rlang::sym("x"), 
+                                    y=-after_stat(density)), 
+                                binwidth=binwidth, 
                                 fill="gray40", color="white", position="identity") +
              scale_y_continuous(labels=abs)
     }

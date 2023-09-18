@@ -1322,11 +1322,12 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
         names(size_values) <- size_names
         
         # Plot probability density curve
-        p1 <- ggplot(dens_df, aes(x=SIGMA, y=DENSITY)) +
+        p1 <- ggplot(dens_df, aes(x=!!rlang::sym("SIGMA"), y=!!rlang::sym("DENSITY"))) +
             base_theme + 
             xlab(expression(Sigma)) +
             ylab("Density") +
-            geom_line(aes(size=size))
+            geom_line(aes(linewidth=!!rlang::sym("size"))) +
+            scale_discrete_manual("linewidth", values = size_values)
         # Add line
         if (colorElement == "id" & is.null(secondaryColumn)) {
             p1 <- p1 + aes(color=!!rlang::sym(idColumn))
@@ -1523,13 +1524,16 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
         if (!is.null(groupColumn) & !is.null(groupColors)) {
             stats_df[,groupColumn] <- factor(stats_df[,groupColumn], levels=names(groupColors))
         }
-        p1 <- ggplot(stats_df, aes(x=!!rlang::sym(idColumn), y=baseline_sigma, ymax=max(baseline_sigma))) +
+        p1 <- ggplot(stats_df, aes(x=!!rlang::sym(idColumn), 
+                                   y=!!rlang::sym("baseline_sigma"), 
+                                   ymax=max(!!rlang::sym("baseline_sigma")))) +
             base_theme + 
             xlab("") +
             ylab(expression(Sigma)) +
             geom_hline(yintercept=0, linewidth=1*size, linetype=2, color="grey") +
             geom_point(size=3*size, position=position_dodge(0.6)) +
-            geom_errorbar(aes(ymin=baseline_ci_lower, ymax=baseline_ci_upper), 
+            geom_errorbar(aes(ymin=!!rlang::sym("baseline_ci_lower"), 
+                              ymax=!!rlang::sym("baseline_ci_upper")), 
                           width=0.2, linewidth=0.5*size, alpha=0.8, position=position_dodge(0.6))
         if (!is.null(title)) {
             p1 <- p1 + ggtitle(title)
@@ -1544,7 +1548,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
             p1 <- p1 + aes(color=!!rlang::sym(groupColumn)) + facet_grid(region ~ .)
         } else if (!is.null(groupColumn) & facetBy == "group") {
             p1 <- p1 + scale_color_manual(name="Region", values=REGION_PALETTE) +
-                aes(color=region) + facet_grid(paste(groupColumn, "~ ."))
+                aes(color=!!rlang::sym("region")) + facet_grid(paste(groupColumn, "~ ."))
         } else {
             stop("Cannot facet by group if groupColumn=NULL")
         }
