@@ -1110,7 +1110,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if (nproc > 1) { 
         parallel::stopCluster(cluster)
         db <- db %>%
-            left_join(db_notused_cols)
+            left_join(db_notused_cols, by= "DTN_ROW_ID")
     }
     
     db <- db[order(db$DTN_ROW_ID), ]
