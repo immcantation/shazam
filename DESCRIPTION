@@ -1,20 +1,22 @@
 Package: shazam
 Type: Package
-Version: 1.1.2.999
-Date: 2023-05-17
+Version: 1.2.0
+Date: 2023-10-01
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Namita", "Gupta", role=c("aut"), 
                     email="namita.gupta@yale.edu"),
-             person("Susanna", "Marquez", role=c("aut"), 
+             person("Susanna", "Marquez", role=c("aut","cre"), 
                     email="susanna.marquez@yale.edu"),
              person("Julian", "Zhou", role=c("aut"), 
                     email="julian.zhou@yale.edu"),
              person("Nima", "Nouri", role=c("aut"), 
                     email="nima.nouri@yale.edu"),
+             person("Noah", "Yann Lee", role=c("aut"),
+                    email="noah.yann.lee@yale.edu"),                    
              person("Ang", "Cui", role=c("ctb"), 
                     email="angcui@mit.edu"),
-             person("Jason", "Vander Heiden", role=c("aut", "cre"), 
+             person("Jason", "Vander Heiden", role=c("aut"), 
                     email="jason.vanderheiden@gmail.com"),
              person("Gur", "Yaari", role=c("aut"), 
                     email="gur.yaari@biu.ac.il"),
@@ -40,18 +42,18 @@ VignetteBuilder: knitr, rmarkdown
 Encoding: UTF-8
 biocViews:
 Depends:
-    R (>= 3.5.0),
+    R (>= 4.0),
     ggplot2 (>= 3.4.0)
 Imports:
-    alakazam (>= 1.1.0),
+    alakazam (>= 1.2.0),
     ape,
     diptest,
     doParallel,
-    dplyr (>= 0.8.1),
+    dplyr (>= 1.0),
     foreach,
     graphics,
     grid,
-    igraph,
+    igraph (>= 1.5.0),
     iterators,
     KernSmooth,
     lazyeval,
