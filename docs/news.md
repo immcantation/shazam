@@ -1,11 +1,26 @@
-# Release Notes
-
-Version 1.1.2.999: February 03, 2023
+Version 1.2.0: October 10, 2023
 -------------------------------------------------------------------------------
 
 General:
 
-+ Updated dependencies to ggplot2 >= 3.4.0.
++ Updated dependencies: alakazam >= 1.3.0, ggplot2 >= 3.4.0, igraph >= 1.5.0.
++ As of `alakazam 1.3.0`, `alakazam::makeChangeoClone` requires the parameter 
+  `locus` with default value `locus`. This function is used in some examples and
+  tests in `shazam`. We added a `locus` column to the package's example data.
+
+Distance Profiling:
+
++ Added to `distToNearest` the parameter `locusValues=c("IGH")` to specify loci
+  values to focus the analysis on.
++ Fixed a bug in `distToNearest` where  grouping by `fields` was applied 
+  after grouping by genes, therefore not treating independently the different 
+  subsets of data to identify groups of genes. In practice, this means that
+  if fields was set to treat samples independently (`fields='sample_id'`), 
+  single linkage was applied to all data, and two genes could be placed in the 
+  same group of genes if they where connected by an ambiguous gene call in any 
+  of the samples. Now, data is separated by `fields`(sample_id in this example)
+  before creating the groups of genes, and ambiguities in other samples are not 
+  considered.
 
 Version 1.1.2: September 26, 2022
 -------------------------------------------------------------------------------

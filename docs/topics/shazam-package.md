@@ -31,15 +31,16 @@ Useful links:
 Author
 -------------------
 
-**Maintainer**: Jason Vander Heiden [jason.vanderheiden@gmail.com](jason.vanderheiden@gmail.com)
+**Maintainer**: Susanna Marquez [susanna.marquez@yale.edu](susanna.marquez@yale.edu)
 
 Authors:
 
 +  Mohamed Uduman [mohamed.uduman@yale.edu](mohamed.uduman@yale.edu)
 +  Namita Gupta [namita.gupta@yale.edu](namita.gupta@yale.edu)
-+  Susanna Marquez [susanna.marquez@yale.edu](susanna.marquez@yale.edu)
 +  Julian Zhou [julian.zhou@yale.edu](julian.zhou@yale.edu)
 +  Nima Nouri [nima.nouri@yale.edu](nima.nouri@yale.edu)
++  Noah Yann Lee [noah.yann.lee@yale.edu](noah.yann.lee@yale.edu)
++  Jason Vander Heiden [jason.vanderheiden@gmail.com](jason.vanderheiden@gmail.com)
 +  Gur Yaari [gur.yaari@biu.ac.il](gur.yaari@biu.ac.il)
 +  Steven Kleinstein [steven.kleinstein@yale.edu](steven.kleinstein@yale.edu) [copyright holder]
 

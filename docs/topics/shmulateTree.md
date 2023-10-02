@@ -96,9 +96,7 @@ shmulateTree(sequence, graph)
 
 ```
 
-*This graph was created by an old(er) igraph version.
-  Call upgrade_graph() on it to use with the current igraph version
-  For now we convert it on the fly...*
+
 ```
             name                                      sequence distance
 1      Inferred1 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
