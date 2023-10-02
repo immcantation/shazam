@@ -2010,7 +2010,7 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
         baseTheme() + 
         xlab("Distance") + 
         ylab("Density") +
-        geom_histogram(aes(y=after_stat(density)), binwidth=binwidth, 
+        geom_histogram(aes(y=after_stat(!!str2lang("density"))), binwidth=binwidth, 
                        fill="gray40", color="white") +
         geom_line(data=fit1, aes(x=!!rlang::sym("x"), y=!!rlang::sym("y")), 
                   color="darkslateblue", linewidth=size) +
@@ -2024,7 +2024,7 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
         cdf <- data.frame(x=cross[is.finite(cross)])
         p <- p + geom_histogram(data=cdf, 
                                 aes(x=!!rlang::sym("x"), 
-                                    y=-after_stat(density)), binwidth=binwidth, 
+                                    y=-after_stat(!!str2lang("density"))), binwidth=binwidth, 
                                 fill="gray40", color="white", position="identity") +
             scale_y_continuous(labels=abs)
     }
@@ -2123,7 +2123,7 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
         baseTheme() +
         xlab("Distance") + 
         ylab("Density") +
-        geom_histogram(aes(y=after_stat(density)), binwidth=binwidth, 
+        geom_histogram(aes(y=after_stat(!!str2lang("density"))), binwidth=binwidth, 
                        fill="gray40", color="white") +
         geom_line(data=ddf, 
                   aes(x=!!rlang::sym("x"), 
@@ -2137,7 +2137,7 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
         cdf <- data.frame(x=cross[is.finite(cross)])
         p <- p + geom_histogram(data=cdf, 
                                 aes(x=!!rlang::sym("x"), 
-                                    y=-after_stat(density)), 
+                                    y=-after_stat(!!str2lang("density"))), 
                                 binwidth=binwidth, 
                                 fill="gray40", color="white", position="identity") +
              scale_y_continuous(labels=abs)
