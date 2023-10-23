@@ -1340,7 +1340,7 @@ calcClonalConsensus <- function(db,
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences. If NULL, mutations 
 #'                               are counted for entire sequence. To use regions definitions,
-#'                               sequences in \code{sequenceColum} and \code{germlineColumn}
+#'                               sequences in \code{sequenceColumn} and \code{germlineColumn}
 #'                               must be aligned, following the IMGT schema.
 #' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
 #'                               and silent mutation criteria. If \code{NULL} then 
@@ -2851,7 +2851,7 @@ plotSlideWindowTune <- function(tuneList,
 #' @param    targetingModel      \link{TargetingModel} object. Default is \link{HH_S5F}.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences. To use regions definitions,
-#'                               sequences in \code{sequenceColum} and \code{germlineColumn}
+#'                               sequences in \code{sequenceColumn} and \code{germlineColumn}
 #'                               must be aligned, following the IMGT schema.
 #' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
 #'                               and silent mutation criteria. If \code{NULL} then 
