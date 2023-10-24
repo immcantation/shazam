@@ -7,4 +7,4 @@ pkg_path <- "."
 doc_path <- "./docs"
 
 # Build
-build_mkdocs(pkg_path, doc_path = doc_path, yaml = FALSE)
+build_mkdocs(pkg_path, doc_path=doc_path, yaml=FALSE)

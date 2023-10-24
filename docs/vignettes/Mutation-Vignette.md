@@ -122,8 +122,8 @@ We can plot the mutation frequencies and explore differences between samples or 
 ```r
 g1 <- ggplot(db_obs, aes(x=c_call, y=mu_freq, fill=c_call)) +
         geom_boxplot() + 
-        labs(title = "Total mutations", 
-             x = "Isotype", y = "Mutation frequency") +
+        labs(title="Total mutations", 
+             x="Isotype", y="Mutation frequency") +
         scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) +
         theme_bw() 
 plot(g1)
@@ -209,14 +209,14 @@ Plot a comparison between CDR silent and replacement mutations.
 ```r
 g2 <- ggplot(db_obs_v, aes(x=c_call, y=mu_freq_cdr_s, fill=c_call)) +
         geom_boxplot() + 
-        labs(title = "CDR silent mutations", 
-             x = "Isotype", y = "Mutation frequency") +
+        labs(title="CDR silent mutations", 
+             x="Isotype", y="Mutation frequency") +
         scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) +
         theme_bw()
 g3 <- ggplot(db_obs_v, aes(x=c_call, y=mu_freq_cdr_r, fill=c_call)) +
         geom_boxplot() + 
-        labs(title = "CDR replacement mutations", 
-             x = "Isotype", y = "Mutation frequency") +
+        labs(title="CDR replacement mutations",
+             x="Isotype", y="Mutation frequency") +
         scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) +
         theme_bw()
 
@@ -268,8 +268,8 @@ frequent in one isotype.
 ```r
 g4 <- ggplot(db_obs_ch, aes(x=c_call, y=mu_freq_seq_r, fill=c_call)) +
         geom_boxplot() + 
-        labs(title = "Charge replacement mutations", 
-             x = "Isotype", y = "Mutation frequency") +
+        labs(title="Charge replacement mutations", 
+             x="Isotype", y="Mutation frequency") +
         scale_fill_manual(name="Isotype", values=IG_COLORS, limits=force) + 
         theme_bw()
 
