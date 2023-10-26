@@ -222,7 +222,7 @@ TargetingMatrix <- setClass("TargetingMatrix",
 #'                         means that the mutability rates for the 1024 5-mers that 
 #'                         contain no "N" at any position sums up to 1 (as opposed to 
 #'                         the entire vector summing up to 1).
-#' @slot     targeting     Rate matrix of a given mutation ocurring, defined as 
+#' @slot     targeting     Rate matrix of a given mutation occurring, defined as 
 #'                         \eqn{mutability * substitution}. The targeting model 
 #'                         is stored as a 5x3125 matrix. Rows define
 #'                         the mutated nucleotide at the center of each 5-mer, one of 
@@ -296,7 +296,7 @@ setMethod("plot", c(x="TargetingModel", y="missing"),
 #' Builds a substitution model
 #'
 #' \code{createSubstitutionMatrix} builds a 5-mer nucleotide substitution model by counting 
-#' the number of substitution mutations occuring in the center position for all 5-mer 
+#' the number of substitution mutations occurring in the center position for all 5-mer 
 #' motifs.
 #'
 #' @param    db                data.frame containing sequence data.
@@ -309,9 +309,9 @@ setMethod("plot", c(x="TargetingModel", y="missing"),
 #' @param    sequenceColumn    name of the column containing IMGT-gapped sample sequences.
 #' @param    germlineColumn    name of the column containing IMGT-gapped germline sequences.
 #' @param    vCallColumn       name of the column containing the V-segment allele call.
-#' @param    multipleMutation  string specifying how to handle multiple mutations occuring 
+#' @param    multipleMutation  string specifying how to handle multiple mutations occurring 
 #'                             within the same 5-mer. If \code{"independent"} then multiple 
-#'                             mutations within the same 5-mer are counted indepedently. 
+#'                             mutations within the same 5-mer are counted independently. 
 #'                             If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                             excluded from the total mutation tally.
 #' @param    returnModel       string specifying what type of model to return; one of
@@ -611,7 +611,7 @@ createSubstitutionMatrix <- function(db, model=c("s", "rs"),
                         stringsAsFactors=F))
     }
     
-    # either construct 5mer substition matrix, and normalize (numMutationsOnly = F)
+    # either construct 5mer substitution matrix, and normalize (numMutationsOnly = F)
     if (!numMutationsOnly) {
       substitutionModel <- sapply(seqinr::words(5, nuc_chars), 
                                   function(x) { .simplifivemer(M, x, 
@@ -728,7 +728,7 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #' Builds a mutability model
 #'
 #' \code{createMutabilityMatrix} builds a 5-mer nucleotide mutability model by counting 
-#' the number of mutations occuring in the center position for all 5-mer motifs.
+#' the number of mutations occurring in the center position for all 5-mer motifs.
 #'
 #' @param    db                  data.frame containing sequence data.
 #' @param    substitutionModel   matrix of 5-mer substitution rates built by 
@@ -744,9 +744,9 @@ minNumMutationsTune <- function(subCount, minNumMutationsRange) {
 #' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
 #' @param    germlineColumn      name of the column containing IMGT-gapped germline sequences.
 #' @param    vCallColumn         name of the column containing the V-segment allele call.
-#' @param    multipleMutation    string specifying how to handle multiple mutations occuring 
+#' @param    multipleMutation    string specifying how to handle multiple mutations occurring 
 #'                               within the same 5-mer. If \code{"independent"} then multiple 
-#'                               mutations within the same 5-mer are counted indepedently. 
+#'                               mutations within the same 5-mer are counted independently. 
 #'                               If \code{"ignore"} then 5-mers with multiple mutations are 
 #'                               excluded from the total mutation tally.
 #' @param    minNumSeqMutations  minimum number of mutations in sequences containing each 5-mer
@@ -1409,11 +1409,11 @@ createTargetingMatrix <- function(substitutionModel, mutabilityModel) {
 #' @param    sequenceColumn      name of the column containing IMGT-gapped sample sequences.
 #' @param    germlineColumn      name of the column containing IMGT-gapped germline sequences.
 #' @param    vCallColumn         name of the column containing the V-segment allele calls.
-#' @param    multipleMutation    string specifying how to handle multiple mutations occuring 
+#' @param    multipleMutation    string specifying how to handle multiple mutations occurring 
 #'                               within the same 5-mer. If \code{"independent"} then multiple 
-#'                               mutations within the same 5-mer are counted indepedently. 
+#'                               mutations within the same 5-mer are counted independently. 
 #'                               If \code{"ignore"} then 5-mers with multiple mutations are 
-#'                               excluded from the otal mutation tally.
+#'                               excluded from the t mutation tally.
 #' @param    minNumMutations     minimum number of mutations required to compute the 5-mer 
 #'                               substitution rates. If the number of mutations for a 5-mer
 #'                               is below this threshold, its substitution rates will be 
@@ -2019,7 +2019,7 @@ calcTargetingDistance <- function(model, places=2) {
 #                       reflects substitution probabilities for each nucleotide. 
 #                       Rownames and colnames are "A","C","G", and "T".
 #
-# @return   a 4x4 symmetrix matrix with \code{NA}s on the diagonal.
+# @return   a 4x4 symmetric matrix with \code{NA}s on the diagonal.
 # 
 # @details  The input 1-mer substitution matrix is approximated by a symmetric matrix 
 #           both with respect to time (e.g. C->T = T->C), and with respect to strand 
@@ -2720,7 +2720,7 @@ listObservedMutations <- function(db, sequenceColumn="sequence_alignment",
 
 #### Testing functions ####
 
-# Function to make dummy data for testing targetting functions
+# Function to make dummy data for testing targeting functions
 # 
 # @param   nseq  number of sequences
 # @param   nmut  number of mutations per sequence

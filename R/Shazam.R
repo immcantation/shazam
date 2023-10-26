@@ -65,7 +65,7 @@
 #'                                           between BASELINe PDFs.
 #'   \item  \link{plotBaselineDensity}:      Plot the probability density functions
 #'                                           resulting from selection analysis.
-#'   \item  \link{plotBaselineSummary}:      Plot summary stastistics resulting from 
+#'   \item  \link{plotBaselineSummary}:      Plot summary statistics resulting from 
 #'                                           selection analysis.
 #' }
 #'
@@ -171,7 +171,7 @@ NULL
 # Mus musculus Ig sequence data.
 #
 # @format   A symmetric matrix of nucleotide substitution distance scores with 
-#           row names and column names definition the specific subsitution.
+#           row names and column names definition the specific substitution.
 # 
 # @references
 # \enumerate{
@@ -189,7 +189,7 @@ NULL
 # human Ig sequence data.
 #
 # @format   A symmetric matrix of nucleotide substitution distance scores with 
-#           row names and column names definition the specific subsitution.
+#           row names and column names definition the specific substitution.
 # 
 # @references
 # \enumerate{
