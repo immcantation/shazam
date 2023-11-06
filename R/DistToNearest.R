@@ -518,7 +518,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
             dist_mat <- dist_mat / seq_length
         } else if (normalize == "mut") {
             #dist <- dist/sum(strsplit(seq1,"")[[1]] != strsplit(seq2,"")[[1]])
-            stop('Sorry! nomalize="mut" is not available.')
+            stop('Sorry! normalize="mut" is not available.')
         }
         
         ## DEBUG
@@ -597,7 +597,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
             
             if (subSampling) {
                 # When there is subsampling, nonsquareDist returns a non-n-by-n matrix 
-                # This matrix has fewers than n rows, and exactly n cols
+                # This matrix has fewer than n rows, and exactly n cols
                 # For each unique sequence, look for its cross-group distances in its column, 
                 #     NOT in its row (because there will be fewer than n rows)
                 
@@ -753,7 +753,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'   \item \code{"aa"}:           Single amino acid Hamming distance matrix from \link[alakazam]{getAAMatrix}.
 #'   \item \code{"hh_s1f"}:       Human single nucleotide distance matrix derived from \link{HH_S1F} with 
 #'                                \link{calcTargetingDistance}.
-#'   \item \code{"hh_s5f"}:       Human 5-mer nucleotide context distance matix derived from \link{HH_S5F} with 
+#'   \item \code{"hh_s5f"}:       Human 5-mer nucleotide context distance matrix derived from \link{HH_S5F} with 
 #'                                \link{calcTargetingDistance}.
 #'   \item \code{"mk_rs1nf"}:     Mouse single nucleotide distance matrix derived from \link{MK_RS1NF} with 
 #'                                \link{calcTargetingDistance}.
@@ -761,7 +761,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                                \link{calcTargetingDistance}.
 #'   \item \code{"hs1f_compat"}:  Backwards compatible human single nucleotide distance matrix used in 
 #'                                SHazaM v0.1.4 and Change-O v0.3.3.
-#'   \item \code{"m1n_compat"}:   Backwards compatibley mouse single nucleotide distance matrix used in 
+#'   \item \code{"m1n_compat"}:   Backwards compatibility mouse single nucleotide distance matrix used in 
 #'                                SHazaM v0.1.4 and Change-O v0.3.3.
 #' }
 #' 

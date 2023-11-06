@@ -106,7 +106,7 @@ makeGraphDf <- function(curCloneGraph, curCloneObj, objSeqId="sequence_id", objS
                                                         cur_clone_num, sep=""))
     
     #3. Now need to fill in missing values for germline sequence and 
-    #   inffered sequences:
+    #   inferred sequences:
     cur_clone_merged_df$clone <- cur_clone_num
     cur_clone_merged_df$v_call <- curCloneObj@v_gene
     cur_clone_merged_df$j_call <- curCloneObj@j_gene
@@ -151,7 +151,7 @@ makeGraphDf <- function(curCloneGraph, curCloneObj, objSeqId="sequence_id", objS
     cur_clone_merged_df$parent_sequence <- cur_clone_merged_df[match(cur_clone_merged_df$parent, 
                                                                      cur_clone_merged_df[,objSeqId]), 
                                                                objSeq]         
-    # filling the parent sequece of the Germline sequence to be its own sequence 
+    # filling the parent sequence of the Germline sequence to be its own sequence 
     # (=GERMLINE_IMGT):
     #cur_clone_merged_df <- mutate(cur_clone_merged_df, 
     #                              parent_sequence=ifelse(is.na(parent_sequence), 
@@ -160,7 +160,7 @@ makeGraphDf <- function(curCloneGraph, curCloneObj, objSeqId="sequence_id", objS
     
     # now checking if the germline sequence is equal to its (only) child sequence. 
     # For example if "250_7" sequence parent is the "250_Germline" sequence, 
-    # then mergin them to one line called "250_7_Germline". 
+    # then merge them to one line called "250_7_Germline". 
     germ_seq_line <- filter(cur_clone_merged_df, !!rlang::sym("orig_sequence_id") == "Germline")
     germ_seq <- germ_seq_line[,objSeq]
     germ_son_seq_line <- filter(cur_clone_merged_df, !!rlang::sym("orig_parent") == "Germline")
@@ -332,10 +332,10 @@ getCloneRegion <- function(clone_num, db, seq_col="sequence",
     if (!is.null(regionDefinition) & !is(regionDefinition, "RegionDefinition")) {
         stop(deparse(substitute(regionDefinition)), " is not a valid RegionDefinition object")
     }
-    # subseting the db to lines for specific clone
+    # subsetting the db to lines for specific clone
     clone_db <- db[db[[clone_col]] == clone_num,]
     if ( length(unique(clone_db[[juncLengthColumn]])) >1 ) {
-        stop("Expecting clones where all sequences have the same junction lenth. Different lengths found for clone ", clone_num)
+        stop("Expecting clones where all sequences have the same junction length. Different lengths found for clone ", clone_num)
     }
     # getting one of the sequences of the specific clone: 
     seq <- clone_db[[seq_col]][1]
@@ -382,7 +382,7 @@ plotJunctionAlignment <- function(db_row, germline_db,
         d_columns <- c(d_call, d_germline_start, d_germline_end)
         found <- d_columns %in% colnames(db_row)
         if (any(!found)) {
-            stop( "Column(s) ", paste(d_columns[!found], sep="", collpase=",") ," not found.")
+            stop( "Column(s) ", paste(d_columns[!found], sep="", collapse=",") ," not found.")
         }
     }
     

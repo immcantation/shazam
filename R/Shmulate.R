@@ -18,7 +18,7 @@ NULL
 #'                           that \code{-} is not accepted.
 #' @param    numMutations    a whole number indicating the number of mutations to be 
 #'                           introduced into \code{sequence}, if \code{frequency=FALSE}.
-#'                           A fraction bewteen 0 and 1 indicating the mutation frequency
+#'                           A fraction between 0 and 1 indicating the mutation frequency
 #'                           if \code{frequency=TRUE}.
 #' @param    targetingModel  5-mer \link{TargetingModel} object to be used for computing 
 #'                           probabilities of mutations at each position. Defaults to

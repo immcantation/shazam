@@ -41,7 +41,7 @@ NULL
 #'                              \code{c} = number of columns = number of regions.
 #' @slot    pdfs                \code{list} of matrices containing PDFs with one item for each 
 #'                              defined region (e.g. \code{cdr} and \code{fwr}). Matrices have dimensions
-#'                              \code{r x c} dementions, where:\cr
+#'                              \code{r x c} dimensions, where:\cr
 #'                              \code{r} = number of rows = number of sequences or groups. \cr
 #'                              \code{c} = number of columns = length of the PDF (default 4001).
 #' @slot    stats               \code{data.frame} of BASELINe statistics, 
@@ -130,7 +130,7 @@ setMethod("summary", c(object="Baseline", nproc=integer()),
 #'                              \code{c} = number of columns = number of regions.
 #' @param   pdfs                \code{list} of matrices containing PDFs with one item for each 
 #'                              defined region (e.g. \code{cdr} and \code{fwr}). Matrices have dimensions
-#'                              \code{r x c} dementions, where:\cr
+#'                              \code{r x c} dimensions, where:\cr
 #'                              \code{r} = number of rows = number of sequences or groups. \cr
 #'                              \code{c} = number of columns = length of the PDF (default 4001).
 #' @param   stats               \code{data.frame} of BASELINe statistics, 
@@ -504,9 +504,9 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
         curIdx <- which(colSums(curIdx)==length(groupBy))
     }, simplify=FALSE)
     
-    # If user wants to paralellize this function and specifies nproc > 1, then
+    # If user wants to parallelize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.  
+    # export all necessary environment variables, functions and packages.  
     baseline@db <- data.frame()
     gc()
     
@@ -522,7 +522,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                                  envir=environment() )
         registerDoParallel(cluster, cores=nproc)
     } else if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # If needed to run on a single core/cpu then, register DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     }
@@ -620,7 +620,7 @@ groupBaseline <- function(baseline, groupBy, nproc=1) {
                         if(is.na(pdfWeight)) { 
                             break
                         }
-                        # The corresponding idexes of these PDFs with the same weight
+                        # The corresponding indexes of these PDFs with the same weight
                         indexesOfWeight <- which(sorted_numbOfSeqs_region==pdfWeight)
                         # Convolute these PDFs together
                         list_sameWeightPdfs <- sorted_list_GroupPdfs[indexesOfWeight]
@@ -825,9 +825,9 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, cpuCount())
     
-    # If user wants to paralellize this function and specifies nproc > 1, then
+    # If user wants to parallelize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.  
+    # export all necessary environment variables, functions and packages.  
     if (nproc > 1){        
         cluster <- parallel::makeCluster(nproc, type="PSOCK")
         parallel::clusterExport(cluster, list('baseline',
@@ -837,7 +837,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
                                 envir=environment())
         registerDoParallel(cluster, cores=nproc)
     } else if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # If needed to run on a single core/cpu then, register DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     }
@@ -901,7 +901,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 
 #' Two-sided test of BASELINe PDFs
 #' 
-#' \code{testBaseline} performs a two-sample signifance test of BASELINe 
+#' \code{testBaseline} performs a two-sample significance test of BASELINe 
 #' posterior probability density functions (PDFs).
 #'
 #' @param    baseline   \code{Baseline} object containing the \code{db} and grouped 
@@ -913,7 +913,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'           \itemize{
 #'             \item  \code{region}:  sequence region, such as \code{cdr} and \code{fwr}.
 #'             \item  \code{test}:    string defining the groups be compared. The
-#'                                    string is formated as the conclusion associated with the
+#'                                    string is formatted as the conclusion associated with the
 #'                                    p-value in the form \code{GROUP1 != GROUP2}. Meaning,
 #'                                    the p-value for rejection of the null hypothesis that 
 #'                                    GROUP1 and GROUP2 have equivalent distributions.
@@ -928,7 +928,7 @@ summarizeBaseline <- function(baseline, returnType=c("baseline", "df"), nproc=1)
 #'   \item  Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
 #'            sequencing data sets. 
 #'            Nucleic Acids Res. 2012 40(17):e134. 
-#'            (Corretions at http://selection.med.yale.edu/baseline/correction/)
+#'            (Corrections at http://selection.med.yale.edu/baseline/correction/)
 #'  }
 #' 
 #' @examples
@@ -1153,7 +1153,7 @@ baseline2DistPValue <-function(base1, base2) {
 #'                          If this is set to "group", then the region will behave as the \code{groupColumn}
 #'                          for purposes of the \code{colorElement} argument.
 #' @param    title          string defining the plot title.
-#' @param    subsetRegions  character vector defining a subset of regions to plot, correspoding 
+#' @param    subsetRegions  character vector defining a subset of regions to plot, corresponding 
 #'                          to the regions for which the \code{baseline} data was calculated. If
 #'                          \code{NULL} all regions in \code{baseline} are plotted.
 #' @param    sigmaLimits    numeric vector containing two values defining the \code{c(lower, upper)}
@@ -1408,7 +1408,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
 #'                          being colors. Also controls the order in which groups appear on the
 #'                          plot. If \code{NULL} alphabetical ordering and a default color palette 
 #'                          will be used. Has no effect if \code{facetBy="group"}.
-#' @param    subsetRegions  character vector defining a subset of regions to plot, correspoding 
+#' @param    subsetRegions  character vector defining a subset of regions to plot, corresponding 
 #'                          to the regions for which the \code{baseline} data was calculated. If
 #'                          \code{NULL} all regions in \code{baseline} are plotted.
 #' @param    facetBy        one of c("group", "region") specifying which category to facet the
@@ -1568,7 +1568,7 @@ plotBaselineSummary <- function(baseline, idColumn, groupColumn=NULL, groupColor
 
 #### Original BASELINe functions ####
 
-##Covolution
+##Convolution
 break2chunks<-function(G=1000){
     base<-2^round(log(sqrt(G),2),0)
     return(c(rep(base,floor(G/base)-1),base+G-(floor(G/base)*base)))
@@ -1675,14 +1675,14 @@ calculate_bayesGHelper <- function( listMatG,length_sigma=4001 ){
 # Given a list of PDFs, returns a convoluted PDF
 groupPosteriors <- function( listPosteriors, max_sigma=20, length_sigma=4001 ,Threshold=2 ){
     listPosteriors = listPosteriors[ !is.na(listPosteriors) ]
-    Length_Postrior<-length(listPosteriors)
-    if(Length_Postrior>1 & Length_Postrior<=Threshold){
+    Length_Posterior<-length(listPosteriors)
+    if(Length_Posterior>1 & Length_Posterior<=Threshold){
         cons = matrix(unlist(listPosteriors),length(listPosteriors[[1]]),length(listPosteriors))
         listMatG <- convolutionPowersOfTwoByTwos(cons,length_sigma=length_sigma)
         y<-calculate_bayesGHelper(listMatG,length_sigma=length_sigma)
         return( y/sum(y)/(2*max_sigma/(length_sigma-1)) )
-    }else if(Length_Postrior==1) return(listPosteriors[[1]])
-    else  if(Length_Postrior==0) return(NA)
+    }else if(Length_Posterior==1) return(listPosteriors[[1]])
+    else  if(Length_Posterior==0) return(NA)
     else {
         cons = matrix(unlist(listPosteriors),length(listPosteriors[[1]]),length(listPosteriors))
         y = fastConv(cons,max_sigma=max_sigma, length_sigma=length_sigma )
@@ -1889,9 +1889,9 @@ calcBaseline <- function(db,
     # the connections and reset the cluster.
     #nproc_arg <- nproc
     
-    # If user wants to paralellize this function and specifies nproc > 1, then
+    # If user wants to parallelize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.  
+    # export all necessary environment variables, functions and packages.  
     if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type="PSOCK")
         parallel::clusterExport(cluster, list('db',
@@ -1922,7 +1922,7 @@ calcBaseline <- function(db,
         registerDoParallel(cluster, cores=nproc)
         #nproc_arg <- cluster
     } else if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # If needed to run on a single core/cpu then, register DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     }
@@ -1931,7 +1931,7 @@ calcBaseline <- function(db,
     # & mu_expected mutations), then the function will:
     #          1. Calculate the numbers of observed mutations
     #          2. Calculate the expected frequencies of mutations    
-    # After that BASELINe prob. densities can be calcualted per sequence. 
+    # After that BASELINe prob. densities can be calculated per sequence. 
     if (is.null(regionDefinition)) {
         rd_labels <- makeNullRegionDefinition()@labels
         observedColumns <- paste0("mu_count_", rd_labels)
@@ -2068,7 +2068,7 @@ calcBaseline <- function(db,
         list_numbOfSeqs[[region]][is.na(list_k[[region]])] <- 0
     }
     
-    # WIP - check Milca's funcittion, hotw it handles hte new data struct for rextender regions
+    # WIP - check Milca's function, how it handles the new data struct for rextender regions
     # Template for values for the regions
     mat_template <- matrix( NA, 
                             ncol=length(regions), 
@@ -2084,7 +2084,7 @@ calcBaseline <- function(db,
     }
     
     # binomK
-    # This holds the number of exact successin in the binomial trials
+    # This holds the number of exact success in in the binomial trials
     binomK <- mat_template
     for(region in regions){
         binomK[,region] <-   list_k[[region]]
@@ -2098,7 +2098,7 @@ calcBaseline <- function(db,
     }
     
     # binomP
-    # This holds the prob of successin in the binomial trials
+    # This holds the prob of success in in the binomial trials
     binomP <- mat_template
     for(region in regions){
         binomP[,region] <-   list_p[[region]]
@@ -2132,5 +2132,3 @@ calcBaseline <- function(db,
     return(baseline)
     
 }
-
-

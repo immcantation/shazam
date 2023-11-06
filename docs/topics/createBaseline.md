@@ -156,7 +156,7 @@ Slot "description":
 [1] ""
 
 Slot "boundaries":
-factor()
+factor(0)
 Levels: 
 
 Slot "seqLength":
@@ -198,8 +198,7 @@ Slot "pdfs":
 list()
 
 Slot "stats":
-[1] group              region             baseline_sigma     baseline_ci_lower 
-[5] baseline_ci_upper  baseline_ci_pvalue
+[1] group              region             baseline_sigma     baseline_ci_lower  baseline_ci_upper  baseline_ci_pvalue
 <0 rows> (or 0-length row.names)
 
 

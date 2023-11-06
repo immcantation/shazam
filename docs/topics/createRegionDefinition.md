@@ -62,7 +62,7 @@ Slot "description":
 [1] ""
 
 Slot "boundaries":
-factor()
+factor(0)
 Levels: 
 
 Slot "seqLength":
