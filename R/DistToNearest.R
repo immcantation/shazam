@@ -433,8 +433,8 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
     
     # corresponding crossGroups values for seq_uniq
     if (!is.null(crossGroups)) {
-        stopifnot( all.equal(sequences[match(seq_uniq, sequences)], 
-                             seq_uniq, check.attributes=FALSE) )
+        stopifnot( isTRUE(all.equal(sequences[match(seq_uniq, sequences)], 
+                             seq_uniq, check.attributes=FALSE)) )
         crossGroups_uniq <- crossGroups[match(seq_uniq, sequences)]
     }
     
@@ -587,8 +587,8 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
             other_idx <- match(other_seq, seq_uniq)
             this_idx <- match(sequences[i], seq_uniq)
             
-            stopifnot( all.equal( other_seq, seq_uniq[other_idx] , check.attributes=FALSE ) )
-            stopifnot( all.equal( sequences[i], seq_uniq[this_idx] , check.attributes=FALSE ) )
+            stopifnot( isTRUE(all.equal( other_seq, seq_uniq[other_idx] , check.attributes=FALSE ) ))
+            stopifnot( isTRUE(all.equal( sequences[i], seq_uniq[this_idx] , check.attributes=FALSE ) ))
             
             # the next two checks may not always be true
             # this happens when all the out-group sequences are identical to the in-group sequences

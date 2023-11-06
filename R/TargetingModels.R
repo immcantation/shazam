@@ -2032,8 +2032,8 @@ symmetrize <- function(sub1mer) {
   colnames(sub1mer) <- toupper(colnames(sub1mer))
   
   # check that rows sum up to 1
-  stopifnot(all.equal(rowSums(sub1mer), rep(1, 4), 
-                      check.names=FALSE, tolerance=0.055))
+  stopifnot(isTRUE(all.equal(rowSums(sub1mer), rep(1, 4), 
+                      check.names=FALSE, tolerance=0.055)))
   
   .minDist <- function(Pars, subMtx) {
     (Pars[1] - subMtx["A", "C"])^2 + (Pars[1] - subMtx["C", "A"])^2 + 
