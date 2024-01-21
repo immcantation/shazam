@@ -1063,8 +1063,8 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("s", "rs"),
     # Return MutabilityModel
     mut_model <- MutabilityModel(Mutability_Mean_Complete,
                                  source=mut_source,
-                                 numMutS=as.numeric(mutationsTotalRS[["S"]]),
-                                 numMutR=as.numeric(mutationsTotalRS[["R"]]))
+                                 numMutS=mutationsTotalRS[["S"]],
+                                 numMutR=mutationsTotalRS[["R"]])
     return(mut_model)
 }
 
