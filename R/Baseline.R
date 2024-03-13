@@ -1356,7 +1356,7 @@ plotBaselineDensity <- function(baseline, idColumn, groupColumn=NULL, colorEleme
     
     # Add additional theme elements
     p1 <- p1 + 
-        scale_size_manual(breaks=names(size_values), values=size_values)
+        scale_size_manual(breaks=names(size_values), values=as.vector(size_values))
     
     if (sizeElement == "none") {
         p1 <- p1 +
