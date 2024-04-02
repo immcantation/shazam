@@ -180,7 +180,7 @@ graph <- ExampleTrees[[17]]
 clone <- alakazam::makeChangeoClone(subset(ExampleDb, clone_id == graph$clone))
 gdf <- makeGraphDf(graph, clone)
 
-# Count of mutations between observed sequence and immediate ancenstor
+# Count of mutations between observed sequence and immediate ancestor
 db_obs <- observedMutations(gdf, sequenceColumn="sequence",
 germlineColumn="parent_sequence",
 regionDefinition=IMGT_VDJ,

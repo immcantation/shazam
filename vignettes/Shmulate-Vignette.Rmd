@@ -30,7 +30,7 @@ vignette: >
 
 `SHazaM` provides two functions for simulating mutated sequences, one at the sequence level (`shmulateSeq`), and the other at the lineage level (`shmulateTree`).
 
-Both functions rely on a 5-mer targeting model for computing the probabilities of mutations at each position along the input sequence. The 5-mer targeting models currently availbale in `SHazaM` are:
+Both functions rely on a 5-mer targeting model for computing the probabilities of mutations at each position along the input sequence. The 5-mer targeting models currently available in `SHazaM` are:
 
 -   `HH_S5F`: Human Heavy chain, Silent, 5-mer, Functional targeting model
 -   `HKL_S5F`: Human Kappa and Lambda light chain, Silent, 5-mer, Functional targeting model

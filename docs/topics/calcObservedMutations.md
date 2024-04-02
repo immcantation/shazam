@@ -78,7 +78,7 @@ and silent (S) mutations.
 For `returnRaw=TRUE`, a list containing 
 
 +  `$pos`: A data frame whose columns (`position`, `r`, 
-`s`, and `region`) indicate, respecitively, the nucleotide 
+`s`, and `region`) indicate, respectively, the nucleotide 
 position, the number of R mutations at that position, the number of S 
 mutations at that position, and the region in which that nucleotide
 is in.
@@ -327,7 +327,7 @@ returnRaw=FALSE)
 ex3_freq <- calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS, 
 returnRaw=FALSE, frequency=TRUE)
-# Compre this with ex3_count
+# Compare this with ex3_count
 table(ex3_raw$pos$region, ex3_raw$pos$r)[, "1"]
 
 ```

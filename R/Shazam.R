@@ -85,7 +85,7 @@
 #' }
 #'
 #' @name     shazam
-#' @docType  package
+#' @docType  _PACKAGE
 #' @references
 #' \enumerate{
 #'   \item  Hershberg U, et al. Improved methods for detecting selection by mutation 

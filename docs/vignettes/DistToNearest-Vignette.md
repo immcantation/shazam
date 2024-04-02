@@ -173,7 +173,7 @@ mixture model), and are chosen via the `method` parameter of
 
 ### Threshold determination by manual inspection
 
-Manual threshold detection simply involves generating a histrogram for
+Manual threshold detection simply involves generating a histogram for
 the values in the `dist_nearest` column of the `distToNearest` output
 and selecting a suitable value within the valley between the two modes.
 
@@ -283,7 +283,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1190462
+## [1] 0.1242717
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is

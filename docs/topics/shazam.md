@@ -78,7 +78,7 @@ by biological or experimental relevance.
 between BASELINe PDFs.
 + [plotBaselineDensity](plotBaselineDensity.md):      Plot the probability density functions
 resulting from selection analysis.
-+ [plotBaselineSummary](plotBaselineSummary.md):      Plot summary stastistics resulting from 
++ [plotBaselineSummary](plotBaselineSummary.md):      Plot summary statistics resulting from 
 selection analysis.
 
 

@@ -31,7 +31,7 @@ that `-` is not accepted.
 numMutations
 :   a whole number indicating the number of mutations to be 
 introduced into `sequence`, if `frequency=FALSE`.
-A fraction bewteen 0 and 1 indicating the mutation frequency
+A fraction between 0 and 1 indicating the mutation frequency
 if `frequency=TRUE`.
 
 targetingModel

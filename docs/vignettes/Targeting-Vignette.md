@@ -143,7 +143,7 @@ The visualization of a dataset's underlying SHM mutability model can be used to
 investigate hot and cold spot motifs. The length of the bars on the plot of 
 mutability rates corresponds to the likelihood of a given base in the given 
 5-mer being mutated. The plotting function `plotMutability` has an argument 
-`style` to specify either a hedgehog plot (circlular) or barplot diplay of
+`style` to specify either a hedgehog plot (circular) or barplot display of
 5-mer mutability rates. If the mutability for only specific bases is required, 
 this can be specified via the `nucleotides` argument.
 

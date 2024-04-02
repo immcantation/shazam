@@ -65,7 +65,7 @@ contain no "N" at any position sums up to 1 (as opposed to
 the entire vector summing up to 1).
 
 `targeting`
-:   Rate matrix of a given mutation ocurring, defined as 
+:   Rate matrix of a given mutation occurring, defined as 
 <code class = 'eq'>mutability * substitution</code>. The targeting model 
 is stored as a 5x3125 matrix. Rows define
 the mutated nucleotide at the center of each 5-mer, one of 

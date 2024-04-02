@@ -146,7 +146,7 @@ NULL
 #'                               characters. See "Choosing ambiguous characters" for how 
 #'                               ambiguous characters are chosen.
 #'                         \item With \code{breakTiesStochastic=TRUE}, ties are resolved 
-#'                               stochastically by randomly picking a character amongst the 
+#'                               stochastically by randomly picking a character among the 
 #'                               ties.
 #'                         \item When both \code{TRUE}, \code{includeAmbiguous} takes 
 #'                               precedence over \code{breakTiesStochastic}.
@@ -247,7 +247,7 @@ NULL
 #'                               \code{breakTiesByColumns}.
 #'                         \item When \code{breakTiesStochastic=FALSE} and 
 #'                               \code{breakTiesByColumns} is not supplied (i.e. \code{NULL}), 
-#'                               the sequence that appears first amongst the ties is taken 
+#'                               the sequence that appears first among the ties is taken 
 #'                               as the consensus.
 #'                    }
 #'          

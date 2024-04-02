@@ -251,7 +251,7 @@ General:
 Distance Calculation:
 
 + Changed default `findThreshold` method to `density`.
-+ Significantly reduced run time of the `density` method by retuning the 
++ Significantly reduced run time of the `density` method by returning the 
   bandwidth detection process. The `density` method should now also yield more 
   consistent thresholds, on average.
 + The `subsample` argument to `findThreshold` now applies to both the 
@@ -388,7 +388,7 @@ Selection Analysis:
 + Fixed a bug in p-value calculation in `summarizeBaseline()`. The returned 
   p-value can now be either positive or negative. Its magnitude (without the 
   sign) should be interpreted as per normal. Its sign indicates the direction 
-  of the seLicense chalection detected. A positive p-value indicates positive selection, 
+  of the selection detected. A positive p-value indicates positive selection, 
   whereas a negative p-value indicates negative selection.
 + Added `editBaseline()` to exported functions, and a corresponding section 
   in the vignette. 
@@ -403,7 +403,7 @@ Targeting Models:
   tune for parameters `minNumMutations` and `minNumSeqMutations` in functions 
   `createSubstitutionMatrix()` and `createMutabilityMatrix()` respectively. 
   Also added function `plotTune()` which helps visualize parameter tuning using
-  the abovementioned two new functions. 
+  the above mentioned two new functions. 
 + Added human kappa and lambda light chain, silent, 5-mer, functional targeting
   model (`HKL_S5F`).
 + Renamed `HS5FModel` as `HH_S5F`, `MRS5NFModel` as `MK_RS5NF`, and `U5NModel` 
@@ -471,7 +471,7 @@ Version 0.1.4:  August 5, 2016
 
 Selection Analysis:
 
-+ Fixed a bug in calcBaseline wherein the germline column was incorrected 
++ Fixed a bug in calcBaseline wherein the germline column was incorrectly
   hardcoded, leading to erroneous mutation counts for some clonal consensus 
   sequences.
 
@@ -495,7 +495,7 @@ General:
 Distance Calculation:
 
 + Added the `cross` argument to `distToNearest()` which allows restriction of 
-  distances to only distances across samples (ie, excludes within-sample 
+  distances to only distances across samples (i.e., excludes within-sample 
   distances).
 + Added `mst` flag to `distToNearest()`, which will return all distances to 
   neighboring nodes in a minimum spanning tree.
@@ -619,7 +619,7 @@ Selection Analysis:
 Targeting Models:
 
 + Added `minNumMutations` parameter to createSubstitutionMatrix. This is the 
-  minimum number of observed 5-mers required for the substituion model. 
+  minimum number of observed 5-mers required for the substitution model. 
   The substitution rate of 5-mers with fewer number of observed mutations
   will be inferred from other 5-mers. 
 + Added `minNumSeqMutations` parameter to createMutabilityMatrix. This is the 
@@ -651,7 +651,7 @@ General:
 + Restructured the S4 class documentation.
 + Fixed bug wherein example `Influenza.tab` file did not load on Mac OS X.
 + Added citations for `citation("shazam")` command.
-+ Added dependency on data.table >= 1.9.4 to fix bug that occured with 
++ Added dependency on data.table >= 1.9.4 to fix bug that occurred with 
   earlier versions of data.table.
 
 Distance Calculation:
@@ -660,8 +660,8 @@ Distance Calculation:
   Yaari et al, 2013 data.
 + Set the `hs1f` as the default distance model for `distToNearest()`.
 + Added conversion of sequences to uppercase in `distToNearest()`.
-+ Fixed a bug wherein unrecongized (including lowercase) characters would
-  lead to silenting returning a distance of 0 to the neared neighbor. 
++ Fixed a bug wherein unrecognized (including lowercase) characters would
+  lead to silencing returning a distance of 0 to the neared neighbor. 
   Unrecognized characters will now raise an error.
 
 Mutation Profiling:

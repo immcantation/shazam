@@ -139,7 +139,7 @@ observed <- observedMutations(clones,
                               sequenceColumn="clonal_sequence",
                               germlineColumn="clonal_germline",
                               regionDefinition=IMGT_V, nproc=1)
-# Count expected mutations and append mu_exptected columns to the output
+# Count expected mutations and append mu_expected columns to the output
 expected <- expectedMutations(observed, 
                               sequenceColumn="clonal_sequence",
                               germlineColumn="clonal_germline",
@@ -384,7 +384,7 @@ removing that sample or isotype from the original input data.
 
 ```r
 # Get indices of rows corresponding to IGHA in the field "db"
-# These are the same indices also in the matrices in the fileds "numbOfSeqs", 
+# These are the same indices also in the matrices in the fields "numbOfSeqs", 
 # "binomK", "binomN", "binomP", and "pdfs"
 # In this example, there is one row of IGHA for each sample
 dbIgMIndex <- which(grouped_2@db[["c_call"]] == "IGHG")

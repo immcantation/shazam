@@ -4,7 +4,7 @@ Description
 --------------------
 
 `createMutabilityMatrix` builds a 5-mer nucleotide mutability model by counting 
-the number of mutations occuring in the center position for all 5-mer motifs.
+the number of mutations occurring in the center position for all 5-mer motifs.
 
 
 Usage
@@ -53,9 +53,9 @@ vCallColumn
 :   name of the column containing the V-segment allele call.
 
 multipleMutation
-:   string specifying how to handle multiple mutations occuring 
+:   string specifying how to handle multiple mutations occurring 
 within the same 5-mer. If `"independent"` then multiple 
-mutations within the same 5-mer are counted indepedently. 
+mutations within the same 5-mer are counted independently. 
 If `"ignore"` then 5-mers with multiple mutations are 
 excluded from the total mutation tally.
 

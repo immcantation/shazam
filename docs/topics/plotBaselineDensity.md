@@ -60,7 +60,7 @@ title
 :   string defining the plot title.
 
 subsetRegions
-:   character vector defining a subset of regions to plot, correspoding 
+:   character vector defining a subset of regions to plot, corresponding 
 to the regions for which the `baseline` data was calculated. If
 `NULL` all regions in `baseline` are plotted.
 

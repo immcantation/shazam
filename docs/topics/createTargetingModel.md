@@ -50,11 +50,11 @@ vCallColumn
 :   name of the column containing the V-segment allele calls.
 
 multipleMutation
-:   string specifying how to handle multiple mutations occuring 
+:   string specifying how to handle multiple mutations occurring 
 within the same 5-mer. If `"independent"` then multiple 
-mutations within the same 5-mer are counted indepedently. 
+mutations within the same 5-mer are counted independently. 
 If `"ignore"` then 5-mers with multiple mutations are 
-excluded from the otal mutation tally.
+excluded from the t mutation tally.
 
 minNumMutations
 :   minimum number of mutations required to compute the 5-mer 

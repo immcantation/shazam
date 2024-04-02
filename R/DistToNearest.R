@@ -768,7 +768,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' Note on \code{NA}s: if, for a given combination of V gene, J gene, and junction length,
 #' there is only 1  heavy chain sequence (as defined by \code{sequenceColumn}), \code{NA} is 
 #' returned instead of a distance (since it has no heavy/long chain neighbor). If for a given combination 
-#' there are multiple heavy/long chain sequences but only 1 unique one, (in which case every heavy/long cahin 
+#' there are multiple heavy/long chain sequences but only 1 unique one, (in which case every heavy/long chain 
 #' sequence in this group is the de facto nearest neighbor to each other, thus giving rise to distances 
 #' of 0), \code{NA}s are returned instead of zero-distances.
 #' 

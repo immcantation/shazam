@@ -52,7 +52,7 @@ plot. If `NULL` alphabetical ordering and a default color palette
 will be used. Has no effect if `facetBy="group"`.
 
 subsetRegions
-:   character vector defining a subset of regions to plot, correspoding 
+:   character vector defining a subset of regions to plot, corresponding 
 to the regions for which the `baseline` data was calculated. If
 `NULL` all regions in `baseline` are plotted.
 

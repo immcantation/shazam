@@ -107,7 +107,7 @@ print(output)
 plotDensityThreshold(output)
 ```
 
-*Warning*:Removed 1 rows containing missing values (`geom_vline()`).![5](plotDensityThreshold-5.png)
+*Warning*:Removed 1 row containing missing values or values outside the scale range (`geom_vline()`).![5](plotDensityThreshold-5.png)
 
 
 See also
