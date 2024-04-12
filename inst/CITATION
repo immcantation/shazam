@@ -73,3 +73,14 @@ bibentry(bibtype = "Article",
          number  = 9,
          pages   = "3566-3574",
          doi     = "10.4049/jimmunol.1502263")
+
+bibentry(bibtype = "Article",
+         style   = "citation",
+         header  = "To cite the mixture model for threshold determination, please use:",         
+         title   = "Optimized Threshold Inference for Partitioning of Clones From High-Throughput B Cell Repertoire Sequencing Data",
+         author  = c(person("Nima", "Nouri"),
+                     person("Steven H.", "Kleinstein")),
+         year    = 2018,
+         journal = "Frontiers in Immunology",
+         volume  = "9",
+         doi     = "10.3389/fimmu.2018.01687")

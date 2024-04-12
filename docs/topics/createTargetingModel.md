@@ -54,7 +54,7 @@ multipleMutation
 within the same 5-mer. If `"independent"` then multiple 
 mutations within the same 5-mer are counted independently. 
 If `"ignore"` then 5-mers with multiple mutations are 
-excluded from the t mutation tally.
+excluded from the total mutation tally.
 
 minNumMutations
 :   minimum number of mutations required to compute the 5-mer 
