@@ -9,6 +9,8 @@ theme:
   sticky_navigation: False
   locale: en
   logo: null
+  analytics:
+    gtag: G-Q0RDCWSDZ2
 markdown_extensions:
   - def_list
   - sane_lists
