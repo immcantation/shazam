@@ -12,6 +12,7 @@ theme:
   analytics:
     gtag: G-Q0RDCWSDZ2
 markdown_extensions:
+  - admonition
   - def_list
   - sane_lists
   - smarty

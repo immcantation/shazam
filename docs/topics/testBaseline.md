@@ -112,7 +112,7 @@ plot(grouped, "c_call")
 
 ```
 
-![7](testBaseline-7.png)
+*Warning*:No shared levels found between `names(values)` of the manual scale and the data's size values.![8](testBaseline-8.png)
 
 ```R
 
