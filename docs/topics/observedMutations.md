@@ -185,6 +185,7 @@ db_obs <- observedMutations(gdf, sequenceColumn="sequence",
 germlineColumn="parent_sequence",
 regionDefinition=IMGT_VDJ,
 nproc=1)
+
 ```
 
 

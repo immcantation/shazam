@@ -122,6 +122,7 @@ method="thresholdedFreq", minFreq=0.3,
 includeAmbiguous=FALSE, 
 breakTiesStochastic=FALSE)
 cons1$cons
+
 ```
 
 

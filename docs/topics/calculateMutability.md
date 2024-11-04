@@ -45,6 +45,7 @@ db <- subset(ExampleDb, c_call == "IGHA" & sample_id == "-1h")
 
 # Calculate mutability of germline sequences using \link{HH_S5F} model
 mutability <- calculateMutability(sequences=db[["germline_alignment_d_mask"]], model=HH_S5F)
+
 ```
 
 

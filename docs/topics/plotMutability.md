@@ -87,6 +87,7 @@ plotMutability(HH_S5F, "C")
 
 # Plot two nucleotides in barchart style
 plotMutability(HH_S5F, c("G", "T"), style="bar")
+
 ```
 
 ![4](plotMutability-4.png)

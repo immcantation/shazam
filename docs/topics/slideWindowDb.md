@@ -70,6 +70,7 @@ data(ExampleDb, package="alakazam")
 slideWindowDb(db=ExampleDb[1:10, ], sequenceColumn="sequence_alignment", 
 germlineColumn="germline_alignment_d_mask", 
 mutThresh=6, windowSize=10, nproc=1)
+
 ```
 
 

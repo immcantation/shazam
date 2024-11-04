@@ -153,6 +153,7 @@ isotype_colors <- c("IGHM"="darkorchid", "IGHD"="firebrick",
 "IGHG"="seagreen", "IGHA"="steelblue")
 plotBaselineSummary(grouped, "sample_id", "c_call", 
 groupColors=isotype_colors, facetBy="region")
+
 ```
 
 ![7](plotBaselineSummary-7.png)

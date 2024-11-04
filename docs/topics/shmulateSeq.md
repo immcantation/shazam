@@ -98,6 +98,7 @@ shmulateSeq(sequence, numMutations=6, frequency=FALSE)
 
 # Introduction 5% mutations
 shmulateSeq(sequence, numMutations=0.05, frequency=TRUE)
+
 ```
 
 

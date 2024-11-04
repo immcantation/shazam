@@ -150,6 +150,7 @@ vCallColumn="v_call",
 model="s", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=FALSE,
 minNumMutations=20)
+
 ```
 
 

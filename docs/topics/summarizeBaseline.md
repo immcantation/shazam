@@ -116,6 +116,7 @@ Calculating BASELINe statistics...
 
 # Get a data.frame of the summary statistics
 stats <- summarizeBaseline(grouped, returnType="df")
+
 ```
 
 

@@ -136,6 +136,7 @@ Examples
 ```R
 # Creates an empty Baseline object
 createBaseline()
+
 ```
 
 

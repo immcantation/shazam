@@ -78,6 +78,7 @@ data(ExampleDb, package = "alakazam")
 len <- ExampleDb$junction_length[1]
 sequence <- ExampleDb$sequence_alignment[1]
 region <- setRegionBoundaries(len, sequence, regionDefinition = IMGT_VDJ)
+
 ```
 
 

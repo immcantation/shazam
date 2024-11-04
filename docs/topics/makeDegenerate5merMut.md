@@ -76,6 +76,7 @@ degenerate5merMut[c("AAAAT", "AACAT", "AAGAT", "AATAT")]
 
 # Normalized
 sum(degenerate5merMut)
+
 ```
 
 

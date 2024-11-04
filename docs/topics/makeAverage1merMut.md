@@ -53,6 +53,7 @@ degenerate5merMut <- makeDegenerate5merMut(mut1mer = example1merMut)
 # Now make a 1-mer model by averaging over the degenerate 5-mer model
 # Expected to get back example1merMut
 makeAverage1merMut(mut5mer = degenerate5merMut)
+
 ```
 
 

@@ -55,6 +55,7 @@ classes <- setNames(translateStrings(chars, hydropathy), chars)
 
 # Create hydropathy mutation definition
 md <- createMutationDefinition("Hydropathy", classes)
+
 ```
 
 

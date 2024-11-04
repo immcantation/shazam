@@ -54,6 +54,7 @@ degenerate5merSub <- makeDegenerate5merSub(sub1mer = HKL_S1F)
 # Now make a 1-mer model by averaging over the degenerate 5-mer model
 # Expected to get back HKL_S1F
 makeAverage1merSub(sub5mer = degenerate5merSub)
+
 ```
 
 

@@ -148,6 +148,7 @@ head(sort(model@mutability, decreasing=TRUE), 5)
 
 # View number of silent mutations used for estimating mutability
 model@numMutS
+
 ```
 
 

@@ -72,6 +72,7 @@ clone <- alakazam::makeChangeoClone(db)
 
 # Extend data with lineage information
 df <- makeGraphDf(graph, clone)
+
 ```
 
 

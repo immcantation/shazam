@@ -62,6 +62,7 @@ degenerate5merSub <- makeDegenerate5merSub(sub1mer = HKL_S1F)
 
 # Look at a few 5-mers
 degenerate5merSub[, c("AAAAT", "AACAT", "AAGAT", "AATAT")]
+
 ```
 
 

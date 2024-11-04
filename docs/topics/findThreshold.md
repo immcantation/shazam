@@ -141,11 +141,12 @@ plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk
 
 ```R
 print(output)
+
 ```
 
 
 ```
-[1] 0.2461115
+[1] 0.2421758
 
 ```
 

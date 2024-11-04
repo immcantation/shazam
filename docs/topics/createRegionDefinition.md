@@ -50,6 +50,7 @@ Examples
 ```R
 # Creates an empty RegionDefinition object
 createRegionDefinition()
+
 ```
 
 

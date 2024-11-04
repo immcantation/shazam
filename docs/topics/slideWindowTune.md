@@ -193,6 +193,7 @@ germlineSeq=db[["germline_alignment_d_mask"]][i],
 returnRaw=TRUE)$pos })
 slideWindowTune(db, dbMutList=exDbMutList, 
 mutThreshRange=2:4, windowSizeRange=2:4)
+
 ```
 
 

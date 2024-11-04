@@ -62,6 +62,7 @@ vCallColumn="v_call")
 *Warning*:Insufficient number of mutations to infer some 5-mers. Filled with 0. 
 ```R
 ext_model <- extendMutabilityMatrix(mut_model)
+
 ```
 
 

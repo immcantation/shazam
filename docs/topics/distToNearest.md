@@ -263,6 +263,7 @@ xlab("distance") +
 geom_histogram(aes(x=dist_nearest), binwidth=0.025, 
 fill="steelblue", color="white")
 plot(p1)
+
 ```
 
 ![2](distToNearest-2.png)

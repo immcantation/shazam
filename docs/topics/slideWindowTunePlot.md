@@ -183,6 +183,7 @@ legendPos="bottomright")
 slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
 plotFiltered=TRUE, percentage=TRUE, 
 jitter.y=TRUE, jitter.y.amt=0.01)
+
 ```
 
 *Warning*:slideWindowTunePlot() is deprecated, please see plotSlideWindowTune() for future use![14](slideWindowTunePlot-14.png)

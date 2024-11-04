@@ -419,6 +419,7 @@ method="catchAll", regionDefinition=IMGT_V)
 clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
 germlineColumn="germline_alignment_d_mask",
 method="mostCommon", expandedDb=TRUE)
+
 ```
 
 

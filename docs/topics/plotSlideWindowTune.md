@@ -185,6 +185,7 @@ legendPos="bottomright")
 plotSlideWindowTune(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
 plotFiltered='filtered', percentage=TRUE, 
 jitter.y=TRUE, jitter.y.amt=0.01)
+
 ```
 
 ![10](plotSlideWindowTune-10.png)

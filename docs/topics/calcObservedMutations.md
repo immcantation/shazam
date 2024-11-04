@@ -369,6 +369,7 @@ table(ex3_raw$pos$region, ex3_raw$pos$r)[, "1"]/ex3_raw$nonN
 
 ```R
 table(ex3_raw$pos$region, ex3_raw$pos$s)[, "1"]/ex3_raw$nonN
+
 ```
 
 
