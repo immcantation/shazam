@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          Rscript tests/setup/install_dep.R
       - name: Document
         run: |
           devtools::document()
