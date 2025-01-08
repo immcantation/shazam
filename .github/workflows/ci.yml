@@ -10,6 +10,8 @@ jobs:
 
   unittest:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     container:
       image: immcantation/test:devel
     steps:
