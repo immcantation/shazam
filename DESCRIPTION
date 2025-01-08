@@ -35,7 +35,7 @@ Description: Provides a computational framework for analyzing mutations in
     Cui, et al (2016) <doi:10.4049/jimmunol.1502263>.
 License: AGPL-3
 URL: http://shazam.readthedocs.io
-BugReports: https://bitbucket.org/kleinstein/shazam/issues
+BugReports: https://github.com/immcantation/shazam/issues
 LazyData: true
 BuildVignettes: true
 VignetteBuilder: knitr, rmarkdown

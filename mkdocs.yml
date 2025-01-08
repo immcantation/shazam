@@ -1,6 +1,6 @@
 site_name: shazam
 site_favicon: img/favicon.ico
-repo_url: https://bitbucket.org/kleinstein/shazam
+repo_url: https://github.com/immcantation/shazam
 edit_uri: src/master/docs/
 theme:
   name: readthedocs
