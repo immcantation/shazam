@@ -50,3 +50,28 @@ build()
 install()
 ```
 
+Some users might experience issue with installing shazam if certain dependencies aren't installed correctly. One straightforward way to ensure you have everything you need is to install via Bioconductor:
+
+```{r}
+install.packages("BiocManager")
+BiocManager::install("shazam")
+```
+
+Some libraries that might require manual installation (depending on your system) includes `xml2`, `rhtslib`, `igraph`, `curl`, `zlib`. 
+
+ - If you are using a conda environment, these libraries can be installed using the following command
+ ```{sh}
+ conda install -c conda-forge curl \
+     zlib \
+     r-xml2 \
+     r-igraph \
+     r-rhtslib \
+     xz
+ ```
+
+ - For Debian/Ubuntu, necessary system development packages can be installed using `apt-get`. The names of these equivalent libraries are `build-essential`, `libcurl4-openssl-dev`, `libssl-dev`, `liblzma-dev`, `libxml2-dev`, `xz-utils`, `libglpk-dev`, `libhts-dev`. 
+ 
+ After this installation, xml2 and igraph can be directly installed from apt-get with library names `r-cran-xml2`, `r-cran-igraph`.
+
+In case if your further encounter errors in installing shazam, feel free to contact us [here](https://dowser.readthedocs.io/en/stable/#contact).
+
