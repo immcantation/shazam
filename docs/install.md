@@ -69,9 +69,9 @@ Some libraries that might require manual installation (depending on your system)
      xz
  ```
 
- - For Debian/Ubuntu, necessary system development packages can be installed using `apt-get`. The names of these equivalent libraries are `build-essential`, `libcurl4-openssl-dev`, `libssl-dev`, `liblzma-dev`, `libxml2-dev`, `xz-utils`, `libglpk-dev`, `libhts-dev`. 
+ - For Debian/Ubuntu, necessary system development packages can be installed using `apt`. The names of these equivalent libraries are `build-essential`, `libcurl4-openssl-dev`, `libssl-dev`, `liblzma-dev`, `libxml2-dev`, `xz-utils`, `libglpk-dev`, `libhts-dev`. 
  
  After this installation, xml2 and igraph can be directly installed from apt-get with library names `r-cran-xml2`, `r-cran-igraph`.
 
-In case if your further encounter errors in installing shazam, feel free to contact us [here](https://dowser.readthedocs.io/en/stable/#contact).
+In case you encounter further errors in installing shazam, feel free to contact us [here](https://dowser.readthedocs.io/en/stable/#contact).
 
