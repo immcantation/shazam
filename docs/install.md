@@ -50,7 +50,7 @@ build()
 install()
 ```
 
-Some users might experience issue with installing shazam if certain dependencies aren't installed correctly. One straightforward way to ensure you have everything you need is to install via Bioconductor:
+Some users might experience issue with installing shazam if Bioconductor dependencies aren't installed correctly. One straightforward way to ensure that Bioconductor dependencies are installed is:
 
 ```{r}
 install.packages("BiocManager")
