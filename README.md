@@ -51,5 +51,9 @@ analysis topics:
 Contact
 -------------------------------------------------------------------------------
 
-For help and questions please contact the [Immcantation Group](mailto:immcantation@googlegroups.com)
-or use the [issue tracker](https://github.com/immcantation/shazam/issues?q=is%3Aissue+is%3Aopen+).
+If you need help or have any questions, please contact the [Immcantation Group](mailto:immcantation@googlegroups.com).
+
+If you have discovered a bug or have a feature request, you can open an issue using the [issue tracker](https://github.com/immcantation/shazam/issues).
+
+To receive alerts about Immcantation releases, news, events, and tutorials, join the [Immcantation News](https://groups.google.com/g/immcantation-news) Google Group. [Membership settings](https://groups.google.com/g/immcantation-news/membership) can be adjusted to change the frequency of email updates.
+
