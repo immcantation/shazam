@@ -5,6 +5,11 @@ General:
 
 + Updated dependencies to ggplot2 >= 3.4.0.
 
+Mutation simulation:
+
++ ShmulateSeq sample mutations from a binomial distribution with provided
+probability instead of taking the floor from the number of sequences.
+
 Version 1.1.2: September 26, 2022
 -------------------------------------------------------------------------------
 

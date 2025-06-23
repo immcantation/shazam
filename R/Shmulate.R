@@ -38,9 +38,10 @@ NULL
 #' Mutations are not introduced to positions in the input \code{sequence} that contain 
 #' \code{.} or \code{N}.
 #' 
-#' With \code{frequency=TRUE}, the number of mutations introduced is the \code{floor} of 
-#' the length of the sequence multiplied by the mutation frequency specified via
-#' \code{numMutations}.
+#' With \code{frequency=TRUE}, the number of mutations is calculated according to the probability
+#' of mutation at each position. For example, if \code{numMutations=0.05} and the length of 
+#' the input \code{sequence} is 100, then the number of mutations will be sampled from a 
+#' binomial distribution with 100 trials and a probability of 0.05.
 #' 
 #' @seealso  See \link{shmulateTree} for imposing mutations on a lineage tree. 
 #'           See \link{HH_S5F} and \link{MK_RS5NF} for predefined 
@@ -116,7 +117,14 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F,
     # if specifying mutation frequency instead of count, 
     # get corresponding mutation count based on sequence length
     if (frequency) {
-        numMutations <- floor(sim_leng*numMutations)
+        #numMutations <- floor(sim_leng*numMutations)
+        sampleMutations <- 0
+        for (i in 1:sim_leng) {
+            mut <- c(0,1)
+            samp <- sample(mut, 1, prob=c(1-numMutations, numMutations))
+            sampleMutations <- sampleMutations + samp
+        }
+        numMutations <- sampleMutations
     }
     
     if (numMutations > sim_leng) {
