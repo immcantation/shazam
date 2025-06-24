@@ -117,13 +117,7 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F,
     # if specifying mutation frequency instead of count, 
     # get corresponding mutation count based on sequence length
     if (frequency) {
-        #numMutations <- floor(sim_leng*numMutations)
-        sampleMutations <- 0
-        for (i in 1:sim_leng) {
-            mut <- c(0,1)
-            samp <- sample(mut, 1, prob=c(1-numMutations, numMutations))
-            sampleMutations <- sampleMutations + samp
-        }
+        sampleMutations <- rbinom(n=1, size=sim_leng, prob=numMutations)
         numMutations <- sampleMutations
     }
     
