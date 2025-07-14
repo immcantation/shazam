@@ -5,7 +5,7 @@ NULL
 
 #### Deprecated ####
 
-#' slideWindowTunePlot - plotSlideWindowTune backward compatability
+#' slideWindowTunePlot - plotSlideWindowTune backward compatibility
 #'
 #' Wrapper function for \link{plotSlideWindowTune}
 #' 

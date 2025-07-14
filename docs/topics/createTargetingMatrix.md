@@ -87,6 +87,7 @@ mut_model <- extendMutabilityMatrix(mut_model)
 
 # Create targeting model from substitution and mutability
 tar_model <- createTargetingMatrix(sub_model, mut_model)
+
 ```
 
 

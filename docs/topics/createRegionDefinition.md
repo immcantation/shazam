@@ -50,6 +50,7 @@ Examples
 ```R
 # Creates an empty RegionDefinition object
 createRegionDefinition()
+
 ```
 
 
@@ -62,7 +63,7 @@ Slot "description":
 [1] ""
 
 Slot "boundaries":
-factor(0)
+factor()
 Levels: 
 
 Slot "seqLength":

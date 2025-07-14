@@ -69,6 +69,7 @@ dist <- calcTargetingDistance(HH_S5F)
 
 # Calculate targeting distance of HH_S1F
 dist <- calcTargetingDistance(HH_S1F)
+
 ```
 
 

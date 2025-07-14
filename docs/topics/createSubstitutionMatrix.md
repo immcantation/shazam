@@ -4,7 +4,7 @@ Description
 --------------------
 
 `createSubstitutionMatrix` builds a 5-mer nucleotide substitution model by counting 
-the number of substitution mutations occuring in the center position for all 5-mer 
+the number of substitution mutations occurring in the center position for all 5-mer 
 motifs.
 
 
@@ -48,9 +48,9 @@ vCallColumn
 :   name of the column containing the V-segment allele call.
 
 multipleMutation
-:   string specifying how to handle multiple mutations occuring 
+:   string specifying how to handle multiple mutations occurring 
 within the same 5-mer. If `"independent"` then multiple 
-mutations within the same 5-mer are counted indepedently. 
+mutations within the same 5-mer are counted independently. 
 If `"ignore"` then 5-mers with multiple mutations are 
 excluded from the total mutation tally.
 
@@ -150,6 +150,7 @@ vCallColumn="v_call",
 model="s", multipleMutation="independent",
 returnModel="5mer", numMutationsOnly=FALSE,
 minNumMutations=20)
+
 ```
 
 

@@ -24,7 +24,7 @@ the following fields (columns) to be present in the table:
 * `junction_length`
 
 
-```r
+``` r
 # Import required packages
 library(alakazam)
 library(dplyr)
@@ -42,8 +42,8 @@ db %>% count(sample_id)
 ## # A tibble: 2 × 2
 ##   sample_id     n
 ##   <chr>     <int>
-## 1 -1h         247
-## 2 +7d         253
+## 1 +7d         253
+## 2 -1h         247
 ```
 
 ## Calculating nearest neighbor distances (heavy chain sequences)
@@ -85,7 +85,7 @@ allows the user to specify whether the average or minimum of the two
 distances is used to determine the overall distance.
 
 
-```r
+``` r
 # Use nucleotide Hamming distance and normalize by junction length
 dist_ham <- distToNearest(db %>% filter(sample_id == "+7d"), 
                           sequenceColumn="junction", 
@@ -138,7 +138,7 @@ There is also a choice of whether grouping should be done using `IGH`
 is governed by `onlyHeavy`.
 
 
-```r
+``` r
 # Single-cell mode 
 # Group cells in a one-stage process (VJthenLen=FALSE) and using
 # both heavy and light chain sequences (onlyHeavy=FALSE)
@@ -173,12 +173,12 @@ mixture model), and are chosen via the `method` parameter of
 
 ### Threshold determination by manual inspection
 
-Manual threshold detection simply involves generating a histrogram for
+Manual threshold detection simply involves generating a histogram for
 the values in the `dist_nearest` column of the `distToNearest` output
 and selecting a suitable value within the valley between the two modes.
 
 
-```r
+``` r
 # Generate Hamming distance histogram
 p1 <- ggplot(subset(dist_ham, !is.na(dist_nearest)), 
              aes(x=dist_nearest)) + 
@@ -196,7 +196,7 @@ By manual inspection, the length normalized `ham` model distance
 threshold would be set to a value near 0.12 in the above example.
 
 
-```r
+``` r
 # Generate HH_S5F distance histogram
 p2 <- ggplot(subset(dist_s5f, !is.na(dist_nearest)), 
              aes(x=dist_nearest)) + 
@@ -222,7 +222,7 @@ the `distToNearest` output. Below is an example of using the `density`
 method for threshold detection.
 
 
-```r
+``` r
 # Find threshold using density method
 output <- findThreshold(dist_ham$dist_nearest, method="density")
 threshold <- output@threshold
@@ -233,7 +233,7 @@ plot(output, title="Density Method")
 
 ![plot of chunk DistToNearest-Vignette-6](figure/DistToNearest-Vignette-6-1.png)
 
-```r
+``` r
 # Print threshold
 print(output)
 ```
@@ -267,7 +267,7 @@ dashed-line shown in figure below defines the distance where the average
 of the sensitivity and specificity reaches its maximum.
 
 
-```r
+``` r
 # Find threshold using gmm method
 output <- findThreshold(dist_ham$dist_nearest, method="gmm", model="gamma-gamma")
 
@@ -277,13 +277,13 @@ plot(output, binwidth=0.02, title="GMM Method: gamma-gamma")
 
 ![plot of chunk DistToNearest-Vignette-7](figure/DistToNearest-Vignette-7-1.png)
 
-```r
+``` r
 # Print threshold
 print(output)
 ```
 
 ```
-## [1] 0.1246892
+## [1] 0.1195359
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is
@@ -305,7 +305,7 @@ and `+7d`, and will set `fields="sample_id"`. This will reproduce
 previous results for sample `+7d` and add results for sample `-1d`.
 
 
-```r
+``` r
 dist_fields <- distToNearest(db, model="ham", normalize="len", 
                              fields="sample_id", nproc=1)
 ```
@@ -313,7 +313,7 @@ dist_fields <- distToNearest(db, model="ham", normalize="len",
 We can plot the nearest neighbor distances for the two samples:
 
 
-```r
+``` r
 # Generate grouped histograms
 p4 <- ggplot(subset(dist_fields, !is.na(dist_nearest)), 
              aes(x=dist_nearest)) +
@@ -341,7 +341,7 @@ neighbor distances for sequences in sample `-1h` will be restricted to
 the closest sequence in sample `+7d` and vice versa.
 
 
-```r
+``` r
 dist_cross <- distToNearest(ExampleDb, sequenceColumn="junction", 
                             vCallColumn="v_call_genotyped", jCallColumn="j_call",
                             model="ham", first=FALSE, 
@@ -349,7 +349,7 @@ dist_cross <- distToNearest(ExampleDb, sequenceColumn="junction",
 ```
 
 
-```r
+``` r
 # Generate cross sample histograms
 p5 <- ggplot(subset(dist_cross, !is.na(cross_dist_nearest)), 
              aes(x=cross_dist_nearest)) + 
@@ -382,7 +382,7 @@ sequence to the subsampled sequences from the same V-J-junction length
 group.
 
 
-```r
+``` r
 # Explore V-J-junction length groups sizes to use subsample
 # Show the size of the largest groups
 top_10_sizes <- ExampleDb %>%
@@ -402,7 +402,7 @@ top_10_sizes <- ExampleDb %>%
 ## Selecting by SIZE
 ```
 
-```r
+``` r
 top_10_sizes
 ```
 
@@ -422,7 +422,7 @@ top_10_sizes
 ## 10    25
 ```
 
-```r
+``` r
 # Use 30 to subsample
 # NOTE: This is a toy example. Subsampling to 30 sequence with real data is unwise
 dist <- distToNearest(ExampleDb, sequenceColumn="junction", 

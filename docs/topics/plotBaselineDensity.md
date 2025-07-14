@@ -60,7 +60,7 @@ title
 :   string defining the plot title.
 
 subsetRegions
-:   character vector defining a subset of regions to plot, correspoding 
+:   character vector defining a subset of regions to plot, corresponding 
 to the regions for which the `baseline` data was calculated. If
 `NULL` all regions in `baseline` are plotted.
 
@@ -151,6 +151,7 @@ Examples
 # sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
 # plotBaselineDensity(grouped, "sample_id", "c_call", facetBy="group",
 # colorValues=sample_colors, sigmaLimits=c(-1, 1))
+
 ```
 
 

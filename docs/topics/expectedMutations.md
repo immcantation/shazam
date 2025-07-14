@@ -43,7 +43,7 @@ targetingModel
 regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions
 and boundaries of the Ig sequences. To use regions definitions,
-sequences in `sequenceColum` and `germlineColumn`
+sequences in `sequenceColumn` and `germlineColumn`
 must be aligned, following the IMGT schema.
 
 mutationDefinition
@@ -121,6 +121,7 @@ germlineColumn="germline_alignment_d_mask",
 regionDefinition=IMGT_V,
 mutationDefinition=HYDROPATHY_MUTATIONS,
 nproc=1)
+
 ```
 
 

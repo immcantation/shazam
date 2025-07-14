@@ -111,6 +111,7 @@ Examples
 # sample_colors <- c("-1h"="steelblue", "+7d"="firebrick")
 # plotBaselineDensity(grouped3, idColumn="sample_id", colorValues=sample_colors,
 # sigmaLimits=c(-1, 1))
+
 ```
 
 

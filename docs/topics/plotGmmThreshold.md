@@ -104,6 +104,7 @@ print(output)
 
 # Plot results
 plotGmmThreshold(output, binwidth=0.02)
+
 ```
 
 ![4](plotGmmThreshold-4.png)

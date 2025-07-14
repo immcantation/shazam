@@ -1,4 +1,4 @@
-**shazam** - *The shazam package*
+# The shazam package
 
 Description
 --------------------
@@ -78,7 +78,7 @@ by biological or experimental relevance.
 between BASELINe PDFs.
 + [plotBaselineDensity](plotBaselineDensity.md):      Plot the probability density functions
 resulting from selection analysis.
-+ [plotBaselineSummary](plotBaselineSummary.md):      Plot summary stastistics resulting from 
++ [plotBaselineSummary](plotBaselineSummary.md):      Plot summary statistics resulting from 
 selection analysis.
 
 
@@ -123,7 +123,6 @@ Vigneault F, Shlomchik M and Kleinstein S (2016). A Model of Somatic Hypermutati
 Targeting in Mice Based on High-Throughput Ig Sequencing Data. The Journal of 
 Immunology, 197(9), 3566-3574.
  
-
 
 
 

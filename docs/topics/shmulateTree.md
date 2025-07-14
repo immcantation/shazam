@@ -118,6 +118,7 @@ shmulateTree(sequence, graph)
 # Add 20% mutation rate to the immediate offsprings of the MRCA
 shmulateTree(sequence, graph, targetingModel=MK_RS5NF,
 field="sample_id", exclude=NA, junctionWeight=0.2)
+
 ```
 
 

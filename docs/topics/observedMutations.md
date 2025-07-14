@@ -45,7 +45,7 @@ regionDefinition
 :   [RegionDefinition](RegionDefinition-class.md) object defining the regions
 and boundaries of the Ig sequences. If NULL, mutations 
 are counted for entire sequence. To use regions definitions,
-sequences in `sequenceColum` and `germlineColumn`
+sequences in `sequenceColumn` and `germlineColumn`
 must be aligned, following the IMGT schema.
 
 mutationDefinition
@@ -180,11 +180,12 @@ graph <- ExampleTrees[[17]]
 clone <- alakazam::makeChangeoClone(subset(ExampleDb, clone_id == graph$clone))
 gdf <- makeGraphDf(graph, clone)
 
-# Count of mutations between observed sequence and immediate ancenstor
+# Count of mutations between observed sequence and immediate ancestor
 db_obs <- observedMutations(gdf, sequenceColumn="sequence",
 germlineColumn="parent_sequence",
 regionDefinition=IMGT_VDJ,
 nproc=1)
+
 ```
 
 

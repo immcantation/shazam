@@ -1,20 +1,22 @@
 Package: shazam
 Type: Package
-Version: 1.1.2.999
-Date: 2023-05-03
+Version: 1.2.1.999
+Date: 2024-08-01
 Authors@R: c(person("Mohamed", "Uduman", role=c("aut"), 
                     email="mohamed.uduman@yale.edu"),
              person("Namita", "Gupta", role=c("aut"), 
                     email="namita.gupta@yale.edu"),
-             person("Susanna", "Marquez", role=c("aut"), 
+             person("Susanna", "Marquez", role=c("aut","cre"), 
                     email="susanna.marquez@yale.edu"),
              person("Julian", "Zhou", role=c("aut"), 
                     email="julian.zhou@yale.edu"),
              person("Nima", "Nouri", role=c("aut"), 
                     email="nima.nouri@yale.edu"),
+             person("Noah", "Yann Lee", role=c("aut"),
+                    email="noah.yann.lee@yale.edu"),                    
              person("Ang", "Cui", role=c("ctb"), 
                     email="angcui@mit.edu"),
-             person("Jason", "Vander Heiden", role=c("aut", "cre"), 
+             person("Jason", "Vander Heiden", role=c("aut"), 
                     email="jason.vanderheiden@gmail.com"),
              person("Gur", "Yaari", role=c("aut"), 
                     email="gur.yaari@biu.ac.il"),
@@ -33,25 +35,25 @@ Description: Provides a computational framework for analyzing mutations in
     Cui, et al (2016) <doi:10.4049/jimmunol.1502263>.
 License: AGPL-3
 URL: http://shazam.readthedocs.io
-BugReports: https://bitbucket.org/kleinstein/shazam/issues
+BugReports: https://github.com/immcantation/shazam/issues
 LazyData: true
 BuildVignettes: true
 VignetteBuilder: knitr, rmarkdown
 Encoding: UTF-8
 biocViews:
 Depends:
-    R (>= 3.5.0),
+    R (>= 4.0),
     ggplot2 (>= 3.4.0)
 Imports:
-    alakazam (>= 1.1.0),
+    alakazam (>= 1.3.0),
     ape,
     diptest,
     doParallel,
-    dplyr (>= 0.8.1),
+    dplyr (>= 1.0),
     foreach,
     graphics,
     grid,
-    igraph,
+    igraph (>= 1.5.0),
     iterators,
     KernSmooth,
     lazyeval,
@@ -85,4 +87,4 @@ Collate:
     'Shmulate.R'
     'TargetingModels.R'
     'kedd.R'
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1

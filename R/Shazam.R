@@ -1,3 +1,7 @@
+#' @keywords internal
+#' @aliases shazam-package
+"_PACKAGE"
+
 # Shazam package documentation and import directives
 
 #' The shazam package
@@ -61,7 +65,7 @@
 #'                                           between BASELINe PDFs.
 #'   \item  \link{plotBaselineDensity}:      Plot the probability density functions
 #'                                           resulting from selection analysis.
-#'   \item  \link{plotBaselineSummary}:      Plot summary stastistics resulting from 
+#'   \item  \link{plotBaselineSummary}:      Plot summary statistics resulting from 
 #'                                           selection analysis.
 #' }
 #'
@@ -81,7 +85,7 @@
 #' }
 #'
 #' @name     shazam
-#' @docType  package
+#' @docType  _PACKAGE
 #' @references
 #' \enumerate{
 #'   \item  Hershberg U, et al. Improved methods for detecting selection by mutation 
@@ -134,7 +138,7 @@
 #' @importFrom  lazyeval    interp
 #' @importFrom  MASS        fitdistr
 #' @importFrom  progress    progress_bar
-#' @importFrom  rlang       sym syms
+#' @importFrom  rlang       sym syms .data
 #' @importFrom  scales      log2_trans log10_trans trans_breaks trans_format
 #'                          math_format percent scientific pretty_breaks
 #' @importFrom  seqinr      c2s s2c words translate
@@ -149,16 +153,13 @@
 #'                          stri_extract_all_regex stri_extract_first_regex  
 #'                          stri_replace_all_regex stri_replace_first_regex
 #' @importFrom  tidyr       gather spread pivot_wider
-#' @importFrom  tidyselect  all_of
+#' @importFrom  tidyselect  all_of any_of
 NULL
 
 # Package loading actions
 .onAttach <- function(libname, pkgname) {
-    msg <- paste("As of v1.0.0 the AIRR Rearrangement schema is now the default file format.",
-                 "A description of the standard is available at https://docs.airr-community.org.",
-                 "The legacy Change-O format is supported through arguments to each function",
-                 "that allow the input column names to be explicitly defined.",
-                 sep="\n")
+    msg <- citation(pkgname)
+    msg <-paste(c(format(msg,"citation")),collapse="\n\n")
     packageStartupMessage(msg)
 }
 
@@ -170,7 +171,7 @@ NULL
 # Mus musculus Ig sequence data.
 #
 # @format   A symmetric matrix of nucleotide substitution distance scores with 
-#           row names and column names definition the specific subsitution.
+#           row names and column names definition the specific substitution.
 # 
 # @references
 # \enumerate{
@@ -188,7 +189,7 @@ NULL
 # human Ig sequence data.
 #
 # @format   A symmetric matrix of nucleotide substitution distance scores with 
-#           row names and column names definition the specific subsitution.
+#           row names and column names definition the specific substitution.
 # 
 # @references
 # \enumerate{

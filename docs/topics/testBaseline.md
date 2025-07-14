@@ -3,7 +3,7 @@
 Description
 --------------------
 
-`testBaseline` performs a two-sample signifance test of BASELINe 
+`testBaseline` performs a two-sample significance test of BASELINe 
 posterior probability density functions (PDFs).
 
 
@@ -34,7 +34,7 @@ A data.frame with test results containing the following columns:
 
 + `region`:  sequence region, such as `cdr` and `fwr`.
 + `test`:    string defining the groups be compared. The
-string is formated as the conclusion associated with the
+string is formatted as the conclusion associated with the
 p-value in the form `GROUP1 != GROUP2`. Meaning,
 the p-value for rejection of the null hypothesis that 
 GROUP1 and GROUP2 have equivalent distributions.
@@ -50,7 +50,7 @@ References
 1. Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
 sequencing data sets. 
 Nucleic Acids Res. 2012 40(17):e134. 
-(Corretions at http://selection.med.yale.edu/baseline/correction/)
+(Corrections at http://selection.med.yale.edu/baseline/correction/)
  
 
 
@@ -118,6 +118,7 @@ plot(grouped, "c_call")
 
 # Perform test on isotype PDFs
 testBaseline(grouped, groupBy="c_call")
+
 ```
 
 

@@ -82,6 +82,7 @@ returnModel="5mer", numMutationsOnly=TRUE)
 
 # Tune minNumMutations
 minNumMutationsTune(subCount, seq(from=10, to=80, by=10))
+
 ```
 
 

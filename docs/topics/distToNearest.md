@@ -32,6 +32,7 @@ subsample = NULL,
 progress = FALSE,
 cellIdColumn = NULL,
 locusColumn = "locus",
+locusValues = c("IGH"),
 onlyHeavy = TRUE,
 keepVJLgroup = TRUE
 )
@@ -118,10 +119,12 @@ bulk sequencing data is assumed.
 
 locusColumn
 :   name of the column containing locus information. 
-Only applicable to single-cell data.
-Ignored if `cellIdColumn=NULL`. Valid loci values
+Valid loci values
 are "IGH", "IGI", "IGK", "IGL", "TRA", "TRB", 
 "TRD", and "TRG".
+
+locusValues
+:   Loci values to focus the analysis on.
 
 onlyHeavy
 :   use only the IGH (BCR) or TRB/TRD (TCR) sequences 
@@ -190,7 +193,7 @@ with gaps assigned zero distance.
 +  `"aa"`:           Single amino acid Hamming distance matrix from [getAAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getAAMatrix).
 +  `"hh_s1f"`:       Human single nucleotide distance matrix derived from [HH_S1F](HH_S1F.md) with 
 [calcTargetingDistance](calcTargetingDistance.md).
-+  `"hh_s5f"`:       Human 5-mer nucleotide context distance matix derived from [HH_S5F](HH_S5F.md) with 
++  `"hh_s5f"`:       Human 5-mer nucleotide context distance matrix derived from [HH_S5F](HH_S5F.md) with 
 [calcTargetingDistance](calcTargetingDistance.md).
 +  `"mk_rs1nf"`:     Mouse single nucleotide distance matrix derived from [MK_RS1NF](MK_RS1NF.md) with 
 [calcTargetingDistance](calcTargetingDistance.md).
@@ -198,14 +201,14 @@ with gaps assigned zero distance.
 [calcTargetingDistance](calcTargetingDistance.md).
 +  `"hs1f_compat"`:  Backwards compatible human single nucleotide distance matrix used in 
 SHazaM v0.1.4 and Change-O v0.3.3.
-+  `"m1n_compat"`:   Backwards compatibley mouse single nucleotide distance matrix used in 
++  `"m1n_compat"`:   Backwards compatibility mouse single nucleotide distance matrix used in 
 SHazaM v0.1.4 and Change-O v0.3.3.
 
 
 Note on `NA`s: if, for a given combination of V gene, J gene, and junction length,
 there is only 1  heavy chain sequence (as defined by `sequenceColumn`), `NA` is 
 returned instead of a distance (since it has no heavy/long chain neighbor). If for a given combination 
-there are multiple heavy/long chain sequences but only 1 unique one, (in which case every heavy/long cahin 
+there are multiple heavy/long chain sequences but only 1 unique one, (in which case every heavy/long chain 
 sequence in this group is the de facto nearest neighbor to each other, thus giving rise to distances 
 of 0), `NA`s are returned instead of zero-distances.
 
@@ -260,6 +263,7 @@ xlab("distance") +
 geom_histogram(aes(x=dist_nearest), binwidth=0.025, 
 fill="steelblue", color="white")
 plot(p1)
+
 ```
 
 ![2](distToNearest-2.png)
@@ -271,7 +275,8 @@ See also
 See [calcTargetingDistance](calcTargetingDistance.md) for generating nucleotide distance matrices 
 from a [TargetingModel](TargetingModel-class.md) object. See [HH_S5F](HH_S5F.md), [HH_S1F](HH_S1F.md), 
 [MK_RS1NF](MK_RS1NF.md), [getDNAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getDNAMatrix), and [getAAMatrix](http://www.rdocumentation.org/packages/alakazam/topics/getAAMatrix)
-for individual model details.
+for individual model details. [getLocus](http://www.rdocumentation.org/packages/alakazam/topics/getSegment) to get locus
+values based on allele calls.
 
 
 

@@ -46,13 +46,13 @@ criterion
 [minNumSeqMutationsTune](minNumSeqMutationsTune.md)).
 
 pchs
-:   point types to pass on to [plot](http://www.rdocumentation.org/packages/base/topics/plot).
+:   point types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot.default).
 
 ltys
-:   line types to pass on to [plot](http://www.rdocumentation.org/packages/base/topics/plot).
+:   line types to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot.default).
 
 cols
-:   colors to pass on to [plot](http://www.rdocumentation.org/packages/base/topics/plot).
+:   colors to pass on to [plot](http://www.rdocumentation.org/packages/graphics/topics/plot.default).
 
 plotLegend
 :   whether to plot legend. Default is `TRUE`. Only applicable 
@@ -139,6 +139,7 @@ plotLegend=TRUE, legendPos=c(25, 30))
 
 # plot for only 1 sample for all the minNumMutations values (no legend)
 plotTune(tuneMtx[[1]], thresh=seq(from=5, to=50, by=5), criterion="3mer")
+
 ```
 
 ![4](plotTune-4.png)

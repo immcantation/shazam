@@ -154,7 +154,7 @@ Consensus lengths
 `"catchAll"` methods:
 
 The length of the consensus sequences is determined by the longest possible
-consensus sequence (baesd on `inputSeq` and `germlineSeq`) and 
+consensus sequence (based on `inputSeq` and `germlineSeq`) and 
 `regionDefinition@seqLength` (if supplied), whichever is shorter.
 
 Given a set of sequences of potentially varying lengths, the longest possible 
@@ -208,7 +208,7 @@ deterministically by representing ties using ambiguous
 characters. See "Choosing ambiguous characters" for how 
 ambiguous characters are chosen.
 +  With `breakTiesStochastic=TRUE`, ties are resolved 
-stochastically by randomly picking a character amongst the 
+stochastically by randomly picking a character among the 
 ties.
 +  When both `TRUE`, `includeAmbiguous` takes 
 precedence over `breakTiesStochastic`.
@@ -289,7 +289,7 @@ single position based on 5 sequences:
 These methods return the most/least mutated sequence as the consensus 
 sequence. 
 
-When there are ties (multple sequences have the maximal/minimal mutation
+When there are ties (multiple sequences have the maximal/minimal mutation
 frequency), this method can be deterministic or stochastic, depending on 
 additional parameters.
 
@@ -309,7 +309,7 @@ sequence is taken as the consensus.
 `breakTiesByColumns`.
 +  When `breakTiesStochastic=FALSE` and 
 `breakTiesByColumns` is not supplied (i.e. `NULL`), 
-the sequence that appears first amongst the ties is taken 
+the sequence that appears first among the ties is taken 
 as the consensus.
 
 
@@ -419,6 +419,7 @@ method="catchAll", regionDefinition=IMGT_V)
 clones <- collapseClones(db, cloneColumn="clone_id", sequenceColumn="sequence_alignment", 
 germlineColumn="germline_alignment_d_mask",
 method="mostCommon", expandedDb=TRUE)
+
 ```
 
 

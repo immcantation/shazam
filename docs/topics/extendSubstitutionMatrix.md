@@ -45,6 +45,7 @@ sub_model <- createSubstitutionMatrix(db, sequenceColumn="sequence_alignment",
 germlineColumn="germline_alignment_d_mask",
 vCallColumn="v_call",model="s")
 ext_model <- extendSubstitutionMatrix(sub_model)
+
 ```
 
 

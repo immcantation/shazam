@@ -25,7 +25,7 @@ be present in the table:
 * `v_call`
 
 
-```r
+``` r
 # Import required packages
 library(shazam)
 
@@ -50,7 +50,7 @@ single 5-mer: `independent` treats each mutation independently and `ignore`
 entirely disregards 5-mers with multiple mutations.
 
 
-```r
+``` r
 # Create substitution model using silent mutations
 sub_model <- createSubstitutionMatrix(db, model="s", 
                                       sequenceColumn="sequence_alignment",
@@ -64,7 +64,7 @@ inferred substitution rates. Similar parameters as those available for
 inferring the substitution rates are available to adjust this function.
 
 
-```r
+``` r
 # Create mutability model using silent mutations
 mut_model <- createMutabilityMatrix(db, sub_model, model="s",
                                     sequenceColumn="sequence_alignment",
@@ -80,7 +80,7 @@ a named vector indicating whether each 5-mer mutability was inferred or measured
 A data.frame with both the mutability values and derivation source.
 
 
-```r
+``` r
 # Number of silent mutations used for estimating 5-mer mutabilities
 mut_model@numMutS
 # Number of replacement mutations used for estimating 5-mer mutabilities
@@ -97,7 +97,7 @@ and `extendMutabilityMatrix`) to extend the models to infer 5-mers with Ns by
 averaging over all corresponding unambiguous 5-mers.
 
 
-```r
+``` r
 # Extend models to include ambiguous 5-mers
 sub_model <- extendSubstitutionMatrix(sub_model)
 mut_model <- extendMutabilityMatrix(mut_model)
@@ -108,7 +108,7 @@ overall SHM targeting matrix (`createTargetingMatrix`), which is the combined
 probability of mutability and substitution. 
 
 
-```r
+``` r
 # Create targeting model matrix from substitution and mutability models
 tar_matrix <- createTargetingMatrix(sub_model, mut_model)
 ```
@@ -125,7 +125,7 @@ using the `collapseClones` function.
 
 
 
-```r
+``` r
 # Collapse sequences into clonal consensus
 clone_db <- collapseClones(db, cloneColumn="clone_id", 
                            sequenceColumn="sequence_alignment",
@@ -143,33 +143,33 @@ The visualization of a dataset's underlying SHM mutability model can be used to
 investigate hot and cold spot motifs. The length of the bars on the plot of 
 mutability rates corresponds to the likelihood of a given base in the given 
 5-mer being mutated. The plotting function `plotMutability` has an argument 
-`style` to specify either a hedgehog plot (circlular) or barplot diplay of
+`style` to specify either a hedgehog plot (circular) or barplot display of
 5-mer mutability rates. If the mutability for only specific bases is required, 
 this can be specified via the `nucleotides` argument.
 
 
-```r
+``` r
 # Generate hedgehog plot of mutability model
 plotMutability(model, nucleotides="A", style="hedgehog")
 ```
 
 ![plot of chunk Targeting-Vignette-8](figure/Targeting-Vignette-8-1.png)
 
-```r
+``` r
 plotMutability(model, nucleotides="C", style="hedgehog")
 ```
 
 ![plot of chunk Targeting-Vignette-8](figure/Targeting-Vignette-8-2.png)
 
 
-```r
+``` r
 # Generate bar plot of mutability model
 plotMutability(model, nucleotides="G", style="bar")
 ```
 
 ![plot of chunk Targeting-Vignette-9](figure/Targeting-Vignette-9-1.png)
 
-```r
+``` r
 plotMutability(model, nucleotides="T", style="bar")
 ```
 
@@ -187,7 +187,7 @@ generated and written directly to a file using the function
 `writeTargetingDistance`.
 
 
-```r
+``` r
 # Calculate distance matrix
 dist <- calcTargetingDistance(model)
 ```

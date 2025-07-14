@@ -433,8 +433,8 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
     
     # corresponding crossGroups values for seq_uniq
     if (!is.null(crossGroups)) {
-        stopifnot( all.equal(sequences[match(seq_uniq, sequences)], 
-                             seq_uniq, check.attributes=FALSE) )
+        stopifnot( isTRUE(all.equal(sequences[match(seq_uniq, sequences)], 
+                             seq_uniq, check.attributes=FALSE)) )
         crossGroups_uniq <- crossGroups[match(seq_uniq, sequences)]
     }
     
@@ -518,7 +518,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
             dist_mat <- dist_mat / seq_length
         } else if (normalize == "mut") {
             #dist <- dist/sum(strsplit(seq1,"")[[1]] != strsplit(seq2,"")[[1]])
-            stop('Sorry! nomalize="mut" is not available.')
+            stop('Sorry! normalize="mut" is not available.')
         }
         
         ## DEBUG
@@ -587,8 +587,8 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
             other_idx <- match(other_seq, seq_uniq)
             this_idx <- match(sequences[i], seq_uniq)
             
-            stopifnot( all.equal( other_seq, seq_uniq[other_idx] , check.attributes=FALSE ) )
-            stopifnot( all.equal( sequences[i], seq_uniq[this_idx] , check.attributes=FALSE ) )
+            stopifnot( isTRUE(all.equal( other_seq, seq_uniq[other_idx] , check.attributes=FALSE ) ))
+            stopifnot( isTRUE(all.equal( sequences[i], seq_uniq[this_idx] , check.attributes=FALSE ) ))
             
             # the next two checks may not always be true
             # this happens when all the out-group sequences are identical to the in-group sequences
@@ -597,7 +597,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
             
             if (subSampling) {
                 # When there is subsampling, nonsquareDist returns a non-n-by-n matrix 
-                # This matrix has fewers than n rows, and exactly n cols
+                # This matrix has fewer than n rows, and exactly n cols
                 # For each unique sequence, look for its cross-group distances in its column, 
                 #     NOT in its row (because there will be fewer than n rows)
                 
@@ -753,7 +753,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'   \item \code{"aa"}:           Single amino acid Hamming distance matrix from \link[alakazam]{getAAMatrix}.
 #'   \item \code{"hh_s1f"}:       Human single nucleotide distance matrix derived from \link{HH_S1F} with 
 #'                                \link{calcTargetingDistance}.
-#'   \item \code{"hh_s5f"}:       Human 5-mer nucleotide context distance matix derived from \link{HH_S5F} with 
+#'   \item \code{"hh_s5f"}:       Human 5-mer nucleotide context distance matrix derived from \link{HH_S5F} with 
 #'                                \link{calcTargetingDistance}.
 #'   \item \code{"mk_rs1nf"}:     Mouse single nucleotide distance matrix derived from \link{MK_RS1NF} with 
 #'                                \link{calcTargetingDistance}.
@@ -761,14 +761,14 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                                \link{calcTargetingDistance}.
 #'   \item \code{"hs1f_compat"}:  Backwards compatible human single nucleotide distance matrix used in 
 #'                                SHazaM v0.1.4 and Change-O v0.3.3.
-#'   \item \code{"m1n_compat"}:   Backwards compatibley mouse single nucleotide distance matrix used in 
+#'   \item \code{"m1n_compat"}:   Backwards compatibility mouse single nucleotide distance matrix used in 
 #'                                SHazaM v0.1.4 and Change-O v0.3.3.
 #' }
 #' 
 #' Note on \code{NA}s: if, for a given combination of V gene, J gene, and junction length,
 #' there is only 1  heavy chain sequence (as defined by \code{sequenceColumn}), \code{NA} is 
 #' returned instead of a distance (since it has no heavy/long chain neighbor). If for a given combination 
-#' there are multiple heavy/long chain sequences but only 1 unique one, (in which case every heavy/long cahin 
+#' there are multiple heavy/long chain sequences but only 1 unique one, (in which case every heavy/long chain 
 #' sequence in this group is the de facto nearest neighbor to each other, thus giving rise to distances 
 #' of 0), \code{NA}s are returned instead of zero-distances.
 #' 
@@ -874,7 +874,9 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     }
     
     # check locus column contains valid values
-    valid_loci <- c("IGH", "IGI", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG")
+    # We could use the airr schema: valid_loci <- airr::RearrangementSchema['locus'][['enum']]
+    valid_loci <- c("IGH", "IGI", "IGK", "IGL", "TRA", "TRB", "TRD", "TRG") 
+    
     seen_loci <- unique(db[[locusColumn]])
     check <- !all(seen_loci %in% valid_loci)
     if (check) {
@@ -940,8 +942,8 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # creates $vj_group
         db <- db %>%
             ungroup() %>%
-            group_by(DTN_TMP_FIELD) %>%
-            do(groupGenes(., v_call=vCallColumn, j_call=jCallColumn, junc_len=NULL,
+            group_by(!!rlang::sym("DTN_TMP_FIELD")) %>%
+            do(groupGenes(.data, v_call=vCallColumn, j_call=jCallColumn, junc_len=NULL,
                          cell_id=cellIdColumn, locus=locusColumn, only_heavy=onlyHeavy,
                          first=first)) %>%
             ungroup()
@@ -954,8 +956,8 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # note that despite the name (VJ), this is based on V+J+L
         db <- db %>%
             ungroup() %>%
-            group_by(DTN_TMP_FIELD) %>%
-            do(groupGenes(., v_call=vCallColumn, j_call=jCallColumn, junc_len=junc_len,
+            group_by(!!rlang::sym("DTN_TMP_FIELD")) %>%
+            do(groupGenes(.data, v_call=vCallColumn, j_call=jCallColumn, junc_len=junc_len,
                           cell_id=cellIdColumn, locus=locusColumn, only_heavy=onlyHeavy,
                           first=first)) %>%
             ungroup()
@@ -968,7 +970,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # make vj_group unique across fields by pasting field group
         db <- db %>%
             dplyr::rowwise() %>%
-            mutate(vj_group=paste("F",DTN_TMP_FIELD,"_",vj_group, sep="", collapse = "")) %>%
+            mutate(vj_group=paste("F",!!rlang::sym("DTN_TMP_FIELD"),"_",!!rlang::sym("vj_group"), sep="", collapse = "")) %>%
             ungroup() 
     }
     db[['DTN_TMP_FIELD']] <- NULL
@@ -1017,10 +1019,12 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     
     # Export groups to the clusters
     if (nproc > 1) { 
+        # This subsetting improves performance
+        required_cols <- unique(c(group_cols,cross,locusColumn,sequenceColumn,"TMP_DIST_NEAREST"))
         db_notused_cols <- db %>%
-            select(c(DTN_ROW_ID, !any_of(c(group_cols,cross))))
+            select(c(!!rlang::sym("DTN_ROW_ID"), !any_of(required_cols)))
         db <- db %>%
-            select(c(DTN_ROW_ID, any_of(c(group_cols,cross))))
+            select(c(!!rlang::sym("DTN_ROW_ID"),  any_of(required_cols)))
         export_functions <- list("db",
                                  "uniqueGroupsIdx", 
                                  "cross",
@@ -1106,7 +1110,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if (nproc > 1) { 
         parallel::stopCluster(cluster)
         db <- db %>%
-            left_join(db_notused_cols)
+            left_join(db_notused_cols, by= "DTN_ROW_ID")
     }
     
     db <- db[order(db$DTN_ROW_ID), ]
@@ -2002,21 +2006,25 @@ plotGmmThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=NULL
     if (is.null(xmax)) { xmax <- NA }
     
     # Plot distToNearest distribution plus Gaussian fits
-    p <- ggplot(xdf, aes(x=x)) +
+    p <- ggplot(xdf, aes(x=!!rlang::sym("x"))) +
         baseTheme() + 
         xlab("Distance") + 
         ylab("Density") +
-        geom_histogram(aes(y=after_stat(density)), binwidth=binwidth, 
+        geom_histogram(aes(y=after_stat(!!str2lang("density"))), binwidth=binwidth, 
                        fill="gray40", color="white") +
-        geom_line(data=fit1, aes(x=x, y=y), color="darkslateblue", linewidth=size) +
-        geom_line(data=fit2, aes(x=x, y=y), color="darkslateblue", linewidth=size) +
+        geom_line(data=fit1, aes(x=!!rlang::sym("x"), y=!!rlang::sym("y")), 
+                  color="darkslateblue", linewidth=size) +
+        geom_line(data=fit2, aes(x=!!rlang::sym("x"), y=!!rlang::sym("y")), 
+                  color="darkslateblue", linewidth=size) +
         geom_vline(xintercept=data@threshold, color="firebrick", 
                    linetype="longdash", linewidth=size)
     
     # Add cross histogram
     if (!is.null(cross)) {
         cdf <- data.frame(x=cross[is.finite(cross)])
-        p <- p + geom_histogram(data=cdf, aes(x=x, y=-after_stat(density)), binwidth=binwidth, 
+        p <- p + geom_histogram(data=cdf, 
+                                aes(x=!!rlang::sym("x"), 
+                                    y=-after_stat(!!str2lang("density"))), binwidth=binwidth, 
                                 fill="gray40", color="white", position="identity") +
             scale_y_continuous(labels=abs)
     }
@@ -2111,13 +2119,15 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     if (is.null(xmax)) { xmax <- NA }
     
     # Plot distToNearest distribution plus Gaussian fits
-    p <- ggplot(xdf, aes(x=x)) +
+    p <- ggplot(xdf, aes(x=!!rlang::sym("x"))) +
         baseTheme() +
         xlab("Distance") + 
         ylab("Density") +
-        geom_histogram(aes(y=after_stat(density)), binwidth=binwidth, 
+        geom_histogram(aes(y=after_stat(!!str2lang("density"))), binwidth=binwidth, 
                        fill="gray40", color="white") +
-        geom_line(data=ddf, aes(x=x, y=y), 
+        geom_line(data=ddf, 
+                  aes(x=!!rlang::sym("x"), 
+                      y=!!rlang::sym("y")), 
                   color="darkslateblue", linewidth=size) +
         geom_vline(xintercept=data@threshold, 
                    color="firebrick", linetype="longdash", linewidth=size)
@@ -2125,7 +2135,10 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
     # Add cross histogram
     if (!is.null(cross)) {
         cdf <- data.frame(x=cross[is.finite(cross)])
-        p <- p + geom_histogram(data=cdf, aes(x=x, y=-after_stat(density)), binwidth=binwidth, 
+        p <- p + geom_histogram(data=cdf, 
+                                aes(x=!!rlang::sym("x"), 
+                                    y=-after_stat(!!str2lang("density"))), 
+                                binwidth=binwidth, 
                                 fill="gray40", color="white", position="identity") +
              scale_y_continuous(labels=abs)
     }

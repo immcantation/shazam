@@ -67,6 +67,7 @@ Calculating BASELINe probability density functions...
 # Edit the field "description"
 baseline <- editBaseline(baseline, field="description", 
 value="+7d IGHG")
+
 ```
 
 

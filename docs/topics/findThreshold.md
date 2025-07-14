@@ -3,7 +3,7 @@
 Description
 --------------------
 
-`findThreshold` automtically determines an optimal threshold for clonal assignment of
+`findThreshold` automatically determines an optimal threshold for clonal assignment of
 Ig sequences using a vector of nearest neighbor distances. It provides two alternative methods 
 using either a Gamma/Gaussian Mixture Model fit (`method="gmm"`) or kernel density 
 fit (`method="density"`).
@@ -141,11 +141,12 @@ plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk
 
 ```R
 print(output)
+
 ```
 
 
 ```
-[1] 0.2493799
+[1] 0.2421758
 
 ```
 

@@ -95,7 +95,7 @@ NULL
 #'                \code{"catchAll"} methods:
 #'          
 #'                The length of the consensus sequences is determined by the longest possible
-#'                consensus sequence (baesd on \code{inputSeq} and \code{germlineSeq}) and 
+#'                consensus sequence (based on \code{inputSeq} and \code{germlineSeq}) and 
 #'                \code{regionDefinition@seqLength} (if supplied), whichever is shorter.
 #'
 #'                Given a set of sequences of potentially varying lengths, the longest possible 
@@ -146,7 +146,7 @@ NULL
 #'                               characters. See "Choosing ambiguous characters" for how 
 #'                               ambiguous characters are chosen.
 #'                         \item With \code{breakTiesStochastic=TRUE}, ties are resolved 
-#'                               stochastically by randomly picking a character amongst the 
+#'                               stochastically by randomly picking a character among the 
 #'                               ties.
 #'                         \item When both \code{TRUE}, \code{includeAmbiguous} takes 
 #'                               precedence over \code{breakTiesStochastic}.
@@ -227,7 +227,7 @@ NULL
 #'                    These methods return the most/least mutated sequence as the consensus 
 #'                    sequence. 
 #'                    
-#'                    When there are ties (multple sequences have the maximal/minimal mutation
+#'                    When there are ties (multiple sequences have the maximal/minimal mutation
 #'                    frequency), this method can be deterministic or stochastic, depending on 
 #'                    additional parameters.
 #'                    
@@ -247,7 +247,7 @@ NULL
 #'                               \code{breakTiesByColumns}.
 #'                         \item When \code{breakTiesStochastic=FALSE} and 
 #'                               \code{breakTiesByColumns} is not supplied (i.e. \code{NULL}), 
-#'                               the sequence that appears first amongst the ties is taken 
+#'                               the sequence that appears first among the ties is taken 
 #'                               as the consensus.
 #'                    }
 #'          
@@ -424,7 +424,7 @@ collapseClones <- function(db, cloneColumn = "clone_id",
         }
     }
     
-    # check mutual exclusivitiy
+    # check mutual exclusivity
     if (method %in% c("thresholdedFreq", "mostCommon")){
         if (includeAmbiguous & breakTiesStochastic) {
             message("includeAmbiguous and breakTiesStochastic are mutually exclusive. When both TRUE, includeAmbiguous will take precedence.")
@@ -518,11 +518,11 @@ collapseClones <- function(db, cloneColumn = "clone_id",
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, cpuCount())
     
-    # If user wants to paralellize this function and specifies nproc > 1, then
+    # If user wants to parallelize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.
+    # export all necessary environment variables, functions and packages.
     if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # If needed to run on a single core/cpu then, register DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     } else {
@@ -545,7 +545,7 @@ collapseClones <- function(db, cloneColumn = "clone_id",
     #cat("Collapsing clonal sequences...\n")
     
     # avoid .combine="cbind"!
-    # if there is only 1 unique clone, .combind="cbind" will result in a vector (as opposed to
+    # if there is only 1 unique clone, .combine="cbind" will result in a vector (as opposed to
     # a matrix) being returned, which will subsequently result a failure in
     # cons_db$clonal_sequence <- cons_mat[, 1]
     cons_mat <- foreach(idx=1:length(uniqueClonesIdx),
@@ -558,7 +558,7 @@ collapseClones <- function(db, cloneColumn = "clone_id",
                             # Verify the assumption that all sequences in the clone have the same
                             # junction length.
                             if (length(unique(cloneDb[[juncLengthColumn]])) > 1 ) {
-                                stop("Expecting all sequences in the same clone with the same junction lenght.")
+                                stop("Expecting all sequences in the same clone with the same junction length.")
                             }
                             
                             cloneRegionDefinition <- regionDefinition
@@ -817,7 +817,7 @@ breakTiesHelper <- function(idx, cols, funs, db) {
 #                                      breakTiesStochastic=FALSE,
 #                                      breakTiesByColumns=list(c("duplicate_count"), c(max)), 
 #                                      db=clone)$cons
-# mostMutated method, resolve ties deterministically withou using additional columns
+# mostMutated method, resolve ties deterministically t using additional columns
 # consInput11 <- consensusSequence(clone$sequence_alignment,
 #                                      muFreqColumn="mu_freq", lenLimit=NULL,
 #                                      method="mostMutated", minFreq=NULL,
@@ -976,7 +976,7 @@ consensusSequence <- function(sequences, db=NULL,
                     # if there is no tie
                 } else if (length(idx)==1){
                     return(names(x)[idx])
-                    # if there are ties (multiple characters >= the threhold)
+                    # if there are ties (multiple characters >= the threshold)
                 } else if (length(idx)>1) {
                     # ambiguous character allowed
                     if (includeAmbiguous) {
@@ -1156,7 +1156,7 @@ consensusSequence <- function(sequences, db=NULL,
 #          maximal/minimal mutation frequency for the input consensus for the \code{"mostMutated"} 
 #          and \code{"leastMutated"} methods, and \code{NULL} for all other methods.
 # 
-# @details See \link{collapseClones} for detailed documention on methods and additional parameters.
+# @details See \link{collapseClones} for detailed documentation on methods and additional parameters.
 # 
 #          Caution: when using the \code{"mostMutated"} and \code{"leastMutated"} methods, if you 
 #          supply a \code{regionDefinition}, it is your responsibility to ensure that the mutation 
@@ -1340,7 +1340,7 @@ calcClonalConsensus <- function(db,
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences. If NULL, mutations 
 #'                               are counted for entire sequence. To use regions definitions,
-#'                               sequences in \code{sequenceColum} and \code{germlineColumn}
+#'                               sequences in \code{sequenceColumn} and \code{germlineColumn}
 #'                               must be aligned, following the IMGT schema.
 #' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
 #'                               and silent mutation criteria. If \code{NULL} then 
@@ -1454,7 +1454,7 @@ calcClonalConsensus <- function(db,
 #' clone <- alakazam::makeChangeoClone(subset(ExampleDb, clone_id == graph$clone))
 #' gdf <- makeGraphDf(graph, clone)
 #' 
-#' # Count of mutations between observed sequence and immediate ancenstor
+#' # Count of mutations between observed sequence and immediate ancestor
 #' db_obs <- observedMutations(gdf, sequenceColumn="sequence",
 #'                             germlineColumn="parent_sequence",
 #'                             regionDefinition=IMGT_VDJ,
@@ -1493,7 +1493,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
         }        
         
         not_na <- !is.na(db[[germlineColumn]])
-        if (!all.equal(nchar(db[[sequenceColumn]][not_na]), nchar(db[[germlineColumn]][not_na]))) {
+        if (!isTRUE(all.equal(nchar(db[[sequenceColumn]][not_na]), nchar(db[[germlineColumn]][not_na])))) {
             warning("Pairs of ", sequenceColumn, " and ", germlineColumn, " sequences with different lengths found.")
             stop("Expecting IMGT aligned, same length sequences in ", sequenceColumn, " and ", germlineColumn,".")
         }
@@ -1505,7 +1505,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     }
     
     # Check if mutation count/freq columns already exist
-    # and throw overwritting warning
+    # and throw overwriting warning
     if (!is.null(regionDefinition)) {
         labels <- regionDefinition@labels
     } else {
@@ -1553,9 +1553,9 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, cpuCount())
     
-    # If user wants to paralellize this function and specifies nproc > 1, then
+    # If user wants to parallelize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.  
+    # export all necessary environment variables, functions and packages.  
     if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
@@ -1572,7 +1572,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                 envir=environment())
         registerDoParallel(cluster,cores=nproc)
     } else if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # If needed to run on a single core/cpu then, register DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     }
@@ -1705,7 +1705,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
 #'           For \code{returnRaw=TRUE}, a list containing 
 #'           \itemize{
 #'                \item \code{$pos}: A data frame whose columns (\code{position}, \code{r}, 
-#'                      \code{s}, and \code{region}) indicate, respecitively, the nucleotide 
+#'                      \code{s}, and \code{region}) indicate, respectively, the nucleotide 
 #'                      position, the number of R mutations at that position, the number of S 
 #'                      mutations at that position, and the region in which that nucleotide
 #'                      is in.
@@ -1851,7 +1851,7 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
 #' ex3_freq <- calcObservedMutations(in_seq, germ_seq, regionDefinition=IMGT_V,
 #'                                  mutationDefinition=HYDROPATHY_MUTATIONS, 
 #'                                  returnRaw=FALSE, frequency=TRUE)
-#' # Compre this with ex3_count
+#' # Compare this with ex3_count
 #' table(ex3_raw$pos$region, ex3_raw$pos$r)[, "1"]
 #' table(ex3_raw$pos$region, ex3_raw$pos$s)[, "1"]
 #' # Compare this with ex3_freq
@@ -1885,7 +1885,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
     }
     
     # IMPORTANT: convert to uppercase 
-    # NUCLEOTIDES, NUCLEOTIDES_AMBIGUOUS are in uppercases only
+    # NUCLEOTIDES, NUCLEOTIDES_AMBIGUOUS are in uppercase only
     inputSeq <- toupper(inputSeq)
     germlineSeq <- toupper(germlineSeq)
     
@@ -1991,7 +1991,7 @@ calcObservedMutations <- function(inputSeq, germlineSeq,
             
             # Determine whether the mutations are R or S
             # a table where rows are r/s/stop/na, cols are codon positions
-            # Count ambiguous characters as "eithe-or" or "and" based on user setting 
+            # Count ambiguous characters as "either-or" or "and" based on user setting 
             
             # Makes use of the fact that c_germlineSeq_codons and c_inputSeqCodons have
             # the same length
@@ -2290,7 +2290,7 @@ slideWindowSeq <- function(inputSeq, germlineSeq, mutThresh, windowSize){
 #
 # @param    mutPos              a \code{data.frame} containing positions and types of point 
 #                               mutations as returned in \code{$pos} by 
-#                               \code{calcObserverdMutations()} with \code{returnRaw=TRUE}. 
+#                               \code{calcObservedMutations()} with \code{returnRaw=TRUE}. 
 #                               Can be \code{NA}, in which case the returned value will be 
 #                               \code{FALSE}.
 # @param    mutThresh           threshold on the number of mutations in \code{windowSize} 
@@ -2383,9 +2383,9 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, cpuCount())
 
-    # If user wants to paralellize this function and specifies nproc > 1, then
+    # If user wants to parallelize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters &
-    # export all nesseary environment variables, functions and packages.
+    # export all necessary environment variables, functions and packages.
     if (nproc == 1) {
         # If needed to run on a single core/cpu then, register DoSEQ
         # (needed for 'foreach' in non-parallel mode)
@@ -2513,11 +2513,11 @@ slideWindowTune <- function(db, sequenceColumn="sequence_alignment",
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, cpuCount())
     
-    # If user wants to paralellize this function and specifies nproc > 1, then
+    # If user wants to parallelize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters &
-    # export all nesseary environment variables, functions and packages.
+    # export all necessary environment variables, functions and packages.
     if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ
+        # If needed to run on a single core/cpu then, register DoSEQ
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     } else {
@@ -2744,7 +2744,7 @@ plotSlideWindowTune <- function(tuneList,
                 x <- window_df[i,]
                 # Find the mutation thresholds that are T
                 idx <- which(x)
-                # If there are none (all F or NA values) or there is only one, do nothig
+                # If there are none (all F or NA values) or there is only one, do nothing
                 # If there are more than one, keep the largest index and set the previous values to F
                 if (length(idx) > 1) {
                     idx <- max(idx)
@@ -2851,7 +2851,7 @@ plotSlideWindowTune <- function(tuneList,
 #' @param    targetingModel      \link{TargetingModel} object. Default is \link{HH_S5F}.
 #' @param    regionDefinition    \link{RegionDefinition} object defining the regions
 #'                               and boundaries of the Ig sequences. To use regions definitions,
-#'                               sequences in \code{sequenceColum} and \code{germlineColumn}
+#'                               sequences in \code{sequenceColumn} and \code{germlineColumn}
 #'                               must be aligned, following the IMGT schema.
 #' @param    mutationDefinition  \link{MutationDefinition} object defining replacement
 #'                               and silent mutation criteria. If \code{NULL} then 
@@ -2947,7 +2947,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
         }        
         
         not_na <- !is.na(db[[germlineColumn]])
-        if (!all.equal(nchar(db[[sequenceColumn]][not_na]), nchar(db[[germlineColumn]][not_na]))) {
+        if (!isTRUE(all.equal(nchar(db[[sequenceColumn]][not_na]), nchar(db[[germlineColumn]][not_na])))) {
             warning("Pairs of ", sequenceColumn, " and ", germlineColumn, " sequences with different lengths found.")
             stop("Expecting IMGT aligned, same length sequences in ", sequenceColumn, " and ", germlineColumn,".")
         }
@@ -2964,7 +2964,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     }
     
     # Check if mutation count/freq columns already exist
-    # and throw overwritting warning
+    # and throw overwriting warning
     if (!is.null(regionDefinition)) {
         labels <- regionDefinition@labels
     } else {
@@ -3001,9 +3001,9 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
     # Ensure that the nproc does not exceed the number of cores/CPUs available
     nproc <- min(nproc, cpuCount(), na.rm=T)
     
-    # If user wants to paralellize this function and specifies nproc > 1, then
+    # If user wants to parallelize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
-    # export all nesseary environment variables, functions and packages.  
+    # export all necessary environment variables, functions and packages.  
     if (nproc > 1) {        
         cluster <- parallel::makeCluster(nproc, type = "PSOCK")
         parallel::clusterExport(cluster, list('db', 'sequenceColumn', 'germlineColumn', 
@@ -3015,7 +3015,7 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
                                 envir=environment() )
         registerDoParallel(cluster,cores=nproc)
     } else if (nproc == 1) {
-        # If needed to run on a single core/cpu then, regsiter DoSEQ 
+        # If needed to run on a single core/cpu then, register DoSEQ 
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     }
@@ -3220,7 +3220,7 @@ calculateTargeting <- function(germlineSeq,
     }
     
     # If an inputSequence is passed then process the germlineSequence
-    # to be the same legth, mask germlineSequence with Ns where inputSequence is also N
+    # to be the same length, mask germlineSequence with Ns where inputSequence is also N
     # If not needed then  you may skip this step by passing in inputSequence=NULL 
     # (which is default). 
     if(!is.null(inputSeq)){    
@@ -3461,7 +3461,7 @@ IUPAC2nucs <- function(code, excludeN=TRUE) {
     }
 }
 
-# Given a nuclotide position, returns the codon number
+# Given a nucleotide position, returns the codon number
 # e.g. nuc 86  = codon 29
 getCodonNumb <- function(nucPos){
     return( ceiling(nucPos/3) )
@@ -3472,12 +3472,12 @@ getCodonNucs <- function(codonNumb){
     getCodonPos(codonNumb*3)
 }
 
-# Given a nucleotide postions return the position in the codon
+# Given a nucleotide positions return the position in the codon
 getContextInCodon <- function(nucPos){
     return((nucPos - 1)%%3 + 1 )
 }
 
-# Given a nuclotide position, returns the pos of the 3 nucs that made the codon
+# Given a nucleotide position, returns the pos of the 3 nucs that made the codon
 # e.g. nuc 86 is part of nucs 85,86,87
 getCodonPos <- function(nucPos) {
     codonNum <-  (ceiling(nucPos / 3)) * 3
@@ -3616,4 +3616,3 @@ checkAmbiguousExist <- function(seqs) {
     bool <- stri_detect_regex(str=seqs, pattern="[^atgcnATGCN\\-\\.]")
     return(bool)
 }
-

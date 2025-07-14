@@ -1,19 +1,34 @@
 site_name: shazam
 site_favicon: img/favicon.ico
-repo_url: https://bitbucket.org/kleinstein/shazam
+repo_url: https://github.com/immcantation/shazam
 edit_uri: src/master/docs/
-theme: readthedocs
+theme:
+  name: readthedocs
+  navigation_depth: 2
+  collapse_navigation: False
+  sticky_navigation: False
+  locale: en
+  logo: null
+  analytics:
+    gtag: G-Q0RDCWSDZ2
 markdown_extensions:
+  - admonition
   - def_list
   - sane_lists
   - smarty
   - toc:
       permalink: True
+      baselevel: 1
+extra_javascript:
+  - path: js/custom.js
+    defer: true
 docs_dir: docs
-pages:
+nav:
+  - 'Immcantation Portal': https://immcantation.readthedocs.io/
   - 'About':
     - 'Introduction': index.md
     - 'Download & Installation': install.md
+    - 'Contributing': contributing.md
     - 'Package Overview': topics/shazam.md
     - 'Release Notes': news.md
     - 'Related Projects': projects.md
@@ -35,6 +50,7 @@ pages:
       - topics/slideWindowSeq.md
       - topics/slideWindowTune.md
       - topics/slideWindowTunePlot.md
+      - topics/plotSlideWindowTune.md
       - topics/shmulateSeq.md
       - topics/shmulateTree.md
     - 'Targeting Inference':
@@ -92,3 +108,4 @@ pages:
       - topics/setRegionBoundaries.md
       - topics/MutationDefinition-class.md
       - topics/RegionDefinition-class.md
+      - topics/convertNumbering.md
