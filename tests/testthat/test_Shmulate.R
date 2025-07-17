@@ -75,6 +75,29 @@ test_that("Test shmulateSeq", {
     )
 })
 
+test_that("Test shmulateSeq with frequency is accurate", {
+    
+    cat("\nTest shmulateSeq with frequency\n")
+    
+    # Example input sequence
+    input_seq <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
+    freq <- 0.01
+    n_reps <- 1000
+    
+    # Simulate using the default human S5F targeting model
+    set.seed(56)
+    
+    num_muts <- 0
+    initial_seq <- strsplit(input_seq,"")[[1]]
+    for (i in 1:n_reps){
+        output <- shmulateSeq(input_seq, numMutations = freq, frequency = T)
+        o <- strsplit(output, "")[[1]]
+        num_muts <- num_muts + sum(initial_seq != o)
+
+    }
+    expect_equal(num_muts, n_reps*nchar(input_seq)*freq, tolerance = 20)
+})
+
 #### shmulateTree ####
 
 test_that("Test shmulateTree", { 

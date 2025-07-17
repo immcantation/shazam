@@ -29,6 +29,11 @@ Distance Profiling:
   before creating the groups of genes, and ambiguities in other samples are not 
   considered.
 
+Mutation simulation:
+
++ ShmulateSeq sample mutations from a binomial distribution with provided
+probability instead of taking the floor from the number of sequences.
+
 Version 1.1.2: September 26, 2022
 -------------------------------------------------------------------------------
 
