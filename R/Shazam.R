@@ -144,7 +144,7 @@
 #' @importFrom  stats       na.omit setNames ecdf sd cor cov median mad
 #'                          approx convolve weighted.mean p.adjust
 #'                          dbeta pbeta qbeta rbeta optim optimize
-#'                          dnorm pnorm runif dgamma pgamma uniroot na.exclude
+#'                          dnorm pnorm rbinom runif dgamma pgamma uniroot na.exclude
 #'                          as.dist cutree integrate
 #' @importFrom  stringi     stri_dup stri_flatten stri_join stri_length 
 #'                          stri_sub stri_sub_replace stri_detect_regex
