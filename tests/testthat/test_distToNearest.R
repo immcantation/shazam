@@ -328,17 +328,20 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
                                cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=TRUE))
     
     ## with data_t2, expect smooth run
-    # group using HC VJL & LC VJL
+    # Request group using HC VJL & LC VJL, but LC VJL is now deprected and will use onlyHevy=TRUE
     # first=F
-    dtn1 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+    expect_warning(dtn1 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                          model="ham", normalize="len", symmetry="avg",
                          first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
-                         cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE)
+                         cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE),
+                   "only_heavy = FALSE is deprecated")
     # first=T
-    dtn2 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+    # onlyHeavy=FALSe is deprecated
+    expect_warning(dtn2 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                          model="ham", normalize="len", symmetry="avg",
                          first=TRUE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
-                         cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE)
+                         cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE),
+                         "only_heavy = FALSE is deprecated")
     
     # group using HC VJL only, without LC VJL
     # first=F
@@ -346,11 +349,16 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
                           model="ham", normalize="len", symmetry="avg",
                           first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
                           cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=TRUE)
+
     # first=T
     dtn4 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                           model="ham", normalize="len", symmetry="avg",
                           first=TRUE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
                           cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=TRUE)
+    
+    # Due to deprecation of onlyHeavy
+    expect_identical(dtn1, dtn3)
+    expect_identical(dtn2, dtn4)
     
     # calcualte expected
     
@@ -747,8 +755,11 @@ test_that("distToNearest fields applied before gene groups", {
         cell_id=1:5
     )
     
-    dtn <- distToNearest(db, first=F, fields="subject_id", VJthenLen = F)
+    expect_error(dtn <- distToNearest(db, first=F, fields="subject_id", VJthenLen = F),
+                   "specify the cell_id")
     
+    dtn <- distToNearest(db, first=F, fields="subject_id", VJthenLen = F, cellId="cell_id")
+
     # S1 should have 2 groups, and S2 one.
     expect_equal(length(unique(dtn$vjl_group)), 3)
 })
