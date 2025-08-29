@@ -1629,12 +1629,13 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
         pb <- progressBar(15)
     }
     for (i in 1:15) {
-        #itr<-1
-        key<-FALSE
-        while (!key){
-            # print(paste0(i,":",itr))
+        itr <- 1
+        max_itr <- 100
+        key <- FALSE
+        while (!key && itr <= max_itr){
+            print(paste0(i,":",itr))
             # Fit mixture Functions
-            MixModel <- try(suppressWarnings(fitdistr(na.exclude(ent), mixFunction, 
+            MixModel <- try(suppressWarnings(MASS::fitdistr(na.exclude(ent), shazam:::mixFunction, 
                                      first_curve = bits[1], second_curve = bits[2], 
                                      start=list(omega = func1.0, 
                                                 func1.1 = func1.1, func1.2 = func1.2,
@@ -1647,7 +1648,7 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
                 func1.2 <- abs(gmmfunc1.2 + sample(c(-1,1), 1)*runif(1))
                 func2.1 <- abs(gmmfunc2.1 + sample(c(-1,1), 1)*runif(1))
                 func2.2 <- abs(gmmfunc2.2 + sample(c(-1,1), 1)*runif(1))
-                #itr<-itr+1
+                itr <- itr + 1
                 next
             } else if ( (bits[1] == "norm"  & bits[2] == "gamma" & MixModel$estimate[[2]] > MixModel$estimate[[4]] * MixModel$estimate[[5]]) |
                         (bits[1] == "gamma" & bits[2] == "norm"  & MixModel$estimate[[2]] * MixModel$estimate[[3]] > MixModel$estimate[[4]]) |
@@ -1659,11 +1660,16 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
                 func2.1 <- abs(gmmfunc2.1 + sample(c(-1,1), 1)*runif(1))
                 func2.2 <- abs(gmmfunc2.2 + sample(c(-1,1), 1)*runif(1))
                 # print("here")
-                #itr<-itr+1
+                itr <- itr + 1
                 next
             } else {
-                key<-TRUE
+                key <- TRUE
             }
+        }
+        
+        # Check if we failed to find a valid fit after max iterations
+        if (!key) {
+            stop(paste0("Failed to fit after ", max_itr, " attempts in outer iteration ", i))
         }
         # print(paste0(func, " fit done. Loglik= ", round(MixModel$loglik, digits = 2)))
         # Invoke fit parameters
