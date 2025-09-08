@@ -766,6 +766,13 @@ test_that("distToNearest fields applied before gene groups", {
 
 ### distToNearest mix sc-bulk
 
+test_that("distToNearest onlyHeavy=FALSE is deprecated", {
+    expect_warning(distToNearest(db, cellIdColumn = NULL, first=F, onlyHeavy=FALSE,
+                  sequenceColumn = "JUNCTION",
+                  vCallColumn = "V_CALL", jCallColumn = "J_CALL", locusColumn = "LOCUS"),
+                  "onlyHeavy = FALSE is deprecated")
+})
+
 test_that("distToNearest mix single cell and bulk", {
     # WIP. Depends on groupGenes.
     # db <- data.frame(
