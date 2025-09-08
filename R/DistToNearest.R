@@ -1630,7 +1630,7 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
     }
     for (i in 1:15) {
         itr <- 1
-        max_itr <- 1000
+        max_itr <- 100
         key <- FALSE
         while (!key && itr <= max_itr){
             print(paste0(i,":",itr))
