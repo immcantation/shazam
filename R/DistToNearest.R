@@ -901,11 +901,12 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         singleCell <- TRUE
     } else {
         singleCell <- FALSE
-    } 
+    }
     
     # Disallow multiple heavy chains per cell
     # sequences with cell_id==NA are not considered, table's default 
-    # is useNA="no"
+    # is useNA="no". In practice that means that distances 
+    # will be calculated between sequences of different cells.
     if (singleCell) {
         # check multiple heavy chains
         x <- sum(table(db[[cellIdColumn]][db[[locusColumn]] == "IGH"]) > 1)
@@ -943,7 +944,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         group_indices()
     
     # create V+J grouping, or V+J+L grouping
-    if (VJthenLen) {
+    if (VJthenLen) { 
         # 2-stage partitioning using first V+J and then L
         # V+J only first
         # creates $vj_group
