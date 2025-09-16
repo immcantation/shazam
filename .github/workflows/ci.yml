@@ -24,21 +24,40 @@ jobs:
         run: |
           devtools::document()
         shell: Rscript {0}
-      - name: Check
+      - name: Update buildignore
+        run: |
+            sed -i '/test/ d' .Rbuildignore
+        shell: bash
+      - name: Run Tests
+        run: |
+            testthat::test_local()
+        shell: Rscript {0}
+      - name: Check usage
+        run: |
+          devtools::install()
+          pkg_name <- read.dcf("DESCRIPTION")[1, "Package"]
+          library(pkg_name, character.only=T)
+          usage_out <- capture.output(codetools::checkUsagePackage(pack=pkg_name))
+          if (length(usage_out) > 0) {
+            print(usage_out)
+            warning("Found issues with code usage.")
+          }
+        shell: Rscript {0}  
+      - name: CRAN check
         env:
           _R_CHECK_CRAN_INCOMING_: false
         run: |
-          options(crayon.enabled=TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--run-donttest"), error_on="warning", check_dir="check")
+              options(crayon.enabled=TRUE)
+              rcmdcheck::rcmdcheck(
+                args = c("--no-manual", 
+                          "--no-tests", 
+                          "--as-cran", 
+                          "--run-donttest", 
+                          "--timings"),
+                error_on = "warning", 
+                check_dir = "check"
+              )
         shell: Rscript {0}
-      - name: Show testthat output
-        if: always()
-        run: find check -name '*testthat.Rout' -exec cat '{}' \; || true
-        shell: bash
-      # - name: Install
-      #   run: |
-      #     devtools::install()
-      #   shell: Rscript {0}
       # - name: Build docs
       #   run: |
       #      git rm -r docs/topics docs/vignettes
