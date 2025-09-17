@@ -815,9 +815,9 @@ test_that("distToNearest mix single cell and bulk", {
                  
     
     # sc only
-    # alakazam::groupGenes(db |> dplyr::filter(!is.na(cell_id)), 
+    # alakazam::groupGenes(db %>% dplyr::filter(!is.na(cell_id)), 
     #                      cell_id = "cell_id", first=F)
-    dtn_sc_h <- distToNearest(db |> dplyr::filter(!is.na(cell_id)), 
+    dtn_sc_h <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
                           cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
                           vCallColumn = "v_call", jCallColumn = "j_call", 
@@ -826,7 +826,7 @@ test_that("distToNearest mix single cell and bulk", {
         dtn_sc_h$dist_nearest, c(0.0833, 0.0833, NA,NA)
     )
     
-    dtn_sc_hl <- distToNearest(db |> dplyr::filter(!is.na(cell_id)), 
+    dtn_sc_hl <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
                           cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
                           vCallColumn = "v_call", jCallColumn = "j_call", 
@@ -836,10 +836,10 @@ test_that("distToNearest mix single cell and bulk", {
     )
     
     # bulk only
-    # alakazam::groupGenes(db |> dplyr::mutate(cell_id=NULL), 
+    # alakazam::groupGenes(db %>% dplyr::mutate(cell_id=NULL), 
     #                      cell_id = NULL, first=F)
     
-    dtn_b_h <- distToNearest(db |> dplyr::mutate(cell_id=NULL), 
+    dtn_b_h <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
                           cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
                           vCallColumn = "v_call", jCallColumn = "j_call", 
@@ -849,7 +849,7 @@ test_that("distToNearest mix single cell and bulk", {
         c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA)
     )
     
-    dtn_b_hl <- distToNearest(db |> dplyr::mutate(cell_id=NULL), 
+    dtn_b_hl <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
                           cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
                           vCallColumn = "v_call", jCallColumn = "j_call", 

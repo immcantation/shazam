@@ -1131,7 +1131,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         db <-do.call(rbind, list_db)
     } else {
         db <- bind_rows(
-            db |> filter(is.na(vj_group)),
+            db %>% filter(is.na(vj_group)),
             do.call(rbind, list_db))
     }
 
