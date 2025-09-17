@@ -317,15 +317,18 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
     
     # expect error with data_t1 
     # cell "B" has 2 HCs (disallowed, as indicated in doc)
-    expect_error(distToNearest(db=data_t1, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
+    expect_warning(expect_error(distToNearest(db=data_t1, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                                model="ham", normalize="len", symmetry="avg",
                                first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
-                               cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE))
+                               cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE),
+                               "multiple heavy chains found. One heavy chain per cell is expected."),
+                               "onlyHeavy = FALSE is deprecated. Running as if onlyHeavy = TRUE")
     
     expect_error(distToNearest(db=data_t1, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                                model="ham", normalize="len", symmetry="avg",
                                first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
-                               cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=TRUE))
+                               cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=TRUE),
+                               "multiple heavy chains found. One heavy chain per cell is expected.")
     
     ## with data_t2, expect smooth run
     # Request group using HC VJL & LC VJL, but LC VJL is now deprected and will use onlyHevy=TRUE
@@ -334,14 +337,16 @@ test_that("distToNearest, single-cell mode with VH:VL paired input", {
                          model="ham", normalize="len", symmetry="avg",
                          first=FALSE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
                          cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE),
-                   "only_heavy = FALSE is deprecated")
+                   "onlyHeavy = FALSE is deprecated. Running as if onlyHeavy = TRUE",
+                   fixed=TRUE)
     # first=T
     # onlyHeavy=FALSe is deprecated
     expect_warning(dtn2 <- distToNearest(db=data_t2, sequenceColumn="JUNCTION", vCallColumn="V_CALL", jCallColumn="J_CALL", 
                          model="ham", normalize="len", symmetry="avg",
                          first=TRUE, VJthenLen=FALSE, keepVJLgroup=TRUE, 
                          cellIdColumn="CELL_ID", locusColumn="LOCUS", onlyHeavy=FALSE),
-                         "only_heavy = FALSE is deprecated")
+                         "onlyHeavy = FALSE is deprecated. Running as if onlyHeavy = TRUE",
+                         fixed=TRUE)
     
     # group using HC VJL only, without LC VJL
     # first=F
@@ -770,22 +775,90 @@ test_that("distToNearest onlyHeavy=FALSE is deprecated", {
     expect_warning(distToNearest(db, cellIdColumn = NULL, first=F, onlyHeavy=FALSE,
                   sequenceColumn = "JUNCTION",
                   vCallColumn = "V_CALL", jCallColumn = "J_CALL", locusColumn = "LOCUS"),
-                  "onlyHeavy = FALSE is deprecated")
+                  "onlyHeavy = FALSE is deprecated. Running as if onlyHeavy = TRUE")
 })
 
 test_that("distToNearest mix single cell and bulk", {
-    # WIP. Depends on groupGenes.
-    # db <- data.frame(
-    #     subject_id=c("S1","S1","S1","S1","S1", "S1", "S1"),
-    #     v_call=c("IGHV1-1*01","IGHV1-1*01","IGHV1-2*01","IGHV1-1*01,IGHV1-2*01","IGHV1-2*01", "IGKV1-1*01", "IGKV1-1*01"),
-    #     j_call=c("IGHJ1*01","IGHJ1*01","IGHJ1*01","IGHJ1*01","IGHJ1*01","IGKJ1*01", "IGKJ1*01"),
-    #     junction=c("TGTAAAAAATGG","TGTAAAAAATGG","TGTAAAACCTGG","TGTAAACCCTGG","TGTAAACCCTGG","TGTCCCCCCTGG","TGTCCCCCCTGG"),
-    #     locus=c("IGH","IGH","IGH","IGH","IGH","IGK","IGK"),
-    #     cell_id=c(1,2,3,NA,NA,1,NA),
-    #     junction_length=12
-    # )
-    # alakazam::groupGenes(db, cell_id="cell_id", only_heavy = F, junc_len=NULL)
-    # distToNearest(db, cellIdColumn = "cell_id", first=F)
+
+    db <- data.frame(
+         subject_id=c("S1","S1","S1","S1","S1", "S1", "S1", "S2"),
+         v_call=c("IGHV1-1*01","IGHV1-1*01","IGHV1-2*01","IGHV1-1*01,IGHV1-2*01","IGHV1-2*01", "IGKV1-1*01", "IGKV1-1*01", "IGKV1-1*01"),
+         j_call=c("IGHJ1*01","IGHJ1*01","IGHJ1*01","IGHJ1*01","IGHJ1*01","IGKJ1*01", "IGKJ1*01", "IGKJ1*01"),
+         junction=c("TGTAAAAAATGG","TGTAAAAATTGG","TGTAAAACCTGG","TGTAAACCCTGG","TGTAAACCCTGG","TGTCCCCCCTGG","TGTCCCCCGTGG", "TGTCCCCAATGG"),
+         locus=c("IGH","IGH","IGH","IGH","IGH","IGK","IGK","IGK"),
+         cell_id=c(1,2,3,NA,NA,1,NA, NA),
+         junction_length=12
+    )
+    # mixed
+    # bulk light chain sequences are not analyzed because they
+    # are not grouped by groupGenes.
+    # alakazam::groupGenes(db, cell_id = "cell_id", first=F)
+    expect_warning( dtn_m_h <- distToNearest(db, 
+                                            cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
+                          sequenceColumn = "junction",
+                          vCallColumn = "v_call", jCallColumn = "j_call", 
+                          locusColumn = "locus", locusValues=c("IGH")),
+                    "The vj_group column contains NA values"
+    )
+    expect_equal(dtn_m_h$dist_nearest, 
+                 c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA))
+    
+    expect_warning(dtn_m_hk <- distToNearest(db, cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
+                          sequenceColumn = "junction",
+                          vCallColumn = "v_call", jCallColumn = "j_call", 
+                          locusColumn = "locus", locusValues=c("IGH","IGK")),
+                   "The vj_group column contains NA values")
+    # the single-cell light chain should have NA dist_nearest
+    expect_equal(dtn_m_hk$dist_nearest, 
+                 c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA)       
+    )
+                 
+    
+    # sc only
+    # alakazam::groupGenes(db |> dplyr::filter(!is.na(cell_id)), 
+    #                      cell_id = "cell_id", first=F)
+    dtn_sc_h <- distToNearest(db |> dplyr::filter(!is.na(cell_id)), 
+                          cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
+                          sequenceColumn = "junction",
+                          vCallColumn = "v_call", jCallColumn = "j_call", 
+                          locusColumn = "locus", locusValues=c("IGH"))
+    expect_equal(
+        dtn_sc_h$dist_nearest, c(0.0833, 0.0833, NA,NA)
+    )
+    
+    dtn_sc_hl <- distToNearest(db |> dplyr::filter(!is.na(cell_id)), 
+                          cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
+                          sequenceColumn = "junction",
+                          vCallColumn = "v_call", jCallColumn = "j_call", 
+                          locusColumn = "locus", locusValues=c("IGH","IGK"))    
+    expect_equal(
+        dtn_sc_hl$dist_nearest, c(0.0833, 0.0833, NA,NA)
+    )
+    
+    # bulk only
+    # alakazam::groupGenes(db |> dplyr::mutate(cell_id=NULL), 
+    #                      cell_id = NULL, first=F)
+    
+    dtn_b_h <- distToNearest(db |> dplyr::mutate(cell_id=NULL), 
+                          cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
+                          sequenceColumn = "junction",
+                          vCallColumn = "v_call", jCallColumn = "j_call", 
+                          locusColumn = "locus", locusValues=c("IGH"))
+    expect_equal(
+        dtn_b_h$dist_nearest,
+        c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA)
+    )
+    
+    dtn_b_hl <- distToNearest(db |> dplyr::mutate(cell_id=NULL), 
+                          cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
+                          sequenceColumn = "junction",
+                          vCallColumn = "v_call", jCallColumn = "j_call", 
+                          locusColumn = "locus", locusValues=c("IGH", "IGK")) 
+    expect_equal(
+        dtn_b_hl$dist_nearest,
+        c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833,  0.0833,  0.0833, 0.1667)
+    )
+
 })
 
 #### AIRR migration tests ####

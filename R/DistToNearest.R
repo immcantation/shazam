@@ -956,7 +956,9 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                          first=first)) %>%
             ungroup()
         # L (later)  
-        group_cols <- c("vj_group", junc_len)
+        # add locusColumn to account for single cells having light chains assigned
+        # the same group as the paired heavy chain
+        group_cols <- c("vj_group", junc_len, locusColumn)
         
     } else {
         # 1-stage partitioning using V+J+L simultaneously
@@ -969,7 +971,10 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                           cell_id=cellIdColumn, locus=locusColumn, only_heavy=onlyHeavy,
                           first=first)) %>%
             ungroup()
-        group_cols <- c("vj_group")
+        
+        # add locusColumn to account for single cells having light chains assigned
+        # the same group as the paired heavy chain
+        group_cols <- c("vj_group", locusColumn)
     }
     
     # groups to use
@@ -983,12 +988,22 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     }
     db[['DTN_TMP_FIELD']] <- NULL
     
+    if (any(is.na(db[["vj_group"]]))) {
+        warning("The vj_group column contains NA values corresponding to ", 
+                sum(is.na(db$vj_group)), 
+                " sequences to which alakazam::groupGenes could not assign a group.",
+                " These sequences will not be analyzed.")
+    }
+    
     # unique groups
     # not necessary but good practice to force as df and assign colnames
     # (in case group_cols has length 1; which can happen in groupBaseline)
-    uniqueGroups <- data.frame(unique(db[, group_cols]), stringsAsFactors=FALSE)
+    uniqueGroups <- data.frame(
+        unique(db[, group_cols]) %>% filter(!is.na(vj_group)),
+        stringsAsFactors=FALSE)
     colnames(uniqueGroups) <- group_cols
     rownames(uniqueGroups) <- NULL
+    
     # indices
     # crucial to have simplify=FALSE 
     # (otherwise won't return a list if uniqueClones has length 1)
@@ -1112,7 +1127,13 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     )
     
     # Convert list from foreach into a db data.frame
-    db <- do.call(rbind, list_db)
+    if (!any(is.na(db[["vj_group"]]))) {
+        db <-do.call(rbind, list_db)
+    } else {
+        db <- bind_rows(
+            db |> filter(is.na(vj_group)),
+            do.call(rbind, list_db))
+    }
 
     # Stop the cluster and add back not used colums
     if (nproc > 1) { 
@@ -1641,7 +1662,6 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
         max_itr <- 100
         key <- FALSE
         while (!key && itr <= max_itr){
-            print(paste0(i,":",itr))
             # Fit mixture Functions
             MixModel <- try(suppressWarnings(MASS::fitdistr(na.exclude(ent), shazam:::mixFunction, 
                                      first_curve = bits[1], second_curve = bits[2], 
