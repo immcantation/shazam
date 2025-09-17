@@ -999,7 +999,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     # not necessary but good practice to force as df and assign colnames
     # (in case group_cols has length 1; which can happen in groupBaseline)
     uniqueGroups <- data.frame(
-        unique(db[, group_cols]) %>% filter(!is.na(vj_group)),
+        unique(db[, group_cols]) %>% filter(!is.na(!!rlang::sym("vj_group"))),
         stringsAsFactors=FALSE)
     colnames(uniqueGroups) <- group_cols
     rownames(uniqueGroups) <- NULL
@@ -1131,7 +1131,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         db <-do.call(rbind, list_db)
     } else {
         db <- bind_rows(
-            db %>% filter(is.na(vj_group)),
+            db %>% filter(is.na(!!rlang::sym("vj_group"))),
             do.call(rbind, list_db))
     }
 
