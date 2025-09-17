@@ -1663,7 +1663,7 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
         key <- FALSE
         while (!key && itr <= max_itr){
             # Fit mixture Functions
-            MixModel <- try(suppressWarnings(MASS::fitdistr(na.exclude(ent), shazam:::mixFunction, 
+            MixModel <- try(suppressWarnings(MASS::fitdistr(na.exclude(ent), mixFunction, 
                                      first_curve = bits[1], second_curve = bits[2], 
                                      start=list(omega = func1.0, 
                                                 func1.1 = func1.1, func1.2 = func1.2,
