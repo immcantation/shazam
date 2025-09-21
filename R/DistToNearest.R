@@ -698,9 +698,9 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                           are "IGH", "IGI", "IGK", "IGL", "TRA", "TRB", 
 #'                           "TRD", and "TRG".
 #' @param    locusValues     Loci values to focus the analysis on.
-#' @param    onlyHeavy       use only the IGH (BCR) or TRB/TRD (TCR) sequences 
+#' @param    onlyHeavy       This is deprecated. Only IGH (BCR) or TRB/TRD (TCR) sequences will be used
 #'                           for grouping. Only applicable to single-cell data.
-#'                           Ignored if \code{cellIdColumn=NULL}. 
+#'                           Ignored if \code{cellIdColumn=NULL}.
 #'                           See \link[alakazam]{groupGenes} for further details.               
 #' @param    keepVJLgroup    logical value specifying whether to keep in the output the the column 
 #'                           column indicating grouping based on V-J-length combinations. Only applicable for
@@ -733,10 +733,9 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' 
 #' For single-cell mode, the input format is the same as that for \link[alakazam]{groupGenes}. 
 #' Namely, each row represents a sequence/chain. Sequences/chains from the same cell are linked
-#' by a cell ID in the \code{cellIdColumn} field. In this mode, there is a choice of whether 
-#' grouping should be done by (a) using IGH (BCR) or TRB/TRD (TCR) sequences only or
-#' (b) using IGH plus IGK/IGL (BCR) or TRB/TRD plus TRA/TRG (TCR). 
-#' This is governed by the \code{onlyHeavy} argument.
+#' by a cell ID in the \code{cellIdColumn} field. Groupin will be done by using IGH (BCR) or 
+#' TRB/TRD (TCR) sequences only. The argument that allowed to include light chains, 
+#' \code{onlyHeavy}, is deprecated.
 #' 
 #' Note, \code{distToNearest} required that each cell (each unique value in \code{cellIdColumn})
 #' correspond to only a single \code{IGH} (BCR) or \code{TRB/TRD} (TCR) sequence.
@@ -830,15 +829,23 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                           mst=FALSE, subsample=NULL, progress=FALSE,
                           cellIdColumn=NULL, locusColumn="locus", locusValues=c("IGH"),
                           onlyHeavy=TRUE, keepVJLgroup=TRUE) {
+    
     # Hack for visibility of foreach index variables
     i <- NULL
     
+    # Deprecation warning for onlyHeavy.
+    # Same warning as in alakazam::groupGenes.
+    if (!onlyHeavy) {
+        warning("onlyHeavy = FALSE is deprecated. Running as if onlyHeavy = TRUE")
+        onlyHeavy <- TRUE
+    }
+        
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
     symmetry <- match.arg(symmetry)
     if (!is.data.frame(db)) { stop('Must submit a data frame') }
-    
+
     # Check base input
     check <- checkColumns(db, c(sequenceColumn, vCallColumn, jCallColumn, fields, cross))
     if (check != TRUE) { stop(check) }
@@ -894,11 +901,12 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         singleCell <- TRUE
     } else {
         singleCell <- FALSE
-    } 
+    }
     
     # Disallow multiple heavy chains per cell
     # sequences with cell_id==NA are not considered, table's default 
-    # is useNA="no"
+    # is useNA="no". In practice that means that distances 
+    # will be calculated between sequences of different cells.
     if (singleCell) {
         # check multiple heavy chains
         x <- sum(table(db[[cellIdColumn]][db[[locusColumn]] == "IGH"]) > 1)
@@ -936,7 +944,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         group_indices()
     
     # create V+J grouping, or V+J+L grouping
-    if (VJthenLen) {
+    if (VJthenLen) { 
         # 2-stage partitioning using first V+J and then L
         # V+J only first
         # creates $vj_group
@@ -948,7 +956,9 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                          first=first)) %>%
             ungroup()
         # L (later)  
-        group_cols <- c("vj_group", junc_len)
+        # add locusColumn to account for single cells having light chains assigned
+        # the same group as the paired heavy chain
+        group_cols <- c("vj_group", junc_len, locusColumn)
         
     } else {
         # 1-stage partitioning using V+J+L simultaneously
@@ -961,7 +971,10 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                           cell_id=cellIdColumn, locus=locusColumn, only_heavy=onlyHeavy,
                           first=first)) %>%
             ungroup()
-        group_cols <- c("vj_group")
+        
+        # add locusColumn to account for single cells having light chains assigned
+        # the same group as the paired heavy chain
+        group_cols <- c("vj_group", locusColumn)
     }
     
     # groups to use
@@ -975,12 +988,22 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     }
     db[['DTN_TMP_FIELD']] <- NULL
     
+    if (any(is.na(db[["vj_group"]]))) {
+        warning("The vj_group column contains NA values corresponding to ", 
+                sum(is.na(db$vj_group)), 
+                " sequences to which alakazam::groupGenes could not assign a group.",
+                " These sequences will not be analyzed.")
+    }
+    
     # unique groups
     # not necessary but good practice to force as df and assign colnames
     # (in case group_cols has length 1; which can happen in groupBaseline)
-    uniqueGroups <- data.frame(unique(db[, group_cols]), stringsAsFactors=FALSE)
+    uniqueGroups <- data.frame(
+        unique(db[, group_cols]) %>% filter(!is.na(!!rlang::sym("vj_group"))),
+        stringsAsFactors=FALSE)
     colnames(uniqueGroups) <- group_cols
     rownames(uniqueGroups) <- NULL
+    
     # indices
     # crucial to have simplify=FALSE 
     # (otherwise won't return a list if uniqueClones has length 1)
@@ -1104,7 +1127,13 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     )
     
     # Convert list from foreach into a db data.frame
-    db <- do.call(rbind, list_db)
+    if (!any(is.na(db[["vj_group"]]))) {
+        db <-do.call(rbind, list_db)
+    } else {
+        db <- bind_rows(
+            db %>% filter(is.na(!!rlang::sym("vj_group"))),
+            do.call(rbind, list_db))
+    }
 
     # Stop the cluster and add back not used colums
     if (nproc > 1) { 
@@ -1633,9 +1662,8 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
         max_itr <- 100
         key <- FALSE
         while (!key && itr <= max_itr){
-            print(paste0(i,":",itr))
             # Fit mixture Functions
-            MixModel <- try(suppressWarnings(MASS::fitdistr(na.exclude(ent), shazam:::mixFunction, 
+            MixModel <- try(suppressWarnings(MASS::fitdistr(na.exclude(ent), mixFunction, 
                                      first_curve = bits[1], second_curve = bits[2], 
                                      start=list(omega = func1.0, 
                                                 func1.1 = func1.1, func1.2 = func1.2,
