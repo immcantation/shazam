@@ -358,7 +358,7 @@ getCharsInModel <- function(model) {
     } else if (model == "mk_rs1nf") {
         chars <- colnames(MK_RS1NF_Distance)
     } else if (model == "mk_rs5nf") {
-        chars <-rownames(MK_RS1NF@targeting)
+        chars <- rownames(MK_RS5NF@targeting)
     } else if (model == "hs1f_compat") {
         chars <- colnames(HS1F_Compat)
     } else if (model == "m1n_compat") {
