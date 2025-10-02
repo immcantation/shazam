@@ -793,6 +793,7 @@ test_that("distToNearest mix single cell and bulk", {
     # bulk light chain sequences are not analyzed because they
     # are not grouped by groupGenes.
     # alakazam::groupGenes(db, cell_id = "cell_id", first=F)
+    # IGH specified
     expect_warning( dtn_m_h <- distToNearest(db, 
                                             cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
@@ -803,6 +804,7 @@ test_that("distToNearest mix single cell and bulk", {
     expect_equal(dtn_m_h$dist_nearest, 
                  c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA))
     
+    #IGH and IGK specified
     expect_warning(dtn_m_hk <- distToNearest(db, cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
                           vCallColumn = "v_call", jCallColumn = "j_call", 
@@ -812,11 +814,23 @@ test_that("distToNearest mix single cell and bulk", {
     expect_equal(dtn_m_hk$dist_nearest, 
                  c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA)       
     )
+
+    # IGK specified
+    expect_warning(dtn_m_k <- distToNearest(db, cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
+                          sequenceColumn = "junction",
+                          vCallColumn = "v_call", jCallColumn = "j_call", 
+                          locusColumn = "locus", locusValues=c("IGK")),
+                   "The vj_group column contains NA values")
+    # All NA dist_nearest
+    expect_equal(dtn_m_k$dist_nearest, 
+                 rep(NA, nrow(dtn_m_k))      
+    )
                  
     
     # sc only
     # alakazam::groupGenes(db %>% dplyr::filter(!is.na(cell_id)), 
     #                      cell_id = "cell_id", first=F)
+    # IGH specified
     dtn_sc_h <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
                           cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
@@ -826,19 +840,30 @@ test_that("distToNearest mix single cell and bulk", {
         dtn_sc_h$dist_nearest, c(0.0833, 0.0833, NA,NA)
     )
     
-    dtn_sc_hl <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
+    # IGH and IGK specified
+    dtn_sc_hk <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
                           cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
                           vCallColumn = "v_call", jCallColumn = "j_call", 
                           locusColumn = "locus", locusValues=c("IGH","IGK"))    
     expect_equal(
-        dtn_sc_hl$dist_nearest, c(0.0833, 0.0833, NA,NA)
+        dtn_sc_hk$dist_nearest, c(0.0833, 0.0833, NA,NA)
     )
+
+    # IGK specified
+    dtn_sc_k <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
+                          cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
+                          sequenceColumn = "junction",
+                          vCallColumn = "v_call", jCallColumn = "j_call", 
+                          locusColumn = "locus", locusValues=c("IGK"))
+    expect_equal(
+        dtn_sc_k$dist_nearest, c(NA, NA, NA,NA)
+    )    
     
     # bulk only
     # alakazam::groupGenes(db %>% dplyr::mutate(cell_id=NULL), 
     #                      cell_id = NULL, first=F)
-    
+    # IGH specified
     dtn_b_h <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
                           cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
@@ -849,16 +874,27 @@ test_that("distToNearest mix single cell and bulk", {
         c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA)
     )
     
-    dtn_b_hl <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
+    # IGH and IGK specified
+    dtn_b_hk <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
                           cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
                           vCallColumn = "v_call", jCallColumn = "j_call", 
                           locusColumn = "locus", locusValues=c("IGH", "IGK")) 
     expect_equal(
-        dtn_b_hl$dist_nearest,
+        dtn_b_hk$dist_nearest,
         c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833,  0.0833,  0.0833, 0.1667)
     )
 
+    # IGK specified
+    dtn_b_k <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
+                          cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
+                          sequenceColumn = "junction",
+                          vCallColumn = "v_call", jCallColumn = "j_call", 
+                          locusColumn = "locus", locusValues=c("IGK")) 
+    expect_equal(
+        dtn_b_k$dist_nearest,
+        c(NA, NA, NA, NA, NA, 0.0833,  0.0833, 0.1667)
+    )    
 })
 
 #### AIRR migration tests ####
