@@ -781,84 +781,156 @@ test_that("distToNearest onlyHeavy=FALSE is deprecated", {
 test_that("distToNearest mix single cell and bulk", {
 
     db <- data.frame(
-         subject_id=c("S1","S1","S1","S1","S1", "S1", "S1", "S2"),
-         v_call=c("IGHV1-1*01","IGHV1-1*01","IGHV1-2*01","IGHV1-1*01,IGHV1-2*01","IGHV1-2*01", "IGKV1-1*01", "IGKV1-1*01", "IGKV1-1*01"),
-         j_call=c("IGHJ1*01","IGHJ1*01","IGHJ1*01","IGHJ1*01","IGHJ1*01","IGKJ1*01", "IGKJ1*01", "IGKJ1*01"),
-         junction=c("TGTAAAAAATGG","TGTAAAAATTGG","TGTAAAACCTGG","TGTAAACCCTGG","TGTAAACCCTGG","TGTCCCCCCTGG","TGTCCCCCGTGG", "TGTCCCCAATGG"),
-         locus=c("IGH","IGH","IGH","IGH","IGH","IGK","IGK","IGK"),
-         cell_id=c(1,2,3,NA,NA,1,NA, NA),
+         subject_id=c("S1","S1","S1","S1","S1", "S1", "S1", "S2", "S3", "S3"),
+         v_call=c("IGHV1-1*01","IGHV1-1*01","IGHV1-2*01","IGHV1-1*01,IGHV1-2*01","IGHV1-2*01", "IGKV1-1*01", "IGKV1-1*01", "IGKV1-1*01", "IGHV1-1*01", "IGKV1-1*01"),
+         j_call=c("IGHJ1*01","IGHJ1*01","IGHJ1*01","IGHJ1*01","IGHJ1*01","IGKJ1*01", "IGKJ1*01", "IGKJ1*01", "IGHJ1*01", "IGKJ1*01"),
+         junction=c("TGTAAAAAATGG","TGTAAAAATTGG","TGTAAAACCTGG","TGTAAACCCTGG","TGTAAACCCTGG","TGTCCCCCCTGG","TGTCCCCCGTGG", "TGTCCCCAATGG", "TGTAAAAAATGG", "TGTCCCCCCTGG"),
+         locus=c("IGH","IGH","IGH","IGH","IGH","IGK","IGK","IGK", "IGH","IGK"),
+         cell_id=c(1,2,3,NA,NA,1,NA, NA, 4, 4),
          junction_length=12
     )
     # mixed
     # bulk light chain sequences are not analyzed because they
     # are not grouped by groupGenes.
     # alakazam::groupGenes(db, cell_id = "cell_id", first=F)
-    expect_warning( dtn_m_h <- distToNearest(db, 
+    # IGH specified
+    expect_message(
+        expect_warning( 
+            dtn_m_h <- distToNearest(db, 
                                             cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
                           vCallColumn = "v_call", jCallColumn = "j_call", 
                           locusColumn = "locus", locusValues=c("IGH")),
-                    "The vj_group column contains NA values"
+            "The vj_group column contains NA values"
+        ),
+        "Running in single-cell mode..+Note: [0-9]+ light/short.*$", 
+        fixed=FALSE
     )
     expect_equal(dtn_m_h$dist_nearest, 
-                 c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA))
+                 c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA, 0.0833, NA))
     
-    expect_warning(dtn_m_hk <- distToNearest(db, cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
-                          sequenceColumn = "junction",
-                          vCallColumn = "v_call", jCallColumn = "j_call", 
-                          locusColumn = "locus", locusValues=c("IGH","IGK")),
-                   "The vj_group column contains NA values")
-    # the single-cell light chain should have NA dist_nearest
-    expect_equal(dtn_m_hk$dist_nearest, 
-                 c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA)       
+    #IGH and IGK specified
+    expect_message(
+        expect_warning(dtn_m_hk <- distToNearest(db, cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
+                            sequenceColumn = "junction",
+                            vCallColumn = "v_call", jCallColumn = "j_call", 
+                            locusColumn = "locus", locusValues=c("IGH","IGK")),
+                    "The vj_group column contains NA values"),
+        "Running in single-cell mode..+Note: [0-9]+ light/short.*Note: locusValues.*$", 
+        fixed=FALSE
     )
-                 
+    # the single-cell light chains should have NA dist_nearest
+    expect_equal(dtn_m_hk$dist_nearest, 
+                 c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA, 0.0833, NA)       
+    )
+
+    # IGK specified
+    expect_message(
+        expect_warning(dtn_m_k <- distToNearest(db, cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
+                            sequenceColumn = "junction",
+                            vCallColumn = "v_call", jCallColumn = "j_call", 
+                            locusColumn = "locus", locusValues=c("IGK")),
+                    "The vj_group column contains NA values"),
+        "Running in single-cell mode..+Note: [0-9]+ light/short.*Note: locusValues.*$", 
+        fixed=FALSE
+    )
+    # All NA dist_nearest
+    expect_equal(dtn_m_k$dist_nearest, 
+                rep(NA, nrow(dtn_m_k))      
+    )
     
     # sc only
     # alakazam::groupGenes(db %>% dplyr::filter(!is.na(cell_id)), 
     #                      cell_id = "cell_id", first=F)
-    dtn_sc_h <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
+    # IGH specified
+    expect_message(
+        dtn_sc_h <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
                           cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
                           vCallColumn = "v_call", jCallColumn = "j_call", 
-                          locusColumn = "locus", locusValues=c("IGH"))
+                          locusColumn = "locus", locusValues=c("IGH")),
+        "Running in single-cell mode..+Note: [0-9]+ light/short.*$", 
+        fixed=FALSE
+    )
     expect_equal(
-        dtn_sc_h$dist_nearest, c(0.0833, 0.0833, NA,NA)
+        dtn_sc_h$dist_nearest, c(0.0833, 0.0833, NA,NA, 0.0833, NA)
     )
     
-    dtn_sc_hl <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
-                          cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
-                          sequenceColumn = "junction",
-                          vCallColumn = "v_call", jCallColumn = "j_call", 
-                          locusColumn = "locus", locusValues=c("IGH","IGK"))    
-    expect_equal(
-        dtn_sc_hl$dist_nearest, c(0.0833, 0.0833, NA,NA)
+    # IGH and IGK specified
+    expect_message(
+        dtn_sc_hk <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
+                        cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
+                        sequenceColumn = "junction",
+                        vCallColumn = "v_call", jCallColumn = "j_call", 
+                        locusColumn = "locus", locusValues=c("IGH","IGK")),    
+        "Running in single-cell mode..+Note: [0-9]+ light/short.*Note: locusValues.*$", 
+        fixed=FALSE
     )
+    expect_equal(
+        dtn_sc_hk$dist_nearest, c(0.0833, 0.0833, NA,NA, 0.0833, NA)
+    )
+
+    # IGK specified
+    expect_message(
+        dtn_sc_k <- distToNearest(db %>% dplyr::filter(!is.na(cell_id)), 
+                            cellIdColumn = "cell_id", first=F, onlyHeavy=TRUE,
+                            sequenceColumn = "junction",
+                            vCallColumn = "v_call", jCallColumn = "j_call", 
+                            locusColumn = "locus", locusValues=c("IGK")),
+    "Running in single-cell mode..+Note: [0-9]+ light/short.*Note: locusValues.*$", 
+    fixed=FALSE
+    )
+    expect_equal(
+        dtn_sc_k$dist_nearest, c(NA, NA, NA,NA, NA, NA)
+    )    
     
     # bulk only
     # alakazam::groupGenes(db %>% dplyr::mutate(cell_id=NULL), 
     #                      cell_id = NULL, first=F)
-    
-    dtn_b_h <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
+    # IGH specified
+    expect_message(
+        dtn_b_h <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
                           cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
                           sequenceColumn = "junction",
                           vCallColumn = "v_call", jCallColumn = "j_call", 
-                          locusColumn = "locus", locusValues=c("IGH"))
+                          locusColumn = "locus", locusValues=c("IGH")),
+        "Running in non-single-cell mode", 
+        fixed=FALSE
+    )
     expect_equal(
         dtn_b_h$dist_nearest,
-        c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA)
+        c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833, NA, NA, NA, 0.0833, NA)
     )
     
-    dtn_b_hl <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
-                          cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
-                          sequenceColumn = "junction",
-                          vCallColumn = "v_call", jCallColumn = "j_call", 
-                          locusColumn = "locus", locusValues=c("IGH", "IGK")) 
+    # IGH and IGK specified
+    expect_message(
+        dtn_b_hk <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
+                        cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
+                        sequenceColumn = "junction",
+                        vCallColumn = "v_call", jCallColumn = "j_call", 
+                        locusColumn = "locus", locusValues=c("IGH", "IGK")),
+        "Running in non-single-cell mode.", 
+        fixed=FALSE
+    )
     expect_equal(
-        dtn_b_hl$dist_nearest,
-        c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833,  0.0833,  0.0833, 0.1667)
+        dtn_b_hk$dist_nearest,
+        c(0.0833, 0.0833, 0.0833, 0.0833, 0.0833,  0.0833,  0.0833, 0.1667, 0.0833, 0.0833)
     )
 
+    # IGK specified
+    expect_message(
+        dtn_b_k <- distToNearest(db %>% dplyr::mutate(cell_id=NULL), 
+                            cellIdColumn = NULL, first=F, onlyHeavy=TRUE,
+                            sequenceColumn = "junction",
+                            vCallColumn = "v_call", jCallColumn = "j_call", 
+                            locusColumn = "locus", locusValues=c("IGK")),
+        "Running in non-single-cell mode.", 
+        fixed=FALSE
+    )
+    expect_equal(
+        dtn_b_k$dist_nearest,
+        c(NA, NA, NA, NA, NA, 0.0833,  0.0833, 0.1667, NA, 0.0833)
+    )    
 })
 
 #### AIRR migration tests ####
