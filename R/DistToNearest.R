@@ -756,7 +756,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                                \link{calcTargetingDistance}.
 #'   \item \code{"mk_rs1nf"}:     Mouse single nucleotide distance matrix derived from \link{MK_RS1NF} with 
 #'                                \link{calcTargetingDistance}.
-#'   \item \code{"mk_rs5nf"}:     Mouse 5-mer nucleotide context distance matrix derived from \link{MK_RS1NF} with 
+#'   \item \code{"mk_rs5nf"}:     Mouse 5-mer nucleotide context distance matrix derived from \link{MK_RS5NF} with 
 #'                                \link{calcTargetingDistance}.
 #'   \item \code{"hs1f_compat"}:  Backwards compatible human single nucleotide distance matrix used in 
 #'                                SHazaM v0.1.4 and Change-O v0.3.3.
