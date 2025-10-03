@@ -643,11 +643,14 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 
 #' Distance to nearest neighbor
 #'
-#' Get non-zero distance of every heavy chain (\code{IGH}) sequence (as defined by 
-#' \code{sequenceColumn}) to its nearest sequence in a partition of heavy chains sharing the same 
-#' V gene, J gene, and junction length (V-J-length), or in a partition of single cells with heavy/long chains
-#' sharing the same heavy/long chain V-J-length combination, or of single cells with heavy/long and light/short chains 
-#' sharing the same heavy/long chain V-J-length and light/short chain V-J-length combinations.
+#' Calculate the non-zero distance from each sequence to its nearest neighbor
+#' within partitions based on shared V gene, J gene, and junction length. 
+#' 
+#' The distance to nearest neighbor can be used to estimate a threshold for assigning 
+#' Ig sequences to clonal groups. A histogram of the resulting vector is often bimodal, with the 
+#' ideal threshold being a value that separates the two modes.
+#' 
+#' Refer to the details section for a more thorough description of the implementation.
 #'
 #' @param    db              data.frame containing sequence data.
 #' @param    sequenceColumn  name of the column containing the junction for grouping and for calculating
@@ -719,13 +722,22 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'           type \code{character} if they were type \code{factor} in the input \code{db}.
 #'
 #' @details
+#' 
+#' There are two modes of operation for \code{distToNearest}: single-cell (all sequences are 
+#' single-cell data), non-single-cell (all sequences are bulk sequencing data). Mixed data, 
+#' where both single-cell and non-single-cell sequences are present in the data, is considered 
+#' a case under the single-single cell mode .
+#' 
 #' To invoke single-cell mode the \code{cellIdColumn} argument must be specified and \code{locusColumn} 
 #' must be correct. Otherwise, \code{distToNearest} will be run with bulk sequencing assumptions, 
-#' using all input sequences regardless of the values in the \code{locusColumn} column.
+#' using all input sequences regardless of the values in the \code{locusColumn} column. 
 #' 
-#' Under single-cell mode, only heavy/long chain (IGH, TRB, TRD) sequences will be used for calculating 
-#' nearest neighbor distances. Under non-single-cell mode, all input sequences will be used for 
-#' calculating nearest neighbor distances, regardless of the values in the \code{locusColumn} field (if present).
+#' Under single-cell mode, only heavy/long chain (IGH, TRB, TRD) sequences will be 
+#' used for calculating nearest neighbor distances regardless of \code{locusValue} values in 
+#' the \code{locusColumn} field (if present). Under non-single-cell mode, 
+#' all input sequences with \code{locusValue} value(s) in the  \code{locusColumn} field will be 
+#' used for calculating nearest neighbor distances.
+#' 
 #' 
 #' Values in the \code{locusColumn} must be one of \code{c("IGH", "IGI", "IGK", "IGL")} for BCR 
 #' or \code{c("TRA", "TRB", "TRD", "TRG")} for TCR sequences. Otherwise, the function returns an 
@@ -740,9 +752,6 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' Note, \code{distToNearest} required that each cell (each unique value in \code{cellIdColumn})
 #' correspond to only a single \code{IGH} (BCR) or \code{TRB/TRD} (TCR) sequence.
 #' 
-#' The distance to nearest neighbor can be used to estimate a threshold for assigning 
-#' Ig sequences to clonal groups. A histogram of the resulting vector is often bimodal, with the 
-#' ideal threshold being a value that separates the two modes.
 #' 
 #' The following distance measures are accepted by the \code{model} parameter.
 #' 
@@ -934,6 +943,30 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         db <- db[valid_seq, ]
     }
     
+    # After determining single-cell vs non-single-cell mode (around line 850)
+    if (singleCell) {
+
+        light_chains <- sum(db[[locusColumn]] %in% c("IGH", "TRB", "TRD") == FALSE)
+        msg <- paste0("Running in single-cell mode.")
+        
+        if (light_chains > 0) {
+            msg <- paste(msg,
+                        paste0("Note: ", light_chains, 
+                        " light/short chain sequences will receive NA distances."),
+                        sep="\n")
+        }    
+        
+        not_used_loci <- setdiff(locusValues, c("IGH", "TRB", "TRD"))
+        if (length(not_used_loci)>0) {
+            this_msg <- paste0("Note: locusValues contains loci that will not be used for distance calculations: ", 
+                    paste(not_used_loci, collapse=", "), 
+                    ". Only IGH (BCR) or TRB/TRD (TCR) sequences are used for distance calculations in single-cell mode.")
+            msg <- paste(msg,this_msg, sep="\n")
+        }
+        if (msg!="") { message(msg) }
+    } else {
+        message("Running in non-single-cell mode.")
+    }
     # junction length columns (prep for groupGenes)
     junc_len <- "JUNC_LEN"
     db[[junc_len]] <- stri_length(db[[sequenceColumn]])
