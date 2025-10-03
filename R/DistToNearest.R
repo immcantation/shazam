@@ -943,7 +943,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         db <- db[valid_seq, ]
     }
     
-    # After determining single-cell vs non-single-cell mode (around line 850)
+    # Info for users
     if (singleCell) {
 
         light_chains <- sum(db[[locusColumn]] %in% c("IGH", "TRB", "TRD") == FALSE)
