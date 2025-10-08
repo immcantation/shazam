@@ -1,3 +1,4 @@
+[![CRAN status](https://www.r-pkg.org/badges/version/shazam)](https://cran.r-project.org/package=shazam)
 [![](http://cranlogs.r-pkg.org/badges/grand-total/shazam)](https://www.r-pkg.org/pkg/shazam)
 [![](https://cranlogs.r-pkg.org/badges/shazam)](https://www.r-pkg.org/pkg/shazam)
 [![](https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=plastic)](https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html)
