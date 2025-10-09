@@ -963,7 +963,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                     ". Only IGH (BCR) or TRB/TRD (TCR) sequences are used for distance calculations in single-cell mode.")
             msg <- paste(msg,this_msg, sep="\n")
         }
-        if (msg!="") { message(msg) }
+        message(msg)
     } else {
         message("Running in non-single-cell mode.")
     }
