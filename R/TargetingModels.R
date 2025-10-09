@@ -2290,7 +2290,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                                   ymax=!!rlang::sym("ymax"), 
                                   fill=!!rlang::sym("text_label"), 
                                   color=!!rlang::sym("text_label")), 
-                      size=0.5*size, alpha=1, show.legend=FALSE) +
+                      linewidth=0.5*size, alpha=1, show.legend=FALSE) +
             #geom_tile(data=sub_rect, 
             #          mapping=aes_string(x="text_x", y="text_y", width="rect_width", fill="text_label"), 
             #          size=0, alpha=0.7, show.legend=FALSE) +
@@ -2349,8 +2349,8 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                                          xend=!!rlang::sym("x"), 
                                          yend=!!rlang::sym("score"), 
                                          color=!!rlang::sym("motif")), 
-                             y=score_offset, size=0.75*size, position=position_nudge(x = -0.5)) +
-                guides(color=guide_legend(override.aes=list(linetype=1, size=2*size)))
+                             y=score_offset, linewidth=0.75*size, position=position_nudge(x = -0.5)) +
+                guides(color=guide_legend(override.aes=list(linetype=1, linewidth=2*size)))
               
         } else if (style == "bar") {
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
@@ -2369,7 +2369,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                          mapping=aes(x=!!rlang::sym("x"), y=!!rlang::sym("score"), 
                                      fill=!!rlang::sym("motif"), 
                                      color=!!rlang::sym("motif")), 
-                         stat="identity", position=position_nudge(x = -0.5), size=0, width=0.7) +
+                         stat="identity", position=position_nudge(x = -0.5), linewidth=0, width=0.7) +
               guides(color=guide_legend(override.aes=list(fill=sub_colors, linetype=0)))
         }
 
