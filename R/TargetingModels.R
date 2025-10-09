@@ -2162,7 +2162,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
     base_theme <- theme_bw() +
         theme(panel.spacing=grid::unit(0, "lines"),
               panel.background=element_blank()) +
-        theme(axis.text=element_text(margin=grid::unit(0, "lines"))) +
+        theme(axis.text=element_text(margin=margin(0, 0, 0, 0, "lines"))) +
         theme(text=element_text(size=10*size),
               title=element_text(size=10*size),
               legend.spacing=grid::unit(0, "lines"),
