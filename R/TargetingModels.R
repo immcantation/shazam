@@ -2332,7 +2332,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
             y_limits <- c(text_offset - 1, score_scale + score_offset)
             #orient_x <- sub_text[[3]]$text_x[1]
             #orient_y <- text_offset - 1
-            p1 <- p1 + theme(plot.margin=grid::unit(c(0, 0, 0, 0), "lines"),
+            p1 <- p1 + theme(plot.margin=margin(0, 0, 0, 0, "lines"),
                              panel.grid=element_blank(), 
                              panel.border=element_blank(),
                              axis.title=element_blank(),
@@ -2355,7 +2355,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
         } else if (style == "bar") {
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
-            p1 <- p1 + theme(plot.margin=grid::unit(c(1, 1, 1, 1), "lines"),
+            p1 <- p1 + theme(plot.margin=margin(0, 0, 0, 0, "lines"),
                              panel.grid=element_blank(), 
                              panel.border=element_rect(color="black"),
                              axis.text.x=element_blank(), 
