@@ -127,9 +127,9 @@ locusValues
 :   Loci values to focus the analysis on.
 
 onlyHeavy
-:   use only the IGH (BCR) or TRB/TRD (TCR) sequences 
+:   This is deprecated. Only IGH (BCR) or TRB/TRD (TCR) sequences will be used
 for grouping. Only applicable to single-cell data.
-Ignored if `cellIdColumn=NULL`. 
+Ignored if `cellIdColumn=NULL`.
 See [groupGenes](http://www.rdocumentation.org/packages/alakazam/topics/groupGenes) for further details.
 
 keepVJLgroup
@@ -173,10 +173,9 @@ error message and stops.
 
 For single-cell mode, the input format is the same as that for [groupGenes](http://www.rdocumentation.org/packages/alakazam/topics/groupGenes). 
 Namely, each row represents a sequence/chain. Sequences/chains from the same cell are linked
-by a cell ID in the `cellIdColumn` field. In this mode, there is a choice of whether 
-grouping should be done by (a) using IGH (BCR) or TRB/TRD (TCR) sequences only or
-(b) using IGH plus IGK/IGL (BCR) or TRB/TRD plus TRA/TRG (TCR). 
-This is governed by the `onlyHeavy` argument.
+by a cell ID in the `cellIdColumn` field. Groupin will be done by using IGH (BCR) or 
+TRB/TRD (TCR) sequences only. The argument that allowed to include light chains, 
+`onlyHeavy`, is deprecated.
 
 Note, `distToNearest` required that each cell (each unique value in `cellIdColumn`)
 correspond to only a single `IGH` (BCR) or `TRB/TRD` (TCR) sequence.
@@ -255,6 +254,11 @@ dist <- distToNearest(db, sequenceColumn="junction",
 vCallColumn="v_call_genotyped", jCallColumn="j_call",
 model="ham", first=FALSE, VJthenLen=TRUE, normalize="len")
 
+```
+
+*Running in non-single-cell mode.*
+```R
+
 # Plot histogram of non-NA distances
 p1 <- ggplot(data=subset(dist, !is.na(dist_nearest))) + 
 theme_bw() + 
@@ -266,7 +270,7 @@ plot(p1)
 
 ```
 
-![2](distToNearest-2.png)
+![4](distToNearest-4.png)
 
 
 See also

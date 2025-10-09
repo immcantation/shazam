@@ -1,5 +1,5 @@
 # [![](http://cranlogs.r-pkg.org/badges/grand-total/shazam)](https://www.r-pkg.org/pkg/shazam) [![](https://cranlogs.r-pkg.org/badges/shazam)](https://www.r-pkg.org/pkg/shazam) [![](https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=plastic)](https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html)
-
+[![CRAN status](https://www.r-pkg.org/badges/version/shazam)](https://cran.r-project.org/package=shazam)
 
 SHazaM
 -------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ To receive alerts about Immcantation releases, news, events, and tutorials, join
 
 **Depends:** ggplot2  
 **Imports:** alakazam, ape, diptest, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, KernSmooth, lazyeval, MASS, methods, parallel, progress, rlang, scales, seqinr, stats, stringi, tidyr, tidyselect, utils  
-**Suggests:** knitr, rmarkdown, testthat
+**Suggests:** knitr, rmarkdown, testthat, tibble
 
 
 ## Authors

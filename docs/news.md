@@ -1,5 +1,31 @@
 # Release Notes
 
+Version 1.3.0: October 9, 2025
+-------------------------------------------------------------------------------
+
+General:
+
++ Development of `shazam` has moved to GitHub: https://github.com/immcantation/shazam
++ Updated dependencies: alakazam >= 1.4.1.
+
+Mutation simulation:
+
++ `shmulateSeq` now samples mutations from a binomial distribution with provided
+  probability instead of taking the floor from the number of sequences.
+
+Distance Profiling:
+
++ Updated `distToNearest` code, documentation and tests to match changes introduced
+  in `alakazam::groupGenes` in `alakazam 1.4.1` to handle mixed data (single-cell
+  and non single-cell, with heavy and/or light chain sequences).
++ Fixed a model mismatch. When `model="mk_rs5nf"` was specified in `distToNearest`, 
+  the function would incorrectly use character validation from the non-existing `MK_RS1NF@targeting` targeting model instead of the correct `MK_RS5NF@targeting`.
+
+Documentation:
+
++ Updated installation instructions to add BiocManager installation option.
++ Added a Contributing section.
+
 Version 1.2.1: August 1, 2024
 -------------------------------------------------------------------------------
 
@@ -30,6 +56,11 @@ Distance Profiling:
   of the samples. Now, data is separated by `fields`(sample_id in this example)
   before creating the groups of genes, and ambiguities in other samples are not 
   considered.
+
+Mutation simulation:
+
++ ShmulateSeq sample mutations from a binomial distribution with provided
+probability instead of taking the floor from the number of sequences.
 
 Version 1.1.2: September 26, 2022
 -------------------------------------------------------------------------------

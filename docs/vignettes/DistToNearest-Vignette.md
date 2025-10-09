@@ -91,12 +91,22 @@ dist_ham <- distToNearest(db %>% filter(sample_id == "+7d"),
                           sequenceColumn="junction", 
                           vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="ham", normalize="len", nproc=1)
+```
 
+```
+## Running in non-single-cell mode.
+```
+
+``` r
 # Use genotyped V assignments, a 5-mer model and no normalization
 dist_s5f <- distToNearest(db %>% filter(sample_id == "+7d"), 
                           sequenceColumn="junction", 
                           vCallColumn="v_call_genotyped", jCallColumn="j_call",
                           model="hh_s5f", normalize="none", nproc=1)
+```
+
+```
+## Running in non-single-cell mode.
 ```
 
 ## Calculating nearest neighbor distances (single-cell paired heavy and light chain sequences)
@@ -283,7 +293,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1195359
+## [1] 0.1200885
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is
@@ -308,6 +318,10 @@ previous results for sample `+7d` and add results for sample `-1d`.
 ``` r
 dist_fields <- distToNearest(db, model="ham", normalize="len", 
                              fields="sample_id", nproc=1)
+```
+
+```
+## Running in non-single-cell mode.
 ```
 
 We can plot the nearest neighbor distances for the two samples:
@@ -346,6 +360,10 @@ dist_cross <- distToNearest(ExampleDb, sequenceColumn="junction",
                             vCallColumn="v_call_genotyped", jCallColumn="j_call",
                             model="ham", first=FALSE, 
                             normalize="len", cross="sample_id", nproc=1)
+```
+
+```
+## Running in non-single-cell mode.
 ```
 
 
@@ -430,4 +448,8 @@ dist <- distToNearest(ExampleDb, sequenceColumn="junction",
                       model="ham", 
                       first=FALSE, normalize="len",
                       subsample=30)
+```
+
+```
+## Running in non-single-cell mode.
 ```

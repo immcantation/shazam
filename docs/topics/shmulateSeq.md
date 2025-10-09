@@ -68,9 +68,10 @@ to the last codon. For example, `ATGCATGC` will be trimmed to `ATGCAT`.
 Mutations are not introduced to positions in the input `sequence` that contain 
 `.` or `N`.
 
-With `frequency=TRUE`, the number of mutations introduced is the `floor` of 
-the length of the sequence multiplied by the mutation frequency specified via
-`numMutations`.
+With `frequency=TRUE`, the number of mutations is calculated according to the probability
+of mutation at each position. For example, if `numMutations=0.05` and the length of 
+the input `sequence` is 100, then the number of mutations will be sampled from a 
+binomial distribution with 100 trials and a probability of 0.05.
 
 
 
@@ -89,7 +90,7 @@ shmulateSeq(sequence, numMutations=6, frequency=FALSE)
 
 
 ```
-[1] "NGGTCTGACGACACGGCCATGTATTATTCTGCCAGAGATG.TTTA"
+[1] "NGCTCTGACGACACGGCCGTGAATGACTGTGCCAGCGATA.TTCA"
 
 ```
 
@@ -103,7 +104,7 @@ shmulateSeq(sequence, numMutations=0.05, frequency=TRUE)
 
 
 ```
-[1] "NGATGTGACGACACGGCCGCGTATTACTGTGCGAGAGATA.TTTA"
+[1] "NGATCTGACGCCACGGCCGTGTATTACTGTGCGAGAGATA.CTTA"
 
 ```
 

@@ -130,6 +130,11 @@ db <- subset(ExampleDb, sample_id == "-1h" & c_call=="IGHG")[1:50,]
 db <- distToNearest(db, sequenceColumn="junction", vCallColumn="v_call",
 jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 
+```
+
+*Running in non-single-cell mode.*
+```R
+
 # Find threshold using the "gmm" method with user defined specificity
 output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", 
 cutoff="user", spc=0.99)
@@ -137,7 +142,7 @@ plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk
 
 ```
 
-![2](findThreshold-2.png)
+![4](findThreshold-4.png)
 
 ```R
 print(output)
@@ -146,7 +151,7 @@ print(output)
 
 
 ```
-[1] 0.2421758
+[1] 0.2520522
 
 ```
 

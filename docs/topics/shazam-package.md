@@ -22,7 +22,7 @@ See also
 Useful links:
 
 +  [http://shazam.readthedocs.io](http://shazam.readthedocs.io)
-+  Report bugs at [https://bitbucket.org/kleinstein/shazam/issues](https://bitbucket.org/kleinstein/shazam/issues)
++  Report bugs at [https://github.com/immcantation/shazam/issues](https://github.com/immcantation/shazam/issues)
 
 
 
