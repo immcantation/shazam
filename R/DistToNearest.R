@@ -2195,9 +2195,13 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
         geom_line(data=ddf, 
                   aes(x=!!rlang::sym("x"), 
                       y=!!rlang::sym("y")), 
-                  color="darkslateblue", linewidth=size) +
-        geom_vline(xintercept=data@threshold, 
-                   color="firebrick", linetype="longdash", linewidth=size)
+                  color="darkslateblue", linewidth=size)
+
+    # Only add threshold line if threshold is not NA or infinite
+    if (!is.na(data@threshold) && is.finite(data@threshold)) {
+        p <- p + geom_vline(xintercept=data@threshold, 
+                           color="firebrick", linetype="longdash", linewidth=size)
+    }
     
     # Add cross histogram
     if (!is.null(cross)) {
