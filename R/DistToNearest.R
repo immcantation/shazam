@@ -745,7 +745,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' 
 #' For single-cell mode, the input format is the same as that for \link[alakazam]{groupGenes}. 
 #' Namely, each row represents a sequence/chain. Sequences/chains from the same cell are linked
-#' by a cell ID in the \code{cellIdColumn} field. Groupin will be done by using IGH (BCR) or 
+#' by a cell ID in the \code{cellIdColumn} field. Grouping will be done by using IGH (BCR) or 
 #' TRB/TRD (TCR) sequences only. The argument that allowed to include light chains, 
 #' \code{onlyHeavy}, is deprecated.
 #' 
