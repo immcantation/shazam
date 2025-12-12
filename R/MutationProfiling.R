@@ -1493,7 +1493,9 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
         }        
         
         not_na <- !is.na(db[[germlineColumn]])
-        if (!isTRUE(all.equal(nchar(db[[sequenceColumn]][not_na]), nchar(db[[germlineColumn]][not_na])))) {
+        if (!isTRUE(all.equal(nchar(db[[sequenceColumn]][not_na]), 
+                              nchar(db[[germlineColumn]][not_na]), 
+                              check.attributes = FALSE))) {
             warning("Pairs of ", sequenceColumn, " and ", germlineColumn, " sequences with different lengths found.")
             stop("Expecting IMGT aligned, same length sequences in ", sequenceColumn, " and ", germlineColumn,".")
         }
@@ -2947,7 +2949,9 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
         }        
         
         not_na <- !is.na(db[[germlineColumn]])
-        if (!isTRUE(all.equal(nchar(db[[sequenceColumn]][not_na]), nchar(db[[germlineColumn]][not_na])))) {
+        if (!isTRUE(all.equal(nchar(db[[sequenceColumn]][not_na]), 
+                              nchar(db[[germlineColumn]][not_na]), 
+                              check.attributes = FALSE))) {
             warning("Pairs of ", sequenceColumn, " and ", germlineColumn, " sequences with different lengths found.")
             stop("Expecting IMGT aligned, same length sequences in ", sequenceColumn, " and ", germlineColumn,".")
         }
