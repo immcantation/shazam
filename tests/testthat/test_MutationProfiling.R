@@ -38,6 +38,54 @@ test_that("collapseClones", {
     }
 }) 
 
+#### collapseClones - named columns fix ####
+test_that("collapseClones removes names from clonal_sequence and clonal_germline", {
+    # Test for single clone (where the bug manifested)
+    db_single <- subset(ExampleDb, CLONE == "3100")
+    clones_single <- collapseClones(db_single, 
+                                   cloneColumn="CLONE", 
+                                   sequenceColumn="SEQUENCE_IMGT", 
+                                   germlineColumn="GERMLINE_IMGT_D_MASK",
+                                   method="thresholdedFreq", 
+                                   minimumFrequency=0.6,
+                                   includeAmbiguous=FALSE, 
+                                   breakTiesStochastic=FALSE)
+    
+    # Check that clonal_sequence and clonal_germline have no names
+    expect_null(names(clones_single$clonal_sequence))
+    expect_null(names(clones_single$clonal_germline))
+    
+    # Test for multiple clones (to ensure fix doesn't break existing behavior)
+    db_multi <- subset(ExampleDb, CLONE %in% c("3100", "3141", "3184"))
+    clones_multi <- collapseClones(db_multi, 
+                                  cloneColumn="CLONE",
+                                  sequenceColumn="SEQUENCE_IMGT",
+                                  germlineColumn="GERMLINE_IMGT_D_MASK",
+                                  method="thresholdedFreq", 
+                                  minimumFrequency=0.6,
+                                  includeAmbiguous=FALSE, 
+                                  breakTiesStochastic=FALSE)
+    
+    # Check that clonal_sequence and clonal_germline have no names
+    expect_null(names(clones_multi$clonal_sequence))
+    expect_null(names(clones_multi$clonal_germline))
+    
+    # Test expandedDb=TRUE case as well
+    clones_expanded <- collapseClones(db_multi, 
+                                     cloneColumn="CLONE",
+                                     sequenceColumn="SEQUENCE_IMGT",
+                                     germlineColumn="GERMLINE_IMGT_D_MASK",
+                                     method="thresholdedFreq", 
+                                     minimumFrequency=0.6,
+                                     includeAmbiguous=FALSE, 
+                                     breakTiesStochastic=FALSE,
+                                     expandedDb=TRUE)
+    
+    # Check that clonal_sequence and clonal_germline have no names even when expanded
+    expect_null(names(clones_expanded$clonal_sequence))
+    expect_null(names(clones_expanded$clonal_germline))
+})
+
 #### binMutationsByRegion ####
 test_that("binMutationsByRegion", {
     
