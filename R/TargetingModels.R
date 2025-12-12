@@ -2183,8 +2183,16 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
     mut_scores <- model[!grepl("N", names(model))]
     mut_scores[!is.finite(mut_scores)] <- 0
     mut_words <- names(mut_scores)
+    
+    # Check if there are any valid 5-mers
+    if (length(mut_words) == 0) {
+        stop("No valid 5-mers found in the mutability model (all contain 'N')")
+    }
+    
     mut_positions <- as.data.frame(t(sapply(mut_words, seqinr::s2c)))
-    colnames(mut_positions) <- paste0("pos", 1:ncol(mut_positions))
+    if (ncol(mut_positions) > 0) {
+        colnames(mut_positions) <- paste0("pos", 1:ncol(mut_positions))
+    }
     mut_df <- data.frame(word=mut_words, 
                          score=mut_scores, 
                          mut_positions)
@@ -2203,6 +2211,11 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
     
     # Subset to nucleotides of interest
     mut_df <- mut_df[mut_df$pos3 %in% nucleotides, ]
+    
+    # Check if any data remains after subsetting
+    if (nrow(mut_df) == 0) {
+        stop("No 5-mers found with center nucleotide(s): ", paste(nucleotides, collapse=", "))
+    }
 
     # Functions to transform and revert score for plotting
     score_max <- max(mut_df$score, na.rm=TRUE)
