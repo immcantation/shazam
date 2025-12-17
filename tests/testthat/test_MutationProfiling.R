@@ -36,12 +36,6 @@ test_that("collapseClones", {
         # expect result from expandedDb=TRUE to be the same as that from expandedDb=FALSE
         expect_identical(clones.1[clones.1[["CLONE"]]==clone, ], clones.2[clones.2[["CLONE"]]==clone, ][1,])
     }
-    
-    # Check that clonal_sequence and clonal_germline have no names
-    expect_null(names(clones.1$clonal_sequence))
-    expect_null(names(clones.1$clonal_germline))
-    expect_null(names(clones.2$clonal_sequence))
-    expect_null(names(clones.2$clonal_germline))
 }) 
 
 #### binMutationsByRegion ####
@@ -2437,6 +2431,8 @@ test_that("collapseClones", {
                        CLONE %in% c("3100", "3141", "3184"))
     db_a <- subset(ExampleDb_airr, isotype %in% c("IgA", "IgG") & sample == "+7d" &
                        clone_id %in% c("3100", "3141", "3184"))
+    db_oneclone <- subset(ExampleDb_airr, isotype %in% c("IgA", "IgG") & sample == "+7d" &
+                           clone_id %in% c("3100"))
     
     rm(ExampleDb, ExampleDb_airr)
     
@@ -2448,9 +2444,18 @@ test_that("collapseClones", {
                                sequenceColumn="sequence_alignment", germlineColumn="germline_alignment_d_mask",
                                method="thresholdedFreq", minimumFrequency=0.6,
                                includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
+    clones_oneclone <- collapseClones(db_oneclone, cloneColumn="clone_id",
+                               sequenceColumn="sequence_alignment", germlineColumn="germline_alignment_d_mask",
+                               method="thresholdedFreq", minimumFrequency=0.6,
+                               includeAmbiguous=FALSE, breakTiesStochastic=FALSE)
     
     expect_identical(clones_a[["clonal_sequence"]], clones_c[["clonal_sequence"]])
     expect_identical(clones_a[["clonal_germline"]], clones_c[["clonal_germline"]])
+
+    # Check that clonal_sequence and clonal_germline have no names
+    # Issue 183
+    expect_null(names(clones_oneclone$clonal_sequence))
+    expect_null(names(clones_oneclone$clonal_germline))
     
 })
 
