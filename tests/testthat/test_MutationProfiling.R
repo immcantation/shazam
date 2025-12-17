@@ -36,6 +36,12 @@ test_that("collapseClones", {
         # expect result from expandedDb=TRUE to be the same as that from expandedDb=FALSE
         expect_identical(clones.1[clones.1[["CLONE"]]==clone, ], clones.2[clones.2[["CLONE"]]==clone, ][1,])
     }
+    
+    # Check that clonal_sequence and clonal_germline have no names
+    expect_null(names(clones.1$clonal_sequence))
+    expect_null(names(clones.1$clonal_germline))
+    expect_null(names(clones.2$clonal_sequence))
+    expect_null(names(clones.2$clonal_germline))
 }) 
 
 #### binMutationsByRegion ####
