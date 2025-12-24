@@ -1065,6 +1065,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("s", "rs"),
                                  source=mut_source,
                                  numMutS=mutationsTotalRS[["S"]],
                                  numMutR=mutationsTotalRS[["R"]])
+    names(mut_model) <- mut_names
     return(mut_model)
 }
 
@@ -1303,11 +1304,12 @@ extendMutabilityMatrix <- function(mutabilityModel) {
     }
     
     # Return extended MutabilityModel
+    extend_names  <- names(extend_mat)
     extend_model <- MutabilityModel(extend_mat,
                                     source=mut_source,
                                     numMutS=mut_s,
                                     numMutR=mut_r)
-
+    names(extend_model) <- extend_names
     return(extend_model)
 }
  
