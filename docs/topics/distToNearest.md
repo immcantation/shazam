@@ -3,11 +3,8 @@
 Description
 --------------------
 
-Get non-zero distance of every heavy chain (`IGH`) sequence (as defined by 
-`sequenceColumn`) to its nearest sequence in a partition of heavy chains sharing the same 
-V gene, J gene, and junction length (V-J-length), or in a partition of single cells with heavy/long chains
-sharing the same heavy/long chain V-J-length combination, or of single cells with heavy/long and light/short chains 
-sharing the same heavy/long chain V-J-length and light/short chain V-J-length combinations.
+Calculate the non-zero distance from each sequence to its nearest neighbor
+within partitions based on shared V gene, J gene, and junction length.
 
 
 Usage
@@ -159,13 +156,29 @@ type `character` if they were type `factor` in the input `db`.
 Details
 -------------------
 
+The distance to nearest neighbor can be used to estimate a threshold for assigning 
+Ig sequences to clonal groups. A histogram of the resulting vector is often bimodal, with the 
+ideal threshold being a value that separates the two modes.
+
+Refer to the details section for a more thorough description of the implementation.
+
+
+
+There are two modes of operation for `distToNearest`: single-cell (all sequences are 
+single-cell data), non-single-cell (all sequences are bulk sequencing data). Mixed data, 
+where both single-cell and non-single-cell sequences are present in the data, is considered 
+a case under the single-single cell mode .
+
 To invoke single-cell mode the `cellIdColumn` argument must be specified and `locusColumn` 
 must be correct. Otherwise, `distToNearest` will be run with bulk sequencing assumptions, 
-using all input sequences regardless of the values in the `locusColumn` column.
+using all input sequences regardless of the values in the `locusColumn` column. 
 
-Under single-cell mode, only heavy/long chain (IGH, TRB, TRD) sequences will be used for calculating 
-nearest neighbor distances. Under non-single-cell mode, all input sequences will be used for 
-calculating nearest neighbor distances, regardless of the values in the `locusColumn` field (if present).
+Under single-cell mode, only heavy/long chain (IGH, TRB, TRD) sequences will be 
+used for calculating nearest neighbor distances regardless of `locusValue` values in 
+the `locusColumn` field (if present). Under non-single-cell mode, 
+all input sequences with `locusValue` value(s) in the  `locusColumn` field will be 
+used for calculating nearest neighbor distances.
+
 
 Values in the `locusColumn` must be one of `c("IGH", "IGI", "IGK", "IGL")` for BCR 
 or `c("TRA", "TRB", "TRD", "TRG")` for TCR sequences. Otherwise, the function returns an 
@@ -173,16 +186,13 @@ error message and stops.
 
 For single-cell mode, the input format is the same as that for [groupGenes](http://www.rdocumentation.org/packages/alakazam/topics/groupGenes). 
 Namely, each row represents a sequence/chain. Sequences/chains from the same cell are linked
-by a cell ID in the `cellIdColumn` field. Groupin will be done by using IGH (BCR) or 
+by a cell ID in the `cellIdColumn` field. Grouping will be done by using IGH (BCR) or 
 TRB/TRD (TCR) sequences only. The argument that allowed to include light chains, 
 `onlyHeavy`, is deprecated.
 
 Note, `distToNearest` required that each cell (each unique value in `cellIdColumn`)
 correspond to only a single `IGH` (BCR) or `TRB/TRD` (TCR) sequence.
 
-The distance to nearest neighbor can be used to estimate a threshold for assigning 
-Ig sequences to clonal groups. A histogram of the resulting vector is often bimodal, with the 
-ideal threshold being a value that separates the two modes.
 
 The following distance measures are accepted by the `model` parameter.
 
@@ -196,7 +206,7 @@ with gaps assigned zero distance.
 [calcTargetingDistance](calcTargetingDistance.md).
 +  `"mk_rs1nf"`:     Mouse single nucleotide distance matrix derived from [MK_RS1NF](MK_RS1NF.md) with 
 [calcTargetingDistance](calcTargetingDistance.md).
-+  `"mk_rs5nf"`:     Mouse 5-mer nucleotide context distance matrix derived from [MK_RS1NF](MK_RS1NF.md) with 
++  `"mk_rs5nf"`:     Mouse 5-mer nucleotide context distance matrix derived from [MK_RS5NF](MK_RS5NF.md) with 
 [calcTargetingDistance](calcTargetingDistance.md).
 +  `"hs1f_compat"`:  Backwards compatible human single nucleotide distance matrix used in 
 SHazaM v0.1.4 and Change-O v0.3.3.

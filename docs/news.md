@@ -1,5 +1,15 @@
 # Release Notes
 
+Version 1.3.1: December 26, 2025
+-------------------------------------------------------------------------------
+
+Mutation Profiling:
+
++ Fixed a bug in `collapseClones()` where column names were set as attributes 
+  when processing single clones, causing `calcBaseline()` to fail due to 
+  attribute mismatches in subsequent `observedMutations()` checks. Now using
+  `unname()` to remove name attributes.
+
 Version 1.3.0: October 20, 2025
 -------------------------------------------------------------------------------
 
