@@ -391,7 +391,7 @@ allValidChars <- function(seq, validChars) {
 #                          "len" = normalize distance by length of junction.
 #                          "mut" = normalize distance by number of mutations in 
 #                          junction.
-# @param    symmetr        if model is hs5f or mrs5nf, distance between seq1 and seq2 is either the
+# @param    symmetry        if model is hs5f or mrs5nf, distance between seq1 and seq2 is either the
 #                          average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 # @param    crossGroups    column for grouping to calculate distances across groups 
 #                          (self vs others).
