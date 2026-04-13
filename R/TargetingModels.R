@@ -1065,6 +1065,7 @@ createMutabilityMatrix <- function(db, substitutionModel, model=c("s", "rs"),
                                  source=mut_source,
                                  numMutS=mutationsTotalRS[["S"]],
                                  numMutR=mutationsTotalRS[["R"]])
+    names(mut_model) <- mut_names
     return(mut_model)
 }
 
@@ -1303,11 +1304,12 @@ extendMutabilityMatrix <- function(mutabilityModel) {
     }
     
     # Return extended MutabilityModel
+    extend_names  <- names(extend_mat)
     extend_model <- MutabilityModel(extend_mat,
                                     source=mut_source,
                                     numMutS=mut_s,
                                     numMutR=mut_r)
-
+    names(extend_model) <- extend_names
     return(extend_model)
 }
  
@@ -2162,7 +2164,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
     base_theme <- theme_bw() +
         theme(panel.spacing=grid::unit(0, "lines"),
               panel.background=element_blank()) +
-        theme(axis.text=element_text(margin=grid::unit(0, "lines"))) +
+        theme(axis.text=element_text(margin=margin(0, 0, 0, 0, "lines"))) +
         theme(text=element_text(size=10*size),
               title=element_text(size=10*size),
               legend.spacing=grid::unit(0, "lines"),
@@ -2290,7 +2292,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                                   ymax=!!rlang::sym("ymax"), 
                                   fill=!!rlang::sym("text_label"), 
                                   color=!!rlang::sym("text_label")), 
-                      size=0.5*size, alpha=1, show.legend=FALSE) +
+                      linewidth=0.5*size, alpha=1, show.legend=FALSE) +
             #geom_tile(data=sub_rect, 
             #          mapping=aes_string(x="text_x", y="text_y", width="rect_width", fill="text_label"), 
             #          size=0, alpha=0.7, show.legend=FALSE) +
@@ -2332,7 +2334,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
             y_limits <- c(text_offset - 1, score_scale + score_offset)
             #orient_x <- sub_text[[3]]$text_x[1]
             #orient_y <- text_offset - 1
-            p1 <- p1 + theme(plot.margin=grid::unit(c(0, 0, 0, 0), "lines"),
+            p1 <- p1 + theme(plot.margin=margin(0, 0, 0, 0, "lines"),
                              panel.grid=element_blank(), 
                              panel.border=element_blank(),
                              axis.title=element_blank(),
@@ -2349,13 +2351,13 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                                          xend=!!rlang::sym("x"), 
                                          yend=!!rlang::sym("score"), 
                                          color=!!rlang::sym("motif")), 
-                             y=score_offset, size=0.75*size, position=position_nudge(x = -0.5)) +
-                guides(color=guide_legend(override.aes=list(linetype=1, size=2*size)))
+                             y=score_offset, linewidth=0.75*size, position=position_nudge(x = -0.5)) +
+                guides(color=guide_legend(override.aes=list(linetype=1, linewidth=2*size)))
               
         } else if (style == "bar") {
             y_breaks <- seq(score_offset, score_scale + score_offset, 1)
             y_limits <- c(text_offset + 0.5, score_scale + score_offset)
-            p1 <- p1 + theme(plot.margin=grid::unit(c(1, 1, 1, 1), "lines"),
+            p1 <- p1 + theme(plot.margin=margin(0, 0, 0, 0, "lines"),
                              panel.grid=element_blank(), 
                              panel.border=element_rect(color="black"),
                              axis.text.x=element_blank(), 
@@ -2369,7 +2371,7 @@ plotMutability <- function(model, nucleotides=c("A", "C", "G", "T"), mark=NULL,
                          mapping=aes(x=!!rlang::sym("x"), y=!!rlang::sym("score"), 
                                      fill=!!rlang::sym("motif"), 
                                      color=!!rlang::sym("motif")), 
-                         stat="identity", position=position_nudge(x = -0.5), size=0, width=0.7) +
+                         stat="identity", position=position_nudge(x = -0.5), linewidth=0, width=0.7) +
               guides(color=guide_legend(override.aes=list(fill=sub_colors, linetype=0)))
         }
 

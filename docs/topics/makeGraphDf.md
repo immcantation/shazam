@@ -82,7 +82,7 @@ See also
 
 See [observedMutations](observedMutations.md) to calculate mutation frequencies using
 `parent_sequence` as the reference germline. See [ChangeoClone](http://www.rdocumentation.org/packages/alakazam/topics/ChangeoClone-class),
-[buildPhylipLineage](http://www.rdocumentation.org/packages/alakazam/topics/buildPhylipLineage), and [graph](http://www.rdocumentation.org/packages/igraph/topics/make_graph) for details on the 
+[buildPhylipLineage](http://www.rdocumentation.org/packages/alakazam/topics/buildPhylipLineage), and [graph](http://www.rdocumentation.org/packages/igraph/topics/graph) for details on the 
 input objects.
 
 

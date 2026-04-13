@@ -596,23 +596,23 @@ collapseClones <- function(db, cloneColumn = "clone_id",
         # Fill all rows with the consensus sequence
         clone_index <- match(db[["fields_clone_id"]], uniqueClones)
         cons_db <- db
-        cons_db$clonal_sequence <- unlist(cons_mat[, 1])[clone_index]
-        cons_db$clonal_germline <- unlist(cons_mat[, 2])[clone_index]
+        cons_db$clonal_sequence <- unname(unlist(cons_mat[, 1])[clone_index])
+        cons_db$clonal_germline <- unname(unlist(cons_mat[, 2])[clone_index])
         
         # assign mutation frequency corresponding to consensus into clonal_sequence_mufreq
         if (method %in% c("mostMutated", "leastMutated")) {
-            cons_db$clonal_sequence_mufreq <- unlist(cons_mat[, 3])[clone_index]
+            cons_db$clonal_sequence_mufreq <- unname(unlist(cons_mat[, 3])[clone_index])
         }
     } else {
         # Return only the first row of each clone
         clone_index <- match(uniqueClones, db[["fields_clone_id"]])
         cons_db <- db[clone_index, ]
-        cons_db$clonal_sequence <- unlist(cons_mat[, 1])
-        cons_db$clonal_germline <- unlist(cons_mat[, 2])
+        cons_db$clonal_sequence <- unname(unlist(cons_mat[, 1]))
+        cons_db$clonal_germline <- unname(unlist(cons_mat[, 2]))
         
         # assign mutation frequency corresponding to consensus into clonal_sequence_mufreq
         if (method %in% c("mostMutated", "leastMutated")) {
-            cons_db$clonal_sequence_mufreq <- unlist(cons_mat[, 3])
+            cons_db$clonal_sequence_mufreq <- unname(unlist(cons_mat[, 3]))
         }
     }
     
@@ -1493,7 +1493,9 @@ observedMutations <- function(db,sequenceColumn = "sequence_alignment",
         }        
         
         not_na <- !is.na(db[[germlineColumn]])
-        if (!isTRUE(all.equal(nchar(db[[sequenceColumn]][not_na]), nchar(db[[germlineColumn]][not_na])))) {
+        if (!isTRUE(all.equal(nchar(db[[sequenceColumn]][not_na]), 
+                              nchar(db[[germlineColumn]][not_na]), 
+                              check.attributes = FALSE))) {
             warning("Pairs of ", sequenceColumn, " and ", germlineColumn, " sequences with different lengths found.")
             stop("Expecting IMGT aligned, same length sequences in ", sequenceColumn, " and ", germlineColumn,".")
         }
@@ -2947,7 +2949,9 @@ expectedMutations <- function(db,sequenceColumn = "sequence_alignment",
         }        
         
         not_na <- !is.na(db[[germlineColumn]])
-        if (!isTRUE(all.equal(nchar(db[[sequenceColumn]][not_na]), nchar(db[[germlineColumn]][not_na])))) {
+        if (!isTRUE(all.equal(nchar(db[[sequenceColumn]][not_na]), 
+                              nchar(db[[germlineColumn]][not_na]), 
+                              check.attributes = FALSE))) {
             warning("Pairs of ", sequenceColumn, " and ", germlineColumn, " sequences with different lengths found.")
             stop("Expecting IMGT aligned, same length sequences in ", sequenceColumn, " and ", germlineColumn,".")
         }

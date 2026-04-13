@@ -87,6 +87,11 @@ db <- subset(ExampleDb, sample_id == "-1h")
 db <- distToNearest(db, sequenceColumn="junction", vCallColumn="v_call_genotyped",
 jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 
+```
+
+*Running in non-single-cell mode.*
+```R
+
 # To find the threshold cut, call findThreshold function for "gmm" method.
 output <- findThreshold(db$dist_nearest, method="gmm", model="norm-norm", cutoff="opt")
 print(output)
@@ -107,7 +112,7 @@ plotGmmThreshold(output, binwidth=0.02)
 
 ```
 
-![4](plotGmmThreshold-4.png)
+![6](plotGmmThreshold-6.png)
 
 
 See also

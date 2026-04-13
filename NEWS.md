@@ -1,3 +1,52 @@
+Version 1.3.1.999: Unreleased
+-------------------------------------------------------------------------------
+
+Distance Profiling:
+
++ Fixed a bug in `findThreshold()` where the `max_itr` limit introduced in 
+  v1.3.0 caused `rocSpace()` to `stop()` when a single outer fitting iteration 
+  exhausted 1000 attempts, aborting analyses that would previously succeed. The 
+  inner loop now emits a `warning()` and continues to the next outer iteration 
+  instead of stopping. If all 15 outer iterations fail to produce a valid fit, 
+  an error message is returned.
+
+
+Version 1.3.1: December 26, 2025
+-------------------------------------------------------------------------------
+
+Mutation Profiling:
+
++ Fixed a bug in `collapseClones()` where column names were set as attributes 
+  when processing single clones, causing `calcBaseline()` to fail due to 
+  attribute mismatches in subsequent `observedMutations()` checks. Now using
+  `unname()` to remove name attributes.
+
+Version 1.3.0: October 20, 2025
+-------------------------------------------------------------------------------
+
+General:
+
++ Development of `shazam` has moved to GitHub: https://github.com/immcantation/shazam
++ Updated dependencies: alakazam >= 1.4.1.
+
+Mutation simulation:
+
++ `shmulateSeq` now samples mutations from a binomial distribution with provided
+  probability instead of taking the floor from the number of sequences.
+
+Distance Profiling:
+
++ Updated `distToNearest` code, documentation and tests to match changes introduced
+  in `alakazam::groupGenes` in `alakazam 1.4.1` to handle mixed data (single-cell
+  and non single-cell, with heavy and/or light chain sequences).
++ Fixed a model mismatch. When `model="mk_rs5nf"` was specified in `distToNearest`, 
+  the function would incorrectly use character validation from the non-existing `MK_RS1NF@targeting` targeting model instead of the correct `MK_RS5NF@targeting`.
+
+Documentation:
+
++ Updated installation instructions to add BiocManager installation option.
++ Added a Contributing section.
+
 Version 1.2.1: August 1, 2024
 -------------------------------------------------------------------------------
 
