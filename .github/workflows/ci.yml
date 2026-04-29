@@ -32,13 +32,6 @@ jobs:
         env:
           _R_CHECK_CRAN_INCOMING_: false
         run: |
-              Sys.setenv("_R_CHECK_FORCE_SUGGESTS_" = "false")
-              if (BiocManager::version() >= "3.22") {
-                if (!requireNamespace("cigarillo", quietly=TRUE)) {
-                  BiocManager::install("cigarillo", update=FALSE)
-                }
-                Sys.setenv("_R_CHECK_FORCE_SUGGESTS_" = "true")
-              }
               options(crayon.enabled=TRUE)
               rcmdcheck::rcmdcheck(
                 args = c("--no-manual", 
