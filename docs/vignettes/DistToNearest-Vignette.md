@@ -39,7 +39,7 @@ db %>% count(sample_id)
 ```
 
 ```
-## # A tibble: 2 × 2
+## # A tibble: 2 x 2
 ##   sample_id     n
 ##   <chr>     <int>
 ## 1 +7d         253
@@ -293,7 +293,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1249113
+## [1] 0.1226895
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is
@@ -425,7 +425,7 @@ top_10_sizes
 ```
 
 ```
-## # A tibble: 10 × 1
+## # A tibble: 10 x 1
 ##     SIZE
 ##    <int>
 ##  1    89
