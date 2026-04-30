@@ -293,7 +293,7 @@ print(output)
 ```
 
 ```
-## [1] 0.1184424
+## [1] 0.1194849
 ```
 
 **Note:** The shape of histogram plotted by `plotGmmThreshold` is

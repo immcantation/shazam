@@ -159,6 +159,7 @@ plotFiltered=TRUE, jitter.y=FALSE)
 
 # Notice that some of the lines overlap
 # Jittering could help
+set.seed(123) # for reproducibility of the example
 slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
 plotFiltered=TRUE, jitter.y=TRUE)
 
@@ -169,6 +170,7 @@ plotFiltered=TRUE, jitter.y=TRUE)
 ```R
 
 # Plot numbers of sequences remaining instead of filtered
+set.seed(123) # for reproducibility of the example
 slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3, 
 plotFiltered=FALSE, jitter.y=TRUE, 
 legendPos="bottomright")
@@ -180,6 +182,7 @@ legendPos="bottomright")
 ```R
 
 # Plot percentages of sequences filtered with a tiny amount of jittering
+set.seed(123) # for reproducibility of the example
 slideWindowTunePlot(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
 plotFiltered=TRUE, percentage=TRUE, 
 jitter.y=TRUE, jitter.y.amt=0.01)
