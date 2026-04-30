@@ -26,29 +26,32 @@ library(shazam)
 sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATA.TTTA"
 
 # Simulate introduction of 6 mutations using the default HH_S5F targeting model
+set.seed(12) # for reproducibility of the example
 shmulateSeq(sequence, numMutations=6)
 ```
 
 ```
-## [1] "NGATGTGACGACACGGCCGTGCATTACTGCGCGAGAGAAA.TGAA"
+## [1] "NGATGTGACGACTGGGCCATATATTACTGTGCGAGAAATA.TTTA"
 ```
 
 ``` r
 # Simulate introduction of mutations at frequency 0.2 using the default HH_S5F targeting model
+set.seed(34) # for reproducibility of the example
 shmulateSeq(sequence, numMutations=0.2, frequency=TRUE)
 ```
 
 ```
-## [1] "NTATCTGACCATTCGGCCGTTTTTTACTGTGTGCGCGAGA.TTTA"
+## [1] "NCATCTTTCGACACGGCCGCGTCTTCCTTTGCGAGAGATA.CTCA"
 ```
 
 ``` r
 # Simulate introduction of 4 mutations using the MK_RS5NF targeting model
+set.seed(56) # for reproducibility of the example
 shmulateSeq(sequence, numMutations=4, targetingModel=MK_RS5NF)
 ```
 
 ```
-## [1] "NGATCTGACGACACGGCCGTGTATTATTGTGCTAGAGCTA.TCTA"
+## [1] "NGATCTGACGACACGACCGTGTATCACTGTGCGAAAGATA.TTCA"
 ```
 
 ## Simulate mutations in a lineage tree
@@ -72,8 +75,7 @@ graph <- ExampleTrees[[17]]
 sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
 
 # Simulate using the default HH_S5F targeting model
-# Setting a seed for reproducibility of the example
-set.seed(321)
+set.seed(321) # for reproducibility of the example
 shmulateTree(sequence, graph)
 ```
 
