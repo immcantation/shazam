@@ -1224,6 +1224,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #' @param    spc        specificity required. Applies only when \code{method="gmm"} and \code{cutoff="user"}.
 #'                      
 #' @param    progress   if \code{TRUE} print a progress bar. 
+#' @param    seed       numeric value to set the random seed for reproducibility of the fitting procedure.
 #' @return   
 #' \itemize{
 #'   \item \code{"gmm"} method:      Returns a \link{GmmThreshold} object including the  
@@ -1273,8 +1274,9 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #'                     jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 #'                             
 #' # Find threshold using the "gmm" method with user defined specificity
+#' # Setting a seed value just for reproducibility of the example results
 #' output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", 
-#'                         cutoff="user", spc=0.99)
+#'                         cutoff="user", spc=0.99, seed=234)
 #' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
 #' print(output)
 #' }
@@ -1283,7 +1285,7 @@ findThreshold <- function (distances, method=c("density", "gmm"),
                            edge=0.9, cross=NULL, subsample=NULL,
                            model=c("gamma-gamma", "gamma-norm", "norm-gamma", "norm-norm"),
                            cutoff=c("optimal", "intersect", "user"), sen=NULL, spc=NULL, 
-                           progress=FALSE){
+                           progress=FALSE, seed=NULL) {
     # Check arguments
     method <- match.arg(method)
     model <- match.arg(model)
@@ -1305,11 +1307,11 @@ findThreshold <- function (distances, method=c("density", "gmm"),
                 output <- NA
             } else {
                 output <- gmmFit(ent=distances, edge=edge, cross=cross, model=model, cutoff=cutoff, 
-                                 sen=sen, spc=spc, progress=progress)
+                                 sen=sen, spc=spc, progress=progress, seed=seed)
             }
         } else {
             output <- gmmFit(ent=distances, edge=edge, cross=cross, model=model, cutoff=cutoff, 
-                             sen=sen, spc=spc, progress=progress)
+                             sen=sen, spc=spc, progress=progress, seed=seed)
         }
     } else if (method == "density") {
         output <- smoothValley(distances)
@@ -1456,7 +1458,7 @@ findThreshold <- function (distances, method=c("density", "gmm"),
 # output <- findThreshold(db$dist_nearest, method="gmm", edge=0.9)
 # # or 
 # output <- gmmFit(db$dist_nearest, edge=0.9) 
-gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=FALSE) {
+gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=FALSE, seed=NULL) {
     
     #************* Filter Unknown Data *************#
     ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
@@ -1491,7 +1493,7 @@ gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=
     }
     
     #*************  set rand seed *************#
-    set.seed(NULL)
+    set.seed(seed)
     
     #*************  define Number of Gaussians *************#
     num_G <- 2
@@ -1628,7 +1630,7 @@ gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=
         sigma.gmm <- c(sigma[1], sigma[2]) 
         
         fit_results <- rocSpace(ent=ent, omega.gmm=omega.gmm , mu.gmm=mu.gmm, sigma.gmm=sigma.gmm, 
-                               model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress)
+                               model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress, seed=seed)
         results <- new("GmmThreshold",
                        x=ent,
                        model=model,
@@ -1653,7 +1655,7 @@ gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=
 }
 
 
-rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc, progress=FALSE) {
+rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc, progress=FALSE, seed=NULL) {
     func <- model
     bits <- strsplit(func,'-')[[1]]
 
@@ -1682,7 +1684,9 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
     gmmfunc2.1 <- func2.1
     gmmfunc2.2 <- func2.2
     
-    set.seed(NULL)
+    # Resets the RNG when no seed provided (original random behavior). When a seed 
+    # is set, inherit the RNG state from gmmFit.
+    if (is.null(seed)) { set.seed(NULL) }
     # options(warn=-1)
     LOG_LIK <- 0
     fit_found <- FALSE
