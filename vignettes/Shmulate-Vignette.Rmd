@@ -82,6 +82,8 @@ graph <- ExampleTrees[[17]]
 sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
 
 # Simulate using the default HH_S5F targeting model
+# Setting a seed for reproducibility of the example
+set.seed(321)
 shmulateTree(sequence, graph)
 ```
 
@@ -101,6 +103,7 @@ plot(graph, layout=layout_as_tree, edge.arrow.mode=0, vertex.label.cex=0.75)
 # The nodes "Germline" and "Inferred1" are thus excluded
 # As a corollary, "GN5SHBT01AKANC", the offspring of "Inferred1", is also excluded
 # In this case, "GN5SHBT07JDYW5" is then taken to be the MRCA
+set.seed(543) # for reproducibility of the example
 shmulateTree(sequence, graph, field="sample_id", exclude=NA)
 ```
 
@@ -114,5 +117,6 @@ par(mar=c(0, 0, 0, 0) + 0.1)
 plot(graph, layout=layout_as_tree, edge.arrow.mode=0, vertex.label.cex=0.75)
 
 # Add 20% mutation rate to the immediate offsprings of the MRCA
+set.seed(798) # for reproducibility of the example
 shmulateTree(sequence, graph, junctionWeight=0.2)
 ```
