@@ -35,6 +35,7 @@ Author
 
 Authors:
 
++  Susanna Marquez [susanna.marquez@yale.edu](susanna.marquez@yale.edu)
 +  Mohamed Uduman [mohamed.uduman@yale.edu](mohamed.uduman@yale.edu)
 +  Namita Gupta [namita.gupta@yale.edu](namita.gupta@yale.edu)
 +  Julian Zhou [julian.zhou@yale.edu](julian.zhou@yale.edu)
