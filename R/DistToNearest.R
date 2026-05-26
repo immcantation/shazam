@@ -1057,7 +1057,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     valid_rows <- which(!is.na(db[["vj_group"]]))
     grp_key <- do.call(paste, c(db[valid_rows, group_cols, drop=FALSE], sep="___"))
     uniqueGroupsIdx <- split(valid_rows, grp_key)
-    
+
     # Auto-reduce to single core when the dataset is too small to benefit from
     # parallelization.
     # Threshold: fall back when < 100k valid rows AND estimated pairwise work
