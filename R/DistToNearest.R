@@ -1134,14 +1134,6 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # wrt db
         idx <- uniqueGroupsIdx[[i]]
         
-        # if (singleCell) {
-        #     # only use IGH, TRB, TRD
-        #     # wrt idx
-        #     idxBool <- db[[locusColumn]][idx] %in% c("IGH", "TRB", "TRD")
-        # } else {
-        #     idxBool <- rep(TRUE, length(idx))
-        # }
-        
         # for the distance calculation use only
         # sequences with locus values specified in `locusValues`
         idxBool <- toupper(db[[locusColumn]][idx]) %in% locusValues
