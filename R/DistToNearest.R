@@ -1014,10 +1014,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if (!is.null(fields)) {
         group_cols <- append(group_cols,fields)
         # make vj_group unique across fields by pasting field group
-        db <- db %>%
-            dplyr::rowwise() %>%
-            mutate(vj_group=paste("F",!!rlang::sym("DTN_TMP_FIELD"),"_",!!rlang::sym("vj_group"), sep="", collapse = "")) %>%
-            ungroup() 
+        db[["vj_group"]] <- paste0("F", db[["DTN_TMP_FIELD"]], "_", db[["vj_group"]])
     }
     db[['DTN_TMP_FIELD']] <- NULL
     
