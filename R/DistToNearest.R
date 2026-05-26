@@ -1040,23 +1040,28 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     # indices
     # crucial to have simplify=FALSE 
     # (otherwise won't return a list if uniqueClones has length 1)
-    uniqueGroupsIdx <- sapply(1:nrow(uniqueGroups), function(i){
-        curGroup <- data.frame(uniqueGroups[i, ], stringsAsFactors=FALSE)
-        colnames(curGroup) <- group_cols
-        # match for each field
-        curIdx <- sapply(group_cols, function(coln){
-            db[[coln]]==curGroup[, coln]
-        }, simplify=FALSE)
-        curIdx <- do.call(rbind, curIdx)
-        # intersect to get match across fields 
-        curIdx <- which(colSums(curIdx)==length(group_cols))
-        # sanity check
-        # no NA
-        stopifnot( all(!is.na(curIdx)) )
-        # index within range of db
-        stopifnot( max(curIdx) <= nrow(db) )
-        return(curIdx)
-    }, simplify=FALSE)
+    # uniqueGroupsIdx <- sapply(1:nrow(uniqueGroups), function(i){
+    #     curGroup <- data.frame(uniqueGroups[i, ], stringsAsFactors=FALSE)
+    #     colnames(curGroup) <- group_cols
+    #     # match for each field
+    #     curIdx <- sapply(group_cols, function(coln){
+    #         db[[coln]]==curGroup[, coln]
+    #     }, simplify=FALSE)
+    #     curIdx <- do.call(rbind, curIdx)
+    #     # intersect to get match across fields 
+    #     curIdx <- which(colSums(curIdx)==length(group_cols))
+    #     # sanity check
+    #     # no NA
+    #     stopifnot( all(!is.na(curIdx)) )
+    #     # index within range of db
+    #     stopifnot( max(curIdx) <= nrow(db) )
+    #     return(curIdx)
+    # }, simplify=FALSE)
+    # alternative using split + paste key 
+    # Old code 1 proc and ExampleDb, 190.6MB memo and 560ms time; new code, 78MB and 380ms
+    valid_rows <- which(!is.na(db[["vj_group"]]))
+    grp_key <- do.call(paste, c(db[valid_rows, group_cols, drop=FALSE], sep="___"))
+    uniqueGroupsIdx <- split(valid_rows, grp_key)
     
     # Create cluster of nproc size and export namespaces
     # If user wants to paralellize this function and specifies nproc > 1, then
@@ -1113,7 +1118,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if (progress) { 
         pb <- progressBar(n_groups) 
     }
-    tryCatch(list_db <- foreach(i=1:n_groups, .errorhandling='stop') %dopar% {
+    tryCatch(list_db <- foreach(i=seq_len(n_groups), .errorhandling='stop') %dopar% {
         # wrt db
         idx <- uniqueGroupsIdx[[i]]
         
