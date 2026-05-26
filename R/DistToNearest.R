@@ -1063,6 +1063,18 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     grp_key <- do.call(paste, c(db[valid_rows, group_cols, drop=FALSE], sep="___"))
     uniqueGroupsIdx <- split(valid_rows, grp_key)
     
+    # Auto-reduce to single core when the dataset is too small to benefit from
+    # parallelization.
+    # Threshold: fall back when < 100k valid rows AND estimated pairwise work
+    # (sum of group_size^2) is below 1e8 (rough proxy for ~10 s single-core).
+    if (nproc > 1) {
+        estimated_work <- sum(lengths(uniqueGroupsIdx)^2)
+        if (length(valid_rows) < 100000L || estimated_work < 1e8) {
+            message("Dataset too small for parallel speedup; falling back to nproc=1.")
+            nproc <- 1L
+        }
+    }
+    
     # Create cluster of nproc size and export namespaces
     # If user wants to paralellize this function and specifies nproc > 1, then
     # initialize and register slave R processes/clusters & 
