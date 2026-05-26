@@ -534,16 +534,14 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
     # Find minimum distance for each sequence
     if (is.null(crossGroups)) {
         if(!mst) {
-            # Return smaller value greater than 0
-            # If all 0, return NA
-            .dmin <- function(i) { 
-                x <- dist_mat[, i]
-                gt0 <- which(x > 0)
-                if (length(gt0) != 0) { min(x[gt0]) } else { NA }
-            }
-            
-            ## TODO: Could be an apply over columns
-            seq_uniq_dist <- setNames(sapply(1:n_uniq, .dmin), names(seq_uniq))
+            # Return smallest value greater than 0 per column; NA if all are 0
+            # Temporary zero out diagonal in-place (only zeros are on diagonal) to avoid a full matrix copy
+            zero_idx <- which(dist_mat == 0)
+            dist_mat[zero_idx] <- NA_real_
+            col_mins <- apply(dist_mat, 2, min, na.rm=TRUE)
+            col_mins[is.infinite(col_mins)] <- NA_real_
+            dist_mat[zero_idx] <- 0
+            seq_uniq_dist <- setNames(col_mins, names(seq_uniq))
         } else {
             # Get adjacency matrix of minimum spanning tree
             adj <- ape::mst(dist_mat)
