@@ -22,35 +22,85 @@ jobs:
           Rscript tests/setup/install_dep.R
       - name: Document
         run: |
-          install.packages('lifecycle')
           devtools::document()
         shell: Rscript {0}
-      - name: Check
+      - name: Update buildignore
+        run: |
+            sed -i '/test/ d' .Rbuildignore
+        shell: bash
+      - name: CRAN check
         env:
           _R_CHECK_CRAN_INCOMING_: false
         run: |
-          options(crayon.enabled=TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--run-donttest"), error_on="error", check_dir="check")
+              options(crayon.enabled=TRUE)
+              rcmdcheck::rcmdcheck(
+                args = c("--no-manual", 
+                          "--as-cran", 
+                          "--run-donttest", 
+                          "--timings"),
+                error_on = "warning", 
+                check_dir = "check"
+              )
         shell: Rscript {0}
       - name: Show testthat output
         if: always()
-        run: find check -name '*testthat.Rout' -exec cat '{}' \; || true
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
         shell: bash
-      # - name: Install
-      #   run: |
-      #     devtools::install()
-      #   shell: Rscript {0}
-      # - name: Build docs
-      #   run: |
-      #      git rm -r docs/topics docs/vignettes
-      #      Rscript docs/build.R
-      #      CHANGES=$(git status --porcelain | wc -l)
-      #         if [[ "${CHANGES}" -gt 0 ]]; then
-      #           git add docs/*
-      #           git commit --allow-empty -m "[skip ci] Auto-build docs."
-      #           git push
-      #         fi
+      - name: Build package tarball without tests
+        run: |
+          echo -e '\n^test' >> .Rbuildignore
+          R CMD build .
+        shell: bash
+      - name: Upload package tarball artifact
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && !env.ACT }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-tarball
+          path: ./*.tar.gz
+      - name: Check usage
+        run: |
+          devtools::install(upgrade = "never")
+          pkg_name <- read.dcf("DESCRIPTION")[1, "Package"]
+          library(pkg_name, character.only=T)
+          usage_out <- capture.output(codetools::checkUsagePackage(pack=pkg_name))
+          if (length(usage_out) > 0) {
+            print(usage_out)
+            warning("Found issues with code usage.")
+          }
+        shell: Rscript {0}  
+      - name: Render Readthedocs documentation
+        run: |
+          rm -rf docs/topics/* docs/vignettes/*
+          Rscript docs/build.R
+          # Re-compress png files to a deterministic form to
+          # avoid committing .png files that differ only in compression values
+          dnf install -y optipng
+          find docs -name '*.png' -exec optipng -o0 -strip all {} \;
+        shell: bash
+      - name: Check for warnings in rendered docs
+        run: |
+          if grep -r "Warning" docs/; then
+            echo "Warnings found in rendered documentation."
+          fi
+        shell: bash
+      - name: Commit rendered docs
+        # Only commit rendered docs on pushes to master, not on PRs or local `act` runs.
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && !env.ACT }}
+        run: |
+          # Container jobs mount the workspace as a different owner; mark it safe for git.
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          # Don't commit changes to makeTempDir.md since it is expected to differ and causes unnecessary commits.
+          git restore --staged docs/topics/makeTempDir.md || true
+          if ! git diff --cached --quiet; then
+            git commit -m "[skip ci] Auto-render docs."
+            git push
+          fi
+        shell: bash
       - name: Update container
+        # Only trigger the Docker Hub build on pushes to master, not on PRs or local `act` runs.
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && !env.ACT }}
         run: |
           curl -H "Content-Type:application/json" --data '{"docker_tag":"devel"}' -X POST https://hub.docker.com/api/build/v1/source/${{ secrets.DOCKERHUB_REPO }}/trigger/${{ secrets.DOCKERHUB_TRIGGER }}/call/
-          

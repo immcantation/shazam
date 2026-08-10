@@ -88,6 +88,11 @@ db <- subset(ExampleDb, sample_id == "-1h")
 db <- distToNearest(db, sequenceColumn="junction", vCallColumn="v_call_genotyped",
 jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 
+```
+
+*Running in non-single-cell mode.*
+```R
+
 # To find the threshold cut, call findThreshold function for "gmm" method.
 output <- findThreshold(db$dist_nearest, method="density")
 print(output)
@@ -108,7 +113,7 @@ plotDensityThreshold(output)
 
 ```
 
-*Warning*:Removed 1 row containing missing values or values outside the scale range (`geom_vline()`).![5](plotDensityThreshold-5.png)
+![6](plotDensityThreshold-6.png)
 
 
 See also

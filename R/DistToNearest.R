@@ -358,7 +358,7 @@ getCharsInModel <- function(model) {
     } else if (model == "mk_rs1nf") {
         chars <- colnames(MK_RS1NF_Distance)
     } else if (model == "mk_rs5nf") {
-        chars <-rownames(MK_RS1NF@targeting)
+        chars <- rownames(MK_RS5NF@targeting)
     } else if (model == "hs1f_compat") {
         chars <- colnames(HS1F_Compat)
     } else if (model == "m1n_compat") {
@@ -391,7 +391,7 @@ allValidChars <- function(seq, validChars) {
 #                          "len" = normalize distance by length of junction.
 #                          "mut" = normalize distance by number of mutations in 
 #                          junction.
-# @param    symmetr        if model is hs5f or mrs5nf, distance between seq1 and seq2 is either the
+# @param    symmetry        if model is hs5f or mrs5nf, distance between seq1 and seq2 is either the
 #                          average (avg) of seq1->seq2 and seq2->seq1 or the minimum (min).
 # @param    crossGroups    column for grouping to calculate distances across groups 
 #                          (self vs others).
@@ -643,11 +643,14 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 
 #' Distance to nearest neighbor
 #'
-#' Get non-zero distance of every heavy chain (\code{IGH}) sequence (as defined by 
-#' \code{sequenceColumn}) to its nearest sequence in a partition of heavy chains sharing the same 
-#' V gene, J gene, and junction length (V-J-length), or in a partition of single cells with heavy/long chains
-#' sharing the same heavy/long chain V-J-length combination, or of single cells with heavy/long and light/short chains 
-#' sharing the same heavy/long chain V-J-length and light/short chain V-J-length combinations.
+#' Calculate the non-zero distance from each sequence to its nearest neighbor
+#' within partitions based on shared V gene, J gene, and junction length. 
+#' 
+#' The distance to nearest neighbor can be used to estimate a threshold for assigning 
+#' Ig sequences to clonal groups. A histogram of the resulting vector is often bimodal, with the 
+#' ideal threshold being a value that separates the two modes.
+#' 
+#' Refer to the details section for a more thorough description of the implementation.
 #'
 #' @param    db              data.frame containing sequence data.
 #' @param    sequenceColumn  name of the column containing the junction for grouping and for calculating
@@ -698,9 +701,9 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                           are "IGH", "IGI", "IGK", "IGL", "TRA", "TRB", 
 #'                           "TRD", and "TRG".
 #' @param    locusValues     Loci values to focus the analysis on.
-#' @param    onlyHeavy       use only the IGH (BCR) or TRB/TRD (TCR) sequences 
+#' @param    onlyHeavy       This is deprecated. Only IGH (BCR) or TRB/TRD (TCR) sequences will be used
 #'                           for grouping. Only applicable to single-cell data.
-#'                           Ignored if \code{cellIdColumn=NULL}. 
+#'                           Ignored if \code{cellIdColumn=NULL}.
 #'                           See \link[alakazam]{groupGenes} for further details.               
 #' @param    keepVJLgroup    logical value specifying whether to keep in the output the the column 
 #'                           column indicating grouping based on V-J-length combinations. Only applicable for
@@ -719,13 +722,22 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'           type \code{character} if they were type \code{factor} in the input \code{db}.
 #'
 #' @details
+#' 
+#' There are two modes of operation for \code{distToNearest}: single-cell (all sequences are 
+#' single-cell data), non-single-cell (all sequences are bulk sequencing data). Mixed data, 
+#' where both single-cell and non-single-cell sequences are present in the data, is considered 
+#' a case under the single-single cell mode .
+#' 
 #' To invoke single-cell mode the \code{cellIdColumn} argument must be specified and \code{locusColumn} 
 #' must be correct. Otherwise, \code{distToNearest} will be run with bulk sequencing assumptions, 
-#' using all input sequences regardless of the values in the \code{locusColumn} column.
+#' using all input sequences regardless of the values in the \code{locusColumn} column. 
 #' 
-#' Under single-cell mode, only heavy/long chain (IGH, TRB, TRD) sequences will be used for calculating 
-#' nearest neighbor distances. Under non-single-cell mode, all input sequences will be used for 
-#' calculating nearest neighbor distances, regardless of the values in the \code{locusColumn} field (if present).
+#' Under single-cell mode, only heavy/long chain (IGH, TRB, TRD) sequences will be 
+#' used for calculating nearest neighbor distances regardless of \code{locusValue} values in 
+#' the \code{locusColumn} field (if present). Under non-single-cell mode, 
+#' all input sequences with \code{locusValue} value(s) in the  \code{locusColumn} field will be 
+#' used for calculating nearest neighbor distances.
+#' 
 #' 
 #' Values in the \code{locusColumn} must be one of \code{c("IGH", "IGI", "IGK", "IGL")} for BCR 
 #' or \code{c("TRA", "TRB", "TRD", "TRG")} for TCR sequences. Otherwise, the function returns an 
@@ -733,17 +745,13 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #' 
 #' For single-cell mode, the input format is the same as that for \link[alakazam]{groupGenes}. 
 #' Namely, each row represents a sequence/chain. Sequences/chains from the same cell are linked
-#' by a cell ID in the \code{cellIdColumn} field. In this mode, there is a choice of whether 
-#' grouping should be done by (a) using IGH (BCR) or TRB/TRD (TCR) sequences only or
-#' (b) using IGH plus IGK/IGL (BCR) or TRB/TRD plus TRA/TRG (TCR). 
-#' This is governed by the \code{onlyHeavy} argument.
+#' by a cell ID in the \code{cellIdColumn} field. Grouping will be done by using IGH (BCR) or 
+#' TRB/TRD (TCR) sequences only. The argument that allowed to include light chains, 
+#' \code{onlyHeavy}, is deprecated.
 #' 
 #' Note, \code{distToNearest} required that each cell (each unique value in \code{cellIdColumn})
 #' correspond to only a single \code{IGH} (BCR) or \code{TRB/TRD} (TCR) sequence.
 #' 
-#' The distance to nearest neighbor can be used to estimate a threshold for assigning 
-#' Ig sequences to clonal groups. A histogram of the resulting vector is often bimodal, with the 
-#' ideal threshold being a value that separates the two modes.
 #' 
 #' The following distance measures are accepted by the \code{model} parameter.
 #' 
@@ -757,7 +765,7 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
 #'                                \link{calcTargetingDistance}.
 #'   \item \code{"mk_rs1nf"}:     Mouse single nucleotide distance matrix derived from \link{MK_RS1NF} with 
 #'                                \link{calcTargetingDistance}.
-#'   \item \code{"mk_rs5nf"}:     Mouse 5-mer nucleotide context distance matrix derived from \link{MK_RS1NF} with 
+#'   \item \code{"mk_rs5nf"}:     Mouse 5-mer nucleotide context distance matrix derived from \link{MK_RS5NF} with 
 #'                                \link{calcTargetingDistance}.
 #'   \item \code{"hs1f_compat"}:  Backwards compatible human single nucleotide distance matrix used in 
 #'                                SHazaM v0.1.4 and Change-O v0.3.3.
@@ -830,15 +838,23 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                           mst=FALSE, subsample=NULL, progress=FALSE,
                           cellIdColumn=NULL, locusColumn="locus", locusValues=c("IGH"),
                           onlyHeavy=TRUE, keepVJLgroup=TRUE) {
+    
     # Hack for visibility of foreach index variables
     i <- NULL
     
+    # Deprecation warning for onlyHeavy.
+    # Same warning as in alakazam::groupGenes.
+    if (!onlyHeavy) {
+        warning("onlyHeavy = FALSE is deprecated. Running as if onlyHeavy = TRUE")
+        onlyHeavy <- TRUE
+    }
+        
     # Initial checks
     model <- match.arg(model)
     normalize <- match.arg(normalize)
     symmetry <- match.arg(symmetry)
     if (!is.data.frame(db)) { stop('Must submit a data frame') }
-    
+
     # Check base input
     check <- checkColumns(db, c(sequenceColumn, vCallColumn, jCallColumn, fields, cross))
     if (check != TRUE) { stop(check) }
@@ -894,11 +910,12 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         singleCell <- TRUE
     } else {
         singleCell <- FALSE
-    } 
+    }
     
     # Disallow multiple heavy chains per cell
     # sequences with cell_id==NA are not considered, table's default 
-    # is useNA="no"
+    # is useNA="no". In practice that means that distances 
+    # will be calculated between sequences of different cells.
     if (singleCell) {
         # check multiple heavy chains
         x <- sum(table(db[[cellIdColumn]][db[[locusColumn]] == "IGH"]) > 1)
@@ -926,6 +943,30 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         db <- db[valid_seq, ]
     }
     
+    # Info for users
+    if (singleCell) {
+
+        light_chains <- sum(db[[locusColumn]] %in% c("IGH", "TRB", "TRD") == FALSE)
+        msg <- paste0("Running in single-cell mode.")
+        
+        if (light_chains > 0) {
+            msg <- paste(msg,
+                        paste0("Note: ", light_chains, 
+                        " light/short chain sequences will receive NA distances."),
+                        sep="\n")
+        }    
+        
+        not_used_loci <- setdiff(locusValues, c("IGH", "TRB", "TRD"))
+        if (length(not_used_loci)>0) {
+            this_msg <- paste0("Note: locusValues contains loci that will not be used for distance calculations: ", 
+                    paste(not_used_loci, collapse=", "), 
+                    ". Only IGH (BCR) or TRB/TRD (TCR) sequences are used for distance calculations in single-cell mode.")
+            msg <- paste(msg,this_msg, sep="\n")
+        }
+        message(msg)
+    } else {
+        message("Running in non-single-cell mode.")
+    }
     # junction length columns (prep for groupGenes)
     junc_len <- "JUNC_LEN"
     db[[junc_len]] <- stri_length(db[[sequenceColumn]])
@@ -936,7 +977,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         group_indices()
     
     # create V+J grouping, or V+J+L grouping
-    if (VJthenLen) {
+    if (VJthenLen) { 
         # 2-stage partitioning using first V+J and then L
         # V+J only first
         # creates $vj_group
@@ -948,7 +989,9 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                          first=first)) %>%
             ungroup()
         # L (later)  
-        group_cols <- c("vj_group", junc_len)
+        # add locusColumn to account for single cells having light chains assigned
+        # the same group as the paired heavy chain
+        group_cols <- c("vj_group", junc_len, locusColumn)
         
     } else {
         # 1-stage partitioning using V+J+L simultaneously
@@ -961,7 +1004,10 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                           cell_id=cellIdColumn, locus=locusColumn, only_heavy=onlyHeavy,
                           first=first)) %>%
             ungroup()
-        group_cols <- c("vj_group")
+        
+        # add locusColumn to account for single cells having light chains assigned
+        # the same group as the paired heavy chain
+        group_cols <- c("vj_group", locusColumn)
     }
     
     # groups to use
@@ -975,32 +1021,47 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     }
     db[['DTN_TMP_FIELD']] <- NULL
     
+    if (any(is.na(db[["vj_group"]]))) {
+        warning("The vj_group column contains NA values corresponding to ", 
+                sum(is.na(db$vj_group)), 
+                " sequences to which alakazam::groupGenes could not assign a group.",
+                " These sequences will not be analyzed.")
+    }
+    
     # unique groups
     # not necessary but good practice to force as df and assign colnames
     # (in case group_cols has length 1; which can happen in groupBaseline)
-    uniqueGroups <- data.frame(unique(db[, group_cols]), stringsAsFactors=FALSE)
+    uniqueGroups <- data.frame(
+        unique(db[, group_cols]) %>% filter(!is.na(!!rlang::sym("vj_group"))),
+        stringsAsFactors=FALSE)
     colnames(uniqueGroups) <- group_cols
     rownames(uniqueGroups) <- NULL
+    
     # indices
     # crucial to have simplify=FALSE 
     # (otherwise won't return a list if uniqueClones has length 1)
-    uniqueGroupsIdx <- sapply(1:nrow(uniqueGroups), function(i){
-        curGroup <- data.frame(uniqueGroups[i, ], stringsAsFactors=FALSE)
-        colnames(curGroup) <- group_cols
-        # match for each field
-        curIdx <- sapply(group_cols, function(coln){
-            db[[coln]]==curGroup[, coln]
-        }, simplify=FALSE)
-        curIdx <- do.call(rbind, curIdx)
-        # intersect to get match across fields 
-        curIdx <- which(colSums(curIdx)==length(group_cols))
-        # sanity check
-        # no NA
-        stopifnot( all(!is.na(curIdx)) )
-        # index within range of db
-        stopifnot( max(curIdx) <= nrow(db) )
-        return(curIdx)
-    }, simplify=FALSE)
+    # uniqueGroupsIdx <- sapply(1:nrow(uniqueGroups), function(i){
+    #     curGroup <- data.frame(uniqueGroups[i, ], stringsAsFactors=FALSE)
+    #     colnames(curGroup) <- group_cols
+    #     # match for each field
+    #     curIdx <- sapply(group_cols, function(coln){
+    #         db[[coln]]==curGroup[, coln]
+    #     }, simplify=FALSE)
+    #     curIdx <- do.call(rbind, curIdx)
+    #     # intersect to get match across fields 
+    #     curIdx <- which(colSums(curIdx)==length(group_cols))
+    #     # sanity check
+    #     # no NA
+    #     stopifnot( all(!is.na(curIdx)) )
+    #     # index within range of db
+    #     stopifnot( max(curIdx) <= nrow(db) )
+    #     return(curIdx)
+    # }, simplify=FALSE)
+    # alternative using split + paste key 
+    # Old code 1 proc and ExampleDb, 190.6MB memo and 560ms time; new code, 78MB and 380ms
+    valid_rows <- which(!is.na(db[["vj_group"]]))
+    grp_key <- do.call(paste, c(db[valid_rows, group_cols, drop=FALSE], sep="___"))
+    uniqueGroupsIdx <- split(valid_rows, grp_key)
     
     # Create cluster of nproc size and export namespaces
     # If user wants to paralellize this function and specifies nproc > 1, then
@@ -1057,7 +1118,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if (progress) { 
         pb <- progressBar(n_groups) 
     }
-    tryCatch(list_db <- foreach(i=1:n_groups, .errorhandling='stop') %dopar% {
+    tryCatch(list_db <- foreach(i=seq_len(n_groups), .errorhandling='stop') %dopar% {
         # wrt db
         idx <- uniqueGroupsIdx[[i]]
         
@@ -1104,7 +1165,13 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     )
     
     # Convert list from foreach into a db data.frame
-    db <- do.call(rbind, list_db)
+    if (!any(is.na(db[["vj_group"]]))) {
+        db <-do.call(rbind, list_db)
+    } else {
+        db <- bind_rows(
+            db %>% filter(is.na(!!rlang::sym("vj_group"))),
+            do.call(rbind, list_db))
+    }
 
     # Stop the cluster and add back not used colums
     if (nproc > 1) { 
@@ -1622,19 +1689,23 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
     
     set.seed(NULL)
     # options(warn=-1)
-    LOG_LIK<-0
+    LOG_LIK <- 0
+    fit_found <- FALSE
     
     if (progress) {
         cat("      STEP> ", "Fitting ", func, "\n", sep="")
         pb <- progressBar(15)
     }
+    # Run 15 independent fitting attempts to keep the best fit across all attempts,
+    # as measured by the highest log-likelihood.
     for (i in 1:15) {
-        #itr<-1
-        key<-FALSE
-        while (!key){
-            # print(paste0(i,":",itr))
+        itr <- 1
+        max_itr <- 1000
+        key <- FALSE
+        # The inner loop controls how many attempts to find a single valid fit.
+        while (!key && itr <= max_itr){
             # Fit mixture Functions
-            MixModel <- try(suppressWarnings(fitdistr(na.exclude(ent), mixFunction, 
+            MixModel <- try(suppressWarnings(MASS::fitdistr(na.exclude(ent), mixFunction, 
                                      first_curve = bits[1], second_curve = bits[2], 
                                      start=list(omega = func1.0, 
                                                 func1.1 = func1.1, func1.2 = func1.2,
@@ -1647,7 +1718,7 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
                 func1.2 <- abs(gmmfunc1.2 + sample(c(-1,1), 1)*runif(1))
                 func2.1 <- abs(gmmfunc2.1 + sample(c(-1,1), 1)*runif(1))
                 func2.2 <- abs(gmmfunc2.2 + sample(c(-1,1), 1)*runif(1))
-                #itr<-itr+1
+                itr <- itr + 1
                 next
             } else if ( (bits[1] == "norm"  & bits[2] == "gamma" & MixModel$estimate[[2]] > MixModel$estimate[[4]] * MixModel$estimate[[5]]) |
                         (bits[1] == "gamma" & bits[2] == "norm"  & MixModel$estimate[[2]] * MixModel$estimate[[3]] > MixModel$estimate[[4]]) |
@@ -1659,11 +1730,19 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
                 func2.1 <- abs(gmmfunc2.1 + sample(c(-1,1), 1)*runif(1))
                 func2.2 <- abs(gmmfunc2.2 + sample(c(-1,1), 1)*runif(1))
                 # print("here")
-                #itr<-itr+1
+                itr <- itr + 1
                 next
             } else {
-                key<-TRUE
+                key <- TRUE
             }
+        }
+        
+        # Check if we failed to find a valid fit after max iterations
+        # If 100 failed attempts, move to the next outer iteration
+        if (!key) {
+            warning(paste0("Failed to fit after ", max_itr, " attempts in outer iteration ", i,
+                           ". Skipping to next iteration."))
+            next
         }
         # print(paste0(func, " fit done. Loglik= ", round(MixModel$loglik, digits = 2)))
         # Invoke fit parameters
@@ -1671,6 +1750,7 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
         log_lik <- round(abs(MixModel$loglik), digits = 2)
         if (log_lik > LOG_LIK){
             LOG_LIK <- log_lik
+            fit_found <- TRUE
             
             FUNC1.0 <- MixModel$estimate[[1]]
             FUNC1.1 <- MixModel$estimate[[2]] 
@@ -1693,6 +1773,15 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
     }
     # options(warn=0)
 
+    # If all 15 outer iterations failed to produce a valid fit, stop with a
+    # informative error. Without this, the code would fail with a cryptic
+    # 'object not found' error because FUNC1.0 etc. are only assigned inside
+    # the loop when a valid fit is found.
+    if (!fit_found) {
+        stop(paste0("No valid fit found for model '", model, "' across all 15 outer iterations. ",
+                    "Try a different model or increase the data size."))
+    }
+
     # Invoke best fit parameters
     log_lik  <- LOG_LIK
     
@@ -1705,6 +1794,13 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
     func2.2 <- FUNC2.2
     
     # order fit parameters
+    # Ensure curve 1 is the left (lower-mean) component and curve 2 is the right
+    # (higher-mean) component. MASS::fitdistr does not guarantee label ordering, so
+    # the optimizer can converge with the two components swapped. The downstream
+    # threshold search uses func1 as the lower distribution and func2 as the upper,
+    # so we swap them here if they are inverted. Only same-family pairs are checked
+    # because for mixed pairs (norm-gamma, gamma-norm) the model definition already
+    # encodes which family is expected on which side.
     if (bits[1]=="norm" & bits[2]=="norm" & func1.1>func2.1) {
         FUNC0 <- func1.0
         FUNC1 <- func1.1 
@@ -2128,9 +2224,13 @@ plotDensityThreshold <- function(data, cross=NULL, xmin=NULL, xmax=NULL, breaks=
         geom_line(data=ddf, 
                   aes(x=!!rlang::sym("x"), 
                       y=!!rlang::sym("y")), 
-                  color="darkslateblue", linewidth=size) +
-        geom_vline(xintercept=data@threshold, 
-                   color="firebrick", linetype="longdash", linewidth=size)
+                  color="darkslateblue", linewidth=size)
+
+    # Only add threshold line if threshold is not NA or infinite
+    if (!is.na(data@threshold) && is.finite(data@threshold)) {
+        p <- p + geom_vline(xintercept=data@threshold, 
+                           color="firebrick", linetype="longdash", linewidth=size)
+    }
     
     # Add cross histogram
     if (!is.null(cross)) {

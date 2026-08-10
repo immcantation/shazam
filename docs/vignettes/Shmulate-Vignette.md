@@ -26,29 +26,32 @@ library(shazam)
 sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATA.TTTA"
 
 # Simulate introduction of 6 mutations using the default HH_S5F targeting model
+set.seed(12) # for reproducibility of the example
 shmulateSeq(sequence, numMutations=6)
 ```
 
 ```
-## [1] "NGATCTGACGACCCGACCCTGTATTATTGTGCGAGAAATT.TTTA"
+## [1] "NGATGTGACGACTGGGCCATATATTACTGTGCGAGAAATA.TTTA"
 ```
 
 ``` r
 # Simulate introduction of mutations at frequency 0.2 using the default HH_S5F targeting model
+set.seed(34) # for reproducibility of the example
 shmulateSeq(sequence, numMutations=0.2, frequency=TRUE)
 ```
 
 ```
-## [1] "NGATCTGACGAAACGGCCGATTATTATTCCACGAGAGAAA.TTCA"
+## [1] "NCATCTTTCGACACGGCCGCGTCTTCCTTTGCGAGAGATA.CTCA"
 ```
 
 ``` r
 # Simulate introduction of 4 mutations using the MK_RS5NF targeting model
+set.seed(56) # for reproducibility of the example
 shmulateSeq(sequence, numMutations=4, targetingModel=MK_RS5NF)
 ```
 
 ```
-## [1] "NGATCTGACGACACGGTCGTGCATTACTGTGCTAGAGATT.TTTA"
+## [1] "NGATCTGACGACACGACCGTGTATCACTGTGCGAAAGATA.TTCA"
 ```
 
 ## Simulate mutations in a lineage tree
@@ -72,19 +75,20 @@ graph <- ExampleTrees[[17]]
 sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
 
 # Simulate using the default HH_S5F targeting model
+set.seed(321) # for reproducibility of the example
 shmulateTree(sequence, graph)
 ```
 
 ```
 ##             name                                      sequence distance
 ## 1      Inferred1 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-## 2 GN5SHBT07JDYW5 NGATCTGACGACACGCCCGTGTATTACTGTGCGAGAGATAGTTTT        2
-## 3 GN5SHBT03EP4KC NGATCTGACGACACGCCCGTGTTTTTCTGTGCGAGACATAGTTTT        3
-## 4 GN5SHBT01AKANC NGATGTGACGACACGGCCATGTATTACTGTGCGGGAGATAGTGTA        4
-## 5 GN5SHBT01A3SFZ NGATCTGACGACACGCCCACGTATTACTGGCCGAGAGAAGGTTTT        6
-## 6 GN5SHBT08HUU7M NGATCTGACGACACGCCCATGTTTTTCTGTGCGAGACACACTTTT        3
-## 7 GN5SHBT04CEA6I NGATCTGACGACACGCCCGTGTATGACTGTGCGAGAGATAGTTTT        1
-## 8 GN5SHBT06IXJIH NGATCTGACGACACGCCCGTATATTACTGTGCGAGAGATAGTTTT        1
+## 2 GN5SHBT07JDYW5 NGAACTGACGACACGGTCGTGTATTACTGTGCGAGAGATAGTTTA        2
+## 3 GN5SHBT03EP4KC NGAGCTGACGACACGGTCGTGCGTTACTGTGCGAGAGATAGTTTA        3
+## 4 GN5SHBT01AKANC NGATGTGACGACACGGCCGTGTCTTGCTGTGCGAGAGATACTTTA        4
+## 5 GN5SHBT01A3SFZ NAGACTGACGACACGGTCGTGTTTTACTGTGCGAGCGAAAGCTTA        6
+## 6 GN5SHBT08HUU7M NGAGCTAACGACACGGTCGTGCGTGACTGTGCGAGGGATAGTTTA        3
+## 7 GN5SHBT04CEA6I NGAGCTGACGACACGGTCGTGTATTACTGTGCGAGAGATAGTTTA        1
+## 8 GN5SHBT06IXJIH NGAACTGACGACACGGTCGTGTATTACTGTGCGAGAGATAGTTTG        1
 ```
 
 It is possible to exclude certain specified nodes from being considered as the MRCA and from being included as part of the simulation. To specify such nodes, use the `field` argument to indicate which annotation field in `vertex_attr(graph)` contains information relevant to deciding which nodes to exclude, and the `exclude` argument to indicate the value in the annotation field that nodes to be excluded carry.
@@ -114,17 +118,18 @@ plot(graph, layout=layout_as_tree, edge.arrow.mode=0, vertex.label.cex=0.75)
 # The nodes "Germline" and "Inferred1" are thus excluded
 # As a corollary, "GN5SHBT01AKANC", the offspring of "Inferred1", is also excluded
 # In this case, "GN5SHBT07JDYW5" is then taken to be the MRCA
+set.seed(543) # for reproducibility of the example
 shmulateTree(sequence, graph, field="sample_id", exclude=NA)
 ```
 
 ```
 ##             name                                      sequence distance
 ## 1 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-## 2 GN5SHBT03EP4KC NGATCTGACGACACGGCCGTGGGTTACTGTGCGAGAGATGGTTTA        3
-## 3 GN5SHBT01A3SFZ NGACCTGACGACACGGGCGTATTCTACTGTGCGGGAGATAGTTTA        6
-## 4 GN5SHBT08HUU7M NGATCTGACGACACGGCCGTGGGATACTGTGCGAGAGATGCATTA        3
-## 5 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTGGATTACTGTGCGAGAGATAGTTTA        1
-## 6 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTGTA        1
+## 2 GN5SHBT03EP4KC NGATCTGACGACACGGCCGTGTATTTCTGGGCGAGAGATAGTTTT        3
+## 3 GN5SHBT01A3SFZ NGATCTGACGACACGGCCGTGGTCTGTTGTGCGAGAGATAGTTCA        6
+## 4 GN5SHBT08HUU7M NCATCTGACGGCACGGCCGTGTATTTTTGGGCGAGAGATAGTTTT        3
+## 5 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTCA        1
+## 6 GN5SHBT06IXJIH NGATCTGACGCCACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        1
 ```
 
 It is also possible to add a proportional number of mutations to the immediate offsprings of the MRCA based on the fraction of the nucleotide sequence that is within the junction region. This is achieved via the optional `junctionWeight` argument, to be supplied as a numeric value between `0` and `1`.
@@ -142,17 +147,18 @@ plot(graph, layout=layout_as_tree, edge.arrow.mode=0, vertex.label.cex=0.75)
 
 ``` r
 # Add 20% mutation rate to the immediate offsprings of the MRCA
+set.seed(798) # for reproducibility of the example
 shmulateTree(sequence, graph, junctionWeight=0.2)
 ```
 
 ```
 ##             name                                      sequence distance
 ## 1      Inferred1 NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA        0
-## 2 GN5SHBT07JDYW5 NGATCTGACGAGACGGCCGTCTATTACTGTGCGAGAGATAGTTTA        2
-## 3 GN5SHBT03EP4KC NTTTCGGACGAGACGGCCGTCTATTACTGTGCGAGAGATAGTTTA        3
-## 4 GN5SHBT01AKANC NGATCTGACGGCACGACCGTGAATTACTGTGCGAGAGATAATTTT        5
-## 5 GN5SHBT01A3SFZ NGATCTGACGAGACGGCCGTCTTTTCCTCTGCGGGACATCGTTTA        6
-## 6 GN5SHBT08HUU7M NTGTCGGACGCGACGGCCGTCTATTACTGTGCGAGAGAGAGTTTA        3
-## 7 GN5SHBT04CEA6I NGATCTGACGAGACGGCCCTCTATTACTGTGCGAGAGATAGTTTA        1
-## 8 GN5SHBT06IXJIH NGATCTGACGAGACGGCCGTCTATTACTGTGCGAGAGATAGTTTC        1
+## 2 GN5SHBT07JDYW5 NGATCTGACGACACGGCCGTGTATTACTTTGCGAGAGATAATTTA        2
+## 3 GN5SHBT03EP4KC NGATCTGACGACACGGCCGTCTATCACTTTGCGAGAGATAATCTA        3
+## 4 GN5SHBT01AKANC NCATCTGACGACACGGCCGTATATTACTGTGAGAGAGATATTATA        5
+## 5 GN5SHBT01A3SFZ NAGTCTGACGACACGGCCTTGTATTACTTAGCGAGAGTTAAATTA        6
+## 6 GN5SHBT08HUU7M NGATCTGACGACACGGCCGTCTATCACTTTGCGAGAGATGATTTT        3
+## 7 GN5SHBT04CEA6I NGATCTGACGACACGGCCGTGTTTTACTTTGCGAGAGATAATTTA        1
+## 8 GN5SHBT06IXJIH NGATCTGACGACACGGCCGTGTATCACTTTGCGAGAGATAATTTA        1
 ```

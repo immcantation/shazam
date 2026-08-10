@@ -1,15 +1,4 @@
-# [![](http://cranlogs.r-pkg.org/badges/grand-total/shazam)](https://www.r-pkg.org/pkg/shazam) [![](https://cranlogs.r-pkg.org/badges/shazam)](https://www.r-pkg.org/pkg/shazam) [![](https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=plastic)](https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html)
-
-**IMPORTANT!** 
-SHazaM has moved to https://github.com/immcantation/shazam
-
-To update Git configuration settings use:
-
-```
-   git config user.email "your-gh-user@email.com"
-   git config user.name "your-gh-user-name"
-   git remote set-url origin git@github.com:immcantation/shazam.git
-```
+# [![](https://www.r-pkg.org/badges/version/shazam)](https://cran.r-project.org/package=shazam) [![](http://cranlogs.r-pkg.org/badges/grand-total/shazam)](https://www.r-pkg.org/pkg/shazam) [![](https://cranlogs.r-pkg.org/badges/shazam)](https://www.r-pkg.org/pkg/shazam) [![](https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=plastic)](https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html)
 
 SHazaM
 -------------------------------------------------------------------------------
@@ -56,11 +45,12 @@ If you have discovered a bug or have a feature request, you can open an issue us
 To receive alerts about Immcantation releases, news, events, and tutorials, join the [Immcantation News](https://groups.google.com/g/immcantation-news) Google Group. [Membership settings](https://groups.google.com/g/immcantation-news/membership) can be adjusted to change the frequency of email updates.
 
 
+
 ## Dependencies
 
 **Depends:** ggplot2  
 **Imports:** alakazam, ape, diptest, doParallel, dplyr, foreach, graphics, grid, igraph, iterators, KernSmooth, lazyeval, MASS, methods, parallel, progress, rlang, scales, seqinr, stats, stringi, tidyr, tidyselect, utils  
-**Suggests:** knitr, rmarkdown, testthat
+**Suggests:** knitr, rmarkdown, testthat, tibble
 
 
 ## Authors
@@ -82,15 +72,15 @@ To receive alerts about Immcantation releases, news, events, and tutorials, join
 To cite the SHazaM package in publications, please use:
 
   Gupta N, Vander Heiden J, Uduman M, Gadala-Maria D, Yaari G,
-  Kleinstein S (2015). “Change-O: a toolkit for analyzing large-scale B
-  cell immunoglobulin repertoire sequencing data.” _Bioinformatics_,
+  Kleinstein S (2015). "Change-O: a toolkit for analyzing large-scale B
+  cell immunoglobulin repertoire sequencing data." _Bioinformatics_,
   1-3. doi:10.1093/bioinformatics/btv359
   <https://doi.org/10.1093/bioinformatics/btv359>.
 
 To cite the selection analysis methods, please use:
 
-  Yaari G, Uduman M, Kleinstein S (2012). “Quantifying selection in
-  high-throughput Immunoglobulin sequencing data sets.” _Nucleic acids
+  Yaari G, Uduman M, Kleinstein S (2012). "Quantifying selection in
+  high-throughput Immunoglobulin sequencing data sets." _Nucleic acids
   research_, *40*(17), e134. doi:10.1093/nar/gks457
   <https://doi.org/10.1093/nar/gks457>.
 
@@ -99,9 +89,9 @@ please use:
 
   Yaari G, Vander Heiden J, Uduman M, Gadala-Maria D, Gupta N, Stern J,
   O'Connor K, Hafler D, Lasserson U, Vigneault F, Kleinstein S (2013).
-  “Models of somatic hypermutation targeting and substitution based on
+  "Models of somatic hypermutation targeting and substitution based on
   synonymous mutations from high-throughput immunoglobulin sequencing
-  data.” _Frontiers in Immunology_, *4*(358), 1-11.
+  data." _Frontiers in Immunology_, *4*(358), 1-11.
   doi:10.3389/fimmu.2013.00358
   <https://doi.org/10.3389/fimmu.2013.00358>.
 
@@ -109,17 +99,17 @@ To cite the HKL_S1F, HKL_S5F, MK_RS1NF, and MK_RS5NF models, please
 use:
 
   Cui A, Di Niro R, Vander Heiden J, Briggs A, Adams K, Gilbert T,
-  O'Connor K, Vigneault F, Shlomchik M, Kleinstein S (2016). “A Model
+  O'Connor K, Vigneault F, Shlomchik M, Kleinstein S (2016). "A Model
   of Somatic Hypermutation Targeting in Mice Based on High-Throughput
-  Ig Sequencing Data.” _The Journal of Immunology_, *197*(9),
+  Ig Sequencing Data." _The Journal of Immunology_, *197*(9),
   3566-3574. doi:10.4049/jimmunol.1502263
   <https://doi.org/10.4049/jimmunol.1502263>.
 
 To cite the mixture model for threshold determination, please use:
 
-  Nouri N, Kleinstein S (2018). “Optimized Threshold Inference for
+  Nouri N, Kleinstein S (2018). "Optimized Threshold Inference for
   Partitioning of Clones From High-Throughput B Cell Repertoire
-  Sequencing Data.” _Frontiers in Immunology_, *9*.
+  Sequencing Data." _Frontiers in Immunology_, *9*.
   doi:10.3389/fimmu.2018.01687
   <https://doi.org/10.3389/fimmu.2018.01687>.
 
