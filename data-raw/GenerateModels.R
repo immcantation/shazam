@@ -38,7 +38,9 @@ U5N <- new("TargetingModel",
                  citation="",
                  substitution=u5n_sub,
                  mutability=u5n_mut,
-                 targeting=u5n_tar)
+                 targeting=u5n_tar,
+                 numMutS=0,
+                 numMutR=0)
 devtools::use_data(U5N, overwrite=TRUE)
 
 #### HH_S1F ####
@@ -132,8 +134,8 @@ HH_S5F <- new("TargetingModel",
                  substitution=hs5f_sub,
                  mutability=hs5f_mut,
                  targeting=hs5f_tar,
-              numMutS=806860,
-              numMutR=0)
+                 numMutS=806860,
+                 numMutR=0)
 devtools::use_data(HH_S5F, overwrite=TRUE)
 
 #### HKL_S5F ####
