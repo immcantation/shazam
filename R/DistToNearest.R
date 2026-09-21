@@ -1229,7 +1229,8 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #' @param    spc        specificity required. Applies only when \code{method="gmm"} and \code{cutoff="user"}.
 #'                      
 #' @param    progress   if \code{TRUE} print a progress bar. 
-#' @param    seed       numeric value to set the random seed for reproducibility of the fitting procedure.
+#' @param    seed       numeric value to set the random seed for reproducibility of the
+#'                      subsampling (if \code{subsample} is specified) and the fitting procedure.
 #' @return   
 #' \itemize{
 #'   \item \code{"gmm"} method:      Returns a \link{GmmThreshold} object including the  
@@ -1296,6 +1297,9 @@ findThreshold <- function (distances, method=c("density", "gmm"),
     model <- match.arg(model)
     cutoff <- match.arg(cutoff)
     
+    # Set the seed before subsampling so the subsample is reproducible too
+    if (!is.null(seed)) { set.seed(seed) }
+
     # Subsample input distances
     if(!is.null(subsample)) {
         subsample <- min(length(distances), subsample)
