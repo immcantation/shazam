@@ -510,7 +510,6 @@ collapseClones <- function(db, cloneColumn = "clone_id",
                                 germlineColumn=germlineColumn, 
                                 regionDefinition=regionDefinition,
                                 frequency=TRUE, combine=TRUE, 
-                                cloneColumn = "fields_clone_id",
                                 mutationDefinition=NULL, nproc=nproc)
         muFreqColumn <- "mu_freq"
     }

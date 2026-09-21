@@ -629,7 +629,6 @@ test_that("calcBaseline Extended regions", {
                                      testStatistic = "focused",
                                      regionDefinition = IMGT_VDJ,
                                      targetingModel = HH_S5F,
-                                     cloneColumn = "CLONE",
                                      juncLengthColumn = "JUNCTION_LENGTH",
                                      nproc=1)
    baseline_clone_3822 <- calcBaseline(db=clone_3822_colapsed, 
@@ -638,7 +637,6 @@ test_that("calcBaseline Extended regions", {
                                        testStatistic = "focused",
                                        regionDefinition = IMGT_VDJ,
                                        targetingModel = HH_S5F,
-                                       cloneColumn = "CLONE",
                                        juncLengthColumn = "JUNCTION_LENGTH",
                                        nproc=1)
    baseline_clone_467 <- calcBaseline(db=clone_467_colapsed, 
@@ -647,7 +645,6 @@ test_that("calcBaseline Extended regions", {
                                        testStatistic = "focused",
                                        regionDefinition = IMGT_VDJ,
                                        targetingModel = HH_S5F,
-                                       cloneColumn = "CLONE",
                                        juncLengthColumn = "JUNCTION_LENGTH",
                                        nproc=1)
    
@@ -657,7 +654,6 @@ test_that("calcBaseline Extended regions", {
                                      testStatistic = "focused",
                                      regionDefinition = IMGT_VDJ,
                                      targetingModel = HH_S5F,
-                                     cloneColumn = "CLONE",
                                      juncLengthColumn = "JUNCTION_LENGTH",
                                      nproc=1)
   expect_equal(baseline_clone_3146@binomK, baseline_3_clones@binomK[1,], check.attributes=F)
@@ -689,7 +685,6 @@ test_that("calcBaseline Extended regions", {
                                              testStatistic = "focused",
                                              regionDefinition = IMGT_VDJ,
                                              targetingModel = HH_S5F,
-                                             cloneColumn = "CLONE",
                                              juncLengthColumn = "JUNCTION_LENGTH",
                                              nproc=1)
   clone_3170_colapsed_IMGT_VDJ_BY_REGIONS <- collapseClones(db_clone_3170, cloneColumn = "CLONE", 
@@ -703,7 +698,6 @@ test_that("calcBaseline Extended regions", {
                                              testStatistic = "focused",
                                              regionDefinition = IMGT_VDJ_BY_REGIONS,
                                              targetingModel = HH_S5F,
-                                             cloneColumn = "CLONE",
                                              juncLengthColumn = "JUNCTION_LENGTH",
                                              nproc=1)
   expect_equal(baseline_clone_3146_IMGT_VDJ@regionDefinition,IMGT_VDJ)

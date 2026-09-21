@@ -4,7 +4,8 @@ Version 1.3.2.999: Unreleased
 Mutation Profiling:
 
 + Removed the unused `cloneColumn` argument from `observedMutations()` and 
-  `expectedMutations()`.
+  `expectedMutations()`, and the unused `cloneColumn` argument from 
+  `calcBaseline()`.
 
 Targeting models:
 
