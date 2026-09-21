@@ -1297,8 +1297,14 @@ findThreshold <- function (distances, method=c("density", "gmm"),
     model <- match.arg(model)
     cutoff <- match.arg(cutoff)
     
-    # Set the seed before subsampling so the subsample is reproducible too
-    if (!is.null(seed)) { set.seed(seed) }
+    # Validate seed
+    if (!is.null(seed)) {
+        if (!is.numeric(seed) || length(seed) != 1 || !is.finite(seed)) {
+            stop("'seed' must be a single finite number or NULL.")
+        }
+        # Set the seed before subsampling so the subsample is reproducible too
+        set.seed(seed)
+    }
 
     # Subsample input distances
     if(!is.null(subsample)) {
