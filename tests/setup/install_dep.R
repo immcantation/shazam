@@ -106,7 +106,7 @@ installDep <- function(pkg, devel_mode, immcantation = immcantation_packages,
                     devtools::install_deps(pkg_tmp_dir, dependencies = TRUE, upgrade = "never", force = FALSE)
                     devtools::document(pkg_tmp_dir)
                     devtools::build(pkg_tmp_dir)
-                    devtools::install(pkg_tmp_dir, upgrade = "never", force = FALSE)
+                    devtools::install(pkg_tmp_dir, upgrade = FALSE)
                     unlink(pkg_tmp_dir, recursive = TRUE)
                     message(paste0("Successfully installed ", pkg, " from GitHub master"))
                 },
