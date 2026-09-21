@@ -234,11 +234,13 @@ shmulateSeq <- function(sequence, numMutations, targetingModel=HH_S5F,
 #' sequence <- "NGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGATAGTTTA"
 #' 
 #' # Simulate using the default human 5-mer targeting model
+#' set.seed(123) # for reproducibility of the example
 #' shmulateTree(sequence, graph)
 #' 
 #' # Simulate using the mouse 5-mer targeting model
 #' # Exclude nodes without a sample identifier
 #' # Add 20% mutation rate to the immediate offsprings of the MRCA
+#' set.seed(321) # for reproducibility of the example
 #' shmulateTree(sequence, graph, targetingModel=MK_RS5NF,
 #'              field="sample_id", exclude=NA, junctionWeight=0.2)
 #'  

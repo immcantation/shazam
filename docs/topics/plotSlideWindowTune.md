@@ -161,6 +161,9 @@ plotFiltered='filtered', jitter.y=FALSE)
 
 # Notice that some of the lines overlap
 # Jittering could help
+# Setting seed for reproducibility of jittering and s
+# genenartion of stable figures in shazam's documentation.
+set.seed(12)
 plotSlideWindowTune(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
 plotFiltered='filtered', jitter.y=TRUE)
 
@@ -171,6 +174,7 @@ plotFiltered='filtered', jitter.y=TRUE)
 ```R
 
 # Plot numbers of sequences remaining instead of filtered
+set.seed(34)
 plotSlideWindowTune(tuneList, pchs=1:3, ltys=1:3, cols=1:3, 
 plotFiltered='remaining', jitter.y=TRUE, 
 legendPos="bottomright")
@@ -182,6 +186,7 @@ legendPos="bottomright")
 ```R
 
 # Plot percentages of sequences filtered with a tiny amount of jittering
+set.seed(56)
 plotSlideWindowTune(tuneList, pchs=1:3, ltys=1:3, cols=1:3,
 plotFiltered='filtered', percentage=TRUE, 
 jitter.y=TRUE, jitter.y.amt=0.01)
