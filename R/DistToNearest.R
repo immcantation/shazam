@@ -1297,14 +1297,10 @@ findThreshold <- function (distances, method=c("density", "gmm"),
     model <- match.arg(model)
     cutoff <- match.arg(cutoff)
     
-    # Validate seed
-    if (!is.null(seed)) {
-        if (!is.numeric(seed) || length(seed) != 1 || !is.finite(seed)) {
-            stop("'seed' must be a single finite number or NULL.")
-        }
-        # Set the seed before subsampling so the subsample is reproducible too
-        set.seed(seed)
-    }
+    # Set the seed (restored on exit) before subsampling so the subsample is 
+    # reproducible too. gmmFit then continues the same RNG stream.
+    restore_seed <- setLocalSeed(seed)
+    on.exit(restore_seed(), add=TRUE)
 
     # Subsample input distances
     if(!is.null(subsample)) {
@@ -1322,11 +1318,11 @@ findThreshold <- function (distances, method=c("density", "gmm"),
                 output <- NA
             } else {
                 output <- gmmFit(ent=distances, edge=edge, cross=cross, model=model, cutoff=cutoff, 
-                                 sen=sen, spc=spc, progress=progress, seed=seed)
+                                 sen=sen, spc=spc, progress=progress, seed=NULL)
             }
         } else {
             output <- gmmFit(ent=distances, edge=edge, cross=cross, model=model, cutoff=cutoff, 
-                             sen=sen, spc=spc, progress=progress, seed=seed)
+                             sen=sen, spc=spc, progress=progress, seed=NULL)
         }
     } else if (method == "density") {
         output <- smoothValley(distances)
@@ -1429,6 +1425,29 @@ findThreshold <- function (distances, method=c("density", "gmm"),
 
 
 
+# Validate and set the random seed, returning a function that restores the 
+# caller's global RNG state. Does nothing if seed is NULL.
+# Usage: restore <- setLocalSeed(seed); on.exit(restore(), add=TRUE)
+setLocalSeed <- function(seed) {
+    if (is.null(seed)) { return(function() invisible(NULL)) }
+    if (!is.numeric(seed) || length(seed) != 1 || !is.finite(seed)) {
+        stop("'seed' must be a single finite number or NULL.")
+    }
+    env <- globalenv()
+    if (exists(".Random.seed", envir=env, inherits=FALSE)) {
+        old <- get(".Random.seed", envir=env, inherits=FALSE)
+        restore <- function() assign(".Random.seed", old, envir=env)
+    } else {
+        restore <- function() {
+            if (exists(".Random.seed", envir=env, inherits=FALSE)) {
+                rm(".Random.seed", envir=env)
+            }
+        }
+    }
+    set.seed(seed)
+    return(restore)
+}
+
 # Find distance threshold with Gaussian Mixture Method
 #
 # Fits a bimodal distribution with two Gaussian functions and calculates maximum of the average of the 
@@ -1508,7 +1527,9 @@ gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=
     }
     
     #*************  set rand seed *************#
-    set.seed(seed)
+    # If NULL, the current RNG stream is used (e.g. as seeded by findThreshold)
+    restore_seed <- setLocalSeed(seed)
+    on.exit(restore_seed(), add=TRUE)
     
     #*************  define Number of Gaussians *************#
     num_G <- 2
@@ -1699,9 +1720,6 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
     gmmfunc2.1 <- func2.1
     gmmfunc2.2 <- func2.2
     
-    # Resets the RNG when no seed provided (original random behavior). When a seed 
-    # is set, inherit the RNG state from gmmFit.
-    if (is.null(seed)) { set.seed(NULL) }
     # options(warn=-1)
     LOG_LIK <- 0
     fit_found <- FALSE
