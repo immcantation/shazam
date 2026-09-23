@@ -20,7 +20,6 @@ ambiguousMode = c("eitherOr", "and"),
 frequency = FALSE,
 combine = FALSE,
 nproc = 1,
-cloneColumn = "clone_id",
 juncLengthColumn = "junction_length"
 )
 ```
@@ -78,9 +77,6 @@ nproc
 cluster has already been set the call function with 
 `nproc` = 0 to not reset or reinitialize. Default is 
 `nproc` = 1.
-
-cloneColumn
-:   clone id column name in `db`
 
 juncLengthColumn
 :   junction length column name in `db`

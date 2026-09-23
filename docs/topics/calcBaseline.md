@@ -20,7 +20,6 @@ targetingModel = HH_S5F,
 mutationDefinition = NULL,
 calcStats = FALSE,
 nproc = 1,
-cloneColumn = NULL,
 juncLengthColumn = NULL
 )
 ```
@@ -69,12 +68,6 @@ nproc
 :   number of cores to distribute the operation over. If 
 `nproc=0` then the `cluster` has already been
 set and will not be reset.
-
-cloneColumn
-:   `character` name of the column in `db` 
-containing clonal identifiers. Relevant only for 
-when regionDefinition includes CDR and FWR4 (else
-this value can be `NULL`)
 
 juncLengthColumn
 :   `character` name of the column in `db` 

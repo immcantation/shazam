@@ -41,7 +41,7 @@ U5N <- new("TargetingModel",
                  targeting=u5n_tar,
                  numMutS=0,
                  numMutR=0)
-devtools::use_data(U5N, overwrite=TRUE)
+usethis::use_data(U5N, overwrite=TRUE)
 
 #### HH_S1F ####
 
@@ -57,7 +57,7 @@ HH_S1F = matrix(data=c(0.0000, 0.3057, 0.4786, 0.2157,
                 dimnames = list(c("A","C","G","T"), 
                                 c("A","C","G","T")))
 
-devtools::use_data(HH_S1F, overwrite=TRUE)
+usethis::use_data(HH_S1F, overwrite=TRUE)
 
 #### HKL_S1F ####
 
@@ -75,7 +75,7 @@ HKL_S1F = matrix(data=c(0.00, 0.26, 0.50, 0.24,
                   dimnames = list(c("A","C","G","T"), 
                                   c("A","C","G","T")))
 
-devtools::use_data(HKL_S1F, overwrite=TRUE)
+usethis::use_data(HKL_S1F, overwrite=TRUE)
 
 #### MK_RS1NF ####
 
@@ -88,7 +88,7 @@ MK_RS1NF = matrix(data=c(0.00, 0.17, 0.53, 0.30,
                 dimnames = list(c("A","C","G","T"), 
                                 c("A","C","G","T")))
 
-devtools::use_data(MK_RS1NF, overwrite=TRUE)
+usethis::use_data(MK_RS1NF, overwrite=TRUE)
 
 #### HH_S5F ####
 
@@ -136,7 +136,7 @@ HH_S5F <- new("TargetingModel",
                  targeting=hs5f_tar,
                  numMutS=806860,
                  numMutR=0)
-devtools::use_data(HH_S5F, overwrite=TRUE)
+usethis::use_data(HH_S5F, overwrite=TRUE)
 
 #### HKL_S5F ####
 
@@ -164,7 +164,7 @@ HKL_S5F <- new("TargetingModel",
                numMutS=117788,
                numMutR=0)
 
-devtools::use_data(HKL_S5F, overwrite=TRUE)
+usethis::use_data(HKL_S5F, overwrite=TRUE)
 
 rm(hL.sub, hL.tar, hL.char, hL.mut)
 
@@ -197,6 +197,6 @@ MK_RS5NF <- new("TargetingModel",
                numMutS=10150,
                numMutR=29023)
 
-devtools::use_data(MK_RS5NF, overwrite=TRUE)
+usethis::use_data(MK_RS5NF, overwrite=TRUE)
 
 rm(mL.sub, mL.tar, mL.char, mL.mut)

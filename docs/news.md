@@ -1,11 +1,17 @@
 # Release Notes
 
-Version dev:
+Version 1.3.2.999: Unreleased
 -------------------------------------------------------------------------------
+
+Mutation Profiling:
+
++ Removed the unused `cloneColumn` argument from `observedMutations()`, 
+  `expectedMutations()`, and `calcBaseline()`.
 
 Targeting models:
 
-+ Fixed a bug in `U5N` targeting model.
++ Fixed the built-in `U5N` targeting model, which was missing the `numMutS`
+  and `numMutR` slots and would error (`no slot of name "numMutS"...`) on any operation reading those slots.
 
 
 Version 1.3.2: April 29, 2026
