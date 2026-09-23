@@ -18,7 +18,6 @@ targetingModel = HH_S5F,
 regionDefinition = NULL,
 mutationDefinition = NULL,
 nproc = 1,
-cloneColumn = "clone_id",
 juncLengthColumn = "junction_length"
 )
 ```
@@ -57,9 +56,6 @@ nproc
 over. If the cluster has already been set the call function with 
 `nproc` = 0 to not reset or reinitialize. Default is 
 `nproc` = 1.
-
-cloneColumn
-:   clone id column name in `db`
 
 juncLengthColumn
 :   junction length column name in `db`
