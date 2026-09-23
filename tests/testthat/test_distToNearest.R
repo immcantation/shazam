@@ -78,7 +78,7 @@ test_that("Test cross distToNearest with model hh_s1f", {
                                    model="hh_s1f", first=FALSE, normalize="len",cross="SAMPLE",
                                    locusColumn="LOCUS")
     ## Exactly same seq, returns NA
-    expect_equal(db2_1_316_630$cross_dist_nearest,c(NA,NA,NA))
+    expect_equal(db2_1_316_630$cross_dist_nearest,c(NA_real_,NA_real_,NA_real_))
     
     ## One seq has been edited, will return distance values
     db3_1_316_630 <- distToNearest(db3[c(1,316,630),], sequenceColumn="JUNCTION",
@@ -159,7 +159,7 @@ test_that("Test cross distToNearest with model hh_s5f", {
                                         model="hh_s5f", first=FALSE, normalize="none",cross="SAMPLE",
                                         locusColumn="LOCUS")
     ## Exactly same seq, returns NA
-    expect_equal(db2_1_316_630_hs5f$cross_dist_nearest,c(NA,NA,NA))
+    expect_equal(db2_1_316_630_hs5f$cross_dist_nearest,c(NA_real_,NA_real_,NA_real_))
     
     ## One seq has been edited, will return distance values
     db3_1_316_630_hs5f <- distToNearest(db3[c(1,316,630),], sequenceColumn="JUNCTION",
@@ -836,7 +836,7 @@ test_that("distToNearest mix single cell and bulk", {
     )
     # All NA dist_nearest
     expect_equal(dtn_m_k$dist_nearest, 
-                rep(NA, nrow(dtn_m_k))      
+                rep(NA_real_, nrow(dtn_m_k))      
     )
     
     # sc only
@@ -881,7 +881,7 @@ test_that("distToNearest mix single cell and bulk", {
     fixed=FALSE
     )
     expect_equal(
-        dtn_sc_k$dist_nearest, c(NA, NA, NA,NA, NA, NA)
+        dtn_sc_k$dist_nearest, rep(NA_real_, 6)
     )    
     
     # bulk only
@@ -979,4 +979,7 @@ test_that("distToNearest & findThreshold, AIRR migration", {
     expect_equal(o_den_c@ydens, o_den_a@ydens)
     expect_equal(o_den_c@threshold, o_den_a@threshold)
 })
+
+
+
 
