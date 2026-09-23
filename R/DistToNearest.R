@@ -1297,8 +1297,14 @@ findThreshold <- function (distances, method=c("density", "gmm"),
     model <- match.arg(model)
     cutoff <- match.arg(cutoff)
     
-    # Set the seed (restored on exit) before subsampling so the subsample is 
-    # reproducible too. gmmFit then continues the same RNG stream.
+    # Set the seed (restored on exit) before subsampling so the subsample is
+    # reproducible too. gmmFit then continues the same RNG stream. When no
+    # seed is given, reseed from system entropy to match legacy (pre-seed-
+    # parameter) behavior, so consecutive unseeded calls stay decorrelated
+    # from the caller's prior RNG state.
+    if (is.null(seed)) {
+        set.seed(NULL)
+    }
     restore_seed <- setLocalSeed(seed)
     on.exit(restore_seed(), add=TRUE)
 
