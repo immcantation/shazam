@@ -3,6 +3,13 @@
 Version 1.3.2.999: Unreleased
 -------------------------------------------------------------------------------
 
+Distance Profiling:
+
++ `findThreshold(method="gmm")` results can now be reproduced by calling 
+  `set.seed()` beforehand. Previously, the fitting procedure reset the random 
+  number generator internally, so results differed between runs and the 
+  caller's random number generator state was overwritten.
+
 Mutation Profiling:
 
 + Removed the unused `cloneColumn` argument from `observedMutations()`, 
