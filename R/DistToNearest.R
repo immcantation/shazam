@@ -1283,8 +1283,8 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #'                             
 #' # Find threshold using the "gmm" method with user defined specificity
 #' # Note: Setting a seed value just for reproducibility of the example 
-#' results. To avoid changing the global random number generator state, 
-#' use instead \code{withr::with_seed(234, findThreshold(...))}
+#' # results. To avoid changing the global random number generator state, 
+#' # use instead withr::with_seed(234, findThreshold(...))
 #' set.seed(234)
 #' output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", 
 #'                         cutoff="user", spc=0.99)
