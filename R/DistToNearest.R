@@ -1671,8 +1671,8 @@ gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=
         mu.gmm    <- c(mu[1], mu[2]) 
         sigma.gmm <- c(sigma[1], sigma[2]) 
         
-        fit_results <- rocSpace(ent=ent, omega.gmm=omega.gmm , mu.gmm=mu.gmm, sigma.gmm=sigma.gmm, 
-                               model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress, seed=seed)
+        fit_results <- rocSpace(ent=ent, omega.gmm=omega.gmm , mu.gmm=mu.gmm, sigma.gmm=sigma.gmm,
+                               model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress)
         results <- new("GmmThreshold",
                        x=ent,
                        model=model,
@@ -1697,7 +1697,7 @@ gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=
 }
 
 
-rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc, progress=FALSE, seed=NULL) {
+rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc, progress=FALSE) {
     func <- model
     bits <- strsplit(func,'-')[[1]]
 
