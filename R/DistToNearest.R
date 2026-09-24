@@ -1257,6 +1257,10 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #'                           between the two modes of the distribution.
 #' }
 #' 
+#' Subsampling (\code{subsample}) and the \code{"gmm"} fitting procedure use R's random 
+#' number generator. For reproducible results, call \code{set.seed()} before 
+#' \code{findThreshold}.
+#' 
 #' @seealso  See \link{distToNearest} for generating the nearest neighbor distance vectors.
 #'           See \link{plotGmmThreshold} and \link{plotDensityThreshold} for plotting output.
 #'      
@@ -1278,6 +1282,10 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #'                     jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 #'                             
 #' # Find threshold using the "gmm" method with user defined specificity
+#' # Note: Setting a seed value just for reproducibility of the example 
+#' # results. To avoid changing the global random number generator state, 
+#' # use instead withr::with_seed(234, findThreshold(...))
+#' set.seed(234)
 #' output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", 
 #'                         cutoff="user", spc=0.99)
 #' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
@@ -1495,9 +1503,6 @@ gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=
         pb <- progressBar(n_iter)
     }
     
-    #*************  set rand seed *************#
-    set.seed(NULL)
-    
     #*************  define Number of Gaussians *************#
     num_G <- 2
     
@@ -1687,7 +1692,6 @@ rocSpace <- function(ent, omega.gmm, mu.gmm, sigma.gmm, model, cutoff, sen, spc,
     gmmfunc2.1 <- func2.1
     gmmfunc2.2 <- func2.2
     
-    set.seed(NULL)
     # options(warn=-1)
     LOG_LIK <- 0
     fit_found <- FALSE
