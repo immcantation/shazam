@@ -1229,8 +1229,6 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #' @param    spc        specificity required. Applies only when \code{method="gmm"} and \code{cutoff="user"}.
 #'                      
 #' @param    progress   if \code{TRUE} print a progress bar. 
-#' @param    seed       numeric value to set the random seed for reproducibility of the
-#'                      subsampling (if \code{subsample} is specified) and the fitting procedure.
 #' @return   
 #' \itemize{
 #'   \item \code{"gmm"} method:      Returns a \link{GmmThreshold} object including the  
@@ -1259,6 +1257,10 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #'                           between the two modes of the distribution.
 #' }
 #' 
+#' Subsampling (\code{subsample}) and the \code{"gmm"} fitting procedure use R's random 
+#' number generator. For reproducible results, call \code{set.seed()} before 
+#' \code{findThreshold}.
+#' 
 #' @seealso  See \link{distToNearest} for generating the nearest neighbor distance vectors.
 #'           See \link{plotGmmThreshold} and \link{plotDensityThreshold} for plotting output.
 #'      
@@ -1280,9 +1282,12 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
 #'                     jCallColumn="j_call", model="ham", normalize="len", nproc=1)
 #'                             
 #' # Find threshold using the "gmm" method with user defined specificity
-#' # Setting a seed value just for reproducibility of the example results
+#' # Note: Setting a seed value just for reproducibility of the example 
+#' results. To avoid changing the global random number generator state, 
+#' use instead \code{withr::with_seed(234, findThreshold(...))}
+#' set.seed(234)
 #' output <- findThreshold(db$dist_nearest, method="gmm", model="gamma-gamma", 
-#'                         cutoff="user", spc=0.99, seed=234)
+#'                         cutoff="user", spc=0.99)
 #' plot(output, binwidth=0.02, title=paste0(output@model, "   loglk=", output@loglk))
 #' print(output)
 #' }
@@ -1291,23 +1296,12 @@ findThreshold <- function (distances, method=c("density", "gmm"),
                            edge=0.9, cross=NULL, subsample=NULL,
                            model=c("gamma-gamma", "gamma-norm", "norm-gamma", "norm-norm"),
                            cutoff=c("optimal", "intersect", "user"), sen=NULL, spc=NULL, 
-                           progress=FALSE, seed=NULL) {
+                           progress=FALSE){
     # Check arguments
     method <- match.arg(method)
     model <- match.arg(model)
     cutoff <- match.arg(cutoff)
     
-    # Set the seed (restored on exit) before subsampling so the subsample is
-    # reproducible too. gmmFit then continues the same RNG stream. When no
-    # seed is given, reseed from system entropy to match legacy (pre-seed-
-    # parameter) behavior, so consecutive unseeded calls stay decorrelated
-    # from the caller's prior RNG state.
-    if (is.null(seed)) {
-        set.seed(NULL)
-    }
-    restore_seed <- setLocalSeed(seed)
-    on.exit(restore_seed(), add=TRUE)
-
     # Subsample input distances
     if(!is.null(subsample)) {
         subsample <- min(length(distances), subsample)
@@ -1324,11 +1318,11 @@ findThreshold <- function (distances, method=c("density", "gmm"),
                 output <- NA
             } else {
                 output <- gmmFit(ent=distances, edge=edge, cross=cross, model=model, cutoff=cutoff, 
-                                 sen=sen, spc=spc, progress=progress, seed=NULL)
+                                 sen=sen, spc=spc, progress=progress)
             }
         } else {
             output <- gmmFit(ent=distances, edge=edge, cross=cross, model=model, cutoff=cutoff, 
-                             sen=sen, spc=spc, progress=progress, seed=NULL)
+                             sen=sen, spc=spc, progress=progress)
         }
     } else if (method == "density") {
         output <- smoothValley(distances)
@@ -1431,29 +1425,6 @@ findThreshold <- function (distances, method=c("density", "gmm"),
 
 
 
-# Validate and set the random seed, returning a function that restores the 
-# caller's global RNG state. Does nothing if seed is NULL.
-# Usage: restore <- setLocalSeed(seed); on.exit(restore(), add=TRUE)
-setLocalSeed <- function(seed) {
-    if (is.null(seed)) { return(function() invisible(NULL)) }
-    if (!is.numeric(seed) || length(seed) != 1 || !is.finite(seed)) {
-        stop("'seed' must be a single finite number or NULL.")
-    }
-    env <- globalenv()
-    if (exists(".Random.seed", envir=env, inherits=FALSE)) {
-        old <- get(".Random.seed", envir=env, inherits=FALSE)
-        restore <- function() assign(".Random.seed", old, envir=env)
-    } else {
-        restore <- function() {
-            if (exists(".Random.seed", envir=env, inherits=FALSE)) {
-                rm(".Random.seed", envir=env)
-            }
-        }
-    }
-    set.seed(seed)
-    return(restore)
-}
-
 # Find distance threshold with Gaussian Mixture Method
 #
 # Fits a bimodal distribution with two Gaussian functions and calculates maximum of the average of the 
@@ -1498,7 +1469,7 @@ setLocalSeed <- function(seed) {
 # output <- findThreshold(db$dist_nearest, method="gmm", edge=0.9)
 # # or 
 # output <- gmmFit(db$dist_nearest, edge=0.9) 
-gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=FALSE, seed=NULL) {
+gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=FALSE) {
     
     #************* Filter Unknown Data *************#
     ent <- ent[!is.na(ent) & !is.nan(ent) & !is.infinite(ent)]
@@ -1531,11 +1502,6 @@ gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=
         cat("ITERATIONS> ", n_iter, "\n", sep="")
         pb <- progressBar(n_iter)
     }
-    
-    #*************  set rand seed *************#
-    # If NULL, the current RNG stream is used (e.g. as seeded by findThreshold)
-    restore_seed <- setLocalSeed(seed)
-    on.exit(restore_seed(), add=TRUE)
     
     #*************  define Number of Gaussians *************#
     num_G <- 2
@@ -1671,7 +1637,7 @@ gmmFit <- function(ent, edge=0.9, cross=NULL, model, cutoff, sen, spc, progress=
         mu.gmm    <- c(mu[1], mu[2]) 
         sigma.gmm <- c(sigma[1], sigma[2]) 
         
-        fit_results <- rocSpace(ent=ent, omega.gmm=omega.gmm , mu.gmm=mu.gmm, sigma.gmm=sigma.gmm,
+        fit_results <- rocSpace(ent=ent, omega.gmm=omega.gmm , mu.gmm=mu.gmm, sigma.gmm=sigma.gmm, 
                                model=model, cutoff=cutoff, sen=sen, spc=spc, progress=progress)
         results <- new("GmmThreshold",
                        x=ent,

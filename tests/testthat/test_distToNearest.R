@@ -525,25 +525,19 @@ test_that("Test findThreshold seed reproducibility", {
                         locusColumn="LOCUS")
     dist_nearest <- db$dist_nearest
 
-    # Same seed reproduces the same fit
+    # set.seed() before the call reproduces the subsample and the fit
+    set.seed(123)
     seeded1 <- findThreshold(dist_nearest, method="gmm", model="gamma-gamma",
-                             edge=0.9, seed=123)
+                             edge=0.9, subsample=100)
+    set.seed(123)
     seeded2 <- findThreshold(dist_nearest, method="gmm", model="gamma-gamma",
-                             edge=0.9, seed=123)
-    expect_equal(seeded1@threshold, seeded2@threshold)
+                             edge=0.9, subsample=100)
+    expect_identical(seeded1, seeded2)
 
-    # A seeded call restores the caller's global RNG state on exit
-    set.seed(7)
-    state_before <- .Random.seed
-    findThreshold(dist_nearest, method="gmm", model="gamma-gamma", edge=0.9, seed=123)
-    expect_equal(.Random.seed, state_before)
-
-    # Unseeded calls remain decorrelated from the caller's prior RNG state
-    set.seed(42)
-    unseeded1 <- findThreshold(dist_nearest, method="gmm", model="gamma-gamma", edge=0.9)
-    set.seed(42)
-    unseeded2 <- findThreshold(dist_nearest, method="gmm", model="gamma-gamma", edge=0.9)
-    expect_false(isTRUE(all.equal(unseeded1@threshold, unseeded2@threshold)))
+    # Without reseeding, consecutive calls draw different random numbers
+    unseeded <- findThreshold(dist_nearest, method="gmm", model="gamma-gamma",
+                              edge=0.9, subsample=100)
+    expect_false(identical(seeded1@x, unseeded@x))
 })
 
 #### calcTargetingDistance ####
