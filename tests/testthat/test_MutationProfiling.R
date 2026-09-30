@@ -2644,49 +2644,40 @@ test_that("observedMutations, extended regions single sequence", {
     db2 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT03AVKX3") #clone 197
     db3 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT07IQGK2") #clone 3090
     db_obs1_ALL_REGIONS <- observedMutations(db=db1, sequenceColumn="SEQUENCE_IMGT", 
-                                cloneColumn="CLONE", 
                                 germlineColumn="GERMLINE_IMGT_D_MASK",
                                 juncLengthColumn="JUNCTION_LENGTH",
                                 regionDefinition=IMGT_VDJ_BY_REGIONS)
     db_obs2_ALL_REGIONS <- observedMutations(db=db2, sequenceColumn="SEQUENCE_IMGT", 
-                                 cloneColumn="CLONE", 
                                  germlineColumn="GERMLINE_IMGT_D_MASK",
                                  juncLengthColumn="JUNCTION_LENGTH",
                                  regionDefinition=IMGT_VDJ_BY_REGIONS)
     db_obs3_ALL_REGIONS <- observedMutations(db=db3, sequenceColumn="SEQUENCE_IMGT", 
-                                 cloneColumn="CLONE", 
                                  germlineColumn="GERMLINE_IMGT_D_MASK",
                                  juncLengthColumn="JUNCTION_LENGTH",
                                  regionDefinition=IMGT_VDJ_BY_REGIONS)
     
     db_obs1_ALL <- observedMutations(db=db1, sequenceColumn="SEQUENCE_IMGT", 
-                                             cloneColumn="CLONE", 
                                              germlineColumn="GERMLINE_IMGT_D_MASK",
                                              juncLengthColumn="JUNCTION_LENGTH",
                                              regionDefinition=IMGT_VDJ)
     db_obs2_ALL <- observedMutations(db=db2, sequenceColumn="SEQUENCE_IMGT", 
-                                             cloneColumn="CLONE", 
                                              germlineColumn="GERMLINE_IMGT_D_MASK",
                                              juncLengthColumn="JUNCTION_LENGTH",
                                              regionDefinition=IMGT_VDJ)
     db_obs3_ALL <- observedMutations(db=db3, sequenceColumn="SEQUENCE_IMGT", 
-                                             cloneColumn="CLONE", 
                                              germlineColumn="GERMLINE_IMGT_D_MASK",
                                              juncLengthColumn="JUNCTION_LENGTH",
                                              regionDefinition=IMGT_VDJ)
     
     db_obs1_V <- observedMutations(db=db1, sequenceColumn="SEQUENCE_IMGT", 
-                                     cloneColumn="CLONE", 
                                      germlineColumn="GERMLINE_IMGT_D_MASK",
                                      juncLengthColumn="JUNCTION_LENGTH",
                                      regionDefinition=IMGT_V)
     db_obs2_V <- observedMutations(db=db2, sequenceColumn="SEQUENCE_IMGT", 
-                                     cloneColumn="CLONE", 
                                      germlineColumn="GERMLINE_IMGT_D_MASK",
                                      juncLengthColumn="JUNCTION_LENGTH",
                                      regionDefinition=IMGT_V)
     db_obs3_V <- observedMutations(db=db3, sequenceColumn="SEQUENCE_IMGT", 
-                                     cloneColumn="CLONE", 
                                      germlineColumn="GERMLINE_IMGT_D_MASK",
                                      juncLengthColumn="JUNCTION_LENGTH",
                                      regionDefinition=IMGT_V)
@@ -2725,7 +2716,6 @@ test_that("observedMutations, extended regions multi sequences", {
     db3 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT07IQGK2") #clone 3090
     db_all <- rbind(db1,db2,db3)
     db_obs_ALL_REGIONS <- observedMutations(db=db_all, sequenceColumn="SEQUENCE_IMGT", 
-                                             cloneColumn="CLONE", 
                                              germlineColumn="GERMLINE_IMGT_D_MASK",
                                              juncLengthColumn="JUNCTION_LENGTH",
                                              regionDefinition=IMGT_VDJ_BY_REGIONS)
@@ -2769,7 +2759,6 @@ test_that("observedMutations, parents as ref", {
        expect_equal(dim(clone_3177_graphDF), c(16,22))
        clone_3177_graphDF_ALL_REGIONS_parent1 <- observedMutations(db=clone_3177_graphDF, 
                                                            sequenceColumn="sequence", 
-                                                           cloneColumn="clone", 
                                                            germlineColumn="parent_sequence",
                                                            juncLengthColumn="junction_length",
                                                            regionDefinition=IMGT_VDJ_BY_REGIONS)
@@ -2778,20 +2767,17 @@ test_that("observedMutations, parents as ref", {
        # results as if we define the refernece sequence as the "parent".
        clone_3177_graphDF_ALL_REGIONS_parent2 <- observedMutations(db=clone_3177_graphDF, 
                                                                   sequenceColumn="sequence", 
-                                                                  cloneColumn="clone", 
                                                                   germlineColumn="parent_sequence",
                                                                   juncLengthColumn="junction_length",
                                                                   regionDefinition=IMGT_VDJ_BY_REGIONS)
        clone_3177_graphDF_ALL_parent1 <- observedMutations(db=clone_3177_graphDF, 
                                                                    sequenceColumn="sequence", 
-                                                                   cloneColumn="clone", 
                                                                    germlineColumn="parent_sequence",
                                                                    juncLengthColumn="junction_length",
                                                                    regionDefinition=IMGT_VDJ)
        
        clone_3177_graphDF_ALL_parent2 <- observedMutations(db=clone_3177_graphDF, 
                                                                    sequenceColumn="sequence", 
-                                                                   cloneColumn="clone", 
                                                                    germlineColumn="parent_sequence",
                                                                    juncLengthColumn="junction_length",
                                                                    regionDefinition=IMGT_VDJ)
@@ -2813,17 +2799,14 @@ test_that("expectedMutations, extended with regard to germline", {
     db3 <- subset(ExampleDb,SEQUENCE_ID == "GN5SHBT07IQGK2") #clone 3090
     db_all <- rbind(db1,db2,db3)
     db_exp_ALL_REGIONS <- expectedMutations(db=db_all, sequenceColumn="SEQUENCE_IMGT", 
-                                            cloneColumn="CLONE", 
                                             germlineColumn="GERMLINE_IMGT_D_MASK",
                                             juncLengthColumn="JUNCTION_LENGTH",
                                             regionDefinition=IMGT_VDJ_BY_REGIONS)
     db_exp_ALL <- expectedMutations(db=db_all, sequenceColumn="SEQUENCE_IMGT", 
-                                    cloneColumn="CLONE", 
                                     germlineColumn="GERMLINE_IMGT_D_MASK",
                                     juncLengthColumn="JUNCTION_LENGTH",
                                     regionDefinition=IMGT_VDJ)
     db_exp_V_BY_REGIONS <- expectedMutations(db=db_all, sequenceColumn="SEQUENCE_IMGT", 
-                                             cloneColumn="CLONE", 
                                              germlineColumn="GERMLINE_IMGT_D_MASK",
                                              juncLengthColumn="JUNCTION_LENGTH",
                                              regionDefinition=IMGT_V_BY_REGIONS)
@@ -2937,27 +2920,22 @@ test_that("expectedMutations, extended with regard to parent", {
         GraphDf_all <- rbind(clone_3163_GraphDf,clone_3100_GraphDf,clone_3115_GraphDf)
         
         db_exp_ALL_REGIONS <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
-                                                cloneColumn="clone", 
                                                 germlineColumn="parent_sequence",
                                                 juncLengthColumn="junction_length",
                                                 regionDefinition=IMGT_VDJ_BY_REGIONS)
         db_exp_ALL_REGIONS_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
-                                                  cloneColumn="clone", 
                                                   germlineColumn="parent_sequence",
                                                   juncLengthColumn="junction_length",
                                                   regionDefinition=IMGT_VDJ_BY_REGIONS)
         db_exp_ALL <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
-                                        cloneColumn="clone", 
                                         germlineColumn="parent_sequence",
                                         juncLengthColumn="junction_length",
                                         regionDefinition=IMGT_VDJ)
         db_exp_ALL_g <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
-                                          cloneColumn="clone", 
                                           germlineColumn="parent_sequence",
                                           juncLengthColumn="junction_length",
                                           regionDefinition=IMGT_VDJ)
         db_exp_V_REGIONS <- expectedMutations(db=GraphDf_all, sequenceColumn="sequence", 
-                                              cloneColumn="clone", 
                                               germlineColumn="parent_sequence",
                                               juncLengthColumn="junction_length",
                                               regionDefinition=IMGT_V_BY_REGIONS)

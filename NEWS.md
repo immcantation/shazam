@@ -1,3 +1,24 @@
+Version 1.3.2.999: Unreleased
+-------------------------------------------------------------------------------
+
+Distance Profiling:
+
++ `findThreshold(method="gmm")` results can now be reproduced by calling 
+  `set.seed()` beforehand. Previously, the fitting procedure reset the random 
+  number generator internally, so results differed between runs and the 
+  caller's random number generator state was overwritten.
+
+Mutation Profiling:
+
++ Removed the unused `cloneColumn` argument from `observedMutations()`, 
+  `expectedMutations()`, and `calcBaseline()`.
+
+Targeting models:
+
++ Fixed the built-in `U5N` targeting model, which was missing the `numMutS`
+  and `numMutR` slots and would error (`no slot of name "numMutS"...`) on any operation reading those slots.
+
+
 Version 1.3.2: April 29, 2026
 -------------------------------------------------------------------------------
 

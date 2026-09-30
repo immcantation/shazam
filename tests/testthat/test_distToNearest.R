@@ -517,6 +517,29 @@ test_that("Test findThreshold", {
     expect_equal(dens_output@threshold, 0.14, tolerance=0.01)
 })
 
+test_that("Test findThreshold seed reproducibility", {
+
+    db <- distToNearest(db, sequenceColumn="JUNCTION",
+                        vCallColumn="V_CALL", jCallColumn="J_CALL",
+                        model="ham", first=FALSE, normalize="len", nproc=1,
+                        locusColumn="LOCUS")
+    dist_nearest <- db$dist_nearest
+
+    # set.seed() before the call reproduces the subsample and the fit
+    set.seed(123)
+    seeded1 <- findThreshold(dist_nearest, method="gmm", model="gamma-gamma",
+                             edge=0.9, subsample=100)
+    set.seed(123)
+    seeded2 <- findThreshold(dist_nearest, method="gmm", model="gamma-gamma",
+                             edge=0.9, subsample=100)
+    expect_identical(seeded1, seeded2)
+
+    # Without reseeding, consecutive calls draw different random numbers
+    unseeded <- findThreshold(dist_nearest, method="gmm", model="gamma-gamma",
+                              edge=0.9, subsample=100)
+    expect_false(identical(seeded1@x, unseeded@x))
+})
+
 #### calcTargetingDistance ####
     
 test_that("Test distance, Change-O tests", {
