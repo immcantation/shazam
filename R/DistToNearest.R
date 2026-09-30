@@ -534,16 +534,14 @@ nearestDist <- function(sequences, model=c("ham", "aa", "hh_s1f", "hh_s5f", "mk_
     # Find minimum distance for each sequence
     if (is.null(crossGroups)) {
         if(!mst) {
-            # Return smaller value greater than 0
-            # If all 0, return NA
-            .dmin <- function(i) { 
-                x <- dist_mat[, i]
-                gt0 <- which(x > 0)
-                if (length(gt0) != 0) { min(x[gt0]) } else { NA }
-            }
-            
-            ## TODO: Could be an apply over columns
-            seq_uniq_dist <- setNames(sapply(1:n_uniq, .dmin), names(seq_uniq))
+            # Return smallest value greater than 0 per column; NA if all are 0
+            # Temporary zero out diagonal in-place (only zeros are on diagonal) to avoid a full matrix copy
+            zero_idx <- which(dist_mat == 0)
+            dist_mat[zero_idx] <- NA_real_
+            col_mins <- apply(dist_mat, 2, min, na.rm=TRUE)
+            col_mins[is.infinite(col_mins)] <- NA_real_
+            dist_mat[zero_idx] <- 0
+            seq_uniq_dist <- setNames(col_mins, names(seq_uniq))
         } else {
             # Get adjacency matrix of minimum spanning tree
             adj <- ape::mst(dist_mat)
@@ -1014,10 +1012,7 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     if (!is.null(fields)) {
         group_cols <- append(group_cols,fields)
         # make vj_group unique across fields by pasting field group
-        db <- db %>%
-            dplyr::rowwise() %>%
-            mutate(vj_group=paste("F",!!rlang::sym("DTN_TMP_FIELD"),"_",!!rlang::sym("vj_group"), sep="", collapse = "")) %>%
-            ungroup() 
+        db[["vj_group"]] <- paste0("F", db[["DTN_TMP_FIELD"]], "_", db[["vj_group"]])
     }
     db[['DTN_TMP_FIELD']] <- NULL
     
@@ -1062,6 +1057,18 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     valid_rows <- which(!is.na(db[["vj_group"]]))
     grp_key <- do.call(paste, c(db[valid_rows, group_cols, drop=FALSE], sep="___"))
     uniqueGroupsIdx <- split(valid_rows, grp_key)
+
+    # Auto-reduce to single core when the dataset is too small to benefit from
+    # parallelization.
+    # Threshold: fall back when < 100k valid rows AND estimated pairwise work
+    # (sum of group_size^2) is below 1e8 (rough proxy for ~10 s single-core).
+    if (nproc > 1) {
+        estimated_work <- sum(lengths(uniqueGroupsIdx)^2)
+        if (length(valid_rows) < 100000L || estimated_work < 1e8) {
+            message("Dataset too small for parallel speedup; falling back to nproc=1.")
+            nproc <- 1L
+        }
+    }
     
     # Create cluster of nproc size and export namespaces
     # If user wants to paralellize this function and specifies nproc > 1, then
@@ -1072,8 +1079,12 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # (needed for 'foreach' in non-parallel mode)
         registerDoSEQ()
     } else if( nproc > 1 ) {
-        cluster <- parallel::makeCluster(nproc, type="PSOCK")
-        registerDoParallel(cluster,cores=nproc)
+        # FORK startup overhead << PSOCK overhead
+        # On Windows FORK is unavailable, so fall back to PSOCK.
+        use_fork <- .Platform$OS.type != "windows"
+        cluster_type <- if (use_fork) "FORK" else "PSOCK"
+        cluster <- parallel::makeCluster(nproc, type=cluster_type)
+        registerDoParallel(cluster, cores=nproc)
     } else {
         stop('Nproc must be positive.')
     }
@@ -1086,16 +1097,8 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
             select(c(!!rlang::sym("DTN_ROW_ID"), !any_of(required_cols)))
         db <- db %>%
             select(c(!!rlang::sym("DTN_ROW_ID"),  any_of(required_cols)))
-        export_functions <- list("db",
-                                 "uniqueGroupsIdx", 
-                                 "cross",
-                                 "mst",
-                                 "subsample",
-                                 "sequenceColumn", 
-                                 "model",
-                                 "normalize",
-                                 "symmetry",
-                                 "nearestDist", 
+        # Internal shazam functions used inside the foreach body.
+        shazam_internal_fns <- c("nearestDist",
                                  "HH_S1F_Distance",
                                  "MK_RS1NF_Distance",
                                  "HH_S5F_Distance",
@@ -1105,11 +1108,27 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
                                  "calcTargetingDistance",
                                  "findUniqSeq",
                                  "pairwise5MerDist",
-                                 "nonsquare5MerDist",
+                                 "nonsquare5MerDist")
+        parallel::clusterExport(cluster, shazam_internal_fns,
+                                envir=asNamespace("shazam"))
+        if (!use_fork) {
+            # PSOCK workers are fresh processes with no inherited environment.
+            # Export the local variables referenced inside the foreach body.
+            # FORK workers inherit the parent process environment, so no export needed.
+            export_local <- list("db",
+                                 "uniqueGroupsIdx",
+                                 "cross",
+                                 "mst",
+                                 "subsample",
+                                 "sequenceColumn",
+                                 "model",
+                                 "normalize",
+                                 "symmetry",
                                  "singleCell",
                                  "locusColumn",
                                  "locusValues")
-        parallel::clusterExport(cluster, export_functions, envir=environment())
+            parallel::clusterExport(cluster, export_local, envir=environment())
+        }
     }
     
     
@@ -1122,39 +1141,36 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
         # wrt db
         idx <- uniqueGroupsIdx[[i]]
         
-        # if (singleCell) {
-        #     # only use IGH, TRB, TRD
-        #     # wrt idx
-        #     idxBool <- db[[locusColumn]][idx] %in% c("IGH", "TRB", "TRD")
-        # } else {
-        #     idxBool <- rep(TRUE, length(idx))
-        # }
-        
         # for the distance calculation use only
         # sequences with locus values specified in `locusValues`
         idxBool <- toupper(db[[locusColumn]][idx]) %in% locusValues
         
-        db_group <- db[idx, ]
-        
         crossGroups <- NULL
         if (!is.null(cross)) {
-              x <- dplyr::group_by(db_group, !!!rlang::syms(cross))
-              crossGroups <- dplyr::group_indices(x)
+            x <- dplyr::group_by(db[idx, ], !!!rlang::syms(cross))
+            crossGroups <- dplyr::group_indices(x)
         }
         
-        arrSeqs <-  db[[sequenceColumn]][idx]
-            
-        db_group$TMP_DIST_NEAREST[idxBool] <- nearestDist(arrSeqs[idxBool], 
-                                                          model=model,
-                                                          normalize=normalize,
-                                                          symmetry=symmetry,
-                                                          crossGroups=crossGroups[idxBool],
-                                                          mst=mst,
-                                                          subsample=subsample)
+        arrSeqs <- db[[sequenceColumn]][idx]
+        
+        dists <- nearestDist(arrSeqs[idxBool],
+                             model=model,
+                             normalize=normalize,
+                             symmetry=symmetry,
+                             crossGroups=crossGroups[idxBool],
+                             mst=mst,
+                             subsample=subsample)
+        
+        # Return only row IDs and distances (not the full db slice)
+        result <- data.frame(DTN_ROW_ID=db[["DTN_ROW_ID"]][idx],
+                             TMP_DIST_NEAREST=NA_real_,
+                             stringsAsFactors=FALSE)
+        result$TMP_DIST_NEAREST[idxBool] <- dists
+        
         # Update progress
         if (progress) { pb$tick() }
         
-        return(db_group)
+        return(result)
     }, 
     error = function(e) {
       if (nproc > 1 & grepl("Error in unserialize(socklist[[n]]) : error reading from connection", e, fixed=TRUE)) {
@@ -1164,13 +1180,10 @@ distToNearest <- function(db, sequenceColumn="junction", vCallColumn="v_call", j
     }
     )
     
-    # Convert list from foreach into a db data.frame
-    if (!any(is.na(db[["vj_group"]]))) {
-        db <-do.call(rbind, list_db)
-    } else {
-        db <- bind_rows(
-            db %>% filter(is.na(!!rlang::sym("vj_group"))),
-            do.call(rbind, list_db))
+    # Merge distances back into db by row ID (avoids rebuilding the full data frame)
+    if (length(list_db) > 0) {
+        dist_updates <- do.call(rbind, list_db)
+        db$TMP_DIST_NEAREST[match(dist_updates$DTN_ROW_ID, db$DTN_ROW_ID)] <- dist_updates$TMP_DIST_NEAREST
     }
 
     # Stop the cluster and add back not used colums
