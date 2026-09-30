@@ -241,7 +241,7 @@ $`4`
 See also
 -------------------
 
-[slideWindowDb](slideWindowDb.md) is called on `db` for tuning. See [slideWindowTunePlot](slideWindowTunePlot.md) 
+[slideWindowDb](slideWindowDb.md) is called on `db` for tuning. See [plotSlideWindowTune](plotSlideWindowTune.md) 
 for visualization. See [calcObservedMutations](calcObservedMutations.md) for generating `dbMutList`.
 
 
