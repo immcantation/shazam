@@ -2460,7 +2460,7 @@ slideWindowDb <- function(db, sequenceColumn="sequence_alignment",
 #'           second call of \link{calcObservedMutations}. This could be helpful especially when 
 #'           \code{db} is large.
 #' 
-#' @seealso  \link{slideWindowDb} is called on \code{db} for tuning. See \link{slideWindowTunePlot} 
+#' @seealso  \link{slideWindowDb} is called on \code{db} for tuning. See \link{plotSlideWindowTune} 
 #'           for visualization. See \link{calcObservedMutations} for generating \code{dbMutList}.
 #'           
 #' @examples
