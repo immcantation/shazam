@@ -34,7 +34,7 @@ Description: Provides a computational framework for analyzing mutations in
     Yaari, et al (2013) <doi:10.3389/fimmu.2013.00358>, 
     Cui, et al (2016) <doi:10.4049/jimmunol.1502263>.
 License: AGPL-3
-URL: http://shazam.readthedocs.io
+URL: https://shazam.readthedocs.io
 BugReports: https://github.com/immcantation/shazam/issues
 LazyData: true
 BuildVignettes: true

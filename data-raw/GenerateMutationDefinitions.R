@@ -33,7 +33,7 @@
 #### Amino acid classes ####
 
 # Load data
-# http://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html
+# https://www.imgt.org/IMGTeducation/Aide-memoire/_UK/aminoacids/IMGTclasses.html
 aa_imgt <- read.csv("data-raw/IMGT_AminoAcidClasses.csv", as.is=TRUE)
 
 # Set vectors or hydropathy, polarity and charge classes

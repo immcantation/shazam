@@ -24,7 +24,7 @@ document <- list(
 
 # Function to install dependencies
 installDep <- function(pkg, devel_mode, immcantation = immcantation_packages,
-                       repos = "http://lib.stat.cmu.edu/R/CRAN/") {
+                       repos = "https://lib.stat.cmu.edu/R/CRAN/") {
     # Required version
     pkg_name <- strsplit(pkg, " ")[[1]][1]
     pkg_version <- gsub(".*\\([^0-9.]*(.*)\\)$", "\\1", pkg)
@@ -68,7 +68,7 @@ installDep <- function(pkg, devel_mode, immcantation = immcantation_packages,
             version_spec <- if (is.null(pkg_version)) NULL else paste(pkg_logic, pkg_version)
             tryCatch(
                 {
-                    devtools::install_version(pkg_name, version_spec, repos = "http://lib.stat.cmu.edu/R/CRAN/", upgrade = "never")
+                    devtools::install_version(pkg_name, version_spec, repos = "https://lib.stat.cmu.edu/R/CRAN/", upgrade = "never")
                 },
                 error = function(e) {
                     cat(as.character(e), "\n")

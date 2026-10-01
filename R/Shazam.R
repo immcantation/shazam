@@ -92,7 +92,7 @@
 #'            Int Immunol. 2008 20(5):683-94.
 #'   \item  Uduman M, et al. Detecting selection in immunoglobulin sequences. 
 #'            Nucleic Acids Res. 2011 39(Web Server issue):W499-504. (Corrections at 
-#'            http://selection.med.yale.edu/baseline/correction/) 
+#'            https://selection.med.yale.edu/baseline/correction/) 
 #'   \item  Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
 #'            sequencing data sets. 
 #'            Nucleic Acids Res. 2012 40(17):e134.
@@ -230,7 +230,7 @@ NULL
 # BAYESIAN_FITTED
 
 # IMGT-KABAT numbering mapping
-# As described hare http://www.imgt.org/IMGTScientificChart/Numbering/IMGT-Kabat_part1.html
+# As described hare https://www.imgt.org/IMGTScientificChart/Numbering/IMGT-Kabat_part1.html
 # CONVERT_NUM_REF
 
 # Add built-in variables to global variables environment
