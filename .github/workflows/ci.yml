@@ -12,6 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      # Pin OpenBLAS to one code path and a single thread so numerical results
+      # (e.g. the gmm fit in findThreshold) do not vary with the runner CPU.
+      OPENBLAS_CORETYPE: Haswell
+      OPENBLAS_NUM_THREADS: 1
+      OMP_NUM_THREADS: 1
     container:
       image: immcantation/test:devel
     steps:
