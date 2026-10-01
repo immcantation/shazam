@@ -4,7 +4,7 @@ Description
 --------------------
 
 Converts numbering systems like Kabat or IMGT using these conventions:
-http://www.imgt.org/IMGTScientificChart/Numbering/IMGT-Kabat_part1.html
+https://www.imgt.org/IMGTScientificChart/Numbering/IMGT-Kabat_part1.html
 with Gaps (unoccupied positions) shown by "G" and Asterisks (*) shown by "S": 
 arbitrary mappings (multiple possible "to" values) represented with "NA"
 

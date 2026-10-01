@@ -111,7 +111,7 @@ analysis of Ig V region sequences.
 Int Immunol. 2008 20(5):683-94.
 1. Uduman M, et al. Detecting selection in immunoglobulin sequences. 
 Nucleic Acids Res. 2011 39(Web Server issue):W499-504. (Corrections at 
-http://selection.med.yale.edu/baseline/correction/) 
+https://selection.med.yale.edu/baseline/correction/) 
 1. Yaari G, et al. Quantifying selection in high-throughput immunoglobulin 
 sequencing data sets. 
 Nucleic Acids Res. 2012 40(17):e134.

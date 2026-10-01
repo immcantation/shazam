@@ -21,7 +21,7 @@ See also
 
 Useful links:
 
-+  [http://shazam.readthedocs.io](http://shazam.readthedocs.io)
++  [https://shazam.readthedocs.io](https://shazam.readthedocs.io)
 +  Report bugs at [https://github.com/immcantation/shazam/issues](https://github.com/immcantation/shazam/issues)
 
 
